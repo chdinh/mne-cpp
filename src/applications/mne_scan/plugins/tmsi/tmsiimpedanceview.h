@@ -49,26 +49,26 @@ public:
     /**
      * Constructs a TMSIImpedanceView.
      */
-    explicit TMSIImpedanceView(QWidget* parent = 0);
+    explicit TMSIImpedanceView(QWidget* parent = nullptr);
 
 private:
     //=========================================================================================================
     /**
      * Reimplemented wheel event used for zoomin in and out of the scene.
      */
-    void wheelEvent(QWheelEvent* event);
+    void wheelEvent(QWheelEvent* event) override;
 
     //=========================================================================================================
     /**
      * Reimplemented resize event used scaling fitting the scene into the view after a resize occured.
      */
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event) override;
 
     //=========================================================================================================
     /**
      * Reimplemented mouse press event handler.
      */
-    void mouseDoubleClickEvent(QMouseEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
 };
 } // NAMESPACE
 

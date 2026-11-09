@@ -63,13 +63,13 @@ public:
     /**
      * Returns the bounding rect of the electrode item. This rect describes the area which the item uses to plot in.
      */
-    QRectF boundingRect() const;
+    QRectF boundingRect() const override;
 
     //=========================================================================================================
     /**
      * Reimplemented paint function.
      */
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
     //=========================================================================================================
     /**

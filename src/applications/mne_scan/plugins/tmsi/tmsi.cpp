@@ -17,18 +17,37 @@
 //=============================================================================================================
 
 #include "tmsi.h"
-#include <memory>
-#include "tmsiproducer.h"
 
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <base/string_utils.h>
+#include <channels/layoutloader.h>
+#include <fiff/fiff.h>
+#include <scMeas/realtimemultisamplearray.h>
+
+#if defined(_WIN32)
 #include <windows.h>
+#endif
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtCore/QtPlugin>
-#include <QtCore/QTextStream>
+#include <QApplication>
 #include <QDebug>
+#include <QThreadPool>
+
+//=============================================================================================================
+// EIGEN INCLUDES
+//=============================================================================================================
+
+#include <Eigen/Geometry>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
 #include <format>
 #include <numbers>
 
@@ -40,7 +59,6 @@ using namespace TMSIPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
 using namespace FIFFLIB;
-using namespace std;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -50,19 +68,15 @@ using namespace Eigen;
 namespace
 {
 
-// The electrodes of an .elc file, in the containers the channel set-up works on
-bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& positions3d, QList<QVector<float>>& positions2d)
+constexpr int kBeepCode = 252;
+
+void beep()
 {
-    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(path.toStdString()));
-    if (!layout)
-        return false;
-    for (const std::string& name : layout->names)
-        names << QString::fromStdString(name);
-    for (const Eigen::Vector3d& r : layout->positions_3d)
-        positions3d.append({static_cast<float>(r.x()), static_cast<float>(r.y()), static_cast<float>(r.z())});
-    for (const Eigen::Vector2d& r : layout->positions_2d)
-        positions2d.append({static_cast<float>(r.x()), static_cast<float>(r.y())});
-    return true;
+#if defined(_WIN32)
+    QThreadPool::globalInstance()->start([] { Beep(450, 700); });
+#else
+    QMetaObject::invokeMethod(qApp, [] { QApplication::beep(); }, Qt::QueuedConnection);
+#endif
 }
 
 } // anonymous namespace
@@ -72,10 +86,6 @@ bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& pos
 //=============================================================================================================
 
 TMSI::TMSI()
-: m_pRMTSA_TMSI(0)
-, m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/tmsi/")
-, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
-, m_pTMSIProducer(new TMSIProducer(this))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);
@@ -117,28 +127,7 @@ void TMSI::init()
 
     m_outputConnectors.append(m_pRMTSA_TMSI);
 
-    //default values used by the setupGUI class must be set here
-    m_iSamplingFreq = 1024;
-    m_iNumberOfChannels = 138;
-    m_iSamplesPerBlock = 16;
-
-    m_bUseChExponent = true;
-    m_bUseUnitGain = true;
-    m_bUseUnitOffset = true;
-    m_bWriteDriverDebugToFile = false;
-    m_bBeepTrigger = false;
-    m_bUseCommonAverage = true;
-    m_bUseKeyboardTrigger = false;
-    m_bCheckImpedances = false;
-
-    m_iTriggerType = 0;
-
-    m_sElcFilePath = QString("../resources/general/3DLayouts/standard_waveguard128_duke.elc");
-
-    m_pFiffInfo = std::make_shared<FiffInfo>();
-
-    //Initialise matrix used to perform a very simple high pass filter operation
-    m_matOldMatrix = MatrixXf::Zero(m_iNumberOfChannels, m_iSamplesPerBlock);
+    m_sElcFilePath = QCoreApplication::applicationDirPath() + "/../resources/general/3DLayouts/standard_waveguard128_duke.elc";
 }
 
 //=============================================================================================================
@@ -149,342 +138,155 @@ void TMSI::unload()
 
 //=============================================================================================================
 
-void TMSI::setUpFiffInfo()
+std::string TMSI::uri() const
+{
+    return std::format("tmsi://?rate={}&channels={}&average={}&simulate={}", m_iSamplingFreq, m_iNumberOfChannels,
+                       m_bUseCommonAverage ? 1 : 0, m_bSimulate ? 1 : 0);
+}
+
+//=============================================================================================================
+
+void TMSI::applyElectrodeLayout(FiffInfo& info) const
 {
     // Only works for ANT Neuro Waveguard Duke caps
-    //Clear old fiff info data
-    m_pFiffInfo->clear();
-
-    //Set number of channels, sampling frequency and high/-lowpass
-    m_pFiffInfo->nchan = m_iNumberOfChannels;
-    m_pFiffInfo->sfreq = m_iSamplingFreq;
-    m_pFiffInfo->highpass = 0.001f;
-    m_pFiffInfo->lowpass = m_iSamplingFreq / 2;
-
-    //Read electrode positions from .elc file
-    QList<QVector<float>> elcLocation3D;
-    QList<QVector<float>> elcLocation2D;
-    QStringList elcChannelNames;
-
-    if (!readElc(m_sElcFilePath, elcChannelNames, elcLocation3D, elcLocation2D))
-        qDebug() << "Error: Reading elc file.";
-
-    //qDebug() << elcLocation3D;
-    //qDebug() << elcLocation2D;
-    //qDebug() << elcChannelNames;
-
-    //The positions read from the asa elc file do not correspond to a RAS coordinate system - use a simple 90° z transformation to fix this
-    Matrix3f rotation_z;
-    rotation_z = AngleAxisf(std::numbers::pi_v<float> / 2, Vector3f::UnitZ());
-    QVector3D center_pos;
-
-    for (int i = 0; i < elcLocation3D.size(); i++) {
-        Vector3f point;
-        point << elcLocation3D[i][0], elcLocation3D[i][1], elcLocation3D[i][2];
-        Vector3f point_rot = rotation_z * point;
-        //        cout<<"point: "<<endl<<point<<endl<<endl;
-        //        cout<<"matrix: "<<endl<<rotation_z<<endl<<endl;
-        //        cout<<"point_rot: "<<endl<<point_rot<<endl<<endl;
-        //        cout<<"-----------------------------"<<endl;
-        elcLocation3D[i][0] = point_rot[0];
-        elcLocation3D[i][1] = point_rot[1];
-        elcLocation3D[i][2] = point_rot[2];
-
-        //Also calculate the center position of the electrode positions in this for routine
-        center_pos.setX(center_pos.x() + elcLocation3D[i][0]);
-        center_pos.setY(center_pos.y() + elcLocation3D[i][1]);
-        center_pos.setZ(center_pos.z() + elcLocation3D[i][2]);
+    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(m_sElcFilePath.toStdString()));
+    if (!layout) {
+        qWarning() << "[TMSI] Cannot read the electrode positions in" << m_sElcFilePath;
+        return;
     }
 
-    center_pos.setX(center_pos.x() / elcLocation3D.size());
-    center_pos.setY(center_pos.y() / elcLocation3D.size());
-    center_pos.setZ(center_pos.z() / elcLocation3D.size());
-
-    //
-    //Write electrode positions to the digitizer info in the fiffinfo
-    //
-    FiffDigPointSet digitizerInfo;
-
-    //Only write the EEG channel positions to the fiff info. The Refa devices have next to the EEG input channels 10 other input channels (Bipolar, Auxilary, Digital, Test)
-    int numberEEGCh;
-    if (m_iNumberOfChannels > 128)
-        numberEEGCh = 138 - (m_iNumberOfChannels - 128);
-    else
-        numberEEGCh = m_iNumberOfChannels;
-
-    //Check if channel size by user corresponds with read channel informations from the elc file. If not append zeros and string 'unknown' until the size matches.
-    if (numberEEGCh > elcLocation3D.size()) {
-        qDebug() << "Warning: setUpFiffInfo() - Not enough positions read from the elc file. Filling missing channel names and positions with zeroes and 'unknown' strings.";
-        QVector<float> tempA(3, 0.0);
-        QVector<float> tempB(2, 0.0);
-        int size = numberEEGCh - elcLocation3D.size();
-        for (int i = 0; i < size; i++) {
-            elcLocation3D.push_back(tempA);
-            elcLocation2D.push_back(tempB);
-            elcChannelNames.append(QString("Unknown"));
-        }
+    // The .elc positions are in mm and turned by 90 degrees against RAS
+    const Matrix3d rotation = AngleAxisd(std::numbers::pi / 2, Vector3d::UnitZ()).toRotationMatrix();
+    std::vector<Vector3d> positions;
+    Vector3d center = Vector3d::Zero();
+    for (const Vector3d& r : layout->positions_3d) {
+        positions.push_back(rotation * r * 0.001);
+        center += positions.back();
+    }
+    if (!positions.empty()) {
+        center /= static_cast<double>(positions.size());
     }
 
-    //Append LAP value to digitizer data. Take location of LE2 electrode minus 1 cm as approximation.
-    FiffDigPoint digPoint;
-    int indexLE2 = elcChannelNames.indexOf("LE2");
-    digPoint.kind = FIFFV_POINT_CARDINAL;
-    digPoint.ident = FIFFV_POINT_LPA; //digitizerInfo.size();
-
-    //Set EEG electrode location - Convert from mm to m
-    if (indexLE2 != -1) {
-        digPoint.r[0] = elcLocation3D[indexLE2][0] * 0.001;
-        digPoint.r[1] = elcLocation3D[indexLE2][1] * 0.001;
-        digPoint.r[2] = (elcLocation3D[indexLE2][2] - 10) * 0.001;
-        digitizerInfo.push_back(digPoint);
-    } else
-        qWarning("Plugin TMSI - ERROR - LE2 not found. Check loaded layout.");
-
-    //Append nasion value to digitizer data. Take location of Z1 electrode minus 6 cm as approximation.
-    int indexZ1 = elcChannelNames.indexOf("Z1");
-    digPoint.kind = FIFFV_POINT_CARDINAL; //FIFFV_POINT_NASION;
-    digPoint.ident = FIFFV_POINT_NASION;  //digitizerInfo.size();
-
-    //Set EEG electrode location - Convert from mm to m
-    if (indexZ1 != -1) {
-        digPoint.r[0] = elcLocation3D[indexZ1][0] * 0.001;
-        digPoint.r[1] = elcLocation3D[indexZ1][1] * 0.001;
-        digPoint.r[2] = (elcLocation3D[indexZ1][2] - 60) * 0.001;
-        digitizerInfo.push_back(digPoint);
-    } else
-        qWarning("Plugin TMSI - ERROR - Z1 not found. Check loaded layout.");
-
-    //Append RAP value to digitizer data. Take location of RE2 electrode minus 1 cm as approximation.
-    int indexRE2 = elcChannelNames.indexOf("RE2");
-    digPoint.kind = FIFFV_POINT_CARDINAL;
-    digPoint.ident = FIFFV_POINT_RPA; //digitizerInfo.size();
-
-    //Set EEG electrode location - Convert from mm to m
-    if (indexRE2 != -1) {
-        digPoint.r[0] = elcLocation3D[indexRE2][0] * 0.001;
-        digPoint.r[1] = elcLocation3D[indexRE2][1] * 0.001;
-        digPoint.r[2] = (elcLocation3D[indexRE2][2] - 10) * 0.001;
-        digitizerInfo.push_back(digPoint);
-    } else
-        qWarning("Plugin TMSI - ERROR - RE2 not found. Check loaded layout.");
-
-    //Add EEG electrode positions as digitizers
-    for (int i = 0; i < numberEEGCh; i++) {
-        FiffDigPoint digPoint;
-        digPoint.kind = FIFFV_POINT_EEG;
-        digPoint.ident = i;
-
-        //Set EEG electrode location - Convert from mm to m
-        digPoint.r[0] = elcLocation3D[i][0] * 0.001;
-        digPoint.r[1] = elcLocation3D[i][1] * 0.001;
-        digPoint.r[2] = elcLocation3D[i][2] * 0.001;
-        digitizerInfo.push_back(digPoint);
+    FiffDigPointSet dig;
+    // Fiducials approximated from the electrodes next to them: LE2, Z1, RE2 lowered by 1, 6 and 1 cm
+    const std::vector<std::tuple<const char*, int, double>> cardinals = {{"LE2", FIFFV_POINT_LPA, 0.01},
+                                                                         {"Z1", FIFFV_POINT_NASION, 0.06},
+                                                                         {"RE2", FIFFV_POINT_RPA, 0.01}};
+    for (const auto& [name, ident, drop] : cardinals) {
+        const auto it = std::find(layout->names.begin(), layout->names.end(), name);
+        if (it == layout->names.end()) {
+            qWarning() << "[TMSI]" << name << "not found. Check the loaded layout.";
+            continue;
+        }
+        FiffDigPoint point;
+        point.kind = FIFFV_POINT_CARDINAL;
+        point.ident = ident;
+        const Vector3d r = positions[static_cast<std::size_t>(it - layout->names.begin())] - Vector3d(0.0, 0.0, drop);
+        for (int k = 0; k < 3; ++k) {
+            point.r[k] = static_cast<float>(r[k]);
+        }
+        dig.push_back(point);
     }
 
-    //Set the final digitizer values to the fiff info
-    m_pFiffInfo->dig = std::move(digitizerInfo);
-
-    //Set up the channel info
-    m_pFiffInfo->chs.clear();
-    m_pFiffInfo->ch_names.clear();
-
-    for (int i = 0; i < m_iNumberOfChannels; i++) {
-        //Create information for each channel
-        FiffChInfo fChInfo;
-
-        //EEG Channels
-        if (i <= numberEEGCh - 1) {
-            //Set channel name
-            if (!elcChannelNames.empty() && i < elcChannelNames.size()) {
-                fChInfo.ch_name = "EEG " + elcChannelNames.at(i).toStdString();
-            } else {
-                fChInfo.ch_name = std::format("EEG {:03}", i);
-            }
-
-            //Set channel type
-            fChInfo.kind = FIFFV_EEG_CH;
-
-            //Set coil type
-            fChInfo.chpos.coil_type = FIFFV_COIL_EEG;
-
-            //Set logno
-            fChInfo.logNo = i;
-
-            //Set coord frame
-            fChInfo.coord_frame = FIFFV_COORD_HEAD;
-
-            //Set unit
-            fChInfo.unit = FIFF_UNIT_V;
-            fChInfo.unit_mul = 0;
-
-            //Set EEG electrode location - Convert from mm to m
-            fChInfo.eeg_loc(0, 0) = elcLocation3D[i][0] * 0.001;
-            fChInfo.eeg_loc(1, 0) = elcLocation3D[i][1] * 0.001;
-            fChInfo.eeg_loc(2, 0) = elcLocation3D[i][2] * 0.001;
-
-            //Set EEG electrode direction - Convert from mm to m
-            fChInfo.eeg_loc(0, 1) = center_pos.x() * 0.001;
-            fChInfo.eeg_loc(1, 1) = center_pos.y() * 0.001;
-            fChInfo.eeg_loc(2, 1) = center_pos.z() * 0.001;
-
-            //Also write the eeg electrode locations into the meg loc variable (mne_ex_read_raw() matlab function wants this)
-            fChInfo.chpos.r0[0] = elcLocation3D[i][0] * 0.001;
-            fChInfo.chpos.r0[1] = elcLocation3D[i][1] * 0.001;
-            fChInfo.chpos.r0[2] = elcLocation3D[i][2] * 0.001;
-
-            fChInfo.chpos.ex[0] = center_pos.x() * 0.001;
-            fChInfo.chpos.ex[1] = center_pos.y() * 0.001;
-            fChInfo.chpos.ex[2] = center_pos.z() * 0.001;
-
-            fChInfo.chpos.ey[0] = 0;
-            fChInfo.chpos.ey[1] = 1;
-            fChInfo.chpos.ey[2] = 0;
-
-            fChInfo.chpos.ez[0] = 0;
-            fChInfo.chpos.ez[1] = 0;
-            fChInfo.chpos.ez[2] = 1;
-
-            //cout<<i<<endl<<fChInfo.eeg_loc<<endl;
+    std::size_t electrode = 0;
+    for (std::size_t c = 0; c < info.chs.size() && electrode < positions.size(); ++c) {
+        FiffChInfo& ch = info.chs[c];
+        if (ch.kind != FIFFV_EEG_CH) {
+            continue;
         }
-
-        //Bipolar channels
-        if (i >= 128 && i <= 131) {
-            //Set channel type
-            fChInfo.kind = FIFFV_MISC_CH;
-
-            fChInfo.ch_name = std::format("BIPO {}", i - 128);
+        const Vector3d& r = positions[electrode];
+        ch.ch_name = "EEG " + layout->names[electrode];
+        info.ch_names[c] = ch.ch_name;
+        ch.coord_frame = FIFFV_COORD_HEAD;
+        ch.chpos.coil_type = FIFFV_COIL_EEG;
+        for (int k = 0; k < 3; ++k) {
+            ch.eeg_loc(k, 0) = r[k];
+            ch.eeg_loc(k, 1) = center[k];
+            ch.chpos.r0[k] = static_cast<float>(r[k]);
+            ch.chpos.ex[k] = static_cast<float>(center[k]);
         }
+        ch.chpos.ey << 0.0f, 1.0f, 0.0f;
+        ch.chpos.ez << 0.0f, 0.0f, 1.0f;
 
-        //Auxilary input channels
-        if (i >= 132 && i <= 135) {
-            //Set channel type
-            fChInfo.kind = FIFFV_MISC_CH;
-
-            fChInfo.ch_name = std::format("AUX {}", i - 132);
+        FiffDigPoint point;
+        point.kind = FIFFV_POINT_EEG;
+        point.ident = static_cast<int>(electrode);
+        for (int k = 0; k < 3; ++k) {
+            point.r[k] = static_cast<float>(r[k]);
         }
-
-        //Digital input channel
-        if (i == 136) {
-            //Set channel type
-            fChInfo.kind = FIFFV_STIM_CH;
-
-            fChInfo.ch_name = "STI 014";
-        }
-
-        //Internally generated test signal - ramp signal
-        if (i == 137) {
-            //Set channel type
-            fChInfo.kind = FIFFV_MISC_CH;
-
-            fChInfo.ch_name = "TEST RAMP";
-        }
-
-        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
-        m_pFiffInfo->chs.push_back(fChInfo);
+        dig.push_back(point);
+        ++electrode;
     }
-
-    //Set head projection
-    m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->dev_head_t.to = FIFFV_COORD_HEAD;
-    m_pFiffInfo->ctf_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->ctf_head_t.to = FIFFV_COORD_HEAD;
-
-    //Set projection data
-    m_pFiffInfo->projs.clear();
-    FiffProj proj;
-    proj.kind = 1;
-    proj.active = false;
-
-    FiffNamedMatrix::SDPtr namedMatrix = proj.data;
-    namedMatrix->ncol = numberEEGCh / 3;
-    namedMatrix->nrow = 1;
-    namedMatrix->data = MatrixXd::Ones(1, namedMatrix->ncol);
-
-    //Set projection 1
-    for (int i = 0; i < namedMatrix->ncol; i++)
-        namedMatrix->col_names.push_back(m_pFiffInfo->ch_names.at(i));
-
-    proj.data = namedMatrix;
-    proj.desc = "PCA-v1";
-    m_pFiffInfo->projs.push_back(proj);
-
-    //Set projection 2
-    namedMatrix->col_names.clear();
-    for (int i = 0; i < namedMatrix->ncol; i++)
-        namedMatrix->col_names.push_back(m_pFiffInfo->ch_names.at(i + namedMatrix->ncol));
-
-    proj.data = namedMatrix;
-    proj.desc = "PCA-v2";
-    m_pFiffInfo->projs.push_back(proj);
-
-    //Set projection 3
-    namedMatrix->col_names.clear();
-    for (int i = 0; i < namedMatrix->ncol; i++)
-        namedMatrix->col_names.push_back(m_pFiffInfo->ch_names.at(i + (2 * namedMatrix->ncol)));
-
-    proj.data = namedMatrix;
-    proj.desc = "PCA-v3";
-    m_pFiffInfo->projs.push_back(proj);
+    info.dig = std::move(dig);
 }
 
 //=============================================================================================================
 
 bool TMSI::start()
 {
+    ACQLIB::registerTmsiScheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[TMSI::start]" << QString::fromStdString(device.error().text());
+        return false;
+    }
+    m_device = std::move(*device);
+    if (m_bCheckImpedances) {
+        QThread::start();
+        return true;
+    }
+
+    auto fiffInfo = ACQLIB::toFiffInfo(*m_device.stream().info());
+    auto reader = m_device.stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[TMSI::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        m_device.close();
+        return false;
+    }
+    applyElectrodeLayout(*fiffInfo);
+    m_iStimRow = -1;
+    for (std::size_t c = 0; c < fiffInfo->chs.size() && m_iStimRow < 0; ++c) {
+        if (fiffInfo->chs[c].kind == FIFFV_STIM_CH) {
+            m_iStimRow = static_cast<int>(c);
+        }
+    }
+
+    //The user can change the channels between runs, so the measurement is set up here and not in init()
+    m_pRMTSA_TMSI->measurementData()->initFromFiffInfo(std::make_shared<FiffInfo>(std::move(*fiffInfo)));
+    m_pRMTSA_TMSI->measurementData()->setMultiArraySize(1);
+
+    if (ACQLIB::AcqError e = m_device.start(); !e.ok()) {
+        qWarning() << "[TMSI::start]" << QString::fromStdString(e.text());
+        m_device.close();
+        return false;
+    }
+    m_reader = std::move(*reader);
+
     if (m_bBeepTrigger) {
         m_qTimerTrigger.start();
     }
-
-    //Setup fiff info
-    setUpFiffInfo();
-
-    //Set the channel size of the RMTSA - this needs to be done here and NOT in the init() function because the user can change the number of channels during runtime
-    m_pRMTSA_TMSI->measurementData()->initFromFiffInfo(m_pFiffInfo);
-    m_pRMTSA_TMSI->measurementData()->setMultiArraySize(m_iSamplesPerBlock);
-    m_pRMTSA_TMSI->measurementData()->setSamplingRate(m_iSamplingFreq);
-
-    m_pTMSIProducer->start(m_iNumberOfChannels,
-                           m_iSamplingFreq,
-                           m_iSamplesPerBlock,
-                           m_bUseChExponent,
-                           m_bUseUnitGain,
-                           m_bUseUnitOffset,
-                           m_bWriteDriverDebugToFile,
-                           m_bUseCommonAverage,
-                           m_bCheckImpedances);
-    wait(500);
-
-    if (m_pTMSIProducer->isRunning()) {
-        // Init BCIFeatureWindow for visualization
-        m_pTmsiManualAnnotationWidget = QSharedPointer<TMSIManualAnnotationWidget>(new TMSIManualAnnotationWidget(this));
-
-        if (m_bUseKeyboardTrigger && !m_bCheckImpedances) {
-            m_pTmsiManualAnnotationWidget->initGui();
-            m_pTmsiManualAnnotationWidget->show();
-        }
-
-        QThread::start();
-        return true;
-    } else {
-        qWarning() << "[TMSI::start] TMSIProducer thread could not be started - Either the device is turned off (check your OS device manager) or the driver DLL (TMSiSDK.dll / TMSiSDK32bit.dll) is not installed in the system32 / SysWOW64 directory";
-        return false;
+    m_pTmsiManualAnnotationWidget = QSharedPointer<TMSIManualAnnotationWidget>(new TMSIManualAnnotationWidget(this));
+    if (m_bUseKeyboardTrigger) {
+        m_pTmsiManualAnnotationWidget->initGui();
+        m_pTmsiManualAnnotationWidget->show();
     }
+
+    QThread::start();
+    return true;
 }
 
 //=============================================================================================================
 
 bool TMSI::stop()
 {
-    //Stop the producer thread first
-    m_pTMSIProducer->stop();
-
-    //Wait until this thread (TMSI) is stopped
     requestInterruption();
-    wait(500);
+    wait();
+
+    m_reader = ACQLIB::AcqReader();
+    m_device.close();
 
     // Clear all data in the buffer connected to displays and other plugins
     m_pRMTSA_TMSI->measurementData()->clear();
-    m_pCircularBuffer->clear();
 
     if (m_pTmsiManualAnnotationWidget) {
         m_pTmsiManualAnnotationWidget->hide();
@@ -523,70 +325,61 @@ QWidget* TMSI::setupWidget()
 
 void TMSI::setKeyboardTriggerType(int type)
 {
-    m_qMutex.lock();
     m_iTriggerType = type;
-    m_qMutex.unlock();
 }
 
 //=============================================================================================================
 
 void TMSI::run()
 {
-    MatrixXf matData;
+    const std::size_t channels = m_device.stream().info()->channelCount();
 
+    if (m_bCheckImpedances) {
+        while (!isInterruptionRequested()) {
+            const auto impedances = m_device.measureImpedances(std::chrono::seconds(5));
+            if (!impedances) {
+                qWarning() << "[TMSI::run]" << QString::fromStdString(impedances.error().text());
+                return;
+            }
+            // Electrode i of the cap is ExG input i, and the ExG inputs lead the stream
+            VectorXd ohms = VectorXd::Zero(static_cast<Index>(impedances->size()));
+            for (const ACQLIB::AcqImpedance& impedance : *impedances) {
+                if (impedance.channel < impedances->size()) {
+                    ohms[static_cast<Index>(impedance.channel)] = impedance.ohms;
+                }
+            }
+            if (m_pTmsiImpedanceWidget) {
+                TMSIImpedanceWidget* widget = m_pTmsiImpedanceWidget.data();
+                QMetaObject::invokeMethod(widget, [widget, ohms] { widget->updateGraphicScene(ohms); }, Qt::QueuedConnection);
+            }
+            QThread::msleep(200);
+        }
+        return;
+    }
+
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
     while (!isInterruptionRequested()) {
-        // Check impedances - send new impedance values to graphic scene
-        if (m_pTMSIProducer->isRunning() && m_bCheckImpedances) {
-            if (m_pCircularBuffer->pop(matData)) {
-                for (qint32 i = 0; i < matData.cols(); ++i) {
-                    m_pTmsiImpedanceWidget->updateGraphicScene(matData.col(i).cast<double>());
-                }
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (!read) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+                continue;
+            }
+            qWarning() << "[TMSI::run]" << QString::fromStdString(read.error().text());
+            return;
+        }
+        if (m_iStimRow >= 0) {
+            // Triggers of this computer go to the last sample of the block, where the subject sees them
+            if (m_bBeepTrigger && m_qTimerTrigger.elapsed() >= m_iTriggerInterval) {
+                beep();
+                block(m_iStimRow, block.cols() - 1) = kBeepCode;
+                m_qTimerTrigger.restart();
+            }
+            if (const int code = m_iTriggerType.exchange(0); m_bUseKeyboardTrigger && code != 0) {
+                block(m_iStimRow, block.cols() - 1) = code;
             }
         }
-
-        //pop matrix only if the producer thread is running
-        if (m_pTMSIProducer->isRunning() && !m_bCheckImpedances) {
-            if (m_pCircularBuffer->pop(matData)) {
-                // Set Beep trigger (if activated)
-                if (m_bBeepTrigger && m_qTimerTrigger.elapsed() >= m_iTriggerInterval) {
-                    QThreadPool::globalInstance()->start([] { Beep(450, 700); });
-                    //Set trigger in received data samples - just for one sample, so that this event is easy to detect
-                    matData(136, m_iSamplesPerBlock - 1) = 252;
-                    m_qTimerTrigger.restart();
-                }
-
-                // Set keyboard trigger (if activated and !=0)
-                if (m_bUseKeyboardTrigger && m_iTriggerType != 0) {
-                    matData(136, m_iSamplesPerBlock - 1) = m_iTriggerType;
-                }
-
-                //Change values of the trigger channel for better plotting - this change is not saved in the produced fif file
-                if (m_iNumberOfChannels > 137) {
-                    for (int i = 0; i < matData.row(137).cols(); i++) {
-                        // Left keyboard or capacitive
-                        if (matData.row(136)[i] == 254) {
-                            matData.row(136)[i] = 4000;
-                        }
-
-                        // Right keyboard
-                        if (matData.row(136)[i] == 253) {
-                            matData.row(136)[i] = 8000;
-                        }
-
-                        // Beep
-                        if (matData.row(136)[i] == 252) {
-                            matData.row(136)[i] = 2000;
-                        }
-                    }
-                }
-
-                //emit values to real time multi sample array
-                m_pRMTSA_TMSI->measurementData()->setValue(matData.cast<double>());
-
-                // Reset keyboard trigger
-                m_iTriggerType = 0;
-            }
-        }
+        m_pRMTSA_TMSI->measurementData()->setValue(block);
     }
 }
 

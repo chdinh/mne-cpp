@@ -17,10 +17,15 @@
 //=============================================================================================================
 
 #include "tmsiimpedancewidget.h"
-#include <memory>
 #include "ui_tmsiimpedancewidget.h"
 
 #include "../tmsi.h"
+
+#include <base/string_utils.h>
+
+#include <algorithm>
+#include <fstream>
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -84,40 +89,18 @@ TMSIImpedanceWidget::~TMSIImpedanceWidget()
 
 //=============================================================================================================
 
-void TMSIImpedanceWidget::updateGraphicScene(VectorXd matValue)
+void TMSIImpedanceWidget::updateGraphicScene(const VectorXd& matValue)
 {
-    // Get scene items
-    QList<QGraphicsItem*> itemList = m_qGScene->items();
-
-    // Update color and impedance values for each electrode item
-    int matIndex = 0;
-    double impedanceValue = 0.0;
-    int numberItems = itemList.size();
-
-    if (itemList.size() > matValue.rows()) {
-        qDebug() << "TMSIImpedanceWidget - ERROR - There were more items in the scene than samples received from the device - Check the current layout! Only available channels will be displayed!";
-        numberItems = matValue.rows();
-        return;
-    }
-
-    for (int i = 0; i < numberItems; i++) {
-        TMSIElectrodeItem* item = (TMSIElectrodeItem*)itemList.at(i);
-
-        // find matrix index for given electrode name
-        matIndex = m_qmElectrodeNameIndex[item->getElectrodeName()];
-        impedanceValue = matValue[matIndex];
-
-        // set new color and impedance value. Clip received impedance value if > predefined max impedance value
-        //        if(impedanceValue>m_dMaxImpedance || impedanceValue<0)
-        //            impedanceValue = m_dMaxImpedance;
-
-        // For testing purposes only!
-        //impedanceValue = ui->m_verticalSlider_manualImpedanceValue->value();
-
-        double scale = ui->m_doubleSpinBox_manualImpedanceValueScale->value();
-        //double scale = 0.000053;
-        //cout << scale <<endl;
-        double valueScaledNormalized = (scale * impedanceValue) / (scale * impedanceValue + 1);
+    // Electrodes of the layout beyond the amplifier's inputs keep their colour
+    const double scale = ui->m_doubleSpinBox_manualImpedanceValueScale->value();
+    for (QGraphicsItem* graphicsItem : m_qGScene->items()) {
+        auto* item = static_cast<TMSIElectrodeItem*>(graphicsItem);
+        const int matIndex = m_qmElectrodeNameIndex.value(item->getElectrodeName(), -1);
+        if (matIndex < 0 || matIndex >= matValue.size()) {
+            continue;
+        }
+        const double impedanceValue = matValue[matIndex];
+        const double valueScaledNormalized = (scale * impedanceValue) / (scale * impedanceValue + 1);
 
         item->setColor(m_cbColorMap->valueToJet(valueScaledNormalized));
         item->setImpedanceValue(impedanceValue);
@@ -145,7 +128,7 @@ void TMSIImpedanceWidget::initGraphicScene()
 
 //=============================================================================================================
 
-void TMSIImpedanceWidget::addElectrodeItem(QString electrodeName, QVector2D position)
+void TMSIImpedanceWidget::addElectrodeItem(const QString& electrodeName, QVector2D position)
 {
     TMSIElectrodeItem* item = new TMSIElectrodeItem(electrodeName, QPointF(position.x(), position.y()), QColor(m_cbColorMap->valueToJet(1)), m_qmElectrodeNameIndex[electrodeName]);
     item->setPos(QPointF(position.x(), position.y()));

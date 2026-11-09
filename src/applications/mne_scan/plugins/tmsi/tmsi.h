@@ -21,51 +21,40 @@
 //=============================================================================================================
 
 #include "tmsi_global.h"
-#include <memory>
 
-#include "FormFiles/tmsisetupwidget.h"
-#include "FormFiles/tmsimanualannotationwidget.h"
 #include "FormFiles/tmsiimpedancewidget.h"
+#include "FormFiles/tmsimanualannotationwidget.h"
 #include "FormFiles/tmsisetupprojectwidget.h"
+#include "FormFiles/tmsisetupwidget.h"
 
-#include <iostream>
-#include <fstream>
-#include <direct.h>
-
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <base/circular_buffer.h>
-
-#include <Eigen/Core>
-#include <scMeas/realtimemultisamplearray.h>
-
-#include <channels/layoutloader.h>
-
-#include <fiff/fiff.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtWidgets>
-#include <QVector>
 #include <QElapsedTimer>
-#include <QThreadPool>
 
 //=============================================================================================================
-// EIGEN INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <unsupported/Eigen/FFT>
-#include <Eigen/Geometry>
+#include <atomic>
+#include <string>
 
 //=============================================================================================================
-// TMSIPLUGIN FORWARD DECLARATIONS
+// FORWARD DECLARATIONS
 //=============================================================================================================
 
 namespace FIFFLIB
 {
 class FiffInfo;
-class FiffStream;
+}
+
+namespace SCMEASLIB
+{
+class RealTimeMultiSampleArray;
 }
 
 //=============================================================================================================
@@ -76,16 +65,11 @@ namespace TMSIPLUGIN
 {
 
 //=============================================================================================================
-// TMSIPLUGIN FORWARD DECLARATIONS
-//=============================================================================================================
-
-class TMSIProducer;
-
-//=============================================================================================================
 /**
  * TMSI...
  *
- * @brief The TMSI class provides a EEG connector. In order for this plugin to work properly the driver dll "RTINST.dll" must be installed in the system directory. This dll is automatically copied in the system directory during the driver installtion of the TMSi Refa device.
+ * @brief EEG connector for TMSi Refa and Porti amplifiers through the tmsi:// source of mne_acq_devices, which can
+ *        also simulate the amplifier.
  */
 class TMSISHARED_EXPORT TMSI : public SCSHAREDLIB::AbstractSensor
 {
@@ -94,7 +78,6 @@ class TMSISHARED_EXPORT TMSI : public SCSHAREDLIB::AbstractSensor
     // Use the Q_INTERFACES() macro to tell Qt's meta-object system about the interfaces
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
-    friend class TMSIProducer;
     friend class TMSISetupWidget;
     friend class TMSIImpedanceWidget;
     friend class TMSISetupProjectWidget;
@@ -110,63 +93,59 @@ public:
     /**
      * Destroys the TMSI.
      */
-    virtual ~TMSI();
+    ~TMSI() override;
 
     //=========================================================================================================
     /**
      * Clone the plugin
      */
-    virtual QSharedPointer<AbstractPlugin> clone() const;
+    QSharedPointer<AbstractPlugin> clone() const override;
 
     //=========================================================================================================
     /**
      * Initialise input and output connectors.
      */
-    virtual void init();
+    void init() override;
 
     //=========================================================================================================
     /**
      * Is called when plugin is detached of the stage. Can be used to safe settings.
      */
-    virtual void unload();
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Sets up the fiff info with the current data chosen by the user. Note: Only works for ANT Neuro Waveguard Duke caps.
+     * Opens the amplifier (or its simulator) and starts streaming, or measuring impedances.
      */
-    void setUpFiffInfo();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Starts the TMSI by starting the tmsi's thread.
+     * Stops streaming and releases the amplifier.
      */
-    virtual bool start();
+    bool stop() override;
+
+    AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+
+    QWidget* setupWidget() override;
+
+    QString getBuildInfo() override;
 
     //=========================================================================================================
     /**
-     * Stops the TMSI by stopping the tmsi's thread.
+     * Writes a trigger code into the stimulus channel of the next block.
+     *
+     * @param[in] type   The code: 254 left, 253 right.
      */
-    virtual bool stop();
-
-    virtual AbstractPlugin::PluginType getType() const;
-    virtual QString getName() const;
-
-    virtual QWidget* setupWidget();
-
-    virtual QString getBuildInfo();
-
     void setKeyboardTriggerType(int type);
-
-    void splitRecordingFile();
 
 protected:
     //=========================================================================================================
     /**
-     * The starting point for the thread. After calling start(), the newly created thread calls this function.
-     * Returning from this method will end the execution of the thread.
-     * Pure virtual method inherited by QThread.
+     * Hands the amplifier's blocks, or its impedances, to the connected plugins and widgets until stop().
      */
-    virtual void run();
+    void run() override;
 
     //=========================================================================================================
     /**
@@ -180,63 +159,39 @@ protected:
      */
     void showSetupProjectDialog();
 
-    //=========================================================================================================
-    /**
-     * Starts data recording
-     */
-    void showStartRecording();
-
-    //=========================================================================================================
-    /**
-     * Implements blinking recording button
-     */
-    void changeRecordingButton();
-
-    //=========================================================================================================
-    /**
-     * Checks if a dir exists
-     */
-    bool dirExists(const std::string& dirName_in);
-
 private:
+    /** @return The tmsi:// URI of the current settings. */
+    std::string uri() const;
+
+    /** Names and places the EEG channels after the electrodes of the cap's .elc file. */
+    void applyElectrodeLayout(FIFFLIB::FiffInfo& info) const;
+
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_TMSI; /**< The RealTimeSampleArray to provide the EEG data.*/
     QSharedPointer<TMSIManualAnnotationWidget> m_pTmsiManualAnnotationWidget;                         /**< Widget for manually annotation the trigger during session.*/
     QSharedPointer<TMSIImpedanceWidget> m_pTmsiImpedanceWidget;                                       /**< Widget for checking the impedances*/
     QSharedPointer<TMSISetupProjectWidget> m_pTmsiSetupProjectWidget;                                 /**< Widget for checking the impedances*/
 
-    QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
+    ACQLIB::AcqDevice m_device; /**< The amplifier while streaming or measuring impedances. */
+    ACQLIB::AcqReader m_reader; /**< Reads the amplifier's stream in run(). */
+    int m_iStimRow = -1;        /**< Row of the stimulus channel in the blocks, -1 if it is not delivered. */
 
-    int m_iSamplingFreq;     /**< The sampling frequency defined by the user via the GUI (in Hertz).*/
-    int m_iNumberOfChannels; /**< The number of channels defined by the user via the GUI.*/
-    int m_iSamplesPerBlock;  /**< The samples per block defined by the user via the GUI.*/
+    int m_iSamplingFreq = 2048;      /**< Sampling rate in Hz; the amplifier runs at the supported rate nearest to it.*/
+    int m_iNumberOfChannels = 0;     /**< Leading amplifier channels to deliver; 0 = all.*/
+    int m_iSamplesPerBlock = 16;     /**< Samples per block handed to the connected plugins.*/
+    bool m_bUseCommonAverage = true; /**< Reference the ExG inputs to their common average.*/
+    bool m_bSimulate = false;        /**< Simulate the amplifier.*/
 
-    int m_iTriggerInterval;        /**< The gap between the trigger signals which request the subject to do something (in ms).*/
-    QElapsedTimer m_qTimerTrigger; /**< Time stemp of the last trigger event (in ms).*/
+    int m_iTriggerInterval = 5000;      /**< The gap between the trigger signals which request the subject to do something (in ms).*/
+    QElapsedTimer m_qTimerTrigger;      /**< Time stemp of the last trigger event (in ms).*/
+    bool m_bBeepTrigger = false;        /**< Flag for using a trigger input.*/
+    bool m_bUseKeyboardTrigger = false; /**< Flag for using the keyboard as a trigger input.*/
+    bool m_bCheckImpedances = false;    /**< Flag for checking the impedances of the EEG amplifier.*/
+    std::atomic<int> m_iTriggerType{0}; /**< Trigger code for the next block, 0 for none.*/
 
-    bool m_bUseChExponent;          /**< Flag for using the channels exponent. Defined by the user via the GUI.*/
-    bool m_bUseUnitGain;            /**< Flag for using the channels unit gain. Defined by the user via the GUI.*/
-    bool m_bUseUnitOffset;          /**< Flag for using the channels unit offset. Defined by the user via the GUI.*/
-    bool m_bWriteDriverDebugToFile; /**< Flag for for writing driver debug informstions to a file. Defined by the user via the GUI.*/
-    bool m_bBeepTrigger;            /**< Flag for using a trigger input.*/
-    bool m_bUseCommonAverage;       /**< Flag for using common average.*/
-    bool m_bUseKeyboardTrigger;     /**< Flag for using the keyboard as a trigger input.*/
-    bool m_bCheckImpedances;        /**< Flag for checking the impedances of the EEG amplifier.*/
+    QString m_sElcFilePath; /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
 
-    int m_iTriggerType; /**< Holds the trigger type | 0 - no trigger activated, 254 - left, 253 - right, 252 - beep.*/
-
-    QString m_sElcFilePath;                         /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
-
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXf>> m_pCircularBuffer; /**< Holds incoming raw data.*/
-
-    QSharedPointer<TMSIProducer> m_pTMSIProducer; /**< the TMSIProducer.*/
-
-    Eigen::MatrixXf m_matOldMatrix; /**< Last received sample matrix by the tmsiproducer/tmsidriver class. Used for simple HP filtering.*/
-
-    QMutex m_qMutex; /**< Holds the threads mutex.*/
-
-    QAction* m_pActionImpedance;    /**< shows impedance widget. */
-    QAction* m_pActionSetupProject; /**< shows setup project dialog. */
+    QAction* m_pActionImpedance = nullptr;    /**< shows impedance widget. */
+    QAction* m_pActionSetupProject = nullptr; /**< shows setup project dialog. */
 };
 } // NAMESPACE
 

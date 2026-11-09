@@ -52,18 +52,8 @@ TMSISetupWidget::TMSISetupWidget(TMSI* pTMSI, QWidget* parent)
             this, &TMSISetupWidget::setDeviceSamplingProperties);
     connect(m_pUi->m_checkBox_UseCommonAverage, static_cast<void (QCheckBox::*)(bool)>(&QCheckBox::clicked),
             this, &TMSISetupWidget::setDeviceSamplingProperties);
-
-    //Connect channel corrections
-    connect(m_pUi->m_checkBox_UseChExponent, static_cast<void (QCheckBox::*)(bool)>(&QCheckBox::clicked),
+    connect(m_pUi->m_checkBox_Simulate, static_cast<void (QCheckBox::*)(bool)>(&QCheckBox::clicked),
             this, &TMSISetupWidget::setDeviceSamplingProperties);
-    connect(m_pUi->m_checkBox_UseUnitGain, static_cast<void (QCheckBox::*)(bool)>(&QCheckBox::clicked),
-            this, &TMSISetupWidget::setDeviceSamplingProperties);
-    connect(m_pUi->m_checkBox_UseUnitOffset, static_cast<void (QCheckBox::*)(bool)>(&QCheckBox::clicked),
-            this, &TMSISetupWidget::setDeviceSamplingProperties);
-
-    //Connect debug file
-    connect(m_pUi->m_checkBox_WriteDriverDebugToFile, static_cast<void (QCheckBox::*)(bool)>(&QCheckBox::clicked),
-            this, &TMSISetupWidget::setWriteToDebugFile);
 
     //Connect trigger properties
     connect(m_pUi->m_spinBox_BeepLength, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
@@ -89,14 +79,7 @@ void TMSISetupWidget::initGui()
     m_pUi->m_spinBox_NumberOfChannels->setValue(m_pTMSI->m_iNumberOfChannels);
     m_pUi->m_spinBox_SamplesPerBlock->setValue(m_pTMSI->m_iSamplesPerBlock);
     m_pUi->m_checkBox_UseCommonAverage->setChecked(m_pTMSI->m_bUseCommonAverage);
-
-    //Init channel corrections
-    m_pUi->m_checkBox_UseChExponent->setChecked(m_pTMSI->m_bUseChExponent);
-    m_pUi->m_checkBox_UseUnitGain->setChecked(m_pTMSI->m_bUseUnitGain);
-    m_pUi->m_checkBox_UseUnitOffset->setChecked(m_pTMSI->m_bUseUnitOffset);
-
-    //Init write to file
-    m_pUi->m_checkBox_WriteDriverDebugToFile->setChecked(m_pTMSI->m_bWriteDriverDebugToFile);
+    m_pUi->m_checkBox_Simulate->setChecked(m_pTMSI->m_bSimulate);
 
     //Init trigger properties
     m_pUi->m_spinBox_BeepLength->setValue(m_pTMSI->m_iTriggerInterval);
@@ -112,19 +95,8 @@ void TMSISetupWidget::setDeviceSamplingProperties()
     m_pTMSI->m_iSamplingFreq = m_pUi->m_spinBox_SamplingFreq->value();
     m_pTMSI->m_iNumberOfChannels = m_pUi->m_spinBox_NumberOfChannels->value();
     m_pTMSI->m_iSamplesPerBlock = m_pUi->m_spinBox_SamplesPerBlock->value();
-
-    m_pTMSI->m_bUseChExponent = m_pUi->m_checkBox_UseChExponent->isChecked();
-    m_pTMSI->m_bUseUnitGain = m_pUi->m_checkBox_UseUnitGain->isChecked();
-    m_pTMSI->m_bUseUnitOffset = m_pUi->m_checkBox_UseUnitOffset->isChecked();
-
     m_pTMSI->m_bUseCommonAverage = m_pUi->m_checkBox_UseCommonAverage->isChecked();
-}
-
-//=============================================================================================================
-
-void TMSISetupWidget::setWriteToDebugFile()
-{
-    m_pTMSI->m_bWriteDriverDebugToFile = m_pUi->m_checkBox_WriteDriverDebugToFile->isChecked();
+    m_pTMSI->m_bSimulate = m_pUi->m_checkBox_Simulate->isChecked();
 }
 
 //=============================================================================================================

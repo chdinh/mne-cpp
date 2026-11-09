@@ -11,10 +11,13 @@ project(mne_acq_devices
 set(SOURCES
   brainamp/brainamp_backend.cpp
   brainamp/brainamp_simulator.cpp
+  tmsi/tmsi_backend.cpp
+  tmsi/tmsi_simulator.cpp
 )
 
 set(PRIVATE_HEADERS
   brainamp/brainamp_transport.h
+  tmsi/tmsi_transport.h
 )
 
 set(HEADERS
@@ -29,6 +32,11 @@ set(_brainamp_hardware OFF)
 if(WIN32 AND EXISTS "${MNE_BRAINAMP_SDK_DIR}/BrainAmpIoCtl.h")
   set(_brainamp_hardware ON)
   list(APPEND SOURCES brainamp/brainamp_driver_win32.cpp)
+endif()
+
+# The TMSi SDK is a system DLL, loaded at run time
+if(WIN32)
+  list(APPEND SOURCES tmsi/tmsi_driver_win32.cpp)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})

@@ -22,6 +22,7 @@
 #include <noisereduction/noisereduction.h>
 #include <rtclustmne/rtclustmne.h>
 #include <rtfwd/rtfwd.h>
+#include <tmsi/tmsi.h>
 
 #include <mainwindow.h>
 
@@ -38,10 +39,12 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QCheckBox>
 #include <QFileDialog>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QtTest>
@@ -71,6 +74,7 @@ private slots:
     void estimatesTheCovariance();
     void passesTheStreamThrough();
     void brainAmpStreamsTheSimulatedAmplifier();
+    void tmsiStreamsTheSimulatedAmplifier();
     void mainWindowSwitchesStyle();
 
 private:
@@ -385,6 +389,57 @@ void TestMneScanPlugins::brainAmpStreamsTheSimulatedAmplifier()
         for (const double marker : block.row(8))
             QVERIFY(marker == 0.0 || marker == 1.0 || marker == 2.0);
     }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::tmsiStreamsTheSimulatedAmplifier()
+{
+    TMSIPLUGIN::TMSI plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        auto* keyboard = setup->findChild<QCheckBox*>("m_checkBox_EnableKeyboardTrigger");
+        auto* rate = setup->findChild<QSpinBox*>("m_spinBox_SamplingFreq");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        QVERIFY(simulate && keyboard && rate && block);
+        simulate->click();
+        keyboard->click();
+        rate->setValue(1024);
+        block->setValue(64);
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    plugin.setKeyboardTriggerType(253);
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // 64 ExG inputs named after the cap's electrodes, 4 bipolar and 4 auxiliary inputs, STI 014, the test ramp
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(74));
+    QCOMPARE(info->chs[0].ch_name, std::string("EEG LM"));
+    QCOMPARE(info->chs[0].kind, FIFFV_EEG_CH);
+    QCOMPARE(info->chs[72].ch_name, std::string("STI 014"));
+    QCOMPARE(info->chs[72].kind, FIFFV_STIM_CH);
+    QVERIFY(info->chs[0].chpos.r0.norm() > 0.05); // on the head, in metres
+    QCOMPARE(std::count_if(info->dig.begin(), info->dig.end(), [](const FiffDigPoint& p) { return p.kind == FIFFV_POINT_CARDINAL; }), 3);
+    QMutexLocker locker(&mutex);
+    bool keyed = false;
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 74);
+        QCOMPARE(data.cols(), 64);
+        QVERIFY(data.topRows(64).cwiseAbs().maxCoeff() < 1e-3);
+        QVERIFY(data.topRows(64).cwiseAbs().maxCoeff() > 0.0);
+        keyed |= data(72, 63) == 253.0;
+    }
+    QVERIFY(keyed); // the keyboard trigger lands on the last sample of a block
 }
 
 //=============================================================================================================

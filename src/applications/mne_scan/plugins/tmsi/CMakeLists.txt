@@ -18,9 +18,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS}
 set(SOURCES
     tmsi.cpp 
     tmsi_global.cpp 
-    tmsiproducer.cpp 
     FormFiles/tmsisetupwidget.cpp 
-    tmsidriver.cpp 
     FormFiles/tmsimanualannotationwidget.cpp 
     FormFiles/tmsiimpedancewidget.cpp 
     tmsielectrodeitem.cpp 
@@ -32,9 +30,7 @@ set(SOURCES
 set(HEADERS
     tmsi.h
     tmsi_global.h 
-    tmsiproducer.h 
     FormFiles/tmsisetupwidget.h 
-    tmsidriver.h 
     FormFiles/tmsimanualannotationwidget.h 
     FormFiles/tmsiimpedancewidget.h 
     tmsielectrodeitem.h 
@@ -85,6 +81,8 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED 
+    mne_acq_devices
+    mne_acq_fiff
     mne_disp
     mne_channels
     mne_base

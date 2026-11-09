@@ -4,10 +4,37 @@ sidebar_label: TMSI
 ---
 # TMSI
 
-The TMSI plugin is only available on the Windows operating system; the TMSI SDK is only available for that platform. Currently the TMSI plugin is not available in the compiled binary releases of MNE-CPP. To get the plugin, it is necessary to build mne_scan from source while having the tmsi drivers installed (you need to make sure that the `TMSiSDK.dll` is present in `C:/Windows/System32/TMSiSDK.dll`.). Follow the instruction in the [build guide](../development/buildguide-cmake.mdx). If building with the command line script, add `tmsi` after the call, like so:
+The TMSI plugin streams TMSi Refa and Porti amplifiers into MNE Scan through the `tmsi://` source of the
+`mne_acq_devices` library. Without an amplifier it simulates one.
 
-```
-.\scripts\build\build_project.bat tmsi
+## Building and running
+
+The plugin is built by default. On Windows it loads the TMSi SDK (`TMSiSDK.dll`, or `TMSiSDK32bit.dll` for a 32-bit
+build) from the system directory at run time; the amplifier's USB driver installs it there. Switch the amplifier on
+before starting the acquisition. The setup widget sets
+
+- **Sampling rate**: the amplifier runs at the supported rate nearest to it, its base rate of 2048 Hz divided by
+  1, 2, 4, 8 or 16.
+- **Number of channels**: the leading amplifier channels to deliver, or all.
+- **Use common average**: reference the ExG inputs to their average in the amplifier.
+- **Simulate the amplifier**: a Refa with 64 ExG inputs that streams synthetic EEG and trigger codes in the SDK's
+  32-bit format.
+- **Trigger beep** and **keyboard trigger**: write codes 252 (beep), 254 (left) and 253 (right) into `STI 014`.
+
+The ExG inputs are named and placed after the electrodes of the cap layout chosen in the project setup. The
+**Check impedance values** action measures the electrode impedances, also of the simulated amplifier.
+
+## Simulation and scripting
+
+The same source is available to every program that links `mne_acq_devices`:
+
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
+
+ACQLIB::registerTmsiScheme();
+auto device = ACQLIB::AcqDevice::open("tmsi://?simulate=1&exg=32&rate=1024");
+auto impedances = device->measureImpedances();
 ```
 
-If building in QtCreator or calling CMake manually, add `-DWITH_TMSI=ON` to your CMake step.
+`simulate=1` also accepts `seed`, `realtime=0` (as fast as possible), `duration` in seconds and `gain`.

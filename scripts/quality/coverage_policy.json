@@ -20,8 +20,8 @@
       "reason": "Built only with -DWITH_GUSBAMP=ON; needs the g.tec gUSBamp SDK and device."
     },
     {
-      "pattern": "src/applications/mne_scan/plugins/tmsi/*",
-      "reason": "Built only with -DWITH_TMSI=ON; needs Windows (windows.h), the TMSi SDK DLL and a TMSi amplifier."
+      "pattern": "src/libraries/acq/devices/tmsi/tmsi_driver_win32.cpp",
+      "reason": "Built only on Windows; needs the TMSi SDK DLL and an amplifier. tmsi://?simulate=1 covers the rest of the source."
     },
     {
       "pattern": "src/applications/mne_scan/plugins/dummytoolbox/*",

@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6315 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6335 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -565,6 +565,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **channels** `[var]` in `BrainAmpSetup` — Physical channels, amplifier * 32 + input.
 - **channels** `[var]` in [ChannelSelection](/docs/api/channels/channel-selection) — Channel names, in file order.
 - **channels** `[fn]` in [IirStreamFilter](/docs/api/dsp/iir-stream-filter)
+- **channels** `[fn]` in `TmsiTransport`
 - **channelScrollRequested** `[signal]` in [ChannelLabelPanel](/docs/api/disp/channel-label-panel) — Emitted while the user drags vertically on the panel.
 - **channelSelectionChanged** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — Sets the currently viewable channels using the corrent name and location parameters.
 - **channelSelectionManagerChanged** `[fn]` in [AverageLayoutView](/docs/api/disp/average-layout-view) — call this whenever the external channel selection manager changes
@@ -836,6 +837,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **commit** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes the first samples of the last view (one release store); without a view, the next granted samples.
 - **commits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — commit() calls.
 - **committed** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Samples committed since creation (= next write position).
+- **commonAverage** `[var]` in `TmsiSetup` — Reference the ExG channels to their average in the amplifier.
 - **comp** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Compensator.
 - **comp** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Which component to compute for free orientations.
 - **comp** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Software gradient compensation data.
@@ -1194,6 +1196,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **description** `[var]` in [MnaOpSchemaPort](/docs/api/mna/mna-op-schema-port) — Human-readable description.
 - **description** `[var]` in [MnaProject](/docs/api/mna/mna-project) — Project description.
 - **description** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — Human-readable: "Covariance matrix must be positive-definite".
+- **description** `[fn]` in `TmsiTransport`
 - **design** `[fn]` in [FirFilter](/docs/api/dsp/fir-filter) — Design a linear-phase FIR filter using [`FilterKernel`](/docs/api/dsp/filter-kernel) as the backend.
 - **designButterworth** `[fn]` in [IirFilter](/docs/api/dsp/iir-filter) — Design a Butterworth filter as a cascade of second-order sections.
 - **DesignMethod** `[enum]` in [FirFilter](/docs/api/dsp/fir-filter) — FIR design method — wraps [`FilterKernel`](/docs/api/dsp/filter-kernel)'s iDesignMethod integer codes.
@@ -1376,6 +1379,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **duration** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Duration in samples (0 = point marker).
 - **duration** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Duration in seconds (0 for point events).
 - **duration** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Duration (seconds).
+- **duration** `[var]` in `TmsiSimulation` — Seconds; 0 runs until stopped.
 - **dVarZThresh** `[var]` in [BadChannelDetectParams](/docs/api/dsp/bad-channel-detect-params) — Z-score of std-dev above this -&gt; noisy.
 - **dZThreshold** `[var]` in [BadChannelsMaxwellParams](/docs/api/dsp/bad-channels-maxwell-params) — Z-score threshold for flagging bad channels.
 
@@ -1570,6 +1574,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **executeIncremental** `[fn]` in [MnaGraphExecutor](/docs/api/mna/mna-graph-executor) — Execute only dirty nodes and their downstream dependents.
 - **executeNode** `[fn]` in [MnaGraphExecutor](/docs/api/mna/mna-graph-executor) — Execute a single node (for testing/debugging).
 - **executionOrder** `[var]` in `StreamContext` — Topological order used for startup/shutdown.
+- **exg** `[var]` in `TmsiSimulation` — ExG inputs; four bipolar and four auxiliary inputs, the digital word and the test ramp follow.
 - **exists** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Checks whether the file at `filePath()` exists on disk.
 - **exists** `[fn]` in [CommandParser](/docs/api/com/command-parser) — Checks if a command exists.
 - **exit_code** `[var]` in [PythonRunnerResult](/docs/api/pybridge/python-runner-result) — Process exit code (-1 if it never started).
@@ -1577,6 +1582,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **experimenter** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Experimenter name.
 - **explain_comp** `[fn]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Return a human-readable description string for a compensation kind constant.
 - **explanation** `[var]` in [MnaVerification](/docs/api/mna/mna-verification) — Human-readable explanation of what this node does and why.
+- **exponent** `[var]` in `TmsiChannel` — See gain.
 - **expression** `[var]` in [MnaParamBinding](/docs/api/mna/mna-param-binding) — Formula string, e.g. "clamp(ref('noise_est_01/snr') * 0.1, 0.01, 1.0)".
 - **expression** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — [`MnaParamTree`](/docs/api/mna/mna-param-tree) expression over attributes, inputs and (post) outputs: "rank &gt; 0".
 - **extension** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — File extension.
@@ -2062,6 +2068,8 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 ## G {#g}
 
 - **gain** `[var]` in `BrainAmpSimulation` — Amplitude factor of the simulated signal.
+- **gain** `[var]` in `TmsiChannel` — Physical = (raw * gain + offset) * 10^exponent.
+- **gain** `[var]` in `TmsiSimulation` — Amplitude factor of the simulated signal.
 - **gainVector** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Magnetometer calibration factors.
 - **gamma** `[var]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Conductivity-ratio coupling matrix (nsurf x nsurf).
 - **gantry_angle** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — Tilt angle of the dewar in degrees.
@@ -2504,6 +2512,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **imbalanceMatrix** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Gradiometer imbalance terms.
 - **iMinDistance** `[var]` in [PeakFinderParams](/docs/api/dsp/peak-finder-params) — Minimum distance between peaks (samples).
 - **impedance** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Impedance value or "n/a" (OPTIONAL).
+- **impedances** `[fn]` in `TmsiTransport` — Measures the electrode impedances.
 - **implantation** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **in_nuse** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — How many components included in the inside expansion.
 - **in_order** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — Order of the inside expansion.
@@ -3454,6 +3463,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **name** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Name of this selection.
 - **name** `[var]` in [MNEMshEyes](/docs/api/mne/mne-msh-eyes) — Name of this viewpoint definition.
 - **name** `[var]` in [MNEMshLightSet](/docs/api/mne/mne-msh-light-set) — Name of this light set.
+- **name** `[var]` in `TmsiChannel` — The SDK's channel name.
 - **names** `[var]` in [ElectrodeLayout](/docs/api/channels/electrode-layout) — Electrode names, from the Labels block if present.
 - **names** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Channel names.
 - **names** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Channel names (optional).
@@ -3686,6 +3696,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **offset** `[var]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Offset to the data in the external file.
 - **offset** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Vector offset.
 - **offset** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — Vector offset.
+- **offset** `[var]` in `TmsiChannel` — See gain.
 - **offsets** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **offsets** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — DC offset corrections for display.
 - **ohms** `[var]` in [AcqImpedance](/docs/api/acq/acq-impedance) — Electrode-skin (or -tissue) impedance magnitude in ohm.
@@ -4250,6 +4261,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **rasGood** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Whether the direction cosines in the header are valid.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index using a volume's transform.
+- **rate** `[var]` in `TmsiSetup` — Requested sampling rate in Hz.
 - **rateCorrection** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Estimated actual / nominal rate.
 - **raw** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Raw data with fully populated FiffInfo.
 - **raw** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Raw-data handle when data originates from a raw file.
@@ -4323,6 +4335,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [MriNiftiIO](/docs/api/mri/mri-nifti-io) — Reads a NIfTI-1 single-file volume.
 - **read** `[fn]` in [MriVolData](/docs/api/mri/mri-vol-data) — Convenience loader: reads an MGH/MGZ file and populates this volume.
 - **read** `[fn]` in `SampleReader` — Decodes the sample starting at `pos` in `data`.
+- **read** `[fn]` in `TmsiTransport` — Reads the buffered samples without waiting.
 - **read_annotations** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_Node`.
 - **read_ascii** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Reads a transform from a text file of four rows, rotation and translation in mm, as MNE-C writes it.
 - **read_ascii** `[fn]` in [FiffEvents](/docs/api/fiff/fiff-events) — Reads a text event file: one event per line as "sample [time] before after"; lines starting with '' or '#' are comments.
@@ -4398,6 +4411,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **readTsv** `[fn]` in [BidsEvent](/docs/api/bids/bids-event) — Read a BIDS *_events.tsv file.
 - **readTsv** `[fn]` in [BidsTsv](/docs/api/bids/bids-tsv) — Reads a TSV file into an ordered list of row maps.
 - **realtime** `[var]` in `BrainAmpSimulation`
+- **realtime** `[var]` in `TmsiSimulation`
 - **realtimeColorsAvailable** `[signal]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Emitted when the real-time pipeline produces a new set of per-vertex colours.
 - **rearrange_source_space** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Rearrange source space after filtering: recount nuse, rebuild vertno, and recompute patch statistics if nearest info is available.
 - **recompStatusChanged** `[signal]` in [FwdSettingsView](/docs/api/disp/fwd-settings-view) — Emit this signal whenever recomputation checkbox changed.
@@ -4768,6 +4782,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **section_count** `[fn]` in [Report](/docs/api/report/report-class)
 - **seed** `[var]` in `BrainAmpSimulation`
 - **seed** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Random seed for reproducibility.
+- **seed** `[var]` in `TmsiSimulation`
 - **seek** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
 - **seek** `[fn]` in [FileByteStream](/docs/api/base/file-byte-stream)
 - **seek** `[fn]` in [MemoryByteStream](/docs/api/base/memory-byte-stream)
@@ -5300,6 +5315,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **setTwinFiducial** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points)
 - **setUnits** `[fn]` in [FastrakParser](/docs/api/acq/fastrak-parser) — Configure the linear unit reported by the device.
 - **setup** `[fn]` in `BrainAmpTransport` — Sends the setup.
+- **setup** `[fn]` in `TmsiTransport` — Sends the setup.
 - **setup_current_lights** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Initialize the custom light set (if needed) and apply it as the active lighting configuration.
 - **setup_curvature_colors** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Allocate and fill per-vertex color arrays using positive/negative curvature colors (if curvature overlay mode is on) or uniform gray.
 - **setup_dipole_fit_data** `[fn]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — Master setup: read all inputs and build a ready-to-use fit workspace.
@@ -5533,6 +5549,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` into a BIDS dataset; `stop()` writes the sidecars (channels.tsv, events.tsv, meg.json, dataset_description.json) as mne-bids does.
 - **start** `[fn]` in `BrainAmpTransport`
 - **start** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Starts the worker thread.
+- **start** `[fn]` in `TmsiTransport`
 - **start_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_START tag.
 - **start_file** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Opens a fiff file for writing and writes the compulsory header tags.
 - **start_file** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Creates or truncates a FIFF file and writes the compulsory header tags.
@@ -5593,6 +5610,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **stop** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtInvOp](/docs/api/dsp/rt-inv-op) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Stops the worker thread.
+- **stop** `[fn]` in `TmsiTransport`
 - **stopAllStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Stop all active background streaming (source estimate + sensor).
 - **stopRealtimeSensorStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Stop real-time sensor data streaming.
 - **stopRealtimeStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Stop real-time source data streaming.
@@ -5959,6 +5977,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **type** `[var]` in [MNEMshColorScaleDef](/docs/api/mne/mne-msh-color-scale-def)
 - **type** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Is this a volume or a surface.
 - **type** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Voxel data type (MRI_UCHAR, MRI_INT, MRI_FLOAT, MRI_SHORT).
+- **type** `[var]` in `TmsiChannel`
 - **typeLabel** `[var]` in `ButterflyTypeGroup`
 - **typeLabel** `[var]` in [ChannelDisplayInfo](/docs/api/disp/channel-display-info) — Short type string: "MEG grad", "MEG mag", "EEG", "EOG", "ECG", "EMG", "STIM", "MISC".
 
@@ -5979,6 +5998,7 @@ Index of 6315 public class members (functions, variables, typedefs, enums) acros
 - **unit** `[var]` in [ElectrodeLayout](/docs/api/channels/electrode-layout) — Unit of the positions, e.g.
 - **unit** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unit of measurement.
 - **unit** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — SI symbol of a unit (FIFF_UNIT_*), e.g.
+- **unit** `[var]` in `TmsiChannel`
 - **unit_mul** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unit multiplier exponent.
 - **unitExponent** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Power of ten of the unit (e.g.
 - **unitMul** `[var]` in `AcqFiffChannel` — FIFF_UNITM_*.

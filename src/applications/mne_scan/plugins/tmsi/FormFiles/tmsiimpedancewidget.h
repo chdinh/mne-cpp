@@ -71,14 +71,14 @@ class TMSIImpedanceWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit TMSIImpedanceWidget(TMSI* pTMSI, QWidget* parent = 0);
-    ~TMSIImpedanceWidget();
+    explicit TMSIImpedanceWidget(TMSI* pTMSI, QWidget* parent = nullptr);
+    ~TMSIImpedanceWidget() override;
 
     //=========================================================================================================
     /**
      * Updates the values of the electrodes placed in the QGraphicsScene.
      */
-    void updateGraphicScene(Eigen::VectorXd matValue);
+    void updateGraphicScene(const Eigen::VectorXd& matValue);
 
     //=========================================================================================================
     /**
@@ -103,7 +103,7 @@ private:
     /**
      * Adds an electrode item to the QGraphicScene.
      */
-    void addElectrodeItem(QString electrodeName, QVector2D position);
+    void addElectrodeItem(const QString& electrodeName, QVector2D position);
 
     //=========================================================================================================
     /**
@@ -140,7 +140,7 @@ private:
     /**
      * Reimplemnted closing event handler. Used to stop the measurement when closing the widget.
      */
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
 
     //=========================================================================================================
     /**

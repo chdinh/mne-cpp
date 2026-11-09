@@ -104,6 +104,7 @@ if(NOT BUILD_SHARED_LIBS)
         scan_noisereduction
         scan_rtclustmne
         scan_rtfwd
+        scan_tmsi
         scan_writetofile)
 
     target_compile_definitions(mne_scan_app_core PUBLIC STATICBUILD)

@@ -20,7 +20,13 @@
 //=============================================================================================================
 
 #include <QWidget>
-#include "ui_tmsimanualannotation.h"
+
+#include <memory>
+
+namespace Ui
+{
+class TMSIManualAnnotationWidget;
+}
 
 //=============================================================================================================
 // DEFINE NAMESPACE TMSIPLUGIN
@@ -53,14 +59,14 @@ public:
      * @param[in] parent pointer to parent widget; If parent is 0, the new TMSIManualAnnotationWidget becomes a window. If parent is another widget, TMSIManualAnnotationWidget becomes a child window inside parent. TMSIManualAnnotationWidget is deleted when its parent is deleted.
      * @param[in] pTMSI a pointer to the corresponding ECGSimulator.
      */
-    TMSIManualAnnotationWidget(TMSI* pTMSI, QWidget* parent = 0);
+    TMSIManualAnnotationWidget(TMSI* pTMSI, QWidget* parent = nullptr);
 
     //=========================================================================================================
     /**
      * Destroys the TMSIManualAnnotationWidget.
      * All TMSIManualAnnotationWidget's children are deleted first. The application exits if TMSIManualAnnotationWidget is the main widget.
      */
-    ~TMSIManualAnnotationWidget();
+    ~TMSIManualAnnotationWidget() override;
 
     //=========================================================================================================
     /**
@@ -72,9 +78,9 @@ public:
 private:
     TMSI* m_pTMSI; /**< a pointer to corresponding TMSI.*/
 
-    Ui::TMSIManualAnnotationWidget ui; /**< the user interface for the TMSIManualAnnotationWidget.*/
+    std::unique_ptr<Ui::TMSIManualAnnotationWidget> ui; /**< the user interface for the TMSIManualAnnotationWidget.*/
 
-    virtual void keyPressEvent(QKeyEvent* event);
+    void keyPressEvent(QKeyEvent* event) override;
 };
 } // NAMESPACE
 

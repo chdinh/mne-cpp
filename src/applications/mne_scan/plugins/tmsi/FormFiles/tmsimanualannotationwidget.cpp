@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "tmsimanualannotationwidget.h"
+#include "ui_tmsimanualannotation.h"
 #include "../tmsi.h"
 
 //=============================================================================================================
@@ -45,8 +46,9 @@ using namespace TMSIPLUGIN;
 TMSIManualAnnotationWidget::TMSIManualAnnotationWidget(TMSI* pTMSI, QWidget* parent)
 : QWidget(parent)
 , m_pTMSI(pTMSI)
+, ui(std::make_unique<Ui::TMSIManualAnnotationWidget>())
 {
-    ui.setupUi(this);
+    ui->setupUi(this);
 }
 
 //=============================================================================================================
@@ -75,12 +77,12 @@ void TMSIManualAnnotationWidget::keyPressEvent(QKeyEvent* event)
         case Qt::Key_Control: //Qt::Key_Left:
             //std::cout<<"Left"<<endl;
             m_pTMSI->setKeyboardTriggerType(253);
-            ui.m_pushButton_Left->click(); //setStyleSheet("background-color: green");
+            ui->m_pushButton_Left->click(); //setStyleSheet("background-color: green");
             break;
         case Qt::Key_Enter: //Qt::Key_Right:
             //std::cout<<"right"<<endl;
             m_pTMSI->setKeyboardTriggerType(254);
-            ui.m_pushButton_Right->click(); //->setStyleSheet("background-color: green");
+            ui->m_pushButton_Right->click(); //->setStyleSheet("background-color: green");
             break;
         default:
             QWidget::keyPressEvent(event);

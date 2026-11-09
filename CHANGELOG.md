@@ -76,8 +76,8 @@ aliases; replace the old spelling as below.
   instead of reading them as zero. `SelectionIO::write_mon` refuses group names
   that would leave the target directory.
 - `ex_make_layout` honours `--mirrorY`; it used to mirror x twice.
-- The EEGoSports, TMSi and g.USBamp MNE Scan plugins (Windows, off by
-  default) compile again. Configuring one without its vendor header now
+- The EEGoSports and g.USBamp MNE Scan plugins (Windows, off by default)
+  compile again. Configuring one without its vendor header now
   stops with a message naming the missing file. Closing the EEGoSports
   impedance widget no longer switches the plugin into impedance mode.
 - New `mne_acq_devices` library with the `brainamp://` source for Brain
@@ -90,6 +90,18 @@ aliases; replace the old spelling as below.
   resolution. It delivers the amplifier's native 5 kHz instead of dropping
   samples to lower rates, which aliased, and the marker channel holds the
   marker codes instead of codes scaled as volts.
+- `tmsi://` streams TMSi Refa and Porti amplifiers, with each channel's
+  gain, offset and exponent as its scale, and measures their impedances;
+  `tmsi://?simulate=1` simulates a Refa on every platform. On Windows it
+  loads the TMSi SDK from the system directory only.
+- The TMSI MNE Scan plugin reads through `tmsi://` and is built by default,
+  with a simulate switch. The impedance view is updated from the GUI thread
+  instead of the acquisition thread. Trigger codes are no longer rewritten
+  for display (254, 253 and 252 became 4000, 8000 and 2000 in recordings),
+  the placeholder projectors (all-ones vectors named PCA-v1 to PCA-v3) are
+  gone, and the beep interval starts at 5 s instead of an uninitialised
+  value. The samples always apply the channels' gain, offset and exponent;
+  the options to skip them and the driver debug file are removed.
 - `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
   uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
 - The export macros of `mne_bids`, `mne_com`, `mne_connectivity`, `mne_dsp`,

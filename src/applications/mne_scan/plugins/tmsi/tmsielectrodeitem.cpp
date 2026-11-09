@@ -18,6 +18,8 @@
 
 #include "tmsielectrodeitem.h"
 
+#include <utility>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -30,7 +32,7 @@ using namespace std;
 //=============================================================================================================
 
 TMSIElectrodeItem::TMSIElectrodeItem(QString electrodeName, QPointF electrodePosition, QColor electrodeColor, int channelIndex)
-: m_sElectrodeName(electrodeName)
+: m_sElectrodeName(std::move(electrodeName))
 , m_qpElectrodePosition(electrodePosition)
 , m_cElectrodeColor(electrodeColor)
 , m_dImpedanceValue(0.0)

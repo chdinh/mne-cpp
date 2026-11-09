@@ -23,6 +23,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <string>
 #include <thread>
 #include <vector>
@@ -102,6 +103,10 @@ Recording record(const std::string& uri)
                         std::int16_t raw = 0;
                         std::memcpy(&raw, part.at(c, s), sizeof(raw));
                         out.samples.push_back(raw * out.scale[c] + info->channels[c].offset);
+                    } else if (info->format == AcqSampleFormat::Int32) {
+                        std::int32_t raw = 0;
+                        std::memcpy(&raw, part.at(c, s), sizeof(raw));
+                        out.samples.push_back(raw * out.scale[c] + info->channels[c].offset);
                     } else {
                         float v = 0.0F;
                         std::memcpy(&v, part.at(c, s), sizeof(v));
@@ -149,6 +154,16 @@ private slots:
     void testBrainAmpInvalidParameters_data();
     void testBrainAmpInvalidParameters();
     void testBrainAmpHardwareUnavailable();
+    void testTmsiStreamLayout();
+    void testTmsiMatchesSynthetic();
+    void testTmsiRate_data();
+    void testTmsiRate();
+    void testTmsiChannelSubset();
+    void testTmsiImpedances();
+    void testTmsiWaitsForGatingReader();
+    void testTmsiInvalidParameters_data();
+    void testTmsiInvalidParameters();
+    void testTmsiHardwareUnavailable();
 };
 
 //=============================================================================================================
@@ -156,6 +171,7 @@ private slots:
 void TestAcqDevices::initTestCase()
 {
     QVERIFY(registerBrainAmpScheme().ok());
+    QVERIFY(registerTmsiScheme().ok());
 }
 
 //=============================================================================================================
@@ -356,6 +372,188 @@ void TestAcqDevices::testBrainAmpHardwareUnavailable()
     QSKIP("built with the BrainAmp driver interface");
 #else
     auto device = AcqDevice::open("brainamp://");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
+    QVERIFY(device.error().text().find("simulate=1") != std::string::npos);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiStreamLayout()
+{
+    auto device = AcqDevice::open("tmsi://?simulate=1&exg=8");
+    QVERIFY(device);
+    QCOMPARE(device->description().backend, std::string("tmsi"));
+    QVERIFY(device->description().device.find("simulated Refa") != std::string::npos);
+
+    // The SDK's format: an int32 per channel; ExG, bipolar and auxiliary inputs, digital inputs, test ramp
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Int32);
+    QCOMPARE(info->layout, AcqLayout::Interleaved);
+    QCOMPARE(info->sfreq, 2048.0);
+    QCOMPARE(info->channelCount(), std::size_t(18));
+    const std::vector<std::pair<std::size_t, std::string>> names = {{0, "EEG 001"}, {7, "EEG 008"}, {8, "BIP 1"}, {11, "BIP 4"}, {12, "AUX 1"}, {15, "AUX 4"}, {16, "STI 014"}, {17, "SAW"}};
+    for (const auto& [index, name] : names) {
+        QCOMPARE(info->channels[index].name, name);
+    }
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Volt);
+    QCOMPARE(info->channels[0].scale, 0.0715256 * 1e-6);
+    // Gain, offset and exponent: (raw * 1 + 100) * 1e-6 V
+    QCOMPARE(info->channels[12].scale, 1e-6);
+    QCOMPARE(info->channels[12].offset, 100e-6);
+    QCOMPARE(info->channels[16].kind, AcqChannelKind::Stim);
+    QCOMPARE(info->channels[16].unit, AcqUnit::None);
+    QCOMPARE(info->channels[16].scale, 1.0);
+    QCOMPARE(info->channels[17].kind, AcqChannelKind::Misc);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiMatchesSynthetic()
+{
+    // The simulated amplifier digitises the synthetic session of the same seed
+    const Recording amp = record("tmsi://?simulate=1&exg=8&rate=1024&seed=3&realtime=0&duration=2");
+    const Recording ref = record("synthetic://?eeg=16&sfreq=1024&seed=3&realtime=0&duration=2&block=8");
+    QCOMPARE(amp.channels, std::size_t(18));
+    QCOMPARE(ref.channels, std::size_t(17));
+    QCOMPARE(amp.frames(), std::size_t(2048));
+    QCOMPARE(ref.frames(), amp.frames());
+
+    for (std::size_t s = 0; s < amp.frames(); ++s) {
+        for (std::size_t c = 0; c < 16; ++c) {
+            QVERIFY2(std::abs(amp.at(s, c) - ref.at(s, c)) <= 0.5 * amp.scale[c] + 1e-12, qPrintable(QString::number(c)));
+        }
+        QCOMPARE(amp.at(s, 16), ref.at(s, 16));
+        QCOMPARE(amp.at(s, 17), static_cast<double>(s)); // the test ramp counts samples
+    }
+    QVERIFY(ref.events.size() >= 1);
+    QCOMPARE(amp.events.size(), ref.events.size());
+    for (std::size_t e = 0; e < ref.events.size(); ++e) {
+        QCOMPARE(amp.events[e].sample, ref.events[e].sample);
+        QCOMPARE(amp.events[e].code, ref.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiRate_data()
+{
+    QTest::addColumn<double>("requested");
+    QTest::addColumn<double>("rate");
+    QTest::newRow("base") << 2048.0 << 2048.0;
+    QTest::newRow("nearest above") << 1000.0 << 1024.0;
+    QTest::newRow("nearest below") << 300.0 << 256.0;
+    QTest::newRow("above the base") << 5000.0 << 2048.0;
+    QTest::newRow("below the lowest") << 10.0 << 128.0;
+}
+
+void TestAcqDevices::testTmsiRate()
+{
+    // The amplifier divides its base rate by a power of two; the stream reports the rate it runs at
+    QFETCH(double, requested);
+    QFETCH(double, rate);
+    auto device = AcqDevice::open(std::format("tmsi://?simulate=1&exg=4&rate={}", requested));
+    QVERIFY(device);
+    QCOMPARE(device->stream().info()->sfreq, rate);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiChannelSubset()
+{
+    const Recording amp = record("tmsi://?simulate=1&exg=8&channels=3&realtime=0&duration=0.5&seed=3");
+    QCOMPARE(amp.channels, std::size_t(3));
+    QCOMPARE(amp.frames(), std::size_t(1024));
+    QVERIFY(amp.events.empty()); // the digital inputs are not delivered
+
+    auto tooMany = AcqDevice::open("tmsi://?simulate=1&exg=8&channels=19");
+    QVERIFY(!tooMany);
+    QCOMPARE(tooMany.error().code(), AcqErrorCode::InvalidParameter);
+    QVERIFY(tooMany.error().text().find("has 18") != std::string::npos);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiImpedances()
+{
+    auto device = AcqDevice::open("tmsi://?simulate=1&exg=8&seed=5");
+    QVERIFY(device);
+    auto impedances = device->measureImpedances();
+    QVERIFY(impedances);
+    QCOMPARE(impedances->size(), std::size_t(8));
+    for (std::size_t i = 0; i < impedances->size(); ++i) {
+        QCOMPARE((*impedances)[i].stream, std::size_t(0));
+        QCOMPARE((*impedances)[i].channel, i);
+        QVERIFY((*impedances)[i].ohms >= 1e3 && (*impedances)[i].ohms <= 20e3);
+    }
+
+    // Only the delivered ExG channels, and not while streaming
+    auto subset = AcqDevice::open("tmsi://?simulate=1&exg=8&seed=5&channels=3");
+    QVERIFY(subset);
+    auto three = subset->measureImpedances();
+    QVERIFY(three);
+    QCOMPARE(three->size(), std::size_t(3));
+    QCOMPARE(three->back().ohms, (*impedances)[2].ohms);
+    QVERIFY(subset->start().ok());
+    QCOMPARE(subset->measureImpedances().error().code(), AcqErrorCode::InvalidState);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiWaitsForGatingReader()
+{
+    // Four seconds are more than the ring holds; the replay waits while the reader is busy
+    auto device = AcqDevice::open("tmsi://?simulate=1&exg=4&realtime=0&duration=4");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(8192));
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("rate") << "tmsi://?simulate=1&rate=0";
+    QTest::newRow("block") << "tmsi://?simulate=1&block=0";
+    QTest::newRow("exg") << "tmsi://?simulate=1&exg=0";
+    QTest::newRow("average") << "tmsi://?simulate=1&average=maybe";
+    QTest::newRow("target") << "tmsi://usb?simulate=1";
+}
+
+void TestAcqDevices::testTmsiInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testTmsiHardwareUnavailable()
+{
+#if defined(_WIN32)
+    QSKIP("Windows looks for the TMSi SDK");
+#else
+    auto device = AcqDevice::open("tmsi://");
     QVERIFY(!device);
     QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
     QVERIFY(device.error().text().find("simulate=1") != std::string::npos);

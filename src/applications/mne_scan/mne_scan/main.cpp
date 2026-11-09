@@ -84,9 +84,7 @@ Q_IMPORT_PLUGIN(EEGoSports)
 #ifdef WITHLSL
 Q_IMPORT_PLUGIN(LSLAdapter)
 #endif
-#ifdef WITHTMSI
 Q_IMPORT_PLUGIN(TMSI)
-#endif
 #endif
 
 //=============================================================================================================
@@ -120,9 +118,7 @@ int main(int argc, char* argv[])
 #ifdef WITHGUSBAMP
     Q_INIT_RESOURCE(gusbamp);
 #endif
-#ifdef WITHTMSI
     Q_INIT_RESOURCE(tmsi);
-#endif
 #endif
 
     BASELIB::Log::install_qt_message_handler();
