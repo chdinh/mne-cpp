@@ -39,6 +39,8 @@ aliases; replace the old spelling as below.
 | `utils/generics/observerpattern.h`, `commandpattern.h`, `UTILSLIB::Subject`, `IObserver`, `ICommand` | `com/rt_command/observer_pattern.h`, `command_pattern.h`, `COMLIB::...` |
 | `Subject::t_Observers` (`QSet`), `observerNumDebug()`, the global `Subject::notifyEnabled` | `observers()` (`std::vector`, attach order), `observers().size()`, per-subject `set_notify_enabled()` |
 | `ex_utils` | `ex_channels`; the other sections moved to `ex_base`, `ex_math`, `ex_pybridge`, `ex_report` and `ex_com` |
+| `UTILSLIB::KMeans`, `Linalg`, `Numerics`, `SimplexAlgorithm`, `Spectral`, `Sphere`, `Warp` (in `math/`) | `MATHLIB::...` |
+| `UTILSLIB::` and `RTPROCESSINGLIB::` names in `dsp/` (`FilterKernel`, `ICA`, `RtAveraging`, ...) | `DSPLIB::...` |
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |

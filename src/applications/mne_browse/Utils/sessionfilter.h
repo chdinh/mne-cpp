@@ -180,24 +180,24 @@ public:
 
 private:
     void ensureDesigned(int iDataSizeHint = 0) const;
-    UTILSLIB::FilterKernel createFirKernel() const;
-    std::vector<UTILSLIB::IirBiquad> createIirSections() const;
+    DSPLIB::FilterKernel createFirKernel() const;
+    std::vector<DSPLIB::IirBiquad> createIirSections() const;
     Eigen::VectorXcd frequencyResponse(int iPoints) const;
 
-    QString m_sName;                                        /**< Human-readable filter name. */
-    DesignMethod m_designMethod;                            /**< Filter design method. */
-    FilterType m_filterType;                                /**< Filter type. */
-    int m_iOrder;                                           /**< FIR taps or IIR order. */
-    double m_dCutoffLowHz;                                  /**< Lower cutoff in Hz. */
-    double m_dCutoffHighHz;                                 /**< Upper cutoff in Hz. */
-    double m_dTransitionHz;                                 /**< FIR transition width in Hz. */
-    double m_dSamplingFrequencyHz;                          /**< Sampling frequency in Hz. */
-    QString m_sApplyTo;                                     /**< Channel scope for this filter. */
-    mutable UTILSLIB::FilterKernel m_firKernel;             /**< Lazily prepared FIR kernel. */
-    mutable std::vector<UTILSLIB::IirBiquad> m_iirSections; /**< Lazily designed IIR SOS cascade. */
-    mutable bool m_bFirDesigned = false;                    /**< True once the FIR kernel matches this session-filter definition. */
-    mutable bool m_bIirDesigned = false;                    /**< True once the IIR sections match this session-filter definition. */
-    mutable int m_iPreparedDataSize = 0;                    /**< Last data size used to prepare the FIR kernel. */
+    QString m_sName;                                      /**< Human-readable filter name. */
+    DesignMethod m_designMethod;                          /**< Filter design method. */
+    FilterType m_filterType;                              /**< Filter type. */
+    int m_iOrder;                                         /**< FIR taps or IIR order. */
+    double m_dCutoffLowHz;                                /**< Lower cutoff in Hz. */
+    double m_dCutoffHighHz;                               /**< Upper cutoff in Hz. */
+    double m_dTransitionHz;                               /**< FIR transition width in Hz. */
+    double m_dSamplingFrequencyHz;                        /**< Sampling frequency in Hz. */
+    QString m_sApplyTo;                                   /**< Channel scope for this filter. */
+    mutable DSPLIB::FilterKernel m_firKernel;             /**< Lazily prepared FIR kernel. */
+    mutable std::vector<DSPLIB::IirBiquad> m_iirSections; /**< Lazily designed IIR SOS cascade. */
+    mutable bool m_bFirDesigned = false;                  /**< True once the FIR kernel matches this session-filter definition. */
+    mutable bool m_bIirDesigned = false;                  /**< True once the IIR sections match this session-filter definition. */
+    mutable int m_iPreparedDataSize = 0;                  /**< Last data size used to prepare the FIR kernel. */
 };
 
 } // namespace MNEBROWSE

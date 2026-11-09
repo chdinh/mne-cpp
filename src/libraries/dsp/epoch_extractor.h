@@ -38,10 +38,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -134,6 +134,6 @@ private:
     static void applyBaseline(Eigen::MatrixXd& matEpoch, int iBase0, int iBase1);
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // EPOCH_EXTRACTOR_DSP_H

@@ -9,7 +9,7 @@
  * @date     March 2026
  * @brief    K-means batch/online update kernels, replicate driver and empty-cluster handling.
  *
- * This translation unit implements the inner loop of @ref UTILSLIB::KMeans:
+ * This translation unit implements the inner loop of @ref MATHLIB::KMeans:
  * the batch Lloyd phase (compute pairwise distances, reassign points,
  * recompute centroids), the optional online single-point refinement
  * phase used to break out of shallow local minima, and the
@@ -46,7 +46,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
 namespace

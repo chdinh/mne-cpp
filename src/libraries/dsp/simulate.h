@@ -51,10 +51,10 @@ class MNEForwardSolution;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -153,6 +153,6 @@ DSPSHARED_EXPORT FIFFLIB::FiffEvoked simulateEvokedNoiseless(
     const INVLIB::InvSourceEstimate& stc,
     const FIFFLIB::FiffInfo& info);
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // SIMULATE_DSP_H

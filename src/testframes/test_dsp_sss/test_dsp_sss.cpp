@@ -20,7 +20,7 @@
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

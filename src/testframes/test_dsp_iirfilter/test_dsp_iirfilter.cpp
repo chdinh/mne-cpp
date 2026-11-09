@@ -17,7 +17,7 @@
 
 #include <dsp/iirfilter.h>
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 //=============================================================================================================

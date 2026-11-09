@@ -7,10 +7,10 @@
 #include <QTemporaryFile>
 #include <math/warp.h>
 
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
-class TestUtilsWarp : public QObject
+class TestMathWarp : public QObject
 {
     Q_OBJECT
 
@@ -179,5 +179,5 @@ private slots:
     }
 };
 
-QTEST_GUILESS_MAIN(TestUtilsWarp)
-#include "test_utils_warp.moc"
+QTEST_GUILESS_MAIN(TestMathWarp)
+#include "test_math_warp.moc"

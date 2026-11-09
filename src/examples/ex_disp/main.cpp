@@ -54,7 +54,7 @@ using namespace Eigen;
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 
 //=============================================================================================================

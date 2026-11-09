@@ -15,7 +15,7 @@
  * estimation. @c annotateMusclZscore band-pass filters the signal in
  * the 110–140 Hz range (typical EMG band), z-scores the Hilbert envelope
  * of every channel, combines and smooths the scores and marks samples
- * above a threshold as BAD_muscle. @ref UTILSLIB::annotateAmplitude "annotateAmplitude" marks
+ * above a threshold as BAD_muscle. @ref DSPLIB::annotateAmplitude "annotateAmplitude" marks
  * spans where consecutive samples jump by more than a "peak" threshold or
  * change by less than a "flat" one, and returns channels for which that
  * holds too often as bad.
@@ -70,10 +70,10 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -155,5 +155,5 @@ DSPSHARED_EXPORT FIFFLIB::FiffAnnotations annotateAmplitude(
     const AnnotateAmplitudeParams& params,
     BASELIB::StringList* bads = nullptr);
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 #endif // ANNOTATE_ARTIFACT_DSP_H

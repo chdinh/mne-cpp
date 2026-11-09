@@ -17,7 +17,7 @@
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_constants.h>
 
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

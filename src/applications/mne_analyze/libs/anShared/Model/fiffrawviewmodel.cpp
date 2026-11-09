@@ -53,9 +53,7 @@
 
 using namespace ANSHAREDLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
-using namespace RTPROCESSINGLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS
@@ -241,7 +239,7 @@ bool FiffRawViewModel::saveToFile(const QString& sPath)
 #endif
     // The same channels as in the view; an empty pick list would filter every channel, triggers included
     const bool ok = m_bPerformFiltering && m_lFilterChannelList.size() > 0
-        ? RTPROCESSINGLIB::filterFile(device, m_pFiffIO->m_qlistRaw[0], m_filterKernel, m_lFilterChannelList)
+        ? DSPLIB::filterFile(device, m_pFiffIO->m_qlistRaw[0], m_filterKernel, m_lFilterChannelList)
         : m_pFiffIO->write_raw(device, 0);
 #ifdef WASMBUILD
     if (ok) {

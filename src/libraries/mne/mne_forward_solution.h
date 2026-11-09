@@ -112,7 +112,7 @@ struct RegionData
         // Kmeans Reduction
         RegionDataOut p_RegionDataOut;
 
-        UTILSLIB::KMeans t_kMeans(t_sDistMeasure, "sample", 5);
+        MATHLIB::KMeans t_kMeans(t_sDistMeasure, "sample", 5);
 
         if (bUseWhitened) {
             t_kMeans.calculate(this->matRoiGWhitened, this->nClusters, p_RegionDataOut.roiIdx, p_RegionDataOut.ctrs, p_RegionDataOut.sumd, p_RegionDataOut.D);

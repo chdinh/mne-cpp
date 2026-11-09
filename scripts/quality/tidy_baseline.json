@@ -1732,13 +1732,13 @@
     "src/testframes/test_trap_music/test_trap_music.cpp": {
       "bugprone-random-generator-seed": 3
     },
-    "src/testframes/test_utils_kmeans/test_utils_kmeans.cpp": {
+    "src/testframes/test_math_kmeans/test_math_kmeans.cpp": {
       "bugprone-random-generator-seed": 1
     },
     "src/testframes/test_channels_layout_selection/test_channels_layout_selection.cpp": {
       "performance-faster-string-find": 1
     },
-    "src/testframes/test_utils_sphere/test_utils_sphere.cpp": {
+    "src/testframes/test_math_sphere/test_math_sphere.cpp": {
       "bugprone-random-generator-seed": 1
     },
     "src/tools/conversion/mne_edf2fiff/edf_ch_info.cpp": {

@@ -53,10 +53,10 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -107,6 +107,6 @@ DSPSHARED_EXPORT std::vector<std::pair<int, int>> computeBridgedElectrodes(
     const FIFFLIB::FiffInfo& info,
     const BridgedElectrodeParams& params = BridgedElectrodeParams());
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // BRIDGED_ELECTRODES_H

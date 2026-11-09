@@ -49,7 +49,7 @@ namespace ANSHAREDLIB
 class FiffRawViewModel;
 }
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 class FilterKernel;
 }
@@ -221,7 +221,7 @@ public:
      *
      * @param[in] filterData   the currently active filter.
      */
-    void setFilter(const UTILSLIB::FilterKernel& filterData);
+    void setFilter(const DSPLIB::FilterKernel& filterData);
 
     //=========================================================================================================
     /**

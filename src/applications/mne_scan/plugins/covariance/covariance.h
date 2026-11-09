@@ -43,7 +43,7 @@ class FiffCov;
 class FiffInfo;
 }
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 class RtCov;
 }

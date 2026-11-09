@@ -329,7 +329,7 @@ public:
      *
      * @param[in] filterData    list of the new filter.
      */
-    void setFilter(QList<UTILSLIB::FilterKernel> filterData);
+    void setFilter(QList<DSPLIB::FilterKernel> filterData);
 
     //=========================================================================================================
     /**
@@ -568,7 +568,7 @@ private:
      */
     void initSphara();
 
-    static void doFilterPerChannelRTMSA(QPair<QList<UTILSLIB::FilterKernel>, QPair<int, Eigen::RowVectorXd>>& channelDataTime);
+    static void doFilterPerChannelRTMSA(QPair<QList<DSPLIB::FilterKernel>, QPair<int, Eigen::RowVectorXd>>& channelDataTime);
 
     //=========================================================================================================
     /**
@@ -654,7 +654,7 @@ private:
     QMap<int, QList<QPair<int, double>>> m_qMapDetectedTriggerOld;       /**< Old detected trigger for each trigger channel. */
     QMap<int, QList<QPair<int, double>>> m_qMapDetectedTriggerOldFreeze; /**< Old detected trigger for each trigger channel while display is freezed. */
     QMap<qint32, float> m_qMapChScaling;                                 /**< Channel scaling map. */
-    QList<UTILSLIB::FilterKernel> m_filterKernel;                        /**< List of currently active filters. */
+    QList<DSPLIB::FilterKernel> m_filterKernel;                          /**< List of currently active filters. */
     QStringList m_filterChannelList;                                     /**< List of channels which are to be filtered.*/
     QMap<qint32, qint32> m_qMapIdxRowSelection;                          /**< Selection mapping.*/
 

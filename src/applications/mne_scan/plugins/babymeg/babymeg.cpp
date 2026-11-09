@@ -53,7 +53,6 @@ using namespace SCMEASLIB;
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using namespace RTPROCESSINGLIB;
 using namespace BASELIB;
 
 //=============================================================================================================
@@ -426,14 +425,14 @@ void BabyMEG::showSqdCtrlDialog()
 void BabyMEG::createDigTrig(MatrixXf& data)
 {
     //Look for triggers in all trigger channels
-    //m_qMapDetectedTrigger = RTPROCESSINGLIB::detectTriggerFlanksMax(data.at(b), m_lTriggerChannelIndices, m_iCurrentSample-nCol, m_dTriggerThreshold, true);
-    QMap<int, QList<QPair<int, double>>> qMapDetectedTrigger = RTPROCESSINGLIB::detectTriggerFlanksGrad(data.cast<double>(),
-                                                                                                        m_lTriggerChannelIndices,
-                                                                                                        0,
-                                                                                                        1.0,
-                                                                                                        false,
-                                                                                                        "Rising",
-                                                                                                        400);
+    //m_qMapDetectedTrigger = DSPLIB::detectTriggerFlanksMax(data.at(b), m_lTriggerChannelIndices, m_iCurrentSample-nCol, m_dTriggerThreshold, true);
+    QMap<int, QList<QPair<int, double>>> qMapDetectedTrigger = DSPLIB::detectTriggerFlanksGrad(data.cast<double>(),
+                                                                                               m_lTriggerChannelIndices,
+                                                                                               0,
+                                                                                               1.0,
+                                                                                               false,
+                                                                                               "Rising",
+                                                                                               400);
 
     //Combine and write results into data block's digital trigger channel
     QMapIterator<int, QList<QPair<int, double>>> i(qMapDetectedTrigger);

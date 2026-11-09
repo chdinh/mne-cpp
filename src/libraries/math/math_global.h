@@ -10,12 +10,12 @@
  * @brief    Export/import macros and build-stamp accessors for MATHLIB.
  *
  * MATHLIB is the numerical-helpers layer of mne-cpp: linear algebra
- * (@ref UTILSLIB::Linalg), general numerics and baseline rescaling
- * (@ref UTILSLIB::Numerics), K-means clustering (@ref UTILSLIB::KMeans),
- * multi-taper spectral estimation (@ref UTILSLIB::Spectral),
+ * (@ref MATHLIB::Linalg), general numerics and baseline rescaling
+ * (@ref MATHLIB::Numerics), K-means clustering (@ref MATHLIB::KMeans),
+ * multi-taper spectral estimation (@ref MATHLIB::Spectral),
  * Nelder–Mead simplex optimisation
- * (@ref UTILSLIB::SimplexAlgorithm), sphere fitting (@ref UTILSLIB::Sphere)
- * thin-plate-spline warping (@ref UTILSLIB::Warp) and plain-text matrix files
+ * (@ref MATHLIB::SimplexAlgorithm), sphere fitting (@ref MATHLIB::Sphere)
+ * thin-plate-spline warping (@ref MATHLIB::Warp) and plain-text matrix files
  * (@ref MATHLIB::write_matrix, @ref MATHLIB::read_matrix). It depends only on
  * Eigen and BASELIB and is therefore safe to pull into any
  * higher-level library (FIFFLIB, FWDLIB, INVERSELIB, CONNECTIVITYLIB).

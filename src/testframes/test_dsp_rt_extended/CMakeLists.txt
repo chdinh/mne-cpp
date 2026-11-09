@@ -3,25 +3,17 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 cmake_minimum_required(VERSION 3.14)
-project(test_rtprocessing_averaging LANGUAGES CXX)
+project(test_dsp_rt_extended LANGUAGES CXX)
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
-
-# Code-coverage instrumentation for the mne_browse sources compiled in below
-if(WITH_CODE_COV)
-  add_compile_options("--coverage" "-O1" "-g")
-  add_link_options("--coverage")
-endif()
+set(CMAKE_AUTORCC ON)
 
 set(QT_REQUIRED_COMPONENTS Core Widgets Concurrent Network Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
-set(SOURCES
-    test_rtprocessing_averaging.cpp
-    ../../applications/mne_browse/Utils/filteroperator.cpp
-    ../../applications/mne_browse/Utils/sessionfilter.cpp
-)
+set(SOURCES test_dsp_rt_extended.cpp)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${SOURCES})
@@ -33,19 +25,9 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED
-    mne_dsp
-    mne_connectivity
-    mne_inv
-    mne_fwd
-    mne_mne
-    mne_fiff
-    mne_fs
-    mne_utils
-    mne_base
-    mne_math
-    mne_events
-    mne_disp
-    mne_disp3D
+  mne_dsp mne_connectivity mne_inv mne_fwd mne_mne
+  mne_fiff mne_fs mne_utils mne_base
+    mne_math mne_events mne_disp mne_disp3D
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -56,7 +38,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   MACOSX_BUNDLE FALSE
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
@@ -64,11 +46,8 @@ endif()
 # Register with CTest
 enable_testing()
 mne_add_test(${PROJECT_NAME}
-    LABELS integration
-    TIMEOUT 60
-    REQUIRES_DATA
-        mne-cpp-test-data/MEG/sample
-        mne-cpp-test-data/Result)
+    LABELS unit
+    TIMEOUT 60)
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)
 endif()

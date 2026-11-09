@@ -45,10 +45,8 @@
 
 using namespace NOISEREDUCTIONPLUGIN;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace DISPLIB;
-using namespace RTPROCESSINGLIB;
 using namespace FIFFLIB;
 using namespace SCSHAREDLIB;
 using namespace Eigen;
@@ -318,7 +316,7 @@ void NoiseReduction::run()
 
     // Init
     MatrixXd matData;
-    QScopedPointer<RTPROCESSINGLIB::FilterOverlapAdd> pRtFilter(new RTPROCESSINGLIB::FilterOverlapAdd());
+    QScopedPointer<DSPLIB::FilterOverlapAdd> pRtFilter(new DSPLIB::FilterOverlapAdd());
 
     while (!isInterruptionRequested()) {
         // Get the current data
@@ -623,16 +621,16 @@ void NoiseReduction::createSpharaOperator()
     MatrixXd matSpharaMultSecond = MatrixXd::Identity(m_pFiffInfo->chs.size(), m_pFiffInfo->chs.size());
 
     if (m_sCurrentSystem == "VectorView") {
-        matSpharaMultFirst = UTILSLIB::makeSpharaProjector(m_matSpharaVVGradLoaded, m_vecIndicesFirstVV, m_pFiffInfo->nchan, m_iNBaseFctsFirst, 1);   //GRADIOMETERS
-        matSpharaMultSecond = UTILSLIB::makeSpharaProjector(m_matSpharaVVMagLoaded, m_vecIndicesSecondVV, m_pFiffInfo->nchan, m_iNBaseFctsSecond, 0); //Magnetometers
+        matSpharaMultFirst = DSPLIB::makeSpharaProjector(m_matSpharaVVGradLoaded, m_vecIndicesFirstVV, m_pFiffInfo->nchan, m_iNBaseFctsFirst, 1);   //GRADIOMETERS
+        matSpharaMultSecond = DSPLIB::makeSpharaProjector(m_matSpharaVVMagLoaded, m_vecIndicesSecondVV, m_pFiffInfo->nchan, m_iNBaseFctsSecond, 0); //Magnetometers
     }
 
     if (m_sCurrentSystem == "BabyMEG") {
-        matSpharaMultFirst = UTILSLIB::makeSpharaProjector(m_matSpharaBabyMEGInnerLoaded, m_vecIndicesFirstBabyMEG, m_pFiffInfo->nchan, m_iNBaseFctsFirst, 0); //InnerLayer
+        matSpharaMultFirst = DSPLIB::makeSpharaProjector(m_matSpharaBabyMEGInnerLoaded, m_vecIndicesFirstBabyMEG, m_pFiffInfo->nchan, m_iNBaseFctsFirst, 0); //InnerLayer
     }
 
     if (m_sCurrentSystem == "EEG") {
-        matSpharaMultFirst = UTILSLIB::makeSpharaProjector(m_matSpharaEEGLoaded, m_vecIndicesFirstEEG, m_pFiffInfo->nchan, m_iNBaseFctsFirst, 0); //InnerLayer
+        matSpharaMultFirst = DSPLIB::makeSpharaProjector(m_matSpharaEEGLoaded, m_vecIndicesFirstEEG, m_pFiffInfo->nchan, m_iNBaseFctsFirst, 0); //InnerLayer
     }
 
     //Write final operator matrices to file

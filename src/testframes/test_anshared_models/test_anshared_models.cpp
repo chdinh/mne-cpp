@@ -156,7 +156,7 @@ void TestAnSharedModels::rawModel_saveToFileRoundTrips()
     // With the viewer's filter on, the saved file is filtered on the channels the viewer filters (EEG here) only:
     // trigger codes and the other channels are written unchanged
     const double sfreq = model.getSamplingFrequency();
-    model.setFilter(UTILSLIB::FilterKernel("lp", 0, 128, 20.0 / (sfreq / 2.0), 0.0, 5.0 / (sfreq / 2.0), sfreq, 0));
+    model.setFilter(DSPLIB::FilterKernel("lp", 0, 128, 20.0 / (sfreq / 2.0), 0.0, 5.0 / (sfreq / 2.0), sfreq, 0));
     model.setFilterChannelType(QStringLiteral("EEG"));
     model.setFilterActive(true);
     const QString filtered = dir.filePath("filtered_raw.fif");

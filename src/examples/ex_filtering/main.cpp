@@ -42,8 +42,7 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -87,16 +86,16 @@ int main(int argc, char* argv[])
 
     // Filtering
     printf("Filtering...");
-    if (RTPROCESSINGLIB::filterFile(fileOut,
-                                    pRaw,
-                                    FilterKernel::filterTypeIndex("BPF"),
-                                    10,
-                                    10,
-                                    0.1,
-                                    pRaw->info.sfreq,
-                                    1024,
-                                    UTILSLIB::FilterKernel::designMethodIndex("Cosine"),
-                                    picks)) {
+    if (DSPLIB::filterFile(fileOut,
+                           pRaw,
+                           FilterKernel::filterTypeIndex("BPF"),
+                           10,
+                           10,
+                           0.1,
+                           pRaw->info.sfreq,
+                           1024,
+                           DSPLIB::FilterKernel::designMethodIndex("Cosine"),
+                           picks)) {
         printf("[done]\n");
     } else {
         printf("[failed]\n");

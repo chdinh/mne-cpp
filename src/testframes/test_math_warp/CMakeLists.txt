@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 cmake_minimum_required(VERSION 3.14)
-project(test_utils_warp LANGUAGES CXX)
+project(test_math_warp LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -13,7 +13,7 @@ set(QT_REQUIRED_COMPONENTS Core Widgets Concurrent Network Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
-set(SOURCES test_utils_warp.cpp)
+set(SOURCES test_math_warp.cpp)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${SOURCES})

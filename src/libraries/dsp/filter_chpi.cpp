@@ -27,7 +27,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -54,11 +54,11 @@ static std::vector<int> megChannelIndices(const FiffInfo& info)
 // DEFINITIONS
 //=============================================================================================================
 
-void UTILSLIB::filterChpi(MatrixXd& data,
-                          const FiffInfo& info,
-                          double sfreq,
-                          const std::vector<double>& hpiFreqs,
-                          const FilterChpiParams& params)
+void DSPLIB::filterChpi(MatrixXd& data,
+                        const FiffInfo& info,
+                        double sfreq,
+                        const std::vector<double>& hpiFreqs,
+                        const FilterChpiParams& params)
 {
     if (hpiFreqs.empty()) {
         return;
@@ -136,10 +136,10 @@ void UTILSLIB::filterChpi(MatrixXd& data,
 
 //=============================================================================================================
 
-void UTILSLIB::filterChpi(MatrixXd& data,
-                          const FiffInfo& info,
-                          double sfreq,
-                          const FilterChpiParams& params)
+void DSPLIB::filterChpi(MatrixXd& data,
+                        const FiffInfo& info,
+                        double sfreq,
+                        const FilterChpiParams& params)
 {
     // Attempt to extract HPI coil frequencies from FiffInfo.
     // The HPI frequency information may be stored in various FIFF blocks

@@ -38,7 +38,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 namespace

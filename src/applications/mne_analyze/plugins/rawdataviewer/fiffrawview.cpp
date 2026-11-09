@@ -51,8 +51,7 @@
 
 using namespace RAWDATAVIEWERPLUGIN;
 using namespace ANSHAREDLIB;
-using namespace RTPROCESSINGLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

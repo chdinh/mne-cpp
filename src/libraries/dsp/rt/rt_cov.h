@@ -17,7 +17,7 @@
  * samples minus one. Computation is offloaded to a worker @c QThread so
  * the acquisition pipeline never blocks on the dense matrix multiply.
  *
- * The @ref RTPROCESSINGLIB::RtCovComputeResult bundle carries both the matrix and the
+ * The @ref DSPLIB::RtCovComputeResult bundle carries both the matrix and the
  * sample count, which lets downstream consumers combine partial estimates,
  * apply rank-corrections, or convert to a @ref FIFFLIB::FiffCov for
  * persistence and inverse-operator construction.
@@ -59,14 +59,14 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE RTPROCESSINGLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
-// RTPROCESSINGLIB FORWARD DECLARATIONS
+// DSPLIB FORWARD DECLARATIONS
 //=============================================================================================================
 
 /**

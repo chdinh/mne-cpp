@@ -13,7 +13,7 @@
  * deforms a simplex of @c n+1 vertices in @c R^n using reflection,
  * expansion, contraction and shrink moves driven entirely by function
  * value comparisons. mne-cpp uses it for dipole-fit residual
- * minimisation (FWDLIB) and for sphere fitting (@ref UTILSLIB::Sphere)
+ * minimisation (FWDLIB) and for sphere fitting (@ref MATHLIB::Sphere)
  * where the objective is noisy and the gradient is either unavailable
  * or expensive.
  *
@@ -47,10 +47,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE MATHLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace MATHLIB
 {
 
 //=============================================================================================================

@@ -300,7 +300,7 @@ void TestIeeg::bipolarPairsFollowLeads()
     }
     Eigen::MatrixXd derived = Eigen::MatrixXd::Random(contacts.size(), 5);
     const Eigen::MatrixXd expected = IeegReference::bipolarMatrix(pairs, int(contacts.size())) * derived;
-    UTILSLIB::setBipolarReference(derived, info, anodes, cathodes);
+    DSPLIB::setBipolarReference(derived, info, anodes, cathodes);
     QCOMPARE(derived.bottomRows(pairs.size()), expected);
     QCOMPARE(StringList(info.ch_names.begin() + info.nchan - int(pairs.size()), info.ch_names.end()), names);
 }

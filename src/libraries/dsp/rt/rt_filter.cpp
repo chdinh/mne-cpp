@@ -37,28 +37,27 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace BASELIB;
 using namespace MNELIB;
 
 //=============================================================================================================
-// DEFINE GLOBAL RTPROCESSINGLIB METHODS
+// DEFINE GLOBAL DSPLIB METHODS
 //=============================================================================================================
 
-bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
-                                 const std::shared_ptr<FiffRawData>& pFiffRawData,
-                                 int type,
-                                 double dCenterfreq,
-                                 double bandwidth,
-                                 double dTransition,
-                                 double dSFreq,
-                                 int iOrder,
-                                 int designMethod,
-                                 const RowVectorXi& vecPicks,
-                                 bool bUseThreads)
+bool DSPLIB::filterFile(QIODevice& pIODevice,
+                        const std::shared_ptr<FiffRawData>& pFiffRawData,
+                        int type,
+                        double dCenterfreq,
+                        double bandwidth,
+                        double dTransition,
+                        double dSFreq,
+                        int iOrder,
+                        int designMethod,
+                        const RowVectorXi& vecPicks,
+                        bool bUseThreads)
 {
     // Normalize cut off frequencies to nyquist
     dCenterfreq = dCenterfreq / (dSFreq / 2.0);
@@ -84,11 +83,11 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
 
 //=============================================================================================================
 
-bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
-                                 const std::shared_ptr<FiffRawData>& pFiffRawData,
-                                 const FilterKernel& filterKernel,
-                                 const RowVectorXi& vecPicks,
-                                 bool bUseThreads)
+bool DSPLIB::filterFile(QIODevice& pIODevice,
+                        const std::shared_ptr<FiffRawData>& pFiffRawData,
+                        const FilterKernel& filterKernel,
+                        const RowVectorXi& vecPicks,
+                        bool bUseThreads)
 {
     int iOrder = filterKernel.getFilterOrder();
 
@@ -174,17 +173,17 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
 
 //=============================================================================================================
 
-MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
-                                     int type,
-                                     double dCenterfreq,
-                                     double bandwidth,
-                                     double dTransition,
-                                     double dSFreq,
-                                     int iOrder,
-                                     int designMethod,
-                                     const RowVectorXi& vecPicks,
-                                     bool bUseThreads,
-                                     bool bKeepOverhead)
+MatrixXd DSPLIB::filterData(const MatrixXd& matData,
+                            int type,
+                            double dCenterfreq,
+                            double bandwidth,
+                            double dTransition,
+                            double dSFreq,
+                            int iOrder,
+                            int designMethod,
+                            const RowVectorXi& vecPicks,
+                            bool bUseThreads,
+                            bool bKeepOverhead)
 {
     // Check for size of data
     if (matData.cols() < iOrder) {
@@ -216,11 +215,11 @@ MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
 
 //=============================================================================================================
 
-MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
-                                     const FilterKernel& filterKernel,
-                                     const RowVectorXi& vecPicks,
-                                     bool bUseThreads,
-                                     bool bKeepOverhead)
+MatrixXd DSPLIB::filterData(const MatrixXd& matData,
+                            const FilterKernel& filterKernel,
+                            const RowVectorXi& vecPicks,
+                            bool bUseThreads,
+                            bool bKeepOverhead)
 {
     int iOrder = filterKernel.getFilterOrder();
 
@@ -291,10 +290,10 @@ MatrixXd RTPROCESSINGLIB::filterData(const MatrixXd& matData,
 
 //=============================================================================================================
 
-MatrixXd RTPROCESSINGLIB::filterDataBlock(const MatrixXd& matData,
-                                          const RowVectorXi& vecPicks,
-                                          const FilterKernel& filterKernel,
-                                          bool bUseThreads)
+MatrixXd DSPLIB::filterDataBlock(const MatrixXd& matData,
+                                 const RowVectorXi& vecPicks,
+                                 const FilterKernel& filterKernel,
+                                 bool bUseThreads)
 {
     int iOrder = filterKernel.getFilterOrder();
 
@@ -354,7 +353,7 @@ MatrixXd RTPROCESSINGLIB::filterDataBlock(const MatrixXd& matData,
 
 //=============================================================================================================
 
-void RTPROCESSINGLIB::filterChannel(RTPROCESSINGLIB::FilterObject& channelDataTime)
+void DSPLIB::filterChannel(DSPLIB::FilterObject& channelDataTime)
 {
     //channelDataTime.vecData = channelDataTime.first.at(i).applyConvFilter(channelDataTime.vecData, true);
     channelDataTime.filterKernel.applyFftFilter(channelDataTime.vecData, true); //FFT Convolution for rt is not suitable. FFT make the signal filtering non causal.
@@ -518,18 +517,18 @@ void FilterOverlapAdd::reset()
 
 //=============================================================================================================
 
-FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
-                                                   const MatrixXi& matEvents,
-                                                   float fTMinS,
-                                                   float fTMaxS,
-                                                   qint32 eventType,
-                                                   bool bApplyBaseline,
-                                                   float fTBaselineFromS,
-                                                   float fTBaselineToS,
-                                                   const std::map<std::string, double>& mapReject,
-                                                   const FilterKernel& filterKernel,
-                                                   const StringList& lExcludeChs,
-                                                   const RowVectorXi& picks)
+FiffEvoked DSPLIB::computeFilteredAverage(const FiffRawData& raw,
+                                          const MatrixXi& matEvents,
+                                          float fTMinS,
+                                          float fTMaxS,
+                                          qint32 eventType,
+                                          bool bApplyBaseline,
+                                          float fTBaselineFromS,
+                                          float fTBaselineToS,
+                                          const std::map<std::string, double>& mapReject,
+                                          const FilterKernel& filterKernel,
+                                          const StringList& lExcludeChs,
+                                          const RowVectorXi& picks)
 {
     MNEEpochDataList lstEpochDataList;
 
@@ -545,7 +544,7 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
     }
     selected.conservativeResize(1, count);
     if (count > 0) {
-        Log::info("[RTPROCESSINGLIB::computeFilteredAverage] {} matching events found", count);
+        Log::info("[DSPLIB::computeFilteredAverage] {} matching events found", count);
     }
 
     // If picks are empty, pick all
@@ -576,7 +575,7 @@ FiffEvoked RTPROCESSINGLIB::computeFilteredAverage(const FiffRawData& raw,
 
         if (raw.read_raw_segment(epoch->epoch, timesDummy, from - iFilterDelay, to + iFilterDelay, picksNew)) {
             // Filter the data
-            epoch->epoch = RTPROCESSINGLIB::filterData(epoch->epoch, filterKernel).block(0, iFilterDelay, epoch->epoch.rows(), to - from + 1);
+            epoch->epoch = DSPLIB::filterData(epoch->epoch, filterKernel).block(0, iFilterDelay, epoch->epoch.rows(), to - from + 1);
 
             if (p == 0) {
                 times.resize(1, to - from + 1);

@@ -43,7 +43,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace INVLIB;
 using namespace FIFFLIB;
@@ -54,7 +54,7 @@ using namespace Eigen;
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-InvSourceEstimate UTILSLIB::simulateStc(
+InvSourceEstimate DSPLIB::simulateStc(
     const VectorXi& activeVertices,
     const VectorXi& allVertices,
     const SimulateStcParams& params)
@@ -109,7 +109,7 @@ InvSourceEstimate UTILSLIB::simulateStc(
 
 //=============================================================================================================
 
-InvSourceEstimate UTILSLIB::simulateStcFromWaveforms(
+InvSourceEstimate DSPLIB::simulateStcFromWaveforms(
     const MatrixXd& waveforms,
     const VectorXi& activeVertices,
     const VectorXi& allVertices,
@@ -141,7 +141,7 @@ InvSourceEstimate UTILSLIB::simulateStcFromWaveforms(
 
 //=============================================================================================================
 
-FiffEvoked UTILSLIB::simulateEvoked(
+FiffEvoked DSPLIB::simulateEvoked(
     const MNEForwardSolution& fwd,
     const InvSourceEstimate& stc,
     const FiffInfo& info,
@@ -189,7 +189,7 @@ FiffEvoked UTILSLIB::simulateEvoked(
 
 //=============================================================================================================
 
-FiffEvoked UTILSLIB::simulateEvokedNoiseless(
+FiffEvoked DSPLIB::simulateEvokedNoiseless(
     const MNEForwardSolution& fwd,
     const InvSourceEstimate& stc,
     const FiffInfo& info)

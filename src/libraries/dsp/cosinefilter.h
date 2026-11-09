@@ -20,7 +20,7 @@
  * Because the design is symmetric in frequency, the resulting impulse
  * response is linear-phase (Type I), so any DC group delay can be removed
  * exactly by a forward / time-reverse pass — see
- * @c FilterKernel::applyFFTFilter and @ref UTILSLIB::FirFilter::applyZeroPhase "FirFilter::applyZeroPhase".
+ * @c FilterKernel::applyFFTFilter and @ref DSPLIB::FirFilter::applyZeroPhase "FirFilter::applyZeroPhase".
  * The class produces both the time-domain coefficients (@c m_vecCoeff) and
  * their zero-padded FFT (@c m_vecFftCoeff) ready for overlap-add use.
  */
@@ -41,10 +41,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -98,6 +98,6 @@ public:
 
     int m_iFilterOrder;
 };
-} // NAMESPACE UTILSLIB
+} // NAMESPACE DSPLIB
 
 #endif // COSINEFILTER_H

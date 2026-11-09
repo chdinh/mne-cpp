@@ -47,7 +47,7 @@
 
 using namespace DISPLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -541,7 +541,7 @@ double FilterDesignView::getTo()
 
 //=============================================================================================================
 
-void FilterDesignView::updateGuiFromFilter(const UTILSLIB::FilterKernel& filter)
+void FilterDesignView::updateGuiFromFilter(const DSPLIB::FilterKernel& filter)
 {
     m_pUi->m_doubleSpinBox_from->setValue(filter.getHighpassFreq());
     m_pUi->m_doubleSpinBox_to->setValue(filter.getLowpassFreq());

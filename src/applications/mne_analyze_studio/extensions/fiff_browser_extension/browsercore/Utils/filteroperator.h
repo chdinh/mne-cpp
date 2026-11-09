@@ -67,7 +67,6 @@ using namespace MNELIB;
 using namespace Eigen;
 
 using namespace DISPLIB;
-using namespace UTILSLIB;
 
 
 //*************************************************************************************************************

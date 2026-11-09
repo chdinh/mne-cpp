@@ -39,10 +39,10 @@
 #include <Eigen/Geometry>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -139,6 +139,6 @@ private:
                                                const HeadPosEntry& headPosCurrent);
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // MAXWELL_MOVEMENT_COMP_DSP_H

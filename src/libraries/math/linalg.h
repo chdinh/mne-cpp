@@ -9,7 +9,7 @@
  * @date     March 2026
  * @brief    Static linear-algebra helpers: SVD-based conditioning, block-diagonal assembly, sorted index pairs.
  *
- * @ref UTILSLIB::Linalg collects the dense / sparse Eigen primitives
+ * @ref MATHLIB::Linalg collects the dense / sparse Eigen primitives
  * that the rest of mne-cpp keeps reaching for but that are not part of
  * Eigen itself: condition number and condition slope from a Jacobi SVD,
  * assembly of block-diagonal sparse matrices from a stack of dense
@@ -54,10 +54,10 @@
 #include <string>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE MATHLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace MATHLIB
 {
 
 //=============================================================================================================

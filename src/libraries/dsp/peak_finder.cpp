@@ -31,14 +31,14 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 //=============================================================================================================
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-VectorXd UTILSLIB::peakProminences(const VectorXd& data, const std::vector<int>& peakIndices)
+VectorXd DSPLIB::peakProminences(const VectorXd& data, const std::vector<int>& peakIndices)
 {
     const int n = static_cast<int>(data.size());
     VectorXd proms(peakIndices.size());
@@ -73,8 +73,8 @@ VectorXd UTILSLIB::peakProminences(const VectorXd& data, const std::vector<int>&
 
 //=============================================================================================================
 
-std::vector<std::pair<int, double>> UTILSLIB::peakFinder(const VectorXd& data,
-                                                         const PeakFinderParams& params)
+std::vector<std::pair<int, double>> DSPLIB::peakFinder(const VectorXd& data,
+                                                       const PeakFinderParams& params)
 {
     const int n = static_cast<int>(data.size());
     std::vector<std::pair<int, double>> peaks;
@@ -145,7 +145,7 @@ std::vector<std::pair<int, double>> UTILSLIB::peakFinder(const VectorXd& data,
 
 //=============================================================================================================
 
-std::vector<std::pair<int, double>> UTILSLIB::peakFinderMne(const VectorXd& data, double thresh, int extrema)
+std::vector<std::pair<int, double>> DSPLIB::peakFinderMne(const VectorXd& data, double thresh, int extrema)
 {
     // Adapted from mne.preprocessing.peak_finder (MNE-Python, BSD-3-Clause).
     std::vector<std::pair<int, double>> result;

@@ -143,7 +143,7 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
             if ((inner_skull = d->bem_model->fwd_bem_find_surface(FIFFV_BEM_SURF_ID_BRAIN)) == nullptr)
                 return FAIL;
 
-            if (!UTILSLIB::Sphere::fit_sphere_to_points(inner_skull->rr, simplex_size, r0_vec, R))
+            if (!MATHLIB::Sphere::fit_sphere_to_points(inner_skull->rr, simplex_size, r0_vec, R))
                 return FAIL;
             d->r0 = r0_vec.head<3>();
 
@@ -1186,7 +1186,7 @@ bool InvDipoleFitData::fit_one(InvDipoleFitData* fit,
             return fit_eval(x, fit);
         };
 
-        if (!UTILSLIB::SimplexAlgorithm::simplex_minimize<float>(
+        if (!MATHLIB::SimplexAlgorithm::simplex_minimize<float>(
                 simplexMat,      /* The initial simplex */
                 vals,            /* Function values at the vertices */
                 ftol[k],         /* Relative convergence tolerance for the target function */

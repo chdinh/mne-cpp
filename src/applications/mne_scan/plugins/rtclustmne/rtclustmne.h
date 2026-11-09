@@ -69,7 +69,7 @@ namespace INVLIB
 class InvMinimumNorm;
 }
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 class RtInvOp;
 }
@@ -247,7 +247,7 @@ protected:
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeSourceEstimate>> m_pRTSEOutput;  /**< The RealTimeSourceEstimate output.*/
     std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularMatrixBuffer;               /**< Holds incoming RealTimeMultiSampleArray data.*/
     std::shared_ptr<BASELIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;           /**< Holds incoming RealTimeMultiSampleArray data.*/
-    std::shared_ptr<RTPROCESSINGLIB::RtInvOp> m_pRtInvOp;                                            /**< Real-time inverse operator. */
+    std::shared_ptr<DSPLIB::RtInvOp> m_pRtInvOp;                                                     /**< Real-time inverse operator. */
     std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwd;                                              /**< Forward solution. */
     std::shared_ptr<FIFFLIB::FiffCov> m_pNoiseCov;                                                   /**< Noise Covariance Matrix. */
     std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotationSet;                                        /**< FsAnnotation set. */

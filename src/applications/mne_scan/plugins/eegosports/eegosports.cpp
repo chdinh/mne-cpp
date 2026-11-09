@@ -64,10 +64,8 @@
 using namespace EEGOSPORTSPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace UTILSLIB;
 using namespace CHANNELSLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 //=============================================================================================================

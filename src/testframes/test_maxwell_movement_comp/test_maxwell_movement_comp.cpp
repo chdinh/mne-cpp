@@ -19,7 +19,7 @@
 #include <Eigen/Geometry>
 #include <cmath>
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 class TestMaxwellMovementComp : public QObject

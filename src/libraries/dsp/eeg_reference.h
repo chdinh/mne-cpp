@@ -58,10 +58,10 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -122,6 +122,6 @@ DSPSHARED_EXPORT void setBipolarReference(Eigen::MatrixXd& data,
                                           const BASELIB::StringList& cathodes,
                                           bool dropOriginals = true);
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // EEG_REFERENCE_H

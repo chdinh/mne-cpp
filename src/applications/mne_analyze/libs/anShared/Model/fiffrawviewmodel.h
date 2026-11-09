@@ -60,7 +60,7 @@ class FiffInfo;
 class FiffChInfo;
 }
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 class FilterOverlapAdd;
 }
@@ -442,7 +442,7 @@ public:
      *
      * @param[in] filterData    list of the new filter.
      */
-    void setFilter(const UTILSLIB::FilterKernel& filterData);
+    void setFilter(const DSPLIB::FilterKernel& filterData);
 
     //=========================================================================================================
     /**
@@ -450,7 +450,7 @@ public:
      *
      * @param[out] Reference to filterKernel in model.
      */
-    const UTILSLIB::FilterKernel& getFilter();
+    const DSPLIB::FilterKernel& getFilter();
 
     //=========================================================================================================
     /**
@@ -615,12 +615,12 @@ private:
     QBuffer m_buffer;
 
     // Filter stuff
-    qint32 m_iMaxFilterLength;                                      /**< Max order of the current filters. */
-    QString m_sFilterChannelType;                                   /**< Kind of channel which is to be filtered. */
-    std::shared_ptr<RTPROCESSINGLIB::FilterOverlapAdd> m_pRtFilter; /**< The filter object. */
-    Eigen::RowVectorXi m_lFilterChannelList;                        /**< The indices of the channels to be filtered.*/
-    bool m_bPerformFiltering;                                       /**< Flag whether to activate/deactivate filtering. */
-    UTILSLIB::FilterKernel m_filterKernel;                          /**< List of currently active filters. */
+    qint32 m_iMaxFilterLength;                             /**< Max order of the current filters. */
+    QString m_sFilterChannelType;                          /**< Kind of channel which is to be filtered. */
+    std::shared_ptr<DSPLIB::FilterOverlapAdd> m_pRtFilter; /**< The filter object. */
+    Eigen::RowVectorXi m_lFilterChannelList;               /**< The indices of the channels to be filtered.*/
+    bool m_bPerformFiltering;                              /**< Flag whether to activate/deactivate filtering. */
+    DSPLIB::FilterKernel m_filterKernel;                   /**< List of currently active filters. */
 
     // fiff stuff
     QSharedPointer<FIFFLIB::FiffIO> m_pFiffIO;          /**< Fiff IO. */

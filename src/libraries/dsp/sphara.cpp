@@ -21,24 +21,23 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
-// DEFINE GLOBAL UTILSLIB METHODS
+// DEFINE GLOBAL DSPLIB METHODS
 //=============================================================================================================
 
-MatrixXd UTILSLIB::makeSpharaProjector(const MatrixXd& matBaseFct,
-                                       const VectorXi& vecIndices,
-                                       int iOperatorDim,
-                                       int iNBaseFct,
-                                       int iSkip)
+MatrixXd DSPLIB::makeSpharaProjector(const MatrixXd& matBaseFct,
+                                     const VectorXi& vecIndices,
+                                     int iOperatorDim,
+                                     int iNBaseFct,
+                                     int iSkip)
 {
     MatrixXd matSpharaOperator = MatrixXd::Identity(iOperatorDim, iOperatorDim);
 
     if (matBaseFct.size() == 0) {
-        Log::warning("[UTILSLIB::makeSpharaProjector] Basis function matrix was empty. Returning identity matrix instead.");
+        Log::warning("[DSPLIB::makeSpharaProjector] Basis function matrix was empty. Returning identity matrix instead.");
         return matSpharaOperator;
     }
 
@@ -56,7 +55,7 @@ MatrixXd UTILSLIB::makeSpharaProjector(const MatrixXd& matBaseFct,
                 if ((r < vecIndices.rows() || c < vecIndices.rows()) && (rowIndex < matSpharaMultGrad.rows() || colIndex < matSpharaMultGrad.cols())) {
                     matSpharaOperator(vecIndices(r), vecIndices(c)) = matSpharaMultGrad(rowIndex, colIndex);
                 } else {
-                    Log::warning("UTILSLIB::makeSpharaProjector - Index is out of range. Returning identity matrix.");
+                    Log::warning("DSPLIB::makeSpharaProjector - Index is out of range. Returning identity matrix.");
                     //matSpharaOperator.setZero();
                     matSpharaOperator = MatrixXd::Identity(iOperatorDim, iOperatorDim);
                     return matSpharaOperator;

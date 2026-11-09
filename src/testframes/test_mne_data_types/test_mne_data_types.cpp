@@ -992,7 +992,7 @@ private slots:
         // It computes x^2 + y^2 + z^2 for each triplet (NOT sqrt)
         VectorXd vec(6);
         vec << 1.0, 2.0, 3.0, 4.0, 5.0, 6.0;
-        VectorXd result = UTILSLIB::Linalg::combine_xyz(vec);
+        VectorXd result = MATHLIB::Linalg::combine_xyz(vec);
         QCOMPARE(result.size(), static_cast<Eigen::Index>(2));
         double exp0 = 1.0 + 4.0 + 9.0;    // 14
         double exp1 = 16.0 + 25.0 + 36.0; // 77
@@ -1006,7 +1006,7 @@ private slots:
         MatrixXd A(2, 4);
         A << 1, 2, 5, 6,
             3, 4, 7, 8;
-        SparseMatrix<double> S = UTILSLIB::Linalg::make_block_diag(A, 2);
+        SparseMatrix<double> S = MATHLIB::Linalg::make_block_diag(A, 2);
         // A has 4 cols with block size 2 → 2 blocks, each 2x2
         // Result should be 4x4 sparse block diagonal
         QCOMPARE(S.rows(), static_cast<Eigen::Index>(4));

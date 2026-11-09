@@ -34,7 +34,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -43,8 +43,8 @@ using namespace Eigen;
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-MatrixXd UTILSLIB::computeElectricalDistance(const MatrixXd& data,
-                                             const FiffInfo& info)
+MatrixXd DSPLIB::computeElectricalDistance(const MatrixXd& data,
+                                           const FiffInfo& info)
 {
     // Find EEG channel indices
     std::vector<int> eegIdx;
@@ -94,7 +94,7 @@ MatrixXd UTILSLIB::computeElectricalDistance(const MatrixXd& data,
 
 //=============================================================================================================
 
-std::vector<std::pair<int, int>> UTILSLIB::computeBridgedElectrodes(
+std::vector<std::pair<int, int>> DSPLIB::computeBridgedElectrodes(
     const MatrixXd& data,
     const FiffInfo& info,
     const BridgedElectrodeParams& params)

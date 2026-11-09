@@ -18,7 +18,7 @@
  * goodness-of-fit values.
  *
  * The continuously updated head-to-device transform is the input to
- * Maxwell movement compensation (@ref UTILSLIB::MaxwellMovementComp), to the live
+ * Maxwell movement compensation (@ref DSPLIB::MaxwellMovementComp), to the live
  * coordinate-frame display, and to dynamic forward-solution updates. The
  * threaded design keeps the GUI responsive even when the HPI fit is run
  * at the full block rate of a multi-channel acquisition.
@@ -69,10 +69,10 @@ class InvHpiModelParameters;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE RTPROCESSINGLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================

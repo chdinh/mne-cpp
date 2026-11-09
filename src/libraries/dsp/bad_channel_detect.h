@@ -44,10 +44,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -161,6 +161,6 @@ private:
     static double median(std::vector<double> values);
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // BAD_CHANNEL_DETECT_DSP_H

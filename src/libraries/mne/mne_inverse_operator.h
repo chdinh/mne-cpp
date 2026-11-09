@@ -111,7 +111,7 @@ struct RegionMT
         const std::string distMeasure = sDistMeasure.empty() ? std::string("cityblock") : sDistMeasure;
 
         RegionMTOut out;
-        UTILSLIB::KMeans kMeans(distMeasure, "sample", 5);
+        MATHLIB::KMeans kMeans(distMeasure, "sample", 5);
         kMeans.calculate(matRoiMT, nClusters,
                          out.roiIdx, out.ctrs, out.sumd, out.D);
         out.iLabelIdxOut = iLabelIdxIn;

@@ -32,10 +32,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -76,6 +76,6 @@ DSPSHARED_EXPORT void fixStimArtifact(Eigen::MatrixXd& data,
                                       double tmax = 0.01,
                                       StimArtifactMode mode = StimArtifactMode::Linear);
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // STIM_ARTIFACT_DSP_H

@@ -43,10 +43,10 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -101,6 +101,6 @@ DSPSHARED_EXPORT void filterChpi(Eigen::MatrixXd& data,
                                  double sfreq,
                                  const FilterChpiParams& params = FilterChpiParams());
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // FILTER_CHPI_DSP_H

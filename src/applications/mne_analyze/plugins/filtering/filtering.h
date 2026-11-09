@@ -41,7 +41,7 @@ namespace ANSHAREDLIB
 class Communicator;
 }
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 class FilterKernel;
 }
@@ -111,7 +111,7 @@ private:
      *
      * @param[in] filterData    The currently active filter.
      */
-    void setFilter(const UTILSLIB::FilterKernel& filterData);
+    void setFilter(const DSPLIB::FilterKernel& filterData);
 
     //=========================================================================================================
     /**

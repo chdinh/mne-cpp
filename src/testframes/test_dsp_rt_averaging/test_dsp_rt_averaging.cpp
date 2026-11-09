@@ -31,13 +31,11 @@
 #include "../../applications/mne_browse/Utils/filteroperator.h"
 #include "../../applications/mne_browse/Utils/sessionfilter.h"
 
-using namespace RTPROCESSINGLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace MNEBROWSE;
-using namespace UTILSLIB;
 using namespace Eigen;
 
 // Helper to create a minimal synthetic FiffInfo
@@ -598,10 +596,10 @@ private slots:
         // Filtered epochs are the epochs of the filtered recording, sampled like mne.Epochs
         const RowVectorXi picks = RowVectorXi::LinSpaced(raw.info.nchan, 0, raw.info.nchan - 1);
         const FilterKernel kernel("data_bp", 2, 256, 10.0 / raw.info.sfreq, 30.0 / raw.info.sfreq, 1.0 / raw.info.sfreq, raw.info.sfreq, 0);
-        const FiffEvoked filtered = RTPROCESSINGLIB::computeFilteredAverage(raw, events, -0.1f, 0.3f, codes.front(), true, -0.1f, 0.0f, {}, kernel);
+        const FiffEvoked filtered = DSPLIB::computeFilteredAverage(raw, events, -0.1f, 0.3f, codes.front(), true, -0.1f, 0.0f, {}, kernel);
         MatrixXd all, allTimes;
         QVERIFY(raw.read_raw_segment(all, allTimes, raw.first_samp, raw.last_samp, picks));
-        const MatrixXd allFiltered = RTPROCESSINGLIB::filterData(all, kernel);
+        const MatrixXd allFiltered = DSPLIB::filterData(all, kernel);
         const int delay = kernel.getFilterOrder() / 2;
         MatrixXd sum = MatrixXd::Zero(all.rows(), to - from + 1);
         int nave = 0;
@@ -622,7 +620,7 @@ private slots:
         QVERIFY2((filtered.data - sum / nave).cwiseAbs().maxCoeff() < 1e-6 * sum.cwiseAbs().maxCoeff() / nave,
                  qPrintable(QString::number((filtered.data - sum / nave).cwiseAbs().maxCoeff())));
         QVERIFY(qAbs(filtered.baseline.first + 0.1f) < 1e-6f);
-        QCOMPARE(RTPROCESSINGLIB::computeFilteredAverage(raw, events, -0.1f, 0.3f, 9999, false, 0.0f, 0.0f, {}, kernel).data.size(), Index(0));
+        QCOMPARE(DSPLIB::computeFilteredAverage(raw, events, -0.1f, 0.3f, 9999, false, 0.0f, 0.0f, {}, kernel).data.size(), Index(0));
     }
 
     //=========================================================================
@@ -804,7 +802,7 @@ private slots:
         }
         QVERIFY(expected.size() > 10);
 
-        const QList<QPair<int, double>> triggers = RTPROCESSINGLIB::detectTriggerFlanksMax(data, stiIdx, 0, 0.5, false, 20);
+        const QList<QPair<int, double>> triggers = DSPLIB::detectTriggerFlanksMax(data, stiIdx, 0, 0.5, false, 20);
         QCOMPARE(triggers, expected);
     }
 
@@ -838,4 +836,4 @@ private slots:
 };
 
 QTEST_GUILESS_MAIN(TestRtProcessingAveraging)
-#include "test_rtprocessing_averaging.moc"
+#include "test_dsp_rt_averaging.moc"

@@ -36,9 +36,9 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
+using namespace MATHLIB;
 using namespace FIFFLIB;
-using namespace UTILSLIB;
 using namespace BASELIB;
 using namespace Eigen;
 using namespace MNELIB;
@@ -207,7 +207,7 @@ void RtAveragingWorker::setBaselineTo(int toSamp,
 void RtAveragingWorker::doAveraging(const MatrixXd& rawSegment)
 {
     //Detect trigger
-    QList<QPair<int, double>> lDetectedTriggers = RTPROCESSINGLIB::detectTriggerFlanksMax(rawSegment, m_iTriggerChIndex, 0, m_fTriggerThreshold, true);
+    QList<QPair<int, double>> lDetectedTriggers = DSPLIB::detectTriggerFlanksMax(rawSegment, m_iTriggerChIndex, 0, m_fTriggerThreshold, true);
 
     //TODO: This does not permit the same trigger type twice in one data block
     for (int i = 0; i < lDetectedTriggers.size(); ++i) {

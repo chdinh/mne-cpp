@@ -21,7 +21,7 @@
  * heatmaps in DISPLIB and DISP3DLIB.
  *
  * The projection is done by first fitting a sphere to the
- * supplied head-frame points (@ref UTILSLIB::Sphere::fit_sphere_simplex), then
+ * supplied head-frame points (@ref MATHLIB::Sphere::fit_sphere_simplex), then
  * applying an azimuthal projection of every electrode onto
  * the tangent plane at the sphere apex. Optional mirroring
  * flags exist for caps whose left/right convention differs

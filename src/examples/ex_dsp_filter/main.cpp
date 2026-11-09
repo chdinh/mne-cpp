@@ -52,8 +52,7 @@
 //=============================================================================================================
 
 using namespace DISPLIB;
-using namespace UTILSLIB;
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 //=============================================================================================================

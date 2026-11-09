@@ -38,7 +38,7 @@
 
 using namespace FIFFLIB;
 using namespace DISPLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 //=============================================================================================================

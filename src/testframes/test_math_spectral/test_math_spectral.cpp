@@ -7,10 +7,10 @@
 #include <math/spectral.h>
 #include <cmath>
 
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
-class TestUtilsSpectral : public QObject
+class TestMathSpectral : public QObject
 {
     Q_OBJECT
 
@@ -233,5 +233,5 @@ private slots:
     }
 };
 
-QTEST_GUILESS_MAIN(TestUtilsSpectral)
-#include "test_utils_spectral.moc"
+QTEST_GUILESS_MAIN(TestMathSpectral)
+#include "test_math_spectral.moc"

@@ -43,10 +43,10 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -99,6 +99,6 @@ DSPSHARED_EXPORT BadChannelsMaxwellResult findBadChannelsMaxwell(
     const FIFFLIB::FiffInfo& info,
     const BadChannelsMaxwellParams& params = BadChannelsMaxwellParams());
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // BAD_CHANNELS_MAXWELL_H

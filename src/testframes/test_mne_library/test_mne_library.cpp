@@ -68,7 +68,6 @@ using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
 using namespace FWDLIB;
-using namespace UTILSLIB;
 using namespace BASELIB;
 using namespace Eigen;
 

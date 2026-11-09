@@ -11,10 +11,10 @@
 #include <cmath>
 #include <vector>
 
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
-class TestUtilsKMeans : public QObject
+class TestMathKMeans : public QObject
 {
     Q_OBJECT
 
@@ -615,5 +615,5 @@ private slots:
     }
 };
 
-QTEST_GUILESS_MAIN(TestUtilsKMeans)
-#include "test_utils_kmeans.moc"
+QTEST_GUILESS_MAIN(TestMathKMeans)
+#include "test_math_kmeans.moc"

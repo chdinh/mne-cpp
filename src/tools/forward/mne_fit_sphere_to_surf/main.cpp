@@ -48,7 +48,7 @@
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace FSLIB;
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
 //=============================================================================================================

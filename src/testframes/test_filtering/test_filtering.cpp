@@ -42,8 +42,7 @@
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -143,15 +142,15 @@ void TestFiltering::initTestCase()
 
     // Filtering
     printf("Filtering...");
-    mFirstFiltered = RTPROCESSINGLIB::filterData(mFirstInData,
-                                                 type,
-                                                 dCenterfreq,
-                                                 dBandwidth,
-                                                 dTransition,
-                                                 dSFreq,
-                                                 1024,
-                                                 UTILSLIB::FilterKernel::designMethodIndex("Cosine"),
-                                                 vPicks);
+    mFirstFiltered = DSPLIB::filterData(mFirstInData,
+                                        type,
+                                        dCenterfreq,
+                                        dBandwidth,
+                                        dTransition,
+                                        dSFreq,
+                                        1024,
+                                        DSPLIB::FilterKernel::designMethodIndex("Cosine"),
+                                        vPicks);
     printf("[done]\n");
 
     // Writing

@@ -36,7 +36,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -110,7 +110,7 @@ int nextFastLen(int n)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffAnnotations UTILSLIB::annotateMusclZscore(
+FiffAnnotations DSPLIB::annotateMusclZscore(
     const MatrixXd& data,
     const FiffInfo& info,
     double sfreq,
@@ -169,7 +169,7 @@ FiffAnnotations UTILSLIB::annotateMusclZscore(
 
 //=============================================================================================================
 
-FiffAnnotations UTILSLIB::annotateAmplitude(
+FiffAnnotations DSPLIB::annotateAmplitude(
     const MatrixXd& data,
     const FiffInfo& info,
     double sfreq,

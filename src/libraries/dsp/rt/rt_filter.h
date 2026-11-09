@@ -9,15 +9,15 @@
  * @date     March 2026
  * @brief    Real-time FIR / IIR filtering of streaming MEG / EEG data blocks.
  *
- * The functions in this header wrap @ref UTILSLIB::FilterKernel and the
+ * The functions in this header wrap @ref DSPLIB::FilterKernel and the
  * design back-ends so an incoming raw data file or live data block can be
  * low-pass, high-pass, band-pass or notch-filtered in place with a single
- * call. @ref RTPROCESSINGLIB::filterFile "filterFile" streams a @ref FIFFLIB::FiffRawData source through
+ * call. @ref DSPLIB::filterFile "filterFile" streams a @ref FIFFLIB::FiffRawData source through
  * a user-designed kernel and writes the filtered output to an arbitrary
  * @c QIODevice, optionally parallelising the per-channel overlap-add work
  * with Qt Concurrent.
  *
- * The companion @ref RTPROCESSINGLIB::FilterObject struct bundles the FIR coefficients with
+ * The companion @ref DSPLIB::FilterObject struct bundles the FIR coefficients with
  * the per-channel @c iRow and a contiguous @c vecData buffer so independent
  * channels can be filtered in parallel without sharing mutable state. All
  * cutoff and transition values are specified in Hz — normalisation against
@@ -67,10 +67,10 @@ class FiffRawData;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE RTPROCESSINGLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 
 /**
@@ -78,7 +78,7 @@ namespace RTPROCESSINGLIB
  */
 struct FilterObject
 {
-    UTILSLIB::FilterKernel filterKernel;
+    DSPLIB::FilterKernel filterKernel;
     int iRow;
     Eigen::RowVectorXd vecData;
 };
@@ -109,7 +109,7 @@ DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
                                  double dTransition,
                                  double dSFreq,
                                  int iOrder = 4096,
-                                 int designMethod = UTILSLIB::FilterKernel::designMethodIndex("Cosine"),
+                                 int designMethod = DSPLIB::FilterKernel::designMethodIndex("Cosine"),
                                  const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                                  bool bUseThreads = true);
 
@@ -128,7 +128,7 @@ DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
  */
 DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
                                  const std::shared_ptr<FIFFLIB::FiffRawData>& pFiffRawData,
-                                 const UTILSLIB::FilterKernel& filterKernel,
+                                 const DSPLIB::FilterKernel& filterKernel,
                                  const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                                  bool bUseThreads = false);
 
@@ -158,7 +158,7 @@ DSPSHARED_EXPORT Eigen::MatrixXd filterData(const Eigen::MatrixXd& matData,
                                             double dTransition,
                                             double dSFreq,
                                             int iOrder = 1024,
-                                            int designMethod = UTILSLIB::FilterKernel::designMethodIndex("Cosine"),
+                                            int designMethod = DSPLIB::FilterKernel::designMethodIndex("Cosine"),
                                             const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                                             bool bUseThreads = true,
                                             bool bKeepOverhead = false);
@@ -177,7 +177,7 @@ DSPSHARED_EXPORT Eigen::MatrixXd filterData(const Eigen::MatrixXd& matData,
  * @return The filtered data in form of a matrix.
  */
 DSPSHARED_EXPORT Eigen::MatrixXd filterData(const Eigen::MatrixXd& matData,
-                                            const UTILSLIB::FilterKernel& filterKernel,
+                                            const DSPLIB::FilterKernel& filterKernel,
                                             const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                                             bool bUseThreads = true,
                                             bool bKeepOverhead = false);
@@ -196,7 +196,7 @@ DSPSHARED_EXPORT Eigen::MatrixXd filterData(const Eigen::MatrixXd& matData,
  */
 DSPSHARED_EXPORT Eigen::MatrixXd filterDataBlock(const Eigen::MatrixXd& matData,
                                                  const Eigen::RowVectorXi& vecPicks,
-                                                 const UTILSLIB::FilterKernel& filterKernel,
+                                                 const DSPLIB::FilterKernel& filterKernel,
                                                  bool bUseThreads = true);
 
 //=========================================================================================================
@@ -237,7 +237,7 @@ DSPSHARED_EXPORT FIFFLIB::FiffEvoked computeFilteredAverage(const FIFFLIB::FiffR
                                                             float fTBaselineFromS,
                                                             float fTBaselineToS,
                                                             const std::map<std::string, double>& mapReject,
-                                                            const UTILSLIB::FilterKernel& filterKernel,
+                                                            const DSPLIB::FilterKernel& filterKernel,
                                                             const BASELIB::StringList& lExcludeChs = {},
                                                             const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi());
 
@@ -279,7 +279,7 @@ public:
                               double dTransition,
                               double dSFreq,
                               int iOrder = 1024,
-                              int designMethod = UTILSLIB::FilterKernel::designMethodIndex("Cosine"),
+                              int designMethod = DSPLIB::FilterKernel::designMethodIndex("Cosine"),
                               const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                               bool bFilterEnd = true,
                               bool bUseThreads = true,
@@ -299,7 +299,7 @@ public:
      * @return The filtered data in form of a matrix.
      */
     Eigen::MatrixXd calculate(const Eigen::MatrixXd& matData,
-                              const UTILSLIB::FilterKernel& filterKernel,
+                              const DSPLIB::FilterKernel& filterKernel,
                               const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                               bool bFilterEnd = true,
                               bool bUseThreads = true,

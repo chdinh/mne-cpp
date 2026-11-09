@@ -37,7 +37,7 @@ Equivalence claims without static cross-validation: none
 
 `cross-validated-live` tests call whatever `mne` is installed, so they are neither pinned nor deterministic.
 
-Tests comparing against embedded MNE-Python values: `test_analyze_averaging`, `test_analyze_dipolefit`, `test_anshared_models`, `test_bids`, `test_channels_standard_montage`, `test_compute_raw_inverse`, `test_dsp_annotate_artifact`, `test_dsp_artifact_detect`, `test_dsp_csd`, `test_dsp_eeg_reference`, `test_dsp_eog_regression`, `test_dsp_firfilter`, `test_dsp_morlet_tfr`, `test_dsp_multitaper`, `test_dsp_simulate`, `test_dsp_welch_psd`, `test_edf2fiff_rwr`, `test_epochs`, `test_field_map`, `test_fiff_coord_trans`, `test_fiff_core_python`, `test_fiff_cov_python`, `test_fiff_dig_point_python`, `test_fiff_evoked_python`, `test_fiff_fs_library`, `test_fiff_info`, `test_fiff_io_evoked_info`, `test_fiff_proj_python`, `test_fiff_raw_formats_python`, `test_fiff_raw_io`, `test_fiff_raw_save_python`, `test_fiff_stream_python`, `test_filtering`, `test_fs_annotation_labels`, `test_fs_io`, `test_fwd_bem_driver_python`, `test_fwd_python`, `test_inv_beamformer_python`, `test_inv_dipole_fit_python`, `test_inv_eloreta_python`, `test_inv_lcmv_python`, `test_inv_sparse`, `test_mne_browse_app`, `test_mne_cov_python`, `test_mne_ctf_comp_python`, `test_mne_forward_ops`, `test_mne_label_python`, `test_mne_raw_data_python`, `test_mne_source_space_ops_python`, `test_mne_source_space_python`, `test_resolution_matrix`, `test_sensor_field_mapper`, `test_source_estimate_io`, `test_source_estimate_types`, `test_spectral_connectivity`, `test_sts_cluster`, `test_surface_laplacian`, `test_tool_data_pipeline`, `test_tool_list_source_space`, `test_utils_spectral`
+Tests comparing against embedded MNE-Python values: `test_analyze_averaging`, `test_analyze_dipolefit`, `test_anshared_models`, `test_bids`, `test_channels_standard_montage`, `test_compute_raw_inverse`, `test_dsp_annotate_artifact`, `test_dsp_artifact_detect`, `test_dsp_csd`, `test_dsp_eeg_reference`, `test_dsp_eog_regression`, `test_dsp_firfilter`, `test_dsp_morlet_tfr`, `test_dsp_multitaper`, `test_dsp_simulate`, `test_dsp_welch_psd`, `test_edf2fiff_rwr`, `test_epochs`, `test_field_map`, `test_fiff_coord_trans`, `test_fiff_core_python`, `test_fiff_cov_python`, `test_fiff_dig_point_python`, `test_fiff_evoked_python`, `test_fiff_fs_library`, `test_fiff_info`, `test_fiff_io_evoked_info`, `test_fiff_proj_python`, `test_fiff_raw_formats_python`, `test_fiff_raw_io`, `test_fiff_raw_save_python`, `test_fiff_stream_python`, `test_filtering`, `test_fs_annotation_labels`, `test_fs_io`, `test_fwd_bem_driver_python`, `test_fwd_python`, `test_inv_beamformer_python`, `test_inv_dipole_fit_python`, `test_inv_eloreta_python`, `test_inv_lcmv_python`, `test_inv_sparse`, `test_math_spectral`, `test_mne_browse_app`, `test_mne_cov_python`, `test_mne_ctf_comp_python`, `test_mne_forward_ops`, `test_mne_label_python`, `test_mne_raw_data_python`, `test_mne_source_space_ops_python`, `test_mne_source_space_python`, `test_resolution_matrix`, `test_sensor_field_mapper`, `test_source_estimate_io`, `test_source_estimate_types`, `test_spectral_connectivity`, `test_sts_cluster`, `test_surface_laplacian`, `test_tool_data_pipeline`, `test_tool_list_source_space`
 
 Tests running MNE-Python live: `test_acq_dlpack`, `test_acq_lsl`, `test_acq_recorder`, `test_crossval_covariance`, `test_ml_trainer`, `test_mne_acq_tool`, `test_mne_compute_raw_inverse`, `test_pybridge_python_runner`
 
@@ -65,7 +65,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.Label` | `Label (FSLIB)` | equivalent | `test_fs_annotation_labels` | 1e-06 |
 | `mne.SourceEstimate.save / read` | `InvSourceEstimateIO` | equivalent | `test_source_estimate_io` | 1e-06 to 1e-05 |
 | `mne.VectorSourceEstimate` | `InvVectorSourceEstimate` | equivalent | `test_source_estimate_types` | 1e-15 to 1e-07 |
-| `mne.add_reference_channels` | `UTILSLIB::addReferenceChannels` | equivalent | `test_dsp_eeg_reference` | exact |
+| `mne.add_reference_channels` | `DSPLIB::addReferenceChannels` | equivalent | `test_dsp_eeg_reference` | exact |
 | `mne.apply_forward` | `INVLIB::applyForward` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
 | `mne.beamformer.apply_dics` | `InvDICS::applyDICS` | equivalent | `test_inv_lcmv_python` | 1e-06 |
 | `mne.beamformer.apply_dics_csd` | `InvDICS::applyDICSCsd` | equivalent | `test_inv_lcmv_python` | 1e-06 |
@@ -140,17 +140,17 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.pick_info` | `FiffInfo::pick_info` | equivalent | `test_fiff_info` | 1e-10 |
 | `mne.pick_types_forward` | `MNEForwardSolution::pick_types` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
 | `mne.preprocessing.EOGRegression` | `EogRegression` | equivalent | `test_dsp_eog_regression` | 1e-15 to 0.3 |
-| `mne.preprocessing.annotate_amplitude` | `UTILSLIB::annotateAmplitude` | equivalent | `test_dsp_annotate_artifact` | 1e-14 to 1e-06 |
-| `mne.preprocessing.annotate_muscle_zscore` | `UTILSLIB::annotateMusclZscore` | equivalent | `test_dsp_annotate_artifact` | 1e-14 to 1e-06 |
+| `mne.preprocessing.annotate_amplitude` | `DSPLIB::annotateAmplitude` | equivalent | `test_dsp_annotate_artifact` | 1e-14 to 1e-06 |
+| `mne.preprocessing.annotate_muscle_zscore` | `DSPLIB::annotateMusclZscore` | equivalent | `test_dsp_annotate_artifact` | 1e-14 to 1e-06 |
 | `mne.preprocessing.annotate_muscle_zscore / annotate_amplitude` | `AnnotateArtifact` | equivalent | `test_dsp_annotate_artifact` | 1e-14 to 1e-06 |
 | `mne.preprocessing.compute_current_source_density` | `SurfaceLaplacian` | equivalent | `test_surface_laplacian` | 1e-06 |
-| `mne.preprocessing.compute_current_source_density` | `UTILSLIB::SurfaceLaplacian::compute` | equivalent | `test_surface_laplacian` | 1e-06 |
+| `mne.preprocessing.compute_current_source_density` | `DSPLIB::SurfaceLaplacian::compute` | equivalent | `test_surface_laplacian` | 1e-06 |
 | `mne.preprocessing.compute_proj_ecg` | `ArtifactDetectProjParams` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
 | `mne.preprocessing.compute_proj_ecg` | `ArtifactDetect::computeProjEcg` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
 | `mne.preprocessing.compute_proj_eog` | `ArtifactDetect::computeProjEog` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
 | `mne.preprocessing.find_ecg_events` | `ArtifactDetect::detectEcg` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
 | `mne.preprocessing.find_eog_events` | `ArtifactDetect::detectEog` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
-| `mne.preprocessing.peak_finder` | `UTILSLIB::peakFinderMne` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
+| `mne.preprocessing.peak_finder` | `DSPLIB::peakFinderMne` | equivalent | `test_dsp_artifact_detect` | 1e-05 |
 | `mne.read_bem_surfaces` | `mne_list_bem (CLI) / FWDLIB` | equivalent | `test_mne_source_space_ops_python` | 1e-06 to 1e-05 |
 | `mne.read_cov` | `FiffCov::FiffCov(io)` | equivalent | `test_fiff_cov_python` | 1e-09 |
 | `mne.read_evokeds` | `FiffEvoked::read` | equivalent | `test_fiff_evoked_python` | 1e-12 to 1e-06 |
@@ -161,9 +161,9 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.read_proj` | `FiffProj::read` | equivalent | `test_fiff_stream_python` | 1e-07 to 1e-05 |
 | `mne.read_source_spaces` | `MNESourceSpace::read` | equivalent | `test_mne_source_space_python` | 0.001 |
 | `mne.read_trans` | `FiffCoordTrans::read` | equivalent | `test_fiff_fs_library` | 1e-10 to 0.5 |
-| `mne.set_bipolar_reference` | `UTILSLIB::setBipolarReference` | equivalent | `test_dsp_eeg_reference` | exact |
+| `mne.set_bipolar_reference` | `DSPLIB::setBipolarReference` | equivalent | `test_dsp_eeg_reference` | exact |
 | `mne.set_eeg_reference` | `EegReference` | equivalent | `test_dsp_eeg_reference` | exact |
-| `mne.set_eeg_reference` | `UTILSLIB::setEegReference` | equivalent | `test_dsp_eeg_reference` | exact |
+| `mne.set_eeg_reference` | `DSPLIB::setEegReference` | equivalent | `test_dsp_eeg_reference` | exact |
 | `mne.setup_volume_source_space` | `mne_volume_source_space (CLI)` | equivalent | `test_mne_source_space_ops_python` | 1e-06 to 1e-05 |
 | `mne.simulation.simulate_stc / simulate_evoked` | `Simulate` | equivalent | `test_dsp_simulate` | 1e-15 to 1e-10 |
 | `mne.source_space.read_source_spaces` | `MNESourceSpace::read` | equivalent | `test_mne_source_space_python` | 0.001 |
@@ -185,9 +185,9 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.stats.spatio_temporal_cluster_test` | `StatsCluster` | equivalent | `test_sts_cluster` | 1e-10 to 0.05 |
 | `mne.stats.ttest_1samp_no_p` | `StatsCluster` | equivalent | `test_sts_cluster` | 1e-10 to 0.05 |
 | `mne.stats.ttest_ind_no_p` | `StatsCluster t-test` | equivalent | `test_sts_cluster` | 1e-10 to 0.05 |
-| `mne.time_frequency.dpss_windows` | `UTILSLIB::Dpss::compute` | equivalent | `test_dsp_multitaper` | 1e-06 |
+| `mne.time_frequency.dpss_windows` | `DSPLIB::Dpss::compute` | equivalent | `test_dsp_multitaper` | 1e-06 |
 | `mne.time_frequency.psd_array_multitaper` | `MultitaperPsd` | equivalent | `test_dsp_multitaper` | 1e-06 |
-| `mne.time_frequency.stftfreq` | `MATHLIB::Spectral::calculateFFTFreqs` | equivalent | `test_utils_spectral` | 1e-12 to 0.01 |
+| `mne.time_frequency.stftfreq` | `MATHLIB::Spectral::calculateFFTFreqs` | equivalent | `test_math_spectral` | 1e-12 to 0.01 |
 | `mne.time_frequency.tfr_morlet` | `MorletTfr` | equivalent | `test_dsp_morlet_tfr` | 1e-10 to 0.1 |
 | `mne.time_frequency.tfr_multitaper` | `MultitaperTfr` | equivalent | `test_dsp_multitaper` | 1e-06 |
 | `mne.write_bem_solution` | `FwdBemModel::fwd_bem_save_model` | equivalent | `test_fwd_bem_driver_python` | 1e-06 to 0.02 |

@@ -38,10 +38,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -204,6 +204,6 @@ private:
     static std::vector<int> qrsDetector(const Eigen::RowVectorXd& filtered, double dSFreq, double dThreshold, double dTStart);
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // ARTIFACT_DETECT_DSP_H

@@ -12,7 +12,7 @@
  * @date     November 2014
  * @brief    Implementation of @ref CHANNELSLIB::LayoutMaker — sphere fit, azimuthal projection and @c .lout writer.
  *
- * The sphere is fitted with @ref UTILSLIB::Sphere::fit_sphere_simplex,
+ * The sphere is fitted with @ref MATHLIB::Sphere::fit_sphere_simplex,
  * the Nelder-Mead fit of the original MNE-C @c make_eeg_layout routine.
  */
 
@@ -44,7 +44,7 @@
 //=============================================================================================================
 
 using namespace CHANNELSLIB;
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace BASELIB;
 using namespace Eigen;
 

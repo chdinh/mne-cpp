@@ -53,10 +53,10 @@
 #include <limits>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -118,6 +118,6 @@ DSPSHARED_EXPORT std::vector<std::pair<int, double>> peakFinderMne(const Eigen::
                                                                    double thresh = std::numeric_limits<double>::quiet_NaN(),
                                                                    int extrema = 1);
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // PEAK_FINDER_H

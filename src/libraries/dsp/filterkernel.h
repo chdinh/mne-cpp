@@ -13,9 +13,9 @@
  * response coefficients of a low-pass, high-pass, band-pass or notch filter
  * together with their zero-padded FFT and applies them to incoming data via
  * overlap-add convolution. Two design back-ends are supported — the
- * cosine-tapered raised-cosine design (@ref UTILSLIB::CosineFilter, fast, smooth
+ * cosine-tapered raised-cosine design (@ref DSPLIB::CosineFilter, fast, smooth
  * roll-off) and the Parks–McClellan equiripple design
- * (@ref UTILSLIB::ParksMcClellan, optimal minimax behaviour). Both produce Type-I
+ * (@ref DSPLIB::ParksMcClellan, optimal minimax behaviour). Both produce Type-I
  * linear-phase responses, so the kernel can be applied either as a single
  * forward pass with a fixed group delay of @c (NumTaps-1)/2 samples or in
  * zero-phase forward / time-reverse mode.
@@ -61,10 +61,10 @@
 #include <QDebug>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -282,16 +282,16 @@ private:
     Eigen::RowVectorXcd m_vecFftCoeff; /**< the FFT-transformed forward filter coefficient set, required for frequency-domain filtering, zero-padded to m_iFftLength. */
 };
 
-} // NAMESPACE UTILSLIB
+} // NAMESPACE DSPLIB
 
 #ifndef metatype_filterkernel
 #define metatype_filterkernel
-Q_DECLARE_METATYPE(UTILSLIB::FilterKernel)
+Q_DECLARE_METATYPE(DSPLIB::FilterKernel)
 #endif
 
 #ifndef metatype_filterparameter
 #define metatype_filterkernel
-Q_DECLARE_METATYPE(UTILSLIB::FilterParameter)
+Q_DECLARE_METATYPE(DSPLIB::FilterParameter)
 #endif
 
 #endif // FILTERKERNEL_H

@@ -9,7 +9,7 @@
  * @date     April 2026
  * @brief    Definitions of the STSLIB build-info accessors declared in sts_global.h.
  *
- * The three thin wrappers forward to UTILSLIB so the build timestamp and
+ * The three thin wrappers forward to BASELIB so the build timestamp and
  * git hash are baked into the STSLIB shared object at link time; this
  * lets analysis pipelines record which exact STSLIB binary produced a
  * given cluster p-value, TFCE map or shrinkage covariance, which matters

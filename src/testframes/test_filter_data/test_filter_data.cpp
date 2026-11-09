@@ -14,8 +14,7 @@
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_info.h>
 
-using namespace RTPROCESSINGLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

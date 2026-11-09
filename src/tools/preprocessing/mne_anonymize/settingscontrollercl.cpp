@@ -22,7 +22,6 @@
 #include "settingscontrollercl.h"
 #include "fiffanonymizer.h"
 #include <base/buildinfo.h>
-#include "utils/utils_global.h"
 #include "fiff/fiff_global.h"
 
 //=============================================================================================================
@@ -487,9 +486,6 @@ void SettingsControllerCl::printHeaderIfVerbose()
     printIfVerbose(m_sAppName + "    Version: " + m_sAppVer);
     printIfVerbose("Build Date: " + m_sBuildDate);
     printIfVerbose("Build Hash: " + m_sBuildHash);
-    printIfVerbose(" ");
-    printIfVerbose(QString("Utils Lib Build Date: ") + UTILSLIB::buildDateTime());
-    printIfVerbose(QString("Utils Lib Build Hash: ") + UTILSLIB::buildHash());
     printIfVerbose(" ");
     printIfVerbose(QString("Fiff Lib Build Date: ") + FIFFLIB::buildDateTime());
     printIfVerbose(QString("Fiff Lib Build Hash: ") + FIFFLIB::buildHash());

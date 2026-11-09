@@ -7,10 +7,10 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Thin forwarders that surface UTILSLIB build-info into MATHLIB.
+ * @brief    Thin forwarders that surface MATHLIB build-info into MATHLIB.
  *
  * The three accessors declared in @ref math_global.h simply delegate to
- * the equivalent helpers in @ref UTILSLIB::buildinfo so that every
+ * the equivalent helpers in @ref MATHLIB::buildinfo so that every
  * mne-cpp library exposes the same build-stamp API surface without
  * duplicating the @c __DATE__ / @c __TIME__ macros or having to know
  * how the CMake git-hash injection works. Keeping the implementation in

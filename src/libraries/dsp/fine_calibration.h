@@ -38,10 +38,10 @@
 #include <QString>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -173,6 +173,6 @@ private:
     std::vector<FineCalEntry> m_entries;
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // FINE_CALIBRATION_DSP_H

@@ -126,7 +126,7 @@ private:
     int m_firstSample = 0;
 
     // ICA result
-    UTILSLIB::IcaResult m_icaResult;
+    DSPLIB::IcaResult m_icaResult;
     bool m_bHasResult = false;
 };
 

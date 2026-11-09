@@ -43,7 +43,7 @@
 
 using namespace Eigen;
 using namespace DISPLIB;
-using namespace UTILSLIB;
+using namespace MATHLIB;
 
 //=============================================================================================================
 // MAIN

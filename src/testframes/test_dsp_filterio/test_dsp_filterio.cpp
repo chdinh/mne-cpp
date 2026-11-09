@@ -14,7 +14,7 @@
 
 #include <dsp/filterio.h>
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 
 class TestDspFilterIo : public QObject
 {

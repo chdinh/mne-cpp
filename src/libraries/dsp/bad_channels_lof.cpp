@@ -45,7 +45,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -54,7 +54,7 @@ using namespace Eigen;
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-VectorXd UTILSLIB::computeLofScores(const MatrixXd& features, int k)
+VectorXd DSPLIB::computeLofScores(const MatrixXd& features, int k)
 {
     const int n = static_cast<int>(features.rows());
 
@@ -70,9 +70,9 @@ VectorXd UTILSLIB::computeLofScores(const MatrixXd& features, int k)
 
 //=============================================================================================================
 
-BASELIB::StringList UTILSLIB::findBadChannelsLof(const MatrixXd& data,
-                                                 const FiffInfo& info,
-                                                 const LofBadChannelParams& params)
+BASELIB::StringList DSPLIB::findBadChannelsLof(const MatrixXd& data,
+                                               const FiffInfo& info,
+                                               const LofBadChannelParams& params)
 {
     // Select channel indices based on type filter
     std::vector<int> chIdx;

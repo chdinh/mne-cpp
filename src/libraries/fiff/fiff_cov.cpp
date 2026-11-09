@@ -63,7 +63,7 @@
 using namespace FIFFLIB;
 using BASELIB::ErrorCode;
 using BASELIB::fail;
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace BASELIB;
 using namespace Eigen;
 

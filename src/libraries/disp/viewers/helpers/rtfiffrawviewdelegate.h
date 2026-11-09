@@ -42,7 +42,7 @@
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 class EventList;
 }

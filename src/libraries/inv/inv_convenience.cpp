@@ -299,7 +299,7 @@ QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
     }
 
     const ArrayXd sing2 = inv.sing.array().square();
-    const double limit = UTILSLIB::Numerics::chi2Isf(1e-3, rank);
+    const double limit = MATHLIB::Numerics::chi2Isf(1e-3, rank);
     bool converged = false;
     for (int iter = 0; iter < 1000 && !converged; ++iter) {
         converged = true;

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_mnemath.cpp
+ * @file     test_math_numerics.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March, 2026
@@ -38,7 +38,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -692,4 +692,4 @@ void TestMNEMath::cleanupTestCase()
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestMNEMath)
-#include "test_utils_mnemath.moc"
+#include "test_math_numerics.moc"

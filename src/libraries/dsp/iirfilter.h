@@ -53,10 +53,10 @@
 #include <QVector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -255,6 +255,6 @@ private:
     Eigen::MatrixXd m_state; /**< channels x (2 * sections): s1, s2 of each section. */
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // IIRFILTER_DSP_H

@@ -10,8 +10,7 @@
 #include <dsp/filterkernel.h>
 #include <dsp/rt/rt_filter.h>
 
-using namespace RTPROCESSINGLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 class TestRtProcessingExtended : public QObject
@@ -368,4 +367,4 @@ private slots:
 };
 
 QTEST_GUILESS_MAIN(TestRtProcessingExtended)
-#include "test_rtprocessing_extended.moc"
+#include "test_dsp_rt_extended.moc"

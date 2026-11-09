@@ -59,7 +59,7 @@ void MNEMneData::computeRegularization(const MNEInverseOperator& inv, const Matr
     SNR = white.colwise().squaredNorm().transpose() / rank;
 
     const ArrayXd sing2 = inv.sing.head(ncomp).array().square();
-    const double limit = UTILSLIB::Numerics::chi2Isf(1e-3, ncomp - 1);
+    const double limit = MATHLIB::Numerics::chi2Isf(1e-3, ncomp - 1);
     lambda2_est.resize(SNR.size());
     for (Index t = 0; t < SNR.size(); ++t) {
         if (SNR(t) < 1.0) {

@@ -478,13 +478,13 @@ QJsonObject NeuroKernelService::handleToolCallUnchecked(const QJsonObject& param
         }
 
         const Eigen::RowVectorXi selectedPicks = picks.head(pickCount);
-        const UTILSLIB::WelchPsdResult psdResult =
-            UTILSLIB::WelchPsd::compute(data,
-                                        raw.info.sfreq,
-                                        std::min(nfft, static_cast<int>(data.cols())),
-                                        0.5,
-                                        UTILSLIB::WelchPsd::Hann,
-                                        selectedPicks);
+        const DSPLIB::WelchPsdResult psdResult =
+            DSPLIB::WelchPsd::compute(data,
+                                      raw.info.sfreq,
+                                      std::min(nfft, static_cast<int>(data.cols())),
+                                      0.5,
+                                      DSPLIB::WelchPsd::Hann,
+                                      selectedPicks);
 
         const Eigen::RowVectorXd meanPsd = psdResult.matPsd.colwise().mean();
         QJsonArray frequencies;

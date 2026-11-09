@@ -66,7 +66,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace CONNECTIVITYLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;

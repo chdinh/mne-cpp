@@ -46,7 +46,6 @@ using namespace COVARIANCEPLUGIN;
 using namespace DISPLIB;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace RTPROCESSINGLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -235,7 +234,7 @@ void Covariance::run()
     m_mutex.lock();
     int iEstimationSamples = m_iEstimationSamples;
     m_mutex.unlock();
-    RTPROCESSINGLIB::RtCov rtCov(m_pFiffInfo);
+    DSPLIB::RtCov rtCov(m_pFiffInfo);
 
     // Start processing data
     while (!isInterruptionRequested()) {

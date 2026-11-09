@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_utils_sphere.cpp
+ * @file     test_math_sphere.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March, 2026
@@ -42,7 +42,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -287,4 +287,4 @@ void TestSphere::cleanupTestCase()
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestSphere)
-#include "test_utils_sphere.moc"
+#include "test_math_sphere.moc"

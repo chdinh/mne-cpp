@@ -34,7 +34,6 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
@@ -76,10 +75,10 @@ static std::vector<int> findAllEegIndices(const FiffInfo& info)
 // FUNCTION IMPLEMENTATIONS
 //=============================================================================================================
 
-void UTILSLIB::setEegReference(MatrixXd& data,
-                               FiffInfo& info,
-                               const StringList& refChannels,
-                               bool projection)
+void DSPLIB::setEegReference(MatrixXd& data,
+                             FiffInfo& info,
+                             const StringList& refChannels,
+                             bool projection)
 {
     const bool useAverage = refChannels.empty() || (refChannels.size() == 1 && BASELIB::equalsIgnoreCase(refChannels.front(), "average"));
 
@@ -160,9 +159,9 @@ void UTILSLIB::setEegReference(MatrixXd& data,
 
 //=============================================================================================================
 
-void UTILSLIB::addReferenceChannels(MatrixXd& data,
-                                    FiffInfo& info,
-                                    const StringList& chNames)
+void DSPLIB::addReferenceChannels(MatrixXd& data,
+                                  FiffInfo& info,
+                                  const StringList& chNames)
 {
     if (chNames.empty()) {
         return;
@@ -209,11 +208,11 @@ void UTILSLIB::addReferenceChannels(MatrixXd& data,
 
 //=============================================================================================================
 
-void UTILSLIB::setBipolarReference(MatrixXd& data,
-                                   FiffInfo& info,
-                                   const StringList& anodes,
-                                   const StringList& cathodes,
-                                   bool dropOriginals)
+void DSPLIB::setBipolarReference(MatrixXd& data,
+                                 FiffInfo& info,
+                                 const StringList& anodes,
+                                 const StringList& cathodes,
+                                 bool dropOriginals)
 {
     if (anodes.size() != cathodes.size()) {
         Log::warning("setBipolarReference: anodes and cathodes must have the same length ({} vs {}).", static_cast<long long>(anodes.size()), static_cast<long long>(cathodes.size()));

@@ -27,13 +27,12 @@
 //=============================================================================================================
 
 using namespace Eigen;
-using namespace RTPROCESSINGLIB;
 
 //=============================================================================================================
-// DEFINE RTPROCESSINGLIB GLOBAL METHODS
+// DEFINE DSPLIB GLOBAL METHODS
 //=============================================================================================================
 
-QList<MatrixXi> RTPROCESSINGLIB::toEventMatrix(QMap<int, QList<QPair<int, double>>> mapTriggers)
+QList<MatrixXi> DSPLIB::toEventMatrix(QMap<int, QList<QPair<int, double>>> mapTriggers)
 {
     QList<MatrixXi> lMatDetectedTrigger;
 
@@ -57,12 +56,12 @@ QList<MatrixXi> RTPROCESSINGLIB::toEventMatrix(QMap<int, QList<QPair<int, double
 
 //=============================================================================================================
 
-QMap<int, QList<QPair<int, double>>> RTPROCESSINGLIB::detectTriggerFlanksMax(const MatrixXd& data,
-                                                                             const QList<int>& lTriggerChannels,
-                                                                             int iOffsetIndex,
-                                                                             double dThreshold,
-                                                                             bool bRemoveOffset,
-                                                                             int iBurstLengthSamp)
+QMap<int, QList<QPair<int, double>>> DSPLIB::detectTriggerFlanksMax(const MatrixXd& data,
+                                                                    const QList<int>& lTriggerChannels,
+                                                                    int iOffsetIndex,
+                                                                    double dThreshold,
+                                                                    bool bRemoveOffset,
+                                                                    int iBurstLengthSamp)
 {
     QMap<int, QList<QPair<int, double>>> qMapDetectedTrigger;
 
@@ -100,12 +99,12 @@ QMap<int, QList<QPair<int, double>>> RTPROCESSINGLIB::detectTriggerFlanksMax(con
 
 //=============================================================================================================
 
-QList<QPair<int, double>> RTPROCESSINGLIB::detectTriggerFlanksMax(const MatrixXd& data,
-                                                                  int iTriggerChannelIdx,
-                                                                  int iOffsetIndex,
-                                                                  double dThreshold,
-                                                                  bool bRemoveOffset,
-                                                                  int iBurstLengthSamp)
+QList<QPair<int, double>> DSPLIB::detectTriggerFlanksMax(const MatrixXd& data,
+                                                         int iTriggerChannelIdx,
+                                                         int iOffsetIndex,
+                                                         double dThreshold,
+                                                         bool bRemoveOffset,
+                                                         int iBurstLengthSamp)
 {
     QList<QPair<int, double>> lDetectedTriggers;
 
@@ -135,13 +134,13 @@ QList<QPair<int, double>> RTPROCESSINGLIB::detectTriggerFlanksMax(const MatrixXd
 
 //=============================================================================================================
 
-QMap<int, QList<QPair<int, double>>> RTPROCESSINGLIB::detectTriggerFlanksGrad(const MatrixXd& data,
-                                                                              const QList<int>& lTriggerChannels,
-                                                                              int iOffsetIndex,
-                                                                              double dThreshold,
-                                                                              bool bRemoveOffset,
-                                                                              const QString& type,
-                                                                              int iBurstLengthSamp)
+QMap<int, QList<QPair<int, double>>> DSPLIB::detectTriggerFlanksGrad(const MatrixXd& data,
+                                                                     const QList<int>& lTriggerChannels,
+                                                                     int iOffsetIndex,
+                                                                     double dThreshold,
+                                                                     bool bRemoveOffset,
+                                                                     const QString& type,
+                                                                     int iBurstLengthSamp)
 {
     QMap<int, QList<QPair<int, double>>> qMapDetectedTrigger;
     RowVectorXd tGradient = RowVectorXd::Zero(data.cols());
@@ -190,13 +189,13 @@ QMap<int, QList<QPair<int, double>>> RTPROCESSINGLIB::detectTriggerFlanksGrad(co
 
 //=============================================================================================================
 
-QList<QPair<int, double>> RTPROCESSINGLIB::detectTriggerFlanksGrad(const MatrixXd& data,
-                                                                   int iTriggerChannelIdx,
-                                                                   int iOffsetIndex,
-                                                                   double dThreshold,
-                                                                   bool bRemoveOffset,
-                                                                   const QString& type,
-                                                                   int iBurstLengthSamp)
+QList<QPair<int, double>> DSPLIB::detectTriggerFlanksGrad(const MatrixXd& data,
+                                                          int iTriggerChannelIdx,
+                                                          int iOffsetIndex,
+                                                          double dThreshold,
+                                                          bool bRemoveOffset,
+                                                          const QString& type,
+                                                          int iBurstLengthSamp)
 {
     QList<QPair<int, double>> lDetectedTriggers;
 

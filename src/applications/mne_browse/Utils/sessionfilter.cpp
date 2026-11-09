@@ -44,7 +44,7 @@
 //=============================================================================================================
 
 using namespace MNEBROWSE;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 

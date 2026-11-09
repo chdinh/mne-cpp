@@ -52,11 +52,10 @@
 //=============================================================================================================
 
 using namespace DISPLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace BASELIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using namespace RTPROCESSINGLIB;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS
@@ -439,7 +438,7 @@ void RtFiffRawViewModel::addData(const QList<MatrixXd>& data)
 
         QList<QPair<int, double>> lTriggers;
         if (m_bTriggerDetectionActive) {
-            lTriggers = RTPROCESSINGLIB::detectTriggerFlanksMax(matBlock, m_iCurrentTriggerChIndex, 0, m_dTriggerThreshold, true, 500);
+            lTriggers = DSPLIB::detectTriggerFlanksMax(matBlock, m_iCurrentTriggerChIndex, 0, m_dTriggerThreshold, true, 500);
         }
 
         forWrappedSpan(m_iCurrentSample, nCol, iMaxCols, [&](int iCol, int iOffset, int iLength) {
@@ -723,16 +722,16 @@ void RtFiffRawViewModel::updateSpharaOptions(const QString& sSytemType, int nBas
         MatrixXd matSpharaMultSecond = MatrixXd::Identity(m_pFiffInfo->chs.size(), m_pFiffInfo->chs.size());
 
         if (sSytemType == "VectorView" && m_matSpharaVVGradLoaded.size() != 0 && m_matSpharaVVMagLoaded.size() != 0) {
-            matSpharaMultFirst = UTILSLIB::makeSpharaProjector(m_matSpharaVVGradLoaded, m_vecIndicesFirstVV, m_pFiffInfo->nchan, nBaseFctsFirst, 1);   //GRADIOMETERS
-            matSpharaMultSecond = UTILSLIB::makeSpharaProjector(m_matSpharaVVMagLoaded, m_vecIndicesSecondVV, m_pFiffInfo->nchan, nBaseFctsSecond, 0); //Magnetometers
+            matSpharaMultFirst = DSPLIB::makeSpharaProjector(m_matSpharaVVGradLoaded, m_vecIndicesFirstVV, m_pFiffInfo->nchan, nBaseFctsFirst, 1);   //GRADIOMETERS
+            matSpharaMultSecond = DSPLIB::makeSpharaProjector(m_matSpharaVVMagLoaded, m_vecIndicesSecondVV, m_pFiffInfo->nchan, nBaseFctsSecond, 0); //Magnetometers
         }
 
         if (sSytemType == "BabyMEG" && m_matSpharaBabyMEGInnerLoaded.size() != 0) {
-            matSpharaMultFirst = UTILSLIB::makeSpharaProjector(m_matSpharaBabyMEGInnerLoaded, m_vecIndicesFirstBabyMEG, m_pFiffInfo->nchan, nBaseFctsFirst, 0); //InnerLayer
+            matSpharaMultFirst = DSPLIB::makeSpharaProjector(m_matSpharaBabyMEGInnerLoaded, m_vecIndicesFirstBabyMEG, m_pFiffInfo->nchan, nBaseFctsFirst, 0); //InnerLayer
         }
 
         if (sSytemType == "EEG" && m_matSpharaEEGLoaded.size() != 0) {
-            matSpharaMultFirst = UTILSLIB::makeSpharaProjector(m_matSpharaEEGLoaded, m_vecIndicesFirstEEG, m_pFiffInfo->nchan, nBaseFctsFirst, 0); //InnerLayer
+            matSpharaMultFirst = DSPLIB::makeSpharaProjector(m_matSpharaEEGLoaded, m_vecIndicesFirstEEG, m_pFiffInfo->nchan, nBaseFctsFirst, 0); //InnerLayer
         }
 
 

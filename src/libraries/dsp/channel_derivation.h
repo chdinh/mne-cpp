@@ -46,10 +46,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -143,6 +143,6 @@ public:
     static bool writeDefinitionFile(const std::filesystem::path& path, const std::vector<DerivationRule>& rules);
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // CHANNEL_DERIVATION_H

@@ -9,7 +9,7 @@
  * @date     March 2026
  * @brief    Multi-taper spectral estimation: tapered FFT, power and cross-spectral density, DPSS weighting.
  *
- * @ref UTILSLIB::Spectral implements the multi-taper / Welch family of
+ * @ref MATHLIB::Spectral implements the multi-taper / Welch family of
  * spectral estimators that the connectivity and time-frequency pipelines
  * in mne-cpp rely on. A single segment of length @c N is windowed by
  * each of @c K Slepian (DPSS) tapers, FFT'd to length @c iNfft, and the
@@ -57,10 +57,10 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE MATHLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace MATHLIB
 {
 
 /**

@@ -45,10 +45,10 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -137,6 +137,6 @@ private:
     bool m_bFitted = false;              /**< Whether fit() has been called. */
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // EOG_REGRESSION_DSP_H

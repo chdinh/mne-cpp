@@ -39,7 +39,7 @@ class RealTimeMultiSampleArray;
 class RealTimeEvokedSet;
 }
 
-namespace RTPROCESSINGLIB
+namespace DSPLIB
 {
 class RtAveraging;
 }
@@ -211,7 +211,7 @@ private:
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
-    std::shared_ptr<RTPROCESSINGLIB::RtAveraging> m_pRtAve; /**< Real-time average object. */
+    std::shared_ptr<DSPLIB::RtAveraging> m_pRtAve; /**< Real-time average object. */
 
     QStringList m_lResponsibleTriggerTypes; /**< List of all trigger types which lead to the recent emit of a new evoked set. */
 

@@ -9,9 +9,9 @@
  * @date     March 2026
  * @brief    General numerical helpers: GCD, log2, histogram binning, baseline rescaling, sparsity tests.
  *
- * @ref UTILSLIB::Numerics groups the scalar / per-vector numerical
+ * @ref MATHLIB::Numerics groups the scalar / per-vector numerical
  * primitives that almost every other library needs but that have no
- * natural home in Eigen or @ref UTILSLIB::Linalg "Linalg": the Euclidean GCD,
+ * natural home in Eigen or @ref MATHLIB::Linalg "Linalg": the Euclidean GCD,
  * integer log2 and @c nchoose2 combinatorics used to size connectivity
  * containers, the sparsity heuristic that decides whether a dense
  * vector should be promoted to an Eigen sparse matrix, fixed-width
@@ -56,10 +56,10 @@
 #include <utility>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE MATHLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace MATHLIB
 {
 
 //=============================================================================================================

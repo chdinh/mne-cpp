@@ -223,7 +223,7 @@ private:
      */
     std::shared_ptr<FIFFLIB::FiffEvokedSet> averageCalculation(const FIFFLIB::FiffRawData& pFiffRaw,
                                                                MatrixXi matEvents,
-                                                               UTILSLIB::FilterKernel filterKernel,
+                                                               DSPLIB::FilterKernel filterKernel,
                                                                FIFFLIB::FiffInfo fiffInfo);
 
     //=========================================================================================================
@@ -322,7 +322,7 @@ private:
     bool m_bAutoRecompute;    /**< Whether to auto recompute averages */
     bool m_bSavingAverage;    /**< Whether to save average */
 
-    UTILSLIB::FilterKernel m_filterKernel; /**< List of currently active filters. */
+    DSPLIB::FilterKernel m_filterKernel; /**< List of currently active filters. */
 
     QFutureWatcher<std::shared_ptr<FIFFLIB::FiffEvokedSet>> m_FutureWatcher; /**< Future watcher for notifing of completed average calculations. */
     QFuture<std::shared_ptr<FIFFLIB::FiffEvokedSet>> m_Future;               /**< Future for performing average calculations of separate thread. */

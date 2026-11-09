@@ -51,7 +51,7 @@
       "include": "dsp",
       "dir_slug": "dsp",
       "sidebar_position": 5,
-      "namespace": "RTPROCESSINGLIB"
+      "namespace": "DSPLIB"
     },
     "connectivity": {
       "dir": "src/libraries/connectivity",
@@ -2965,7 +2965,7 @@
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": "sklearn.cluster.KMeans",
-      "test": "test_utils_kmeans",
+      "test": "test_math_kmeans",
       "example": "ex_math",
       "example_snippet": [
         "ex_math/main.cpp#kmeans_calculate"
@@ -3160,7 +3160,7 @@
       "mne_c_tool": "libmne (linalg)",
       "mne_python": "numpy.linalg / scipy.linalg",
       "sklearn": null,
-      "test": "test_utils_mnemath",
+      "test": "test_math_numerics",
       "example": "ex_math",
       "example_snippet": [
         "ex_math/main.cpp#linalg_usage"
@@ -3204,7 +3204,7 @@
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_warp",
+      "test": "test_math_warp",
       "example": "ex_math",
       "example_snippet": [
         "ex_math/main.cpp#warp_calculate"
@@ -3226,7 +3226,7 @@
       "mne_c_tool": "mne_fit_sphere_to_surf",
       "mne_python": "mne.make_sphere_model",
       "sklearn": null,
-      "test": "test_utils_sphere",
+      "test": "test_math_sphere",
       "example": "ex_math",
       "example_snippet": [
         "ex_math/main.cpp#sphere_fit"
@@ -8403,7 +8403,7 @@
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_mnemath",
+      "test": "test_math_numerics",
       "example": "ex_math",
       "example_snippet": [
         "ex_math/main.cpp#numerics_rescale"
@@ -8557,7 +8557,7 @@
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_utils_spectral",
+      "test": "test_math_spectral",
       "example": "ex_math",
       "example_snippet": [
         "ex_math/main.cpp#spectral_psd"
@@ -13126,7 +13126,7 @@
       {
         "python": "mne.add_reference_channels",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::addReferenceChannels",
+        "mne_cpp": "DSPLIB::addReferenceChannels",
         "note": "",
         "test": "test_dsp_eeg_reference",
         "equivalence": "equivalent"
@@ -13294,7 +13294,7 @@
       {
         "python": "mne.channels.combine_channels",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::ChannelDerivation::apply",
+        "mne_cpp": "DSPLIB::ChannelDerivation::apply",
         "note": "weighted sums only; no median/std",
         "test": "test_dsp_channel_derivation"
       },
@@ -13481,7 +13481,7 @@
       {
         "python": "mne.channels.read_vectorview_selection",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::SelectionIO::readMNESelFile",
+        "mne_cpp": "CHANNELSLIB::SelectionIO::readMNESelFile",
         "note": "reads .sel; no name filter or space fixing",
         "test": "test_channels_layout_selection"
       },
@@ -13549,7 +13549,7 @@
         "status": "partial",
         "mne_cpp": "MATHLIB::Linalg::rank",
         "note": "matrix rank; no per-type/info/SSP handling",
-        "test": "test_utils_mnemath"
+        "test": "test_math_numerics"
       },
       {
         "python": "mne.compute_raw_covariance",
@@ -13755,7 +13755,7 @@
       {
         "python": "mne.decoding.XdawnTransformer",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::Xdawn::fit/apply",
+        "mne_cpp": "DSPLIB::Xdawn::fit/apply",
         "note": "",
         "test": "test_dsp_xdawn"
       },
@@ -14658,21 +14658,21 @@
       {
         "python": "mne.preprocessing.EOGRegression",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::EogRegression",
+        "mne_cpp": "DSPLIB::EogRegression",
         "note": "matrix input; no Epochs/Evoked, picks argument, proj handling or saving",
         "test": "test_dsp_eog_regression"
       },
       {
         "python": "mne.preprocessing.ICA",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::ICA::run/excludeComponents, ExtendedInfomax",
+        "mne_cpp": "DSPLIB::ICA::run/excludeComponents, ExtendedInfomax",
         "note": "stateless functions; no info-aware object or save",
         "test": "test_dsp_ica"
       },
       {
         "python": "mne.preprocessing.annotate_amplitude",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::annotateAmplitude",
+        "mne_cpp": "DSPLIB::annotateAmplitude",
         "note": "scalar thresholds for all data channels; BAD_ACQ_SKIP spans not skipped; a channel bad for both reasons listed once",
         "test": "test_dsp_annotate_artifact",
         "equivalence": "equivalent"
@@ -14692,7 +14692,7 @@
       {
         "python": "mne.preprocessing.annotate_muscle_zscore",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::annotateMusclZscore",
+        "mne_cpp": "DSPLIB::annotateMusclZscore",
         "note": "automatic channel-type choice only",
         "test": "test_dsp_annotate_artifact",
         "equivalence": "equivalent"
@@ -14718,7 +14718,7 @@
       {
         "python": "mne.preprocessing.compute_current_source_density",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::SurfaceLaplacian::compute",
+        "mne_cpp": "DSPLIB::SurfaceLaplacian::compute",
         "note": "data matrix plus positions; no Info conversion",
         "test": "test_surface_laplacian",
         "equivalence": "equivalent"
@@ -14800,7 +14800,7 @@
       {
         "python": "mne.preprocessing.find_bad_channels_maxwell",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::findBadChannelsMaxwell",
+        "mne_cpp": "DSPLIB::findBadChannelsMaxwell",
         "note": "robust z-score of the whole-recording SSS residual, not mne's chunk-wise limit/min_count; no flat channels",
         "test": "test_dsp_bad_channels_maxwell"
       },
@@ -14875,7 +14875,7 @@
       {
         "python": "mne.preprocessing.peak_finder",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::peakFinderMne",
+        "mne_cpp": "DSPLIB::peakFinderMne",
         "note": "",
         "test": "test_dsp_artifact_detect",
         "equivalence": "equivalent"
@@ -14907,14 +14907,14 @@
       {
         "python": "mne.preprocessing.regress_artifact",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::EogRegression::fitApply",
+        "mne_cpp": "DSPLIB::EogRegression::fitApply",
         "note": "matrix input; no betas input or output",
         "test": "test_dsp_eog_regression"
       },
       {
         "python": "mne.preprocessing.write_fine_calibration",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::FineCalibration::write",
+        "mne_cpp": "DSPLIB::FineCalibration::write",
         "note": "",
         "test": "test_fine_calibration"
       },
@@ -15169,7 +15169,7 @@
       {
         "python": "mne.set_bipolar_reference",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::setBipolarReference",
+        "mne_cpp": "DSPLIB::setBipolarReference",
         "note": "",
         "test": "test_dsp_eeg_reference",
         "equivalence": "equivalent"
@@ -15177,7 +15177,7 @@
       {
         "python": "mne.set_eeg_reference",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::setEegReference",
+        "mne_cpp": "DSPLIB::setEegReference",
         "note": "",
         "test": "test_dsp_eeg_reference",
         "equivalence": "equivalent"
@@ -15236,7 +15236,7 @@
       {
         "python": "mne.simulation.simulate_evoked",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::simulateEvoked",
+        "mne_cpp": "DSPLIB::simulateEvoked",
         "note": "no iir_filter; STC rows must equal forward columns",
         "test": "test_dsp_simulate"
       },
@@ -15249,14 +15249,14 @@
       {
         "python": "mne.simulation.simulate_sparse_stc",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::simulateStc",
+        "mne_cpp": "DSPLIB::simulateStc",
         "note": "caller picks vertices; fixed Gaussian envelopes",
         "test": "test_dsp_simulate"
       },
       {
         "python": "mne.simulation.simulate_stc",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::simulateStcFromWaveforms",
+        "mne_cpp": "DSPLIB::simulateStcFromWaveforms",
         "note": "vertex list + waveforms; no labels/src/value_fun",
         "test": "test_dsp_simulate"
       },
@@ -15527,7 +15527,7 @@
       {
         "python": "mne.time_frequency.CrossSpectralDensity",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::CsdResult",
+        "mne_cpp": "DSPLIB::CsdResult",
         "note": "no channel names/pick/IO",
         "test": "test_dsp_csd"
       },
@@ -15572,14 +15572,14 @@
       {
         "python": "mne.time_frequency.Spectrum",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::WelchPsdResult, MultitaperPsdResult",
+        "mne_cpp": "DSPLIB::WelchPsdResult, MultitaperPsdResult",
         "note": "PSD and frequencies only; no Info, plotting or I/O",
         "test": "test_dsp_welch_psd"
       },
       {
         "python": "mne.time_frequency.SpectrumArray",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::WelchPsdResult, MultitaperPsdResult",
+        "mne_cpp": "DSPLIB::WelchPsdResult, MultitaperPsdResult",
         "note": "PSD and frequencies only; no Info, plotting or I/O",
         "test": "test_dsp_welch_psd"
       },
@@ -15646,7 +15646,7 @@
       {
         "python": "mne.time_frequency.dpss_windows",
         "status": "implemented",
-        "mne_cpp": "UTILSLIB::Dpss::compute",
+        "mne_cpp": "DSPLIB::Dpss::compute",
         "note": "",
         "test": "test_dsp_multitaper",
         "equivalence": "equivalent"
@@ -15685,14 +15685,14 @@
       {
         "python": "mne.time_frequency.psd_array_multitaper",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::MultitaperPsd::compute",
+        "mne_cpp": "DSPLIB::MultitaperPsd::compute",
         "note": "normalization='full' only, no adaptive weights or fmin/fmax",
         "test": "test_dsp_multitaper"
       },
       {
         "python": "mne.time_frequency.psd_array_welch",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::WelchPsd::compute",
+        "mne_cpp": "DSPLIB::WelchPsd::compute",
         "note": "overlap as a fraction, n_per_seg = n_fft, mean average only, no fmin/fmax",
         "test": "test_dsp_welch_psd"
       },
@@ -15726,7 +15726,7 @@
         "status": "implemented",
         "mne_cpp": "MATHLIB::Spectral::calculateFFTFreqs",
         "note": "",
-        "test": "test_utils_spectral",
+        "test": "test_math_spectral",
         "equivalence": "equivalent"
       },
       {
@@ -15739,7 +15739,7 @@
       {
         "python": "mne.time_frequency.tfr_array_multitaper",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::MultitaperTfr::computeArray",
+        "mne_cpp": "DSPLIB::MultitaperTfr::computeArray",
         "note": "power for one epoch; no complex/ITC/decim",
         "test": "test_dsp_multitaper"
       },
@@ -15759,7 +15759,7 @@
       {
         "python": "mne.time_frequency.tfr_multitaper",
         "status": "partial",
-        "mne_cpp": "UTILSLIB::MultitaperTfr::computeArray",
+        "mne_cpp": "DSPLIB::MultitaperTfr::computeArray",
         "note": "matrix input; no Epochs/Evoked, averaging or ITC",
         "test": "test_dsp_multitaper"
       },

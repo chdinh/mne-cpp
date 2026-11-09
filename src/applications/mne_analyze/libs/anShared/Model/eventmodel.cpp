@@ -816,11 +816,11 @@ void EventModel::getEventsFromNewData()
     }
 
     for (int iChannelIndex : stimChannelIndexList) {
-        QList<QPair<int, double>> detectedTriggerSamples = RTPROCESSINGLIB::detectTriggerFlanksMax(mSampleData,
-                                                                                                   iChannelIndex,
-                                                                                                   0,
-                                                                                                   m_dThreshold,
-                                                                                                   0);
+        QList<QPair<int, double>> detectedTriggerSamples = DSPLIB::detectTriggerFlanksMax(mSampleData,
+                                                                                          iChannelIndex,
+                                                                                          0,
+                                                                                          m_dThreshold,
+                                                                                          0);
 
         QMap<double, QList<int>> mEventsinTypes;
 

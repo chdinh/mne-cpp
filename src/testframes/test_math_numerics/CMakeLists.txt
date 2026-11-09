@@ -3,17 +3,19 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 cmake_minimum_required(VERSION 3.14)
-project(test_utils_spectral LANGUAGES CXX)
+project(test_math_numerics LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Widgets Concurrent Network Test)
+set(QT_REQUIRED_COMPONENTS Core Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
-set(SOURCES test_utils_spectral.cpp)
+set(SOURCES
+    test_math_numerics.cpp
+)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${SOURCES})
@@ -25,13 +27,16 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED
-  mne_dsp mne_connectivity mne_inv mne_fwd mne_mne
-  mne_fiff mne_fs mne_utils mne_base
-    mne_math mne_events mne_disp mne_disp3D
+  mne_utils
+  mne_base
+    mne_math
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-  ${QT_REQUIRED_COMPONENT_LIBS} ${MNE_LIBS_REQUIRED} Eigen3::Eigen)
+  ${QT_REQUIRED_COMPONENT_LIBS}
+  ${MNE_LIBS_REQUIRED}
+  Eigen3::Eigen
+)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   WIN32_EXECUTABLE FALSE
@@ -46,7 +51,7 @@ endif()
 # Register with CTest
 enable_testing()
 mne_add_test(${PROJECT_NAME}
-    LABELS unit parity
+    LABELS unit
     TIMEOUT 60)
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)

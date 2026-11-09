@@ -52,7 +52,7 @@ using namespace MNELIB;
 using namespace FSLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
+using namespace MATHLIB;
 using namespace Eigen;
 using namespace DISP3DLIB;
 

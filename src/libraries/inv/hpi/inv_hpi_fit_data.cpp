@@ -175,7 +175,7 @@ DipFitError InvHpiFitData::dipfitError(const Eigen::MatrixXd& matPos,
     //matLf = sensors.tra * matLf;
 
     // Compute lead field for a magnetic dipole in infinite vacuum
-    e.moment = UTILSLIB::Linalg::pinv(matLf) * matData;
+    e.moment = MATHLIB::Linalg::pinv(matLf) * matData;
 
     //matDif = matData - matLf * e.moment;
     matDif = matData - matProjectors * matLf * e.moment;

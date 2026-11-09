@@ -64,8 +64,7 @@
 
 using namespace AVERAGINGPLUGIN;
 using namespace ANSHAREDLIB;
-using namespace RTPROCESSINGLIB;
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace MNELIB;
 
 //=============================================================================================================
@@ -399,7 +398,7 @@ void Averaging::computeAverage()
 
 std::shared_ptr<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFLIB::FiffRawData& FiffRaw,
                                                                       MatrixXi matEvents,
-                                                                      UTILSLIB::FilterKernel filterKernel,
+                                                                      DSPLIB::FilterKernel filterKernel,
                                                                       FIFFLIB::FiffInfo fiffInfo)
 {
     std::map<std::string, double> mapReject;
@@ -423,8 +422,8 @@ std::shared_ptr<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFF
     QMutexLocker lock(&m_ParameterMutex);
     for (const int eventCode : eventCodes) {
         FIFFLIB::FiffEvoked evoked = m_bPerformFiltering
-            ? RTPROCESSINGLIB::computeFilteredAverage(FiffRaw, matEvents, m_fPreStim, m_fPostStim, eventCode, m_bBaseline,
-                                                      m_fBaselineFromS, m_fBaselineToS, mapReject, filterKernel)
+            ? DSPLIB::computeFilteredAverage(FiffRaw, matEvents, m_fPreStim, m_fPostStim, eventCode, m_bBaseline,
+                                             m_fBaselineFromS, m_fBaselineToS, mapReject, filterKernel)
             : MNEEpochDataList::computeAverage(FiffRaw, matEvents, m_fPreStim, m_fPostStim, eventCode, m_bBaseline,
                                                m_fBaselineFromS, m_fBaselineToS, mapReject);
         if (evoked.empty())

@@ -32,7 +32,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace RTPROCESSINGLIB;
+using namespace DSPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 using namespace INVLIB;

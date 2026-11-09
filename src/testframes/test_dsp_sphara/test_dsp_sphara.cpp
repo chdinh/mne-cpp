@@ -16,7 +16,7 @@
 
 #include <Eigen/Core>
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 class TestDspSphara : public QObject

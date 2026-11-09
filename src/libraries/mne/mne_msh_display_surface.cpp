@@ -201,7 +201,7 @@ void MNEMshDisplaySurface::get_head_scale(FIFFLIB::FiffDigitizerData& dig,
         }
     }
 
-    if (!UTILSLIB::Sphere::fit_sphere_to_points(dig_rr.topRows(ndig), simplex_size, r0, Rdig)) {
+    if (!MATHLIB::Sphere::fit_sphere_to_points(dig_rr.topRows(ndig), simplex_size, r0, Rdig)) {
         return;
     }
 
@@ -220,7 +220,7 @@ void MNEMshDisplaySurface::get_head_scale(FIFFLIB::FiffDigitizerData& dig,
         }
     }
 
-    if (!UTILSLIB::Sphere::fit_sphere_to_points(head_rr.topRows(nhead), simplex_size, r0, Rscalp)) {
+    if (!MATHLIB::Sphere::fit_sphere_to_points(head_rr.topRows(nhead), simplex_size, r0, Rscalp)) {
         return;
     }
 

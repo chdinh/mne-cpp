@@ -17,7 +17,7 @@
 
 #include <dsp/ica.h>
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
 using namespace Eigen;
 
 class TestDspIca : public QObject

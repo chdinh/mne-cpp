@@ -131,8 +131,8 @@
 
 using namespace DISPLIB;
 using namespace FIFFLIB;
-using UTILSLIB::FilterKernel;
-using UTILSLIB::FilterIO;
+using DSPLIB::FilterKernel;
+using DSPLIB::FilterIO;
 using Eigen::MatrixXd;
 
 namespace

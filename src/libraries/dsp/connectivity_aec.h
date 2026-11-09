@@ -30,10 +30,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -97,6 +97,6 @@ private:
     ConnectivityAec() = delete;
 };
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // CONNECTIVITY_AEC_DSP_H

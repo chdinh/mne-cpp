@@ -40,7 +40,8 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace UTILSLIB;
+using namespace DSPLIB;
+using namespace MATHLIB;
 using namespace BASELIB;
 using namespace Eigen;
 
@@ -48,13 +49,13 @@ using namespace Eigen;
 // INIT STATIC MEMBERS
 //=============================================================================================================
 
-const std::vector<UTILSLIB::FilterParameter> FilterKernel::m_designMethods({FilterParameter(QString("Cosine"), QString("A cosine filter")),
-                                                                            FilterParameter(QString("Tschebyscheff"), QString("A tschebyscheff filter"))});
-const std::vector<UTILSLIB::FilterParameter> FilterKernel::m_filterTypes({FilterParameter(QString("LPF"), QString("An LPF filter")),
-                                                                          FilterParameter(QString("HPF"), QString("An HPF filter")),
-                                                                          FilterParameter(QString("BPF"), QString("A BPF filter")),
-                                                                          FilterParameter(QString("NOTCH"), QString("A NOTCH filter")),
-                                                                          FilterParameter(QString("UNKNOWN"), QString("An UNKNOWN filter"))});
+const std::vector<DSPLIB::FilterParameter> FilterKernel::m_designMethods({FilterParameter(QString("Cosine"), QString("A cosine filter")),
+                                                                          FilterParameter(QString("Tschebyscheff"), QString("A tschebyscheff filter"))});
+const std::vector<DSPLIB::FilterParameter> FilterKernel::m_filterTypes({FilterParameter(QString("LPF"), QString("An LPF filter")),
+                                                                        FilterParameter(QString("HPF"), QString("An HPF filter")),
+                                                                        FilterParameter(QString("BPF"), QString("A BPF filter")),
+                                                                        FilterParameter(QString("NOTCH"), QString("A NOTCH filter")),
+                                                                        FilterParameter(QString("UNKNOWN"), QString("An UNKNOWN filter"))});
 
 namespace
 {
@@ -513,7 +514,7 @@ QString FilterKernel::getShortDescription() const
 
 //=============================================================================================================
 
-UTILSLIB::FilterParameter FilterKernel::getDesignMethod() const
+DSPLIB::FilterParameter FilterKernel::getDesignMethod() const
 {
     if (m_iDesignMethod < 0) {
         return m_designMethods.at(0);
@@ -523,7 +524,7 @@ UTILSLIB::FilterParameter FilterKernel::getDesignMethod() const
 
 //=============================================================================================================
 
-UTILSLIB::FilterParameter FilterKernel::getFilterType() const
+DSPLIB::FilterParameter FilterKernel::getFilterType() const
 {
     if (m_iFilterType < 0) {
         return m_filterTypes.at(0);

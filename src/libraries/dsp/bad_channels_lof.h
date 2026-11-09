@@ -58,10 +58,10 @@ class FiffInfo;
 }
 
 //=============================================================================================================
-// DEFINE NAMESPACE UTILSLIB
+// DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
 
-namespace UTILSLIB
+namespace DSPLIB
 {
 
 //=============================================================================================================
@@ -111,6 +111,6 @@ DSPSHARED_EXPORT BASELIB::StringList findBadChannelsLof(const Eigen::MatrixXd& d
 DSPSHARED_EXPORT Eigen::VectorXd computeLofScores(const Eigen::MatrixXd& features,
                                                   int k);
 
-} // namespace UTILSLIB
+} // namespace DSPLIB
 
 #endif // BAD_CHANNELS_LOF_H
