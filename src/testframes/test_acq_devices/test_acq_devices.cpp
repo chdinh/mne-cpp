@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <cstring>
 #include <string>
+#include <thread>
 #include <vector>
 
 //=============================================================================================================
@@ -78,7 +79,10 @@ Recording record(const std::string& uri)
     for (const AcqChannelInfo& channel : info->channels) {
         out.scale.push_back(channel.scale);
     }
-    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    // Replays as fast as they are read wait for the reader instead of overrunning it
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
     if (!reader || !device->start().ok()) {
         return out;
     }
@@ -137,6 +141,7 @@ private slots:
     void testBrainAmpScheme();
     void testBrainAmpStreamLayout();
     void testBrainAmpMatchesSynthetic();
+    void testBrainAmpWaitsForGatingReader();
     void testBrainAmpResolution();
     void testBrainAmpClipsAtFullScale();
     void testBrainAmpNeedsAmplifiers();
@@ -222,6 +227,34 @@ void TestAcqDevices::testBrainAmpMatchesSynthetic()
         QCOMPARE(amp.events[e].sample, ref.events[e].sample);
         QCOMPARE(amp.events[e].code, ref.events[e].code);
     }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainAmpWaitsForGatingReader()
+{
+    // Four seconds are more than the ring holds; the replay waits while the reader is busy
+    auto device = AcqDevice::open("brainamp://?simulate=1&channels=4&realtime=0&duration=4");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(20000));
+    QVERIFY(device->lastError().ok());
 }
 
 //=============================================================================================================

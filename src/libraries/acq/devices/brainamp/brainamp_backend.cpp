@@ -272,7 +272,10 @@ private:
         const std::size_t points = m_config.setup.points;
         const std::size_t width = m_config.setup.channels.size() + 1;
         while (!m_stop.load(std::memory_order_acquire)) {
-            auto view = m_writer->beginWrite(points);
+            auto view = m_writer->beginWrite(points, kPoll);
+            if (!view && view.error() == AcqErrorCode::Timeout) {
+                continue; // a gating reader has not freed the space yet
+            }
             if (!view) {
                 reportError(view.error());
                 return;
