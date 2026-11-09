@@ -10,14 +10,50 @@
  * @brief    Tests for HTML Report generation.
  */
 
-#include <utils/report.h>
+//=============================================================================================================
+// INCLUDES
+//=============================================================================================================
+
+#include <report/report.h>
+
+//=============================================================================================================
+// QT INCLUDES
+//=============================================================================================================
 
 #include <QtTest>
 #include <QObject>
-#include <QTemporaryFile>
+#include <QTemporaryDir>
 
-using namespace UTILSLIB;
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
 
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <string>
+#include <string_view>
+
+//=============================================================================================================
+// USED NAMESPACES
+//=============================================================================================================
+
+using namespace REPORTLIB;
+
+namespace
+{
+
+bool contains(std::string_view text, std::string_view part)
+{
+    return text.find(part) != std::string_view::npos;
+}
+
+} // namespace
+
+//=============================================================================================================
+/**
+ * @brief Tests for Report: sections, HTML structure, escaping and saving.
+ */
 class TestReport : public QObject
 {
     Q_OBJECT
@@ -25,138 +61,122 @@ class TestReport : public QObject
 private slots:
     void testConstructor()
     {
-        Report report("Test Report");
-        QCOMPARE(report.title(), QString("Test Report"));
-        QCOMPARE(report.sectionCount(), 0);
-    }
-
-    void testDefaultTitle()
-    {
-        Report report;
-        QVERIFY(report.title().contains("MNE-CPP"));
+        const Report report("Test Report");
+        QCOMPARE(report.title(), std::string("Test Report"));
+        QCOMPARE(report.section_count(), std::size_t(0));
+        QVERIFY(contains(Report().title(), "MNE-CPP"));
     }
 
     void testAddText()
     {
         Report report("Test");
-        report.addText("Info", "Some text content");
-        QCOMPARE(report.sectionCount(), 1);
+        report.add_text("Info", "Some text content");
+        QCOMPARE(report.section_count(), std::size_t(1));
 
-        QString html = report.toHtml();
-        QVERIFY(html.contains("Some text content"));
-        QVERIFY(html.contains("Info"));
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<h2>Info</h2>"));
+        QVERIFY(contains(html, "<p>Some text content</p>"));
     }
 
     void testAddTable()
     {
         Report report("Test");
-        QStringList headers = {"Name", "Value"};
-        QList<QStringList> rows;
-        rows.append(QStringList{"Lambda", "0.1"});
-        rows.append(QStringList{"SNR", "3.0"});
+        report.add_table("Parameters", {"Name", "Value"}, {{"Lambda", "0.1"}, {"SNR", "3.0"}});
+        QCOMPARE(report.section_count(), std::size_t(1));
 
-        report.addTable("Parameters", headers, rows);
-        QCOMPARE(report.sectionCount(), 1);
-
-        QString html = report.toHtml();
-        QVERIFY(html.contains("<table>"));
-        QVERIFY(html.contains("Lambda"));
-        QVERIFY(html.contains("3.0"));
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<table>"));
+        QVERIFY(contains(html, "<th>Name</th>"));
+        QVERIFY(contains(html, "<td>Lambda</td>"));
+        QVERIFY(contains(html, "<td>3.0</td>"));
     }
 
     void testAddKeyValue()
     {
         Report report("Test");
-        QList<QPair<QString, QString>> pairs;
-        pairs.append(QPair<QString, QString>("Subject", "sub-01"));
-        pairs.append(QPair<QString, QString>("Channels", "306"));
+        report.add_key_value("Data Info", {{"Subject", "sub-01"}, {"Channels", "306"}});
 
-        report.addKeyValue("Data Info", pairs);
-
-        QString html = report.toHtml();
-        QVERIFY(html.contains("<dl>"));
-        QVERIFY(html.contains("sub-01"));
-        QVERIFY(html.contains("306"));
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<dl>"));
+        QVERIFY(contains(html, "<dt>Subject</dt>"));
+        QVERIFY(contains(html, "<dd>306</dd>"));
     }
 
     void testAddCode()
     {
         Report report("Test");
-        report.addCode("Script", "auto x = computeInverse();");
+        report.add_code("Script", "auto x = computeInverse();");
 
-        QString html = report.toHtml();
-        QVERIFY(html.contains("<pre>"));
-        QVERIFY(html.contains("<code>"));
-        QVERIFY(html.contains("computeInverse"));
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<pre><code>auto x = computeInverse();</code></pre>"));
     }
 
     void testHtmlStructure()
     {
         Report report("My Report");
-        report.addText("Section 1", "Content 1");
+        report.add_text("Section 1", "Content 1");
+        report.add_text("Section 2", "Content 2");
 
-        QString html = report.toHtml();
-        QVERIFY(html.contains("<!DOCTYPE html>"));
-        QVERIFY(html.contains("<html"));
-        QVERIFY(html.contains("</html>"));
-        QVERIFY(html.contains("<title>My Report</title>"));
-        QVERIFY(html.contains("MNE-CPP")); // footer
-    }
-
-    void testSaveToFile()
-    {
-        Report report("Save Test");
-        report.addText("Section", "Test content");
-
-        QTemporaryFile tmp;
-        tmp.setAutoRemove(true);
-        QVERIFY(tmp.open());
-        QString path = tmp.fileName();
-        tmp.close();
-
-        QVERIFY(report.save(path));
-
-        QFile file(path);
-        QVERIFY(file.open(QIODevice::ReadOnly));
-        QByteArray content = file.readAll();
-        QVERIFY(content.contains("<!DOCTYPE html>"));
-        QVERIFY(content.contains("Save Test"));
-    }
-
-    void testSaveFailsOnBadPath()
-    {
-        Report report("Test");
-        QVERIFY(!report.save("/nonexistent/dir/report.html"));
+        const std::string html = report.to_html();
+        QVERIFY(html.starts_with("<!DOCTYPE html>"));
+        QVERIFY(contains(html, "<meta charset=\"UTF-8\">"));
+        QVERIFY(contains(html, "<title>My Report</title>"));
+        QVERIFY(contains(html, "<h1>My Report</h1>"));
+        QVERIFY(html.find("Section 1") < html.find("Section 2")); // sections keep their order
+        QVERIFY(contains(html, "Generated by MNE-CPP on "));
+        QVERIFY(html.ends_with("</html>\n"));
     }
 
     void testHtmlEscaping()
     {
-        Report report("Test");
-        report.addText("XSS Test", "<script>alert('xss')</script>");
+        Report report("<b>Title & \"quotes\"</b>");
+        report.add_text("<script>", "a < b && c > 'd'");
+        report.add_table("t", {"<h>"}, {{"<td>"}});
+        report.add_key_value("kv", {{"<k>", "<v>"}});
+        report.add_code("c", "if (a<b) { x = \"&\"; }");
 
-        QString html = report.toHtml();
-        QVERIFY(!html.contains("<script>"));
-        QVERIFY(html.contains("&lt;script&gt;"));
+        const std::string html = report.to_html();
+        QVERIFY(!contains(html, "<script>"));
+        QVERIFY(!contains(html, "<b>"));
+        QVERIFY(contains(html, "<title>&lt;b&gt;Title &amp; &quot;quotes&quot;&lt;/b&gt;</title>"));
+        QVERIFY(contains(html, "<p>a &lt; b &amp;&amp; c &gt; &#39;d&#39;</p>"));
+        QVERIFY(contains(html, "<th>&lt;h&gt;</th>"));
+        QVERIFY(contains(html, "<td>&lt;td&gt;</td>"));
+        QVERIFY(contains(html, "<dt>&lt;k&gt;</dt>"));
+        QVERIFY(contains(html, "x = &quot;&amp;&quot;"));
     }
 
-    void testMultipleSections()
+    void testUnicode()
     {
-        Report report("Multi");
-        report.addText("A", "First");
-        report.addText("B", "Second");
-        report.addCode("C", "Third");
+        Report report("Messung µV");
+        report.add_text("Größe", "5 µV, 10 Ω");
+        const std::string html = report.to_html();
+        QVERIFY(contains(html, "<h1>Messung µV</h1>"));
+        QVERIFY(contains(html, "5 µV, 10 Ω"));
+    }
 
-        QCOMPARE(report.sectionCount(), 3);
+    void testSave()
+    {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const std::filesystem::path path = std::filesystem::path(dir.path().toStdString()) / "report.html";
 
-        QString html = report.toHtml();
-        // Sections should appear in order
-        int posA = html.indexOf("First");
-        int posB = html.indexOf("Second");
-        int posC = html.indexOf("Third");
-        QVERIFY(posA < posB);
-        QVERIFY(posB < posC);
+        Report report("Saved Report");
+        report.add_text("Section", "Content");
+        QVERIFY(report.save(path));
+
+        std::ifstream file(path, std::ios::binary);
+        const std::string saved((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        QVERIFY(contains(saved, "<h1>Saved Report</h1>"));
+        QVERIFY(contains(saved, "<p>Content</p>"));
+
+        QVERIFY(!report.save(path.parent_path() / "missing_dir" / "report.html"));
     }
 };
+
+//=============================================================================================================
+// MAIN
+//=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestReport)
 #include "test_report.moc"

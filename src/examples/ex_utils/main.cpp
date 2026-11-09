@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.4.0
  * @date     October 2026
- * @brief    Utilities library: observers, commands, montages, layouts, selections and reports.
+ * @brief    Utilities library: observers, commands, montages, layouts and selections.
  *
  * Every step checks its result (round trips, known electrode positions) and the
  * example exits non-zero on a mismatch.
@@ -23,7 +23,6 @@
 #include <channels/layoutloader.h>
 #include <channels/layoutmaker.h>
 #include <channels/standard_montage.h>
-#include <utils/report.h>
 #include <channels/selectionio.h>
 
 //=============================================================================================================
@@ -215,16 +214,6 @@ int main(int argc, char* argv[])
     //! [layout_loader_usage]
     ok &= expect(capNames == QStringList({"Fp1", "Cz"}) && capUnit == "mm" && cap3D.size() == 2 && cap3D[1] == QVector<float>({0.0f, 0.0f, 87.0f}),
                  "LayoutLoader reads the electrode names, positions and unit of an .elc file");
-
-    //! [report_usage]
-    Report report("Example report");
-    report.addText("Summary", "All utilities were exercised.");
-    report.addTable("Montage", {"Electrode", "z (m)"}, {{"Cz", "0.087"}, {"Fp1", "0.033"}});
-    const QString html = report.toHtml();
-    report.save(dir.filePath("report.html"));
-    //! [report_usage]
-    ok &= expect(report.sectionCount() == 2 && html.contains("<table") && html.contains("Fp1") && QFile::exists(dir.filePath("report.html")),
-                 "Report renders text and table sections to HTML");
 
     std::println("{}", ok ? "All utils checks passed." : "utils checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

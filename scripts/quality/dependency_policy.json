@@ -19,10 +19,11 @@
     },
     {
       "name": "support",
-      "description": "Cross-cutting helpers used by everything above, and the Python bridge.",
+      "description": "Cross-cutting helpers used by everything above: the Python bridge and HTML reports.",
       "libraries": [
         "mne_utils",
-        "mne_pybridge"
+        "mne_pybridge",
+        "mne_report"
       ]
     },
     {

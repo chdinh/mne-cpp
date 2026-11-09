@@ -153,6 +153,10 @@ component_management:
       name: libraries/pybridge
       paths:
         - src/libraries/pybridge/**
+    - component_id: libraries_report
+      name: libraries/report
+      paths:
+        - src/libraries/report/**
     - component_id: libraries_utils
       name: libraries/utils
       paths:

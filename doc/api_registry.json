@@ -170,6 +170,15 @@
       "sidebar_position": 14,
       "namespace": "PYBRIDGELIB"
     },
+    "report": {
+      "dir": "src/libraries/report",
+      "sidebar_label": "Report Library",
+      "origin": "mne-python",
+      "include": "report",
+      "dir_slug": "report",
+      "sidebar_position": 14,
+      "namespace": "REPORTLIB"
+    },
     "com": {
       "dir": "src/libraries/com",
       "sidebar_label": "Communication Library",
@@ -3309,16 +3318,16 @@
     },
     {
       "name": "Report",
-      "module": "utils",
-      "header": "utils/report.h",
+      "module": "report",
+      "header": "report/report.h",
       "origin": "mne-python",
       "mne_c_tool": null,
       "mne_python": "mne.Report",
       "sklearn": null,
       "test": "test_report",
-      "example": "ex_utils",
+      "example": "ex_report",
       "example_snippet": [
-        "ex_utils/main.cpp#report_usage"
+        "ex_report/main.cpp#report_usage"
       ],
       "example_mode": "run",
       "status": "done",
@@ -11702,29 +11711,6 @@
       "python_url": null
     },
     {
-      "name": "ReportSection",
-      "module": "utils",
-      "header": "utils/report.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": null,
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 63,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null,
-      "example_exempt": true,
-      "example_exempt_reason": "Private storage record of Report; sections are created through the Report::add* methods.",
-      "example_used_in": [
-        "ex_utils/main.cpp#report_usage"
-      ]
-    },
-    {
       "name": "SSSParams",
       "module": "dsp",
       "header": "dsp/sss.h",
@@ -16511,6 +16497,17 @@
         "level": "start",
         "library": "pybridge"
       },
+      "ex_report": {
+        "title": "Summarise an analysis run as an HTML report",
+        "tasks": [
+          "infrastructure"
+        ],
+        "modalities": [
+          "generic"
+        ],
+        "level": "start",
+        "library": "report"
+      },
       "ex_bids": {
         "title": "Read and write BIDS datasets",
         "tasks": [
@@ -17249,7 +17246,7 @@
         "level": "start"
       },
       "ex_utils": {
-        "title": "Montages, layouts, selections and reports",
+        "title": "Montages, layouts and selections",
         "tasks": [
           "infrastructure"
         ],

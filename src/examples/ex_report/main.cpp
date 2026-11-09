@@ -1,0 +1,88 @@
+//=============================================================================================================
+/**
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright (c) 2026 MNE-CPP Authors
+ *
+ * @file     main.cpp
+ * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    2.5.0
+ * @date     November 2026
+ * @brief    Report library: summarise an analysis run as a self-contained HTML page.
+ *
+ * Every step checks its result and the example exits non-zero on a mismatch. The report is written to the
+ * temporary directory and removed afterwards.
+ */
+
+//=============================================================================================================
+// INCLUDES
+//=============================================================================================================
+
+#include <report/report.h>
+
+//=============================================================================================================
+// QT INCLUDES
+//=============================================================================================================
+
+#include <QCoreApplication>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <cstdlib>
+#include <filesystem>
+#include <print>
+#include <system_error>
+#include <string>
+#include <string_view>
+
+//=============================================================================================================
+// USED NAMESPACES
+//=============================================================================================================
+
+using namespace REPORTLIB;
+
+//=============================================================================================================
+// DEFINE GLOBAL METHODS
+//=============================================================================================================
+
+namespace
+{
+
+bool expect(bool condition, std::string_view what)
+{
+    std::println("{} {}", condition ? "  ok  " : "  FAIL", what);
+    return condition;
+}
+
+} // namespace
+
+//=============================================================================================================
+// MAIN
+//=============================================================================================================
+
+int main(int argc, char* argv[])
+{
+    QCoreApplication app(argc, argv);
+    bool ok = true;
+    const std::filesystem::path path = std::filesystem::temp_directory_path() / "ex_report.html";
+
+    //! [report_usage]
+    Report report("Auditory evoked responses, sub-01");
+    report.add_key_value("Data", {{"Raw file", "sample_audvis_raw.fif"}, {"Channels", "306 MEG, 60 EEG"}});
+    report.add_table("Inverse", {"Parameter", "Value"}, {{"Method", "dSPM"}, {"SNR", "3"}, {"Depth", "0.8"}});
+    report.add_text("Notes", "Bad channels MEG 2443 and EEG 053 were excluded.");
+    report.add_code("Pipeline", "mne_process_raw --raw sample_audvis_raw.fif --lowpass 40");
+    const std::string html = report.to_html();
+    report.save(path); // open in any browser
+    //! [report_usage]
+
+    ok &= expect(report.section_count() == 4 && html.find("<td>dSPM</td>") != std::string::npos,
+                 "Report renders key-value, table, text and code sections to HTML");
+    std::error_code ec;
+    ok &= expect(std::filesystem::file_size(path, ec) == html.size(), "Report saves the page"); // fixed-width timestamp
+    std::filesystem::remove(path);
+
+    std::println("{}", ok ? "All report checks passed." : "report checks FAILED.");
+    return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+}

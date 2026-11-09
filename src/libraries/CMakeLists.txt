@@ -65,6 +65,7 @@ add_subdirectory(channels)
 if(NOT WASM) # QProcess is not available in Qt for WebAssembly
   add_subdirectory(pybridge)
 endif()
+add_subdirectory(report)
 add_subdirectory(lsl)
 
 add_subdirectory(fiff)

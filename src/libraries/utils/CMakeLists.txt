@@ -18,14 +18,12 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
-  report.cpp
   generics/observerpattern.cpp
   utils_global.cpp
 )
 
 set(HEADERS
   utils_global.h
-  report.h
   generics/commandpattern.h
   generics/observerpattern.h
 )

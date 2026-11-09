@@ -38,6 +38,7 @@ add_subdirectory(ex_inverse_cmne)
 add_subdirectory(ex_ieeg)
 add_subdirectory(ex_math)
 add_subdirectory(ex_mne_api)
+add_subdirectory(ex_report)
 add_subdirectory(ex_sts_statistics)
 add_subdirectory(ex_warp)
 

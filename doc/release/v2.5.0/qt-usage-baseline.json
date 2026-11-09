@@ -24,13 +24,14 @@
     }
   },
   "summary": {
-    "libraries": 27,
+    "libraries": 28,
     "qt_free": [
       "acq",
       "decoding",
-      "math"
+      "math",
+      "report"
     ],
-    "tokens": 14686,
+    "tokens": 14640,
     "gui_outside_design": []
   },
   "libraries": {
@@ -452,6 +453,14 @@
         "Core"
       ]
     },
+    "report": {
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 4,
+      "modules": []
+    },
     "sts": {
       "tokens": 0,
       "by_category": {},
@@ -463,17 +472,13 @@
       ]
     },
     "utils": {
-      "tokens": 47,
+      "tokens": 1,
       "by_category": {
-        "containers": 8,
-        "files": 4,
-        "global": 1,
-        "strings": 33,
-        "time": 1
+        "containers": 1
       },
-      "public_header_includes": 8,
+      "public_header_includes": 4,
       "q_object": 0,
-      "files": 7,
+      "files": 5,
       "modules": [
         "Core"
       ]

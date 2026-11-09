@@ -3,9 +3,9 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 481,
-    "exported_free_functions": 172,
-    "registered_classes": 575,
+    "exported_classes": 480,
+    "exported_free_functions": 176,
+    "registered_classes": 574,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
     "registered_header_only": 81,
@@ -16,14 +16,14 @@
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 97,
     "registered_without_api_page": 0,
-    "with_snippet": 450,
-    "public_api_units": 576,
+    "with_snippet": 449,
+    "public_api_units": 575,
     "example_eligible": 414,
-    "example_exempt": 162,
+    "example_exempt": 161,
     "eligible_backed_by_registry_example": 413,
     "eligible_used_by_some_example": 354,
-    "examples_on_disk": 77,
-    "examples_built": 77
+    "examples_on_disk": 78,
+    "examples_built": 78
   },
   "by_library": {
     "acq": {
@@ -224,6 +224,15 @@
       "eligible_used_by_example": 4,
       "with_snippet": 4
     },
+    "report": {
+      "public": 1,
+      "registered": 1,
+      "with_test": 1,
+      "eligible": 1,
+      "eligible_with_registry_example": 1,
+      "eligible_used_by_example": 1,
+      "with_snippet": 1
+    },
     "sts": {
       "public": 10,
       "registered": 10,
@@ -234,13 +243,13 @@
       "with_snippet": 10
     },
     "utils": {
-      "public": 5,
-      "registered": 5,
-      "with_test": 1,
-      "eligible": 4,
-      "eligible_with_registry_example": 4,
-      "eligible_used_by_example": 4,
-      "with_snippet": 5
+      "public": 3,
+      "registered": 3,
+      "with_test": 0,
+      "eligible": 3,
+      "eligible_with_registry_example": 3,
+      "eligible_used_by_example": 3,
+      "with_snippet": 3
     }
   },
   "exported_free_functions": [
@@ -1073,6 +1082,26 @@
       "name": "parse_progress_line",
       "header": "pybridge/python_runner.h",
       "library": "pybridge"
+    },
+    {
+      "name": "html_escape",
+      "header": "report/report.h",
+      "library": "report"
+    },
+    {
+      "name": "buildDateTime",
+      "header": "report/report_global.h",
+      "library": "report"
+    },
+    {
+      "name": "buildHash",
+      "header": "report/report_global.h",
+      "library": "report"
+    },
+    {
+      "name": "buildHashLong",
+      "header": "report/report_global.h",
+      "library": "report"
     },
     {
       "name": "buildDateTime",
@@ -14163,6 +14192,29 @@
       "exempt_reason": null
     },
     {
+      "name": "Report",
+      "header": "report/report.h",
+      "library": "report",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "done",
+      "test": "test_report",
+      "test_resolves": true,
+      "example": "ex_report",
+      "example_state": "built",
+      "including_examples": [
+        "ex_report"
+      ],
+      "snippets": [
+        "ex_report/main.cpp#report_usage"
+      ],
+      "api_page": "doc/website/docs/api/report/report-class.mdx",
+      "python_equiv": "mne.Report",
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "StatsAdjacency",
       "header": "sts/sts_adjacency.h",
       "library": "sts",
@@ -14468,52 +14520,6 @@
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
-    },
-    {
-      "name": "Report",
-      "header": "utils/report.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "done",
-      "test": "test_report",
-      "test_resolves": true,
-      "example": "ex_utils",
-      "example_state": "built",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#report_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/report.mdx",
-      "python_equiv": "mne.Report",
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "ReportSection",
-      "header": "utils/report.h",
-      "library": "utils",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [
-        "ex_utils"
-      ],
-      "snippets": [
-        "ex_utils/main.cpp#report_usage"
-      ],
-      "api_page": "doc/website/docs/api/utils/report-section.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "registry: Private storage record of Report; sections are created through the Report::add* methods."
     }
   ]
 }
