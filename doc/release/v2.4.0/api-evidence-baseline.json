@@ -2201,6 +2201,173 @@
       "exempt_reason": null
     },
     {
+      "name": "AcquiredPoints",
+      "header": "acq/devices/polhemus/acquired_points.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#acquired_points_usage",
+        "ex_acq_polhemus/main.cpp#acquired_points_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/acquired-points.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "DigitizedPoint",
+      "header": "acq/devices/polhemus/acquired_points.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#acquired_points_usage",
+        "ex_acq_polhemus/main.cpp#acquired_points_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/digitized-point.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "FastrakParser",
+      "header": "acq/devices/polhemus/fastrak_parser.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#fastrak_parser_usage",
+        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/fastrak-parser.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "FastrakSample",
+      "header": "acq/devices/polhemus/fastrak_parser.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#fastrak_parser_usage",
+        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/fastrak-sample.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "PolhemusConnection",
+      "header": "acq/devices/polhemus/polhemus_connection.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage",
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/polhemus-connection.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "PolhemusSerialConfig",
+      "header": "acq/devices/polhemus/polhemus_connection.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage",
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/polhemus-serial-config.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "PolhemusCoregistration",
+      "header": "acq/devices/polhemus/polhemus_coregistration.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": null,
+      "test_resolves": false,
+      "example": "ex_acq_polhemus",
+      "example_state": "built",
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
+      "snippets": [
+        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
+      ],
+      "api_page": "doc/website/docs/api/acq/polhemus-coregistration.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
       "name": "AcqBidsPath",
       "header": "acq/fiff/acq_recorder.h",
       "library": "acq",
@@ -2304,173 +2471,6 @@
         "ex_acq_record/main.cpp#acq_record_bids"
       ],
       "api_page": "doc/website/docs/api/acq/acq-recorder-stats.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "AcquiredPoints",
-      "header": "acq/polhemus/acquired_points.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#acquired_points_usage",
-        "ex_acq_polhemus/main.cpp#acquired_points_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/acquired-points.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "DigitizedPoint",
-      "header": "acq/polhemus/acquired_points.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#acquired_points_usage",
-        "ex_acq_polhemus/main.cpp#acquired_points_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/digitized-point.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "FastrakParser",
-      "header": "acq/polhemus/fastrak_parser.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage",
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/fastrak-parser.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "FastrakSample",
-      "header": "acq/polhemus/fastrak_parser.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage",
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/fastrak-sample.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PolhemusConnection",
-      "header": "acq/polhemus/polhemus_connection.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage",
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/polhemus-connection.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PolhemusSerialConfig",
-      "header": "acq/polhemus/polhemus_connection.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage",
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/polhemus-serial-config.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PolhemusCoregistration",
-      "header": "acq/polhemus/polhemus_coregistration.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/polhemus-coregistration.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null

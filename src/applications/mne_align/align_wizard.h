@@ -24,8 +24,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <acq/polhemus/acquired_points.h>
-#include <acq/polhemus/polhemus_connection.h>
+#include <acq/devices/polhemus/acquired_points.h>
+#include <acq/devices/polhemus/polhemus_connection.h>
 
 #include <channels/standard_montage.h>
 

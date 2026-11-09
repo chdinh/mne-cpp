@@ -84,7 +84,7 @@ add_subdirectory(acq/fiff)
 add_subdirectory(acq/lsl)
 add_subdirectory(acq/devices)
 if(NOT WASM) # Qt SerialPort is not available in WebAssembly
-  add_subdirectory(acq/polhemus)
+  add_subdirectory(acq/devices/polhemus)
 endif()
 
 add_subdirectory(mna)

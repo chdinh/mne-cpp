@@ -38,6 +38,14 @@
       "public_header_includes": 0,
       "modules": []
     },
+    "acq/devices/polhemus": {
+      "tokens": 164,
+      "public_header_includes": 14,
+      "modules": [
+        "Core",
+        "SerialPort"
+      ]
+    },
     "acq/fiff": {
       "tokens": 46,
       "public_header_includes": 0,
@@ -50,14 +58,6 @@
       "public_header_includes": 0,
       "modules": [
         "Core"
-      ]
-    },
-    "acq/polhemus": {
-      "tokens": 164,
-      "public_header_includes": 14,
-      "modules": [
-        "Core",
-        "SerialPort"
       ]
     },
     "base": {

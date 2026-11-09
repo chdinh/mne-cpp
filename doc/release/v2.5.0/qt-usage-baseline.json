@@ -54,6 +54,25 @@
       "files": 6,
       "modules": []
     },
+    "acq/devices/polhemus": {
+      "tokens": 164,
+      "by_category": {
+        "containers": 5,
+        "files": 11,
+        "global": 7,
+        "objects_signals": 57,
+        "other": 15,
+        "strings": 65,
+        "time": 4
+      },
+      "public_header_includes": 14,
+      "q_object": 3,
+      "files": 8,
+      "modules": [
+        "Core",
+        "SerialPort"
+      ]
+    },
     "acq/fiff": {
       "tokens": 46,
       "by_category": {
@@ -76,25 +95,6 @@
       "files": 3,
       "modules": [
         "Core"
-      ]
-    },
-    "acq/polhemus": {
-      "tokens": 164,
-      "by_category": {
-        "containers": 5,
-        "files": 11,
-        "global": 7,
-        "objects_signals": 57,
-        "other": 15,
-        "strings": 65,
-        "time": 4
-      },
-      "public_header_includes": 14,
-      "q_object": 3,
-      "files": 8,
-      "modules": [
-        "Core",
-        "SerialPort"
       ]
     },
     "base": {

@@ -18,10 +18,10 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <acq/polhemus/acquired_points.h>
-#include <acq/polhemus/fastrak_parser.h>
-#include <acq/polhemus/polhemus_connection.h>
-#include <acq/polhemus/polhemus_coregistration.h>
+#include <acq/devices/polhemus/acquired_points.h>
+#include <acq/devices/polhemus/fastrak_parser.h>
+#include <acq/devices/polhemus/polhemus_connection.h>
+#include <acq/devices/polhemus/polhemus_coregistration.h>
 
 #include <cmath>
 #include <cstdlib>

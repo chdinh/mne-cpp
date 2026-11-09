@@ -7837,7 +7837,7 @@
     {
       "name": "AcquiredPoints",
       "module": "acq",
-      "header": "acq/polhemus/acquired_points.h",
+      "header": "acq/devices/polhemus/acquired_points.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -8035,7 +8035,7 @@
     {
       "name": "FastrakParser",
       "module": "acq",
-      "header": "acq/polhemus/fastrak_parser.h",
+      "header": "acq/devices/polhemus/fastrak_parser.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -8477,7 +8477,7 @@
     {
       "name": "PolhemusConnection",
       "module": "acq",
-      "header": "acq/polhemus/polhemus_connection.h",
+      "header": "acq/devices/polhemus/polhemus_connection.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -8499,7 +8499,7 @@
     {
       "name": "PolhemusCoregistration",
       "module": "acq",
-      "header": "acq/polhemus/polhemus_coregistration.h",
+      "header": "acq/devices/polhemus/polhemus_coregistration.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -11295,7 +11295,7 @@
     {
       "name": "DigitizedPoint",
       "module": "acq",
-      "header": "acq/polhemus/acquired_points.h",
+      "header": "acq/devices/polhemus/acquired_points.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -11383,7 +11383,7 @@
     {
       "name": "FastrakSample",
       "module": "acq",
-      "header": "acq/polhemus/fastrak_parser.h",
+      "header": "acq/devices/polhemus/fastrak_parser.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,
@@ -11704,7 +11704,7 @@
     {
       "name": "PolhemusSerialConfig",
       "module": "acq",
-      "header": "acq/polhemus/polhemus_connection.h",
+      "header": "acq/devices/polhemus/polhemus_connection.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
       "mne_python": null,

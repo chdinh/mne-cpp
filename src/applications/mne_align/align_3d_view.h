@@ -36,7 +36,7 @@
 
 #include <Eigen/Geometry>
 
-#include <acq/polhemus/acquired_points.h>
+#include <acq/devices/polhemus/acquired_points.h>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS

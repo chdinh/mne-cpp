@@ -30,7 +30,7 @@ set(HEADERS
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..> $<INSTALL_INTERFACE:include>)
+target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../..> $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
@@ -54,7 +54,7 @@ install(TARGETS ${PROJECT_NAME} ${MNE_CPP_EXPORT_SET}
 
 foreach(_header ${HEADERS})
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/${_header}"
-        DESTINATION include/acq/polhemus
+        DESTINATION include/acq/devices/polhemus
         COMPONENT sdk
     )
 endforeach()
