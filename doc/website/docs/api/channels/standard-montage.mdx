@@ -22,33 +22,17 @@ class CHANNELSLIB::StandardMontage
 Standard EEG montage with named electrode positions.
 
 ```cpp title="src/examples/ex_channels/main.cpp"
-const QList<ElectrodePosition> montage1020 = StandardMontage::getMontage(StandardMontage::System::Standard_1020);
-Vector3d cz;
-const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1005 positions, metres, MNI frame
+const std::vector<ElectrodePosition> montage1020 = StandardMontage::montage(StandardMontage::System::Standard_1020);
+const std::optional<Vector3d> cz = StandardMontage::find_electrode("Cz"); // mne's standard_1005 positions, metres, MNI frame
 ```
 
 ---
 
 ## Static Methods
 
-### getMontage(system)
+### montage(system)
 
-Get a standard montage by system name.
-
-**Parameters:**
-
-- **system** : *System*
-  The montage system.
-
-**Returns:**
-
-- *QList&lt; [ElectrodePosition](/docs/api/channels/electrode-position) &gt;* — List of electrode positions.
-
----
-
-### getElectrodeNames(system)
-
-Get electrode names for a standard montage.
+The electrodes of a montage system.
 
 **Parameters:**
 
@@ -57,33 +41,13 @@ Get electrode names for a standard montage.
 
 **Returns:**
 
-- *QStringList* — List of electrode names.
+- *std::vector&lt; [ElectrodePosition](/docs/api/channels/electrode-position) &gt;* — The electrode positions.
 
 ---
 
-### findElectrode(name, pos)
+### electrode_names(system)
 
-Look up a single electrode position by name.
-
-Searches every position of the standard_1005 table, including the fiducials Nz, LPA and RPA.
-
-**Parameters:**
-
-- **name** : *const QString &*
-  Electrode name (case-insensitive).
-
-- **pos** : *Eigen::Vector3d &*
-  Position if found.
-
-**Returns:**
-
-- *bool* — true if found.
-
----
-
-### electrodeCount(system)
-
-Get the number of electrodes in a montage.
+The electrode names of a montage system.
 
 **Parameters:**
 
@@ -92,13 +56,43 @@ Get the number of electrodes in a montage.
 
 **Returns:**
 
-- *int* — Number of electrode positions defined for the montage.
+- *BASELIB::StringList* — The electrode names, in montage order.
+
+---
+
+### find_electrode(name)
+
+Looks up an electrode of the standard_1005 table, fiducials included.
+
+**Parameters:**
+
+- **name** : *std::string_view*
+  Electrode name, case-insensitive.
+
+**Returns:**
+
+- *std::optional&lt; Eigen::Vector3d &gt;* — The position, or no value if the name is unknown.
+
+---
+
+### electrode_count(system)
+
+The number of electrodes of a montage system.
+
+**Parameters:**
+
+- **system** : *System*
+  The montage system.
+
+**Returns:**
+
+- *std::size_t* — The electrode count.
 
 ---
 
 ## Example
 
-- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Utilities library: montages, layouts and selections.
+- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Channels library: montages, layouts and selections.
 - Full source: [`src/examples/ex_channels/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_channels/main.cpp)
 - Build target: `ex_channels` (runs under CTest)
 
@@ -106,13 +100,12 @@ Get the number of electrodes in a montage.
 
 ### [ex_channels](../../examples/channels/ex_channels.mdx)
 
-Utilities library: montages, layouts and selections.
+Channels library: montages, layouts and selections.
 
-````cpp title="src/examples/ex_channels/main.cpp, line 94"
-const QList<ElectrodePosition> montage1020 = StandardMontage::getMontage(StandardMontage::System::Standard_1020);
-Vector3d cz;
-const bool found = StandardMontage::findElectrode("Cz", cz); // mne's standard_1005 positions, metres, MNI frame
-ok &= expect(montage1020.size() == StandardMontage::electrodeCount(StandardMontage::System::Standard_1020) && found && (cz - Vector3d(0.0004009, -0.009167, 0.100244)).norm() < 1e-12,
+````cpp title="src/examples/ex_channels/main.cpp, line 85"
+const std::vector<ElectrodePosition> montage1020 = StandardMontage::montage(StandardMontage::System::Standard_1020);
+const std::optional<Vector3d> cz = StandardMontage::find_electrode("Cz"); // mne's standard_1005 positions, metres, MNI frame
+ok &= expect(montage1020.size() == StandardMontage::electrode_count(StandardMontage::System::Standard_1020) && cz && (*cz - Vector3d(0.0004009, -0.009167, 0.100244)).norm() < 1e-12,
              std::format("10-20 montage: {} electrodes, Cz at (0.4, -9.2, 100.2) mm", montage1020.size()));
 ````
 

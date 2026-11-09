@@ -39,18 +39,8 @@ Needs the [MNE sample dataset](../../manual/sample-dataset.mdx) in `resources/da
 
 ```bash
 cmake --build build/developer-dynamic --target ex_make_layout
-./out/Release/examples/ex_make_layout --help
+./out/Release/examples/ex_make_layout
 ```
-
-### Options
-
-| Option | Description |
-|---|---|
-| `--fileIn` | The input file &lt;in&gt;. |
-| `--coilType` | The coil type &lt;out&gt;. |
-| `--fileOut` | The output file &lt;out&gt;. |
-| `--mirrorX` | Mirror final layout along x-axis &lt;mirrorX&gt;. |
-| `--mirrorY` | Mirror final layout along &lt;-axis &lt;mirrorY&gt;. |
 
 ## Key API
 
@@ -58,16 +48,16 @@ The documented classes this example uses most:
 
 | Class | Library |
 |---|---|
-| [`FiffInfo`](../../api/fiff/fiff-info.mdx) | FIFF I/O |
+| [`LayoutMaker`](../../api/channels/layout-maker.mdx) | Channels |
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`LayoutLoader`](../../api/channels/layout-loader.mdx) | Channels |
-| [`LayoutMaker`](../../api/channels/layout-maker.mdx) | Channels |
-| [`Log`](../../api/base/log.mdx) | Base |
+| [`LayoutOptions`](../../api/channels/layout-options.mdx) | Channels |
 
 ## Used in the API reference
 
 - [LayoutLoader](../../api/channels/layout-loader.mdx)
 - [LayoutMaker](../../api/channels/layout-maker.mdx)
+- [LayoutOptions](../../api/channels/layout-options.mdx)
 
 ## Source
 
@@ -92,146 +82,100 @@ The documented classes this example uses most:
 // INCLUDES
 //=============================================================================================================
 
-#include <vector>
-#include <math.h>
-
-#include <channels/layoutmaker.h>
+#include <base/string_utils.h>
 #include <channels/layoutloader.h>
-#include <base/log.h>
-
+#include <channels/layoutmaker.h>
 #include <fiff/fiff.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QtCore/QCoreApplication>
-#include <QCommandLineParser>
-#include <QDebug>
+#include <cstdlib>
+#include <filesystem>
+#include <map>
+#include <optional>
+#include <print>
+#include <string>
+#include <string_view>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace FIFFLIB;
+using namespace BASELIB;
 using namespace CHANNELSLIB;
+using namespace FIFFLIB;
+using namespace Eigen;
 
 //=============================================================================================================
 // MAIN
 //=============================================================================================================
 
-//=============================================================================================================
 /**
- * The function main marks the entry point of the program.
- * By default, main has the storage class extern.
+ * Reads the sensor positions of one coil type from a FIFF file, or the electrodes of an .elc file, and writes
+ * their 2-D layout.
  *
- * @param[in] argc (argument count) is an integer that indicates how many arguments were entered on the command line when the program was started.
- * @param[in] argv (argument vector) is an array of pointers to arrays of character objects. The array objects are null-terminated strings, representing the arguments that were entered on the command line when the program was started.
- * @return the value that was set to exit() (which is 0 if exit() is called via quit()).
+ * Usage: ex_make_layout [--fileIn <fif|elc>] [--fileOut <lout>] [--coilType <type>] [--mirrorX 0|1] [--mirrorY 0|1]
  */
 int main(int argc, char* argv[])
 {
-    //
-    // Please notice that this example only works in release mode.
-    // Debug mode somehow corrupts the simplex coder. ToDo: Fix this!
-    //
-    BASELIB::Log::install_qt_message_handler();
-    QCoreApplication a(argc, argv);
-
-    // Command Line Parser
-    QCommandLineParser parser;
-    parser.setApplicationDescription("Make Layout Example");
-    parser.addHelpOption();
-    QCommandLineOption inputOption("fileIn", "The input file <in>.", "in", QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif");
-    QCommandLineOption chKindOption("coilType", "The coil type <out>.", "coilType", "3012"); // 3012 = FIFFV_COIL_VV_PLANAR_T1, use coil type instead of kind because this way we can distinguish between different layers (outer, inner, etc.), see fiff_constants for details FIFFV_REF_MEG_CH FIFFV_COIL_BABY_REF_MAG FIFFV_COIL_BABY_MAG
-    QCommandLineOption outputOption("fileOut", "The output file <out>.", "out", "makeLayout_default.lout");
-    QCommandLineOption mirrorxOption("mirrorX", "Mirror final layout along x-axis <mirrorX>.", "mirrorX", "0");
-    QCommandLineOption mirroryOption("mirrorY", "Mirror final layout along <-axis <mirrorY>.", "mirrorY", "0");
-
-    parser.addOption(inputOption);
-    parser.addOption(outputOption);
-    parser.addOption(chKindOption);
-    parser.addOption(mirrorxOption);
-    parser.addOption(mirroryOption);
-    parser.process(a);
-
-    //Read 3D locations
-    if (!parser.value(inputOption).contains(".fif") && !parser.value(inputOption).contains(".elc")) {
-        qDebug() << "MakeLayout::Main - Input file type not supported";
-        return 0;
+    // 3012 = FIFFV_COIL_VV_PLANAR_T1: the coil type, unlike the kind, tells sensor layers apart
+    std::map<std::string, std::string, std::less<>> options{
+        {"--fileIn", (std::filesystem::path(argv[0]).parent_path() / "../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif").string()},
+        {"--fileOut", "makeLayout_default.lout"},
+        {"--coilType", "3012"},
+        {"--mirrorX", "0"},
+        {"--mirrorY", "0"}};
+    for (int i = 1; i < argc; ++i) {
+        const auto option = options.find(std::string_view(argv[i]));
+        if (option == options.end() || i + 1 == argc) {
+            std::println(stderr, "Usage: {} [--fileIn <fif|elc>] [--fileOut <lout>] [--coilType <type>] [--mirrorX 0|1] [--mirrorY 0|1]", argv[0]);
+            return EXIT_FAILURE;
+        }
+        option->second = argv[++i];
     }
 
-    QList<QVector<float>> inputPoints;
-    QList<QVector<float>> outputPoints;
-    QList<QVector<float>> channel2DData;
-    QStringList names;
+    const std::filesystem::path input = pathFromUtf8(options["--fileIn"]);
+    const std::string extension = toLower(input.extension().string());
+    std::vector<Vector3d> positions;
+    StringList names;
 
-    if (parser.value(inputOption).contains(".fif")) {
-        FiffRawData raw(parser.value(inputOption).toStdString());
-        FiffInfo fiffInfo = raw.info;
-
-        int chKind = parser.value(chKindOption).toInt();
-
-        for (int i = 0; i < static_cast<int>(fiffInfo.ch_names.size()); i++) {
-            int type = fiffInfo.chs.at(i).chpos.coil_type;
-
-            if (type == chKind) {
-                QVector<float> temp;
-                float x = fiffInfo.chs.at(i).chpos.r0[0] * 100.0f;
-                float y = fiffInfo.chs.at(i).chpos.r0[1] * 100.0f;
-                float z = fiffInfo.chs.at(i).chpos.r0[2] * 100.0f;
-
-                temp.append(x);
-                temp.append(y);
-                temp.append(-z);
-                inputPoints.append(temp);
-
-                qDebug() << x << " " << y << " " << z;
-
-                names << QString::fromStdString(fiffInfo.ch_names.at(i));
+    if (extension == ".fif") {
+        const FiffRawData raw(input);
+        const int coilType = toInt(options["--coilType"]).value_or(3012);
+        for (std::size_t i = 0; i < raw.info.ch_names.size(); ++i) {
+            const auto& position = raw.info.chs[i].chpos;
+            if (position.coil_type == coilType) {
+                // z flipped so the projection looks onto the top of the head
+                positions.emplace_back(position.r0[0], position.r0[1], -position.r0[2]);
+                names.push_back(raw.info.ch_names[i]);
             }
         }
-    }
-
-    if (parser.value(inputOption).contains(".elc")) {
-        QString unit;
-
-        LayoutLoader::readAsaElcFile(parser.value(inputOption), names, inputPoints, channel2DData, unit);
-    }
-
-    qDebug() << "Read the following 3D coordinates from file:";
-    qDebug() << names;
-    qDebug() << inputPoints;
-
-    // convert 3D points to layout and write to file
-    if (inputPoints.size() > 0) {
-        float prad = 60.0;
-        float width = 5.0;
-        float height = 4.0;
-
-        QFile out(parser.value(outputOption));
-
-        int numberTries = 0;
-        while (numberTries < 10) {
-            if (!LayoutMaker::makeLayout(inputPoints,
-                                         outputPoints,
-                                         names,
-                                         out,
-                                         true,
-                                         prad,
-                                         width,
-                                         height,
-                                         true,
-                                         (bool)parser.value(mirrorxOption).toInt(),
-                                         (bool)parser.value(mirrorxOption).toInt())) {
-                numberTries++;
-            } else {
-                numberTries = 11;
-            }
+    } else if (extension == ".elc") {
+        if (const auto cap = LayoutLoader::read_elc(input)) {
+            positions = cap->positions_3d;
+            names = cap->names;
         }
+    } else {
+        std::println(stderr, "Input file type not supported: {}", input.string());
+        return EXIT_FAILURE;
     }
+    std::println("Read {} sensor positions", positions.size());
 
-    return 0;
+    const LayoutOptions layoutOptions{.radius = 60.0,
+                                      .box_width = 5.0,
+                                      .box_height = 4.0,
+                                      .mirror_x = options["--mirrorX"] == "1",
+                                      .mirror_y = options["--mirrorY"] == "1"};
+    const auto corners = LayoutMaker::make_layout(positions, layoutOptions);
+    if (!corners || !LayoutMaker::write_lout(pathFromUtf8(options["--fileOut"]), *corners, names, layoutOptions)) {
+        std::println(stderr, "Could not make the layout");
+        return EXIT_FAILURE;
+    }
+    std::println("Wrote {}", options["--fileOut"]);
+    return EXIT_SUCCESS;
 }
 ````
 

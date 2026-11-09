@@ -15,80 +15,54 @@ sidebar_position: 27
 class CHANNELSLIB::LayoutLoader
 ```
 
-Reads ANT .elc files, which contain the electrode positions of an EEG cap.
+Reads ANT/ASA .elc files, which hold the electrode positions of an EEG cap.
 
-Reads ANT .elc electrode files into Qt/STL containers.
+Reads ANT/ASA .elc electrode files.
 
 ```cpp title="src/examples/ex_channels/main.cpp"
 // ANT .elc electrode file: names, 3-D positions and their unit
-QStringList capNames;
-QList<QVector<float>> cap3D;
-QList<QVector<float>> cap2D;
-QString capUnit;
-LayoutLoader::readAsaElcFile(capFile.fileName(), capNames, cap3D, cap2D, capUnit);
+const std::optional<ElectrodeLayout> cap = LayoutLoader::read_elc(dir / "cap.elc");
 ```
 
 ---
 
 ## Static Methods
 
-### readAsaElcFile(path, channelNames, location3D, location2D, unit)
+### read_elc(path)
 
-Reads the specified ANT elc-layout file.
+Reads an .elc file.
 
 **Parameters:**
 
-- **path** : *const QString &*
-  holds the file path of the elc file which is to be read.
-
-- **channelNames** : *QStringList &*
-  Receives the channel names.
-
-- **location3D** : *QList&lt; QVector&lt; float &gt; &gt; &*
-  holds the vector to which the read 3D positions are stored.
-
-- **location2D** : *QList&lt; QVector&lt; float &gt; &gt; &*
-  holds the vector to which the read 2D positions are stored.
-
-- **unit** : *QString &*
-  Receives the unit of the positions.
+- **path** : *const std::filesystem::path &*
+  The .elc file.
 
 **Returns:**
 
-- *bool* — true if reading was successful, false otherwise.
+- *std::optional&lt; [ElectrodeLayout](/docs/api/channels/electrode-layout) &gt;* — The electrodes, or no value if the file has no .elc extension, cannot be opened or is malformed.
 
 ---
 
-### readAsaElcFile(path, channelNames, location3D, location2D, unit)
+### parse_elc(text)
 
-Reads the specified ANT elc-layout file.
+Parses the text of an .elc file.
+
+Position lines are `"name : x y z"` or plain `"x y z"`; the names of a Labels block take precedence. Lines starting with `#` are comments.
 
 **Parameters:**
 
-- **path** : *const std::string &*
-  holds the file path of the elc file which is to be read.
-
-- **channelNames** : *std::vector&lt; std::string &gt; &*
-  Receives the channel names.
-
-- **location3D** : *std::vector&lt; std::vector&lt; float &gt; &gt; &*
-  holds the vector to which the read 3D positions are stored.
-
-- **location2D** : *std::vector&lt; std::vector&lt; float &gt; &gt; &*
-  holds the vector to which the read 2D positions are stored.
-
-- **unit** : *std::string &*
-  Receives the unit of the positions.
+- **text** : *std::string_view*
+  The file contents.
 
 **Returns:**
 
-- *bool* — true if reading was successful, false otherwise.
+- *std::optional&lt; [ElectrodeLayout](/docs/api/channels/electrode-layout) &gt;* — The electrodes, or no value if there are none or names and positions do not pair up.
 
 ---
 
 ## Example
 
-- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Utilities library: montages, layouts and selections.
+- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Channels library: montages, layouts and selections.
 - Full source: [`src/examples/ex_channels/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_channels/main.cpp)
 - Build target: `ex_channels` (runs under CTest)
 
@@ -96,14 +70,13 @@ Reads the specified ANT elc-layout file.
 
 ### [ex_channels](../../examples/channels/ex_channels.mdx)
 
-Utilities library: montages, layouts and selections.
+Channels library: montages, layouts and selections.
 
-````cpp title="src/examples/ex_channels/main.cpp, line 131"
-QList<QVector<float>> cap3D;
-QList<QVector<float>> cap2D;
-QString capUnit;
-LayoutLoader::readAsaElcFile(capFile.fileName(), capNames, cap3D, cap2D, capUnit);
-ok &= expect(capNames == QStringList({"Fp1", "Cz"}) && capUnit == "mm" && cap3D.size() == 2 && cap3D[1] == QVector<float>({0.0f, 0.0f, 87.0f}),
+````cpp title="src/examples/ex_channels/main.cpp, line 117"
+                                  "Labels\nFp1\tCz\n";
+// ANT .elc electrode file: names, 3-D positions and their unit
+const std::optional<ElectrodeLayout> cap = LayoutLoader::read_elc(dir / "cap.elc");
+ok &= expect(cap && cap->names == StringList({"Fp1", "Cz"}) && cap->unit == "mm" && cap->positions_3d.size() == 2 && cap->positions_3d[1] == Vector3d(0.0, 0.0, 87.0),
              "LayoutLoader reads the electrode names, positions and unit of an .elc file");
 ````
 
@@ -111,9 +84,16 @@ ok &= expect(capNames == QStringList({"Fp1", "Cz"}) && capUnit == "mm" && cap3D.
 
 Project the 3D sensor positions of a FIFF file onto a 2D channel layout.
 
-````cpp title="src/examples/ex_make_layout/main.cpp, line 123"
-    LayoutLoader::readAsaElcFile(parser.value(inputOption), names, inputPoints, channel2DData, unit);
+````cpp title="src/examples/ex_make_layout/main.cpp, line 91"
+    if (const auto cap = LayoutLoader::read_elc(input)) {
+        positions = cap->positions_3d;
+        names = cap->names;
+    }
+} else {
+    std::println(stderr, "Input file type not supported: {}", input.string());
+    return EXIT_FAILURE;
 }
+std::println("Read {} sensor positions", positions.size());
 ````
 
 ## Authors of this file

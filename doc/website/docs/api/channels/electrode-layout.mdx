@@ -1,0 +1,52 @@
+---
+id: electrode-layout
+title: "CHANNELSLIB::ElectrodeLayout"
+sidebar_label: ElectrodeLayout
+sidebar_position: 58
+---
+
+# ElectrodeLayout
+
+**Namespace:** `CHANNELSLIB` &nbsp;·&nbsp; **Library:** Channels Library &nbsp;·&nbsp; **Source:** [`channels/layoutloader.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/channels/layoutloader.h)
+
+`#include <channels/layoutloader.h>`
+
+```cpp
+struct CHANNELSLIB::ElectrodeLayout
+```
+
+The electrodes of an .elc file, in file order.
+
+```cpp title="src/examples/ex_channels/main.cpp"
+// ANT .elc electrode file: names, 3-D positions and their unit
+const std::optional<ElectrodeLayout> cap = LayoutLoader::read_elc(dir / "cap.elc");
+```
+
+---
+
+## Example
+
+- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Channels library: montages, layouts and selections.
+- Full source: [`src/examples/ex_channels/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_channels/main.cpp)
+- Build target: `ex_channels` (runs under CTest)
+
+## Used in examples
+
+### [ex_channels](../../examples/channels/ex_channels.mdx)
+
+Channels library: montages, layouts and selections.
+
+````cpp title="src/examples/ex_channels/main.cpp, line 117"
+                                  "Labels\nFp1\tCz\n";
+// ANT .elc electrode file: names, 3-D positions and their unit
+const std::optional<ElectrodeLayout> cap = LayoutLoader::read_elc(dir / "cap.elc");
+ok &= expect(cap && cap->names == StringList({"Fp1", "Cz"}) && cap->unit == "mm" && cap->positions_3d.size() == 2 && cap->positions_3d[1] == Vector3d(0.0, 0.0, 87.0),
+             "LayoutLoader reads the electrode names, positions and unit of an .elc file");
+````
+
+## Authors of this file
+
+- Lorenz Esch &lt;lorenz.esch@tu-ilmenau.de&gt;
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;
+- Juan GPC &lt;jgarciaprieto@mgh.harvard.edu&gt;
+- Gabriel Motta &lt;gabrielbenmotta@gmail.com&gt;

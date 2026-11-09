@@ -246,7 +246,7 @@
     {
       "name": "ex_channels",
       "title": "Montages, layouts and selections",
-      "brief": "Utilities library: montages, layouts and selections",
+      "brief": "Channels library: montages, layouts and selections",
       "thumbnail": "",
       "url": "/docs/examples/channels/ex_channels/",
       "library": "channels",

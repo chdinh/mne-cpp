@@ -15,120 +15,73 @@ sidebar_position: 28
 class CHANNELSLIB::LayoutMaker
 ```
 
-Make layout files from given 3D points.
+Makes 2-D channel layouts from 3-D sensor positions.
 
-Make layout files from given 3D points.
+Makes 2-D channel layouts from 3-D sensor positions.
 
 ```cpp title="src/examples/ex_channels/main.cpp"
 // Azimuthal equidistant projection around the fitted sphere: Cz lands near the centre, the nose points up
-QList<QVector<float>> points3d;
-QStringList names;
+std::vector<Vector3d> positions;
+StringList names;
 for (const ElectrodePosition& electrode : montage1020) {
-    points3d.append({static_cast<float>(electrode.pos.x()), static_cast<float>(electrode.pos.y()), static_cast<float>(electrode.pos.z())});
-    names.append(electrode.name);
+    positions.push_back(electrode.pos);
+    names.push_back(electrode.name);
 }
-QList<QVector<float>> layout2d;
-QFile layoutFile(dir.filePath("1020.lout"));
-LayoutMaker::makeLayout(points3d, layout2d, names, layoutFile, true, 20.0f, 5.0f, 4.0f, true);
+const LayoutOptions options{.radius = 20.0, .box_width = 5.0, .box_height = 4.0};
+const auto layout = LayoutMaker::make_layout(positions, options);
+if (layout)
+    LayoutMaker::write_lout(dir / "1020.lout", *layout, names, options);
 ```
 
 ---
 
 ## Static Methods
 
-### makeLayout(inputPoints, outputPoints, names, outFile, do_fit, prad, w, h, writeFile, mirrorXAxis, mirrorYAxis)
+### make_layout(positions, options)
 
-Reads the specified ANT elc-layout file.
+Projects 3-D positions onto the plane.
 
 **Parameters:**
 
-- **inputPoints** : *const QList&lt; QVector&lt; float &gt; &gt; &*
-  The input points in 3D space.
+- **positions** : *std::span&lt; const Eigen::Vector3d &gt;*
+  The sensor positions.
 
-- **outputPoints** : *QList&lt; QVector&lt; float &gt; &gt; &*
-  The output layout points in 2D space.
-
-- **names** : *const QStringList &*
-  The channel names.
-
-- **outFile** : *QFile &*
-  The outout file.
-
-- **do_fit** : *bool*
-  The flag whether to do a sphere fitting.
-
-- **prad** : *float*
-  Radius of the projection disk in layout units.
-
-- **w** : *float*
-  Width of each channel box in layout units.
-
-- **h** : *float*
-  Height of each channel box in layout units.
-
-- **writeFile** : *bool*
-  The flag whether to write to file.
-
-- **mirrorXAxis** : *bool*
-  Mirror points at x axis.
-
-- **mirrorYAxis** : *bool*
-  Mirror points at y axis.
+- **options** : *const [LayoutOptions](/docs/api/channels/layout-options) &*
+  Projection and box size.
 
 **Returns:**
 
-- *bool* — true if making layout was successful, false otherwise.
+- *std::optional&lt; std::vector&lt; Eigen::Vector2d &gt; &gt;* — The lower-left corner of each channel box, or no value if there are no positions or all coincide.
 
 ---
 
-### makeLayout(inputPoints, outputPoints, names, outFilePath, do_fit, prad, w, h, writeFile, mirrorXAxis, mirrorYAxis)
+### write_lout(path, corners, names, options)
 
-Reads the specified ANT elc-layout file.
+Writes channel boxes as an MNE-C .lout file.
 
 **Parameters:**
 
-- **inputPoints** : *const std::vector&lt; std::vector&lt; float &gt; &gt; &*
-  The input points in 3D space.
+- **path** : *const std::filesystem::path &*
+  The output file.
 
-- **outputPoints** : *std::vector&lt; std::vector&lt; float &gt; &gt; &*
-  The output layout points in 2D space.
+- **corners** : *std::span&lt; const Eigen::Vector2d &gt;*
+  The lower-left corner of each box, as returned by `make_layout()`.
 
-- **names** : *const std::vector&lt; std::string &gt; &*
-  The channel names.
+- **names** : *const BASELIB::StringList &*
+  The channel names; boxes without a name are written unnamed.
 
-- **outFilePath** : *const std::string &*
-  The outout file.
-
-- **do_fit** : *bool*
-  The flag whether to do a sphere fitting.
-
-- **prad** : *float*
-  Radius of the projection disk in layout units.
-
-- **w** : *float*
-  Width of each channel box in layout units.
-
-- **h** : *float*
-  Height of each channel box in layout units.
-
-- **writeFile** : *bool*
-  The flag whether to write to file.
-
-- **mirrorXAxis** : *bool*
-  Mirror points at x axis.
-
-- **mirrorYAxis** : *bool*
-  Mirror points at y axis.
+- **options** : *const [LayoutOptions](/docs/api/channels/layout-options) &*
+  The box size.
 
 **Returns:**
 
-- *bool* — true if making layout was successful, false otherwise.
+- *bool* — Whether the file was written.
 
 ---
 
 ## Example
 
-- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Utilities library: montages, layouts and selections.
+- Start here: [ex_channels](../../examples/channels/ex_channels.mdx) — Channels library: montages, layouts and selections.
 - Full source: [`src/examples/ex_channels/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_channels/main.cpp)
 - Build target: `ex_channels` (runs under CTest)
 
@@ -136,42 +89,40 @@ Reads the specified ANT elc-layout file.
 
 ### [ex_channels](../../examples/channels/ex_channels.mdx)
 
-Utilities library: montages, layouts and selections.
+Channels library: montages, layouts and selections.
 
-````cpp title="src/examples/ex_channels/main.cpp, line 109"
-QList<QVector<float>> layout2d;
-QFile layoutFile(dir.filePath("1020.lout"));
-LayoutMaker::makeLayout(points3d, layout2d, names, layoutFile, true, 20.0f, 5.0f, 4.0f, true);
-const int iCz = names.indexOf("Cz");
-const int iFp1 = names.indexOf("Fp1");
-const int iO1 = names.indexOf("O1");
-const int iT8 = names.indexOf("T8");
-// Box corners: the box of an electrode at (x, y) starts at (x - w/2, y - h/2)
-const float czX = layout2d[iCz][0] + 2.5f;
-const float czY = layout2d[iCz][1] + 2.0f;
-ok &= expect(layout2d.size() == names.size() && std::hypot(czX, czY) < 1.0f && layout2d[iFp1][1] > layout2d[iCz][1] && layout2d[iO1][1] < layout2d[iCz][1] && layout2d[iFp1][0] < layout2d[iCz][0] && layout2d[iT8][0] > layout2d[iCz][0],
-             std::format("LayoutMaker: Cz at ({:g}, {:g}), Fp1 front-left, O1 back, T8 right", czX, czY));
+````cpp title="src/examples/ex_channels/main.cpp, line 99"
+const LayoutOptions options{.radius = 20.0, .box_width = 5.0, .box_height = 4.0};
+const auto layout = LayoutMaker::make_layout(positions, options);
+if (layout)
+    LayoutMaker::write_lout(dir / "1020.lout", *layout, names, options);
+if (layout) {
+    const auto box = [&](std::string_view name) {
+        return (*layout)[static_cast<std::size_t>(indexOf(names, name))];
+    };
+    // Box corners: the box of an electrode at (x, y) starts at (x - w/2, y - h/2)
+    const Vector2d czCentre = box("Cz") + Vector2d(2.5, 2.0);
+    ok &= expect(czCentre.norm() < 1.0 && box("Fp1").y() > box("Cz").y() && box("O1").y() < box("Cz").y() && box("Fp1").x() < box("Cz").x() && box("T8").x() > box("Cz").x(),
+                 std::format("LayoutMaker: Cz at ({:g}, {:g}), Fp1 front-left, O1 back, T8 right", czCentre.x(), czCentre.y()));
+} else {
 ````
 
 ### [ex_make_layout](../../examples/fiff/ex_make_layout.mdx)
 
 Project the 3D sensor positions of a FIFF file onto a 2D channel layout.
 
-````cpp title="src/examples/ex_make_layout/main.cpp, line 140"
-if (!LayoutMaker::makeLayout(inputPoints,
-                             outputPoints,
-                             names,
-                             out,
-                             true,
-                             prad,
-                             width,
-                             height,
-                             true,
-                             (bool)parser.value(mirrorxOption).toInt(),
-                             (bool)parser.value(mirrorxOption).toInt())) {
-    numberTries++;
-} else {
-    numberTries = 11;
+````cpp title="src/examples/ex_make_layout/main.cpp, line 103"
+                                      .box_height = 4.0,
+                                      .mirror_x = options["--mirrorX"] == "1",
+                                      .mirror_y = options["--mirrorY"] == "1"};
+    const auto corners = LayoutMaker::make_layout(positions, layoutOptions);
+    if (!corners || !LayoutMaker::write_lout(pathFromUtf8(options["--fileOut"]), *corners, names, layoutOptions)) {
+        std::println(stderr, "Could not make the layout");
+        return EXIT_FAILURE;
+    }
+    std::println("Wrote {}", options["--fileOut"]);
+    return EXIT_SUCCESS;
+}
 ````
 
 ## Authors of this file

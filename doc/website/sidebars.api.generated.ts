@@ -502,7 +502,10 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/channels/layout-loader',
         'api/channels/layout-maker',
         'api/channels/selection-io',
-        'api/channels/electrode-position'
+        'api/channels/electrode-position',
+        'api/channels/electrode-layout',
+        'api/channels/layout-options',
+        'api/channels/channel-selection'
       ],
     },
     {
