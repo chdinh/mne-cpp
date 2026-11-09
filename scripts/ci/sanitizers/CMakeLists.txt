@@ -23,7 +23,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Test)
 get_filename_component(MNE_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../../.." ABSOLUTE)
 find_package(Eigen3 REQUIRED NO_MODULE PATHS "${MNE_ROOT}/src/external/eigen")
 add_subdirectory("${MNE_ROOT}/src/libraries/acq" acq)
-foreach(_lib math utils fiff bids acq/fiff lsl acq/lsl)
+foreach(_lib base math utils fiff bids acq/fiff lsl acq/lsl)
     add_subdirectory("${MNE_ROOT}/src/libraries/${_lib}" "lib_${_lib}")
 endforeach()
 
