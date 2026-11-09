@@ -30,7 +30,6 @@ set(MNE_LIBS_REQUIRED
   mne_disp3D
   mne_ieeg
   mne_fiff
-  mne_utils
   mne_base
   mne_math
 )

@@ -47,15 +47,14 @@ int main()
     static_cast<void>(reader->release(*view));
     device->close();
 
-    const auto sos = UTILSLIB::IirFilter::designButterworth(4, UTILSLIB::IirFilter::LowPass, 30.0, 0.0, info->sfreq);
-    const Eigen::MatrixXd filtered = UTILSLIB::IirFilter::applyZeroPhaseMatrix(data, sos);
+    const auto sos = DSPLIB::IirFilter::designButterworth(4, DSPLIB::IirFilter::LowPass, 30.0, 0.0, info->sfreq);
+    const Eigen::MatrixXd filtered = DSPLIB::IirFilter::applyZeroPhaseMatrix(data, sos);
 
     FIFFLIB::FiffInfo fiffInfo;
     fiffInfo.sfreq = static_cast<float>(info->sfreq);
     fiffInfo.nchan = static_cast<int>(info->channels.size());
 
-    const bool ok = filtered.allFinite() && filtered.rows() == data.rows() && fiffInfo.nchan == 5
-                    && filtered.row(0).cwiseAbs().maxCoeff() > 0.0;
+    const bool ok = filtered.allFinite() && filtered.rows() == data.rows() && fiffInfo.nchan == 5 && filtered.row(0).cwiseAbs().maxCoeff() > 0.0;
     std::printf("%s: %d channels at %g Hz, peak %g after a 30 Hz low-pass\n", ok ? "OK" : "FAILED", fiffInfo.nchan,
                 static_cast<double>(fiffInfo.sfreq), filtered.row(0).cwiseAbs().maxCoeff());
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

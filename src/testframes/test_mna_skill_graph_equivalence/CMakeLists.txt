@@ -61,8 +61,8 @@ mne_add_test(${PROJECT_NAME}
 # Ensure runtime can find the shared libs we link against.
 if(APPLE)
     set_tests_properties(${PROJECT_NAME} PROPERTIES ENVIRONMENT
-        "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:mne_analyze_studio_core>:$<TARGET_FILE_DIR:mne_analyze_studio_temporal_filter_skill>:$<TARGET_FILE_DIR:mne_analyze_studio_source_estimation_skill>:$<TARGET_FILE_DIR:mne_inv>:$<TARGET_FILE_DIR:mne_mne>:$<TARGET_FILE_DIR:mne_fiff>:$<TARGET_FILE_DIR:mne_utils>")
+        "DYLD_LIBRARY_PATH=$<TARGET_FILE_DIR:mne_analyze_studio_core>:$<TARGET_FILE_DIR:mne_analyze_studio_temporal_filter_skill>:$<TARGET_FILE_DIR:mne_analyze_studio_source_estimation_skill>:$<TARGET_FILE_DIR:mne_inv>:$<TARGET_FILE_DIR:mne_mne>:$<TARGET_FILE_DIR:mne_fiff>:$<TARGET_FILE_DIR:mne_base>")
 elseif(UNIX)
     set_tests_properties(${PROJECT_NAME} PROPERTIES ENVIRONMENT
-        "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:mne_analyze_studio_core>:$<TARGET_FILE_DIR:mne_analyze_studio_temporal_filter_skill>:$<TARGET_FILE_DIR:mne_analyze_studio_source_estimation_skill>:$<TARGET_FILE_DIR:mne_inv>:$<TARGET_FILE_DIR:mne_mne>:$<TARGET_FILE_DIR:mne_fiff>:$<TARGET_FILE_DIR:mne_utils>")
+        "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:mne_analyze_studio_core>:$<TARGET_FILE_DIR:mne_analyze_studio_temporal_filter_skill>:$<TARGET_FILE_DIR:mne_analyze_studio_source_estimation_skill>:$<TARGET_FILE_DIR:mne_inv>:$<TARGET_FILE_DIR:mne_mne>:$<TARGET_FILE_DIR:mne_fiff>:$<TARGET_FILE_DIR:mne_base>")
 endif()

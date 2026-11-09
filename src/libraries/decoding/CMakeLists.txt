@@ -37,7 +37,7 @@ mne_warn_on_narrowing(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 
-set(MNE_LIBS_REQUIRED mne_utils mne_base)
+set(MNE_LIBS_REQUIRED mne_base)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${MNE_LIBS_REQUIRED}

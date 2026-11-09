@@ -234,13 +234,6 @@
       "modules": [
         "Core"
       ]
-    },
-    "utils": {
-      "tokens": 0,
-      "public_header_includes": 0,
-      "modules": [
-        "Core"
-      ]
     }
   }
 }

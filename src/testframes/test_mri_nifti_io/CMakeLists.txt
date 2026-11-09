@@ -37,7 +37,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     ${QT_REQUIRED_COMPONENT_LIBS}
     mne_mri
     mne_fiff
-    mne_utils
     mne_base
     mne_math
     Eigen3::Eigen

@@ -28,7 +28,6 @@ set(MNE_LIBS_REQUIRED
     mne_mri
     mne_disp
     mne_inv
-    mne_utils
     mne_base
     mne_math
     mne_connectivity

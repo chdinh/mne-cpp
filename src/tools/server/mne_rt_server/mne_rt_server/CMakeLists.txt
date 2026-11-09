@@ -48,7 +48,6 @@ set(MNE_LIBS_REQUIRED
     mne_connectivity
     mne_com
     mne_fiff
-    mne_utils
     mne_base
     mne_math
 )

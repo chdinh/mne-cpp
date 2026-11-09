@@ -46,6 +46,5 @@ target_link_libraries(mne_analyze_studio_mna_skills PUBLIC
     ${QT_REQUIRED_COMPONENT_LIBS}
     mne_analyze_studio_core
     mne_mna
-    mne_utils
     mne_base
 )

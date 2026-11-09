@@ -30,7 +30,6 @@ set(MNE_LIBS_REQUIRED
     mne_fiff
     mne_mne
     mne_fs
-    mne_utils
     mne_base
     mne_math
 )

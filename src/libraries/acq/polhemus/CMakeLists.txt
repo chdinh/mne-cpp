@@ -38,7 +38,6 @@ target_link_libraries(${PROJECT_NAME}
     Qt${QT_VERSION_MAJOR}::SerialPort
   PRIVATE
     Eigen3::Eigen
-    mne_utils
     mne_base)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_ACQ_POLHEMUS_LIBRARY)

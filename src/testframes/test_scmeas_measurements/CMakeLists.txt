@@ -47,7 +47,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     scMeas
     scDisp
     mne_fiff
-    mne_utils
     mne_base
     mne_math
     mne_disp

@@ -19,9 +19,8 @@
     },
     {
       "name": "support",
-      "description": "Cross-cutting helpers used by everything above: the Python bridge and HTML reports.",
+      "description": "Cross-cutting services used by everything above: the Python bridge and HTML reports.",
       "libraries": [
-        "mne_utils",
         "mne_pybridge",
         "mne_report"
       ]

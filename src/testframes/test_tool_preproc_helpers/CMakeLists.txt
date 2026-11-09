@@ -30,7 +30,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
     mne_fiff
     mne_mne
-    mne_utils
     mne_base
     mne_math
     Eigen3::Eigen

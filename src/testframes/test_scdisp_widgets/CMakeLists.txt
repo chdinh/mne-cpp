@@ -32,7 +32,6 @@ set(MNE_LIBS_REQUIRED
     scMeas
     scDisp
     mne_fiff
-    mne_utils
     mne_base
     mne_math
 )

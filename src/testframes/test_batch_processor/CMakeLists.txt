@@ -33,7 +33,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
     mne_mne
     mne_fiff
-    mne_utils
     mne_base
     mne_math
     mne_events

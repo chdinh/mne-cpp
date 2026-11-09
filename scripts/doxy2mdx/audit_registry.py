@@ -142,7 +142,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.apply:
         module_of_ns = {mod.get("namespace"): key for key, mod in registry["modules"].items()}
         registered = {entry["name"] for entry in registry["classes"]}
-        # Several namespaces span directories (UTILSLIB covers dsp/ and math/); siblings in the header decide.
+        # Several namespaces span directories (e.g. FIFFLIB is declared in fiff/ and in mne/); siblings in the header decide.
         module_of_header = {entry["header"]: entry["module"] for entry in registry["classes"]}
         last = defaultdict(int)
         for entry in registry["classes"]:

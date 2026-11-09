@@ -49,7 +49,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mne_disp
     mne_mne
     mne_fiff
-    mne_utils
     mne_base
     mne_math
     Eigen3::Eigen

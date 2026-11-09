@@ -11,7 +11,7 @@ The `mne_ml` library (`MLLIB` namespace) provides machine learning infrastructur
 target_link_libraries(my_app PRIVATE mne_ml)
 ```
 
-Dependencies: `mne_utils`, `mne_math`, Qt6::Core, Eigen3. Optional: ONNX Runtime (enabled via `USE_ONNXRUNTIME=ON`).
+Dependencies: `mne_base`, `mne_math`, `mne_pybridge` (except on WebAssembly), Qt6::Core, Eigen3. Optional: ONNX Runtime (enabled via `USE_ONNXRUNTIME=ON`).
 
 ## Class Inventory
 

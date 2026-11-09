@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 478,
-    "exported_free_functions": 176,
+    "exported_free_functions": 173,
     "registered_classes": 574,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
@@ -1108,21 +1108,6 @@
       "name": "buildHashLong",
       "header": "sts/sts_global.h",
       "library": "sts"
-    },
-    {
-      "name": "buildDateTime",
-      "header": "utils/utils_global.h",
-      "library": "utils"
-    },
-    {
-      "name": "buildHash",
-      "header": "utils/utils_global.h",
-      "library": "utils"
-    },
-    {
-      "name": "buildHashLong",
-      "header": "utils/utils_global.h",
-      "library": "utils"
     }
   ],
   "classes": [
@@ -6608,7 +6593,7 @@
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage",
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/artifact-detect.mdx",
+      "api_page": "doc/website/docs/api/dsp/artifact-detect.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6634,7 +6619,7 @@
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage",
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/artifact-detect-ecg-params.mdx",
+      "api_page": "doc/website/docs/api/dsp/artifact-detect-ecg-params.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6660,7 +6645,7 @@
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage",
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/artifact-detect-eog-params.mdx",
+      "api_page": "doc/website/docs/api/dsp/artifact-detect-eog-params.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6686,7 +6671,7 @@
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage",
         "ex_dsp_artifacts/main.cpp#artifact_detect_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/artifact-detect-proj-params.mdx",
+      "api_page": "doc/website/docs/api/dsp/artifact-detect-proj-params.mdx",
       "python_equiv": "mne.preprocessing.compute_proj_ecg",
       "example_eligible": true,
       "exempt_reason": null
@@ -6710,7 +6695,7 @@
         "ex_dsp_artifacts/main.cpp#bad_channel_detect_usage",
         "ex_dsp_artifacts/main.cpp#bad_channel_detect_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/bad-channel-detect.mdx",
+      "api_page": "doc/website/docs/api/dsp/bad-channel-detect.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6734,7 +6719,7 @@
         "ex_dsp_artifacts/main.cpp#bad_channel_detect_usage",
         "ex_dsp_artifacts/main.cpp#bad_channel_detect_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/bad-channel-detect-params.mdx",
+      "api_page": "doc/website/docs/api/dsp/bad-channel-detect-params.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6929,7 +6914,7 @@
         "ex_dsp_preprocessing/main.cpp#channel_derivation_usage",
         "ex_dsp_preprocessing/main.cpp#channel_derivation_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/channel-derivation.mdx",
+      "api_page": "doc/website/docs/api/dsp/channel-derivation.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6953,7 +6938,7 @@
         "ex_dsp_preprocessing/main.cpp#channel_derivation_usage",
         "ex_dsp_preprocessing/main.cpp#channel_derivation_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/derivation-rule.mdx",
+      "api_page": "doc/website/docs/api/dsp/derivation-rule.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -6999,7 +6984,7 @@
       "snippets": [
         "ex_dsp_filter/main.cpp#cosine_filter_design"
       ],
-      "api_page": "doc/website/docs/api/utils/cosine-filter.mdx",
+      "api_page": "doc/website/docs/api/dsp/cosine-filter.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7023,7 +7008,7 @@
         "ex_dsp_spectral/main.cpp#csd_compute",
         "ex_dsp_spectral/main.cpp#csd_compute"
       ],
-      "api_page": "doc/website/docs/api/utils/csd.mdx",
+      "api_page": "doc/website/docs/api/dsp/csd.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7047,7 +7032,7 @@
         "ex_dsp_spectral/main.cpp#csd_compute",
         "ex_dsp_spectral/main.cpp#csd_compute"
       ],
-      "api_page": "doc/website/docs/api/utils/csd-result.mdx",
+      "api_page": "doc/website/docs/api/dsp/csd-result.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7071,7 +7056,7 @@
         "ex_dsp_spectral/main.cpp#dpss_compute",
         "ex_dsp_spectral/main.cpp#dpss_compute"
       ],
-      "api_page": "doc/website/docs/api/utils/dpss.mdx",
+      "api_page": "doc/website/docs/api/dsp/dpss.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7095,7 +7080,7 @@
         "ex_dsp_spectral/main.cpp#dpss_compute",
         "ex_dsp_spectral/main.cpp#dpss_compute"
       ],
-      "api_page": "doc/website/docs/api/utils/dpss-result.mdx",
+      "api_page": "doc/website/docs/api/dsp/dpss-result.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7165,7 +7150,7 @@
         "ex_dsp_preprocessing/main.cpp#epoch_extractor_usage",
         "ex_dsp_preprocessing/main.cpp#epoch_extractor_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/epoch-extractor.mdx",
+      "api_page": "doc/website/docs/api/dsp/epoch-extractor.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7189,7 +7174,7 @@
         "ex_dsp_preprocessing/main.cpp#epoch_extractor_usage",
         "ex_dsp_preprocessing/main.cpp#epoch_extractor_usage"
       ],
-      "api_page": "doc/website/docs/api/utils/epoch-extractor-params.mdx",
+      "api_page": "doc/website/docs/api/dsp/epoch-extractor-params.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7308,7 +7293,7 @@
       "snippets": [
         "ex_dsp_filter/main.cpp#filter_io_round_trip"
       ],
-      "api_page": "doc/website/docs/api/utils/filter-io.mdx",
+      "api_page": "doc/website/docs/api/dsp/filter-io.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7360,7 +7345,7 @@
         "ex_dsp_filter/main.cpp#filter_kernel_design",
         "ex_dsp_filter/main.cpp#filter_kernel_design"
       ],
-      "api_page": "doc/website/docs/api/utils/filter-parameter.mdx",
+      "api_page": "doc/website/docs/api/dsp/filter-parameter.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -7798,7 +7783,7 @@
       "snippets": [
         "ex_dsp_filter/main.cpp#parks_mcclellan_design"
       ],
-      "api_page": "doc/website/docs/api/utils/parks-mc-clellan.mdx",
+      "api_page": "doc/website/docs/api/dsp/parks-mc-clellan.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -8328,7 +8313,7 @@
       "snippets": [
         "ex_dsp_spectral/main.cpp#spectrogram_make"
       ],
-      "api_page": "doc/website/docs/api/utils/spectogram-input-data.mdx",
+      "api_page": "doc/website/docs/api/dsp/spectogram-input-data.mdx",
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "registry: Per-window work item of the parallel Spectrogram map-reduce; built and consumed only there."
@@ -8354,7 +8339,7 @@
       "snippets": [
         "ex_dsp_spectral/main.cpp#spectrogram_make"
       ],
-      "api_page": "doc/website/docs/api/utils/spectrogram.mdx",
+      "api_page": "doc/website/docs/api/dsp/spectrogram.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -11737,7 +11722,7 @@
       "snippets": [
         "ex_math/main.cpp#numerics_rescale"
       ],
-      "api_page": "doc/website/docs/api/utils/numerics.mdx",
+      "api_page": "doc/website/docs/api/math/numerics.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -11784,7 +11769,7 @@
       "snippets": [
         "ex_math/main.cpp#spectral_psd"
       ],
-      "api_page": "doc/website/docs/api/utils/spectral.mdx",
+      "api_page": "doc/website/docs/api/math/spectral.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
@@ -11808,7 +11793,7 @@
       "snippets": [
         "ex_math/main.cpp#spectral_psd"
       ],
-      "api_page": "doc/website/docs/api/utils/tapered-spectra-input-data.mdx",
+      "api_page": "doc/website/docs/api/math/tapered-spectra-input-data.mdx",
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "registry: Per-row work item of the parallel tapered-spectra computation in Spectral; built and consumed only there."

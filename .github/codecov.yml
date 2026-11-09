@@ -157,10 +157,6 @@ component_management:
       name: libraries/report
       paths:
         - src/libraries/report/**
-    - component_id: libraries_utils
-      name: libraries/utils
-      paths:
-        - src/libraries/utils/**
     - component_id: applications_mne_align
       name: applications/mne_align
       paths:

@@ -51,14 +51,17 @@ MNE-CPP applications — MNE Scan, MNE Analyze, MNE Anonymize, and the
 command-line tools — are built solely on these libraries, so any
 functionality available in an application can also be used
 programmatically. The libraries are organised in layers: low-level I/O
-and math utilities at the bottom, domain-specific processing in the
+and math at the bottom, domain-specific processing in the
 middle, and visualization at the top.
 
 ### Core Libraries
 
 | Library | Namespace | Purpose |
 |---------|-----------|---------|
-| [**Utils**](/docs/api/utils/) | `UTILSLIB` | Shared utilities: I/O helpers, spectral analysis, layout management, and warp algorithms |
+| [**Base**](/docs/api/base/) | `BASELIB` | Foundation of every library: logging, error results, byte streams, string and path helpers, thread pool, circular buffer |
+| [**Channels**](/docs/api/channels/) | `CHANNELSLIB` | Sensor layouts, channel selections and standard EEG montages |
+| [**Pybridge**](/docs/api/pybridge/) | `PYBRIDGELIB` | Running Python scripts and MNE-Python cross-validation from C++ |
+| [**Report**](/docs/api/report/) | `REPORTLIB` | Self-contained HTML reports of analysis results, like `mne.Report` |
 | [**Math**](/docs/api/math/) | `MATHLIB` | Mathematical algorithms and geometry: linear algebra, optimization, spectral estimation, K-Means, sphere fitting |
 | [**Fs**](/docs/api/fs/) | `FSLIB` | FreeSurfer surface and annotation I/O |
 | [**Fiff**](/docs/api/fiff/) | `FIFFLIB` | FIFF file I/O and data structures (raw, epochs, evoked, covariance, forward) |

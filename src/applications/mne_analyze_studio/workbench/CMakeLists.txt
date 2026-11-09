@@ -62,7 +62,6 @@ target_link_libraries(mne_analyze_studio_app_core PUBLIC
     mne_inv
     mne_math
     mne_mne
-    mne_utils
     mne_base
     Eigen3::Eigen
 )

@@ -19,7 +19,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Qt${QT_VERSION_MAJOR}::Core
   mne_dsp
   mne_fiff
-  mne_utils
   mne_base
   mne_connectivity
   mne_inv

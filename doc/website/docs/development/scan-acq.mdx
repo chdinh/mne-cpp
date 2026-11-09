@@ -85,7 +85,7 @@ When stopping the acquisition, both threads are interrupted by setting the `m_bI
 | Class | Location | Purpose |
 |-------|----------|---------|
 | `AbstractSensor` | `src/applications/mne_scan/libs/scShared/` | Base class for all acquisition plugins |
-| `CircularBuffer` | `src/libraries/utils/` | Lock-free ring buffer for inter-thread data transfer |
+| `CircularBuffer` | `src/libraries/base/` | Bounded blocking ring buffer for inter-thread data transfer |
 | `PluginOutputData` | `src/applications/mne_scan/libs/scShared/` | Typed output connector that passes data to downstream plugins |
 
 ## Implementing a New Acquisition Plugin

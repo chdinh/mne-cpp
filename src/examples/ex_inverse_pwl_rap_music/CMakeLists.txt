@@ -40,7 +40,6 @@ set(MNE_LIBS_REQUIRED
   mne_mne
   mne_fiff
   mne_fs
-  mne_utils
   mne_base
     mne_math
   mne_events

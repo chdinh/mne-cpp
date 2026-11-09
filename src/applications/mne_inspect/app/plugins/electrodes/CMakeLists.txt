@@ -43,7 +43,6 @@ set(MNE_LIBS_REQUIRED
     mne_ieeg
     mne_mri
     mne_fiff
-    mne_utils
     mne_base
     mne_math
 )

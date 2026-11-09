@@ -41,7 +41,7 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 # FiffInfo appears in acq_fiff.h, so its clients need mne_fiff too.
-target_link_libraries(${PROJECT_NAME} PUBLIC mne_acq mne_fiff mne_utils mne_base)
+target_link_libraries(${PROJECT_NAME} PUBLIC mne_acq mne_fiff mne_base)
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ${QT_REQUIRED_COMPONENT_LIBS}
   mne_bids

@@ -63,7 +63,6 @@ list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 target_link_libraries(${PROJECT_NAME} PUBLIC mne_fiff)
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ${QT_REQUIRED_COMPONENT_LIBS}
-  mne_utils
   mne_base
   Eigen3::Eigen)
 

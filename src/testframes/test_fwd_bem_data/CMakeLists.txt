@@ -33,7 +33,6 @@ target_link_libraries(test_fwd_bem_data PRIVATE
     mne_mne
     mne_fiff
     mne_fs
-    mne_utils
     mne_base
     mne_math
     mne_events

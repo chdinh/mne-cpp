@@ -21,7 +21,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mne_mne
     mne_fwd
     mne_inv
-    mne_utils
     mne_base
     mne_math
     Eigen3::Eigen

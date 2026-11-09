@@ -24,7 +24,7 @@
     }
   },
   "summary": {
-    "libraries": 28,
+    "libraries": 27,
     "qt_free": [
       "acq",
       "decoding",
@@ -467,16 +467,6 @@
       "public_header_includes": 0,
       "q_object": 0,
       "files": 17,
-      "modules": [
-        "Core"
-      ]
-    },
-    "utils": {
-      "tokens": 0,
-      "by_category": {},
-      "public_header_includes": 0,
-      "q_object": 0,
-      "files": 2,
       "modules": [
         "Core"
       ]

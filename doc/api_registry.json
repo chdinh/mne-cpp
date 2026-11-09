@@ -143,15 +143,6 @@
       "sidebar_position": 14,
       "namespace": "BASELIB"
     },
-    "utils": {
-      "dir": "src/libraries/utils",
-      "sidebar_label": "Utilities Library",
-      "origin": "mne-c + custom",
-      "include": "utils",
-      "dir_slug": "utils",
-      "sidebar_position": 14,
-      "namespace": "UTILSLIB"
-    },
     "channels": {
       "dir": "src/libraries/channels",
       "sidebar_label": "Channels Library",
@@ -7867,7 +7858,7 @@
     },
     {
       "name": "ArtifactDetect",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/artifact_detect.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -7882,14 +7873,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 4,
+      "sidebar_position": 67,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "BadChannelDetect",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/bad_channel_detect.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -7904,14 +7895,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 5,
+      "sidebar_position": 68,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "ChannelDerivation",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/channel_derivation.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -7926,7 +7917,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 6,
+      "sidebar_position": 69,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -7955,7 +7946,7 @@
     },
     {
       "name": "CosineFilter",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/cosinefilter.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -7970,14 +7961,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 9,
+      "sidebar_position": 70,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "Csd",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/csd.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -7992,14 +7983,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 10,
+      "sidebar_position": 71,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "Dpss",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/dpss.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8014,14 +8005,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 11,
+      "sidebar_position": 72,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "EpochExtractor",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/epoch_extractor.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8036,7 +8027,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 13,
+      "sidebar_position": 73,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8065,7 +8056,7 @@
     },
     {
       "name": "FilterIO",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/filterio.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8080,14 +8071,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 16,
+      "sidebar_position": 74,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "FilterParameter",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/filterkernel.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8102,7 +8093,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 18,
+      "sidebar_position": 75,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8397,7 +8388,7 @@
     },
     {
       "name": "Numerics",
-      "module": "utils",
+      "module": "math",
       "header": "math/numerics.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8419,7 +8410,7 @@
     },
     {
       "name": "ParksMcClellan",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/parksmcclellan.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8434,7 +8425,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 36,
+      "sidebar_position": 76,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8551,7 +8542,7 @@
     },
     {
       "name": "Spectral",
-      "module": "utils",
+      "module": "math",
       "header": "math/spectral.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8573,7 +8564,7 @@
     },
     {
       "name": "Spectrogram",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/spectrogram.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -8588,7 +8579,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 47,
+      "sidebar_position": 77,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11032,7 +11023,7 @@
     },
     {
       "name": "ArtifactDetectEcgParams",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/artifact_detect.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11047,14 +11038,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 50,
+      "sidebar_position": 78,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "ArtifactDetectEogParams",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/artifact_detect.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11069,14 +11060,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 51,
+      "sidebar_position": 79,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "ArtifactDetectProjParams",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/artifact_detect.h",
       "origin": "mne-python",
       "mne_c_tool": null,
@@ -11091,7 +11082,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 66,
+      "sidebar_position": 80,
       "guide": null,
       "python_equiv": null,
       "python_url": null,
@@ -11099,7 +11090,7 @@
     },
     {
       "name": "BadChannelDetectParams",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/bad_channel_detect.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11114,7 +11105,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 52,
+      "sidebar_position": 81,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11193,7 +11184,7 @@
     },
     {
       "name": "CsdResult",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/csd.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11208,14 +11199,14 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 53,
+      "sidebar_position": 82,
       "guide": null,
       "python_equiv": null,
       "python_url": null
     },
     {
       "name": "DerivationRule",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/channel_derivation.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11230,7 +11221,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 54,
+      "sidebar_position": 83,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11259,7 +11250,7 @@
     },
     {
       "name": "DpssResult",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/dpss.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11274,7 +11265,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 56,
+      "sidebar_position": 84,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11303,7 +11294,7 @@
     },
     {
       "name": "EpochExtractorParams",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/epoch_extractor.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11318,7 +11309,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 58,
+      "sidebar_position": 85,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11759,7 +11750,7 @@
     },
     {
       "name": "SpectogramInputData",
-      "module": "utils",
+      "module": "dsp",
       "header": "dsp/spectrogram.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,
@@ -11770,7 +11761,7 @@
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 64,
+      "sidebar_position": 86,
       "guide": null,
       "python_equiv": null,
       "python_url": null,
@@ -11804,7 +11795,7 @@
     },
     {
       "name": "TaperedSpectraInputData",
-      "module": "utils",
+      "module": "math",
       "header": "math/spectral.h",
       "origin": "mne-c + custom",
       "mne_c_tool": null,

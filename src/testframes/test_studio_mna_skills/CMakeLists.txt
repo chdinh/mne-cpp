@@ -31,7 +31,6 @@ set(MNE_LIBS_REQUIRED
     mne_analyze_studio_mna_skills
     mne_analyze_studio_core
     mne_fiff
-    mne_utils
     mne_base
     mne_math
 )

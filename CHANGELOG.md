@@ -41,10 +41,14 @@ aliases; replace the old spelling as below.
 | `ex_utils` | `ex_channels`; the other sections moved to `ex_base`, `ex_math`, `ex_pybridge`, `ex_report` and `ex_com` |
 | `UTILSLIB::KMeans`, `Linalg`, `Numerics`, `SimplexAlgorithm`, `Spectral`, `Sphere`, `Warp` (in `math/`) | `MATHLIB::...` |
 | `UTILSLIB::` and `RTPROCESSINGLIB::` names in `dsp/` (`FilterKernel`, `ICA`, `RtAveraging`, ...) | `DSPLIB::...` |
+| `mne_utils`, `utils/utils_global.h`, `UTILSLIB::buildDateTime()` | removed: link the library you use; build stamps come from each library's `<NS>::buildDateTime()` |
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
 
+- `mne_utils` is gone. Its contents moved to `mne_base`, `mne_math`,
+  `mne_channels`, `mne_pybridge`, `mne_report` and `mne_com`, so each library
+  has one purpose and one namespace.
 - `mne_base` is the new lowest library: logging, error results, byte streams,
   string and path helpers, the thread pool and the circular buffer. It depends
   on the standard library, zlib and Qt Core only, so `mne_lsl` logs through it.
