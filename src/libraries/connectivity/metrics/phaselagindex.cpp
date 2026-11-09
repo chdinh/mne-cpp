@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "phaselagindex.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -71,7 +72,7 @@ Network PhaseLagIndex::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("PLI");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "PhaseLagIndex::calculate - Input data is empty";
+        Log::debug("PhaseLagIndex::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -105,7 +106,7 @@ Network PhaseLagIndex::calculate(ConnectivitySettings& connectivitySettings)
         m_iNumberBinStart > iNFreqs ||
         m_iNumberBinAmount > iNFreqs ||
         m_iNumberBinAmount + m_iNumberBinStart > iNFreqs) {
-        qDebug() << "PhaseLagIndex::calculate - Resetting to full spectrum";
+        Log::debug("PhaseLagIndex::calculate - Resetting to full spectrum");
         AbstractMetric::m_iNumberBinStart = 0;
         AbstractMetric::m_iNumberBinAmount = iNFreqs;
     }
@@ -128,7 +129,6 @@ Network PhaseLagIndex::calculate(ConnectivitySettings& connectivitySettings)
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Compute DSWPLV in parallel for all trials
@@ -137,7 +137,6 @@ Network PhaseLagIndex::calculate(ConnectivitySettings& connectivitySettings)
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute PLI
@@ -145,7 +144,6 @@ Network PhaseLagIndex::calculate(ConnectivitySettings& connectivitySettings)
                finalNetwork);
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;
@@ -163,7 +161,6 @@ void PhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData& inputDa
                             const std::pair<MatrixXd, VectorXd>& tapers)
 {
     if (std::ssize(inputData.vecPairCsdImagSign) == iNRows) {
-        //qDebug() << "PhaseLagIndex::compute - vecPairCsdImagSign was already computed for this trial.";
         return;
     }
 

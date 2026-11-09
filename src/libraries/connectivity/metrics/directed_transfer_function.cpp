@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "directed_transfer_function.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "mvar_model.h"
@@ -27,7 +28,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -61,7 +61,7 @@ Network DirectedTransferFunction::calculate(ConnectivitySettings& connectivitySe
     Network finalNetwork("DTF");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "DirectedTransferFunction::calculate - Input data is empty";
+        UTILSLIB::Log::debug("DirectedTransferFunction::calculate - Input data is empty");
         return finalNetwork;
     }
 

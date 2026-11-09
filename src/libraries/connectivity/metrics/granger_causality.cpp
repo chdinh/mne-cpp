@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "granger_causality.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "mvar_model.h"
@@ -27,7 +28,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -61,7 +61,7 @@ Network GrangerCausality::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("GC");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "GrangerCausality::calculate - Input data is empty";
+        UTILSLIB::Log::debug("GrangerCausality::calculate - Input data is empty");
         return finalNetwork;
     }
 

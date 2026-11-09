@@ -677,9 +677,6 @@ int read_triangle_file(const std::filesystem::path& fname,
             which = WHICH_FACE_SPLIT(quad[0], quad[1]);
 #endif
             which = quad[0];
-            /*
-    qInfo("%f ",sqrt(1.9*quad[0]) + sqrt(3.5*quad[1]));
-     */
 
             if (EVEN(which)) {
                 tri(ntri, 0) = quad[0];

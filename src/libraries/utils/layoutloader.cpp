@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "layoutloader.h"
+#include <utils/logger/log.h>
 #include <algorithm>
 #include <fstream>
 
@@ -35,7 +36,6 @@
 #include <QIODevice>
 #include <QTextStream>
 #include <QFile>
-#include <QDebug>
 #include <QRegularExpression>
 
 //=============================================================================================================
@@ -60,7 +60,7 @@ bool LayoutLoader::readAsaElcFile(const QString& path,
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error opening elc file";
+        Log::debug("Error opening elc file");
         return false;
     }
 
@@ -148,7 +148,7 @@ bool LayoutLoader::readAsaElcFile(const std::string& path,
     std::ifstream inFile(path);
 
     if (!inFile.is_open()) {
-        qDebug() << "Error opening elc file";
+        Log::debug("Error opening elc file");
         return false;
     }
 

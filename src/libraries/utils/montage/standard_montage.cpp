@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "standard_montage.h"
+#include <utils/logger/log.h>
 
 #include <QFile>
 #include <QTextStream>
@@ -52,7 +53,7 @@ const QList<ElectrodePosition>& standard1005Table()
         QList<ElectrodePosition> positions;
         QFile file(QStringLiteral(":/utils/montages/standard_1005.elc"));
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            qWarning("[StandardMontage] the built-in standard_1005 table is missing");
+            Log::warning("[StandardMontage] the built-in standard_1005 table is missing");
             return positions;
         }
         QTextStream in(&file);

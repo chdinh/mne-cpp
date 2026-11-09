@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "rt_client.h"
+#include <utils/logger/log.h>
 #include "rt_cmd_client.h"
 #include "rt_data_client.h"
 
@@ -130,13 +131,10 @@ void RtClient::run()
     //    // example commands
     //    t_cmdClient["help"].send();
     //    t_cmdClient.waitForDataAvailable(1000);
-    //    qDebug() << t_cmdClient.readAvailableData();
     //    t_cmdClient["clist"].send();
     //    t_cmdClient.waitForDataAvailable(1000);
-    //    qDebug() << t_cmdClient.readAvailableData();
     //    t_cmdClient["conlist"].send();
     //    t_cmdClient.waitForDataAvailable(1000);
-    //    qDebug() << t_cmdClient.readAvailableData();
 
     // read meas info
     t_cmdClient["measinfo"].pValues()[0].setValue(clientId);
@@ -155,16 +153,14 @@ void RtClient::run()
 
         if (kind == FIFF_DATA_BUFFER) {
             to += matData.cols();
-            qInfo("Reading %d ... %d  =  %9.3f ... %9.3f secs...", from, to,
-                  static_cast<float>(from) / m_pFiffInfo->sfreq,
-                  static_cast<float>(to) / m_pFiffInfo->sfreq);
+            UTILSLIB::Log::info("Reading {} ... {}  =  {:9.3f} ... {:9.3f} secs...", from, to, static_cast<float>(from) / m_pFiffInfo->sfreq, static_cast<float>(to) / m_pFiffInfo->sfreq);
             from += matData.cols();
 
             emit rawBufferReceived(matData);
         } else if (FIFF_DATA_BUFFER == FIFF_BLOCK_END)
             m_bIsRunning = false;
 
-        qInfo("[done]");
+        UTILSLIB::Log::info("[done]");
     }
 
     //

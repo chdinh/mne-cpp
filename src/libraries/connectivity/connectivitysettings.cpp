@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "connectivitysettings.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -37,7 +38,6 @@
 
 #include <QCommandLineParser>
 #include <QElapsedTimer>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -179,12 +179,12 @@ bool ConnectivitySettings::empty() const
 void ConnectivitySettings::removeFirst(int iAmount)
 {
     if (m_trialData.empty()) {
-        qDebug() << "ConnectivitySettings::removeFirst - No elements to delete. Returning.";
+        UTILSLIB::Log::debug("ConnectivitySettings::removeFirst - No elements to delete. Returning.");
         return;
     }
 
     if (std::ssize(m_trialData) < iAmount) {
-        qDebug() << "ConnectivitySettings::removeFirst - Not enough elements stored in list in order to delete them. Returning.";
+        UTILSLIB::Log::debug("ConnectivitySettings::removeFirst - Not enough elements stored in list in order to delete them. Returning.");
         return;
     }
 
@@ -199,12 +199,12 @@ void ConnectivitySettings::removeFirst(int iAmount)
 void ConnectivitySettings::removeLast(int iAmount)
 {
     if (m_trialData.empty()) {
-        qDebug() << "ConnectivitySettings::removeLast - No elements to delete. Returning.";
+        UTILSLIB::Log::debug("ConnectivitySettings::removeLast - No elements to delete. Returning.");
         return;
     }
 
     if (std::ssize(m_trialData) < iAmount) {
-        qDebug() << "ConnectivitySettings::removeLast - Not enough elements stored in list in order to delete them. Returning.";
+        UTILSLIB::Log::debug("ConnectivitySettings::removeLast - Not enough elements stored in list in order to delete them. Returning.");
         return;
     }
 

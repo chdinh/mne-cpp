@@ -658,13 +658,6 @@ void FwdBemModel::correct_auto_elements(MNESurface& surf, Eigen::MatrixXf& mat)
                 mat(j, tri->vert[1]) = mat(j, tri->vert[1]) + miss;
             }
         }
-        /*
-         * Just check it it out...
-         *
-        for (k = 0, sum = 0; k < nnode; k++)
-          sum = sum + mat(j,k);
-        qInfo("row %d sum = %g",j+1,sum/pi2);
-        */
     }
 #endif
     return;

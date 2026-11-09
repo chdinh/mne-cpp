@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "command.h"
+#include <utils/logger/log.h>
 #include "command_manager.h"
 
 //=============================================================================================================
@@ -117,7 +118,7 @@ Command::Command(const QString& p_sCommand, const QString& p_sDescription,
             m_qListParamDescriptions = p_vecParameterDescriptions;
         }
     } else {
-        qCritical("error: description vector hasn't the same size like parameter map.\n");
+        UTILSLIB::Log::critical("error: description vector hasn't the same size like parameter map.\n");
         return;
     }
 }
@@ -218,7 +219,6 @@ QString Command::toStringReadySend() const
 
     QString t_sParameters;
     for (qint32 i = 0; i < m_qListParamNames.size(); ++i) {
-        //        qDebug() << m_qListParamValues[i];
         t_sParameters.append(QString("\"%1\":\"%2\"").arg(m_qListParamNames[i]).arg(m_qListParamValues[i].toString()));
 
         if (i < m_qListParamNames.size() - 1)

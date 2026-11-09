@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "rt_data_client.h"
+#include <utils/logger/log.h>
 #include <fiff/fiff_file.h>
 
 //=============================================================================================================
@@ -111,7 +112,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
     while (!t_bReadMeasBlockStart) {
         t_pTag = t_fiffStream.read_rt_tag();
         if (t_pTag->kind == FIFF_BLOCK_START && *(t_pTag->toInt()) == FIFFB_MEAS_INFO) {
-            qInfo("FIFF_BLOCK_START FIFFB_MEAS_INFO");
+            UTILSLIB::Log::info("FIFF_BLOCK_START FIFFB_MEAS_INFO");
             t_bReadMeasBlockStart = true;
         }
     }
@@ -326,7 +327,7 @@ FiffInfo::SPtr RtDataClient::readInfo()
 
         // END MEAS
         if (t_pTag->kind == FIFF_BLOCK_END && *t_pTag->toInt() == FIFFB_MEAS_INFO) {
-            qInfo("FIFF_BLOCK_END FIFFB_MEAS_INFO");
+            UTILSLIB::Log::info("FIFF_BLOCK_END FIFFB_MEAS_INFO");
             t_bReadMeasBlockEnd = true;
         }
     }
@@ -361,7 +362,7 @@ MetaData RtDataClient::readMetadata()
     while (!t_bReadMeasBlockStart) {
         t_pTag = t_fiffStream.read_rt_tag();
         if (t_pTag->kind == FIFF_BLOCK_START && *(t_pTag->toInt()) == FIFFB_MEAS_INFO) {
-            qInfo("FIFF_BLOCK_START FIFFB_MEAS_INFO");
+            UTILSLIB::Log::info("FIFF_BLOCK_START FIFFB_MEAS_INFO");
             t_bReadMeasBlockStart = true;
         }
     }
@@ -581,7 +582,7 @@ MetaData RtDataClient::readMetadata()
 
         // END MEAS
         if (t_pTag->kind == FIFF_BLOCK_END && *t_pTag->toInt() == FIFFB_MEAS_INFO) {
-            qInfo("FIFF_BLOCK_END FIFFB_MEAS_INFO");
+            UTILSLIB::Log::info("FIFF_BLOCK_END FIFFB_MEAS_INFO");
             t_bReadMeasBlockEnd = true;
         }
     }

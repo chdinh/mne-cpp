@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "report.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -29,7 +30,6 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 #include <QDateTime>
 
 //=============================================================================================================
@@ -161,7 +161,7 @@ bool Report::save(const QString& sPath) const
 {
     QFile file(sPath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[Report::save] Cannot open:" << sPath;
+        Log::warning("[Report::save] Cannot open: {}", sPath.toStdString());
         return false;
     }
 

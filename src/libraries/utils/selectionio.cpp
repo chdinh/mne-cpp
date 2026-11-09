@@ -26,6 +26,7 @@
 //=============================================================================================================
 
 #include "selectionio.h"
+#include <utils/logger/log.h>
 
 #include <iostream>
 #include <fstream>
@@ -38,7 +39,6 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QFile>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -67,7 +67,7 @@ bool SelectionIO::readMNESelFile(QString path, QMultiMap<QString, QStringList>& 
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error opening selection file";
+        Log::debug("Error opening selection file");
         return false;
     }
 
@@ -113,7 +113,7 @@ bool SelectionIO::readMNESelFile(const std::string& path, std::multimap<std::str
 
     std::ifstream inFile(path);
     if (!inFile.is_open()) {
-        qDebug() << "Error opening selection file";
+        Log::debug("Error opening selection file");
         return false;
     }
 
@@ -159,7 +159,7 @@ bool SelectionIO::readBrainstormMonFile(QString path, QMultiMap<QString, QString
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "Error opening montage file";
+        Log::debug("Error opening montage file");
         return false;
     }
 
@@ -199,7 +199,7 @@ bool SelectionIO::readBrainstormMonFile(const std::string& path, std::multimap<s
 
     std::ifstream inFile(path);
     if (!inFile.is_open()) {
-        qDebug() << "Error opening montage file";
+        Log::debug("Error opening montage file");
         return false;
     }
     std::vector<std::string> channels;
@@ -231,7 +231,7 @@ bool SelectionIO::writeMNESelFile(QString path, const QMultiMap<QString, QString
 
     QFile file(path);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "Error opening sel file for writing";
+        Log::debug("Error opening sel file for writing");
         return false;
     }
 
@@ -266,7 +266,7 @@ bool SelectionIO::writeMNESelFile(const std::string& path, const std::map<std::s
 
     std::ofstream outFile(path);
     if (!outFile.is_open()) {
-        qDebug() << "Error opening sel file for writing";
+        Log::debug("Error opening sel file for writing");
         return false;
     }
 
@@ -295,7 +295,7 @@ bool SelectionIO::writeBrainstormMonFiles(QString path, const QMultiMap<QString,
 
         QFile file(newPath);
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qDebug() << "Error opening mon file for writing";
+            Log::debug("Error opening mon file for writing");
             return false;
         }
 
@@ -321,7 +321,7 @@ bool SelectionIO::writeBrainstormMonFiles(const std::string& path, const std::ma
         std::string newPath{path.substr(0, path.find_last_of("/") + 1) + mapElement.first + ".mon"};
         std::ofstream outFile(newPath);
         if (!outFile.is_open()) {
-            qDebug() << "Error opening mon file for writing";
+            Log::debug("Error opening mon file for writing");
             return false;
         }
 

@@ -20,8 +20,8 @@
  */
 
 #include "polhemus_connection.h"
+#include <utils/logger/log.h>
 
-#include <QDebug>
 #include <QtMath>
 
 using namespace ACQLIB;
@@ -239,7 +239,7 @@ bool PolhemusConnection::openSerial(const QString& portName, const PolhemusSeria
             m_pSerial->write(cmd);
         }
         m_pSerial->flush();
-        qInfo() << "Fastrak: hemisphere set to" << h.x() << h.y() << h.z();
+        UTILSLIB::Log::info("Fastrak: hemisphere set to {} {} {}", h.x(), h.y(), h.z());
     }
 
     if (!cfg.streamCommand.isEmpty()) {

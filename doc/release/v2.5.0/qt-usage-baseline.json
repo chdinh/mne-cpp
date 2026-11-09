@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 15570,
+    "tokens": 15353,
     "gui_outside_design": []
   },
   "libraries": {
@@ -67,15 +67,14 @@
       ]
     },
     "acq/polhemus": {
-      "tokens": 198,
+      "tokens": 164,
       "by_category": {
         "containers": 5,
         "files": 11,
         "global": 7,
-        "logging": 32,
         "objects_signals": 57,
         "other": 15,
-        "strings": 67,
+        "strings": 65,
         "time": 4
       },
       "public_header_includes": 14,
@@ -87,13 +86,12 @@
       ]
     },
     "bids": {
-      "tokens": 1081,
+      "tokens": 1029,
       "by_category": {
         "containers": 82,
         "files": 102,
         "global": 34,
         "json": 32,
-        "logging": 52,
         "regex": 3,
         "strings": 769,
         "time": 7
@@ -106,13 +104,12 @@
       ]
     },
     "com": {
-      "tokens": 397,
+      "tokens": 376,
       "by_category": {
         "containers": 20,
         "files": 5,
         "global": 49,
         "json": 45,
-        "logging": 21,
         "network": 9,
         "objects_signals": 90,
         "smart_pointers": 8,
@@ -130,10 +127,9 @@
       ]
     },
     "connectivity": {
-      "tokens": 92,
+      "tokens": 61,
       "by_category": {
         "global": 7,
-        "logging": 31,
         "objects_signals": 4,
         "threads": 50
       },
@@ -351,9 +347,8 @@
       "modules": []
     },
     "ml": {
-      "tokens": 15,
+      "tokens": 12,
       "by_category": {
-        "logging": 3,
         "strings": 12
       },
       "public_header_includes": 2,
@@ -364,13 +359,12 @@
       ]
     },
     "mna": {
-      "tokens": 1661,
+      "tokens": 1641,
       "by_category": {
         "containers": 65,
         "files": 28,
         "global": 33,
         "json": 335,
-        "logging": 20,
         "objects_signals": 80,
         "other": 5,
         "regex": 19,
@@ -431,12 +425,12 @@
       ]
     },
     "utils": {
-      "tokens": 513,
+      "tokens": 457,
       "by_category": {
         "containers": 55,
         "files": 71,
         "global": 16,
-        "logging": 62,
+        "logging": 6,
         "objects_signals": 15,
         "other": 2,
         "regex": 10,
@@ -445,7 +439,7 @@
         "threads": 9,
         "time": 2
       },
-      "public_header_includes": 38,
+      "public_header_includes": 37,
       "q_object": 1,
       "files": 33,
       "modules": [

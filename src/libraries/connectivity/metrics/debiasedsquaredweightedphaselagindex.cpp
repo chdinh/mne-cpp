@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "debiasedsquaredweightedphaselagindex.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -71,7 +72,7 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
     Network finalNetwork("DSWPLI");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "DebiasedSquaredWeightedPhaseLagIndex::calculate - Input data is empty";
+        Log::debug("DebiasedSquaredWeightedPhaseLagIndex::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -106,7 +107,7 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
         m_iNumberBinStart > iNFreqs ||
         m_iNumberBinAmount > iNFreqs ||
         m_iNumberBinAmount + m_iNumberBinStart > iNFreqs) {
-        qDebug() << "DebiasedSquaredWeightedPhaseLagIndex::calculate - Resetting to full spectrum";
+        Log::debug("DebiasedSquaredWeightedPhaseLagIndex::calculate - Resetting to full spectrum");
         AbstractMetric::m_iNumberBinStart = 0;
         AbstractMetric::m_iNumberBinAmount = iNFreqs;
     }
@@ -130,7 +131,6 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Compute DSWPLI in parallel for all trials
@@ -139,7 +139,6 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute DSWPLI
@@ -147,7 +146,6 @@ Network DebiasedSquaredWeightedPhaseLagIndex::calculate(ConnectivitySettings& co
                   finalNetwork);
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;
@@ -168,7 +166,6 @@ void DebiasedSquaredWeightedPhaseLagIndex::compute(ConnectivitySettings::Interme
     if (std::ssize(inputData.vecPairCsd) == iNRows &&
         std::ssize(inputData.vecPairCsdImagSqrd) == iNRows &&
         std::ssize(inputData.vecPairCsdImagAbs) == iNRows) {
-        //qDebug() << "DebiasedSquaredWeightedPhaseLagIndex::compute - vecPairCsd, vecPairCsdImagSqrd and vecPairCsdImagAbs were already computed for this trial.";
         return;
     }
 

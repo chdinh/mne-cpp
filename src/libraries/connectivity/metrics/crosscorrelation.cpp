@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "crosscorrelation.h"
+#include <utils/logger/log.h>
 
 #include <utility>
 #include "../network/networknode.h"
@@ -73,7 +74,7 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("XCOR");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "CrossCorrelation::calculate - Input data is empty";
+        Log::debug("CrossCorrelation::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -106,7 +107,6 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Calculate connectivity matrix over epochs and average afterwards
@@ -117,7 +117,6 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
     matDist /= connectivitySettings.size();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     //Add edges to network
@@ -130,7 +129,6 @@ Network CrossCorrelation::calculate(ConnectivitySettings& connectivitySettings)
     }
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;
@@ -189,7 +187,6 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
     }
 
     //    iTime = timer.elapsed();
-    //    qDebug() << QThread::currentThreadId() << "CrossCorrelation::compute timer - Tapered spectra:" << iTime;
     //    timer.restart();
 
     // Perform multiplication and transform back to time domain to find max XCOR coefficient
@@ -214,7 +211,6 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
     }
 
     //    iTime = timer.elapsed();
-    //    qDebug() << QThread::currentThreadId() << "CrossCorrelation::compute timer - Multiplication and inv FFT:" << iTime;
     //    timer.restart();
 
     // Sum up weights
@@ -230,7 +226,6 @@ void CrossCorrelation::compute(ConnectivitySettings::IntermediateTrialData& inpu
     mutex.unlock();
 
     //    iTime = timer.elapsed();
-    //    qDebug() << QThread::currentThreadId() << "CrossCorrelation::compute timer - Summing up matDist:" << iTime;
     //    timer.restart();
 
     if (!m_bStorageModeIsActive) {

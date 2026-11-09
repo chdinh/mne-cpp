@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "command_manager.h"
+#include <utils/logger/log.h>
 #include "raw_command.h"
 
 //=============================================================================================================
@@ -31,7 +32,6 @@
 //=============================================================================================================
 
 #include <QVector>
-#include <QDebug>
 #include <QJsonObject>
 #include <QStringList>
 
@@ -117,7 +117,7 @@ void CommandManager::insert(const QJsonDocument& p_jsonDocument)
         if (!m_qMapCommands.contains(it.key()))
             m_qMapCommands.insert(it.key(), Command(it.key(), it.value().toObject(), true, this));
         else
-            qWarning("Warning: CommandMap contains command %s already. Insertion skipped.\n", it.key().toUtf8().constData());
+            UTILSLIB::Log::warning("Warning: CommandMap contains command {} already. Insertion skipped.\n", it.key().toStdString());
     }
 
     emit commandMapChanged();

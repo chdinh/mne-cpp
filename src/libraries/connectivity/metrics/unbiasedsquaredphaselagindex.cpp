@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "unbiasedsquaredphaselagindex.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -71,7 +72,7 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
     Network finalNetwork("USPLI");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "UnbiasedSquaredPhaseLagIndex::calculate - Input data is empty";
+        Log::debug("UnbiasedSquaredPhaseLagIndex::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -106,7 +107,7 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
         m_iNumberBinStart > iNFreqs ||
         m_iNumberBinAmount > iNFreqs ||
         m_iNumberBinAmount + m_iNumberBinStart > iNFreqs) {
-        qDebug() << "UnbiasedSquaredPhaseLagIndex::calculate - Resetting to full spectrum";
+        Log::debug("UnbiasedSquaredPhaseLagIndex::calculate - Resetting to full spectrum");
         AbstractMetric::m_iNumberBinStart = 0;
         AbstractMetric::m_iNumberBinAmount = iNFreqs;
     }
@@ -129,7 +130,6 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Compute DSWPLV in parallel for all trials
@@ -138,7 +138,6 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute USPLI
@@ -146,7 +145,6 @@ Network UnbiasedSquaredPhaseLagIndex::calculate(ConnectivitySettings& connectivi
                  finalNetwork);
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;
@@ -164,7 +162,6 @@ void UnbiasedSquaredPhaseLagIndex::compute(ConnectivitySettings::IntermediateTri
                                            const std::pair<MatrixXd, VectorXd>& tapers)
 {
     if (std::ssize(inputData.vecPairCsdImagSign) == iNRows) {
-        //qDebug() << "UnbiasedSquaredPhaseLagIndex::compute - vecPairCsdImagSign was already computed for this trial.";
         return;
     }
 

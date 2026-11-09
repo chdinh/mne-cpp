@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "correlation.h"
+#include <utils/logger/log.h>
 #include "../network/networknode.h"
 #include "../network/networkedge.h"
 #include "../network/network.h"
@@ -65,7 +66,7 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("COR");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "Correlation::calculate - Input data is empty";
+        UTILSLIB::Log::debug("Correlation::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -76,7 +77,6 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
     add_nodes(finalNetwork, rows, connectivitySettings.getNodePositions());
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Calculate connectivity matrix over epochs and average afterwards
@@ -99,7 +99,6 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
     //    matDist /= connectivitySettings.size();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     //Add edges to network
@@ -112,7 +111,6 @@ Network Correlation::calculate(ConnectivitySettings& connectivitySettings)
     }
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;

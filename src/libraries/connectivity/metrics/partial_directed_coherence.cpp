@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "partial_directed_coherence.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include "mvar_model.h"
@@ -27,7 +28,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -61,7 +61,7 @@ Network PartialDirectedCoherence::calculate(ConnectivitySettings& connectivitySe
     Network finalNetwork("PDC");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "PartialDirectedCoherence::calculate - Input data is empty";
+        UTILSLIB::Log::debug("PartialDirectedCoherence::calculate - Input data is empty");
         return finalNetwork;
     }
 

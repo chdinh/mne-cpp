@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "coherency.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -70,7 +71,7 @@ void Coherency::calculateAbs(Network& finalNetwork,
     //    timer.start();
 
     if (connectivitySettings.empty()) {
-        qDebug() << "Coherency::calculateReal - Input data is empty";
+        Log::debug("Coherency::calculateReal - Input data is empty");
         return;
     }
 
@@ -103,7 +104,6 @@ void Coherency::calculateAbs(Network& finalNetwork,
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     QFuture<void> result = QtConcurrent::map(connectivitySettings.getTrialData(),
@@ -111,7 +111,6 @@ void Coherency::calculateAbs(Network& finalNetwork,
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute CSD/sqrt(PSD_X * PSD_Y)
@@ -127,7 +126,6 @@ void Coherency::calculateAbs(Network& finalNetwork,
     resultCSDPSD.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 }
 
@@ -141,7 +139,7 @@ void Coherency::calculateImag(Network& finalNetwork,
     //    timer.start();
 
     if (connectivitySettings.empty()) {
-        qDebug() << "Coherency::calculateImag - Input data is empty";
+        Log::debug("Coherency::calculateImag - Input data is empty");
         return;
     }
 
@@ -174,7 +172,6 @@ void Coherency::calculateImag(Network& finalNetwork,
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     QFuture<void> result = QtConcurrent::map(connectivitySettings.getTrialData(),
@@ -182,7 +179,6 @@ void Coherency::calculateImag(Network& finalNetwork,
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute CSD/sqrt(PSD_X * PSD_Y)
@@ -198,7 +194,6 @@ void Coherency::calculateImag(Network& finalNetwork,
     resultCSDPSD.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 }
 
@@ -218,11 +213,9 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
     //    timer.start();
 
     if (std::ssize(inputData.vecPairCsd) == iNRows) {
-        //qDebug() << "Coherency::compute - vecPairCsd were already computed for this trial.";
         return;
     }
 
-    //qDebug() << "Coherency::compute - vecPairCsdSum and matPsdSum are computed for this trial.";
 
     // Substract mean, compute tapered spectra and PSD
     // This code was copied and changed modified Utils/Spectra since we do not want to call the function due to time loss.
@@ -293,7 +286,6 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
     mutex.unlock();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << QThread::currentThreadId() << "Coherency::compute timer - compute - Tapered spectra and PSD (summing):" << iTime;
     //    timer.restart();
 
     // Compute CSD
@@ -337,7 +329,6 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
     }
 
     //    iTime = timer.elapsed();
-    //    qWarning() << QThread::currentThreadId() << "Coherency::compute timer - compute - CSD summing:" << iTime;
     //    timer.restart();
 
     //Do not store data to save memory
@@ -347,7 +338,6 @@ void Coherency::compute(ConnectivitySettings::IntermediateTrialData& inputData,
     }
 
     //    iTime = timer.elapsed();
-    //    qWarning() << QThread::currentThreadId() << "Coherency::compute timer - compute - Deleting data:" << iTime;
     //    timer.restart();
 }
 

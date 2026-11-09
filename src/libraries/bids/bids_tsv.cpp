@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "bids_tsv.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -22,7 +23,6 @@
 
 #include <QFile>
 #include <QTextStream>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -65,7 +65,7 @@ QList<BidsTsvRow> BidsTsv::readTsv(const QString& sFilePath,
 
     QFile file(sFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[BidsTsv::readTsv] Cannot open" << sFilePath;
+        UTILSLIB::Log::warning("[BidsTsv::readTsv] Cannot open {}", sFilePath.toStdString());
         return rows;
     }
 
@@ -104,7 +104,7 @@ bool BidsTsv::writeTsv(const QString& sFilePath,
 {
     QFile file(sFilePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[BidsTsv::writeTsv] Cannot open" << sFilePath << "for writing";
+        UTILSLIB::Log::warning("[BidsTsv::writeTsv] Cannot open {} for writing", sFilePath.toStdString());
         return false;
     }
 

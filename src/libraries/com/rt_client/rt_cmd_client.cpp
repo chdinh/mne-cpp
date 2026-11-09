@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "rt_cmd_client.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -133,12 +134,12 @@ void RtCmdClient::sendCommandJSON(const Command& p_command)
                     // because we do not have a stop character and do not know how many bytes to receive.
                     respComplete = t_qByteArrayRaw.count('{') == t_qByteArrayRaw.count('}');
                 }
-                qDebug() << "Response: " << t_qByteArrayRaw.size() << " bytes";
+                UTILSLIB::Log::debug("Response: {} bytes", t_qByteArrayRaw.size());
             } while (!respComplete);
             t_sReply = QString(t_qByteArrayRaw);
         }
     } else {
-        qWarning() << "Request was not send, because client is not connected!";
+        UTILSLIB::Log::warning("Request was not send, because client is not connected!");
     }
 
     m_qMutex.lock();
@@ -165,8 +166,6 @@ qint32 RtCmdClient::requestBufsize()
     QJsonDocument t_jsonDocumentOrigin = QJsonDocument::fromJson(t_sJsonCommands, &error);
 
     if (error.error == QJsonParseError::NoError) {
-        //        qDebug() << t_jsonDocumentOrigin;//"Received Commands" << m_commandManager.commandMap().keys();
-
         //Switch to command object
         if (t_jsonDocumentOrigin.isObject() && t_jsonDocumentOrigin.object().value(QString("bufsize")) != QJsonValue::Undefined) {
             qint32 size = static_cast<qint32>(t_jsonDocumentOrigin.object().value(QString("bufsize")).toDouble());
@@ -174,7 +173,7 @@ qint32 RtCmdClient::requestBufsize()
         }
     }
 
-    qCritical() << "Unable to parse JSON response: " << error.errorString();
+    UTILSLIB::Log::critical("Unable to parse JSON response: {}", error.errorString().toStdString());
     return -1;
 }
 
@@ -204,7 +203,7 @@ void RtCmdClient::requestCommands()
     if (error.error == QJsonParseError::NoError)
         m_commandManager.insert(t_jsonDocumentOrigin);
     else
-        qCritical() << "Unable to parse JSON response: " << error.errorString();
+        UTILSLIB::Log::critical("Unable to parse JSON response: {}", error.errorString().toStdString());
 }
 
 //=============================================================================================================
@@ -244,7 +243,7 @@ qint32 RtCmdClient::requestConnectors(QMap<qint32, QString>& p_qMapConnectors)
         if (!p_qMapConnectors.contains(id))
             p_qMapConnectors.insert(id, t_qConnectorName);
         else
-            qWarning("Warning: CommandMap contains command %s already. Insertion skipped.\n", it.key().toUtf8().constData());
+            UTILSLIB::Log::warning("Warning: CommandMap contains command {} already. Insertion skipped.\n", it.key().toStdString());
 
         //if connector is active indicate it
         if (it.value().toObject().value(QString("active")).toBool())

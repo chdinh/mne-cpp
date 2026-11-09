@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "bids_edf_reader.h"
+#include <utils/logger/log.h>
 
 #include <fiff/fiff_constants.h>
 
@@ -22,7 +23,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QFileInfo>
 #include <QIODevice>
 
@@ -133,7 +133,7 @@ bool EDFReader::open(const QString& sFilePath)
     m_file.setFileName(sFilePath);
 
     if (!m_file.open(QIODevice::ReadOnly)) {
-        qWarning() << "[EDFReader::open] Could not open file:" << sFilePath;
+        UTILSLIB::Log::warning("[EDFReader::open] Could not open file: {}", sFilePath.toStdString());
         return false;
     }
 
@@ -215,8 +215,7 @@ void EDFReader::parseHeader(QIODevice* pDev)
 
     // Verify header size consistency
     if (pDev->pos() != m_iNumBytesInHeader) {
-        qWarning() << "[EDFReader::parseHeader] Header byte count mismatch: read"
-                   << pDev->pos() << "expected" << m_iNumBytesInHeader;
+        UTILSLIB::Log::warning("[EDFReader::parseHeader] Header byte count mismatch: read {} expected {}", pDev->pos(), m_iNumBytesInHeader);
     }
 
     // Calculate bytes per data record
@@ -264,15 +263,14 @@ FiffInfo EDFReader::getInfo() const
 MatrixXf EDFReader::readRawSegment(int iStartSampleIdx, int iEndSampleIdx) const
 {
     if (!m_bIsOpen) {
-        qWarning() << "[EDFReader::readRawSegment] File not open";
+        UTILSLIB::Log::warning("[EDFReader::readRawSegment] File not open");
         return MatrixXf();
     }
 
     long totalSamples = getSampleCount();
     if (iStartSampleIdx < 0 || iStartSampleIdx >= totalSamples ||
         iEndSampleIdx < 0 || iEndSampleIdx > totalSamples) {
-        qWarning() << "[EDFReader::readRawSegment] Index out of bounds:"
-                   << iStartSampleIdx << "-" << iEndSampleIdx;
+        UTILSLIB::Log::warning("[EDFReader::readRawSegment] Index out of bounds: {} - {}", iStartSampleIdx, iEndSampleIdx);
         return MatrixXf();
     }
 

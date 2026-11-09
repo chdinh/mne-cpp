@@ -137,7 +137,7 @@ public:
 
     //=========================================================================================================
     /**
-     * List the properties of available models via qInfo.
+     * List the properties of available models via UTILSLIB::Log.
      */
     void fwd_list_eeg_sphere_models();
 

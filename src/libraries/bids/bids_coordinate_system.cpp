@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "bids_coordinate_system.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -24,7 +25,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -43,7 +43,7 @@ BidsCoordinateSystem BidsCoordinateSystem::readJson(const QString& sFilePath)
 
     QFile file(sFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[BidsCoordinateSystem::readJson] Cannot open" << sFilePath;
+        UTILSLIB::Log::warning("[BidsCoordinateSystem::readJson] Cannot open {}", sFilePath.toStdString());
         return cs;
     }
 
@@ -52,8 +52,7 @@ BidsCoordinateSystem BidsCoordinateSystem::readJson(const QString& sFilePath)
     file.close();
 
     if (error.error != QJsonParseError::NoError) {
-        qWarning() << "[BidsCoordinateSystem::readJson] Parse error in" << sFilePath
-                   << ":" << error.errorString();
+        UTILSLIB::Log::warning("[BidsCoordinateSystem::readJson] Parse error in {} : {}", sFilePath.toStdString(), error.errorString().toStdString());
         return cs;
     }
 
@@ -133,7 +132,7 @@ bool BidsCoordinateSystem::writeJson(const QString& sFilePath,
 
     QFile file(sFilePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[BidsCoordinateSystem::writeJson] Cannot open" << sFilePath << "for writing";
+        UTILSLIB::Log::warning("[BidsCoordinateSystem::writeJson] Cannot open {} for writing", sFilePath.toStdString());
         return false;
     }
 

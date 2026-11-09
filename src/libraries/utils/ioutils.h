@@ -40,6 +40,7 @@
 //=============================================================================================================
 
 #include "utils_global.h"
+#include <utils/logger/log.h>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -52,7 +53,6 @@
 #include <QSharedPointer>
 #include <QTextStream>
 #include <QFile>
-#include <QDebug>
 #include <QStringList>
 #include <QRegularExpression>
 
@@ -193,7 +193,7 @@ bool IOUtils::write_eigen_matrix(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::D
             stream << "\n";
         }
     } else {
-        qWarning() << "Could not write Eigen element to file! Path does not exist!";
+        Log::warning("Could not write Eigen element to file! Path does not exist!");
         return false;
     }
 
@@ -240,7 +240,7 @@ bool IOUtils::write_eigen_matrix(const Eigen::Matrix<T, Eigen::Dynamic, Eigen::D
             outputFile << "\n";
         }
     } else {
-        qWarning() << "Could not write Eigen element to file! Path does not exist!";
+        Log::warning("Could not write Eigen element to file! Path does not exist!");
         return false;
     }
 
@@ -317,7 +317,7 @@ bool IOUtils::read_eigen_matrix(Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
             out.row(i) = help[i].transpose();
         }
     } else {
-        qWarning() << "IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!";
+        Log::warning("IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!");
         return false;
     }
 
@@ -398,7 +398,7 @@ bool IOUtils::read_eigen_matrix(Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
             out.row(static_cast<Eigen::Index>(i)) = help[i].transpose();
         }
     } else {
-        qWarning() << "IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!";
+        Log::warning("IOUtils::read_eigen_matrix - Could not read Eigen element from file! Path does not exist!");
         return false;
     }
 

@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "weightedphaselagindex.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -72,7 +73,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
     Network finalNetwork("WPLI");
 
     if (connectivitySettings.empty()) {
-        qWarning() << "WeightedPhaseLagIndex::calculate - Input data is empty";
+        Log::warning("WeightedPhaseLagIndex::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -107,7 +108,7 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
         m_iNumberBinStart > iNFreqs ||
         m_iNumberBinAmount > iNFreqs ||
         m_iNumberBinAmount + m_iNumberBinStart > iNFreqs) {
-        qDebug() << "WeightedPhaseLagIndex::calculate - Resetting to full spectrum";
+        Log::debug("WeightedPhaseLagIndex::calculate - Resetting to full spectrum");
         AbstractMetric::m_iNumberBinStart = 0;
         AbstractMetric::m_iNumberBinAmount = iNFreqs;
     }
@@ -130,7 +131,6 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Compute WPLI in parallel for all trials
@@ -139,7 +139,6 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute WPLI
@@ -147,7 +146,6 @@ Network WeightedPhaseLagIndex::calculate(ConnectivitySettings& connectivitySetti
                 finalNetwork);
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;
@@ -170,7 +168,6 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
 
     if (std::ssize(inputData.vecPairCsd) == iNRows &&
         std::ssize(inputData.vecPairCsdImagAbs) == iNRows) {
-        //qDebug() << "WeightedPhaseLagIndex::compute - vecPairCsd and vecPairCsdImagAbs were already computed for this trial.";
         return;
     }
 
@@ -213,7 +210,6 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
         }
 
         //        iTime = timer.elapsed();
-        //        qWarning() << "WeightedPhaseLagIndex::compute timer - Compute spectra:" << iTime;
         //        timer.restart();
     }
 
@@ -247,7 +243,6 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
         }
 
         //        iTime = timer.elapsed();
-        //        qWarning() << "WeightedPhaseLagIndex::compute timer - Compute CSD and Imag CSD:" << iTime;
         //        timer.restart();
 
         mutex.lock();
@@ -265,7 +260,6 @@ void WeightedPhaseLagIndex::compute(ConnectivitySettings::IntermediateTrialData&
         mutex.unlock();
 
         //        iTime = timer.elapsed();
-        //        qWarning() << "WeightedPhaseLagIndex::compute timer - Add CSD to sum:" << iTime;
         //        timer.restart();
     } else {
         if (inputData.vecPairCsdImagAbs.empty()) {

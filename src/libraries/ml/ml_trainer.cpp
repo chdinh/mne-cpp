@@ -31,6 +31,7 @@
 //=============================================================================================================
 
 #include "ml_trainer.h"
+#include <utils/logger/log.h>
 
 #ifndef WASMBUILD // QProcess (used by PythonRunner) is not available in Qt WASM
 
@@ -38,7 +39,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -78,11 +78,11 @@ PythonRunnerResult MLTrainer::run(const QString& scriptPath,
     if (!m_runner.isPythonAvailable()) {
         PythonRunnerResult result;
         result.stdErr = QStringLiteral("Python interpreter not found: ") + m_runner.config().pythonExe;
-        qWarning() << "[MLTrainer]" << result.stdErr;
+        Log::warning("[MLTrainer] {}", result.stdErr.toStdString());
         return result;
     }
 
-    qDebug() << "[MLTrainer] Running training script:" << scriptPath;
+    Log::debug("[MLTrainer] Running training script: {}", scriptPath.toStdString());
 
     // If a venv is configured, use runInVenv (creates venv + installs deps automatically)
     if (!m_runner.config().venvDir.isEmpty()) {
@@ -103,7 +103,7 @@ QStringList MLTrainer::checkPrerequisites(const QStringList& packages) const
         }
     }
     if (!missing.isEmpty()) {
-        qWarning() << "[MLTrainer] Missing Python packages:" << missing.join(QStringLiteral(", "));
+        Log::warning("[MLTrainer] Missing Python packages: {}", (missing.join(QStringLiteral(", "))).toStdString());
     }
     return missing;
 }

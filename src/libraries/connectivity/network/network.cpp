@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "network.h"
+#include <utils/logger/log.h>
 
 #include <algorithm>
 #include <cmath>
@@ -28,7 +29,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -221,19 +221,19 @@ void Network::set_threshold(double threshold)
 void Network::set_frequency_range(float lower, float upper)
 {
     if (lower > upper) {
-        qWarning() << "Network::set_frequency_range - Lower frequency is above the upper frequency. Weights are not recalculated.";
+        UTILSLIB::Log::warning("Network::set_frequency_range - Lower frequency is above the upper frequency. Weights are not recalculated.");
         return;
     }
     if (m_sfreq <= 0.0f) {
-        qWarning() << "Network::set_frequency_range - Sampling frequency has not been set.";
+        UTILSLIB::Log::warning("Network::set_frequency_range - Sampling frequency has not been set.");
         return;
     }
     if (upper > m_sfreq / 2.0f) {
-        qWarning() << "Network::set_frequency_range - Upper frequency is above the Nyquist frequency.";
+        UTILSLIB::Log::warning("Network::set_frequency_range - Upper frequency is above the Nyquist frequency.");
         return;
     }
     if (m_used_freq_bins <= 0) {
-        qWarning() << "Network::set_frequency_range - Number of frequency bins has not been set.";
+        UTILSLIB::Log::warning("Network::set_frequency_range - Number of frequency bins has not been set.");
         return;
     }
 
@@ -257,7 +257,7 @@ void Network::normalize()
 {
     const double max = m_weight_range.second;
     if (max == 0.0) {
-        qWarning() << "Network::normalize - All weights are 0; nothing to normalize.";
+        UTILSLIB::Log::warning("Network::normalize - All weights are 0; nothing to normalize.");
         return;
     }
 

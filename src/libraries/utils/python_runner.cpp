@@ -23,13 +23,13 @@
 //=============================================================================================================
 
 #include "python_runner.h"
+#include <utils/logger/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
 #include <QProcess>
-#include <QDebug>
 #include <QRegularExpression>
 #include <QDir>
 #include <QFile>
@@ -151,7 +151,7 @@ bool PythonRunner::isPackageAvailable(const QString& packageName) const
     // Sanitize: only allow valid Python identifiers to prevent injection
     static const QRegularExpression validPkg(QStringLiteral("^[A-Za-z_][A-Za-z0-9_.]*$"));
     if (!validPkg.match(packageName).hasMatch()) {
-        qWarning() << "[PythonRunner] Invalid package name:" << packageName;
+        Log::warning("[PythonRunner] Invalid package name: {}", packageName.toStdString());
         return false;
     }
 
@@ -202,7 +202,7 @@ PythonRunnerResult PythonRunner::ensureVenv()
 
     // Step 1: Create venv if it doesn't exist
     if (!venvExists) {
-        qDebug() << "[PythonRunner] Creating virtual environment at:" << m_config.venvDir;
+        Log::debug("[PythonRunner] Creating virtual environment at: {}", m_config.venvDir.toStdString());
 
         QProcess venvProc;
         venvProc.start(m_config.pythonExe,
@@ -210,7 +210,7 @@ PythonRunnerResult PythonRunner::ensureVenv()
 
         if (!venvProc.waitForStarted(10000)) {
             result.stdErr = QStringLiteral("Failed to start venv creation: ") + venvProc.errorString();
-            qWarning() << "[PythonRunner]" << result.stdErr;
+            Log::warning("[PythonRunner] {}", result.stdErr.toStdString());
             return result;
         }
 
@@ -218,20 +218,20 @@ PythonRunnerResult PythonRunner::ensureVenv()
             result.stdErr = QStringLiteral("Venv creation timed out.");
             venvProc.kill();
             venvProc.waitForFinished(5000);
-            qWarning() << "[PythonRunner]" << result.stdErr;
+            Log::warning("[PythonRunner] {}", result.stdErr.toStdString());
             return result;
         }
 
         if (venvProc.exitCode() != 0) {
             result.exitCode = venvProc.exitCode();
             result.stdErr = QString::fromUtf8(venvProc.readAllStandardError());
-            qWarning() << "[PythonRunner] venv creation failed:" << result.stdErr;
+            Log::warning("[PythonRunner] venv creation failed: {}", result.stdErr.toStdString());
             return result;
         }
 
-        qDebug() << "[PythonRunner] Virtual environment created.";
+        Log::debug("[PythonRunner] Virtual environment created.");
     } else {
-        qDebug() << "[PythonRunner] Virtual environment already exists at:" << m_config.venvDir;
+        Log::debug("[PythonRunner] Virtual environment already exists at: {}", m_config.venvDir.toStdString());
     }
 
     // Step 2: Install dependencies
@@ -251,9 +251,9 @@ PythonRunnerResult PythonRunner::ensureVenv()
         if (QFileInfo::exists(tomlPath)) {
             pipArgs << QStringLiteral("install") << m_config.packageDir;
             needsInstall = true;
-            qDebug() << "[PythonRunner] Installing from pyproject.toml in:" << m_config.packageDir;
+            Log::debug("[PythonRunner] Installing from pyproject.toml in: {}", m_config.packageDir.toStdString());
         } else {
-            qWarning() << "[PythonRunner] packageDir set but no pyproject.toml found at:" << tomlPath;
+            Log::warning("[PythonRunner] packageDir set but no pyproject.toml found at: {}", tomlPath.toStdString());
         }
     }
 
@@ -262,9 +262,9 @@ PythonRunnerResult PythonRunner::ensureVenv()
             pipArgs << QStringLiteral("install")
                     << QStringLiteral("-r") << m_config.requirementsFile;
             needsInstall = true;
-            qDebug() << "[PythonRunner] Installing from requirements.txt:" << m_config.requirementsFile;
+            Log::debug("[PythonRunner] Installing from requirements.txt: {}", m_config.requirementsFile.toStdString());
         } else {
-            qWarning() << "[PythonRunner] requirementsFile not found:" << m_config.requirementsFile;
+            Log::warning("[PythonRunner] requirementsFile not found: {}", m_config.requirementsFile.toStdString());
         }
     }
 
@@ -274,7 +274,7 @@ PythonRunnerResult PythonRunner::ensureVenv()
 
         if (!pipProc.waitForStarted(10000)) {
             result.stdErr = QStringLiteral("Failed to start pip: ") + pipProc.errorString();
-            qWarning() << "[PythonRunner]" << result.stdErr;
+            Log::warning("[PythonRunner] {}", result.stdErr.toStdString());
             return result;
         }
 
@@ -284,7 +284,7 @@ PythonRunnerResult PythonRunner::ensureVenv()
             result.timedOut = true;
             pipProc.kill();
             pipProc.waitForFinished(5000);
-            qWarning() << "[PythonRunner]" << result.stdErr;
+            Log::warning("[PythonRunner] {}", result.stdErr.toStdString());
             return result;
         }
 
@@ -293,12 +293,12 @@ PythonRunnerResult PythonRunner::ensureVenv()
         result.exitCode = pipProc.exitCode();
 
         if (pipProc.exitCode() != 0) {
-            qWarning() << "[PythonRunner] pip install failed with code" << pipProc.exitCode();
-            qWarning() << "[PythonRunner] stderr:" << result.stdErr;
+            Log::warning("[PythonRunner] pip install failed with code {}", pipProc.exitCode());
+            Log::warning("[PythonRunner] stderr: {}", result.stdErr.toStdString());
             return result;
         }
 
-        qDebug() << "[PythonRunner] Dependencies installed successfully.";
+        Log::debug("[PythonRunner] Dependencies installed successfully.");
     }
 
     // Step 3: Switch interpreter to the venv Python
@@ -306,7 +306,7 @@ PythonRunnerResult PythonRunner::ensureVenv()
     result.success = true;
     result.exitCode = 0;
 
-    qDebug() << "[PythonRunner] Using venv Python:" << m_config.pythonExe;
+    Log::debug("[PythonRunner] Using venv Python: {}", m_config.pythonExe.toStdString());
     return result;
 }
 
@@ -351,13 +351,13 @@ PythonRunnerResult PythonRunner::execute(const QStringList& fullArgs)
         process.setProcessEnvironment(env);
     }
 
-    qDebug() << "[PythonRunner] Launching:" << m_config.pythonExe << fullArgs.join(QLatin1Char(' '));
+    Log::debug("[PythonRunner] Launching: {} {}", m_config.pythonExe.toStdString(), (fullArgs.join(QLatin1Char(' '))).toStdString());
 
     process.start(m_config.pythonExe, fullArgs);
 
     if (!process.waitForStarted(10000)) {
         result.stdErr = QStringLiteral("Failed to start Python process: ") + process.errorString();
-        qWarning() << "[PythonRunner]" << result.stdErr;
+        Log::warning("[PythonRunner] {}", result.stdErr.toStdString());
         return result;
     }
 
@@ -396,9 +396,9 @@ PythonRunnerResult PythonRunner::execute(const QStringList& fullArgs)
 
             // Log to Qt debug system
             if (channel == 0) {
-                qDebug() << "[Python stdout]" << line;
+                Log::debug("[Python stdout] {}", line.toStdString());
             } else {
-                qWarning() << "[Python stderr]" << line;
+                Log::warning("[Python stderr] {}", line.toStdString());
             }
         }
     };
@@ -425,7 +425,7 @@ PythonRunnerResult PythonRunner::execute(const QStringList& fullArgs)
             result.stdErr += QStringLiteral("\nProcess timed out after %1 ms.").arg(m_config.timeoutMsec);
             process.kill();
             process.waitForFinished(5000);
-            qWarning() << "[PythonRunner] Process timed out after" << m_config.timeoutMsec << "ms.";
+            Log::warning("[PythonRunner] Process timed out after {} ms.", m_config.timeoutMsec);
             break;
         }
     }
@@ -462,9 +462,9 @@ PythonRunnerResult PythonRunner::execute(const QStringList& fullArgs)
                       result.exitCode == 0);
 
     if (result.success) {
-        qDebug() << "[PythonRunner] Script finished successfully.";
+        Log::debug("[PythonRunner] Script finished successfully.");
     } else if (!result.timedOut) {
-        qWarning() << "[PythonRunner] Script exited with code" << result.exitCode;
+        Log::warning("[PythonRunner] Script exited with code {}", result.exitCode);
     }
 
     emit finished(result);

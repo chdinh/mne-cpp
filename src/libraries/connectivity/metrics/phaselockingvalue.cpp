@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "phaselockingvalue.h"
+#include <utils/logger/log.h>
 
 #include <vector>
 #include <utility>
@@ -71,7 +72,7 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
     Network finalNetwork("PLV");
 
     if (connectivitySettings.empty()) {
-        qDebug() << "PhaseLockingValue::calculate - Input data is empty";
+        Log::debug("PhaseLockingValue::calculate - Input data is empty");
         return finalNetwork;
     }
 
@@ -105,7 +106,7 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
         m_iNumberBinStart > iNFreqs ||
         m_iNumberBinAmount > iNFreqs ||
         m_iNumberBinAmount + m_iNumberBinStart > iNFreqs) {
-        qDebug() << "PhaseLockingValue::calculate - Resetting to full spectrum";
+        Log::debug("PhaseLockingValue::calculate - Resetting to full spectrum");
         AbstractMetric::m_iNumberBinStart = 0;
         AbstractMetric::m_iNumberBinAmount = iNFreqs;
     }
@@ -128,7 +129,6 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
     };
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Preparation" << iTime;
     //    timer.restart();
 
     // Compute PLV in parallel for all trials
@@ -137,7 +137,6 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
     result.waitForFinished();
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "ComputeSpectraPSDCSD" << iTime;
     //    timer.restart();
 
     // Compute PLV
@@ -145,7 +144,6 @@ Network PhaseLockingValue::calculate(ConnectivitySettings& connectivitySettings)
                finalNetwork);
 
     //    iTime = timer.elapsed();
-    //    qWarning() << "Compute" << iTime;
     //    timer.restart();
 
     return finalNetwork;
@@ -163,7 +161,6 @@ void PhaseLockingValue::compute(ConnectivitySettings::IntermediateTrialData& inp
                                 const std::pair<MatrixXd, VectorXd>& tapers)
 {
     if (std::ssize(inputData.vecPairCsdNormalized) == iNRows) {
-        //qDebug() << "PhaseLockingValue::compute - vecPairCsdNormalized was already computed for this trial.";
         return;
     }
 

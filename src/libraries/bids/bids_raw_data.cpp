@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "bids_raw_data.h"
+#include <utils/logger/log.h>
 #include "bids_channel.h"
 #include "bids_dataset_description.h"
 #include "bids_const.h"
@@ -27,7 +28,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
 #include <QFile>
@@ -211,8 +211,7 @@ void readSidecarJson(const QString& sFilePath,
 
     double sf = json.value(QStringLiteral("SamplingFrequency")).toDouble();
     if (sf > 0.0 && std::abs(info.sfreq - static_cast<float>(sf)) > 0.5f)
-        qWarning() << "[BidsRawData::read] Sampling frequency mismatch: raw ="
-                   << info.sfreq << "sidecar =" << sf;
+        UTILSLIB::Log::warning("[BidsRawData::read] Sampling frequency mismatch: raw = {} sidecar = {}", info.sfreq, sf);
 
     // Store independent metadata fields on BidsRawData
     data.ieegReference = json.value(QStringLiteral("iEEGReference")).toString();
@@ -486,12 +485,12 @@ QJsonObject buildSidecarJson(const BidsRawData& data,
 bool copyFile(const QString& src, const QString& dst, bool overwrite)
 {
     if (!QFileInfo::exists(src)) {
-        qWarning() << "[BidsRawData::write] Source file does not exist:" << src;
+        UTILSLIB::Log::warning("[BidsRawData::write] Source file does not exist: {}", src.toStdString());
         return false;
     }
     if (QFileInfo::exists(dst)) {
         if (!overwrite) {
-            qWarning() << "[BidsRawData::write] Target file already exists:" << dst;
+            UTILSLIB::Log::warning("[BidsRawData::write] Target file already exists: {}", dst.toStdString());
             return false;
         }
         QFile::remove(dst);
@@ -507,7 +506,7 @@ bool copyBrainVisionFiles(const QString& srcVhdr, const BIDSPath& bidsPath, bool
 
     QFile vhdrFile(srcVhdr);
     if (!vhdrFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "[BidsRawData::write] Cannot open .vhdr file:" << srcVhdr;
+        UTILSLIB::Log::warning("[BidsRawData::write] Cannot open .vhdr file: {}", srcVhdr.toStdString());
         return false;
     }
 
@@ -541,7 +540,7 @@ bool copyBrainVisionFiles(const QString& srcVhdr, const BIDSPath& bidsPath, bool
                         "MarkerFile=" + QFileInfo(newMarkerFile).fileName());
 
     if (QFileInfo::exists(dstVhdr) && !overwrite) {
-        qWarning() << "[BidsRawData::write] Target file already exists:" << dstVhdr;
+        UTILSLIB::Log::warning("[BidsRawData::write] Target file already exists: {}", dstVhdr.toStdString());
         return false;
     }
     if (QFileInfo::exists(dstVhdr))
@@ -549,7 +548,7 @@ bool copyBrainVisionFiles(const QString& srcVhdr, const BIDSPath& bidsPath, bool
 
     QFile dstVhdrFile(dstVhdr);
     if (!dstVhdrFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qWarning() << "[BidsRawData::write] Cannot write .vhdr file:" << dstVhdr;
+        UTILSLIB::Log::warning("[BidsRawData::write] Cannot write .vhdr file: {}", dstVhdr.toStdString());
         return false;
     }
     dstVhdrFile.write(vhdrStr.toUtf8());
@@ -559,7 +558,7 @@ bool copyBrainVisionFiles(const QString& srcVhdr, const BIDSPath& bidsPath, bool
         QString srcData = QDir(srcDir).absoluteFilePath(dataFileName);
         QString dstData = dstDir + QFileInfo(newDataFile).fileName();
         if (!copyFile(srcData, dstData, overwrite)) {
-            qWarning() << "[BidsRawData::write] Failed to copy data file:" << srcData;
+            UTILSLIB::Log::warning("[BidsRawData::write] Failed to copy data file: {}", srcData.toStdString());
             return false;
         }
     }
@@ -579,7 +578,7 @@ bool copyBrainVisionFiles(const QString& srcVhdr, const BIDSPath& bidsPath, bool
 
                 if (QFileInfo::exists(dstMarker)) {
                     if (!overwrite) {
-                        qWarning() << "[BidsRawData::write] Target marker file already exists:" << dstMarker;
+                        UTILSLIB::Log::warning("[BidsRawData::write] Target marker file already exists: {}", dstMarker.toStdString());
                         return false;
                     }
                     QFile::remove(dstMarker);
@@ -703,15 +702,15 @@ BidsRawData BidsRawData::read(const BIDSPath& bidsPath)
     // Step 1 — Validate BIDSPath
     //=========================================================================================================
     if (bidsPath.root().isEmpty()) {
-        qWarning() << "[BidsRawData::read] BIDSPath root is not set";
+        UTILSLIB::Log::warning("[BidsRawData::read] BIDSPath root is not set");
         return result;
     }
     if (bidsPath.subject().isEmpty()) {
-        qWarning() << "[BidsRawData::read] BIDSPath subject is not set";
+        UTILSLIB::Log::warning("[BidsRawData::read] BIDSPath subject is not set");
         return result;
     }
     if (bidsPath.extension().isEmpty()) {
-        qWarning() << "[BidsRawData::read] BIDSPath extension is not set";
+        UTILSLIB::Log::warning("[BidsRawData::read] BIDSPath extension is not set");
         return result;
     }
 
@@ -731,7 +730,7 @@ BidsRawData BidsRawData::read(const BIDSPath& bidsPath)
     }
 
     if (!QFileInfo::exists(rawFilePath)) {
-        qWarning() << "[BidsRawData::read] Raw data file not found:" << rawFilePath;
+        UTILSLIB::Log::warning("[BidsRawData::read] Raw data file not found: {}", rawFilePath.toStdString());
         return result;
     }
 
@@ -740,12 +739,12 @@ BidsRawData BidsRawData::read(const BIDSPath& bidsPath)
     //=========================================================================================================
     result.reader = createReader(bidsPath.extension());
     if (!result.reader) {
-        qWarning() << "[BidsRawData::read] Unsupported file extension:" << bidsPath.extension();
+        UTILSLIB::Log::warning("[BidsRawData::read] Unsupported file extension: {}", bidsPath.extension().toStdString());
         return result;
     }
 
     if (!result.reader->open(rawFilePath)) {
-        qWarning() << "[BidsRawData::read] Failed to open raw file:" << rawFilePath;
+        UTILSLIB::Log::warning("[BidsRawData::read] Failed to open raw file: {}", rawFilePath.toStdString());
         return result;
     }
 
@@ -829,23 +828,23 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     // Step 1 — Validate
     //=========================================================================================================
     if (bidsPath.root().isEmpty()) {
-        qWarning() << "[BidsRawData::write] BIDSPath root is not set";
+        UTILSLIB::Log::warning("[BidsRawData::write] BIDSPath root is not set");
         return result;
     }
     if (bidsPath.subject().isEmpty()) {
-        qWarning() << "[BidsRawData::write] BIDSPath subject is not set";
+        UTILSLIB::Log::warning("[BidsRawData::write] BIDSPath subject is not set");
         return result;
     }
     if (bidsPath.task().isEmpty()) {
-        qWarning() << "[BidsRawData::write] BIDSPath task is not set";
+        UTILSLIB::Log::warning("[BidsRawData::write] BIDSPath task is not set");
         return result;
     }
     if (bidsPath.datatype().isEmpty()) {
-        qWarning() << "[BidsRawData::write] BIDSPath datatype is not set";
+        UTILSLIB::Log::warning("[BidsRawData::write] BIDSPath datatype is not set");
         return result;
     }
     if (raw.info.empty()) {
-        qWarning() << "[BidsRawData::write] FiffRawData info is empty";
+        UTILSLIB::Log::warning("[BidsRawData::write] FiffRawData info is empty");
         return result;
     }
 
@@ -853,7 +852,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     // Step 2 — Create directory structure
     //=========================================================================================================
     if (!bidsPath.mkdirs()) {
-        qWarning() << "[BidsRawData::write] Failed to create directory:" << bidsPath.directory();
+        UTILSLIB::Log::warning("[BidsRawData::write] Failed to create directory: {}", bidsPath.directory().toStdString());
         return result;
     }
 
@@ -862,7 +861,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     //=========================================================================================================
     if (options.copyData && !sourcePath.isEmpty()) {
         if (!copyRawDataFile(sourcePath, bidsPath, options.overwrite)) {
-            qWarning() << "[BidsRawData::write] Failed to copy raw data file";
+            UTILSLIB::Log::warning("[BidsRawData::write] Failed to copy raw data file");
             return result;
         }
     }
@@ -873,13 +872,13 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     {
         BIDSPath channelsPath = bidsPath.channelsTsvPath();
         if (!options.overwrite && QFileInfo::exists(channelsPath.filePath())) {
-            qWarning() << "[BidsRawData::write] channels.tsv already exists:" << channelsPath.filePath();
+            UTILSLIB::Log::warning("[BidsRawData::write] channels.tsv already exists: {}", channelsPath.filePath().toStdString());
             return result;
         }
 
         QList<BidsChannel> channelRecords = buildChannelRecords(raw.info);
         if (!BidsChannel::writeTsv(channelsPath.filePath(), channelRecords)) {
-            qWarning() << "[BidsRawData::write] Failed to write channels.tsv";
+            UTILSLIB::Log::warning("[BidsRawData::write] Failed to write channels.tsv");
             return result;
         }
     }
@@ -899,7 +898,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
             BIDSPath electrodesPath = bidsPath.electrodesTsvPath();
             if (options.overwrite || !QFileInfo::exists(electrodesPath.filePath())) {
                 if (!BidsElectrode::writeTsv(electrodesPath.filePath(), electrodeRecords))
-                    qWarning() << "[BidsRawData::write] Failed to write electrodes.tsv";
+                    UTILSLIB::Log::warning("[BidsRawData::write] Failed to write electrodes.tsv");
             }
         }
 
@@ -934,7 +933,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
                 : datatype == QLatin1String("eeg") ? QStringLiteral("EEG")
                                                    : QStringLiteral("iEEG");
             if (!BidsCoordinateSystem::writeJson(coordsysPath.filePath(), cs, modality))
-                qWarning() << "[BidsRawData::write] Failed to write coordsystem.json";
+                UTILSLIB::Log::warning("[BidsRawData::write] Failed to write coordsystem.json");
         }
     }
 
@@ -944,7 +943,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     if (!events.isEmpty()) {
         BIDSPath eventsPath = bidsPath.eventsTsvPath();
         if (!options.overwrite && QFileInfo::exists(eventsPath.filePath())) {
-            qWarning() << "[BidsRawData::write] events.tsv already exists:" << eventsPath.filePath();
+            UTILSLIB::Log::warning("[BidsRawData::write] events.tsv already exists: {}", eventsPath.filePath().toStdString());
             return result;
         }
 
@@ -960,7 +959,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
         }
 
         if (!BidsEvent::writeTsv(eventsPath.filePath(), eventsToWrite))
-            qWarning() << "[BidsRawData::write] Failed to write events.tsv";
+            UTILSLIB::Log::warning("[BidsRawData::write] Failed to write events.tsv");
     }
 
     //=========================================================================================================
@@ -969,13 +968,13 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
     {
         BIDSPath sidecarPath = bidsPath.sidecarJsonPath();
         if (!options.overwrite && QFileInfo::exists(sidecarPath.filePath())) {
-            qWarning() << "[BidsRawData::write] Sidecar JSON already exists:" << sidecarPath.filePath();
+            UTILSLIB::Log::warning("[BidsRawData::write] Sidecar JSON already exists: {}", sidecarPath.filePath().toStdString());
             return result;
         }
 
         QJsonObject sidecarJson = buildSidecarJson(*this, bidsPath);
         if (!writeJsonFile(sidecarPath.filePath(), sidecarJson)) {
-            qWarning() << "[BidsRawData::write] Failed to write sidecar JSON";
+            UTILSLIB::Log::warning("[BidsRawData::write] Failed to write sidecar JSON");
             return result;
         }
     }
@@ -995,7 +994,7 @@ BIDSPath BidsRawData::write(const BIDSPath& bidsPath,
             desc.datasetType = QStringLiteral("raw");
 
             if (!BidsDatasetDescription::write(descPath, desc))
-                qWarning() << "[BidsRawData::write] Failed to write dataset_description.json";
+                UTILSLIB::Log::warning("[BidsRawData::write] Failed to write dataset_description.json");
         }
     }
 
