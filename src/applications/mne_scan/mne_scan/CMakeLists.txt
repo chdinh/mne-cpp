@@ -94,6 +94,7 @@ if(NOT BUILD_SHARED_LIBS)
     target_link_libraries(${PROJECT_NAME} PRIVATE
         scan_averaging
         scan_babymeg
+        scan_brainamp
         scan_covariance
         scan_fiffsimulator
         scan_ftbuffer

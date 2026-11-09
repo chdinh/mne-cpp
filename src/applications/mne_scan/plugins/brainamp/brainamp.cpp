@@ -18,24 +18,27 @@
 //=============================================================================================================
 
 #include "brainamp.h"
-#include <memory>
-#include "brainampproducer.h"
 
 #include "FormFiles/brainampsetupwidget.h"
 #include "FormFiles/brainampsetupprojectwidget.h"
 
-#include <direct.h>
-
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
 #include <fiff/fiff.h>
 #include <scMeas/realtimemultisamplearray.h>
+
+//=============================================================================================================
+// QT INCLUDES
+//=============================================================================================================
+
+#include <QDebug>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <chrono>
 #include <format>
-#include <iostream>
-#include <QDebug>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -52,20 +55,6 @@ using namespace Eigen;
 //=============================================================================================================
 
 BrainAMP::BrainAMP()
-: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(8))
-, m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/brainamp/")
-, m_iSamplingFreq(1000)
-, m_iSamplesPerBlock(1000)
-, m_dLPAShift(0.01)
-, m_dRPAShift(0.01)
-, m_dNasionShift(0.06)
-, m_bCheckImpedances(false)
-, m_bUseTrackedCardinalMode(true)
-, m_bUseElectrodeShiftMode(false)
-, m_sLPA("2LD")
-, m_sRPA("2RD")
-, m_sNasion("0Z")
-, m_pBrainAMPProducer(new BrainAMPProducer(this))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);
@@ -78,8 +67,6 @@ BrainAMP::BrainAMP()
 
 BrainAMP::~BrainAMP()
 {
-    //std::cout << "BrainAMP::~BrainAMP() " << std::endl;
-
     //If the program is closed while the sampling is in process
     if (this->isRunning()) {
         this->stop();
@@ -103,12 +90,11 @@ void BrainAMP::init()
 
     m_outputConnectors.append(m_pRMTSA_BrainAMP);
 
-    //default values used by the setupGUI class must be set here
-
     QSettings settings("MNECPP");
-    m_iSamplingFreq = settings.value(QString("BRAINAMP/sFreq"), 1000).toInt();
-    m_iSamplesPerBlock = settings.value(QString("BRAINAMP/samplesPerBlock"), 1000).toInt();
-    m_bCheckImpedances = false;
+    m_iChannels = settings.value(QString("BRAINAMP/channels"), 32).toInt();
+    m_sResolution = settings.value(QString("BRAINAMP/resolution"), QString("100nV")).toString();
+    m_bSimulate = settings.value(QString("BRAINAMP/simulate"), false).toBool();
+    m_iSamplesPerBlock = settings.value(QString("BRAINAMP/samplesPerBlock"), 500).toInt();
 
     m_sElcFilePath = settings.value(QString("BRAINAMP/elcFilePath"), QString("../resources/general/3DLayouts/standard_waveguard64_duke.elc")).toString();
 
@@ -122,8 +108,6 @@ void BrainAMP::init()
     m_sNasion = settings.value(QString("BRAINAMP/NasionElectrode"), QString("")).toString();
     m_bUseTrackedCardinalMode = settings.value(QString("BRAINAMP/useTrackedCardinalsMode"), true).toBool();
     m_bUseElectrodeShiftMode = settings.value(QString("BRAINAMP/useElectrodeshiftMode"), false).toBool();
-
-    m_pFiffInfo = std::make_shared<FiffInfo>();
 }
 
 //=============================================================================================================
@@ -134,119 +118,41 @@ void BrainAMP::unload()
 
 //=============================================================================================================
 
-void BrainAMP::setUpFiffInfo()
+std::string BrainAMP::uri() const
 {
-    //
-    //Clear old fiff info data
-    //
-    m_pFiffInfo->clear();
-
-    //
-    //Set number of channels, sampling frequency and high/-lowpass
-    //
-    m_pFiffInfo->nchan = 33;
-    m_pFiffInfo->sfreq = m_iSamplingFreq;
-    m_pFiffInfo->highpass = 0.001f;
-    m_pFiffInfo->lowpass = m_iSamplingFreq / 2;
-
-    //
-    //Set up the channel info
-    //
-    m_pFiffInfo->chs.clear();
-    m_pFiffInfo->ch_names.clear();
-
-    for (int i = 0; i < m_pFiffInfo->nchan; ++i) {
-        //Create information for each channel
-        FiffChInfo fChInfo;
-
-        //EEG Channels
-        if (i <= m_pFiffInfo->nchan - 2) {
-            fChInfo.ch_name = std::format("EEG {:03}", i);
-
-            //Set channel type
-            fChInfo.kind = FIFFV_EEG_CH;
-
-            //Set logno
-            fChInfo.logNo = i;
-
-            //Set coord frame
-            fChInfo.coord_frame = FIFFV_COORD_HEAD;
-
-            //Set unit
-            fChInfo.unit = FIFF_UNIT_V;
-            fChInfo.unit_mul = 0;
-
-            //Set EEG electrode location - Convert from mm to m
-            fChInfo.eeg_loc(0, 0) = 0;
-            fChInfo.eeg_loc(1, 0) = 0;
-            fChInfo.eeg_loc(2, 0) = 0;
-
-            //Set EEG electrode direction - Convert from mm to m
-            fChInfo.eeg_loc(0, 1) = 0;
-            fChInfo.eeg_loc(1, 1) = 0;
-            fChInfo.eeg_loc(2, 1) = 0;
-
-            //Also write the eeg electrode locations into the meg loc variable (mne_ex_read_raw() matlab function wants this)
-            fChInfo.chpos.r0(0) = 0;
-            fChInfo.chpos.r0(1) = 0;
-            fChInfo.chpos.r0(2) = 0;
-
-            fChInfo.chpos.ex(0) = 1;
-            fChInfo.chpos.ex(1) = 0;
-            fChInfo.chpos.ex(2) = 0;
-
-            fChInfo.chpos.ey(0) = 0;
-            fChInfo.chpos.ey(1) = 1;
-            fChInfo.chpos.ey(2) = 0;
-
-            fChInfo.chpos.ez(0) = 0;
-            fChInfo.chpos.ez(1) = 0;
-            fChInfo.chpos.ez(2) = 1;
-        }
-
-        //Digital input channel
-        if (i == m_pFiffInfo->nchan - 1) {
-            //Set channel type
-            fChInfo.kind = FIFFV_STIM_CH;
-
-            fChInfo.ch_name = "STIM";
-        }
-
-        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
-        m_pFiffInfo->chs.push_back(fChInfo);
-    }
-
-    //
-    //Set head projection
-    //
-    m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->dev_head_t.to = FIFFV_COORD_HEAD;
-    m_pFiffInfo->ctf_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->ctf_head_t.to = FIFFV_COORD_HEAD;
+    return std::format("brainamp://?channels={}&resolution={}&simulate={}", m_iChannels, m_sResolution.toStdString(),
+                       m_bSimulate ? 1 : 0);
 }
 
 //=============================================================================================================
 
 bool BrainAMP::start()
 {
-    //Setup fiff info
-    setUpFiffInfo();
-
-    //Set the channel size of the RMTSA - this needs to be done here and NOT in the init() function because the user can change the number of channels during runtime
-    m_pRMTSA_BrainAMP->measurementData()->initFromFiffInfo(m_pFiffInfo);
-    m_pRMTSA_BrainAMP->measurementData()->setMultiArraySize(1);
-    m_pRMTSA_BrainAMP->measurementData()->setSamplingRate(m_iSamplingFreq);
-
-    m_pBrainAMPProducer->start(m_iSamplesPerBlock,
-                               m_iSamplingFreq);
-
-    if (m_pBrainAMPProducer->isRunning()) {
-        QThread::start();
-        return true;
-    } else {
-        qWarning() << "BrainAMP::start() - BrainAMPProducer thread could not be started.";
+    ACQLIB::registerBrainAmpScheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[BrainAMP::start]" << QString::fromStdString(device.error().text());
         return false;
     }
+    auto fiffInfo = ACQLIB::toFiffInfo(*device->stream().info());
+    auto reader = device->stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[BrainAMP::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        return false;
+    }
+
+    //The user can change the channels between runs, so the measurement is set up here and not in init()
+    m_pRMTSA_BrainAMP->measurementData()->initFromFiffInfo(std::make_shared<FiffInfo>(std::move(*fiffInfo)));
+    m_pRMTSA_BrainAMP->measurementData()->setMultiArraySize(1);
+
+    if (ACQLIB::AcqError e = device->start(); !e.ok()) {
+        qWarning() << "[BrainAMP::start]" << QString::fromStdString(e.text());
+        return false;
+    }
+    m_device = std::move(*device);
+    m_reader = std::move(*reader);
+    QThread::start();
+    return true;
 }
 
 //=============================================================================================================
@@ -254,18 +160,19 @@ bool BrainAMP::start()
 bool BrainAMP::stop()
 {
     requestInterruption();
-    wait(500);
+    wait();
 
-    //Stop the producer thread first
-    m_pBrainAMPProducer->stop();
+    m_device.close();
+    m_reader = ACQLIB::AcqReader();
 
     // Clear all data in the buffer connected to displays and other plugins
     m_pRMTSA_BrainAMP->measurementData()->clear();
-    m_pCircularBuffer->clear();
 
     //Store settings for next use
     QSettings settings("MNECPP");
-    settings.setValue(QString("BRAINAMP/sFreq"), m_iSamplingFreq);
+    settings.setValue(QString("BRAINAMP/channels"), m_iChannels);
+    settings.setValue(QString("BRAINAMP/resolution"), m_sResolution);
+    settings.setValue(QString("BRAINAMP/simulate"), m_bSimulate);
     settings.setValue(QString("BRAINAMP/samplesPerBlock"), m_iSamplesPerBlock);
     settings.setValue(QString("BRAINAMP/LPAShift"), m_dLPAShift);
     settings.setValue(QString("BRAINAMP/RPAShift"), m_dRPAShift);
@@ -279,15 +186,6 @@ bool BrainAMP::stop()
     settings.setValue(QString("BRAINAMP/useElectrodeshiftMode"), m_bUseElectrodeShiftMode);
 
     return true;
-}
-
-//=============================================================================================================
-
-void BrainAMP::setSampleData(MatrixXd& matData)
-{
-    while (!m_pCircularBuffer->push(matData)) {
-        //Do nothing until the circular buffer is ready to accept new data again
-    }
 }
 
 //=============================================================================================================
@@ -333,15 +231,16 @@ void BrainAMP::onUpdateCardinalPoints(const QString& sLPA, double dLPA, const QS
 
 void BrainAMP::run()
 {
-    MatrixXd matData;
-
+    const std::size_t channels = m_reader.channelCount();
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
     while (!isInterruptionRequested()) {
-        if (m_pBrainAMPProducer->isRunning()) {
-            //pop matrix
-            if (m_pCircularBuffer->pop(matData)) {
-                //emit values to real time multi sample array
-                m_pRMTSA_BrainAMP->measurementData()->setValue(matData);
-            }
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (read) {
+            m_pRMTSA_BrainAMP->measurementData()->setValue(block);
+        } else if (read.error() != ACQLIB::AcqErrorCode::Timeout) {
+            qWarning() << "[BrainAMP::run]" << QString::fromStdString(read.error().text());
+            return;
         }
     }
 }

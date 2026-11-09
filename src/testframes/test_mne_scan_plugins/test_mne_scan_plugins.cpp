@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <averaging/averaging.h>
+#include <brainamp/brainamp.h>
 #include <covariance/covariance.h>
 #include <hpi/hpi.h>
 #include <neuronalconnectivity/neuronalconnectivity.h>
@@ -69,6 +70,7 @@ private slots:
     void averagesTheStimulusEvents();
     void estimatesTheCovariance();
     void passesTheStreamThrough();
+    void brainAmpStreamsTheSimulatedAmplifier();
     void mainWindowSwitchesStyle();
 
 private:
@@ -348,6 +350,41 @@ void TestMneScanPlugins::passesTheStreamThrough()
     QMutexLocker locker(&mutex);
     QVERIFY(!blocks.isEmpty());
     QVERIFY(blocks.first().isApprox(m_data.middleCols(0, 200)));
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::brainAmpStreamsTheSimulatedAmplifier()
+{
+    QSettings settings("MNECPP");
+    settings.setValue("BRAINAMP/channels", 8);
+    settings.setValue("BRAINAMP/simulate", true);
+    settings.setValue("BRAINAMP/samplesPerBlock", 250);
+    BRAINAMPPLUGIN::BrainAMP plugin;
+    plugin.init();
+    delete plugin.setupWidget();
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+    settings.remove("BRAINAMP");
+
+    // 8 EEG channels and the marker channel at the amplifier's native 5 kHz
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& block : blocks) {
+        QCOMPARE(block.rows(), 9);
+        QCOMPARE(block.cols(), 250);
+        QVERIFY(block.topRows(8).cwiseAbs().maxCoeff() < 1e-3);
+        QVERIFY(block.topRows(8).cwiseAbs().maxCoeff() > 0.0);
+        for (const double marker : block.row(8))
+            QVERIFY(marker == 0.0 || marker == 1.0 || marker == 2.0);
+    }
 }
 
 //=============================================================================================================

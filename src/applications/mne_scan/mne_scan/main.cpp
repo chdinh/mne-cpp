@@ -77,9 +77,7 @@ Q_IMPORT_PLUGIN(Hpi)
 #ifdef WITHGUSBAMP
 Q_IMPORT_PLUGIN(GUSBAmp)
 #endif
-#ifdef WITHBRAINAMP
 Q_IMPORT_PLUGIN(BrainAMP)
-#endif
 #ifdef WITHEEGOSPORTS
 Q_IMPORT_PLUGIN(EEGoSports)
 #endif
@@ -115,9 +113,7 @@ int main(int argc, char* argv[])
     Q_INIT_RESOURCE(averaging);
     Q_INIT_RESOURCE(writetofile);
     Q_INIT_RESOURCE(hpi);
-#ifdef WITHBRAINAMP
     Q_INIT_RESOURCE(brainamp);
-#endif
 #ifdef WITHEEGOSPORTS
     Q_INIT_RESOURCE(eegosports);
 #endif

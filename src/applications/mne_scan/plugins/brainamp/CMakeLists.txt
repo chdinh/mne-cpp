@@ -6,13 +6,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(scan_brainamp LANGUAGES CXX)
 
-# Brain Products' BrainAmp SDK is not redistributable: copy BrainAmpIoCtl.h into this directory.
-foreach(_vendor_file BrainAmpIoCtl.h)
-  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_vendor_file}")
-    message(FATAL_ERROR "${PROJECT_NAME} needs ${_vendor_file} from Brain Products' BrainAmp SDK in ${CMAKE_CURRENT_SOURCE_DIR}")
-  endif()
-endforeach()
-
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -25,18 +18,14 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS}
 set(SOURCES
     brainamp.cpp
     brainamp_global.cpp
-    brainampproducer.cpp
     FormFiles/brainampsetupwidget.cpp
-    brainampdriver.cpp
     FormFiles/brainampsetupprojectwidget.cpp
 )
 
 set(HEADERS
     brainamp.h
     brainamp_global.h
-    brainampproducer.h
     FormFiles/brainampsetupwidget.h
-    brainampdriver.h
     FormFiles/brainampsetupprojectwidget.h
 )
 
@@ -80,6 +69,8 @@ set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED 
+    mne_acq_devices
+    mne_acq_fiff
     mne_disp
     mne_channels
     mne_base

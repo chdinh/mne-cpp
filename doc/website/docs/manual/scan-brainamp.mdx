@@ -4,24 +4,42 @@ sidebar_label: BrainAmp
 ---
 # BrainAmp
 
-This article describes the installation and usage of the BrainAMP EEG driver plugin for MNE Scan.
+The BrainAmp plugin streams Brain Products BrainAmp amplifiers into MNE Scan through the `brainamp://` source of the
+`mne_acq_devices` library. Without an amplifier it simulates one.
 
-## Building the BrainAMP EEG plugin
+## Building
 
-In order to build the BrainAMP driver, at first, the header file `BrainAmpIoCtl.h` from the BrainAMP SDK has to be included into the mne-cpp project. These files can be found in the device's attached software library. They have to be copied to the BrainAMP driver repository which is to be found under:
+The plugin is built by default. To talk to a real amplifier on Windows, copy `BrainAmpIoCtl.h` from the BrainAmp SDK
+into `src/applications/mne_scan/plugins/brainamp`, or point CMake at the directory that holds it:
 
-`\mne-cpp\applications\mne_scan\plugins\brainamp`
+```bash
+cmake -B build -DMNE_BRAINAMP_SDK_DIR=C:/BrainAmpSDK
+```
 
-In a second step, the plugin's source code has to be reintegrated into the mne-cpp project. Therefore, in the file :
+Without the header the source only simulates.
 
-`\mne-cpp\applications\mne_scan\plugins\plugins.pro`
+## Running
 
-the plugin's project `brainamp` has to be restored by deleting the `#` in front of the name in the Sensor section. After this is done, the MNE Scan project can be rebuilt.
+Install the BrainAmp USB driver from the software that came with the amplifier and switch the amplifier on before
+starting MNE Scan. The setup widget sets
 
-## Running the BrainAMP EEG plugin
+- **Channels**: EEG channels, 32 per amplifier and up to 128. The amplifiers must be connected in order.
+- **Resolution**: the step of one bit, 100 nV, 500 nV, 10 µV or 152.6 µV.
+- **Samples per block**: samples handed to the connected plugins at once.
+- **Simulate the amplifier**: streams the amplifier's wire format with synthetic EEG and trigger codes.
 
-For running the BrainAMP EEG plugin, the according driver has to be installed to the operating system. The files can also be found on the device attached software, as well as a documentation which will guide the whole process. After that, the BrainAMP EEG plugin can be used in the MNE Scan environment, like shown in the following figure.
+The amplifier samples at 5000 Hz. The marker word arrives as the stimulus channel `STI 014`.
 
-![](/img/BrainAMP_GUI.jpg "The GUI of the gUSBamp EEG plugin.")
+## Simulation and scripting
 
-Delivered sample frequency and block size can be set on the plugin's surface. Please mind the depicted information. After the settings are done, the acquisition can be started with the green `run` button.
+The same source is available to every program that links `mne_acq_devices`:
+
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
+
+ACQLIB::registerBrainAmpScheme();
+auto device = ACQLIB::AcqDevice::open("brainamp://?simulate=1&channels=64&resolution=500nV");
+```
+
+`simulate=1` also accepts `seed`, `realtime=0` (as fast as possible), `duration` in seconds and `gain`.

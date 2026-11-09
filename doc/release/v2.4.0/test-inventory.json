@@ -6,9 +6,9 @@
     "commit": "0800c9a1bf606c2df8c44e35fbb42ea13029b549"
   },
   "summary": {
-    "directories": 280,
+    "directories": 281,
     "registration": {
-      "unconditional": 270,
+      "unconditional": 271,
       "conditional": 7,
       "unregistered": 3
     },
@@ -23,7 +23,7 @@
       "test-data": 122
     },
     "gui": 46,
-    "with_qskip": 96,
+    "with_qskip": 97,
     "ci_excluded": {},
     "retry_paths": [],
     "ci": {
@@ -34,6 +34,7 @@
         "registered_not_executed": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_devices",
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_fiff_replay",
@@ -119,6 +120,7 @@
         "registered_not_executed": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_devices",
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_fiff_replay",
@@ -204,6 +206,7 @@
         "registered_not_executed": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_devices",
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_fiff_replay",
@@ -289,6 +292,7 @@
         "registered_not_executed": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_devices",
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_fiff_replay",
@@ -374,6 +378,7 @@
         "registered_not_executed": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_devices",
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_fiff_replay",
@@ -459,6 +464,7 @@
         "registered_not_executed": [
           "test_acq_convert",
           "test_acq_device",
+          "test_acq_devices",
           "test_acq_dlpack",
           "test_acq_error",
           "test_acq_fiff_replay",
@@ -621,6 +627,38 @@
         "AcqSchemeInfo",
         "AcqUri"
       ]
+    },
+    {
+      "name": "test_acq_devices",
+      "cmake": "src/testframes/test_acq_devices/CMakeLists.txt",
+      "registration": {
+        "state": "unconditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_acq_devices"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 120,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 1,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": []
     },
     {
       "name": "test_acq_dlpack",

@@ -35,6 +35,7 @@ add_subdirectory(fiffsimulator)
 add_subdirectory(ftbuffer)
 add_subdirectory(babymeg)
 add_subdirectory(natus)
+add_subdirectory(brainamp)
 
 # Algorithm Plugin
 add_subdirectory(rtclustmne)
@@ -46,14 +47,9 @@ add_subdirectory(writetofile)
 add_subdirectory(hpi)
 add_subdirectory(rtfwd)
 
-option(WITH_BRAINAMP    "Build BrainAMP pluign"     OFF)
 option(WITH_EEGO        "Build Eego Sport plugin"   OFF)
 option(WITH_GUSBAMP     "Build GUSBAmp plugin"      OFF)
 option(WITH_TMSI        "Build TMSI plugin"         OFF)
-
-if(WITH_BRAINAMP)
-    add_subdirectory(brainamp)
-endif()
 
 if(WITH_EEGO)
     add_subdirectory(eegosports)

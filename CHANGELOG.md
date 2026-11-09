@@ -76,10 +76,20 @@ aliases; replace the old spelling as below.
   instead of reading them as zero. `SelectionIO::write_mon` refuses group names
   that would leave the target directory.
 - `ex_make_layout` honours `--mirrorY`; it used to mirror x twice.
-- The BrainAmp, EEGoSports, TMSi and g.USBamp MNE Scan plugins (Windows, off
-  by default) compile again. Configuring one without its vendor header now
+- The EEGoSports, TMSi and g.USBamp MNE Scan plugins (Windows, off by
+  default) compile again. Configuring one without its vendor header now
   stops with a message naming the missing file. Closing the EEGoSports
   impedance widget no longer switches the plugin into impedance mode.
+- New `mne_acq_devices` library with the `brainamp://` source for Brain
+  Products BrainAmp amplifiers. `brainamp://?simulate=1` emits the amplifier's
+  int16 wire format from `synthetic://` signals, so it runs without hardware
+  on every platform; on Windows the source talks to the BrainAmp driver when
+  `BrainAmpIoCtl.h` is in `MNE_BRAINAMP_SDK_DIR`.
+- The BrainAmp MNE Scan plugin reads through `brainamp://` and is built by
+  default; its setup has a simulate switch, the channel count and the
+  resolution. It delivers the amplifier's native 5 kHz instead of dropping
+  samples to lower rates, which aliased, and the marker channel holds the
+  marker codes instead of codes scaled as volts.
 - `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
   uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
 - The export macros of `mne_bids`, `mne_com`, `mne_connectivity`, `mne_dsp`,

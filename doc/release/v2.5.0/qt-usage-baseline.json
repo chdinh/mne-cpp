@@ -24,9 +24,10 @@
     }
   },
   "summary": {
-    "libraries": 27,
+    "libraries": 28,
     "qt_free": [
       "acq",
+      "acq/devices",
       "channels",
       "decoding",
       "math",
@@ -43,6 +44,14 @@
       "public_header_includes": 0,
       "q_object": 0,
       "files": 39,
+      "modules": []
+    },
+    "acq/devices": {
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 6,
       "modules": []
     },
     "acq/fiff": {

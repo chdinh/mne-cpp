@@ -42,11 +42,10 @@ BrainAMPSetupWidget::BrainAMPSetupWidget(BrainAMP* pBrainAMP, QWidget* parent)
 {
     ui.setupUi(this);
 
-    //Connect device sampling properties
-    connect(ui.m_comboBox_SamplingFreq, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &BrainAMPSetupWidget::setSamplingFreq);
-    connect(ui.m_spinBox_BlockSize, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, &BrainAMPSetupWidget::setSamplesPerBlock);
+    connect(ui.m_spinBox_Channels, &QSpinBox::valueChanged, this, [this](int value) { m_pBrainAMP->m_iChannels = value; });
+    connect(ui.m_comboBox_Resolution, &QComboBox::currentTextChanged, this, [this](const QString& text) { m_pBrainAMP->m_sResolution = text; });
+    connect(ui.m_checkBox_Simulate, &QCheckBox::toggled, this, [this](bool checked) { m_pBrainAMP->m_bSimulate = checked; });
+    connect(ui.m_spinBox_BlockSize, &QSpinBox::valueChanged, this, [this](int value) { m_pBrainAMP->m_iSamplesPerBlock = value; });
 }
 
 //=============================================================================================================
@@ -59,21 +58,8 @@ BrainAMPSetupWidget::~BrainAMPSetupWidget()
 
 void BrainAMPSetupWidget::initGui()
 {
-    //Init device sampling properties
-    ui.m_comboBox_SamplingFreq->setCurrentText(QString::number(m_pBrainAMP->m_iSamplingFreq));
+    ui.m_spinBox_Channels->setValue(m_pBrainAMP->m_iChannels);
+    ui.m_comboBox_Resolution->setCurrentText(m_pBrainAMP->m_sResolution);
+    ui.m_checkBox_Simulate->setChecked(m_pBrainAMP->m_bSimulate);
     ui.m_spinBox_BlockSize->setValue(m_pBrainAMP->m_iSamplesPerBlock);
-}
-
-//=============================================================================================================
-
-void BrainAMPSetupWidget::setSamplingFreq()
-{
-    m_pBrainAMP->m_iSamplingFreq = ui.m_comboBox_SamplingFreq->currentText().toInt();
-}
-
-//=============================================================================================================
-
-void BrainAMPSetupWidget::setSamplesPerBlock()
-{
-    m_pBrainAMP->m_iSamplesPerBlock = ui.m_spinBox_BlockSize->value();
 }

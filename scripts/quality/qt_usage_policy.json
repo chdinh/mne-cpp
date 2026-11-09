@@ -33,6 +33,11 @@
       "public_header_includes": 0,
       "modules": []
     },
+    "acq/devices": {
+      "tokens": 0,
+      "public_header_includes": 0,
+      "modules": []
+    },
     "acq/fiff": {
       "tokens": 46,
       "public_header_includes": 0,

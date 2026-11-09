@@ -65,14 +65,14 @@ public:
      * @param[in] pBrainAMP a pointer to the corresponding ECGSimulator.
      */
     explicit BrainAMPSetupProjectWidget(BrainAMP* pBrainAMP,
-                                        QWidget* parent = 0);
+                                        QWidget* parent = nullptr);
 
     //=========================================================================================================
     /**
      * Destructs a BrainAMPSetupProjectWidget which is a child of parent.
      *
      */
-    ~BrainAMPSetupProjectWidget();
+    ~BrainAMPSetupProjectWidget() override;
 
     //=========================================================================================================
     /**

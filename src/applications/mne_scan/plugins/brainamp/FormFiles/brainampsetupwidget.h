@@ -59,14 +59,14 @@ public:
      * @param[in] parent pointer to parent widget; If parent is 0, the new BrainAMPSetupWidget becomes a window. If parent is another widget, BrainAMPSetupWidget becomes a child window inside parent. BrainAMPSetupWidget is deleted when its parent is deleted.
      * @param[in] pBrainAMP a pointer to the corresponding ECGSimulator.
      */
-    BrainAMPSetupWidget(BrainAMP* pBrainAMP, QWidget* parent = 0);
+    BrainAMPSetupWidget(BrainAMP* pBrainAMP, QWidget* parent = nullptr);
 
     //=========================================================================================================
     /**
      * Destroys the BrainAMPSetupWidget.
      * All BrainAMPSetupWidget's children are deleted first. The application exits if BrainAMPSetupWidget is the main widget.
      */
-    ~BrainAMPSetupWidget();
+    ~BrainAMPSetupWidget() override;
 
     //=========================================================================================================
     /**
@@ -76,27 +76,6 @@ public:
     void initGui();
 
 private:
-    //=========================================================================================================
-    /**
-     * Sets the device sampling properties.
-     *
-     */
-    void setDeviceSamplingProperties();
-
-    //=========================================================================================================
-    /**
-     * Forward the device sampling frequency.
-     *
-     */
-    void setSamplingFreq();
-
-    //=========================================================================================================
-    /**
-     * Forward the device samples per block.
-     *
-     */
-    void setSamplesPerBlock();
-
     BrainAMP* m_pBrainAMP;     /**< a pointer to corresponding BrainAMP.*/
     Ui::BrainAMPSetupClass ui; /**< the user interface for the BrainAMPSetupWidget.*/
 };

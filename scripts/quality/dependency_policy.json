@@ -50,8 +50,9 @@
     },
     {
       "name": "acquisition",
-      "description": "Bridges of the standard-C++ acquisition core to FIFF, BIDS and LSL (measurement-info conversion, recording, the lsl:// source) and the Polhemus digitiser.",
+      "description": "Bridges of the standard-C++ acquisition core to FIFF, BIDS and LSL (measurement-info conversion, recording, the lsl:// source), the EEG amplifier sources with their simulators, and the Polhemus digitiser.",
       "libraries": [
+        "mne_acq_devices",
         "mne_acq_fiff",
         "mne_acq_lsl",
         "mne_acq_polhemus"

@@ -21,27 +21,11 @@
 //=============================================================================================================
 
 #include "brainamp_global.h"
-#include <memory>
 
-#include <fstream>
-
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <base/circular_buffer.h>
 
-#include <Eigen/Core>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QFile>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
-
-#include <unsupported/Eigen/FFT>
-#include <Eigen/Geometry>
+#include <string>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -50,12 +34,6 @@
 namespace SCMEASLIB
 {
 class RealTimeMultiSampleArray;
-}
-
-namespace FIFFLIB
-{
-class FiffStream;
-class FiffInfo;
 }
 
 //=============================================================================================================
@@ -69,7 +47,6 @@ namespace BRAINAMPPLUGIN
 // BRAINAMPPLUGIN FORWARD DECLARATIONS
 //=============================================================================================================
 
-class BrainAMPProducer;
 class BrainAMPSetupWidget;
 class BrainAMPSetupProjectWidget;
 
@@ -77,7 +54,8 @@ class BrainAMPSetupProjectWidget;
 /**
  * BrainAMP...
  *
- * @brief The BrainAMP class provides a EEG connector. In order for this plugin to work properly the driver dll "RTINST.dll" must be installed in the system directory. This dll is automatically copied in the system directory during the driver installtion of the TMSi Refa device.
+ * @brief EEG connector for Brain Products BrainAmp amplifiers through the brainamp:// source of mne_acq_devices,
+ *        which can also simulate the amplifier.
  */
 class BRAINAMPSHARED_EXPORT BrainAMP : public SCSHAREDLIB::AbstractSensor
 {
@@ -86,9 +64,7 @@ class BRAINAMPSHARED_EXPORT BrainAMP : public SCSHAREDLIB::AbstractSensor
     // Use the Q_INTERFACES() macro to tell Qt's meta-object system about the interfaces
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
-    friend class BrainAMPProducer;
     friend class BrainAMPSetupWidget;
-    friend class BrainAMPImpedanceWidget;
     friend class BrainAMPSetupProjectWidget;
 
 public:
@@ -102,56 +78,44 @@ public:
     /**
      * Destroys the BrainAMP.
      */
-    virtual ~BrainAMP();
+    ~BrainAMP() override;
 
     //=========================================================================================================
     /**
      * Clone the plugin
      */
-    virtual QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const;
+    QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const override;
 
     //=========================================================================================================
     /**
      * Initialise input and output connectors.
      */
-    virtual void init();
+    void init() override;
 
     //=========================================================================================================
     /**
      * Is called when plugin is detached of the stage. Can be used to safe settings.
      */
-    virtual void unload();
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Sets up the fiff info with the current data chosen by the user.
+     * Opens the amplifier (or its simulator) and starts streaming.
      */
-    void setUpFiffInfo();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Starts the BrainAMP by starting the tmsi's thread.
+     * Stops streaming and releases the amplifier.
      */
-    virtual bool start();
+    bool stop() override;
 
-    //=========================================================================================================
-    /**
-     * Stops the BrainAMP by stopping the tmsi's thread.
-     */
-    virtual bool stop();
+    AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
 
-    //=========================================================================================================
-    /**
-     * Set/Add received samples to a QList.
-     */
-    void setSampleData(Eigen::MatrixXd& matData);
+    QWidget* setupWidget() override;
 
-    virtual AbstractPlugin::PluginType getType() const;
-    virtual QString getName() const;
-
-    virtual QWidget* setupWidget();
-
-    virtual QString getBuildInfo();
+    QString getBuildInfo() override;
 
 protected slots:
     //=========================================================================================================
@@ -170,11 +134,9 @@ protected slots:
 protected:
     //=========================================================================================================
     /**
-     * The starting point for the thread. After calling start(), the newly created thread calls this function.
-     * Returning from this method will end the execution of the thread.
-     * Pure virtual method inherited by QThread.
+     * Hands the amplifier's blocks to the connected plugins until stop().
      */
-    virtual void run();
+    void run() override;
 
     //=========================================================================================================
     /**
@@ -183,40 +145,34 @@ protected:
     void showSetupProjectDialog();
 
 private:
+    /** @return The brainamp:// URI of the current settings. */
+    std::string uri() const;
+
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_BrainAMP; /**< The RealTimeSampleArray to provide the EEG data.*/
     QSharedPointer<BrainAMPSetupProjectWidget> m_pBrainAMPSetupProjectWidget;                             /**< Widget for checking the impedances*/
 
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer; /**< Holds incoming raw data.*/
+    ACQLIB::AcqDevice m_device; /**< The amplifier while streaming. */
+    ACQLIB::AcqReader m_reader; /**< Reads the amplifier's stream in run(). */
 
-    QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
+    int m_iChannels = 32;            /**< EEG channels, 32 per amplifier.*/
+    QString m_sResolution = "100nV"; /**< Step of one bit.*/
+    bool m_bSimulate = false;        /**< Simulate the amplifier.*/
+    int m_iSamplesPerBlock = 500;    /**< Samples per block handed to the connected plugins.*/
 
-    int m_iSamplingFreq;    /**< The sampling frequency defined by the user via the GUI (in Hertz).*/
-    int m_iSamplesPerBlock; /**< The number of channels defined by the user via the GUI.*/
+    double m_dLPAShift = 0.01;    /**< The shift in m in to generate the LPA.*/
+    double m_dRPAShift = 0.01;    /**< The shift in m in to generate the RPA.*/
+    double m_dNasionShift = 0.06; /**< The shift in m in to generate the Nasion.*/
 
-    double m_dLPAShift;    /**< The shift in m in to generate the LPA.*/
-    double m_dRPAShift;    /**< The shift in m in to generate the RPA.*/
-    double m_dNasionShift; /**< The shift in m in to generate the Nasion.*/
-
-    bool m_bCheckImpedances;        /**< Flag for checking the impedances of the EEG amplifier.*/
-    bool m_bUseTrackedCardinalMode; /**< Flag for using the tracked cardinal mode.*/
-    bool m_bUseElectrodeShiftMode;  /**< Flag for using the electrode shift mode.*/
+    bool m_bUseTrackedCardinalMode = true; /**< Flag for using the tracked cardinal mode.*/
+    bool m_bUseElectrodeShiftMode = false; /**< Flag for using the electrode shift mode.*/
 
     QString m_sElcFilePath;      /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
     QString m_sCardinalFilePath; /**< Holds the path for the .elc file holding the cardinals/fiducials (electrode positions). Defined by the user via the GUI.*/
-    QString m_sLPA;              /**< The electrode to take to function as the LPA.*/
-    QString m_sRPA;              /**< The electrode to take to function as the RPA.*/
-    QString m_sNasion;           /**< The electrode to take to function as the Nasion.*/
+    QString m_sLPA = "2LD";      /**< The electrode to take to function as the LPA.*/
+    QString m_sRPA = "2RD";      /**< The electrode to take to function as the RPA.*/
+    QString m_sNasion = "0Z";    /**< The electrode to take to function as the Nasion.*/
 
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
-
-    QSharedPointer<BrainAMPProducer> m_pBrainAMPProducer; /**< the BrainAMPProducer.*/
-
-    QMutex m_qMutex; /**< Holds the threads mutex.*/
-
-    QAction* m_pActionSetupProject;  /**< shows setup project dialog. */
-    QAction* m_pActionSetupStimulus; /**< starts stimulus feature. */
-
-    QMutex m_mutex;
+    QAction* m_pActionSetupProject = nullptr; /**< shows setup project dialog. */
 };
 } // NAMESPACE
 
