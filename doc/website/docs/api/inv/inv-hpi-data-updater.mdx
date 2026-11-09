@@ -39,7 +39,7 @@ Constructs a [`InvHpiDataUpdater`](/docs/api/inv/inv-hpi-data-updater) object.
 
 **Parameters:**
 
-- **pFiffInfo** : *const QSharedPointer&lt;[FiffInfo](/docs/api/fiff/fiff-info)&gt;*
+- **pFiffInfo** : *const std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt; &*
   Measurement info used to initialize channels, bads, HPI digitizer points and sensors.
 
 ---
@@ -50,7 +50,7 @@ Check if information in [FiffInfo](/docs/api/fiff/fiff-info) changed and update 
 
 **Parameters:**
 
-- **pFiffInfo** : *const QSharedPointer&lt;[FiffInfo](/docs/api/fiff/fiff-info)&gt;*
+- **pFiffInfo** : *const std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt; &*
   The FiffInfo to check for changes.
 
 ---
@@ -112,7 +112,7 @@ inline get functions for private member variables.
 
 Inverse library: continuous head position (HPI) fitting.
 
-````cpp title="src/examples/ex_inv_hpi/main.cpp, line 109"
+````cpp title="src/examples/ex_inv_hpi/main.cpp, line 110"
 InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
@@ -132,7 +132,7 @@ const Vector3d reference = maxfilter.block<1, 3>(0, 4).transpose();
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 292"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 293"
 InvHpiDataUpdater updater(hpiInfo); // MEG picks, sensor geometry and digitised coil positions
 updater.prepareDataAndProjectors(hpiData, projectors);
 const InvHpiModelParameters model(QVector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
@@ -142,7 +142,7 @@ const InvHpiModelParameters model(QVector<int>({166, 154, 161, 158}), hpiInfo->s
 
 Fit continuous HPI coils on raw data with SSP and write the head positions for comparison with MaxFilter.
 
-````cpp title="src/examples/ex_hpiFit/main.cpp, line 182"
+````cpp title="src/examples/ex_hpiFit/main.cpp, line 183"
 InvHpiDataUpdater hpiDataUpdater = InvHpiDataUpdater(pFiffInfo);
 InvHpiFit HPI = InvHpiFit(hpiDataUpdater.getSensors());
 ````

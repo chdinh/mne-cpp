@@ -64,7 +64,7 @@ Creates the real-time averaging object.
 - **iTriggerIndex** : *quint32*
   Row in dex of channel which is to be scanned for triggers.
 
-- **pFiffInfo** : *[FIFFLIB::FiffInfo](/docs/api/fiff/fiff-info)::SPtr*
+- **pFiffInfo** : *std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt;*
   Associated Fiff Information.
 
 ---
@@ -199,7 +199,7 @@ Resets the averaged data stored.
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 158"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 159"
 RtAveragingWorker averager(10, 20, 80, 0, 0, 2, info); // up to 10 epochs, 20 pre / 80 post samples, trigger row 2
 FiffEvokedSet evokedSet;
 QObject::connect(&averager, &RtAveragingWorker::resultReady,

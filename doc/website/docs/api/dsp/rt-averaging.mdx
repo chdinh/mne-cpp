@@ -66,7 +66,7 @@ Creates the real-time averaging object.
 - **iTriggerIndex** : *quint32*
   Row in dex of channel which is to be scanned for triggers.
 
-- **pFiffInfo** : *[FIFFLIB::FiffInfo](/docs/api/fiff/fiff-info)::SPtr*
+- **pFiffInfo** : *std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt;*
   Associated Fiff Information.
 
 - **parent** : *QObject **
@@ -115,7 +115,7 @@ Restarts the thread by interrupting its computation queue, quitting, waiting and
 - **iTriggerIndex** : *quint32*
   Row in dex of channel which is to be scanned for triggers.
 
-- **pFiffInfo** : *[FIFFLIB::FiffInfo](/docs/api/fiff/fiff-info)::SPtr*
+- **pFiffInfo** : *std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt;*
   Associated Fiff Information.
 
 ---
@@ -245,7 +245,7 @@ Reset the data processing in the real-time worker.
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 163"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 164"
     averager.doWork(block); // runs synchronously; RtAveraging moves this worker to a thread
 }
 // Average of k = 1..4 is 2.5 after the trigger and 0 before it; MEG0121 stays at -2

@@ -73,7 +73,7 @@ Find a model with a given name and return a duplicate Refactored from: fwd_eeg_s
 
 **Returns:**
 
-- *[FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model)::UPtr* — A duplicat of the found model.
+- *std::unique_ptr&lt; [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) &gt;* — A duplicat of the found model.
 
 ---
 
@@ -103,15 +103,15 @@ The model will be owned by the set.
 
 **Parameters:**
 
-- **s** : *UPtr*
+- **s** : *std::unique_ptr&lt; [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set) &gt;*
   The model set (created if nullptr).
 
-- **m** : *[FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model)::UPtr*
+- **m** : *std::unique_ptr&lt; [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) &gt;*
   The model to add (ownership transferred).
 
 **Returns:**
 
-- *UPtr* — The model set.
+- *std::unique_ptr&lt; [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set) &gt;* — The model set.
 
 ---
 
@@ -121,12 +121,12 @@ Choose and setup the default EEG sphere model Refactored from: fwd_eeg_sphere_mo
 
 **Parameters:**
 
-- **s** : *UPtr*
+- **s** : *std::unique_ptr&lt; [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set) &gt;*
   The model set to which loaded models are added.
 
 **Returns:**
 
-- *UPtr* — The model set with the default model (s + default models).
+- *std::unique_ptr&lt; [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set) &gt;* — The model set with the default model (s + default models).
 
 ---
 
@@ -139,12 +139,12 @@ Load all models available in the specified file Refactored from: fwd_eeg_sphere_
 - **p_sFileName** : *const std::filesystem::path &*
   file name to load models from.
 
-- **now** : *UPtr*
+- **now** : *std::unique_ptr&lt; [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set) &gt;*
   The model set to which loaded models are added.
 
 **Returns:**
 
-- *UPtr* — The loaded model set (now + loaded models).
+- *std::unique_ptr&lt; [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set) &gt;* — The loaded model set (now + loaded models).
 
 ---
 

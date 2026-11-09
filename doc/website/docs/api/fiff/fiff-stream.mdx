@@ -29,7 +29,7 @@ Reads or writes one `QIODevice`. Builds the FIFF directory and [`FiffDirNode`](/
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
@@ -203,7 +203,7 @@ Returns the directory compiled into a tree tree is set when `open()` was called.
 
 **Returns:**
 
-- *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &* — the compiled directory.
+- *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &* — the compiled directory.
 
 ---
 
@@ -243,7 +243,7 @@ Helper to get all evoked entries.
 
 **Parameters:**
 
-- **evoked_node** : *const std::vector&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &gt; &*
+- **evoked_node** : *const std::vector&lt; std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &gt; &*
   evoked tree nodes.
 
 - **comments** : *StringList &*
@@ -304,7 +304,7 @@ Builds the block tree of a directory from the block that starts at an entry.
 
 **Returns:**
 
-- *[FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — The block, or null if a tag cannot be read.
+- *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt;* — The block, or null if a tag cannot be read.
 
 ---
 
@@ -316,7 +316,7 @@ Reads the bad channel list from a node if it exists Note: In difference to mne-m
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node of interest.
 
 **Returns:**
@@ -342,7 +342,7 @@ Reads the first MNE-Python annotations block (FIFFB_MNE_ANNOTATIONS) below `p_No
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node to search, e.g. `dirtree()`.
 
 - **annotations** : *[FiffAnnotations](/docs/api/fiff/fiff-annotations) &*
@@ -420,7 +420,7 @@ Reads a covariance matrix from a fiff file
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   look for the matrix in here.
 
 - **cov_kind** : *fiff_int_t*
@@ -443,7 +443,7 @@ Read the CTF software compensation data from the given node
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node of interest.
 
 - **p_Chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
@@ -461,7 +461,7 @@ Reads the digitizer data below a node, as MNE-C's load_digitizer_data (digitizer
 
 **Parameters:**
 
-- **node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node.
 
 **Returns:**
@@ -478,13 +478,13 @@ Read the measurement info Source is assumed to be an open fiff file.
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node of interest.
 
 - **p_Info** : *[FiffInfo](/docs/api/fiff/fiff-info) &*
   The read measurement info.
 
-- **p_NodeInfo** : *[FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_NodeInfo** : *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The to measurement corresponding fiff_dir_node.
 
 **Returns:**
@@ -501,7 +501,7 @@ Read light measurement info from forward operator.
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node of interest.
 
 - **p_InfoForward** : *[FiffInfoBase](/docs/api/fiff/fiff-info-base) &*
@@ -521,7 +521,7 @@ Reads a named matrix.
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node of interest.
 
 - **matkind** : *fiff_int_t*
@@ -542,7 +542,7 @@ Read the SSP data under a given directory node.
 
 **Parameters:**
 
-- **p_Node** : *const [FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **p_Node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   The node of interest.
 
 **Returns:**
@@ -1313,7 +1313,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
@@ -1325,7 +1325,7 @@ ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 
 
 Read a FIFF file from a memory buffer with a chosen byte order and summarise its contents.
 
-````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 125"
+````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 126"
 FIFFLIB::FiffStream stream(&buffer);
 stream.setLittleEndian(littleEndian);
 ````

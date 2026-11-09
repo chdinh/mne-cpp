@@ -75,7 +75,7 @@ Reads a sparse named matrix (MNE-C `mne_read_sparse_named_matrix`).
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   An open FIFF stream.
 
-- **node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   A `FIFFB_MNE_NAMED_MATRIX` block, or a block whose direct children contain one.
 
 - **kind** : *int*

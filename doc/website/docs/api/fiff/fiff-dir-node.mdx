@@ -23,7 +23,7 @@ Each node corresponds to one `FIFFB_BLOCK_START` ... `FIFFB_BLOCK_END` pair in t
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
@@ -86,7 +86,7 @@ Finds the blocks of a kind in this block and its sub-blocks, in file order.
 
 **Returns:**
 
-- *std::vector&lt; SPtr &gt;* — The blocks of the tree itself, not copies.
+- *std::vector&lt; std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &gt;* — The blocks of the tree itself, not copies.
 
 ---
 
@@ -186,7 +186,7 @@ Copies directory subtrees from fidin to fidout.
 - **in_id** : *const [FiffId](/docs/api/fiff/fiff-id) &*
   file id description.
 
-- **p_Nodes** : *std::span&lt; const SPtr &gt;*
+- **p_Nodes** : *std::span&lt; const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &gt;*
   subtree directories to be copied.
 
 - **target** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
@@ -215,7 +215,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 QFile structureFile(dir + "/sample_audvis-ave.fif");
 FiffStream stream(&structureFile);
 const bool opened = stream.open();
-const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
@@ -227,9 +227,9 @@ ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 
 
 Read a FIFF file from a memory buffer with a chosen byte order and summarise its contents.
 
-````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 129"
+````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 130"
 FIFFLIB::FiffInfo FifInfo;
-FIFFLIB::FiffDirNode::SPtr DirNode;
+std::shared_ptr<FIFFLIB::FiffDirNode> DirNode;
 ````
 
 ## Authors of this file

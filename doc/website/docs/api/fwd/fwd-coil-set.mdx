@@ -60,7 +60,7 @@ Create a MEG coil definition using a database of templates Change the coordinate
 
 **Returns:**
 
-- *[FwdCoil](/docs/api/fwd/fwd-coil)::UPtr* — The created meg coil.
+- *std::unique_ptr&lt; [FwdCoil](/docs/api/fwd/fwd-coil) &gt;* — The created meg coil.
 
 ---
 
@@ -84,7 +84,7 @@ Create a MEG coil set definition using a database of templates Change the coordi
 
 **Returns:**
 
-- *FwdCoilSet::UPtr* — The created meg coil set.
+- *std::unique_ptr&lt; [FwdCoilSet](/docs/api/fwd/fwd-coil-set) &gt;* — The created meg coil set.
 
 ---
 
@@ -99,7 +99,7 @@ Make a coil set duplicate.
 
 **Returns:**
 
-- *FwdCoilSet::UPtr* — The duplicated coil set.
+- *std::unique_ptr&lt; [FwdCoilSet](/docs/api/fwd/fwd-coil-set) &gt;* — The duplicated coil set.
 
 ---
 
@@ -192,7 +192,7 @@ Create a EEG coil set definition using a channel information Change the coordina
 
 **Returns:**
 
-- *FwdCoilSet::UPtr* — The created meg coil set.
+- *std::unique_ptr&lt; [FwdCoilSet](/docs/api/fwd/fwd-coil-set) &gt;* — The created meg coil set.
 
 ---
 
@@ -207,7 +207,7 @@ Read a coil definitions from file.
 
 **Returns:**
 
-- *FwdCoilSet::UPtr* — The read meg coil set.
+- *std::unique_ptr&lt; [FwdCoilSet](/docs/api/fwd/fwd-coil-set) &gt;* — The read meg coil set.
 
 ---
 

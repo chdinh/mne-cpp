@@ -49,7 +49,7 @@ Creates the real-time inverse operator estimation object.
 
 **Parameters:**
 
-- **p_pFiffInfo** : *QSharedPointer&lt;[FiffInfo](/docs/api/fiff/fiff-info)&gt; &*
+- **p_pFiffInfo** : *std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt; &*
   Fiff measurement info.
 
 - **p_pFwd** : *QSharedPointer&lt;[MNEForwardSolution](/docs/api/mne/mne-forward-solution)&gt; &*
@@ -113,7 +113,7 @@ Stops the thread by interrupting its computation queue, quitting and waiting.
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 318"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 319"
 RtInvOp rtInvOp(rawInfo, fwd); // MEG-only operator, loose 0.2, depth 0.8
 MNEInverseOperator inverse;
 bool inverseDone = false;

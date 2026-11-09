@@ -586,7 +586,7 @@ Read an integer tag from a FIFF node.
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   Open FIFF stream to read from.
 
-- **node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Directory node to search for the tag.
 
 - **what** : *int*
@@ -615,7 +615,7 @@ Load BEM surfaces of specified kinds from a FIFF file.
 
 **Returns:**
 
-- *FwdBemModel::UPtr* — BEM model containing the requested surfaces, or nullptr on failure.
+- *std::unique_ptr&lt; [FwdBemModel](/docs/api/fwd/fwd-bem-model) &gt;* — BEM model containing the requested surfaces, or nullptr on failure.
 
 ---
 
@@ -632,7 +632,7 @@ Convenience wrapper that loads only the inner skull surface.
 
 **Returns:**
 
-- *FwdBemModel::UPtr* — BEM model, or nullptr on failure.
+- *std::unique_ptr&lt; [FwdBemModel](/docs/api/fwd/fwd-bem-model) &gt;* — BEM model, or nullptr on failure.
 
 ---
 
@@ -647,7 +647,7 @@ Load a three-layer BEM model (scalp, outer skull, inner skull) from a FIFF file.
 
 **Returns:**
 
-- *FwdBemModel::UPtr* — BEM model, or nullptr on failure.
+- *std::unique_ptr&lt; [FwdBemModel](/docs/api/fwd/fwd-bem-model) &gt;* — BEM model, or nullptr on failure.
 
 ---
 

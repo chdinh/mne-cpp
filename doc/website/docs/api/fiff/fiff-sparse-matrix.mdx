@@ -162,7 +162,7 @@ Add the upper triangle to a lower-triangular sparse RCS matrix.
 
 **Returns:**
 
-- *FiffSparseMatrix::UPtr* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix) with both triangles.
+- *std::unique_ptr&lt; [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) &gt;* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix) with both triangles.
 
 ---
 
@@ -172,7 +172,7 @@ Extract only the lower triangle (including diagonal) from a square RCS matrix.
 
 **Returns:**
 
-- *FiffSparseMatrix::UPtr* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix) with lower-triangle elements.
+- *std::unique_ptr&lt; [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) &gt;* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix) with lower-triangle elements.
 
 ---
 
@@ -224,7 +224,7 @@ Conversion of tag data into the standard sparse representation.
 
 **Returns:**
 
-- *FiffSparseMatrix::UPtr* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix), or nullptr on error.
+- *std::unique_ptr&lt; [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) &gt;* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix), or nullptr on error.
 
 ---
 
@@ -251,7 +251,7 @@ Create a sparse RCS matrix from row-based data.
 
 **Returns:**
 
-- *FiffSparseMatrix::UPtr* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix), or nullptr on error.
+- *std::unique_ptr&lt; [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) &gt;* — A unique pointer to the newly constructed [`FiffSparseMatrix`](/docs/api/fiff/fiff-sparse-matrix), or nullptr on error.
 
 ---
 

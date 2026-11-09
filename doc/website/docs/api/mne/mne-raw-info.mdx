@@ -83,12 +83,12 @@ Walks up the tree from the given node by following parent pointers until a node 
 
 **Parameters:**
 
-- **node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Starting node from which to search upward.
 
 **Returns:**
 
-- *[FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — Shared pointer to the enclosing FIFFB_MEAS node, or an empty shared pointer if no such node is found.
+- *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt;* — Shared pointer to the enclosing FIFFB_MEAS node, or an empty shared pointer if no such node is found.
 
 ---
 
@@ -100,12 +100,12 @@ First locates the enclosing FIFFB_MEAS node by walking up the tree from the give
 
 **Parameters:**
 
-- **node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Starting node from which to search.
 
 **Returns:**
 
-- *[FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — Shared pointer to the FIFFB_MEAS_INFO node, or an empty shared pointer if not found.
+- *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt;* — Shared pointer to the FIFFB_MEAS_INFO node, or an empty shared pointer if not found.
 
 ---
 
@@ -117,12 +117,12 @@ Searches the tree under the given node for a FIFFB_RAW_DATA block. If none is fo
 
 **Parameters:**
 
-- **node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Root node of the subtree to search.
 
 **Returns:**
 
-- *[FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — Shared pointer to the raw data directory node, or an empty shared pointer if neither raw nor continuous data blocks are found.
+- *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt;* — Shared pointer to the raw data directory node, or an empty shared pointer if neither raw nor continuous data blocks are found.
 
 ---
 
@@ -134,12 +134,12 @@ Searches the tree under the given node for a FIFFB_SMSH_RAW_DATA block, which co
 
 **Parameters:**
 
-- **node** : *const [FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *const std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Root node of the subtree to search.
 
 **Returns:**
 
-- *[FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr* — Shared pointer to the MaxShield raw data directory node, or an empty shared pointer if no such block is found.
+- *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt;* — Shared pointer to the MaxShield raw data directory node, or an empty shared pointer if no such block is found.
 
 ---
 
@@ -154,7 +154,7 @@ Extracts channel information, sampling frequency, filter parameters, coordinate 
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   Open FIFF stream to read tags from.
 
-- **node** : *[FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Starting directory node (typically the raw data node).
 
 - **id** : *std::unique_ptr&lt; [FiffId](/docs/api/fiff/fiff-id) &gt; &*
@@ -196,7 +196,7 @@ This is an overloaded member function, provided for convenience. It differs from
 - **stream** : *[FiffStream](/docs/api/fiff/fiff-stream) &*
   Open FIFF stream to read tags from.
 
-- **node** : *[FIFFLIB::FiffDirNode](/docs/api/fiff/fiff-dir-node)::SPtr &*
+- **node** : *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
   Starting directory node (typically the raw data node).
 
 - **id** : *std::unique_ptr&lt; [FiffId](/docs/api/fiff/fiff-id) &gt; &*

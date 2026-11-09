@@ -46,7 +46,7 @@ Creates the worker.
 - **iFftLength** : *qint32*
   FFT length (number of samples per window).
 
-- **pFiffInfo** : *[FIFFLIB::FiffInfo](/docs/api/fiff/fiff-info)::SPtr*
+- **pFiffInfo** : *const std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt; &*
   Associated Fiff Information.
 
 - **iDataLength** : *qint32*
@@ -78,7 +78,7 @@ Process one data block, accumulate, and emit the spectrum when enough blocks are
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 220"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 221"
 RtNoiseWorker noiseWorker(64, info200, 10); // 64-point FFT over 10 accumulated blocks
 MatrixXd spectrum;
 QObject::connect(&noiseWorker, &RtNoiseWorker::resultReady, [&](const MatrixXd& psd) { spectrum = psd; });

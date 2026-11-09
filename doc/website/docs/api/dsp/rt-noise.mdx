@@ -46,7 +46,7 @@ Creates the real-time noise estimation object.
 - **iFftLength** : *qint32*
   Number of samples per FFT window.
 
-- **pFiffInfo** : *[FIFFLIB::FiffInfo](/docs/api/fiff/fiff-info)::SPtr*
+- **pFiffInfo** : *const std::shared_ptr&lt; [FiffInfo](/docs/api/fiff/fiff-info) &gt; &*
   Associated Fiff Information.
 
 - **iDataLength** : *qint32*
@@ -132,7 +132,7 @@ Blocks until the worker thread has finished, or until the timeout (ms) expires.
 
 DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI fitting and inverse operators.
 
-````cpp title="src/examples/ex_dsp_rt/main.cpp, line 231"
+````cpp title="src/examples/ex_dsp_rt/main.cpp, line 232"
 RtNoise rtNoise(64, info200, 10);
 bool noiseDone = false;
 QObject::connect(&rtNoise, &RtNoise::SpecCalculated, [&](const MatrixXd& psd) { noiseDone = psd.topRows(2).isApprox(spectrum.topRows(2)); }); // the empty stim row is -inf dB

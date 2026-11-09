@@ -415,9 +415,9 @@ double edgeWeight(const Network& network, int start, int end)
 
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
-````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 93"
+````cpp title="src/examples/ex_connectivity/connectivitysettingsmanager.h, line 94"
 ConnectivitySettings m_settings;
-RtConnectivity::SPtr m_pRtConnectivity;
+std::shared_ptr<RtConnectivity> m_pRtConnectivity;
 std::vector<Network> m_rawNetworkData; /**< Results as computed. */
 std::vector<Network> m_networkData;    /**< Results averaged over the selected band and normalized. */
 std::map<std::string, Eigen::Vector4i> mColor;
