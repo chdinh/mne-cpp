@@ -14,7 +14,7 @@
  */
 
 #ifndef EEGOSPORTSIMPEDANCESCENE_H
-#define EEGOSportsIMPEDANCESCENE_H
+#define EEGOSPORTSIMPEDANCESCENE_H
 
 //=============================================================================================================
 // INCLUDES
