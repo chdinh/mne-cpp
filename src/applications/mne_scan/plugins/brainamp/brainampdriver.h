@@ -48,7 +48,6 @@ namespace BRAINAMPPLUGIN
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
-class BrainAMPProducer;
 
 //=============================================================================================================
 // DEFINES
@@ -87,10 +86,8 @@ public:
     //=========================================================================================================
     /**
      * Constructs a BrainAMPDriver.
-     *
-     * @param[in] pEEGoSportsProducer a pointer to the corresponding EEGoSports Producer class.
      */
-    BrainAMPDriver(BrainAMPProducer* pBrainAmpProducer);
+    BrainAMPDriver();
 
     //=========================================================================================================
     /**
@@ -141,10 +138,7 @@ public:
     bool uninitDevice();
 
 private:
-    BrainAMPProducer* m_pBrainAmpProducer; /**< A pointer to the corresponding BrainAmpProducer class.*/
-
     bool m_bInitDeviceSuccess; /**< Flag which defines if the device initialisation was successfull.*/
-    bool m_bDllLoaded;         /**< Flag which defines if the driver DLL was loaded successfully.*/
 
     uint m_uiDownsample;        /**< The number of channels defined by the user via the GUI.*/
     uint m_uiSamplingFrequency; /**< The sampling frequency defined by the user via the GUI (in Hertz).*/

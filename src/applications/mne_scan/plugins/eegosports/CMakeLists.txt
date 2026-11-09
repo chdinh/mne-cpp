@@ -6,6 +6,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(scan_eegosports LANGUAGES CXX)
 
+# The eemagine eego SDK is not redistributable: copy eemagine/sdk/factory.h, eemagine/sdk/wrapper.cc into this directory.
+foreach(_vendor_file eemagine/sdk/factory.h eemagine/sdk/wrapper.cc)
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_vendor_file}")
+    message(FATAL_ERROR "${PROJECT_NAME} needs ${_vendor_file} from the eemagine eego SDK in ${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+endforeach()
+
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

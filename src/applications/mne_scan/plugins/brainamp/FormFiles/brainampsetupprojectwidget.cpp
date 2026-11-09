@@ -46,8 +46,8 @@ using namespace CHANNELSLIB;
 
 BrainAMPSetupProjectWidget::BrainAMPSetupProjectWidget(BrainAMP* pBrainAMP, QWidget* parent)
 : QWidget(parent)
-, ui(std::make_unique<Ui::BrainAMPSetupProjectWidget>())
 , m_pBrainAMP(pBrainAMP)
+, ui(std::make_unique<Ui::BrainAMPSetupProjectWidget>())
 {
     ui->setupUi(this);
 
@@ -196,7 +196,7 @@ void BrainAMPSetupProjectWidget::changeCap()
                                                 "../resources/mne_scan/plugins/tmsi/loc_files",
                                                 tr("Electrode location files (*.elc)"));
 
-    if (path == NULL) {
+    if (path.isEmpty()) {
         path = ui->m_qLineEdit_EEGCap->text();
     }
 
@@ -213,7 +213,7 @@ void BrainAMPSetupProjectWidget::changeCardinalFile()
                                                 "../resources/mne_scan/plugins/tmsi/loc_files",
                                                 tr("Electrode location files (*.elc)"));
 
-    if (path == NULL)
+    if (path.isEmpty())
         path = ui->m_lineEdit_cardinalFile->text();
 
     ui->m_lineEdit_cardinalFile->setText(path);

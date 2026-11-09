@@ -29,6 +29,8 @@
 #include <QtCore/QtPlugin>
 #include <QDebug>
 
+#include <format>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -44,13 +46,12 @@ using namespace FIFFLIB;
 //=============================================================================================================
 
 GUSBAmp::GUSBAmp()
-: m_pRTMSA_GUSBAmp(0)
+: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
 , m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/gusbamp/")
 , m_pGUSBAmpProducer(new GUSBAmpProducer(this))
-, m_iNumberOfChannels(0)
-, m_iSamplesPerBlock(0)
 , m_iSampleRate(128)
-, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
+, m_iSamplesPerBlock(0)
+, m_iNumberOfChannels(0)
 {
     m_viChannelsToAcquire = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
@@ -87,28 +88,18 @@ void GUSBAmp::setUpFiffInfo()
     int numberEEGCh = m_iNumberOfChannels;
 
     //Set up the channel info
-    QStringList QSLChNames;
     m_pFiffInfo->chs.clear();
+    m_pFiffInfo->ch_names.clear();
 
     for (int i = 0; i < m_iNumberOfChannels; i++) {
         //Create information for each channel
-        QString sChType;
         FiffChInfo fChInfo;
 
         //EEG Channels
         if (i <= numberEEGCh - 1) {
             //Set channel name
             //fChInfo.ch_name = elcChannelNames.at(i);
-            sChType = QString("EEG ");
-            if (i < 10) {
-                sChType.append("00");
-            }
-
-            if (i >= 10 && i < 100) {
-                sChType.append("0");
-            }
-
-            fChInfo.ch_name = sChType.append(sChType.number(i));
+            fChInfo.ch_name = std::format("EEG {:03}", i);
 
             //Set channel type
             fChInfo.kind = FIFFV_EEG_CH;
@@ -126,13 +117,9 @@ void GUSBAmp::setUpFiffInfo()
             //cout<<i<<endl<<fChInfo.eeg_loc<<endl;
         }
 
-        QSLChNames << sChType;
-
-        m_pFiffInfo->chs.append(fChInfo);
+        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
+        m_pFiffInfo->chs.push_back(fChInfo);
     }
-
-    //Set channel names in fiff_info_base
-    m_pFiffInfo->ch_names = QSLChNames;
 
     //Set head projection
     m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
@@ -245,7 +232,6 @@ QWidget* GUSBAmp::setupWidget()
 
 void GUSBAmp::run()
 {
-    qint32 size = 0;
     MatrixXf matValue;
 
     while (!isInterruptionRequested()) {
@@ -278,20 +264,6 @@ void GUSBAmp::showSetupProjectDialog()
         m_pGUSBampSetupProjectWidget->show();
         m_pGUSBampSetupProjectWidget->raise();
     }
-}
-
-//=============================================================================================================
-
-bool GUSBAmp::dirExists(const std::string& dirName_in)
-{
-    DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
-    if (ftyp == INVALID_FILE_ATTRIBUTES) {
-        return false; //something is wrong with your path!
-    }
-    if (ftyp & FILE_ATTRIBUTE_DIRECTORY) {
-        return true; // this is a directory!
-    }
-    return false; // this is not a directory!
 }
 
 //=============================================================================================================

@@ -21,9 +21,8 @@
 #include <QtCore/QcoreApplication>
 #include <QDebug>
 #include "gusbampdriver.h"
-#include "gusbampproducer.h"
 #include <iostream>
-#include <Windows.h>
+#include <windows.h>
 #include <deque>
 #include <stdarg.h>
 
@@ -39,18 +38,17 @@ using namespace std;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-GUSBAmpDriver::GUSBAmpDriver(GUSBAmpProducer* pGUSBAmpProducer)
-: m_pGUSBAmpProducer(pGUSBAmpProducer)
-, m_chNumberOfChannels(0)
+GUSBAmpDriver::GUSBAmpDriver()
+: m_iSlaveSerialsSize(0)
 , m_iNumberOfScans(0)
-, m_iSlaveSerialsSize(0)
-, m_QUEUE_SIZE(4)
+, m_chNumberOfChannels(0)
 , m_bTrigger(FALSE)
 , m_mode(M_NORMAL)
 , m_commonReference({FALSE, FALSE, FALSE, FALSE})
 , m_commonGround({FALSE, FALSE, FALSE, FALSE})
-, m_numBytesReceived(0)
+, m_QUEUE_SIZE(4)
 , m_isRunning(false)
+, m_numBytesReceived(0)
 {
 //Linking the specific API-library to the project
 #ifdef _WIN64
@@ -196,7 +194,7 @@ bool GUSBAmpDriver::initDevice()
                     throw string("Error on GT_SetGround: Couldn't set common ground for device ").append(*serialNumber);
                 }
             }
-            qInfo("\tg.USBamp %s initialized as %s (#%d in the call sequence)!", *serialNumber, (isSlave) ? "slave" : "master", m_openedDevicesHandles.size());
+            qInfo("\tg.USBamp %s initialized as %s (#%zu in the call sequence)!", *serialNumber, (isSlave) ? "slave" : "master", m_openedDevicesHandles.size());
         }
 
         //define the buffer variables and start the device:
@@ -332,7 +330,7 @@ bool GUSBAmpDriver::getSampleMatrixValue(MatrixXf& sampleMatrix)
                     BYTE ByteValue[sizeof(float)];
                     float FloatValue;
 
-                    for (int i = 0; i < sizeof(float); i++) {
+                    for (std::size_t i = 0; i < sizeof(float); i++) {
                         ByteValue[i] = m_buffers[deviceIndex][queueIndex][(scanIndex * (m_chNumberOfChannels + m_bTrigger) + channelIndex) * sizeof(float) + HEADER_SIZE + i];
                     }
                     memcpy(&FloatValue, &ByteValue, sizeof(float));

@@ -97,13 +97,6 @@ private:
      */
     void setSamplesPerBlock();
 
-    //=========================================================================================================
-    /**
-     * Shows the About Dialog
-     *
-     */
-    void showAboutDialog();
-
     BrainAMP* m_pBrainAMP;     /**< a pointer to corresponding BrainAMP.*/
     Ui::BrainAMPSetupClass ui; /**< the user interface for the BrainAMPSetupWidget.*/
 };

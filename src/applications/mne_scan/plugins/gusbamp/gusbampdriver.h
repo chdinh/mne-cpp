@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include <gusbamp_global.h>
-#include <Windows.h> //windows.h-library for LPSTR-,UCHAR-, and HANDLE-files
+#include <windows.h> //windows.h-library for LPSTR-,UCHAR-, and HANDLE-files
 #include <deque>
 #include <vector>
 #include <stdarg.h>
@@ -48,7 +48,6 @@ namespace GUSBAMPPLUGIN
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
-class GUSBAmpProducer;
 
 //=============================================================================================================
 /**
@@ -99,10 +98,8 @@ public:
     //=========================================================================================================
     /**
      * Constructs a GUSBAmpDriver.
-     *
-     * @param[in]  pGUSBAmpProducer a pointer to the corresponding GUSBAmp Producer class.
      */
-    GUSBAmpDriver(GUSBAmpProducer* pGUSBAmpProducer);
+    GUSBAmpDriver();
 
     //=========================================================================================================
     /**
@@ -201,9 +198,6 @@ public:
      *
      */
     std::vector<int> getSizeOfSampleMatrix(void);
-
-protected:
-    GUSBAmpProducer* m_pGUSBAmpProducer; /**< A pointer to the corresponding GUSBAmpProducer class.*/
 };
 } // NAMESPACE
 

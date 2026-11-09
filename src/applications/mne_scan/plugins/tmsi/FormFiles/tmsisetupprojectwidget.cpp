@@ -32,8 +32,8 @@ using namespace TMSIPLUGIN;
 
 TMSISetupProjectWidget::TMSISetupProjectWidget(TMSI* pTMSI, QWidget* parent)
 : QWidget(parent)
-, ui(std::make_unique<Ui::TMSISetupProjectWidget>())
 , m_pTMSI(pTMSI)
+, ui(std::make_unique<Ui::TMSISetupProjectWidget>())
 {
     ui->setupUi(this);
 
@@ -68,7 +68,7 @@ void TMSISetupProjectWidget::changeCap()
                                                 "../resources/mne_scan/plugins/tmsi/loc_files",
                                                 tr("Electrode location files (*.elc)"));
 
-    if (path == NULL)
+    if (path.isEmpty())
         path = ui->m_qLineEdit_EEGCap->text();
 
     ui->m_qLineEdit_EEGCap->setText(path);

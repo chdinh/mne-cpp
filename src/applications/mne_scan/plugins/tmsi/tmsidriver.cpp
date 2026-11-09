@@ -17,7 +17,6 @@
 //=============================================================================================================
 
 #include "tmsidriver.h"
-#include "tmsiproducer.h"
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -26,13 +25,31 @@
 using namespace TMSIPLUGIN;
 
 //=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+// A function of the TMSi SDK DLL; the detour via void (*)() is the sanctioned cast between function pointer types.
+template<typename Function>
+Function loadFunction(HINSTANCE library, const char* name)
+{
+    const auto function = reinterpret_cast<Function>(reinterpret_cast<void (*)()>(::GetProcAddress(library, name)));
+    if (!function)
+        qWarning() << "Plugin TMSI - ERROR - Error loading method " << name;
+    return function;
+}
+
+} // anonymous namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-TMSIDriver::TMSIDriver(TMSIProducer* pTMSIProducer)
-: m_pTMSIProducer(pTMSIProducer)
+TMSIDriver::TMSIDriver()
+: m_bInitDeviceSuccess(false)
 , m_bDllLoaded(true)
-, m_bInitDeviceSuccess(false)
 , m_uiNumberOfChannels(138)
 , m_uiSamplingFrequency(1024)
 , m_uiSamplesPerBlock(1)
@@ -71,22 +88,22 @@ TMSIDriver::TMSIDriver(TMSIProducer* pTMSIProducer)
     }
 
     //Load DLL methods for initializing the driver
-    __load_dll_func__(m_oFpOpen, POPEN, "Open");
-    __load_dll_func__(m_oFpClose, PCLOSE, "Close");
-    __load_dll_func__(m_oFpStart, PSTART, "Start");
-    __load_dll_func__(m_oFpStop, PSTOP, "Stop");
-    __load_dll_func__(m_oFpGetSignalFormat, PGETSIGNALFORMAT, "GetSignalFormat");
-    __load_dll_func__(m_oFpSetSignalBuffer, PSETSIGNALBUFFER, "SetSignalBuffer");
-    __load_dll_func__(m_oFpGetSamples, PGETSAMPLES, "GetSamples");
-    __load_dll_func__(m_oFpGetBufferInfo, PGETBUFFERINFO, "GetBufferInfo");
-    __load_dll_func__(m_oFpFree, PFREE, "Free");
-    __load_dll_func__(m_oFpLibraryInit, PLIBRARYINIT, "LibraryInit");
-    __load_dll_func__(m_oFpLibraryExit, PLIBRARYEXIT, "LibraryExit");
-    __load_dll_func__(m_oFpGetDeviceList, PGETDEVICELIST, "GetDeviceList");
-    __load_dll_func__(m_oFpGetFrontEndInfo, PGETFRONTENDINFO, "GetFrontEndInfo");
-    __load_dll_func__(m_oFpSetRefCalculation, PSETREFCALCULATION, "SetRefCalculation");
-    __load_dll_func__(m_oFpSetMeasuringMode, PSETMEASURINGMODE, "SetMeasuringMode");
-    __load_dll_func__(m_oFpGetErrorCode, PGETERRORCODE, "GetErrorCode");
+    m_oFpOpen = loadFunction<POPEN>(m_oLibHandle, "Open");
+    m_oFpClose = loadFunction<PCLOSE>(m_oLibHandle, "Close");
+    m_oFpStart = loadFunction<PSTART>(m_oLibHandle, "Start");
+    m_oFpStop = loadFunction<PSTOP>(m_oLibHandle, "Stop");
+    m_oFpGetSignalFormat = loadFunction<PGETSIGNALFORMAT>(m_oLibHandle, "GetSignalFormat");
+    m_oFpSetSignalBuffer = loadFunction<PSETSIGNALBUFFER>(m_oLibHandle, "SetSignalBuffer");
+    m_oFpGetSamples = loadFunction<PGETSAMPLES>(m_oLibHandle, "GetSamples");
+    m_oFpGetBufferInfo = loadFunction<PGETBUFFERINFO>(m_oLibHandle, "GetBufferInfo");
+    m_oFpFree = loadFunction<PFREE>(m_oLibHandle, "Free");
+    m_oFpLibraryInit = loadFunction<PLIBRARYINIT>(m_oLibHandle, "LibraryInit");
+    m_oFpLibraryExit = loadFunction<PLIBRARYEXIT>(m_oLibHandle, "LibraryExit");
+    m_oFpGetDeviceList = loadFunction<PGETDEVICELIST>(m_oLibHandle, "GetDeviceList");
+    m_oFpGetFrontEndInfo = loadFunction<PGETFRONTENDINFO>(m_oLibHandle, "GetFrontEndInfo");
+    m_oFpSetRefCalculation = loadFunction<PSETREFCALCULATION>(m_oLibHandle, "SetRefCalculation");
+    m_oFpSetMeasuringMode = loadFunction<PSETMEASURINGMODE>(m_oLibHandle, "SetMeasuringMode");
+    m_oFpGetErrorCode = loadFunction<PGETERRORCODE>(m_oLibHandle, "GetErrorCode");
 
     qInfo("Plugin TMSI - INFO - TMSIDriver() - Successfully loaded all DLL functions");
 }
@@ -186,18 +203,11 @@ bool TMSIDriver::initDevice(int iNumberOfChannels,
     //Get information about the connected device
     FRONTENDINFO FrontEndInfo;
     Status = m_oFpGetFrontEndInfo(m_HandleMaster, &FrontEndInfo);
-    unsigned short serial, hwVersion, swVersion, baseSf, maxRS232, nrOfChannels;
-
     if (!Status)
         qWarning("Plugin TMSI - ERROR - initDevice() - FrontendInfo NOT available");
-    else {
-        serial = FrontEndInfo.Serial;
-        hwVersion = FrontEndInfo.HwVersion;
-        swVersion = FrontEndInfo.SwVersion;
-        baseSf = FrontEndInfo.BaseSf;
-        maxRS232 = FrontEndInfo.maxRS232;
-        nrOfChannels = FrontEndInfo.NrOfChannels;
-    }
+    else
+        qInfo("Plugin TMSI - INFO - initDevice() - Front end %lu: hardware %u, software %u, base rate %u Hz, %u channels",
+              FrontEndInfo.Serial, FrontEndInfo.HwVersion, FrontEndInfo.SwVersion, FrontEndInfo.BaseSf, FrontEndInfo.NrOfChannels);
 
     // Set Ref Calculation
     if (m_bUseCommonAverage) {
@@ -217,7 +227,7 @@ bool TMSIDriver::initDevice(int iNumberOfChannels,
         m_uiNumberOfAvailableChannels = pSignalFormat[0].Elements;
 
         if (m_bWriteDriverDebugToFile)
-            m_outputFileStream << "Found " << m_wcDeviceName << " device (" << m_ulSerialNumber << ") with " << m_uiNumberOfAvailableChannels << " available channels" << endl
+            m_outputFileStream << "Found " << QString::fromWCharArray(m_wcDeviceName).toStdString() << " device (" << m_ulSerialNumber << ") with " << m_uiNumberOfAvailableChannels << " available channels" << endl
                                << endl;
 
         for (uint i = 0; i < m_uiNumberOfAvailableChannels; i++) {

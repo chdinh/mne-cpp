@@ -61,7 +61,6 @@ namespace EEGOSPORTSPLUGIN
 // EEGOSPORTSPLUGIN FORWARD DECLARATIONS
 //=============================================================================================================
 
-class EEGoSportsProducer;
 
 //=============================================================================================================
 // DEFINES
@@ -81,10 +80,8 @@ public:
     //=========================================================================================================
     /**
      * Constructs a EEGoSportsDriver.
-     *
-     * @param[in] pEEGoSportsProducer a pointer to the corresponding EEGoSportsProducer class.
      */
-    EEGoSportsDriver(EEGoSportsProducer* pEEGoSportsProducer);
+    EEGoSportsDriver();
 
     //=========================================================================================================
     /**
@@ -149,8 +146,6 @@ public:
     QList<uint> getChannellist();
 
 private:
-    EEGoSportsProducer* m_pEEGoSportsProducer; /**< A pointer to the corresponding EEGoSportsProducer class.*/
-
     bool m_bInitDeviceSuccess;     /**< Flag which defines if the device initialisation was successfully.*/
     bool m_bStartRecordingSuccess; /**< Flag which defines if the recording was started successfully.*/
     bool m_bDllLoaded;             /**< Flag which defines if the driver DLL was loaded successfully.*/

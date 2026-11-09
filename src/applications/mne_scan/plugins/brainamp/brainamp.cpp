@@ -33,6 +33,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <format>
 #include <iostream>
 #include <QDebug>
 
@@ -51,18 +52,20 @@ using namespace Eigen;
 //=============================================================================================================
 
 BrainAMP::BrainAMP()
-: m_pRMTSA_BrainAMP(0)
+: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(8))
 , m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/brainamp/")
-, m_pBrainAMPProducer(new BrainAMPProducer(this))
+, m_iSamplingFreq(1000)
+, m_iSamplesPerBlock(1000)
 , m_dLPAShift(0.01)
 , m_dRPAShift(0.01)
 , m_dNasionShift(0.06)
+, m_bCheckImpedances(false)
 , m_bUseTrackedCardinalMode(true)
 , m_bUseElectrodeShiftMode(false)
 , m_sLPA("2LD")
 , m_sRPA("2RD")
 , m_sNasion("0Z")
-, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(8))
+, m_pBrainAMPProducer(new BrainAMPProducer(this))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);
@@ -149,27 +152,16 @@ void BrainAMP::setUpFiffInfo()
     //
     //Set up the channel info
     //
-    QStringList QSLChNames;
     m_pFiffInfo->chs.clear();
+    m_pFiffInfo->ch_names.clear();
 
     for (int i = 0; i < m_pFiffInfo->nchan; ++i) {
         //Create information for each channel
-        QString sChType;
         FiffChInfo fChInfo;
 
         //EEG Channels
         if (i <= m_pFiffInfo->nchan - 2) {
-            //Set channel name
-            sChType = QString("EEG ");
-            if (i < 10) {
-                sChType.append("00");
-            }
-
-            if (i >= 10 && i < 100) {
-                sChType.append("0");
-            }
-
-            fChInfo.ch_name = sChType.append(sChType.number(i));
+            fChInfo.ch_name = std::format("EEG {:03}", i);
 
             //Set channel type
             fChInfo.kind = FIFFV_EEG_CH;
@@ -217,17 +209,12 @@ void BrainAMP::setUpFiffInfo()
             //Set channel type
             fChInfo.kind = FIFFV_STIM_CH;
 
-            sChType = QString("STIM");
-            fChInfo.ch_name = sChType;
+            fChInfo.ch_name = "STIM";
         }
 
-        QSLChNames << sChType;
-
-        m_pFiffInfo->chs.append(fChInfo);
+        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
+        m_pFiffInfo->chs.push_back(fChInfo);
     }
-
-    //Set channel names in fiff_info_base
-    m_pFiffInfo->ch_names = QSLChNames;
 
     //
     //Set head projection

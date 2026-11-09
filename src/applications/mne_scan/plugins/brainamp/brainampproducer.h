@@ -34,6 +34,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <memory>
+
 #include <QThread>
 
 //=============================================================================================================
@@ -98,8 +100,8 @@ protected:
     virtual void run();
 
 private:
-    BrainAMP* m_pBrainAmp;                            /**< A pointer to the corresponding BrainAmp class.*/
-    QSharedPointer<BrainAMPDriver> m_pBrainAmpDriver; /**< A pointer to the corresponding BrainAmp driver class.*/
+    BrainAMP* m_pBrainAmp;                             /**< A pointer to the corresponding BrainAmp class.*/
+    std::unique_ptr<BrainAMPDriver> m_pBrainAmpDriver; /**< A pointer to the corresponding BrainAmp driver class.*/
 
     bool m_bIsRunning; /**< Whether BrainAMPProducer is running.*/
 };

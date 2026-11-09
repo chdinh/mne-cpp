@@ -48,8 +48,8 @@
 
 #include <QtWidgets>
 #include <QVector>
-#include <QTime>
-#include <QtConcurrent/QtConcurrent>
+#include <QElapsedTimer>
+#include <QThreadPool>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -210,8 +210,8 @@ private:
     int m_iNumberOfChannels; /**< The number of channels defined by the user via the GUI.*/
     int m_iSamplesPerBlock;  /**< The samples per block defined by the user via the GUI.*/
 
-    int m_iTriggerInterval; /**< The gap between the trigger signals which request the subject to do something (in ms).*/
-    QTime m_qTimerTrigger;  /**< Time stemp of the last trigger event (in ms).*/
+    int m_iTriggerInterval;        /**< The gap between the trigger signals which request the subject to do something (in ms).*/
+    QElapsedTimer m_qTimerTrigger; /**< Time stemp of the last trigger event (in ms).*/
 
     bool m_bUseChExponent;          /**< Flag for using the channels exponent. Defined by the user via the GUI.*/
     bool m_bUseUnitGain;            /**< Flag for using the channels unit gain. Defined by the user via the GUI.*/

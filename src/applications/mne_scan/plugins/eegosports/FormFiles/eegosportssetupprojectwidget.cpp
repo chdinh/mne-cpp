@@ -43,8 +43,8 @@ using namespace CHANNELSLIB;
 
 EEGoSportsSetupProjectWidget::EEGoSportsSetupProjectWidget(EEGoSports* pEEGoSports, QWidget* parent)
 : QWidget(parent)
-, m_pUi(std::make_unique<Ui::EEGoSportsSetupProjectWidget>())
 , m_pEEGoSports(pEEGoSports)
+, m_pUi(std::make_unique<Ui::EEGoSportsSetupProjectWidget>())
 {
     m_pUi->setupUi(this);
 
@@ -204,7 +204,7 @@ void EEGoSportsSetupProjectWidget::changeCap()
                                                 "../resources/mne_scan/plugins/eegosports/loc_files",
                                                 tr("Electrode location files (*.elc)"));
 
-    if (path == NULL) {
+    if (path.isEmpty()) {
         path = m_pUi->m_qLineEdit_EEGCap->text();
     }
 
@@ -221,7 +221,7 @@ void EEGoSportsSetupProjectWidget::changeCardinalFile()
                                                 "../resources/mne_scan/plugins/loc_files",
                                                 tr("Electrode location files (*.elc)"));
 
-    if (path == NULL)
+    if (path.isEmpty())
         path = m_pUi->m_lineEdit_cardinalFile->text();
 
     m_pUi->m_lineEdit_cardinalFile->setText(path);

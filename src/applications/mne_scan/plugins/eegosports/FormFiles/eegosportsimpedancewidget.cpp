@@ -48,8 +48,8 @@ using namespace EEGOSPORTSPLUGIN;
 //=============================================================================================================
 
 EEGoSportsImpedanceWidget::EEGoSportsImpedanceWidget(EEGoSports* pEEGoSports, QWidget* parent)
-: m_pEEGoSports(pEEGoSports)
-, QWidget(parent)
+: QWidget(parent)
+, m_pEEGoSports(pEEGoSports)
 , m_pUi(std::make_unique<Ui::EEGoSportsImpedanceWidget>())
 , m_dMaxImpedance(20000)
 {
@@ -319,7 +319,7 @@ void EEGoSportsImpedanceWidget::saveToFile()
     // Update position
     for (int i = 0; i < itemListNew.size(); i++) {
         EEGoSportsElectrodeItem* item = itemListNew.at(i);
-        outputFileStream << i << " " << item->getElectrodeName().toStdString() << " " << item->getImpedanceValue() << endl;
+        outputFileStream << i << " " << item->getElectrodeName().toStdString() << " " << item->getImpedanceValue() << std::endl;
     }
 
     outputFileStream.close();

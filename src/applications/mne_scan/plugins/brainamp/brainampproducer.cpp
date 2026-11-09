@@ -41,7 +41,7 @@ using namespace Eigen;
 
 BrainAMPProducer::BrainAMPProducer(BrainAMP* pBrainAmp)
 : m_pBrainAmp(pBrainAmp)
-, m_pBrainAmpDriver(new BrainAMPDriver(this))
+, m_pBrainAmpDriver(std::make_unique<BrainAMPDriver>())
 , m_bIsRunning(true)
 {
 }

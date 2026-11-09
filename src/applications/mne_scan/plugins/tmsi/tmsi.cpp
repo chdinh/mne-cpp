@@ -20,6 +20,8 @@
 #include <memory>
 #include "tmsiproducer.h"
 
+#include <windows.h>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -27,6 +29,7 @@
 #include <QtCore/QtPlugin>
 #include <QtCore/QTextStream>
 #include <QDebug>
+#include <format>
 #include <numbers>
 
 //=============================================================================================================
@@ -71,8 +74,8 @@ bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& pos
 TMSI::TMSI()
 : m_pRMTSA_TMSI(0)
 , m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/tmsi/")
-, m_pTMSIProducer(new TMSIProducer(this))
 , m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
+, m_pTMSIProducer(new TMSIProducer(this))
 {
     // Create record file option action bar item/button
     m_pActionSetupProject = new QAction(QIcon(":/images/database.png"), tr("Setup project"), this);
@@ -282,30 +285,20 @@ void TMSI::setUpFiffInfo()
     m_pFiffInfo->dig = std::move(digitizerInfo);
 
     //Set up the channel info
-    QStringList QSLChNames;
     m_pFiffInfo->chs.clear();
+    m_pFiffInfo->ch_names.clear();
 
     for (int i = 0; i < m_iNumberOfChannels; i++) {
         //Create information for each channel
-        QString sChType;
         FiffChInfo fChInfo;
 
         //EEG Channels
         if (i <= numberEEGCh - 1) {
             //Set channel name
             if (!elcChannelNames.empty() && i < elcChannelNames.size()) {
-                sChType = QString("EEG ");
-                sChType.append(elcChannelNames.at(i));
-                fChInfo.ch_name = sChType;
+                fChInfo.ch_name = "EEG " + elcChannelNames.at(i).toStdString();
             } else {
-                sChType = QString("EEG ");
-                if (i < 10)
-                    sChType.append("00");
-
-                if (i >= 10 && i < 100)
-                    sChType.append("0");
-
-                fChInfo.ch_name = sChType.append(sChType.number(i));
+                fChInfo.ch_name = std::format("EEG {:03}", i);
             }
 
             //Set channel type
@@ -359,8 +352,7 @@ void TMSI::setUpFiffInfo()
             //Set channel type
             fChInfo.kind = FIFFV_MISC_CH;
 
-            sChType = QString("BIPO ");
-            fChInfo.ch_name = sChType.append(sChType.number(i - 128));
+            fChInfo.ch_name = std::format("BIPO {}", i - 128);
         }
 
         //Auxilary input channels
@@ -368,8 +360,7 @@ void TMSI::setUpFiffInfo()
             //Set channel type
             fChInfo.kind = FIFFV_MISC_CH;
 
-            sChType = QString("AUX ");
-            fChInfo.ch_name = sChType.append(sChType.number(i - 132));
+            fChInfo.ch_name = std::format("AUX {}", i - 132);
         }
 
         //Digital input channel
@@ -377,8 +368,7 @@ void TMSI::setUpFiffInfo()
             //Set channel type
             fChInfo.kind = FIFFV_STIM_CH;
 
-            sChType = QString("STI 014");
-            fChInfo.ch_name = sChType;
+            fChInfo.ch_name = "STI 014";
         }
 
         //Internally generated test signal - ramp signal
@@ -386,17 +376,12 @@ void TMSI::setUpFiffInfo()
             //Set channel type
             fChInfo.kind = FIFFV_MISC_CH;
 
-            sChType = QString("TEST RAMP");
-            fChInfo.ch_name = sChType;
+            fChInfo.ch_name = "TEST RAMP";
         }
 
-        QSLChNames << sChType;
-
-        m_pFiffInfo->chs.append(fChInfo);
+        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
+        m_pFiffInfo->chs.push_back(fChInfo);
     }
-
-    //Set channel names in fiff_info_base
-    m_pFiffInfo->ch_names = QSLChNames;
 
     //Set head projection
     m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
@@ -417,29 +402,29 @@ void TMSI::setUpFiffInfo()
 
     //Set projection 1
     for (int i = 0; i < namedMatrix->ncol; i++)
-        namedMatrix->col_names << QSLChNames.at(i);
+        namedMatrix->col_names.push_back(m_pFiffInfo->ch_names.at(i));
 
     proj.data = namedMatrix;
-    proj.desc = QString("PCA-v1");
-    m_pFiffInfo->projs.append(proj);
+    proj.desc = "PCA-v1";
+    m_pFiffInfo->projs.push_back(proj);
 
     //Set projection 2
     namedMatrix->col_names.clear();
     for (int i = 0; i < namedMatrix->ncol; i++)
-        namedMatrix->col_names << QSLChNames.at(i + namedMatrix->ncol);
+        namedMatrix->col_names.push_back(m_pFiffInfo->ch_names.at(i + namedMatrix->ncol));
 
     proj.data = namedMatrix;
-    proj.desc = QString("PCA-v2");
-    m_pFiffInfo->projs.append(proj);
+    proj.desc = "PCA-v2";
+    m_pFiffInfo->projs.push_back(proj);
 
     //Set projection 3
     namedMatrix->col_names.clear();
     for (int i = 0; i < namedMatrix->ncol; i++)
-        namedMatrix->col_names << QSLChNames.at(i + (2 * namedMatrix->ncol));
+        namedMatrix->col_names.push_back(m_pFiffInfo->ch_names.at(i + (2 * namedMatrix->ncol)));
 
     proj.data = namedMatrix;
-    proj.desc = QString("PCA-v3");
-    m_pFiffInfo->projs.append(proj);
+    proj.desc = "PCA-v3";
+    m_pFiffInfo->projs.push_back(proj);
 }
 
 //=============================================================================================================
@@ -547,7 +532,6 @@ void TMSI::setKeyboardTriggerType(int type)
 
 void TMSI::run()
 {
-    qint32 size = 0;
     MatrixXf matData;
 
     while (!isInterruptionRequested()) {
@@ -565,7 +549,7 @@ void TMSI::run()
             if (m_pCircularBuffer->pop(matData)) {
                 // Set Beep trigger (if activated)
                 if (m_bBeepTrigger && m_qTimerTrigger.elapsed() >= m_iTriggerInterval) {
-                    QtConcurrent::run(Beep, 450, 700);
+                    QThreadPool::globalInstance()->start([] { Beep(450, 700); });
                     //Set trigger in received data samples - just for one sample, so that this event is easy to detect
                     matData(136, m_iSamplesPerBlock - 1) = 252;
                     m_qTimerTrigger.restart();

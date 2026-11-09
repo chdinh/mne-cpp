@@ -19,14 +19,9 @@
 //=============================================================================================================
 
 #include "eegosportsdriver.h"
-#include "eegosportsproducer.h"
 
 #include "eemagine/sdk/wrapper.cc" // Wrapper code to be compiled.
 #include "eemagine/sdk/factory.h"  // SDK header
-
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 
 //=============================================================================================================
 // QT INCLUDES
@@ -38,7 +33,9 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -52,11 +49,10 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-EEGoSportsDriver::EEGoSportsDriver(EEGoSportsProducer* pEEGoSportsProducer)
-: m_pEEGoSportsProducer(pEEGoSportsProducer)
-, m_bDllLoaded(true)
-, m_bInitDeviceSuccess(false)
+EEGoSportsDriver::EEGoSportsDriver()
+: m_bInitDeviceSuccess(false)
 , m_bStartRecordingSuccess(false)
+, m_bDllLoaded(true)
 , m_uiNumberOfChannels(90)
 , m_uiNumberOfEEGChannels(64)
 , m_uiSamplingFrequency(512)
@@ -103,7 +99,7 @@ bool EEGoSportsDriver::initDevice(bool bWriteDriverDebugToFile,
 
         //std::cout<<"[EEGoSportsDriver::initDevice] Serial number of connected eegosports device: "<<m_pAmplifier->getSerialNumber()<<std::endl;
 
-        QThread::msleep(100);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     } catch (std::runtime_error& e) {
         qWarning() << "[EEGoSportsDriver::initDevice] error " << e.what();
@@ -165,7 +161,7 @@ bool EEGoSportsDriver::startRecording(int iSamplesPerBlock,
             m_pDataStream.reset(m_pAmplifier->OpenEegStream(m_uiSamplingFrequency, reference_range, bipolar_range));
         }
 
-        QThread::msleep(100);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     } catch (std::runtime_error& e) {
         qWarning() << "[EEGoSportsDriver::startRecording]" << e.what();

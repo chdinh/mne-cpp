@@ -32,7 +32,7 @@
 #include <fiff/fiff.h>
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <unistd.h>
 #endif
@@ -48,11 +48,13 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QDebug>
+#include <QRegularExpression>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <format>
 #include <iostream>
 #include <numbers>
 
@@ -96,9 +98,8 @@ bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& pos
 //=============================================================================================================
 
 EEGoSports::EEGoSports()
-: m_pRMTSA_EEGoSports(0)
+: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10))
 , m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/eegosports/")
-, m_pEEGoSportsProducer(new EEGoSportsProducer(this))
 , m_dLPAShift(0.01)
 , m_dRPAShift(0.01)
 , m_dNasionShift(0.06)
@@ -107,7 +108,7 @@ EEGoSports::EEGoSports()
 , m_sLPA("2LD")
 , m_sRPA("2RD")
 , m_sNasion("0Z")
-, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10))
+, m_pEEGoSportsProducer(new EEGoSportsProducer(this))
 {
 }
 
@@ -366,30 +367,20 @@ void EEGoSports::setUpFiffInfo()
     //
     //Set up the channel info
     //
-    QStringList QSLChNames;
     m_pFiffInfo->chs.clear();
+    m_pFiffInfo->ch_names.clear();
 
     for (int i = 0; i < m_iNumberOfChannels; i++) {
         //Create information for each channel
-        QString sChType;
         FiffChInfo fChInfo;
 
         //EEG Channels
         if (i < m_iNumberOfEEGChannels || (i > (m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels) && m_bCheckImpedances)) {
             //Set channel name
             if (!elcChannelNames.empty() && i < elcChannelNames.size()) {
-                sChType = QString("EEG ");
-                sChType.append(elcChannelNames.at(i));
-                fChInfo.ch_name = sChType;
+                fChInfo.ch_name = "EEG " + elcChannelNames.at(i).toStdString();
             } else {
-                sChType = QString("EEG ");
-                if (i < 10)
-                    sChType.append("00");
-
-                if (i >= 10 && i < 100)
-                    sChType.append("0");
-
-                fChInfo.ch_name = sChType.append(sChType.number(i));
+                fChInfo.ch_name = std::format("EEG {:03}", i);
             }
 
             //Set channel type
@@ -439,32 +430,28 @@ void EEGoSports::setUpFiffInfo()
             //Set channel type
             fChInfo.kind = FIFFV_MISC_CH;
 
-            sChType = QString("BIPO ");
-            fChInfo.ch_name = sChType.append(sChType.number(i - m_iNumberOfEEGChannels));
+            fChInfo.ch_name = std::format("BIPO {}", i - m_iNumberOfEEGChannels);
         }
         //Digital input channel
         else if (!m_bCheckImpedances && i == m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels) {
             //Set channel type
             fChInfo.kind = FIFFV_STIM_CH;
 
-            sChType = QString("STIM");
-            fChInfo.ch_name = sChType;
+            fChInfo.ch_name = "STIM";
         }
         //Internally generated test signal - ramp signal
         else if (!m_bCheckImpedances && i == m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels + 1) {
             //Set channel type
             fChInfo.kind = FIFFV_MISC_CH;
 
-            sChType = QString("TEST");
-            fChInfo.ch_name = sChType;
+            fChInfo.ch_name = "TEST";
         }
         //Add reference channel for EEG measurement
         //Set channel name
         else if (!m_bCheckImpedances && i == m_iNumberOfChannels - 1) {
-            int refindex = elcChannelNames.indexOf(QRegExp("ref", Qt::CaseInsensitive, QRegExp::RegExp));
+            int refindex = elcChannelNames.indexOf(QRegularExpression("ref", QRegularExpression::CaseInsensitiveOption));
 
-            sChType = QString("EEG REF");
-            fChInfo.ch_name = sChType;
+            fChInfo.ch_name = "EEG REF";
 
             //Set channel type
             fChInfo.kind = FIFFV_EEG_CH;
@@ -519,15 +506,11 @@ void EEGoSports::setUpFiffInfo()
             fChInfo.chpos.ez(2) = 1;
         }
 
-        QSLChNames << sChType;
-
-        m_pFiffInfo->chs.append(fChInfo);
+        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
+        m_pFiffInfo->chs.push_back(fChInfo);
     }
 
-    qInfo() << "[EEGoSports::setUpFiffInfo] Number of Channels " << QSLChNames.length();
-
-    //Set channel names in fiff_info_base
-    m_pFiffInfo->ch_names = QSLChNames;
+    qInfo() << "[EEGoSports::setUpFiffInfo] Number of Channels " << m_pFiffInfo->ch_names.size();
 
     //
     //Set head projection

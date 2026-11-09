@@ -23,11 +23,13 @@
 #include <gusbamp_global.h>
 #include <base/circular_buffer.h>
 #include <vector>
-#include <Windows.h>
+#include <windows.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
+
+#include <memory>
 
 #include <QThread>
 #include <QDebug>
@@ -103,10 +105,9 @@ protected:
     virtual void run();
 
 private:
-    GUSBAmp* m_pGUSBAmp;                            /**< A pointer to the corresponding GUSBAmp class.*/
-    QSharedPointer<GUSBAmpDriver> m_pGUSBAmpDriver; /**< A pointer to the corresponding GUSBAmp driver class.*/
+    GUSBAmp* m_pGUSBAmp;                             /**< A pointer to the corresponding GUSBAmp class.*/
+    std::unique_ptr<GUSBAmpDriver> m_pGUSBAmpDriver; /**< A pointer to the corresponding GUSBAmp driver class.*/
 
-    int m_iSampRate;                         /**< sample rate of the device. */
     QString m_sFilePath;                     /**< path of the file of written data. */
     std::vector<QString> m_vSerials;         /**< vector with the serial numbers of the devices*/
     std::vector<int> m_viSizeOfSampleMatrix; /**< size of the sample matrix [rows columns]. */

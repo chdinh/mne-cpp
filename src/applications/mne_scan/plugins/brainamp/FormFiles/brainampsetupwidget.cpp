@@ -18,7 +18,6 @@
 //=============================================================================================================
 
 #include "brainampsetupwidget.h"
-#include "brainampaboutwidget.h"
 #include "../brainamp.h"
 
 //=============================================================================================================
@@ -77,12 +76,4 @@ void BrainAMPSetupWidget::setSamplingFreq()
 void BrainAMPSetupWidget::setSamplesPerBlock()
 {
     m_pBrainAMP->m_iSamplesPerBlock = ui.m_spinBox_BlockSize->value();
-}
-
-//=============================================================================================================
-
-void BrainAMPSetupWidget::showAboutDialog()
-{
-    BrainAMPAboutWidget aboutDialog(this);
-    aboutDialog.exec();
 }

@@ -163,19 +163,12 @@ using namespace Eigen;
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
-class TMSIProducer;
 
 //=============================================================================================================
 // DEFINES
 //=============================================================================================================
 
 inline constexpr auto MAX_BUFFER_SIZE = 0xFFFFFFFF;
-
-//DLL Function loader define
-#define __load_dll_func__(var, type, name)            \
-    var = (type)::GetProcAddress(m_oLibHandle, name); \
-    if (!var)                                         \
-        qWarning() << "Plugin TMSI - ERROR - Error loading method " << name;
 
 // Measurement modes:
 #define MEASURE_MODE_NORMAL ((ULONG)0x0)
@@ -244,10 +237,8 @@ public:
     //=========================================================================================================
     /**
      * Constructs a TMSIDriver.
-     *
-     * @param[in] pTMSIProducer a pointer to the corresponding TMSI Producer class.
      */
-    TMSIDriver(TMSIProducer* pTMSIProducer);
+    TMSIDriver();
 
     //=========================================================================================================
     /**
@@ -295,8 +286,6 @@ public:
     bool uninitDevice();
 
 private:
-    TMSIProducer* m_pTMSIProducer; /**< A pointer to the corresponding TMSIProducer class.*/
-
     //Flags
     bool m_bInitDeviceSuccess; /**< Flag which defines if the device initialisation was successfull.*/
     bool m_bDllLoaded;         /**< Flag which defines if the driver DLL was loaded successfully.*/
@@ -309,7 +298,6 @@ private:
     bool m_bUseUnitGain;            /**< Flag for using the channels unit gain. Defined by the user via the GUI.*/
     bool m_bUseUnitOffset;          /**< Flag for using the channels unit offset. Defined by the user via the GUI.*/
     bool m_bWriteDriverDebugToFile; /**< Flag for for writing driver debug informstions to a file. Defined by the user via the GUI.*/
-    bool m_bUsePreprocessing;       /**< Flag for using preprocessing actions for the EEG data. Defined by the user via the GUI.*/
     bool m_bUseCommonAverage;       /**< Flag for using common average.*/
     bool m_bMeasureImpedances;      /**< Flag for impedance measuring mode.*/
 

@@ -6,6 +6,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(scan_gusbamp LANGUAGES CXX)
 
+# g.tec's g.USBamp API is not redistributable: copy gtec_gUSBamp.h into this directory.
+foreach(_vendor_file gtec_gUSBamp.h)
+  if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_vendor_file}")
+    message(FATAL_ERROR "${PROJECT_NAME} needs ${_vendor_file} from g.tec's g.USBamp API in ${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+endforeach()
+
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)

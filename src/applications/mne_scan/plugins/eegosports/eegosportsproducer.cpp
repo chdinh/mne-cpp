@@ -43,7 +43,7 @@ using namespace Eigen;
 
 EEGoSportsProducer::EEGoSportsProducer(EEGoSports* pEEGoSports)
 : m_pEEGoSports(pEEGoSports)
-, m_pEEGoSportsDriver(new EEGoSportsDriver(this))
+, m_pEEGoSportsDriver(std::make_unique<EEGoSportsDriver>())
 {
 }
 

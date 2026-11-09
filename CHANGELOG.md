@@ -76,6 +76,10 @@ aliases; replace the old spelling as below.
   instead of reading them as zero. `SelectionIO::write_mon` refuses group names
   that would leave the target directory.
 - `ex_make_layout` honours `--mirrorY`; it used to mirror x twice.
+- The BrainAmp, EEGoSports, TMSi and g.USBamp MNE Scan plugins (Windows, off
+  by default) compile again. Configuring one without its vendor header now
+  stops with a message naming the missing file. Closing the EEGoSports
+  impedance widget no longer switches the plugin into impedance mode.
 - `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
   uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
 - `Subject::detach` of an observer that is not attached no longer crashes, and

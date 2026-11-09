@@ -196,13 +196,6 @@ private slots:
     void on_comboBox_currentIndexChanged(const QString& arg1);
 
 private:
-    //=========================================================================================================
-    /**
-     * Shows the About Dialog
-     *
-     */
-    void showAboutDialog();
-
     GUSBAmp* m_pGUSBAmp;      /**< a pointer to corresponding GUSBAmp.*/
     Ui::GUSBAmpSetupClass ui; /**< the user interface for the GUSBAmpSetupWidget.*/
 };

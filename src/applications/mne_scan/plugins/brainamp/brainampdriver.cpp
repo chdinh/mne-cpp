@@ -18,11 +18,8 @@
 //=============================================================================================================
 
 #include "brainampdriver.h"
-#include "brainampproducer.h"
 
-#include <conio.h>
-#include <stdio.h>
-#include <io.h>
+#include <algorithm>
 #include <vector>
 
 #include <QDebug>
@@ -40,9 +37,9 @@ using namespace std;
 
 AmpTypes amplifiers[4] = {None, None, None, None}; /**< Connected amplifiers.*/
 
-BrainAMPDriver::BrainAMPDriver(BrainAMPProducer* pBrainAmpProducer)
-: m_pBrainAmpProducer(pBrainAmpProducer)
-, m_bInitDeviceSuccess(false)
+BrainAMPDriver::BrainAMPDriver()
+: m_bInitDeviceSuccess(false)
+, m_uiDownsample(1)
 , m_uiSamplingFrequency(1000)
 , m_uiSamplesPerBlock(200)
 , DeviceAmp(INVALID_HANDLE_VALUE)
@@ -110,7 +107,7 @@ bool BrainAMPDriver::initDevice(int iSamplesPerBlock,
     // Make sure that amps exist, otherwise a long timeout will occur.
     int nHighestChannel = 0;
     for (int i = 0; i < Setup.nChannels; i++) {
-        nHighestChannel = max(Setup.nChannelList[i], nHighestChannel);
+        nHighestChannel = std::max<int>(Setup.nChannelList[i], nHighestChannel);
     }
 
     int nRequiredAmps = (nHighestChannel + 1) / 32;
@@ -250,7 +247,7 @@ bool BrainAMPDriver::getSampleMatrixValue(Eigen::MatrixXd& sampleMatrix)
 
         //Transform into matrix structure
         int counter = 0;
-        for (int i = 0; i < m_uiSamplesPerBlock; ++i) {
+        for (uint i = 0; i < m_uiSamplesPerBlock; ++i) {
             for (int n = 0; n < Setup.nChannels + 1; ++n) {
                 sampleMatrix(n, i) = pnData[counter] * 100e-09;
                 counter++;
@@ -271,7 +268,7 @@ bool BrainAMPDriver::getSampleMatrixValue(Eigen::MatrixXd& sampleMatrix)
         qInfo("BrainAMPDriver::initDevice - Buffer state failed, error code: %u", ::GetLastError());
     }
 
-    qInfo("BrainAMPDriver::initDevice - Buffer state: %u", nState);
+    qInfo("BrainAMPDriver::initDevice - Buffer state: %ld", nState);
 
     //Sleep(10);
 

@@ -27,8 +27,9 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <memory>
+
 #include <QThread>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // DEFINE NAMESPACE EEGOSPORTSPLUGIN
@@ -111,11 +112,10 @@ protected:
     virtual void run();
 
 private:
-    EEGoSports* m_pEEGoSports;                            /**< A pointer to the corresponding EEGoSports class.*/
-    QSharedPointer<EEGoSportsDriver> m_pEEGoSportsDriver; /**< A pointer to the corresponding EEGoSportsDriver class.*/
+    EEGoSports* m_pEEGoSports;                             /**< A pointer to the corresponding EEGoSports class.*/
+    std::unique_ptr<EEGoSportsDriver> m_pEEGoSportsDriver; /**< A pointer to the corresponding EEGoSportsDriver class.*/
 
-    bool m_bMeasureImpedance; /**< Whether it is an impedance measurement.*/
-    bool m_bIsConnected;      /**< Whether EEGoSportsProducer is connected to device.*/
+    bool m_bIsConnected; /**< Whether EEGoSportsProducer is connected to device.*/
 };
 } // NAMESPACE
 

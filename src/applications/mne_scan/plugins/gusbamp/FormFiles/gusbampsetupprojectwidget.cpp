@@ -33,8 +33,8 @@ using namespace GUSBAMPPLUGIN;
 
 GUSBAmpSetupProjectWidget::GUSBAmpSetupProjectWidget(GUSBAmp* pGUSBAmp, QWidget* parent)
 : QWidget(parent)
-, ui(std::make_unique<Ui::GUSBAmpSetupProjectWidget>())
 , m_pGUSBAmp(pGUSBAmp)
+, ui(std::make_unique<Ui::GUSBAmpSetupProjectWidget>())
 {
     ui->setupUi(this);
 
@@ -67,7 +67,7 @@ void GUSBAmpSetupProjectWidget::changeCap()
                                                 "../resources/mne_scan/plugins/gusbamp/loc_files",
                                                 tr("Electrode location files (*.elc)"));
 
-    if (path == NULL) {
+    if (path.isEmpty()) {
         path = ui->m_qLineEdit_EEGCap->text();
     }
 

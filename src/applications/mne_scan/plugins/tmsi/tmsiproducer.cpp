@@ -34,7 +34,7 @@ using namespace TMSIPLUGIN;
 
 TMSIProducer::TMSIProducer(TMSI* pTMSI)
 : m_pTMSI(pTMSI)
-, m_pTMSIDriver(new TMSIDriver(this))
+, m_pTMSIDriver(std::make_unique<TMSIDriver>())
 {
 }
 

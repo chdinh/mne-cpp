@@ -137,12 +137,6 @@ public:
 
     //=========================================================================================================
     /**
-     * Checks if a dir exists
-     */
-    bool dirExists(const std::string& dirName_in);
-
-    //=========================================================================================================
-    /**
      * returns the type of the plug in
      */
     virtual SCSHAREDLIB::AbstractPlugin::PluginType getType() const;
@@ -189,7 +183,7 @@ private:
     std::vector<QString> m_vSerials;         /**< vector of all Serials (the first one is the master). */
     int m_iSampleRate;                       /**< the sample rate in Hz (see documentation of the g.USBamp API for details on this value and the NUMBER_OF_SCANS!)*/
     int m_iSamplesPerBlock;                  /**< The samples per block defined by the user via the GUI. */
-    UCHAR m_iNumberOfChannels;               /**< the channels that should be acquired from each device. */
+    int m_iNumberOfChannels;                 /**< the channels that should be acquired from each device. */
     std::vector<int> m_viSizeOfSampleMatrix; /**< vector including the size of the two dimensional sample Matrix. */
     std::vector<int> m_viChannelsToAcquire;  /**< vector of the calling numbers of the channels to be acquired. */
     Eigen::RowVectorXd m_cals;

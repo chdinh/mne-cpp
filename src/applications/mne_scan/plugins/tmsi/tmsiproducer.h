@@ -25,6 +25,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <memory>
+
 #include <QThread>
 
 //=============================================================================================================
@@ -108,8 +110,8 @@ protected:
     virtual void run();
 
 private:
-    TMSI* m_pTMSI;                            /**< A pointer to the corresponding TMSI class.*/
-    QSharedPointer<TMSIDriver> m_pTMSIDriver; /**< A pointer to the corresponding TMSI driver class.*/
+    TMSI* m_pTMSI;                             /**< A pointer to the corresponding TMSI class.*/
+    std::unique_ptr<TMSIDriver> m_pTMSIDriver; /**< A pointer to the corresponding TMSI driver class.*/
 };
 } // NAMESPACE
 

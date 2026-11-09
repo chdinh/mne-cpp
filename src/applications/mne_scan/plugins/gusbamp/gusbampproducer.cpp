@@ -35,8 +35,7 @@ using namespace std;
 
 GUSBAmpProducer::GUSBAmpProducer(GUSBAmp* pGUSBAmp)
 : m_pGUSBAmp(pGUSBAmp)
-, m_pGUSBAmpDriver(new GUSBAmpDriver(this))
-, m_iSampRate(1200)
+, m_pGUSBAmpDriver(std::make_unique<GUSBAmpDriver>())
 , m_sFilePath("data")
 {
     m_viSizeOfSampleMatrix.resize(2, 0);
