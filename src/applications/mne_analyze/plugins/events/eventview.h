@@ -381,7 +381,7 @@ private:
     QSharedPointer<ANSHAREDLIB::EventModel> m_pEventModel;         /** < Pointer to associated model. Points to currently loaded. */
     QSharedPointer<ANSHAREDLIB::FiffRawViewModel> m_pFiffRawModel; /** < Pointer to currently loaded FIffRawViewModel */
 
-    QSharedPointer<DISPLIB::TriggerDetectionView> m_pTriggerDetectView; /** < Pointer to viewer to control GUI for detecting triggers */
+    std::shared_ptr<DISPLIB::TriggerDetectionView> m_pTriggerDetectView; /** < Pointer to viewer to control GUI for detecting triggers */
 
     QColorDialog* m_pColordialog; /** < Used for Prompting users for event type colors */
 

@@ -78,9 +78,6 @@ class DISPSHARED_EXPORT LinePlot : public QWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<LinePlot> SPtr;            /**< Shared pointer type for LinePlot. */
-    typedef QSharedPointer<const LinePlot> ConstSPtr; /**< Const shared pointer type for LinePlot. */
-
     //=========================================================================================================
     /**
      * Constructs a line series plot

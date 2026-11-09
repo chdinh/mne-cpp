@@ -30,6 +30,7 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -71,9 +72,6 @@ class DISPSHARED_EXPORT ButterflyView : public QWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ButterflyView> SPtr;            /**< Shared pointer type for ButterflyView. */
-    typedef QSharedPointer<const ButterflyView> ConstSPtr; /**< Const shared pointer type for ButterflyView. */
-
     //=========================================================================================================
     /**
      * The constructor.
@@ -105,7 +103,7 @@ public:
      *
      * @param[in] model     The new evoked set model.
      */
-    void setEvokedSetModel(QSharedPointer<EvokedSetModel> model);
+    void setEvokedSetModel(std::shared_ptr<EvokedSetModel> model);
 
     //=========================================================================================================
     /**
@@ -113,7 +111,7 @@ public:
      *
      * @return the currently set EvokedSetModel.
      */
-    QSharedPointer<EvokedSetModel> getEvokedSetModel();
+    std::shared_ptr<EvokedSetModel> getEvokedSetModel();
 
     //=========================================================================================================
     /**
@@ -229,7 +227,7 @@ public:
      *
      * @param[in] pChannelInfoModel     The new channel info model.
      */
-    void setChannelInfoModel(QSharedPointer<ChannelInfoModel>& pChannelInfoModel);
+    void setChannelInfoModel(std::shared_ptr<ChannelInfoModel>& pChannelInfoModel);
 
     //=========================================================================================================
     /**
@@ -245,7 +243,7 @@ public:
      *
      * @param[in] selectedChannelsIndexes  list of indices of channels channels to be displayed.
      */
-    void showSelectedChannels(const QList<int> selectedChannelsIndexes);
+    void showSelectedChannels(const QList<int>& selectedChannelsIndexes);
 
     //=========================================================================================================
     /**
@@ -307,8 +305,8 @@ protected:
     QMap<QString, bool> m_modalityMap; /**< Map of different modalities. */
     QMap<qint32, float> m_scaleMap;    /**< Map with all channel types and their current scaling value.*/
 
-    QSharedPointer<EvokedSetModel> m_pEvokedSetModel;     /**< The evoked model. */
-    QSharedPointer<ChannelInfoModel> m_pChannelInfoModel; /**< The channel info model. */
+    std::shared_ptr<EvokedSetModel> m_pEvokedSetModel;     /**< The evoked model. */
+    std::shared_ptr<ChannelInfoModel> m_pChannelInfoModel; /**< The channel info model. */
 
     QSharedPointer<QMap<QString, bool>> m_qMapAverageActivation; /**< Average activation status. */
     QSharedPointer<QMap<QString, QColor>> m_qMapAverageColor;    /**< Average colors. */

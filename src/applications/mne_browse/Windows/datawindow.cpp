@@ -84,15 +84,15 @@ QColor markerColorForIndex(int index)
     return kMarkerColors.at(index % kMarkerColors.size());
 }
 
-QMultiMap<int, QSharedPointer<MNEOperator>> browserAssignedOperators(const std::shared_ptr<FIFFLIB::FiffInfo>& info,
-                                                                     const QSharedPointer<SessionFilter>& filterDefinition)
+QMultiMap<int, std::shared_ptr<MNEOperator>> browserAssignedOperators(const std::shared_ptr<FIFFLIB::FiffInfo>& info,
+                                                                      const QSharedPointer<SessionFilter>& filterDefinition)
 {
-    QMultiMap<int, QSharedPointer<MNEOperator>> assignedOperators;
+    QMultiMap<int, std::shared_ptr<MNEOperator>> assignedOperators;
     if (!info || filterDefinition.isNull()) {
         return assignedOperators;
     }
 
-    const QSharedPointer<MNEOperator> operatorBase = QSharedPointer<MNEOperator>::create(MNEOperator::FILTER);
+    const std::shared_ptr<MNEOperator> operatorBase = std::make_shared<MNEOperator>(MNEOperator::FILTER);
     operatorBase->m_sName = filterDefinition->displayName();
     for (int channelIndex = 0; channelIndex < info->nchan; ++channelIndex) {
         if (filterDefinition->appliesToChannel(*info, channelIndex)) {
@@ -1703,7 +1703,7 @@ void DataWindow::customContextMenuRequested(QPoint pos)
     //**************** FilterOperators ****************
     //selected channels
     QMenu* filtOpSubMenu = new QMenu("Apply FilterOperator to selected channel", menu);
-    QMutableMapIterator<QString, QSharedPointer<MNEOperator>> it(m_pRawModel->operators());
+    QMutableMapIterator<QString, std::shared_ptr<MNEOperator>> it(m_pRawModel->operators());
     while (it.hasNext()) {
         it.next();
         QAction* doApplyFilter = filtOpSubMenu->addAction(tr("%1").arg(it.key()));

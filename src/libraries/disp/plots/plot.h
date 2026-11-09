@@ -66,9 +66,6 @@ class DISPSHARED_EXPORT Plot : public Graph
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<Plot> SPtr;            /**< Shared pointer type for Plot class. */
-    typedef QSharedPointer<const Plot> ConstSPtr; /**< Const shared pointer type for Plot class. */
-
     //=========================================================================================================
     /**
      * Creates the plot.

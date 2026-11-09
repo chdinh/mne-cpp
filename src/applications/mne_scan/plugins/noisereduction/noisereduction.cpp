@@ -252,10 +252,10 @@ void NoiseReduction::initPluginControlWidgets()
         pFilterSettingsView->setObjectName("group_tab_Settings_Filter");
         plControlWidgets.append(pFilterSettingsView);
 
-        connect(pFilterSettingsView->getFilterView().data(), &FilterDesignView::filterChannelTypeChanged,
+        connect(pFilterSettingsView->getFilterView().get(), &FilterDesignView::filterChannelTypeChanged,
                 this, &NoiseReduction::setFilterChannelType);
 
-        connect(pFilterSettingsView->getFilterView().data(), &FilterDesignView::filterChanged,
+        connect(pFilterSettingsView->getFilterView().get(), &FilterDesignView::filterChanged,
                 this, &NoiseReduction::setFilter);
 
         connect(pFilterSettingsView, &FilterSettingsView::filterActivationChanged,

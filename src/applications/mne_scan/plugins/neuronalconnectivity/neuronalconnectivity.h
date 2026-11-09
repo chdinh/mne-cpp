@@ -241,7 +241,7 @@ private:
     std::shared_ptr<UTILSLIB::CircularBuffer<CONNECTIVITYLIB::Network>> m_pCircularBuffer; /**< The circular buffer holding the connectivity estimates.*/
     std::shared_ptr<RTPROCESSINGLIB::RtConnectivity> m_pRtConnectivity;                    /**< The real-time connectivity estimation object.*/
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                                        /**< Fiff measurement info.*/
-    QSharedPointer<DISPLIB::ConnectivitySettingsView> m_pConnectivitySettingsView;         /**< The connectivity settings widget which will be added to the Quick Control view. The QuickControlView will not take ownership. Ownership will be managed by the QSharedPointer.*/
+    std::shared_ptr<DISPLIB::ConnectivitySettingsView> m_pConnectivitySettingsView;        /**< The connectivity settings widget which will be added to the Quick Control view. The QuickControlView will not take ownership. Ownership will be managed by the QSharedPointer.*/
     QAction* m_pActionShowYourWidget;                                                      /**< flag whether thread is running.*/
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeSourceEstimate>::SPtr m_pRTSEInput;    /**< The RealTimeSourceEstimate input.*/

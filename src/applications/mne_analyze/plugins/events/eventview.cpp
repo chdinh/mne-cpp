@@ -78,9 +78,9 @@ EventView::EventView()
     onDataChanged();
     createContextMenu();
 
-    m_pTriggerDetectView = QSharedPointer<DISPLIB::TriggerDetectionView>(new DISPLIB::TriggerDetectionView("MNEANALYZE/EVENTS",
-                                                                                                           nullptr,
-                                                                                                           Qt::Window));
+    m_pTriggerDetectView = std::make_shared<DISPLIB::TriggerDetectionView>("MNEANALYZE/EVENTS",
+                                                                           nullptr,
+                                                                           Qt::Window);
     m_pTriggerDetectView->setProcessingMode(DISPLIB::AbstractView::ProcessingMode::Offline);
     m_pTriggerDetectView->setWindowFlag(Qt::WindowStaysOnTopHint);
 }
@@ -163,7 +163,7 @@ void EventView::initGUIFunctionality()
     connect(m_pUi->m_pushButtonStim, &QPushButton::clicked,
             this, &EventView::onStimButtonClicked, Qt::UniqueConnection);
 
-    connect(m_pTriggerDetectView.data(), &DISPLIB::TriggerDetectionView::detectTriggers,
+    connect(m_pTriggerDetectView.get(), &DISPLIB::TriggerDetectionView::detectTriggers,
             this, &EventView::onDetectTriggers, Qt::UniqueConnection);
 
     connect(&m_FutureWatcher, &QFutureWatcher<QMap<double, QList<int>>>::finished,
@@ -299,7 +299,7 @@ void EventView::disconnectFromModel()
                this, &EventView::customGroupContextMenuRequested);
     disconnect(m_pUi->m_pushButtonStim, &QPushButton::clicked,
                this, &EventView::onStimButtonClicked);
-    disconnect(m_pTriggerDetectView.data(), &DISPLIB::TriggerDetectionView::detectTriggers,
+    disconnect(m_pTriggerDetectView.get(), &DISPLIB::TriggerDetectionView::detectTriggers,
                this, &EventView::onDetectTriggers);
 }
 

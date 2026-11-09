@@ -83,9 +83,6 @@ namespace DISP3DLIB
 class DISP3DSHARED_EXPORT GeometryInfo
 {
 public:
-    typedef QSharedPointer<GeometryInfo> SPtr;
-    typedef QSharedPointer<const GeometryInfo> ConstSPtr;
-
     GeometryInfo() = delete;
 
     //=========================================================================================================

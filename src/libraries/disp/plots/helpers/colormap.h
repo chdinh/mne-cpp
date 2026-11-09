@@ -333,9 +333,6 @@ const Eigen::MatrixX3i m_matViridrisData = (Eigen::MatrixX3i(256, 3) << 68, 1, 8
 class DISPSHARED_EXPORT ColorMap
 {
 public:
-    typedef QSharedPointer<ColorMap> SPtr;            /**< Shared pointer type for ColorMap class. */
-    typedef QSharedPointer<const ColorMap> ConstSPtr; /**< Const shared pointer type for ColorMap class. */
-
     //=========================================================================================================
     /**
      * Default constructor

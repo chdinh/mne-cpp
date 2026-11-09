@@ -63,9 +63,6 @@ class DISPSHARED_EXPORT DraggableFramelessWidget : public QWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<DraggableFramelessWidget> SPtr;            /**< Shared pointer type for DraggableFramelessWidget. */
-    typedef QSharedPointer<const DraggableFramelessWidget> ConstSPtr; /**< Const shared pointer type for DraggableFramelessWidget. */
-
     //=========================================================================================================
     /**
      * Constructs a DraggableFramelessWidget which is a child of parent.

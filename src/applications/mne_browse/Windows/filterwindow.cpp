@@ -169,7 +169,7 @@ void FilterWindow::initFilterPlot()
 
 void FilterWindow::initTableViews()
 {
-    ui->m_tableView_activeFilters->setModel(m_pMainWindow->chInfoWindow()->getDataModel().data());
+    ui->m_tableView_activeFilters->setModel(m_pMainWindow->chInfoWindow()->getDataModel().get());
 
     //Hide columns
     ui->m_tableView_activeFilters->hideColumn(0);

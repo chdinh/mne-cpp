@@ -97,9 +97,6 @@ class DISPSHARED_EXPORT RtFiffRawView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtFiffRawView> SPtr;            /**< Shared pointer type for RtFiffRawView. */
-    typedef QSharedPointer<const RtFiffRawView> ConstSPtr; /**< Const shared pointer type for RtFiffRawView. */
-
     //=========================================================================================================
     /**
      * Constructs a RtFiffRawView which is a child of parent.

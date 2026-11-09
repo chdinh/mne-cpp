@@ -76,9 +76,6 @@ class DISPSHARED_EXPORT Bar : public QWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<Bar> SPtr;            /**< Shared pointer type for Bar class. */
-    typedef QSharedPointer<const Bar> ConstSPtr; /**< Const shared pointer type for Bar class. */
-
     //=========================================================================================================
     /**
      * The constructor for Bar.

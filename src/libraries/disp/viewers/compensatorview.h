@@ -72,9 +72,6 @@ class DISPSHARED_EXPORT CompensatorView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<CompensatorView> SPtr;            /**< Shared pointer type for CompensatorView. */
-    typedef QSharedPointer<const CompensatorView> ConstSPtr; /**< Const shared pointer type for CompensatorView. */
-
     //=========================================================================================================
     /**
      * Constructs a CompensatorView which is a child of parent.

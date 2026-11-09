@@ -60,9 +60,6 @@ namespace DISPLIB
 class DISPSHARED_EXPORT MNEOperator
 {
 public:
-    typedef QSharedPointer<MNEOperator> SPtr;            /**< Shared pointer type for MNEOperator. */
-    typedef QSharedPointer<const MNEOperator> ConstSPtr; /**< Const shared pointer type for MNEOperator. */
-
     enum OperatorType
     {
         FILTER,

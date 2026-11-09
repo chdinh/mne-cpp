@@ -81,9 +81,6 @@ class DISPSHARED_EXPORT AverageLayoutView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<AverageLayoutView> SPtr;            /**< Shared pointer type for AverageLayoutView. */
-    typedef QSharedPointer<const AverageLayoutView> ConstSPtr; /**< Const shared pointer type for AverageLayoutView. */
-
     //=========================================================================================================
     /**
      * Constructs a AverageLayoutView which is a child of parent.
@@ -115,7 +112,7 @@ public:
      *
      * @param[in] pChannelInfoModel     The new channel info model.
      */
-    void setChannelInfoModel(QSharedPointer<ChannelInfoModel>& pChannelInfoModel);
+    void setChannelInfoModel(std::shared_ptr<ChannelInfoModel>& pChannelInfoModel);
 
     //=========================================================================================================
     /**
@@ -123,7 +120,7 @@ public:
      *
      * @param[in] pEvokedSetModel     The new evoked set model.
      */
-    void setEvokedSetModel(QSharedPointer<EvokedSetModel> pEvokedSetModel);
+    void setEvokedSetModel(const std::shared_ptr<EvokedSetModel>& pEvokedSetModel);
 
     //=========================================================================================================
     /**
@@ -131,7 +128,7 @@ public:
      *
      * @return the currently set EvokedSetModel.
      */
-    QSharedPointer<EvokedSetModel> getEvokedSetModel();
+    std::shared_ptr<EvokedSetModel> getEvokedSetModel();
 
     //=========================================================================================================
     /**
@@ -270,9 +267,9 @@ protected:
      */
     void updateProcessingMode(ProcessingMode mode);
 
-    QSharedPointer<AverageScene> m_pAverageScene;                  /**< The pointer to the average scene. */
-    QSharedPointer<DISPLIB::EvokedSetModel> m_pEvokedSetModel;     /**< The data model. */
-    QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel; /**< Channel info model. */
+    std::shared_ptr<AverageScene> m_pAverageScene;                  /**< The pointer to the average scene. */
+    std::shared_ptr<DISPLIB::EvokedSetModel> m_pEvokedSetModel;     /**< The data model. */
+    std::shared_ptr<DISPLIB::ChannelInfoModel> m_pChannelInfoModel; /**< Channel info model. */
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo for currently loaded file. */
 

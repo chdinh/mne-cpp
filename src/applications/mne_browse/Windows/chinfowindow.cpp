@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "chinfowindow.h"
+#include <memory>
 
 
 //*************************************************************************************************************
@@ -52,7 +53,7 @@ ChInfoWindow::~ChInfoWindow()
 
 //*************************************************************************************************************
 
-ChannelInfoModel::SPtr ChInfoWindow::getDataModel()
+std::shared_ptr<ChannelInfoModel> ChInfoWindow::getDataModel()
 {
     return m_pChannelInfoModel;
 }
@@ -62,7 +63,7 @@ ChannelInfoModel::SPtr ChInfoWindow::getDataModel()
 
 void ChInfoWindow::initMVC()
 {
-    m_pChannelInfoModel = ChannelInfoModel::SPtr(new ChannelInfoModel(this));
+    m_pChannelInfoModel = std::make_shared<ChannelInfoModel>(this);
 }
 
 
@@ -70,9 +71,9 @@ void ChInfoWindow::initMVC()
 
 void ChInfoWindow::initTableViews()
 {
-    ui->m_tableView_chInfos->setModel(m_pChannelInfoModel.data());
+    ui->m_tableView_chInfos->setModel(m_pChannelInfoModel.get());
     ui->m_tableView_chInfos->verticalHeader()->setVisible(false);
 
-    connect(m_pChannelInfoModel.data(), &ChannelInfoModel::dataChanged,
+    connect(m_pChannelInfoModel.get(), &ChannelInfoModel::dataChanged,
             ui->m_tableView_chInfos, &QTableView::resizeColumnsToContents);
 }

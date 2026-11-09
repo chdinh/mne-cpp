@@ -77,9 +77,6 @@ class DISPSHARED_EXPORT FrequencySpectrumModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<FrequencySpectrumModel> SPtr;            /**< Shared pointer type for FrequencySpectrumModel. */
-    typedef QSharedPointer<const FrequencySpectrumModel> ConstSPtr; /**< Const shared pointer type for FrequencySpectrumModel. */
-
     //=========================================================================================================
     /**
      * Constructs an real-time multi sample array table model for the given parent.

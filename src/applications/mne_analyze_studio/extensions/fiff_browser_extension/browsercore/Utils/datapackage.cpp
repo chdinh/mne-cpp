@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "datapackage.h"
+#include <memory>
 
 #include <math/numerics.h>
 
@@ -251,7 +252,7 @@ double DataPackage::dataRawMean(int row)
 
 //*************************************************************************************************************
 
-void DataPackage::applyFFTFilter(int channelNumber, QSharedPointer<FilterOperator> filter, bool useRawData)
+void DataPackage::applyFFTFilter(int channelNumber, const std::shared_ptr<FilterOperator>& filter, bool useRawData)
 {
     if (channelNumber >= m_dataRawOriginal.rows()) {
         qWarning() << "DataPackage::applyFFTFilter - channel number out of range.";

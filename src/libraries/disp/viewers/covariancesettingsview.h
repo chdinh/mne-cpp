@@ -62,9 +62,6 @@ class DISPSHARED_EXPORT CovarianceSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<CovarianceSettingsView> SPtr;      /**< Shared pointer type for CovarianceAdjustmentWidget. */
-    typedef QSharedPointer<CovarianceSettingsView> ConstSPtr; /**< Const shared pointer type for CovarianceAdjustmentWidget. */
-
     explicit CovarianceSettingsView(const QString& sSettingsPath = "",
                                     QWidget* parent = 0);
 

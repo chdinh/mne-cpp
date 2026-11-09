@@ -103,9 +103,6 @@ class DISPSHARED_EXPORT ChannelDataModel : public QObject
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ChannelDataModel> SPtr;
-    typedef QSharedPointer<const ChannelDataModel> ConstSPtr;
-
     explicit ChannelDataModel(QObject* parent = nullptr);
 
     //=========================================================================================================

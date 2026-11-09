@@ -153,13 +153,13 @@ private:
      */
     bool virtual eventFilter(QObject* object, QEvent* event);
 
-    QSharedPointer<DISPLIB::EvokedSetModel> m_pEvokedSetModel;             /**< RTE data model. */
-    QSharedPointer<SCMEASLIB::RealTimeEvokedSet> m_pRTESet;                /**< The real-time evoked measurement. */
-    QSharedPointer<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< ChannelSelectionView. */
-    QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel;         /**< Channel info model. */
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                        /**< FiffInfo, which is used instead of ListChInfo*/
-    QPointer<DISPLIB::AverageLayoutView> m_pAverageLayoutView;             /**< 2D layout view for plotting averages*/
-    QPointer<DISPLIB::ButterflyView> m_pButterflyView;                     /**< Butterfly plot. */
+    std::shared_ptr<DISPLIB::EvokedSetModel> m_pEvokedSetModel;             /**< RTE data model. */
+    QSharedPointer<SCMEASLIB::RealTimeEvokedSet> m_pRTESet;                 /**< The real-time evoked measurement. */
+    std::shared_ptr<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< ChannelSelectionView. */
+    std::shared_ptr<DISPLIB::ChannelInfoModel> m_pChannelInfoModel;         /**< Channel info model. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                         /**< FiffInfo, which is used instead of ListChInfo*/
+    QPointer<DISPLIB::AverageLayoutView> m_pAverageLayoutView;              /**< 2D layout view for plotting averages*/
+    QPointer<DISPLIB::ButterflyView> m_pButterflyView;                      /**< Butterfly plot. */
 
     QList<qint32> m_qListCurrentSelection; /**< Current selection list -> hack around C++11 lambda . */
 

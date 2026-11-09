@@ -226,11 +226,11 @@ public:
 
     //=========================================================================================================
     /** Returns the operator map (non-const for filter application). */
-    QMap<QString, QSharedPointer<MNEOperator>>& operators()
+    QMap<QString, std::shared_ptr<MNEOperator>>& operators()
     {
         return m_Operators;
     }
-    const QMap<QString, QSharedPointer<MNEOperator>>& operators() const
+    const QMap<QString, std::shared_ptr<MNEOperator>>& operators() const
     {
         return m_Operators;
     }
@@ -280,13 +280,13 @@ private:
      */
     QPair<MatrixXd, MatrixXd> readSegment(fiff_int_t from, fiff_int_t to);
 
-    bool m_bFileloaded;                                     /**< True when a FIFF raw file is loaded. */
-    std::vector<FiffChInfo> m_chInfolist;                   /**< Cached channel metadata for the loaded raw file. */
-    std::shared_ptr<FiffInfo> m_pFiffInfo;                  /**< Shared measurement info of the loaded raw file. */
-    QSharedPointer<FIFFLIB::FiffIO> m_pfiffIO;              /**< Legacy FIFF I/O backend used by the table model path. */
-    QSharedPointer<QIODevice> m_pSourceDevice;              /**< Persistent source device used by the legacy raw model. */
-    QByteArray m_sourceBuffer;                              /**< In-memory copy for non-file-backed source devices. */
-    QMap<QString, QSharedPointer<MNEOperator>> m_Operators; /**< Available processing operators keyed by operator name. */
+    bool m_bFileloaded;                                      /**< True when a FIFF raw file is loaded. */
+    std::vector<FiffChInfo> m_chInfolist;                    /**< Cached channel metadata for the loaded raw file. */
+    std::shared_ptr<FiffInfo> m_pFiffInfo;                   /**< Shared measurement info of the loaded raw file. */
+    QSharedPointer<FIFFLIB::FiffIO> m_pfiffIO;               /**< Legacy FIFF I/O backend used by the table model path. */
+    QSharedPointer<QIODevice> m_pSourceDevice;               /**< Persistent source device used by the legacy raw model. */
+    QByteArray m_sourceBuffer;                               /**< In-memory copy for non-file-backed source devices. */
+    QMap<QString, std::shared_ptr<MNEOperator>> m_Operators; /**< Available processing operators keyed by operator name. */
 
     bool m_bStartReached; /**< True when the buffered window touches the file start. */
     bool m_bEndReached;   /**< True when the buffered window touches the file end. */
@@ -305,7 +305,7 @@ private:
 
     QList<QSharedPointer<DataPackage>> m_data; /**< Buffered raw-data packages currently cached in memory. */
 
-    QMultiMap<int, QSharedPointer<MNEOperator>> m_assignedOperators; /**< Processing operators assigned per channel row. */
+    QMultiMap<int, std::shared_ptr<MNEOperator>> m_assignedOperators; /**< Processing operators assigned per channel row. */
 
     qint32 m_iAbsFiffCursor;   /**< Current absolute FIFF cursor position in samples. */
     qint32 m_iCurAbsScrollPos; /**< Current absolute scroll position in samples. */
@@ -337,7 +337,7 @@ signals:
      *
      * @param[in]  assignedOperators  Current per-channel operator assignments.
      */
-    void assignedOperatorsChanged(const QMultiMap<int, QSharedPointer<MNEOperator>>&);
+    void assignedOperatorsChanged(const QMultiMap<int, std::shared_ptr<MNEOperator>>&);
 
     void writeProgressChanged(int);
 
@@ -369,7 +369,7 @@ public slots:
      * @param[in] operatorPtr  Operator to assign and apply.
      * @param[in] chType       Name fragment channels must contain to be processed.
      */
-    void applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOperator>& operatorPtr, const QString& chType);
+    void applyOperator(QModelIndexList chlist, const std::shared_ptr<MNEOperator>& operatorPtr, const QString& chType);
 
     //=========================================================================================================
     /**
@@ -378,7 +378,7 @@ public slots:
      * @param[in] chlist       Selected channel rows.
      * @param[in] operatorPtr  Operator to assign and apply.
      */
-    void applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOperator>& operatorPtr);
+    void applyOperator(QModelIndexList chlist, const std::shared_ptr<MNEOperator>& operatorPtr);
 
     //=========================================================================================================
     /**
@@ -416,7 +416,7 @@ public slots:
      * @param[in] chlist      Selected channel rows.
      * @param[in] filterPtr   Filter operator to remove.
      */
-    void undoFilter(QModelIndexList chlist, const QSharedPointer<MNEOperator>& filterPtr);
+    void undoFilter(QModelIndexList chlist, const std::shared_ptr<MNEOperator>& filterPtr);
 
     //=========================================================================================================
     /**

@@ -1492,15 +1492,15 @@ void MainWindow::setupWindowWidgets()
 
     //Connect channel info window with legacy processing updates, layout manager, average manager and the data window
     connect(rawModel(), &RawModel::assignedOperatorsChanged,
-            m_pChInfoWindow->getDataModel().data(), &ChannelInfoModel::assignedOperatorsChanged);
+            m_pChInfoWindow->getDataModel().get(), &ChannelInfoModel::assignedOperatorsChanged);
 
     connect(m_pChannelSelectionView, &ChannelSelectionView::loadedLayoutMap,
-            m_pChInfoWindow->getDataModel().data(), &ChannelInfoModel::layoutChanged);
+            m_pChInfoWindow->getDataModel().get(), &ChannelInfoModel::layoutChanged);
 
-    connect(m_pChInfoWindow->getDataModel().data(), &ChannelInfoModel::channelsMappedToLayout,
+    connect(m_pChInfoWindow->getDataModel().get(), &ChannelInfoModel::channelsMappedToLayout,
             m_pChannelSelectionView, &ChannelSelectionView::setCurrentlyMappedFiffChannels);
 
-    connect(m_pChInfoWindow->getDataModel().data(), &ChannelInfoModel::channelsMappedToLayout,
+    connect(m_pChInfoWindow->getDataModel().get(), &ChannelInfoModel::channelsMappedToLayout,
             m_pAverageWindow, &AverageWindow::setMappedChannelNames);
 
     connect(m_pNoiseReductionWindow, &NoiseReductionWindow::projSelectionChanged,

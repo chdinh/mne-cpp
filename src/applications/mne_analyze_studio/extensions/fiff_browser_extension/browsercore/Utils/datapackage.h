@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "filteroperator.h"
+#include <memory>
 #include "types.h"
 
 
@@ -199,7 +200,7 @@ public:
      * @param useRawData flag if filter should be used on already processed data or on raw data
      * @return a row vector truncated by numberFilterTaps/2 at front and end
      */
-    void applyFFTFilter(int channelNumber, QSharedPointer<FilterOperator> filter, bool useRawData = true);
+    void applyFFTFilter(int channelNumber, const std::shared_ptr<FilterOperator>& filter, bool useRawData = true);
 
 private:
     //=========================================================================================================

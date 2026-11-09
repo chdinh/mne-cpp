@@ -81,9 +81,6 @@ class DISPSHARED_EXPORT AveragingSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<AveragingSettingsView> SPtr;      /**< Shared pointer type for AveragingAdjustmentWidget. */
-    typedef QSharedPointer<AveragingSettingsView> ConstSPtr; /**< Const shared pointer type for AveragingAdjustmentWidget. */
-
     explicit AveragingSettingsView(const QString& sSettingsPath = "",
                                    const QMap<QString, int>& mapStimChsIndexNames = QMap<QString, int>(),
                                    QWidget* parent = nullptr);

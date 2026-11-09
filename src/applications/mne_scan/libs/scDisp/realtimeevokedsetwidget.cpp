@@ -202,32 +202,32 @@ void RealTimeEvokedSetWidget::initDisplayControllWidgets()
         m_pToolBox->setCurrentIndex(settings.value(QString("MNESCAN/RTESW/selectedView"), 0).toInt());
 
         // Init data model and set first data
-        m_pEvokedSetModel = EvokedSetModel::SPtr::create(this);
+        m_pEvokedSetModel = std::make_shared<EvokedSetModel>(this);
         std::shared_ptr<FiffEvokedSet> pEvokedSet = m_pRTESet->getValue();
         pEvokedSet->info = *m_pFiffInfo.get();
         m_pEvokedSetModel->setEvokedSet(pEvokedSet);
         m_pButterflyView->setEvokedSetModel(m_pEvokedSetModel);
 
         //Init channel info and selection view
-        m_pChannelInfoModel = ChannelInfoModel::SPtr::create(m_pFiffInfo,
-                                                             this);
+        m_pChannelInfoModel = std::make_shared<ChannelInfoModel>(m_pFiffInfo,
+                                                                 this);
 
-        m_pChannelSelectionView = QSharedPointer<ChannelSelectionView>::create(QString("MNESCAN/RTESW"),
-                                                                               this,
-                                                                               m_pChannelInfoModel,
-                                                                               Qt::Window);
+        m_pChannelSelectionView = std::make_shared<ChannelSelectionView>(QString("MNESCAN/RTESW"),
+                                                                         this,
+                                                                         m_pChannelInfoModel,
+                                                                         Qt::Window);
         m_pChannelSelectionView->setWindowTitle(tr(QString("%1: Channel Selection Window").arg(t_sRTESName).toUtf8()));
 
-        connect(m_pChannelSelectionView.data(), &ChannelSelectionView::loadedLayoutMap,
-                m_pChannelInfoModel.data(), &ChannelInfoModel::layoutChanged);
+        connect(m_pChannelSelectionView.get(), &ChannelSelectionView::loadedLayoutMap,
+                m_pChannelInfoModel.get(), &ChannelInfoModel::layoutChanged);
 
-        connect(m_pChannelInfoModel.data(), &ChannelInfoModel::channelsMappedToLayout,
-                m_pChannelSelectionView.data(), &ChannelSelectionView::setCurrentlyMappedFiffChannels);
+        connect(m_pChannelInfoModel.get(), &ChannelInfoModel::channelsMappedToLayout,
+                m_pChannelSelectionView.get(), &ChannelSelectionView::setCurrentlyMappedFiffChannels);
 
-        connect(m_pChannelSelectionView.data(), &ChannelSelectionView::showSelectedChannelsOnly,
+        connect(m_pChannelSelectionView.get(), &ChannelSelectionView::showSelectedChannelsOnly,
                 m_pButterflyView.data(), &ButterflyView::showSelectedChannelsOnly);
 
-        connect(m_pChannelSelectionView.data(), &ChannelSelectionView::selectionChanged,
+        connect(m_pChannelSelectionView.get(), &ChannelSelectionView::selectionChanged,
                 m_pAverageLayoutView.data(), &AverageLayoutView::channelSelectionManagerChanged);
 
         // Init the views. This needs to be done in the following order because we need to draw the items in the m_pChannelSelectionView first, hence we need to init it first.
@@ -348,23 +348,23 @@ void RealTimeEvokedSetWidget::initDisplayControllWidgets()
         pAverageSelectionView->setObjectName("group_tab_View_Selection");
         lControlWidgets.append(pAverageSelectionView);
 
-        connect(m_pEvokedSetModel.data(), &EvokedSetModel::newAverageActivationMap,
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
                 pAverageSelectionView, &AverageSelectionView::setAverageActivation);
-        connect(m_pEvokedSetModel.data(), &EvokedSetModel::newAverageColorMap,
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
                 pAverageSelectionView, &AverageSelectionView::setAverageColor);
 
-        connect(m_pEvokedSetModel.data(), &EvokedSetModel::newAverageColorMap,
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
                 m_pButterflyView.data(), &ButterflyView::setAverageColor);
-        connect(m_pEvokedSetModel.data(), &EvokedSetModel::newAverageActivationMap,
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
                 m_pButterflyView.data(), &ButterflyView::setAverageActivation);
         connect(pAverageSelectionView, &AverageSelectionView::newAverageActivationMap,
                 m_pButterflyView.data(), &ButterflyView::setAverageActivation);
         connect(pAverageSelectionView, &AverageSelectionView::newAverageColorMap,
                 m_pButterflyView.data(), &ButterflyView::setAverageColor);
 
-        connect(m_pEvokedSetModel.data(), &EvokedSetModel::newAverageColorMap,
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
                 m_pAverageLayoutView.data(), &AverageLayoutView::setAverageColor);
-        connect(m_pEvokedSetModel.data(), &EvokedSetModel::newAverageActivationMap,
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
                 m_pAverageLayoutView.data(), &AverageLayoutView::setAverageActivation);
         connect(pAverageSelectionView, &AverageSelectionView::newAverageActivationMap,
                 m_pAverageLayoutView.data(), &AverageLayoutView::setAverageActivation);
@@ -402,7 +402,7 @@ void RealTimeEvokedSetWidget::updateViewport()
 void RealTimeEvokedSetWidget::showSensorSelectionWidget()
 {
     if (!m_pChannelSelectionView) {
-        m_pChannelSelectionView = QSharedPointer<ChannelSelectionView>::create();
+        m_pChannelSelectionView = std::make_shared<ChannelSelectionView>();
     }
 
     m_pChannelSelectionView->show();

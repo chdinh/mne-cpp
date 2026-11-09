@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "connectivitysettingsmanager.h"
+#include <memory>
 
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
@@ -383,17 +384,17 @@ int main(int argc, char* argv[])
     pBrainView->setModel(pModel);
 
     // Create ConnectivitySettingsView as standalone widget
-    QSharedPointer<ConnectivitySettingsView> pConnSettingsView = QSharedPointer<ConnectivitySettingsView>::create("EX_CONNECTIVITY");
+    std::shared_ptr<ConnectivitySettingsView> pConnSettingsView = std::make_shared<ConnectivitySettingsView>("EX_CONNECTIVITY");
 
-    QObject::connect(pConnSettingsView.data(), &ConnectivitySettingsView::connectivityMetricChanged,
+    QObject::connect(pConnSettingsView.get(), &ConnectivitySettingsView::connectivityMetricChanged,
                      pConnectivitySettingsManager.data(), &ConnectivitySettingsManager::onConnectivityMetricChanged);
 
-    QObject::connect(pConnSettingsView.data(), &ConnectivitySettingsView::numberTrialsChanged,
+    QObject::connect(pConnSettingsView.get(), &ConnectivitySettingsView::numberTrialsChanged,
                      [&pConnectivitySettingsManager, &pConnSettingsView, iNumTrials](int a) {
                          pConnSettingsView->setNumberTrials(qMin(iNumTrials,a));
                          pConnectivitySettingsManager.data()->onNumberTrialsChanged(qMin(iNumTrials,a)); });
 
-    QObject::connect(pConnSettingsView.data(), &ConnectivitySettingsView::freqBandChanged,
+    QObject::connect(pConnSettingsView.get(), &ConnectivitySettingsView::freqBandChanged,
                      pConnectivitySettingsManager.data(), &ConnectivitySettingsManager::onFreqBandChanged);
 
     QObject::connect(pConnectivitySettingsManager.data(), &ConnectivitySettingsManager::newConnectivityResultAvailable,

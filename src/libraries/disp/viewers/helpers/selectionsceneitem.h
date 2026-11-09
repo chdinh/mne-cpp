@@ -83,9 +83,6 @@ public:
 class DISPSHARED_EXPORT SelectionSceneItem : public QGraphicsItem
 {
 public:
-    typedef QSharedPointer<SelectionSceneItem> SPtr;            /**< Shared pointer type for SelectionSceneItem. */
-    typedef QSharedPointer<const SelectionSceneItem> ConstSPtr; /**< Const shared pointer type for SelectionSceneItem. */
-
     //=========================================================================================================
     /**
      * Constructs a SelectionSceneItem.

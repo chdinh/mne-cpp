@@ -63,9 +63,6 @@ class DISPSHARED_EXPORT MultiViewWindow : public QDockWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<MultiViewWindow> SPtr;            /**< Shared pointer type for MultiViewWindow. */
-    typedef QSharedPointer<const MultiViewWindow> ConstSPtr; /**< Const shared pointer type for MultiViewWindow. */
-
     //=========================================================================================================
     /**
      * Constructs an MultiViewWindow.

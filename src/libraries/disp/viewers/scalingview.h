@@ -106,9 +106,6 @@ class DISPSHARED_EXPORT ScalingView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ScalingView> SPtr;            /**< Shared pointer type for ScalingView. */
-    typedef QSharedPointer<const ScalingView> ConstSPtr; /**< Const shared pointer type for ScalingView. */
-
     //=========================================================================================================
     /**
      * Constructs a ScalingView which is a child of parent.

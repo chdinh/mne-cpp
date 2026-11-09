@@ -74,9 +74,6 @@ class DISPSHARED_EXPORT TriggerDetectionView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<TriggerDetectionView> SPtr;            /**< Shared pointer type for TriggerDetectionView. */
-    typedef QSharedPointer<const TriggerDetectionView> ConstSPtr; /**< Const shared pointer type for TriggerDetectionView. */
-
     //=========================================================================================================
     /**
      * Constructs a TriggerDetectionView which is a child of parent.

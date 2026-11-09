@@ -69,9 +69,6 @@ class DISPSHARED_EXPORT ProjectorsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ProjectorsView> SPtr;            /**< Shared pointer type for ProjectorsView. */
-    typedef QSharedPointer<const ProjectorsView> ConstSPtr; /**< Const shared pointer type for ProjectorsView. */
-
     //=========================================================================================================
     /**
      * Constructs a ProjectorsView which is a child of parent.

@@ -85,9 +85,6 @@ class DISPSHARED_EXPORT ChannelSelectionView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ChannelSelectionView> SPtr;            /**< Shared pointer type for ChannelSelectionView. */
-    typedef QSharedPointer<const ChannelSelectionView> ConstSPtr; /**< Const shared pointer type for ChannelSelectionView. */
-
     //=========================================================================================================
     /**
      * Constructs a ChannelSelectionView which is a child of parent.
@@ -99,7 +96,7 @@ public:
      */
     ChannelSelectionView(const QString& sSettingsPath = "",
                          QWidget* parent = 0,
-                         QSharedPointer<ChannelInfoModel> pChannelInfoModel = QSharedPointer<ChannelInfoModel>(0),
+                         std::shared_ptr<ChannelInfoModel> pChannelInfoModel = std::shared_ptr<ChannelInfoModel>(0),
                          Qt::WindowType f = Qt::Widget);
 
     //=========================================================================================================
@@ -124,7 +121,7 @@ public:
      *
      * @param[in] channelIndexList channels which are be to set as selected.
      */
-    void highlightChannels(QModelIndexList channelIndexList);
+    void highlightChannels(const QModelIndexList& channelIndexList);
 
     //=========================================================================================================
     /**
@@ -133,7 +130,7 @@ public:
      *
      * @param[in] channelList channels which are be to set as selected.
      */
-    void selectChannels(QStringList channelList);
+    void selectChannels(const QStringList& channelList);
 
     //=========================================================================================================
     /**
@@ -194,7 +191,7 @@ public:
      *
      * @param[in] currentLayoutFile the current layout file.
      */
-    void setCurrentLayoutFile(QString currentLayoutFile);
+    void setCurrentLayoutFile(const QString& currentLayoutFile);
 
     //=========================================================================================================
     /**
@@ -309,7 +306,7 @@ private:
      *
      * @param[in] path holds file pathloll.
      */
-    bool loadLayout(QString path);
+    bool loadLayout(const QString& path);
     QString resolveLayoutPath(const QString& layoutFile) const;
 
     //=========================================================================================================
@@ -318,7 +315,7 @@ private:
      *
      * @param[in] path holds file path.
      */
-    bool loadSelectionGroups(QString path);
+    bool loadSelectionGroups(const QString& path);
 
     //=========================================================================================================
     /**
@@ -395,7 +392,7 @@ private:
 
     std::unique_ptr<Ui::ChannelSelectionViewWidget> m_pUi; /**< Pointer to the qt designer generated ui class. */
 
-    QSharedPointer<ChannelInfoModel> m_pChannelInfoModel; /**< Pointer to the channel info model. */
+    std::shared_ptr<ChannelInfoModel> m_pChannelInfoModel; /**< Pointer to the channel info model. */
 
     QMap<QString, QPointF> m_layoutMap;                   /**< QMap with the loaded layout. each channel name correspond to a QPointF variable. */
     QMultiMap<QString, QStringList> m_selectionGroupsMap; /**< QMultiMap with the loaded selection groups. Each group name holds a string list with the corresponding channels of the group.*/

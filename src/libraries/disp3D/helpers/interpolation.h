@@ -72,9 +72,6 @@ namespace DISP3DLIB
 class DISP3DSHARED_EXPORT Interpolation
 {
 public:
-    typedef QSharedPointer<Interpolation> SPtr;
-    typedef QSharedPointer<const Interpolation> ConstSPtr;
-
     Interpolation() = delete;
 
     //=========================================================================================================

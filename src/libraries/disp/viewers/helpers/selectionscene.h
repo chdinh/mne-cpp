@@ -57,9 +57,6 @@ class DISPSHARED_EXPORT SelectionScene : public LayoutScene
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<SelectionScene> SPtr;            /**< Shared pointer type for SelectionScene. */
-    typedef QSharedPointer<const SelectionScene> ConstSPtr; /**< Const shared pointer type for SelectionScene. */
-
     //=========================================================================================================
     /**
      * Constructs a SelectionScene.

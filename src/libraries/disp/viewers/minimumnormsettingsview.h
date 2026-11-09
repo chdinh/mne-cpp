@@ -64,9 +64,6 @@ class DISPSHARED_EXPORT MinimumNormSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<MinimumNormSettingsView> SPtr;            /**< Shared pointer type for MinimumNormSettingsView. */
-    typedef QSharedPointer<const MinimumNormSettingsView> ConstSPtr; /**< Const shared pointer type for MinimumNormSettingsView. */
-
     //=========================================================================================================
     /**
      * Constructs a MinimumNormSettingsView which is a child of parent.

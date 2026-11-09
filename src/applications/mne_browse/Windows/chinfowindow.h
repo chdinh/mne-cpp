@@ -89,7 +89,7 @@ public:
     /**
      * Returns the ChannelInfoModel of this window
      */
-    ChannelInfoModel::SPtr getDataModel();
+    std::shared_ptr<ChannelInfoModel> getDataModel();
 
 private:
     //=========================================================================================================
@@ -108,7 +108,7 @@ private:
 
     std::unique_ptr<Ui::ChInfoWindow> ui; /**< Pointer to the qt designer generated ui class.*/
 
-    ChannelInfoModel::SPtr m_pChannelInfoModel; /**< The channel info model.*/
+    std::shared_ptr<ChannelInfoModel> m_pChannelInfoModel; /**< The channel info model.*/
 };
 
 } // NAMESPACE MNEBROWSE

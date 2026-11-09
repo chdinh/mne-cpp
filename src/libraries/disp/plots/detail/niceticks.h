@@ -48,8 +48,8 @@ inline QVector<double> niceTicks(double lo, double hi, int target, double minSte
         return exponent < 0 ? k * multiple / scale : k * multiple * scale;
     };
     const double step = tick(1.0);
-    for (double k = std::ceil(lo / step - 1e-9); tick(k) <= hi + step * 1e-9; k += 1.0) {
-        ticks.append(k == 0.0 ? 0.0 : tick(k));
+    for (auto k = static_cast<long long>(std::ceil(lo / step - 1e-9)); tick(static_cast<double>(k)) <= hi + step * 1e-9; ++k) {
+        ticks.append(k == 0 ? 0.0 : tick(static_cast<double>(k)));
     }
     return ticks;
 }

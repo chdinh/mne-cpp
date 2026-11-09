@@ -99,9 +99,6 @@ class DISPSHARED_EXPORT ChannelInfoModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ChannelInfoModel> SPtr;            /**< Shared pointer type for ChannelInfoModel. */
-    typedef QSharedPointer<const ChannelInfoModel> ConstSPtr; /**< Const shared pointer type for ChannelInfoModel. */
-
     ChannelInfoModel(std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo, QObject* parent = 0);
     ChannelInfoModel(QObject* parent = 0);
 
@@ -136,7 +133,7 @@ public:
      *
      * @param[in] assignedOperators the filter operators which are currently active.
      */
-    void assignedOperatorsChanged(const QMultiMap<int, QSharedPointer<MNEOperator>>& assignedOperators);
+    void assignedOperatorsChanged(const QMultiMap<int, std::shared_ptr<MNEOperator>>& assignedOperators);
 
     //=========================================================================================================
     /**
@@ -195,8 +192,8 @@ protected:
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The fiff info of the currently loaded fiff file. */
 
-    QMultiMap<int, QSharedPointer<MNEOperator>> m_assignedOperators; /**< Map of MNEOperator types to channels.*/
-    QMap<QString, QPointF> m_layoutMap;                              /**< The current layout map with a position for all MEG and EEG channels. */
+    QMultiMap<int, std::shared_ptr<MNEOperator>> m_assignedOperators; /**< Map of MNEOperator types to channels.*/
+    QMap<QString, QPointF> m_layoutMap;                               /**< The current layout map with a position for all MEG and EEG channels. */
 
     QStringList m_aliasNames;          /**< list of given channel aliases. */
     QStringList m_mappedLayoutChNames; /**< list of the mapped layout channel names. */

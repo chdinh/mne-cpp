@@ -90,7 +90,7 @@ Averaging::Averaging()
 , m_bAutoRecompute(false)
 , m_bSavingAverage(false)
 {
-    m_pEvokedModel = QSharedPointer<DISPLIB::EvokedSetModel>(new DISPLIB::EvokedSetModel());
+    m_pEvokedModel = std::make_shared<DISPLIB::EvokedSetModel>();
 }
 
 //=============================================================================================================
@@ -495,23 +495,23 @@ void Averaging::loadFullGui(std::shared_ptr<FIFFLIB::FiffInfo> pInfo)
     DISPLIB::AverageSelectionView* pAverageSelectionView = new DISPLIB::AverageSelectionView(QString("MNEANALYZE/AVERAGING"));
     pAverageSelectionView->setObjectName("group_tab_View_Selection");
 
-    connect(m_pEvokedModel.data(), &DISPLIB::EvokedSetModel::newAverageActivationMap,
+    connect(m_pEvokedModel.get(), &DISPLIB::EvokedSetModel::newAverageActivationMap,
             pAverageSelectionView, &DISPLIB::AverageSelectionView::setAverageActivation, Qt::UniqueConnection);
-    connect(m_pEvokedModel.data(), &DISPLIB::EvokedSetModel::newAverageColorMap,
+    connect(m_pEvokedModel.get(), &DISPLIB::EvokedSetModel::newAverageColorMap,
             pAverageSelectionView, &DISPLIB::AverageSelectionView::setAverageColor, Qt::UniqueConnection);
 
-    connect(m_pEvokedModel.data(), &DISPLIB::EvokedSetModel::newAverageColorMap,
+    connect(m_pEvokedModel.get(), &DISPLIB::EvokedSetModel::newAverageColorMap,
             m_pButterflyView.data(), &DISPLIB::ButterflyView::setAverageColor, Qt::UniqueConnection);
-    connect(m_pEvokedModel.data(), &DISPLIB::EvokedSetModel::newAverageActivationMap,
+    connect(m_pEvokedModel.get(), &DISPLIB::EvokedSetModel::newAverageActivationMap,
             m_pButterflyView.data(), &DISPLIB::ButterflyView::setAverageActivation, Qt::UniqueConnection);
     connect(pAverageSelectionView, &DISPLIB::AverageSelectionView::newAverageActivationMap,
             m_pButterflyView.data(), &DISPLIB::ButterflyView::setAverageActivation, Qt::UniqueConnection);
     connect(pAverageSelectionView, &DISPLIB::AverageSelectionView::newAverageColorMap,
             m_pButterflyView.data(), &DISPLIB::ButterflyView::setAverageColor, Qt::UniqueConnection);
 
-    connect(m_pEvokedModel.data(), &DISPLIB::EvokedSetModel::newAverageColorMap,
+    connect(m_pEvokedModel.get(), &DISPLIB::EvokedSetModel::newAverageColorMap,
             m_pAverageLayoutView.data(), &DISPLIB::AverageLayoutView::setAverageColor, Qt::UniqueConnection);
-    connect(m_pEvokedModel.data(), &DISPLIB::EvokedSetModel::newAverageActivationMap,
+    connect(m_pEvokedModel.get(), &DISPLIB::EvokedSetModel::newAverageActivationMap,
             m_pAverageLayoutView.data(), &DISPLIB::AverageLayoutView::setAverageActivation, Qt::UniqueConnection);
     connect(pAverageSelectionView, &DISPLIB::AverageSelectionView::newAverageActivationMap,
             m_pAverageLayoutView.data(), &DISPLIB::AverageLayoutView::setAverageActivation, Qt::UniqueConnection);

@@ -83,9 +83,6 @@ class DISPSHARED_EXPORT CoregSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<CoregSettingsView> SPtr;            /**< Shared pointer type for DISPLIB. */
-    typedef QSharedPointer<const CoregSettingsView> ConstSPtr; /**< Const shared pointer type for DISPLIB. */
-
     //=========================================================================================================
     /**
     * Constructs a CoregSettingsView object.

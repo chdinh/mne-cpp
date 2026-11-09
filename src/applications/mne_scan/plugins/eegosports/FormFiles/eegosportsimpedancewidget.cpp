@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "eegosportsimpedancewidget.h"
+#include <memory>
 #include "ui_eegosportsimpedancewidget.h"
 
 #include <utils/layoutloader.h>
@@ -55,7 +56,7 @@ EEGoSportsImpedanceWidget::EEGoSportsImpedanceWidget(EEGoSports* pEEGoSports, QW
     m_pUi->setupUi(this);
 
     // Init colormap object
-    m_cbColorMap = QSharedPointer<ColorMap>(new ColorMap());
+    m_cbColorMap = std::make_shared<ColorMap>();
 
     // Init GUI stuff
     m_qGScene = new EEGoSportsImpedanceScene(m_pUi->m_graphicsView_impedanceView);

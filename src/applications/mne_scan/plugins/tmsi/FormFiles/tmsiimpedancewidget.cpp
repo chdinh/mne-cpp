@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "tmsiimpedancewidget.h"
+#include <memory>
 #include "ui_tmsiimpedancewidget.h"
 
 #include "../tmsi.h"
@@ -51,7 +52,7 @@ TMSIImpedanceWidget::TMSIImpedanceWidget(TMSI* pTMSI, QWidget* parent)
     ui->setupUi(this);
 
     // Init colormap object
-    m_cbColorMap = QSharedPointer<ColorMap>(new ColorMap());
+    m_cbColorMap = std::make_shared<ColorMap>();
 
     // Init GUI stuff
     m_qGScene = new TMSIImpedanceScene(ui->m_graphicsView_impedanceView);

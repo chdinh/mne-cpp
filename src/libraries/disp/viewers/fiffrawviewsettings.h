@@ -72,9 +72,6 @@ class DISPSHARED_EXPORT FiffRawViewSettings : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<FiffRawViewSettings> SPtr;            /**< Shared pointer type for FiffRawViewSettings. */
-    typedef QSharedPointer<const FiffRawViewSettings> ConstSPtr; /**< Const shared pointer type for FiffRawViewSettings. */
-
     //=========================================================================================================
     /**
      * Constructs a FiffRawViewSettings which is a child of parent.

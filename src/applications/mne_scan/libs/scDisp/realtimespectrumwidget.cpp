@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "realtimespectrumwidget.h"
+#include <memory>
 
 #include <disp/viewers/spectrumsettingsview.h>
 #include <disp/viewers/spectrumview.h>
@@ -147,11 +148,11 @@ void RealTimeSpectrumWidget::initDisplayControllWidgets()
 void RealTimeSpectrumWidget::initSettingsWidget()
 {
     if (!m_pSpectrumSettingsView) {
-        m_pSpectrumSettingsView = QSharedPointer<SpectrumSettingsView>(new SpectrumSettingsView("MNESCAN", this, Qt::Window));
+        m_pSpectrumSettingsView = std::make_shared<SpectrumSettingsView>("MNESCAN", this, Qt::Window);
 
         m_pSpectrumSettingsView->setWindowTitle("Frequency Spectrum Settings");
 
-        connect(m_pSpectrumSettingsView.data(), &SpectrumSettingsView::settingsChanged, this, &RealTimeSpectrumWidget::broadcastSettings);
+        connect(m_pSpectrumSettingsView.get(), &SpectrumSettingsView::settingsChanged, this, &RealTimeSpectrumWidget::broadcastSettings);
     }
 
     if (m_pFS->isInit() && m_pFS->getFiffInfo()) {

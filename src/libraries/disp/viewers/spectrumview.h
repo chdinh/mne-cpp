@@ -80,9 +80,6 @@ class DISPSHARED_EXPORT SpectrumView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<SpectrumView> SPtr;            /**< Shared pointer type for SpectrumView. */
-    typedef QSharedPointer<const SpectrumView> ConstSPtr; /**< Const shared pointer type for SpectrumView. */
-
     //=========================================================================================================
     /**
      * Constructs a SpectrumView which is a child of parent.

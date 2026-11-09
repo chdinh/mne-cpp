@@ -45,6 +45,7 @@
 #include <QKeyEvent>
 #include <QSignalBlocker>
 #include <QDebug>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -60,11 +61,11 @@ using namespace UTILSLIB;
 
 ChannelSelectionView::ChannelSelectionView(const QString& sSettingsPath,
                                            QWidget* parent,
-                                           ChannelInfoModel::SPtr pChannelInfoModel,
+                                           std::shared_ptr<ChannelInfoModel> pChannelInfoModel,
                                            Qt::WindowType f)
 : AbstractView(parent, f)
 , m_pUi(std::make_unique<Ui::ChannelSelectionViewWidget>())
-, m_pChannelInfoModel(pChannelInfoModel)
+, m_pChannelInfoModel(std::move(pChannelInfoModel))
 , m_bSetup(false)
 {
     m_sSettingsPath = sSettingsPath;
@@ -205,7 +206,7 @@ void ChannelSelectionView::setCurrentlyMappedFiffChannels(const QStringList& map
 
 //=============================================================================================================
 
-void ChannelSelectionView::highlightChannels(QModelIndexList channelIndexList)
+void ChannelSelectionView::highlightChannels(const QModelIndexList& channelIndexList)
 {
     QStringList channelList;
     for (int i = 0; i < channelIndexList.size(); i++) {
@@ -228,7 +229,7 @@ void ChannelSelectionView::highlightChannels(QModelIndexList channelIndexList)
 
 //=============================================================================================================
 
-void ChannelSelectionView::selectChannels(QStringList channelList)
+void ChannelSelectionView::selectChannels(const QStringList& channelList)
 {
     QList<QGraphicsItem*> allSceneItems = m_pSelectionScene->items();
 
@@ -309,7 +310,7 @@ QString ChannelSelectionView::getCurrentGroupFile()
 
 //=============================================================================================================
 
-void ChannelSelectionView::setCurrentLayoutFile(QString currentLayoutFile)
+void ChannelSelectionView::setCurrentLayoutFile(const QString& currentLayoutFile)
 {
     qDebug() << "setCurrentLayoutFile:" << currentLayoutFile;
     const QSignalBlocker blocker(m_pUi->m_comboBox_layoutFile);
@@ -459,7 +460,7 @@ void ChannelSelectionView::updateProcessingMode(ProcessingMode mode)
 
 //=============================================================================================================
 
-bool ChannelSelectionView::loadLayout(QString path)
+bool ChannelSelectionView::loadLayout(const QString& path)
 {
     qDebug() << "loadLayout:" << path;
     const std::optional<MNELIB::MNELayout> layout = MNELIB::MNELayout::read(path.toStdU16String());
@@ -564,7 +565,7 @@ QString ChannelSelectionView::resolveLayoutPath(const QString& layoutFile) const
 
 //=============================================================================================================
 
-bool ChannelSelectionView::loadSelectionGroups(QString path)
+bool ChannelSelectionView::loadSelectionGroups(const QString& path)
 {
     //Clear the visible channel list
     m_pUi->m_listWidget_visibleChannels->clear();

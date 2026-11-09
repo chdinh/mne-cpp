@@ -75,9 +75,6 @@ class DISPSHARED_EXPORT ImageSc : public Graph
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ImageSc> SPtr;            /**< Shared pointer type for ImageSc class. */
-    typedef QSharedPointer<const ImageSc> ConstSPtr; /**< Const shared pointer type for ImageSc class. */
-
     //=========================================================================================================
     /**
      * Creates the scaled image view.

@@ -85,9 +85,6 @@ class DISPSHARED_EXPORT ArtifactSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ArtifactSettingsView> SPtr;      /**< Shared pointer type for AveragingAdjustmentWidget. */
-    typedef QSharedPointer<ArtifactSettingsView> ConstSPtr; /**< Const shared pointer type for AveragingAdjustmentWidget. */
-
     explicit ArtifactSettingsView(const QString& sSettingsPath = "",
                                   const std::vector<FIFFLIB::FiffChInfo>& fiffChInfoList = std::vector<FIFFLIB::FiffChInfo>(),
                                   QWidget* parent = nullptr);

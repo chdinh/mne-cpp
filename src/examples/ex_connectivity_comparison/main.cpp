@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <disp3D/view/brainview.h>
+#include <memory>
 #include <utils/string_utils.h>
 #include <disp3D/model/braintreemodel.h>
 #include <disp3D/model/items/networktreeitem.h>
@@ -379,7 +380,7 @@ int main(int argc, char* argv[])
     pBrainView->setNetworkThreshold(0.9);
 
     // Create ConnectivitySettingsView as standalone widget
-    QSharedPointer<ConnectivitySettingsView> pConnSettingsView = QSharedPointer<ConnectivitySettingsView>::create("EX_CONNECTIVITY_COMP");
+    std::shared_ptr<ConnectivitySettingsView> pConnSettingsView = std::make_shared<ConnectivitySettingsView>("EX_CONNECTIVITY_COMP");
     pConnSettingsView->setNumberTrials(iNumTrials);
     pConnSettingsView->setFrequencyBand(dFreqMin, dFreqMax);
 
@@ -429,10 +430,10 @@ int main(int argc, char* argv[])
         pBrainView->loadSourceEstimate(lhStcPath, rhStcPath);
     }
 
-    QObject::connect(pConnSettingsView.data(), &ConnectivitySettingsView::numberTrialsChanged,
+    QObject::connect(pConnSettingsView.get(), &ConnectivitySettingsView::numberTrialsChanged,
                      [&pConnSettingsView, iNumTrials]() { pConnSettingsView->setNumberTrials(iNumTrials); });
 
-    QObject::connect(pConnSettingsView.data(), &ConnectivitySettingsView::freqBandChanged,
+    QObject::connect(pConnSettingsView.get(), &ConnectivitySettingsView::freqBandChanged,
                      [&pConnSettingsView, dFreqMin, dFreqMax]() { pConnSettingsView->setFrequencyBand(dFreqMin, dFreqMax); });
 
     pConnSettingsView->show();

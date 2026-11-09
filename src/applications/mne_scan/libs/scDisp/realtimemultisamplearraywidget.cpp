@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "realtimemultisamplearraywidget.h"
+#include <memory>
 
 #include <disp/viewers/filterdesignview.h>
 #include <disp/viewers/channelselectionview.h>
@@ -156,26 +157,26 @@ void RealTimeMultiSampleArrayWidget::initDisplayControllWidgets()
         }
 
         //Init channel selection manager
-        m_pChannelInfoModel = ChannelInfoModel::SPtr::create(m_pFiffInfo,
-                                                             this);
+        m_pChannelInfoModel = std::make_shared<ChannelInfoModel>(m_pFiffInfo,
+                                                                 this);
 
-        m_pChannelSelectionView = ChannelSelectionView::SPtr::create(QString("MNESCAN/RTMSAW"),
-                                                                     this,
-                                                                     m_pChannelInfoModel,
-                                                                     Qt::Window);
+        m_pChannelSelectionView = std::make_shared<ChannelSelectionView>(QString("MNESCAN/RTMSAW"),
+                                                                         this,
+                                                                         m_pChannelInfoModel,
+                                                                         Qt::Window);
         m_pChannelSelectionView->setWindowTitle(tr(QString("%1: Channel Selection Window").arg(sRTMSAWName).toUtf8()));
 
-        connect(m_pChannelSelectionView.data(), &ChannelSelectionView::loadedLayoutMap,
-                m_pChannelInfoModel.data(), &ChannelInfoModel::layoutChanged);
+        connect(m_pChannelSelectionView.get(), &ChannelSelectionView::loadedLayoutMap,
+                m_pChannelInfoModel.get(), &ChannelInfoModel::layoutChanged);
 
-        connect(m_pChannelInfoModel.data(), &ChannelInfoModel::channelsMappedToLayout,
-                m_pChannelSelectionView.data(), &ChannelSelectionView::setCurrentlyMappedFiffChannels);
+        connect(m_pChannelInfoModel.get(), &ChannelInfoModel::channelsMappedToLayout,
+                m_pChannelSelectionView.get(), &ChannelSelectionView::setCurrentlyMappedFiffChannels);
 
-        connect(m_pChannelSelectionView.data(), &ChannelSelectionView::showSelectedChannelsOnly,
+        connect(m_pChannelSelectionView.get(), &ChannelSelectionView::showSelectedChannelsOnly,
                 m_pChannelDataView.data(), &RtFiffRawView::showSelectedChannelsOnly);
 
         connect(m_pChannelDataView.data(), &RtFiffRawView::channelMarkingChanged,
-                m_pChannelSelectionView.data(), &ChannelSelectionView::updateBadChannels);
+                m_pChannelSelectionView.get(), &ChannelSelectionView::updateBadChannels);
 
         m_pChannelInfoModel->layoutChanged(m_pChannelSelectionView->getLayoutMap());
 

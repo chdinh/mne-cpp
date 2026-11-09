@@ -80,9 +80,6 @@ class DISPSHARED_EXPORT RtFiffRawViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtFiffRawViewDelegate> SPtr;            /**< Shared pointer type for RtFiffRawViewDelegate. */
-    typedef QSharedPointer<const RtFiffRawViewDelegate> ConstSPtr; /**< Const shared pointer type for RtFiffRawViewDelegate. */
-
     //=========================================================================================================
     /**
      * Creates a new abstract item delegate with the given parent.

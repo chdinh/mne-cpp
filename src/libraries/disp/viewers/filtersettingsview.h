@@ -74,9 +74,6 @@ class DISPSHARED_EXPORT FilterSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<FilterSettingsView> SPtr;            /**< Shared pointer type for FilterSettingsView. */
-    typedef QSharedPointer<const FilterSettingsView> ConstSPtr; /**< Const shared pointer type for FilterSettingsView. */
-
     //=========================================================================================================
     /**
      * Constructs a FilterSettingsView which is a child of parent.
@@ -101,7 +98,7 @@ public:
      *
      * @return Shared pointer to the owned FilterDesignView.
      */
-    QSharedPointer<FilterDesignView> getFilterView();
+    std::shared_ptr<FilterDesignView> getFilterView();
 
     //=========================================================================================================
     /**
@@ -195,7 +192,7 @@ protected:
 
     QString m_sSettingsPath; /**< The settings path to store the GUI settings to. */
 
-    QSharedPointer<FilterDesignView> m_pFilterView; /**< The filter view. */
+    std::shared_ptr<FilterDesignView> m_pFilterView; /**< The filter view. */
 
     std::unique_ptr<Ui::FilterSettingsViewWidget> m_pUi; /**< The filter settings GUI view. */
 };

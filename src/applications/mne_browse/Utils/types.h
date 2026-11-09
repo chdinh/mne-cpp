@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
+#include <memory>
 #include <Eigen/SparseCore>
 #include <fiff/fiff.h>
 #include "filteroperator.h"
@@ -128,7 +129,7 @@ Q_DECLARE_METATYPE(const FIFFLIB::FiffInfo*);
 Q_DECLARE_METATYPE(MNEBROWSE::MatrixXdR);
 Q_DECLARE_METATYPE(MNEBROWSE::RowVectorPair);
 Q_DECLARE_METATYPE(QList<MNEBROWSE::RowVectorPair>);
-Q_DECLARE_METATYPE(QSharedPointer<DISPLIB::MNEOperator>);
+Q_DECLARE_METATYPE(std::shared_ptr<DISPLIB::MNEOperator>);
 Q_DECLARE_METATYPE(MNEBROWSE::WhiteningSettings);
 
 #endif // TYPES_H

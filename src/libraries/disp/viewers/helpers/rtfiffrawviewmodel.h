@@ -95,9 +95,6 @@ class DISPSHARED_EXPORT RtFiffRawViewModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtFiffRawViewModel> SPtr;            /**< Shared pointer type for RtFiffRawViewModel. */
-    typedef QSharedPointer<const RtFiffRawViewModel> ConstSPtr; /**< Const shared pointer type for RtFiffRawViewModel. */
-
     //=========================================================================================================
     /**
      * Constructs an real-time multi sample array table model for the given parent.

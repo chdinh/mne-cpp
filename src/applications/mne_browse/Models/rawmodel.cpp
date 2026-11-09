@@ -303,15 +303,15 @@ void RawModel::genStdFilterOps()
     //HPF
     double cutoffFreqHz = 50; //in Hz
     QString name = QString("HPF_%1").arg(cutoffFreqHz);
-    m_Operators.insert(name, QSharedPointer<MNEOperator>(new FilterOperator(name, FilterOperator::HPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, fftLength, dMethod)));
+    m_Operators.insert(name, std::make_shared<FilterOperator>(name, FilterOperator::HPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, fftLength, dMethod));
 
     //LPF
     cutoffFreqHz = 30; //in Hz
     name = QString("LPF_%1").arg(cutoffFreqHz);
-    m_Operators.insert(name, QSharedPointer<MNEOperator>(new FilterOperator(name, FilterOperator::LPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, fftLength, dMethod)));
+    m_Operators.insert(name, std::make_shared<FilterOperator>(name, FilterOperator::LPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, fftLength, dMethod));
     cutoffFreqHz = 10; //in Hz
     name = QString("LPF_%1").arg(cutoffFreqHz);
-    m_Operators.insert(name, QSharedPointer<MNEOperator>(new FilterOperator(name, FilterOperator::LPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, fftLength, dMethod)));
+    m_Operators.insert(name, std::make_shared<FilterOperator>(name, FilterOperator::LPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, fftLength, dMethod));
 
     //BPF
     double from_freqHz = 30;
@@ -321,14 +321,14 @@ void RawModel::genStdFilterOps()
     double center = from_freqHz + bw / 2;
 
     name = QString("BPF_%1-%2").arg(from_freqHz).arg(to_freqHz);
-    m_Operators.insert(name, QSharedPointer<MNEOperator>(new FilterOperator(name, FilterOperator::BPF, 80, center / nyquist_freq, bw / nyquist_freq, trans_width / nyquist_freq, sfreq, fftLength, dMethod)));
+    m_Operators.insert(name, std::make_shared<FilterOperator>(name, FilterOperator::BPF, 80, center / nyquist_freq, bw / nyquist_freq, trans_width / nyquist_freq, sfreq, fftLength, dMethod));
 
     //Own/manual set filter - only an entry i nthe operator list generated which is called when the filterwindow is used
     cutoffFreqHz = 40;
     //only create if filter does not exist yet
     if (!m_Operators.contains(QString("User defined (See 'Adjust/Filter')"))) {
         name = QString("User defined (See 'Adjust/Filter')");
-        m_Operators.insert(name, QSharedPointer<MNEOperator>(new FilterOperator(name, FilterOperator::LPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, (m_iWindowSize + m_iFilterTaps), dMethod)));
+        m_Operators.insert(name, std::make_shared<FilterOperator>(name, FilterOperator::LPF, m_iFilterTaps, cutoffFreqHz / nyquist_freq, 5 / nyquist_freq, 1 / nyquist_freq, sfreq, (m_iWindowSize + m_iFilterTaps), dMethod));
     }
 
     qInfo() << "RawModel: Standard FilterOperators generated and loaded.";
@@ -687,7 +687,7 @@ void RawModel::markChBad(QModelIndexList chlist, bool status)
 
 //*************************************************************************************************************
 
-void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOperator>& operatorPtr, const QString& chType)
+void RawModel::applyOperator(QModelIndexList chlist, const std::shared_ptr<MNEOperator>& operatorPtr, const QString& chType)
 {
     m_filterChType = chType;
 
@@ -726,7 +726,7 @@ void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOpe
 
 //*************************************************************************************************************
 
-void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOperator>& operatorPtr)
+void RawModel::applyOperator(QModelIndexList chlist, const std::shared_ptr<MNEOperator>& operatorPtr)
 {
     //filter all when chlist is empty
     if (chlist.empty()) {
@@ -766,15 +766,15 @@ void RawModel::applyOperator(QModelIndexList chlist, const QSharedPointer<MNEOpe
 
 void RawModel::applyOperatorsConcurrently(QPair<int, RowVectorXd>& chdata) const
 {
-    QSharedPointer<FilterOperator> filter;
+    std::shared_ptr<FilterOperator> filter;
 
     //QList<int> listFilteredChs = m_assignedOperators.keys();
 
-    QList<QSharedPointer<MNEOperator>> ops = m_assignedOperators.values(chdata.first);
+    QList<std::shared_ptr<MNEOperator>> ops = m_assignedOperators.values(chdata.first);
     for (qint32 i = 0; i < ops.size(); ++i) {
         switch (ops[i]->m_OperatorType) {
             case MNEOperator::FILTER: {
-                filter = ops[i].staticCast<FilterOperator>();
+                filter = std::static_pointer_cast<FilterOperator>(ops[i]);
                 RowVectorXd tmp = filter->applyFFTFilter(chdata.second);
                 chdata.second = tmp;
                 break;
@@ -854,11 +854,11 @@ void RawModel::updateOperators()
 
 //*************************************************************************************************************
 
-void RawModel::undoFilter(QModelIndexList chlist, const QSharedPointer<MNEOperator>& filterPtr)
+void RawModel::undoFilter(QModelIndexList chlist, const std::shared_ptr<MNEOperator>& filterPtr)
 {
     for (qint32 i = 0; i < chlist.size(); ++i) {
         if (m_assignedOperators.contains(chlist[i].row()) && m_assignedOperators.values(chlist[i].row()).contains(filterPtr)) {
-            QMutableMultiMapIterator<int, QSharedPointer<MNEOperator>> it(m_assignedOperators);
+            QMutableMultiMapIterator<int, std::shared_ptr<MNEOperator>> it(m_assignedOperators);
             while (it.hasNext()) {
                 it.next();
                 if (it.key() == chlist[i].row() && it.value() == filterPtr) {

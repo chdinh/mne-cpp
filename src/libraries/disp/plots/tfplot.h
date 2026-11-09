@@ -73,9 +73,6 @@ class DISPSHARED_EXPORT TFplot : public ImageSc
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<TFplot> SPtr;            /**< Shared pointer type for TFplot class. */
-    typedef QSharedPointer<const TFplot> ConstSPtr; /**< Const shared pointer type for TFplot class. */
-
     //=========================================================================================================
     /**
      * Plots the frequency bins from @p lower_frq to @p upper_frq.

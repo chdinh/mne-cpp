@@ -102,9 +102,6 @@ class DISPSHARED_EXPORT EvokedSetModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<EvokedSetModel> SPtr;            /**< Shared pointer type for EvokedSetModel. */
-    typedef QSharedPointer<const EvokedSetModel> ConstSPtr; /**< Const shared pointer type for EvokedSetModel. */
-
     //=========================================================================================================
     /**
      * Constructs an real-time multi sample array table model for the given parent.

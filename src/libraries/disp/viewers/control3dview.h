@@ -68,9 +68,6 @@ class DISPSHARED_EXPORT Control3DView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<Control3DView> SPtr;            /**< Shared pointer type for Control3DView. */
-    typedef QSharedPointer<const Control3DView> ConstSPtr; /**< Const shared pointer type for Control3DView. */
-
     //=========================================================================================================
     /**
      * Default constructor.

@@ -76,9 +76,6 @@ class DISPSHARED_EXPORT Spline : public QWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<Spline> SPtr;            /**< Shared pointer type for Spline class. */
-    typedef QSharedPointer<const Spline> ConstSPtr; /**< Const shared pointer type for Spline class. */
-
     //=========================================================================================================
     /**
      * The constructor for Spline

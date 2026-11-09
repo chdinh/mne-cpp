@@ -184,7 +184,7 @@ void ChannelSelection::setFiffSettings(std::shared_ptr<FIFFLIB::FiffInfo> pFiffI
     //First time set up only
     m_pControlLayout->takeAt(0)->widget()->hide();
 
-    m_pChannelInfoModel = QSharedPointer<DISPLIB::ChannelInfoModel>(new DISPLIB::ChannelInfoModel(m_pFiffInfo));
+    m_pChannelInfoModel = std::make_shared<DISPLIB::ChannelInfoModel>(m_pFiffInfo);
 
     m_pChannelSelectionView = std::make_unique<DISPLIB::ChannelSelectionView>(QString("MNEANALYZE/CHANSELECT"),
                                                                               nullptr,
@@ -199,9 +199,9 @@ void ChannelSelection::setFiffSettings(std::shared_ptr<FIFFLIB::FiffInfo> pFiffI
     m_pControlLayout->addWidget(m_pApplyToView);
 
     connect(m_pChannelSelectionView.get(), &DISPLIB::ChannelSelectionView::loadedLayoutMap,
-            m_pChannelInfoModel.data(), &DISPLIB::ChannelInfoModel::layoutChanged, Qt::UniqueConnection);
+            m_pChannelInfoModel.get(), &DISPLIB::ChannelInfoModel::layoutChanged, Qt::UniqueConnection);
 
-    connect(m_pChannelInfoModel.data(), &DISPLIB::ChannelInfoModel::channelsMappedToLayout,
+    connect(m_pChannelInfoModel.get(), &DISPLIB::ChannelInfoModel::channelsMappedToLayout,
             m_pChannelSelectionView.get(), &DISPLIB::ChannelSelectionView::setCurrentlyMappedFiffChannels, Qt::UniqueConnection);
 
     //Slots for event loop

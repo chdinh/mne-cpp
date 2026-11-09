@@ -1674,7 +1674,7 @@ void TestDispViewers2::channelSelectionView_lifecycle()
     }
 
     auto info = createBrowserTestInfo();
-    ChannelInfoModel::SPtr infoModel(new ChannelInfoModel);
+    std::shared_ptr<ChannelInfoModel> infoModel(new ChannelInfoModel);
     infoModel->setFiffInfo(info);
 
     ChannelSelectionView view(QStringLiteral("test_disp_viewers2_lifecycle"),
@@ -1707,7 +1707,7 @@ void TestDispViewers2::channelSelectionView_initialLayoutLoads()
     }
 
     auto info = createBrowserTestInfo();
-    ChannelInfoModel::SPtr infoModel(new ChannelInfoModel);
+    std::shared_ptr<ChannelInfoModel> infoModel(new ChannelInfoModel);
     infoModel->setFiffInfo(info);
 
     ChannelSelectionView view(QStringLiteral("test_disp_viewers2_selection"),
@@ -1857,7 +1857,7 @@ void TestDispViewers2::butterflyView_drawsAveragesAcrossTheFullWidth()
     evoked.data.row(0).setConstant(5e-13);
     set->evoked.push_back(evoked);
 
-    auto model = QSharedPointer<EvokedSetModel>::create();
+    auto model = std::make_shared<EvokedSetModel>();
     model->setEvokedSet(set);
     ButterflyView view(QStringLiteral("test_disp_viewers2_butterfly"));
     view.resize(400, 200);
@@ -2270,7 +2270,7 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
     evoked.data.row(0).tail(60).setConstant(8e-13);
     evoked.data.row(2).tail(60).setConstant(-8e-13);
     set->evoked.push_back(evoked);
-    auto model = QSharedPointer<EvokedSetModel>::create();
+    auto model = std::make_shared<EvokedSetModel>();
     model->setEvokedSet(set);
     auto pInfo = std::make_shared<FiffInfo>(set->info);
 
@@ -2590,7 +2590,7 @@ void TestDispViewers2::channelInfoModel_basics()
     model.layoutChanged(QMap<QString, QPointF>());
 
     // assignedOperatorsChanged with empty map
-    QMultiMap<int, QSharedPointer<MNEOperator>> emptyOps;
+    QMultiMap<int, std::shared_ptr<MNEOperator>> emptyOps;
     model.assignedOperatorsChanged(emptyOps);
 
     // clearModel — resets to empty FiffInfo state

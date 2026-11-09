@@ -61,9 +61,6 @@ class DISPSHARED_EXPORT TfSettingsView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<TfSettingsView> SPtr;            /**< Shared pointer type for TfSettingsView. */
-    typedef QSharedPointer<const TfSettingsView> ConstSPtr; /**< Const shared pointer type for TfSettingsView. */
-
     //=========================================================================================================
     /**
      * Constructs a TfSettingsView which is a child of parent.

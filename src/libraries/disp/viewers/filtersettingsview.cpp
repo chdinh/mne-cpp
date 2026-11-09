@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "filtersettingsview.h"
+#include <memory>
 
 #include "filterdesignview.h"
 
@@ -56,19 +57,19 @@ FilterSettingsView::FilterSettingsView(const QString& sSettingsPath,
     loadSettings();
 
     //Create and connect design viewer
-    m_pFilterView = FilterDesignView::SPtr::create(m_sSettingsPath,
-                                                   nullptr,
-                                                   Qt::Dialog);
+    m_pFilterView = std::make_shared<FilterDesignView>(m_sSettingsPath,
+                                                       nullptr,
+                                                       Qt::Dialog);
 
-    connect(m_pFilterView.data(), &FilterDesignView::updateFilterFrom, [=, this](double dFrom) {
+    connect(m_pFilterView.get(), &FilterDesignView::updateFilterFrom, [=, this](double dFrom) {
         m_pUi->m_pDoubleSpinBoxFrom->setValue(dFrom);
     });
-    connect(m_pFilterView.data(), &FilterDesignView::updateFilterTo, [=, this](double dTo) {
+    connect(m_pFilterView.get(), &FilterDesignView::updateFilterTo, [=, this](double dTo) {
         m_pUi->m_pDoubleSpinBoxTo->setValue(dTo);
     });
 
     connect(this, &FilterSettingsView::guiStyleChanged,
-            m_pFilterView.data(), &FilterDesignView::guiStyleChanged);
+            m_pFilterView.get(), &FilterDesignView::guiStyleChanged);
 
     m_pUi->m_pDoubleSpinBoxFrom->setValue(m_pFilterView->getFrom());
     m_pUi->m_pDoubleSpinBoxTo->setValue(m_pFilterView->getTo());
@@ -95,7 +96,7 @@ FilterSettingsView::~FilterSettingsView()
 
 //=============================================================================================================
 
-QSharedPointer<FilterDesignView> FilterSettingsView::getFilterView()
+std::shared_ptr<FilterDesignView> FilterSettingsView::getFilterView()
 {
     return m_pFilterView;
 }

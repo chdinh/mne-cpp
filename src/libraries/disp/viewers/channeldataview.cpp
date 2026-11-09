@@ -193,7 +193,7 @@ void ChannelDataView::setupLayout()
     traceColumn->addWidget(m_pTimeRuler, 0);
 
     m_pRhiView = new ChannelRhiView(this);
-    m_pRhiView->setModel(m_pModel.data());
+    m_pRhiView->setModel(m_pModel.get());
     m_pRhiView->setBackgroundColor(m_bgColor);
     m_pRhiView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_pRhiView->setFocusPolicy(Qt::ClickFocus);
@@ -228,7 +228,7 @@ void ChannelDataView::setupLayout()
 
     // ── Overview bar (minimap) ───────────────────────────────────────────
     m_pOverviewBar = new OverviewBarWidget(this);
-    m_pOverviewBar->setModel(m_pModel.data());
+    m_pOverviewBar->setModel(m_pModel.get());
     outerLayout->addWidget(m_pOverviewBar, 0);
 
     // ── Bottom row: horizontal scroll bar + scroll-mode toggle ───────────
@@ -316,16 +316,16 @@ void ChannelDataView::setupLayout()
     connect(m_pRhiView, &ChannelRhiView::viewResized,
             this, [this](int, int) { updateSamplesPerPixel(); });
 
-    connect(m_pModel.data(), &ChannelDataModel::dataChanged,
+    connect(m_pModel.get(), &ChannelDataModel::dataChanged,
             this, &ChannelDataView::updateScrollBarRange);
 
-    connect(m_pModel.data(), &ChannelDataModel::metaChanged,
+    connect(m_pModel.get(), &ChannelDataModel::metaChanged,
             this, &ChannelDataView::updateChannelScrollBarRange);
 
     // Keep label panel in sync with model changes so status pills update immediately.
-    connect(m_pModel.data(), &ChannelDataModel::metaChanged,
+    connect(m_pModel.get(), &ChannelDataModel::metaChanged,
             m_pLabelPanel, QOverload<>::of(&QWidget::update));
-    connect(m_pModel.data(), &ChannelDataModel::dataChanged,
+    connect(m_pModel.get(), &ChannelDataModel::dataChanged,
             m_pLabelPanel, QOverload<>::of(&QWidget::update));
 
     // Feed current visible sample window to the label panel for the RMS level bar.
@@ -357,10 +357,10 @@ void ChannelDataView::setupLayout()
                 }
             });
     // Rebuild envelope when data changes.
-    connect(m_pModel.data(), &ChannelDataModel::dataChanged,
+    connect(m_pModel.get(), &ChannelDataModel::dataChanged,
             this, [this]() {
                 if (m_pOverviewBar) {
-                    m_pOverviewBar->setModel(m_pModel.data());
+                    m_pOverviewBar->setModel(m_pModel.get());
                 }
             });
     // Click/drag on overview bar → navigate.
@@ -396,7 +396,7 @@ void ChannelDataView::init(const std::shared_ptr<FiffInfo>& pInfo)
     }
 
     if (m_pLabelPanel) {
-        m_pLabelPanel->setModel(m_pModel.data());
+        m_pLabelPanel->setModel(m_pModel.get());
         m_pLabelPanel->setVisibleChannelCount(m_pRhiView ? m_pRhiView->visibleChannelCount() : 12);
     }
 

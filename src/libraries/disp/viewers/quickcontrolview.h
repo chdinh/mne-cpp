@@ -70,9 +70,6 @@ class DISPSHARED_EXPORT QuickControlView : public DISPLIB::DraggableFramelessWid
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<QuickControlView> SPtr;            /**< Shared pointer type for QuickControlView. */
-    typedef QSharedPointer<const QuickControlView> ConstSPtr; /**< Const shared pointer type for QuickControlView. */
-
     //=========================================================================================================
     /**
      * Constructs a QuickControlView which is a child of parent.

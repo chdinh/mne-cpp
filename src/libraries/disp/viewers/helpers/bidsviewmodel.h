@@ -97,9 +97,6 @@ class DISPSHARED_EXPORT BidsViewModel : public QStandardItemModel
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<BidsViewModel> SPtr;            /**< Shared pointer type for BidsViewModel. */
-    typedef QSharedPointer<const BidsViewModel> ConstSPtr; /**< Const shared pointer type for BidsViewModel. */
-
     //=========================================================================================================
     /**
      * Constructs the Analyze Data Model.

@@ -30,6 +30,7 @@
 #include <QPainterPath>
 #include <QPaintEvent>
 
+#include <array>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -49,10 +50,10 @@ using namespace Eigen;
 namespace
 {
 
-const QVector<QColor> kPalette = {QColor(70, 130, 180), QColor(221, 132, 82), QColor(85, 168, 104),
-                                  QColor(196, 78, 82), QColor(129, 114, 179), QColor(147, 120, 96),
-                                  QColor(218, 139, 195), QColor(140, 140, 140), QColor(204, 185, 116),
-                                  QColor(100, 181, 205)};
+constexpr std::array<QColor, 10> kPalette = {QColor(70, 130, 180), QColor(221, 132, 82), QColor(85, 168, 104),
+                                             QColor(196, 78, 82), QColor(129, 114, 179), QColor(147, 120, 96),
+                                             QColor(218, 139, 195), QColor(140, 140, 140), QColor(204, 185, 116),
+                                             QColor(100, 181, 205)};
 
 } // namespace
 
@@ -178,7 +179,7 @@ void LinePlot::addSeries(const QVector<double>& x,
     }
     QColor lineColor = color;
     if (!lineColor.isValid()) {
-        lineColor = kPalette[m_series.size() % kPalette.size()];
+        lineColor = kPalette[static_cast<std::size_t>(m_series.size()) % kPalette.size()];
         for (const QColor& candidate : kPalette) {
             if (std::none_of(m_series.cbegin(), m_series.cend(), [&](const Series& s) { return s.color == candidate; })) {
                 lineColor = candidate;

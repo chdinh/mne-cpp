@@ -82,9 +82,6 @@ class DISPSHARED_EXPORT FilterDesignView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<FilterDesignView> SPtr;            /**< Shared pointer type for FilterDesignView. */
-    typedef QSharedPointer<const FilterDesignView> ConstSPtr; /**< Const shared pointer type for FilterDesignView. */
-
     //=========================================================================================================
     /**
      * Constructs a FilterDesignView dialog which is a child of parent.

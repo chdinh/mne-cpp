@@ -68,9 +68,6 @@ class DISPSHARED_EXPORT MultiView : public QMainWindow
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<MultiView> SPtr;            /**< Shared pointer type for MultiView. */
-    typedef QSharedPointer<const MultiView> ConstSPtr; /**< Const shared pointer type for MultiView. */
-
     //=========================================================================================================
     /**
      * Constructs an MultiView.

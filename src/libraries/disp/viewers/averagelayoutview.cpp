@@ -68,10 +68,10 @@ AverageLayoutView::AverageLayoutView(const QString& sSettingsPath,
     m_pAverageLayoutView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_pAverageLayoutView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    m_pAverageScene = AverageScene::SPtr(new AverageScene(m_pAverageLayoutView.data(), this));
+    m_pAverageScene = std::make_shared<AverageScene>(m_pAverageLayoutView.data(), this);
     m_pAverageScene->setBackgroundBrush(QBrush(Qt::white));
 
-    m_pAverageLayoutView->setScene(m_pAverageScene.data());
+    m_pAverageLayoutView->setScene(m_pAverageScene.get());
 
     //set layouts
     QVBoxLayout* neLayout = new QVBoxLayout(this);
@@ -100,17 +100,17 @@ void AverageLayoutView::updateViewport()
 
 //=============================================================================================================
 
-void AverageLayoutView::setChannelInfoModel(QSharedPointer<ChannelInfoModel>& pChannelInfoModel)
+void AverageLayoutView::setChannelInfoModel(std::shared_ptr<ChannelInfoModel>& pChannelInfoModel)
 {
     m_pChannelInfoModel = pChannelInfoModel;
 }
 
 //=============================================================================================================
 
-void AverageLayoutView::setEvokedSetModel(QSharedPointer<EvokedSetModel> pEvokedSetModel)
+void AverageLayoutView::setEvokedSetModel(const std::shared_ptr<EvokedSetModel>& pEvokedSetModel)
 {
     if (pEvokedSetModel) {
-        connect(pEvokedSetModel.data(), &EvokedSetModel::dataChanged,
+        connect(pEvokedSetModel.get(), &EvokedSetModel::dataChanged,
                 this, &AverageLayoutView::updateData, Qt::UniqueConnection);
     }
 
@@ -408,7 +408,7 @@ void AverageLayoutView::setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& pF
 
 //=============================================================================================================
 
-QSharedPointer<EvokedSetModel> AverageLayoutView::getEvokedSetModel()
+std::shared_ptr<EvokedSetModel> AverageLayoutView::getEvokedSetModel()
 {
     return m_pEvokedSetModel;
 }

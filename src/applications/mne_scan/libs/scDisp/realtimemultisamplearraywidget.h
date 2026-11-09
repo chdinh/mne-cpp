@@ -150,10 +150,10 @@ private:
 private:
     QSharedPointer<SCMEASLIB::RealTimeMultiSampleArray> m_pRTMSA; /**< The real-time sample array measurement. */
 
-    QSharedPointer<DISPLIB::QuickControlView> m_pQuickControlView;         /**< quick control widget. */
-    QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel;         /**< channel info model. */
-    QSharedPointer<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< ChannelSelectionView. */
-    QPointer<DISPLIB::RtFiffRawView> m_pChannelDataView;                   /**< the QTableView being part of the model/view framework of Qt. */
+    std::shared_ptr<DISPLIB::QuickControlView> m_pQuickControlView;         /**< quick control widget. */
+    std::shared_ptr<DISPLIB::ChannelInfoModel> m_pChannelInfoModel;         /**< channel info model. */
+    std::shared_ptr<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< ChannelSelectionView. */
+    QPointer<DISPLIB::RtFiffRawView> m_pChannelDataView;                    /**< the QTableView being part of the model/view framework of Qt. */
 
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo, which is used insteadd of ListChInfo*/
 

@@ -294,11 +294,11 @@ private:
 
     void updateEvokedSetModel();
 
-    QSharedPointer<ANSHAREDLIB::FiffRawViewModel> m_pFiffRawModel; /**< Pointer to currently loaded FiffRawView Model. */
-    QSharedPointer<QList<QPair<int, double>>> m_pTriggerList;      /**< Pointer to list of stim triggers. */
-    QSharedPointer<DISPLIB::EvokedSetModel> m_pEvokedModel;        /**< Pointer to model used to display averaging data from m_pFiffEvokedSet and m_pFiffEvoked. */
-    QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel; /**< Pointer to model that holds channel info data. */
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                /**< Pointer to info about loaded fiff data. */
+    QSharedPointer<ANSHAREDLIB::FiffRawViewModel> m_pFiffRawModel;  /**< Pointer to currently loaded FiffRawView Model. */
+    QSharedPointer<QList<QPair<int, double>>> m_pTriggerList;       /**< Pointer to list of stim triggers. */
+    std::shared_ptr<DISPLIB::EvokedSetModel> m_pEvokedModel;        /**< Pointer to model used to display averaging data from m_pFiffEvokedSet and m_pFiffEvoked. */
+    std::shared_ptr<DISPLIB::ChannelInfoModel> m_pChannelInfoModel; /**< Pointer to model that holds channel info data. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                 /**< Pointer to info about loaded fiff data. */
 
     QPointer<ANSHAREDLIB::Communicator> m_pCommu;              /**< To broadcst signals. */
     QPointer<DISPLIB::ButterflyView> m_pButterflyView;         /**< The butterfly plot view. */

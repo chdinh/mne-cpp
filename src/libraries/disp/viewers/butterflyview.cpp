@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "butterflyview.h"
+#include <memory>
 
 #include "scalingview.h"
 
@@ -33,6 +34,7 @@
 #include <QDebug>
 #include <QSvgGenerator>
 #include <QSettings>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -81,11 +83,11 @@ void ButterflyView::updateViewport()
 
 //=============================================================================================================
 
-void ButterflyView::setEvokedSetModel(QSharedPointer<EvokedSetModel> model)
+void ButterflyView::setEvokedSetModel(std::shared_ptr<EvokedSetModel> model)
 {
-    m_pEvokedSetModel = model;
+    m_pEvokedSetModel = std::move(model);
 
-    connect(m_pEvokedSetModel.data(), &EvokedSetModel::dataChanged,
+    connect(m_pEvokedSetModel.get(), &EvokedSetModel::dataChanged,
             this, &ButterflyView::dataUpdate, Qt::UniqueConnection);
 }
 
@@ -216,7 +218,7 @@ void ButterflyView::setAverageActivation(const QSharedPointer<QMap<QString, bool
 
 //=============================================================================================================
 
-void ButterflyView::setChannelInfoModel(QSharedPointer<ChannelInfoModel>& pChannelInfoModel)
+void ButterflyView::setChannelInfoModel(std::shared_ptr<ChannelInfoModel>& pChannelInfoModel)
 {
     m_pChannelInfoModel = pChannelInfoModel;
 }
@@ -240,7 +242,7 @@ void ButterflyView::showSelectedChannelsOnly(const QStringList& selectedChannels
 
 //=============================================================================================================
 
-void ButterflyView::showSelectedChannels(const QList<int> selectedChannelsIndexes)
+void ButterflyView::showSelectedChannels(const QList<int>& selectedChannelsIndexes)
 {
     setSelectedChannels(selectedChannelsIndexes);
 }
@@ -560,7 +562,7 @@ void ButterflyView::createPlotPath(qint32 row, QPainter& painter) const
 
 //=============================================================================================================
 
-QSharedPointer<EvokedSetModel> ButterflyView::getEvokedSetModel()
+std::shared_ptr<EvokedSetModel> ButterflyView::getEvokedSetModel()
 {
     return m_pEvokedSetModel;
 }

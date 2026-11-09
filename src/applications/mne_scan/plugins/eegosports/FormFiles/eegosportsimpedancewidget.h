@@ -164,7 +164,7 @@ private:
 
     std::unique_ptr<Ui::EEGoSportsImpedanceWidget> m_pUi; /**< The user interface for the EEGoSportsImpedanceWidget.*/
 
-    QSharedPointer<ColorMap> m_cbColorMap; /**< The pointer the colormap object.*/
+    std::shared_ptr<ColorMap> m_cbColorMap; /**< The pointer the colormap object.*/
 
     double m_dMaxImpedance; /**< Maximum impedance value. This is a fixed value to scale the color map.*/
 };

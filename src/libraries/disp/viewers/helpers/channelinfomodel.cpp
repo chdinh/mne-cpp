@@ -356,8 +356,8 @@ QVariant ChannelInfoModel::data(const QModelIndex& index, int role) const
             QVariant v;
 
             //            //Check if mne operator is a filter operator
-            //            QSharedPointer<MNEOperator> operatorPtr = m_assignedOperators.value(index.row(), QSharedPointer<MNEOperator>(new MNEOperator()));
-            //            QSharedPointer<FilterOperator> filterOperator;
+            //            std::shared_ptr<MNEOperator> operatorPtr = m_assignedOperators.value(index.row(), std::make_shared<MNEOperator>());
+            //            std::shared_ptr<FilterOperator> filterOperator;
 
             switch (role) {
                 case Qt::DisplayRole: {
@@ -537,7 +537,7 @@ void ChannelInfoModel::setFiffInfo(std::shared_ptr<FiffInfo>& pFiffInfo)
 
 //=============================================================================================================
 
-void ChannelInfoModel::assignedOperatorsChanged(const QMultiMap<int, QSharedPointer<MNEOperator>>& assignedOperators)
+void ChannelInfoModel::assignedOperatorsChanged(const QMultiMap<int, std::shared_ptr<MNEOperator>>& assignedOperators)
 {
     beginResetModel();
 

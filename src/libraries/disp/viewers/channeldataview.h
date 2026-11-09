@@ -92,9 +92,6 @@ class DISPSHARED_EXPORT ChannelDataView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<ChannelDataView> SPtr;
-    typedef QSharedPointer<const ChannelDataView> ConstSPtr;
-
     //=========================================================================================================
     /**
      * Constructs a ChannelDataView.
@@ -423,7 +420,7 @@ public:
      */
     ChannelDataModel* model() const
     {
-        return m_pModel.data();
+        return m_pModel.get();
     }
 
 signals:
@@ -510,7 +507,7 @@ private:
     void updateSamplesPerPixel();
 
     QString m_sSettingsPath;
-    QSharedPointer<ChannelDataModel> m_pModel;
+    std::shared_ptr<ChannelDataModel> m_pModel;
     ChannelLabelPanel* m_pLabelPanel = nullptr;
     ChannelRhiView* m_pRhiView = nullptr;
     TimeRulerWidget* m_pTimeRuler = nullptr;

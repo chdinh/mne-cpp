@@ -95,7 +95,7 @@ private:
 
     std::unique_ptr<Ui::TMSIImpedanceWidget> ui; /**< The user interface for the TMSIImpedanceWidget.*/
 
-    QSharedPointer<DISPLIB::ColorMap> m_cbColorMap; /**< The pointer the colormap object.*/
+    std::shared_ptr<DISPLIB::ColorMap> m_cbColorMap; /**< The pointer the colormap object.*/
 
     double m_dMaxImpedance; /**< Maximum impedance value. This is a fixed value to scale the color map.*/
 

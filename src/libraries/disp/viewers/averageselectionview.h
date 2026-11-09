@@ -63,9 +63,6 @@ class DISPSHARED_EXPORT AverageSelectionView : public AbstractView
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<AverageSelectionView> SPtr;            /**< Shared pointer type for AverageSelectionView. */
-    typedef QSharedPointer<const AverageSelectionView> ConstSPtr; /**< Const shared pointer type for AverageSelectionView. */
-
     //=========================================================================================================
     /**
      * Constructs a AverageSelectionView which is a child of parent.

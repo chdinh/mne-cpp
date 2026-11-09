@@ -111,7 +111,7 @@ public:
     DISPLIB::Plot* m_pEvokedSourceSignalCoursePlot = nullptr;
     DISPLIB::ImageSc* m_pImageConnWeights = nullptr;
 
-    TFplot::SPtr m_pTfPlot;
+    std::shared_ptr<TFplot> m_pTfPlot;
     Eigen::MatrixXd m_matEvoked;
     Eigen::MatrixXd m_matEvokedSource;
     MNELIB::MNEEpochDataList epochs;
@@ -231,7 +231,7 @@ public:
 
                 //            Eigen::MatrixXd dataSpectrum = Spectrogram::makeSpectrogram(plotVeca, m_settings.getSamplingFrequency()*0.05);
 
-                //            m_pTfPlot = TFplot::SPtr::create(dataSpectrum, m_settings.getSamplingFrequency(), 2,50, ColorMaps::Jet);
+                //            m_pTfPlot = std::make_shared<TFplot>(dataSpectrum, m_settings.getSamplingFrequency(), 2,50, ColorMaps::Jet);
                 //            m_pTfPlot->show();
             }
 

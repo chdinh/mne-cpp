@@ -74,9 +74,6 @@ class DISPSHARED_EXPORT Graph : public QWidget
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<Graph> SPtr;            /**< Shared pointer type for Graph class. */
-    typedef QSharedPointer<const Graph> ConstSPtr; /**< Const shared pointer type for Graph class. */
-
     //=========================================================================================================
     /**
      * The constructor.
