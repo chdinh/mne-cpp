@@ -21,6 +21,7 @@
 #include <charconv>
 #include <cstring>
 #include <fstream>
+#include <future>
 #include <string>
 #include <thread>
 
@@ -297,4 +298,26 @@ AcqExpected<std::vector<unsigned>> ACQLIB::acqNumaNodeCpus(int node)
         cpus.push_back(c);
     }
     return cpus;
+}
+
+//=============================================================================================================
+
+AcqExpected<std::thread> ACQLIB::start_thread(const AcqThreadPolicy& policy, std::function<void()> body)
+{
+    // The promise's shared state outlives both ends, unlike a flag the thread could still notify after we return
+    std::promise<AcqError> applied;
+    std::future<AcqError> result = applied.get_future();
+    std::thread thread([policy, body = std::move(body), applied = std::move(applied)]() mutable {
+        AcqError error = acqApplyThreadPolicy(policy);
+        const bool ok = error.ok();
+        applied.set_value(std::move(error));
+        if (ok) {
+            body();
+        }
+    });
+    if (AcqError error = result.get(); !error.ok()) {
+        thread.join();
+        return error;
+    }
+    return thread;
 }

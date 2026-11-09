@@ -106,6 +106,10 @@ aliases; replace the old spelling as below.
   started; it stayed empty unless the working directory was `bin/`. With a
   cap of more electrodes than the amplifier measures it colours the measured
   ones instead of none.
+- `ACQLIB::start_thread(policy, body)` starts a thread under an
+  `AcqThreadPolicy` and returns it, or the error of a refused policy without
+  running `body`. Every acquisition backend and the recorder start their
+  threads with it.
 - `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
   uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
 - The export macros of `mne_bids`, `mne_com`, `mne_connectivity`, `mne_dsp`,

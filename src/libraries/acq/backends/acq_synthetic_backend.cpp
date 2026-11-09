@@ -781,23 +781,11 @@ public:
             clock.anchorSample = stream.next;
             stream.writer->setClock(clock);
         }
-        // The thread applies its policy before producing anything; a refused policy fails start(). The flag is a
-        // member: the thread may still be inside notify_one() when start() returns.
-        m_applied.store(-1, std::memory_order_relaxed);
-        m_thread = std::thread([this] {
-            m_refused = acqApplyThreadPolicy(m_config.thread);
-            const bool ok = m_refused.ok();
-            m_applied.store(ok ? 1 : 0, std::memory_order_release);
-            m_applied.notify_one();
-            if (ok) {
-                run();
-            }
-        });
-        m_applied.wait(-1, std::memory_order_acquire);
-        if (m_applied.load(std::memory_order_acquire) == 0) {
-            m_thread.join();
-            return m_refused;
+        auto thread = start_thread(m_config.thread, [this] { run(); });
+        if (!thread) {
+            return thread.error();
         }
+        m_thread = std::move(*thread);
         return {};
     }
 
@@ -1030,8 +1018,6 @@ private:
     std::mutex m_mutex;
     std::condition_variable m_wake;
     std::atomic<bool> m_stop{false};
-    std::atomic<int> m_applied{-1}; // start(): -1 pending, 1 the thread policy applied, 0 refused (m_refused)
-    AcqError m_refused;
 };
 
 //=============================================================================================================

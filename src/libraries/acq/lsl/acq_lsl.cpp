@@ -515,21 +515,11 @@ public:
     AcqError start() override
     {
         m_stop.store(false, std::memory_order_relaxed);
-        m_applied.store(-1, std::memory_order_relaxed);
-        m_thread = std::thread([this] {
-            m_refused = acqApplyThreadPolicy(m_config.thread);
-            const bool ok = m_refused.ok();
-            m_applied.store(ok ? 1 : 0, std::memory_order_release);
-            m_applied.notify_one();
-            if (ok) {
-                run();
-            }
-        });
-        m_applied.wait(-1, std::memory_order_acquire);
-        if (m_applied.load(std::memory_order_acquire) == 0) {
-            m_thread.join();
-            return m_refused;
+        auto thread = start_thread(m_config.thread, [this] { run(); });
+        if (!thread) {
+            return thread.error();
         }
+        m_thread = std::move(*thread);
         return {};
     }
 
@@ -768,8 +758,6 @@ private:
     double m_correction = 0.0;
     std::thread m_thread;
     std::atomic<bool> m_stop{false};
-    std::atomic<int> m_applied{-1};
-    AcqError m_refused;
 };
 
 AcqSchemeInfo schemeInfo()

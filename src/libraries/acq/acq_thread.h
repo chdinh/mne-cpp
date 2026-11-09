@@ -25,7 +25,9 @@
 #include "acq_error.h"
 
 #include <cstdint>
+#include <functional>
 #include <span>
+#include <thread>
 #include <vector>
 
 //=============================================================================================================
@@ -104,6 +106,18 @@ struct AcqThreadPolicy
  *         InvalidParameter for a node that does not exist.
  */
 [[nodiscard]] ACQSHARED_EXPORT AcqExpected<std::vector<unsigned>> acqNumaNodeCpus(int node);
+
+//=============================================================================================================
+/**
+ * Starts a thread that applies @p policy and then runs @p body, e.g. a backend's producer loop. Returns once the
+ * policy is applied, so a refused policy fails the start instead of the acquisition.
+ *
+ * @param[in] policy   CPUs and priority of the thread.
+ * @param[in] body     What the thread runs; not run if the policy is refused.
+ *
+ * @return The running thread, or the error of acqApplyThreadPolicy() after the thread has ended.
+ */
+[[nodiscard]] ACQSHARED_EXPORT AcqExpected<std::thread> start_thread(const AcqThreadPolicy& policy, std::function<void()> body);
 
 } // namespace ACQLIB
 

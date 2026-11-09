@@ -48,7 +48,6 @@
 #include <cstring>
 #include <deque>
 #include <filesystem>
-#include <future>
 #include <limits>
 #include <mutex>
 #include <sstream>
@@ -438,7 +437,6 @@ struct AcqRecorder::Impl
     std::size_t allocated = 0;
     std::vector<std::byte> snapshot; // race-free copy of the view being encoded
 
-    std::promise<AcqError> applied; // the reader thread's policy result; a member, as it outlives begin()
 
     // Writer thread.
     std::thread writerThread;
@@ -1129,26 +1127,18 @@ struct AcqRecorder::Impl
         }
         recording.store(true, std::memory_order_release);
         writerThread = std::thread([this] { writerLoop(); });
-        std::future<AcqError> policy = applied.get_future();
-        readerThread = std::thread([this] {
-            AcqError e = acqApplyThreadPolicy(options.thread);
-            const bool ok = e.ok();
-            applied.set_value(std::move(e));
-            if (ok) {
-                readerLoop();
-            } else {
+        auto started = start_thread(options.thread, [this] { readerLoop(); });
+        if (!started) {
+            {
                 std::lock_guard<std::mutex> lock(mutex);
                 writerDone = true;
                 queued.notify_one();
             }
-        });
-        AcqError e = policy.get();
-        if (!e.ok()) {
-            readerThread.join();
             writerThread.join();
             stopped = true;
-            return e;
+            return started.error();
         }
+        readerThread = std::move(*started);
         return {};
     }
 

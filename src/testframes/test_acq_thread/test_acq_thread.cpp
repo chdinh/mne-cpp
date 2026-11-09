@@ -19,6 +19,7 @@
 #include <QtTest/QtTest>
 
 #include <algorithm>
+#include <atomic>
 #include <thread>
 #include <vector>
 
@@ -49,6 +50,7 @@ private slots:
     void testPinThisThread();
     void testPinRejectsBadCpus();
     void testPriority();
+    void testStartThread();
     void testBackendThreadPolicy_data();
     void testBackendThreadPolicy();
 };
@@ -140,6 +142,25 @@ void TestAcqThread::testPriority()
 #endif
         QVERIFY2(e.ok() || refused, (std::to_string(i) + ": " + e.text()).c_str());
     }
+}
+
+//=============================================================================================================
+
+void TestAcqThread::testStartThread()
+{
+    std::atomic<int> runs{0};
+    auto thread = start_thread({}, [&runs] { ++runs; });
+    QVERIFY(thread);
+    thread->join();
+    QCOMPARE(runs.load(), 1);
+
+    // A refused policy runs nothing and leaves no thread behind
+    AcqThreadPolicy refused;
+    refused.cpus = {1U << 20};
+    auto none = start_thread(refused, [&runs] { ++runs; });
+    QVERIFY(!none);
+    QCOMPARE(none.error().code(), kCanPin ? AcqErrorCode::InvalidParameter : AcqErrorCode::PlatformUnsupported);
+    QCOMPARE(runs.load(), 1);
 }
 
 //=============================================================================================================
