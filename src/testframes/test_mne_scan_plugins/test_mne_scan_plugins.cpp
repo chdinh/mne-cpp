@@ -23,6 +23,7 @@
 #include <rtclustmne/rtclustmne.h>
 #include <rtfwd/rtfwd.h>
 #include <tmsi/tmsi.h>
+#include <tmsi/tmsielectrodeitem.h>
 
 #include <mainwindow.h>
 
@@ -41,6 +42,7 @@
 
 #include <QCheckBox>
 #include <QFileDialog>
+#include <QGraphicsView>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
@@ -75,6 +77,7 @@ private slots:
     void passesTheStreamThrough();
     void brainAmpStreamsTheSimulatedAmplifier();
     void tmsiStreamsTheSimulatedAmplifier();
+    void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
 
 private:
@@ -440,6 +443,34 @@ void TestMneScanPlugins::tmsiStreamsTheSimulatedAmplifier()
         keyed |= data(72, 63) == 253.0;
     }
     QVERIFY(keyed); // the keyboard trigger lands on the last sample of a block
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::tmsiImpedanceViewShowsTheMeasuredElectrodes()
+{
+    TMSIPLUGIN::TMSI plugin;
+    plugin.init();
+    TMSIPLUGIN::TMSIImpedanceWidget widget(&plugin);
+    widget.initGraphicScene();
+    auto* view = widget.findChild<QGraphicsView*>("m_graphicsView_impedanceView");
+    QVERIFY(view && view->scene());
+    QCOMPARE(view->scene()->items().size(), 128); // the 128-electrode cap, wherever MNE Scan was started
+
+    // A 64-input amplifier measures the first 64 electrodes of the cap
+    Eigen::VectorXd ohms = Eigen::VectorXd::LinSpaced(64, 1e3, 64e3);
+    widget.updateGraphicScene(ohms);
+    int measured = 0;
+    for (QGraphicsItem* graphicsItem : view->scene()->items()) {
+        auto* item = static_cast<TMSIPLUGIN::TMSIElectrodeItem*>(graphicsItem);
+        if (item->getChannelIndex() < 64) {
+            QCOMPARE(item->getImpedanceValue(), ohms[item->getChannelIndex()]);
+            ++measured;
+        } else {
+            QCOMPARE(item->getImpedanceValue(), 0.0);
+        }
+    }
+    QCOMPARE(measured, 64);
 }
 
 //=============================================================================================================

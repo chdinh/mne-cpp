@@ -102,6 +102,10 @@ aliases; replace the old spelling as below.
   gone, and the beep interval starts at 5 s instead of an uninitialised
   value. The samples always apply the channels' gain, offset and exponent;
   the options to skip them and the driver debug file are removed.
+- The TMSI impedance view finds its cap layouts wherever MNE Scan was
+  started; it stayed empty unless the working directory was `bin/`. With a
+  cap of more electrodes than the amplifier measures it colours the measured
+  ones instead of none.
 - `Sphere::fit_sphere_simplex` returns a zero centre when the fit fails; it was
   uninitialised. `LayoutMaker` then projects around the origin, as MNE-C does.
 - The export macros of `mne_bids`, `mne_com`, `mne_connectivity`, `mne_dsp`,

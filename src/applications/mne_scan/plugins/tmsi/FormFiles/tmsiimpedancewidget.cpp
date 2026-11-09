@@ -31,8 +31,23 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QCoreApplication>
 #include <QFileDialog>
 #include <QString>
+
+//=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+QString layoutDirectory()
+{
+    return QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/tmsi/loc_files/";
+}
+
+} // anonymous namespace
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -116,7 +131,7 @@ void TMSIImpedanceWidget::initGraphicScene()
     // Clear all items from scene
     m_qGScene->clear();
 
-    const auto layout = CHANNELSLIB::LayoutLoader::read_elc("../resources/mne_scan/plugins/tmsi/loc_files/standard_waveguard128.elc");
+    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8((layoutDirectory() + "standard_waveguard128.elc").toStdString()));
     if (!layout) {
         qDebug() << "Error: Reading elc file.";
         return;
@@ -218,7 +233,7 @@ void TMSIImpedanceWidget::loadLayout()
 {
     QString sElcFilePath = QFileDialog::getOpenFileName(this,
                                                         tr("Open Layout"),
-                                                        "../resources/mne_scan/plugins/tmsi/loc_files/",
+                                                        layoutDirectory(),
                                                         tr("ELC layout file (*.elc)"));
 
     const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(sElcFilePath.toStdString()));
