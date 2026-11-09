@@ -36,7 +36,7 @@ const std::vector<std::pair<int, int>> bridged = computeBridgedElectrodes(data, 
 
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 176"
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 177"
 BridgedElectrodeParams bridging; // electrical distance below 0.3 flags a pair
 const std::vector<std::pair<int, int>> bridged = computeBridgedElectrodes(data, info, bridging);
 ok &= expect(bridged.size() == 1 && bridged[0] == std::make_pair(6, 7),

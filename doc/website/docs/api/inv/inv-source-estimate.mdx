@@ -91,7 +91,7 @@ Constructs a source estimate from its data.
 
 ### InvSourceEstimate(path)
 
-Reads an .stc file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads an .stc file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -111,7 +111,7 @@ Writes the estimate as an .stc file, as MNE-C's mne_write_stc_file and mne.Sourc
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -126,7 +126,7 @@ Writes a surface estimate as the "&lt;base&gt;-lh.stc" and "&lt;base&gt;-rh.stc"
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the pair cannot be written: Format if the split point is unknown or the data do not match the vertices, Io if a file cannot be written.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the pair cannot be written: Format if the split point is unknown or the data do not match the vertices, Io if a file cannot be written.
 
 ---
 
@@ -141,7 +141,7 @@ Writes the first time point as a .w file, as mne.write_w does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written: Format if the estimate is empty, Io otherwise.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written: Format if the estimate is empty, Io otherwise.
 
 ---
 
@@ -252,7 +252,7 @@ Reads an .stc file, as mne.read_source_estimate does for one hemisphere.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — The source estimate, or why the file cannot be read: Io if it cannot be opened, Format if it ends before the data its header announces.
+- *[Expected](/docs/api/base/expected)&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — The source estimate, or why the file cannot be read: Io if it cannot be opened, Format if it ends before the data its header announces.
 
 ---
 
@@ -267,7 +267,7 @@ Reads a .w file (one value per vertex), as mne.read_w does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — A single-column source estimate, or why the file cannot be read (Io or Format).
+- *[Expected](/docs/api/base/expected)&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — A single-column source estimate, or why the file cannot be read (Io or Format).
 
 ---
 
@@ -298,7 +298,7 @@ ok &= expect(stc.data.rows() == 70 && stc.data.cols() == 421 && near(stc.data.cw
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 431"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 432"
 InvSourceEstimate sourceEstimate;
 QList<qint64> qVecElapsedTime;
 for (qint32 i = 0; i < 100; ++i) {

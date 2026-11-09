@@ -50,7 +50,7 @@ const SurfaceLaplacianResult csd = SurfaceLaplacian::compute(eeg, electrodes, 1e
 
 Preprocessing tools of the dsp library on synthetic data with a known ground truth.
 
-````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 219"
+````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 220"
 const SurfaceLaplacianResult csd = SurfaceLaplacian::compute(eeg, electrodes, 1e-5, 4, 50, 0.09);
 // mne.preprocessing.compute_current_source_density(sphere=(0, 0, 0, 0.09), lambda2=1e-5, stiffness=4), sample 3
 VectorXd mneCsd(8);

@@ -12,7 +12,7 @@ Compute a clustered MNE, dSPM or sLORETA estimate of the sample evoked response 
 
 <ExampleFacts name="ex_disp_3D" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Build and run
 
@@ -106,7 +106,7 @@ The documented classes this example uses most:
 
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -132,7 +132,6 @@ using namespace MNELIB;
 using namespace FSLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
 using namespace Eigen;
 using namespace DISP3DLIB;
 
@@ -155,7 +154,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName(QStringLiteral("MNE-CPP"));
     QCoreApplication::setOrganizationDomain(QStringLiteral("mne-cpp.org"));

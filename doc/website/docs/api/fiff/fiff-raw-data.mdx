@@ -97,7 +97,7 @@ Constructs empty raw data.
 
 ### FiffRawData(path)
 
-Opens a raw FIFF file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Opens a raw FIFF file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -110,11 +110,11 @@ Opens a raw FIFF file like `read()`; throws [`Error`](/docs/api/utils/error) if 
 
 Opens raw FIFF data held in bytes that are not a file, e.g.
 
-in memory, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+in memory, like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
-- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;*
   The raw data; kept for reading segments.
 
 ---
@@ -273,7 +273,7 @@ Sets up the CTF/4D compensator that `read()` applies to bring the data to anothe
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the compensator cannot be made (Format).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the compensator cannot be made (Format).
 
 ---
 
@@ -293,7 +293,7 @@ Opens a raw FIFF file, like mne.io.read_raw_fif(path, preload=False): reads the 
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffRawData](/docs/api/fiff/fiff-raw-data) &gt;* — The raw data, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no raw data, Format if it is damaged or holds MaxShield data that is not allowed.
+- *[Expected](/docs/api/base/expected)&lt; [FiffRawData](/docs/api/fiff/fiff-raw-data) &gt;* — The raw data, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no raw data, Format if it is damaged or holds MaxShield data that is not allowed.
 
 ---
 
@@ -305,7 +305,7 @@ in memory, like read(path).
 
 **Parameters:**
 
-- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;*
   The raw data; kept for reading segments.
 
 - **allow_maxshield** : *bool*
@@ -313,7 +313,7 @@ in memory, like read(path).
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffRawData](/docs/api/fiff/fiff-raw-data) &gt;* — The raw data, or why it cannot be read.
+- *[Expected](/docs/api/base/expected)&lt; [FiffRawData](/docs/api/fiff/fiff-raw-data) &gt;* — The raw data, or why it cannot be read.
 
 ---
 

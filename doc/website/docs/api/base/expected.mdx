@@ -1,22 +1,22 @@
 ---
 id: expected
-title: "UTILSLIB::Expected"
+title: "BASELIB::Expected"
 sidebar_label: Expected
 sidebar_position: 70
 ---
 
 # Expected
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/error.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/error.h)
+**Namespace:** `BASELIB` &nbsp;·&nbsp; **Library:** Base Library &nbsp;·&nbsp; **Source:** [`base/error.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/base/error.h)
 
-`#include <utils/error.h>`
+`#include <base/error.h>`
 
 ```cpp
 template <class T>
-class UTILSLIB::Expected
+class BASELIB::Expected
 ```
 
-A value or the [`Error`](/docs/api/utils/error) why there is none; std::expected whose `value()` throws that [`Error`](/docs/api/utils/error).
+A value or the [`Error`](/docs/api/base/error) why there is none; std::expected whose `value()` throws that [`Error`](/docs/api/base/error).
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 if (auto mriToDevice = FiffCoordTrans::read(trans, FIFFV_COORD_MRI, FIFFV_COORD_DEVICE)) {
@@ -45,7 +45,7 @@ classDiagram
 
 **Returns:**
 
-- *decltype(auto)* — The value; throws the [`Error`](/docs/api/utils/error), rather than std::bad_expected_access, if there is none.
+- *decltype(auto)* — The value; throws the [`Error`](/docs/api/base/error), rather than std::bad_expected_access, if there is none.
 
 ---
 
@@ -53,7 +53,7 @@ classDiagram
 
 **Returns:**
 
-- *decltype(auto)* — The value; throws the [`Error`](/docs/api/utils/error), rather than std::bad_expected_access, if there is none.
+- *decltype(auto)* — The value; throws the [`Error`](/docs/api/base/error), rather than std::bad_expected_access, if there is none.
 
 ---
 
@@ -61,7 +61,7 @@ classDiagram
 
 **Returns:**
 
-- *decltype(auto)* — The value; throws the [`Error`](/docs/api/utils/error), rather than std::bad_expected_access, if there is none.
+- *decltype(auto)* — The value; throws the [`Error`](/docs/api/base/error), rather than std::bad_expected_access, if there is none.
 
 ---
 

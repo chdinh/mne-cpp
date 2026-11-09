@@ -73,7 +73,7 @@ Run the Picard [`ICA`](/docs/api/dsp/ica) algorithm.
 
 Preprocessing tools of the dsp library on synthetic data with a known ground truth.
 
-````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 132"
+````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 133"
 const IcaResult picard = PicardIca::run(mixed, 3);
 ok &= expect(worstRecovery(picard.matSources, sources) > 0.99, std::format("Picard recovers all sources (worst |r| {:g})", worstRecovery(picard.matSources, sources)));
 ````

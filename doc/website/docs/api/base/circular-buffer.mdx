@@ -1,0 +1,148 @@
+---
+id: circular-buffer
+title: "BASELIB::CircularBuffer"
+sidebar_label: CircularBuffer
+sidebar_position: 7
+---
+
+# CircularBuffer
+
+**Namespace:** `BASELIB` &nbsp;·&nbsp; **Library:** Base Library &nbsp;·&nbsp; **Source:** [`base/circular_buffer.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/base/circular_buffer.h)
+
+`#include <base/circular_buffer.h>`
+
+```cpp
+template <typename T>
+class BASELIB::CircularBuffer
+```
+
+Fixed-capacity first-in first-out queue; push waits while it is full and pop while it is empty, each for at most the timeout.
+
+```cpp title="src/examples/ex_base/main.cpp"
+CircularBuffer<double> buffer(4); // one thread pushes, another pops
+buffer.push(std::array{1.0, 2.0, 3.0});
+double first = 0.0;
+double second = 0.0;
+buffer.pop(first);
+buffer.pop(second);
+```
+
+---
+
+## Public Methods
+
+### CircularBuffer(capacity, timeout)
+
+**Parameters:**
+
+- **capacity** : *std::size_t*
+  Number of elements the buffer holds.
+
+- **timeout** : *std::chrono::milliseconds*
+  How long push and pop wait for room or data.
+
+---
+
+### CircularBuffer()
+
+---
+
+### operator=()
+
+---
+
+### push(element)
+
+Appends `element`.
+
+**Parameters:**
+
+- **element** : *U &&*
+  The element to append.
+
+**Returns:**
+
+- *bool* — Whether it was appended before the timeout.
+
+---
+
+### push(elements)
+
+Appends all of `elements`, or none.
+
+**Parameters:**
+
+- **elements** : *std::span&lt; const T &gt;*
+  The elements to append, in order.
+
+**Returns:**
+
+- *bool* — Whether there was room for all of them before the timeout.
+
+---
+
+### pop(element)
+
+Removes the oldest element.
+
+**Parameters:**
+
+- **element** : *T &*
+  Receives the element; unchanged if none arrived before the timeout.
+
+**Returns:**
+
+- *bool* — Whether an element was removed.
+
+---
+
+### clear()
+
+Drops all elements.
+
+---
+
+### size()
+
+**Returns:**
+
+- *std::size_t* — The number of elements waiting to be popped.
+
+---
+
+### capacity()
+
+**Returns:**
+
+- *std::size_t* — The number of elements the buffer holds.
+
+---
+
+## Example
+
+- Start here: [ex_base](../../examples/base/ex_base.mdx) — Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
+- Full source: [`src/examples/ex_base/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_base/main.cpp)
+- Build target: `ex_base` (runs under CTest)
+
+## Used in examples
+
+### [ex_base](../../examples/base/ex_base.mdx)
+
+Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
+
+````cpp title="src/examples/ex_base/main.cpp, line 131"
+CircularBuffer<double> buffer(4); // one thread pushes, another pops
+buffer.push(std::array{1.0, 2.0, 3.0});
+double first = 0.0;
+double second = 0.0;
+buffer.pop(first);
+buffer.pop(second);
+ok &= expect(first == 1.0 && second == 2.0 && buffer.size() == 1, "CircularBuffer pops in FIFO order, one element left");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;
+- Lorenz Esch &lt;lorenz.esch@tu-ilmenau.de&gt;
+- Juan GPC &lt;jgarciaprieto@mgh.harvard.edu&gt;
+- Gabriel Motta &lt;gabrielbenmotta@gmail.com&gt;

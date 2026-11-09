@@ -12,7 +12,7 @@ Average a raw recording and localize dipole pairs with RAP-MUSIC on a parcellati
 
 <ExampleFacts name="ex_clustered_inverse_rap_music_raw" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Background
 
@@ -60,7 +60,7 @@ The documented classes this example uses most:
 | [`InvSourceEstimate`](../../api/inv/inv-source-estimate.mdx) | Inverse |
 | [`MNEForwardSolution`](../../api/mne/mne-forward-solution.mdx) | MNE Core |
 | [`BrainTreeModel`](../../api/disp3-d/brain-tree-model.mdx) | 3D Visualization |
-| [`Error`](../../api/utils/error.mdx) | Utilities |
+| [`Error`](../../api/base/error.mdx) | Base |
 
 ## Used in the API reference
 
@@ -110,7 +110,7 @@ The documented classes this example uses most:
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <iostream>
 
@@ -133,7 +133,7 @@ using namespace MNELIB;
 using namespace FSLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace DISP3DLIB;
 
 //=============================================================================================================
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

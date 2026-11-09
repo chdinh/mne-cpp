@@ -295,7 +295,7 @@ Compatible with numpy.savetxt() output.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
@@ -303,9 +303,9 @@ Compatible with numpy.savetxt() output.
 
 ### [ex_utils](../../examples/utils/ex_utils.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 316"
+````cpp title="src/examples/ex_utils/main.cpp, line 246"
 const PythonRunnerResult run = python.runCode("import sys\nprint('[progress] 50% half')\nprint(sum(map(int, sys.argv[1:])))", {"2", "3"});
 PythonTestHelper helper;                                                    // oracle access for tests
 const MatrixXd fromNumpy = helper.evalMatrix("print('1 2'); print('3 4')"); // one line per row

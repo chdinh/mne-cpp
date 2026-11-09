@@ -39,7 +39,7 @@ Constructs empty digitizer data.
 
 ### FiffDigitizerData(path)
 
-Reads the digitizer data of a FIFF file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads the digitizer data of a FIFF file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -81,7 +81,7 @@ Reads the digitizer data of a FIFF file: the points of its isotrak block in head
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) &gt;* — The data, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no digitizer points.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) &gt;* — The data, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no digitizer points.
 
 ---
 

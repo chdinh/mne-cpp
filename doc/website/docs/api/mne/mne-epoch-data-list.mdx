@@ -150,7 +150,7 @@ Read the epochs from a raw file based on provided events.
 - **mapReject** : *const std::map&lt; std::string, double &gt; &*
   Peak-to-peak rejection thresholds per channel type (e.g. "grad", "mag", "eeg").
 
-- **lExcludeChs** : *const UTILSLIB::StringList &*
+- **lExcludeChs** : *const BASELIB::StringList &*
   List of channel names to exclude.
 
 - **picks** : *const Eigen::RowVectorXi &*
@@ -177,7 +177,7 @@ Checks the givven matrix for artifacts beyond a threshold value.
 - **mapReject** : *const std::map&lt; std::string, double &gt; &*
   The channel data types to scan for. EEG, MEG or EOG.
 
-- **lExcludeChs** : *const UTILSLIB::StringList &*
+- **lExcludeChs** : *const BASELIB::StringList &*
   List of channel names to exclude.
 
 **Returns:**
@@ -203,7 +203,7 @@ Multi-category offline averaging. Reads epochs from raw data for multiple event 
 - **eventCodes** : *const std::vector&lt; int &gt; &*
   List of event codes, one per category.
 
-- **comments** : *const UTILSLIB::StringList &*
+- **comments** : *const BASELIB::StringList &*
   List of category names/comments, one per category.
 
 - **tmin** : *float*
@@ -260,7 +260,7 @@ Convenience function: reads epochs, optionally applies baseline correction and a
 - **mapReject** : *const std::map&lt; std::string, double &gt; &*
   The thresholds per channel type to reject epochs.
 
-- **lExcludeChs** : *const UTILSLIB::StringList &*
+- **lExcludeChs** : *const BASELIB::StringList &*
   List of channel names to exclude.
 
 - **vecPicks** : *const Eigen::RowVectorXi &*

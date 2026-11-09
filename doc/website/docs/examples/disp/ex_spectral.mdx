@@ -12,7 +12,7 @@ Multitaper spectra, power spectral density and cross-spectral density of random 
 
 <ExampleFacts name="ex_spectral" />
 
-**Libraries:** [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [Math](../../api/math/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [Math](../../api/math/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -35,16 +35,14 @@ The documented classes this example uses most:
 
 | Class | Library |
 |---|---|
-| [`Spectral`](../../api/utils/spectral.mdx) | Utilities |
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`LinePlot`](../../api/disp/line-plot.mdx) | Visualization |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
 - [FigureExporter](../../api/disp/figure-exporter.mdx)
 - [LinePlot](../../api/disp/line-plot.mdx)
-- [Spectral](../../api/utils/spectral.mdx)
 
 ## Source
 
@@ -74,7 +72,7 @@ The documented classes this example uses most:
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
 #include <math/spectral.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <mne/mne.h>
 
 //=============================================================================================================
@@ -113,7 +111,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Generate input data

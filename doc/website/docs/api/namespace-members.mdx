@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 443 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 438 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -63,6 +63,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **bidsTypeToFiffKind** `[fn]` in [BIDSLIB](/docs/api/bids/) — Maps BIDS channel type strings back to FIFF channel kind constants.
 - **BIG_TIME** `[var]` in [INVLIB](/docs/api/inv/)
 - **buildDateTime** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns build date and time.
+- **buildDateTime** `[fn]` in [BASELIB](/docs/api/base/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [BIDSLIB](/docs/api/bids/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [COMLIB](/docs/api/com/) — Compile-time date/time stamp baked into the ``COMLIB`` binary.
 - **buildDateTime** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Returns build date and time.
@@ -84,6 +85,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildDateTime** `[fn]` in [STSLIB](/docs/api/sts/) — Returns build date and time.
 - **buildDateTime** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date and time.
 - **buildHash** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns abbreviated build git hash.
+- **buildHash** `[fn]` in [BASELIB](/docs/api/base/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [BIDSLIB](/docs/api/bids/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [COMLIB](/docs/api/com/) — Abbreviated git commit hash (typically 7 hex chars) of the source tree this library was built from.
 - **buildHash** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Returns abbreviated build git hash.
@@ -105,6 +107,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **buildHash** `[fn]` in [STSLIB](/docs/api/sts/) — Returns abbreviated build git hash.
 - **buildHash** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns abbreviated build git hash.
 - **buildHashLong** `[fn]` in [ACQLIB](/docs/api/acq/) — Returns full build git hash.
+- **buildHashLong** `[fn]` in [BASELIB](/docs/api/base/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [BIDSLIB](/docs/api/bids/) — Returns full build git hash.
 - **buildHashLong** `[fn]` in [COMLIB](/docs/api/com/) — Full-length git commit hash (40 hex chars) of the source tree this library was built from.
 - **buildHashLong** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Returns full build git hash.
@@ -128,19 +131,11 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **BVBinaryFormat** `[enum]` in [BIDSLIB](/docs/api/bids/) — Binary format enumeration for BrainVision data files.
 - **BVOrientation** `[enum]` in [BIDSLIB](/docs/api/bids/) — Data orientation enumeration.
 - **bytesPerSample** `[fn]` in [ACQLIB](/docs/api/acq/)
-- **byteSwap** `[fn]` in [UTILSLIB](/docs/api/utils/)
-- **byteSwapInPlace** `[fn]` in [UTILSLIB](/docs/api/utils/) — Reverses the bytes of every element of `data`.
+- **byteSwap** `[fn]` in [BASELIB](/docs/api/base/)
+- **byteSwapInPlace** `[fn]` in [BASELIB](/docs/api/base/) — Reverses the bytes of every element of `data`.
 - **ChannelFormat** `[enum]` in [LSLLIB](/docs/api/lsl/) — Data format of a channel (mirroring the values used in the original LSL protocol).
-- **CircularBuffer_char** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of char type.
-- **CircularBuffer_double** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of double type.
-- **CircularBuffer_int** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of integer type.
-- **CircularBuffer_Matrix_double** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of Eigen::MatrixXd type.
-- **CircularBuffer_Matrix_float** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of Eigen::MatrixXf type.
-- **CircularBuffer_pair_double_double** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of double Pair type.
-- **CircularBuffer_pair_int_int** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of integer Pair type.
-- **CircularBuffer_short** `[type]` in [UTILSLIB](/docs/api/utils/) — Defines [`CircularBuffer`](/docs/api/utils/circular-buffer) of short type.
 - **ColorMaps** `[enum]` in [DISPLIB](/docs/api/disp/)
-- **Compression** `[enum]` in [UTILSLIB](/docs/api/utils/) — How the bytes of a file are stored.
+- **Compression** `[enum]` in [BASELIB](/docs/api/base/) — How the bytes of a file are stored.
 - **compute_connectivity** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Computes every connectivity method the settings ask for, as mne_connectivity.spectral_connectivity_epochs does for its spectral methods.
 - **computeBridgedElectrodes** `[fn]` in [UTILSLIB](/docs/api/utils/) — Detect bridged EEG electrodes.
 - **computeElectricalDistance** `[fn]` in [UTILSLIB](/docs/api/utils/) — Compute electrical distance matrix between EEG channels.
@@ -149,15 +144,15 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **computeSourceBandPower** `[fn]` in [INVLIB](/docs/api/inv/) — Compute band power for source estimate.
 - **computeSourcePsd** `[fn]` in [INVLIB](/docs/api/inv/) — Compute PSD for a source estimate using Welch's method.
 - **computeWhitener** `[fn]` in [INVLIB](/docs/api/inv/) — Compute whitening matrix from a noise covariance.
-- **contains** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **contains** `[fn]` in [BASELIB](/docs/api/base/)
 - **COR_HEIGHT** `[var]` in [MRILIB](/docs/api/mri/) — Height of each COR slice in pixels.
 - **COR_NSLICE** `[var]` in [MRILIB](/docs/api/mri/) — Number of COR slices.
 - **COR_PIXEL_SIZE** `[var]` in [MRILIB](/docs/api/mri/) — Pixel size for COR slices (1mm in meters).
 - **COR_WIDTH** `[var]` in [MRILIB](/docs/api/mri/) — Width of each COR slice in pixels.
 - **count_annotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Counts annotations by description, like mne.count_annotations.
 - **DATA_TYPE** `[var]` in [FIFFLIB](/docs/api/fiff/) — DATA_TYPE encoding 0000ffff.
-- **dateTimeNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date and time (time preprocessor was run).
-- **dateToday** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build date (time preprocessor was run).
+- **dateTimeNow** `[fn]` in [BASELIB](/docs/api/base/) — Returns build date and time (time preprocessor was run).
+- **dateToday** `[fn]` in [BASELIB](/docs/api/base/) — Returns build date (time preprocessor was run).
 - **decode** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes all samples of `view` into `out`.
 - **decode** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes all samples of `view` into `out`.
 - **decode** `[fn]` in [ACQLIB](/docs/api/acq/) — Decodes all samples of `view` into `out`.    Real formats yield a zero imaginary part.
@@ -187,13 +182,13 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).
 - **encode** `[fn]` in [ACQLIB](/docs/api/acq/) — Encodes `in` into the reserved space of `view` (an output stream, or an input ring written by a backend that receives physical values).    For real formats the imaginary part must be 0, otherwise the element counts as clipped.
 - **encodeBits** `[fn]` in [ACQLIB](/docs/api/acq/) — Writes bit fields into the reserved samples of `view`, leaving the analog bits untouched; call before or after `encode()` of the same view.
-- **equalsIgnoreCase** `[fn]` in [UTILSLIB](/docs/api/utils/)
-- **ErrorCode** `[enum]` in [UTILSLIB](/docs/api/utils/) — What went wrong, so callers can react without parsing the message.
+- **equalsIgnoreCase** `[fn]` in [BASELIB](/docs/api/base/)
+- **ErrorCode** `[enum]` in [BASELIB](/docs/api/base/) — What went wrong, so callers can react without parsing the message.
 - **estimateSnr** `[fn]` in [INVLIB](/docs/api/inv/) — Estimate the SNR of evoked data as a function of time.
 - **events_from_annotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Converts annotations to events, like mne.events_from_annotations.
 - **extrasFromJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **extrasToJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
-- **fail** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **fail** `[fn]` in [BASELIB](/docs/api/base/)
 - **FiducialId** `[enum]` in [ACQLIB](/docs/api/acq/) — Identifier for the three cardinal fiducials.
 - **fiff_byte_t** `[type]` in [FIFFLIB](/docs/api/fiff/)
 - **fiff_char_t** `[type]` in [FIFFLIB](/docs/api/fiff/)
@@ -225,7 +220,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **fitMatchedPoints** `[fn]` in [MNELIB](/docs/api/mne/) — Corresponding point set registration using quaternions.
 - **fitUser** `[type]` in [FWDLIB](/docs/api/fwd/)
 - **fixStimArtifact** `[fn]` in [UTILSLIB](/docs/api/utils/) — Repair stimulus artifacts by interpolating or zeroing data around events.
-- **fromBigEndian** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **fromBigEndian** `[fn]` in [BASELIB](/docs/api/base/)
 - **fromFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Describes a FIFF measurement as a stream.
 - **fromTokens** `[fn]` in [INVLIB](/docs/api/inv/) — Reconstruct an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) from a token sequence.
 - **FWD_BEM_CONSTANT_COLL** `[var]` in [FWDLIB](/docs/api/fwd/)
@@ -248,14 +243,14 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **FWD_IS_MEG_COIL** `[fn]` in [FWDLIB](/docs/api/fwd/)
 - **getDefaultScalingValue** `[fn]` in [DISPLIB](/docs/api/disp/) — Get the default scaling values by channel type.
 - **getScalingValue** `[fn]` in [DISPLIB](/docs/api/disp/) — Get the scaling value from suplied scale map, and check if there is a float asigned to the scale.
-- **gitHash** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns short version of the hash of the current git commit.
-- **gitHashLong** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns entire hash of the current git commit.
+- **gitHash** `[fn]` in [BASELIB](/docs/api/base/) — Returns short version of the hash of the current git commit.
+- **gitHashLong** `[fn]` in [BASELIB](/docs/api/base/) — Returns entire hash of the current git commit.
 - **IcaComponentLabel** `[enum]` in [DECODINGLIB](/docs/api/decoding/) — Categorical label assigned to a single ICA component.
 - **ieegAllowedCoordSystems** `[fn]` in [BIDSLIB](/docs/api/bids/) — Allowed coordinate systems for iEEG electrodes (BIDS-iEEG spec).
 - **ieegAllowedExtensions** `[fn]` in [BIDSLIB](/docs/api/bids/) — Supported raw data file extensions for iEEG in BIDS.
 - **IeegLeadType** `[enum]` in [IEEGLIB](/docs/api/ieeg/) — Kind of lead a contact sits on.
 - **IeegSurfaceMapMode** `[enum]` in [IEEGLIB](/docs/api/ieeg/) — How the weights of contacts near one vertex combine; the modes of MNE-Python's stc_near_sensors.
-- **indexOf** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **indexOf** `[fn]` in [BASELIB](/docs/api/base/)
 - **InvEstimateMethod** `[enum]` in [INVLIB](/docs/api/inv/) — Enumerates the inverse estimation method that produced a source estimate.
 - **InvOrientationType** `[enum]` in [INVLIB](/docs/api/inv/) — Enumerates the orientation constraint used during source estimation.
 - **InvSourceSpaceType** `[enum]` in [INVLIB](/docs/api/inv/) — Enumerates the source space type underlying a source estimate.
@@ -265,7 +260,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **isComplex** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **isHit** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/)
 - **isTrue** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Read a boolean from QSettings with a default fallback.
-- **join** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **join** `[fn]` in [BASELIB](/docs/api/base/)
 - **kBemHead** `[var]` in `SURFACEKEYS`
 - **kBemPrefix** `[var]` in `SURFACEKEYS`
 - **kContourEeg** `[var]` in `SURFACEKEYS`
@@ -378,7 +373,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **operator==** `[fn]` in [MNELIB](/docs/api/mne/)
 - **operator==** `[fn]` in [MNELIB](/docs/api/mne/)
 - **packABGR** `[fn]` in [DISP3DLIB](/docs/api/disp3-d/) — Pack RGBA colour components into a single ABGR uint32_t suitable for GPU vertex attributes declared as UNormByte4.
-- **pathFromUtf8** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **pathFromUtf8** `[fn]` in [BASELIB](/docs/api/base/)
 - **peakFinder** `[fn]` in [UTILSLIB](/docs/api/utils/) — Find peaks in a 1D signal.
 - **peakFinderMne** `[fn]` in [UTILSLIB](/docs/api/utils/) — Noise-tolerant extrema search of `mne.preprocessing.peak_finder`.
 - **peakProminences** `[fn]` in [UTILSLIB](/docs/api/utils/) — Compute prominence of each peak.
@@ -389,7 +384,7 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **PythonLineCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Line-level callback signature.
 - **PythonProgressCallback** `[type]` in [UTILSLIB](/docs/api/utils/) — Progress callback signature.
 - **read** `[fn]` in [ACQLIB](/docs/api/acq/) — Reads samples into an Eigen matrix, resizing it only when its shape differs (so a reused matrix does not allocate).
-- **read_file_bytes** `[fn]` in [UTILSLIB](/docs/api/utils/) — Reads a whole file, decompressing it if asked to.
+- **read_file_bytes** `[fn]` in [BASELIB](/docs/api/base/) — Reads a whole file, decompressing it if asked to.
 - **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **ref** `[fn]` in [ACQLIB](/docs/api/acq/)
 - **registerFiffScheme** `[fn]` in [ACQLIB](/docs/api/acq/) — Registers the fiff:// scheme with `AcqDeviceRegistry::instance()`.
@@ -412,18 +407,18 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **simulateStcFromWaveforms** `[fn]` in [UTILSLIB](/docs/api/utils/) — Create a synthetic source time course from custom waveforms.
 - **SliceOrientation** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Orientation for an orthogonal MRI slice.
 - **SliceOrientation** `[enum]` in [MRILIB](/docs/api/mri/) — Slice orientation for orthogonal MRI volume slicing.
-- **split** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **split** `[fn]` in [BASELIB](/docs/api/base/)
 - **SplitterHit** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Identifies which splitter(s) are hit by a cursor position.
 - **StatsCorrection** `[enum]` in [STSLIB](/docs/api/sts/) — Multiple comparison correction method.
 - **StatsTailType** `[enum]` in [STSLIB](/docs/api/sts/) — Tail type for statistical tests.
 - **StimArtifactMode** `[enum]` in [UTILSLIB](/docs/api/utils/) — Mode for stimulus artifact repair.
+- **StringList** `[type]` in [BASELIB](/docs/api/base/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [DISPLIB](/docs/api/disp/) — Ordered list of names, e.g.
 - **StringList** `[type]` in `DSPLIB` — Ordered list of names, e.g.
 - **StringList** `[type]` in [FIFFLIB](/docs/api/fiff/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [FWDLIB](/docs/api/fwd/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [INVLIB](/docs/api/inv/) — Ordered list of names, e.g.
 - **StringList** `[type]` in [MNELIB](/docs/api/mne/) — Ordered list of names, e.g.
-- **StringList** `[type]` in [UTILSLIB](/docs/api/utils/) — Ordered list of names, e.g.
 - **swap_doublep** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 64-bit double in place.
 - **swap_float** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 32-bit float.
 - **swap_floatp** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 32-bit float in place.
@@ -432,20 +427,20 @@ Index of 443 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **swap_long** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 64-bit long.
 - **swap_longp** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 64-bit long in place.
 - **swap_short** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Swap a 16-bit short.
-- **timeNowNow** `[fn]` in [UTILSLIB](/docs/api/utils/) — Returns build time (time preprocessor was run).
-- **toBigEndian** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **timeNowNow** `[fn]` in [BASELIB](/docs/api/base/) — Returns build time (time preprocessor was run).
+- **toBigEndian** `[fn]` in [BASELIB](/docs/api/base/)
 - **toDLPack** `[fn]` in [ACQLIB](/docs/api/acq/) — Exports one part of `view` as a read-only DLPack tensor of shape channels x samples, without a copy.
-- **toDouble** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **toDouble** `[fn]` in [BASELIB](/docs/api/base/)
 - **toEventMatrix** `[fn]` in [RTPROCESSINGLIB](/docs/api/dsp/) — Transforms QMap with stored information about events per stim channel to a list of event matrices.
 - **toFiffInfo** `[fn]` in [ACQLIB](/docs/api/acq/) — Builds FIFF measurement info for a stream, e.g.
-- **toInt** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **toInt** `[fn]` in [BASELIB](/docs/api/base/)
 - **tokenIds** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the integer token IDs from a token sequence (discarding continuous values).
 - **tokenize** `[fn]` in [INVLIB](/docs/api/inv/) — Serialise an [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) into a flat token sequence.
 - **tokenValues** `[fn]` in [INVLIB](/docs/api/inv/) — Extract just the continuous values from a token sequence (discarding IDs).
-- **toLower** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **toLower** `[fn]` in [BASELIB](/docs/api/base/)
 - **toQMatrix4x4** `[fn]` in `SURFACEKEYS` — Convert an Eigen 4x4 matrix to a QMatrix4x4.
-- **trimmed** `[fn]` in [UTILSLIB](/docs/api/utils/)
-- **utf8FromPath** `[fn]` in [UTILSLIB](/docs/api/utils/)
+- **trimmed** `[fn]` in [BASELIB](/docs/api/base/)
+- **utf8FromPath** `[fn]` in [BASELIB](/docs/api/base/)
 - **vecDefaultWeights** `[var]` in [MNELIB](/docs/api/mne/)
 - **verify** `[fn]` in [ACQLIB](/docs/api/acq/) — Determines the origin of `target` from loop-back markers against `reference` and verifies the declared clock relation: every marker must imply the same origin within `toleranceTicks`, so drift (a missing or wrong clock connection) is detected instead of producing wrong samples.
 - **VisualizationMode** `[enum]` in [DISP3DLIB](/docs/api/disp3-d/) — Overlay visualisation modes for brain surfaces.

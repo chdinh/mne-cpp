@@ -1,25 +1,25 @@
 ---
 id: log-capture
-title: "UTILSLIB::LogCapture"
+title: "BASELIB::LogCapture"
 sidebar_label: LogCapture
 sidebar_position: 68
 ---
 
 # LogCapture
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/logger/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/logger/log.h)
+**Namespace:** `BASELIB` &nbsp;·&nbsp; **Library:** Base Library &nbsp;·&nbsp; **Source:** [`base/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/base/log.h)
 
-`#include <utils/log.h>`
+`#include <base/log.h>`
 
 ```cpp
-class UTILSLIB::LogCapture
+class BASELIB::LogCapture
 ```
 
 Records every message instead of passing it on, while it exists; replaces `QTest::ignoreMessage`.
 
 Records every level; the sink and level before are restored on destruction, so captures nest when destroyed in reverse order.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_base/main.cpp"
 LogCapture capture; // in a test: record instead of printing
 Log::warning("channel MEG 0113 is flat");
 const int flat = capture.count(Log::Level::Warning, "flat");
@@ -57,7 +57,7 @@ const int flat = capture.count(Log::Level::Warning, "flat");
 
 **Parameters:**
 
-- **level** : *[Log](/docs/api/utils/log)::Level*
+- **level** : *[Log](/docs/api/base/log)::Level*
   Severity to count.
 
 - **contains** : *std::string_view*
@@ -77,17 +77,17 @@ Forgets the messages recorded so far.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_base](../../examples/base/ex_base.mdx) — Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
+- Full source: [`src/examples/ex_base/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_base/main.cpp)
+- Build target: `ex_base` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_base](../../examples/base/ex_base.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 165"
+````cpp title="src/examples/ex_base/main.cpp, line 88"
 LogCapture capture; // in a test: record instead of printing
 Log::warning("channel MEG 0113 is flat");
 const int flat = capture.count(Log::Level::Warning, "flat");

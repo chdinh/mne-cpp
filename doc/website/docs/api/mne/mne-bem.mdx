@@ -41,7 +41,7 @@ Constructs an empty model.
 
 ### MNEBem(path)
 
-Reads a -bem.fif file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads a -bem.fif file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -61,7 +61,7 @@ Writes the model, as mne.write_bem_surfaces does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -225,7 +225,7 @@ Reads the BEM surfaces of a file, as mne.read_bem_surfaces does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNEBem](/docs/api/mne/mne-bem) &gt;* — The model, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no BEM surfaces, Format if a surface is incomplete or inconsistent.
+- *[Expected](/docs/api/base/expected)&lt; [MNEBem](/docs/api/mne/mne-bem) &gt;* — The model, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no BEM surfaces, Format if a surface is incomplete or inconsistent.
 
 ---
 
@@ -243,7 +243,7 @@ Reads the BEM surfaces from an open FIFF stream.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNEBem](/docs/api/mne/mne-bem) &gt;* — The model, or why the stream cannot be read (see read(path)).
+- *[Expected](/docs/api/base/expected)&lt; [MNEBem](/docs/api/mne/mne-bem) &gt;* — The model, or why the stream cannot be read (see read(path)).
 
 ---
 
@@ -282,7 +282,7 @@ MNEBem t_Bem(parser.value(bemFileInOption).toStdU16String());
 
 Compute a clustered MNE, dSPM or sLORETA estimate of the sample evoked response and show it on the cortex with Disp3D.
 
-````cpp title="src/examples/ex_disp_3D/main.cpp, line 250"
+````cpp title="src/examples/ex_disp_3D/main.cpp, line 249"
 //Read and show BEM
 MNEBem t_Bem((QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/subjects/sample/bem/sample-5120-5120-5120-bem.fif").toStdU16String());
 for (std::size_t i = 0; i < t_Bem.size(); ++i) {

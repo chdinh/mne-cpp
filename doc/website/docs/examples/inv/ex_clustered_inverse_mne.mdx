@@ -12,7 +12,7 @@ Cluster the forward solution by cortical parcellation and compute an MNE, dSPM o
 
 <ExampleFacts name="ex_clustered_inverse_mne" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Math](../../api/math/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Math](../../api/math/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Background
 
@@ -106,7 +106,7 @@ The documented classes this example uses most:
 #include <disp3D/model/braintreemodel.h>
 
 #include <math/linalg.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <iostream>
 
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 #ifdef STATICBUILD
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

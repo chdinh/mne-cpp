@@ -23,7 +23,7 @@ Features:
 - Runs scripts with `-u` (unbuffered) by default for real-time output.
 - Streams stdout/stderr line-by-line through optional callbacks.
 - Parses a simple progress protocol: lines matching `[progress] <float>%` or `[progress] <float>% <message>`.
-- Reports through [`Log`](/docs/api/utils/log).
+- Reports through [`Log`](/docs/api/base/log).
 - Supports timeout, environment injection, and working directory.
 
 No Python embedding or linkage is required.
@@ -246,7 +246,7 @@ Get the Python interpreter path inside the configured venv.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
@@ -254,9 +254,9 @@ Get the Python interpreter path inside the configured venv.
 
 ### [ex_utils](../../examples/utils/ex_utils.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 313"
+````cpp title="src/examples/ex_utils/main.cpp, line 243"
 PythonRunner python; // "python3" from PATH; a venv is configured via PythonRunnerConfig
 QStringList progress;
 python.setProgressCallback([&](float pct, const QString& msg) { progress << QString("%1 %2").arg(pct).arg(msg); });

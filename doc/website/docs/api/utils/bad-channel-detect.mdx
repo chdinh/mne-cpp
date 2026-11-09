@@ -119,21 +119,6 @@ This detector is most useful for sensor arrays where physically close channels s
 - Full source: [`src/examples/ex_dsp_artifacts/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_dsp_artifacts/main.cpp)
 - Build target: `ex_dsp_artifacts` (runs under CTest)
 
-## Used in examples
-
-### [ex_dsp_artifacts](../../examples/dsp/ex_dsp_artifacts.mdx)
-
-Artifact detection and repair with the dsp library on a recording with planted defects.
-
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 151"
-BadChannelDetect::Params badParams;
-badParams.dFlatThreshold = 1e-9; // EEG in volts
-const std::vector<int> flat = BadChannelDetect::detectFlat(data.topRows(kEeg), badParams.dFlatThreshold);
-const std::vector<int> bad = BadChannelDetect::detect(data.topRows(kEeg), badParams);
-ok &= expect(flat == std::vector<int>({2}) && std::ranges::contains(bad, 2) && std::ranges::contains(bad, 5),
-             std::format("BadChannelDetect: flat {}, bad {} (flat 2, noisy 5)", flat.size() == 1 ? flat[0] : -1, bad.size()));
-````
-
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

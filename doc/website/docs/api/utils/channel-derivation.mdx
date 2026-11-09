@@ -39,7 +39,7 @@ Channels are grouped by shaft prefix (all leading alphabetic characters and apos
 
 **Parameters:**
 
-- **channelNames** : *const StringList &*
+- **channelNames** : *const BASELIB::StringList &*
   List of channel names, e.g. \{"LH1","LH2","LH3","RA1","RA2"\}.
 
 **Returns:**
@@ -56,7 +56,7 @@ Each output channel equals the original channel minus the mean of all channels: 
 
 **Parameters:**
 
-- **channelNames** : *const StringList &*
+- **channelNames** : *const BASELIB::StringList &*
   List of channel names.
 
 **Returns:**
@@ -74,7 +74,7 @@ Apply derivation rules to a data matrix.
 - **matData** : *const Eigen::MatrixXd &*
   Input data matrix (n_channels × n_times).
 
-- **channelNames** : *const StringList &*
+- **channelNames** : *const BASELIB::StringList &*
   Channel names corresponding to rows of matData.
 
 - **rules** : *const std::vector&lt; [DerivationRule](/docs/api/utils/derivation-rule) &gt; &*
@@ -82,7 +82,7 @@ Apply derivation rules to a data matrix.
 
 **Returns:**
 
-- *std::pair&lt; Eigen::MatrixXd, StringList &gt;* — A pair of (derived data matrix, derived channel names). The output matrix has n_rules rows × n_times columns.
+- *std::pair&lt; Eigen::MatrixXd, BASELIB::StringList &gt;* — A pair of (derived data matrix, derived channel names). The output matrix has n_rules rows × n_times columns.
 
 ---
 

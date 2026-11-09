@@ -12,7 +12,7 @@ Localize dipole pairs in single trials of a raw recording with Powell RAP-MUSIC 
 
 <ExampleFacts name="ex_st_clustered_inverse_pwl_rap_music" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Build and run
 
@@ -95,7 +95,7 @@ The documented classes this example uses most:
 #include <disp3D/view/brainview.h>
 #include <disp3D/model/braintreemodel.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <iostream>
 
@@ -116,7 +116,7 @@ using namespace MNELIB;
 using namespace FSLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace DISP3DLIB;
 
 //=============================================================================================================
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

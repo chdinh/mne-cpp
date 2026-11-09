@@ -35,7 +35,7 @@ sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
 sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
 sel.pick.resize(sel.nchan);
 for (int c = 0; c < sel.nchan; ++c) {
-    sel.pick[c] = static_cast<int>(UTILSLIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
+    sel.pick[c] = static_cast<int>(BASELIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
 }
 
 const int ns = 25;

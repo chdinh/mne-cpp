@@ -12,6 +12,7 @@ All public namespaces in the MNE-CPP library tree.
 | Namespace | Classes | Description |
 |-----------|---------|-------------|
 | [`ACQLIB`](/docs/api/acq/) | 59 | Headless acquisition: sources, streams, zero-copy readers and native sample formats. |
+| [`BASELIB`](/docs/api/base/) | 9 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | [`BIDSLIB`](/docs/api/bids/) | 14 | BIDS dataset reading, writing, path construction, and sidecar metadata handling for iEEG/EEG/MEG. |
 | [`COMLIB`](/docs/api/com/) | 8 | Real-time client/server communication primitives for talking to `mne_rt_server`. |
 | [`CONNECTIVITYLIB`](/docs/api/connectivity/) | 20 | Functional connectivity metrics (coherence, PLV, cross-correlation, etc.). |
@@ -33,7 +34,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`RTPROCESSINGLIB`](/docs/api/dsp/) | 15 |  |
 | [`STSLIB`](/docs/api/sts/) | 10 | Statistical testing (t-tests, F-tests, cluster permutation, multiple comparison correction). |
 | `SURFACEKEYS` | 0 | Centralised string constants for surface map keys. |
-| [`UTILSLIB`](/docs/api/utils/) | 94 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
+| [`UTILSLIB`](/docs/api/utils/) | 85 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | `Ui` | 0 |  |
 
 ## Class inventory by namespace
@@ -99,6 +100,18 @@ All public namespaces in the MNE-CPP library tree.
 - [PolhemusConnection](/docs/api/acq/polhemus-connection)
 - [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - [PolhemusSerialConfig](/docs/api/acq/polhemus-serial-config)
+
+### BASELIB
+
+- [ByteStream](/docs/api/base/byte-stream)
+- [CircularBuffer](/docs/api/base/circular-buffer)
+- [Error](/docs/api/base/error)
+- [Expected](/docs/api/base/expected)
+- [FileByteStream](/docs/api/base/file-byte-stream)
+- [Log](/docs/api/base/log)
+- [LogCapture](/docs/api/base/log-capture)
+- [MemoryByteStream](/docs/api/base/memory-byte-stream)
+- [ThreadPool](/docs/api/base/thread-pool)
 
 ### BIDSLIB
 
@@ -579,9 +592,7 @@ All public namespaces in the MNE-CPP library tree.
 - [BadChannelsMaxwellParams](/docs/api/dsp/bad-channels-maxwell-params)
 - [BadChannelsMaxwellResult](/docs/api/dsp/bad-channels-maxwell-result)
 - [BridgedElectrodeParams](/docs/api/dsp/bridged-electrode-params)
-- [ByteStream](/docs/api/utils/byte-stream)
 - [ChannelDerivation](/docs/api/utils/channel-derivation)
-- [CircularBuffer](/docs/api/utils/circular-buffer)
 - [ConnectivityAec](/docs/api/dsp/connectivity-aec)
 - [CosineFilter](/docs/api/utils/cosine-filter)
 - [Csd](/docs/api/utils/csd)
@@ -593,10 +604,7 @@ All public namespaces in the MNE-CPP library tree.
 - [EogRegression](/docs/api/dsp/eog-regression)
 - [EpochExtractor](/docs/api/utils/epoch-extractor)
 - [EpochExtractorParams](/docs/api/utils/epoch-extractor-params)
-- [Error](/docs/api/utils/error)
-- [Expected](/docs/api/utils/expected)
 - [ExtendedInfomax](/docs/api/dsp/extended-infomax)
-- [FileByteStream](/docs/api/utils/file-byte-stream)
 - [FilterChpiParams](/docs/api/dsp/filter-chpi-params)
 - [FilterIO](/docs/api/utils/filter-io)
 - [FilterKernel](/docs/api/dsp/filter-kernel)
@@ -620,11 +628,8 @@ All public namespaces in the MNE-CPP library tree.
 - [LayoutMaker](/docs/api/utils/layout-maker)
 - [Linalg](/docs/api/math/linalg)
 - [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params)
-- [Log](/docs/api/utils/log)
-- [LogCapture](/docs/api/utils/log-capture)
 - [MaxwellMoveCompParams](/docs/api/dsp/maxwell-move-comp-params)
 - [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp)
-- [MemoryByteStream](/docs/api/utils/memory-byte-stream)
 - [MorletTfr](/docs/api/dsp/morlet-tfr)
 - [MorletTfrResult](/docs/api/dsp/morlet-tfr-result)
 - [MultitaperPsd](/docs/api/dsp/multitaper-psd)
@@ -656,7 +661,6 @@ All public namespaces in the MNE-CPP library tree.
 - [SurfaceLaplacian](/docs/api/dsp/surface-laplacian)
 - [SurfaceLaplacianResult](/docs/api/dsp/surface-laplacian-result)
 - [TaperedSpectraInputData](/docs/api/utils/tapered-spectra-input-data)
-- [ThreadPool](/docs/api/utils/thread-pool)
 - [Warp](/docs/api/math/warp)
 - [WelchPsd](/docs/api/dsp/welch-psd)
 - [WelchPsdResult](/docs/api/dsp/welch-psd-result)

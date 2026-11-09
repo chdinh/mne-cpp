@@ -1,23 +1,23 @@
 ---
 id: memory-byte-stream
-title: "UTILSLIB::MemoryByteStream"
+title: "BASELIB::MemoryByteStream"
 sidebar_label: MemoryByteStream
 sidebar_position: 72
 ---
 
 # MemoryByteStream
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/byte_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/byte_stream.h)
+**Namespace:** `BASELIB` &nbsp;·&nbsp; **Library:** Base Library &nbsp;·&nbsp; **Source:** [`base/byte_stream.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/base/byte_stream.h)
 
-`#include <utils/byte_stream.h>`
+`#include <base/byte_stream.h>`
 
 ```cpp
-class UTILSLIB::MemoryByteStream
+class BASELIB::MemoryByteStream
 ```
 
 A byte stream over a growable buffer in memory.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_base/main.cpp"
 MemoryByteStream memory;
 memory.writeBigEndian(std::int16_t{0x0102});
 const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant byte first
@@ -28,7 +28,7 @@ const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant 
 ```mermaid
 classDiagram
     ByteStream <|-- MemoryByteStream
-    click ByteStream href "../../utils/byte-stream/"
+    click ByteStream href "../../base/byte-stream/"
 ```
 
 ---
@@ -119,17 +119,17 @@ Writes `bytes` bytes at the current position, overwriting or extending the strea
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_base](../../examples/base/ex_base.mdx) — Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
+- Full source: [`src/examples/ex_base/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_base/main.cpp)
+- Build target: `ex_base` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_base](../../examples/base/ex_base.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 187"
+````cpp title="src/examples/ex_base/main.cpp, line 110"
 MemoryByteStream memory;
 memory.writeBigEndian(std::int16_t{0x0102});
 const bool bigEndian = memory.data()[0] == std::byte{0x01}; // most significant byte first

@@ -1,30 +1,30 @@
 ---
 id: log
-title: "UTILSLIB::Log"
+title: "BASELIB::Log"
 sidebar_label: Log
 sidebar_position: 67
 ---
 
 # Log
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/logger/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/logger/log.h)
+**Namespace:** `BASELIB` &nbsp;·&nbsp; **Library:** Base Library &nbsp;·&nbsp; **Source:** [`base/log.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/base/log.h)
 
-`#include <utils/log.h>`
+`#include <base/log.h>`
 
 ```cpp
-class UTILSLIB::Log
+class BASELIB::Log
 ```
 
 Writes library messages to the current sink; thread-safe.
 
-```cpp title="src/examples/ex_utils/main.cpp"
-Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format, then passed to Qt's handler
+```cpp title="src/examples/ex_base/main.cpp"
+Log::warning("channel {} is flat", "MEG 0113"); // formatted as by std::format
 ```
 
-```cpp title="src/examples/ex_utils/main.cpp"
-UTILSLIB::Log::install_qt_message_handler();                                                // console output
-UTILSLIB::Log::set_file(UTILSLIB::pathFromUtf8(dir.filePath("example.log").toStdString())); // and a plain-text copy
-Log::info("logging to {}", UTILSLIB::utf8FromPath(Log::file()));
+```cpp title="src/examples/ex_base/main.cpp"
+Log::install_qt_message_handler();  // console output
+Log::set_file(dir / "example.log"); // and a plain-text copy
+Log::info("logging to {}", utf8FromPath(Log::file()));
 ```
 
 ---
@@ -160,7 +160,7 @@ Replaces the sink.
 
 ### install_qt_message_handler()
 
-Installs the Qt message handler that prints every Qt message, and so every forwarded [`Log`](/docs/api/utils/log) message, at or above `level()`: results to stdout, diagnostics to stderr, with coloured level tags when built with MNE_LOG_MODE=FORMATTED.
+Installs the Qt message handler that prints every Qt message, and so every forwarded [`Log`](/docs/api/base/log) message, at or above `level()`: results to stdout, diagnostics to stderr, with coloured level tags when built with MNE_LOG_MODE=FORMATTED.
 
 ---
 
@@ -189,23 +189,24 @@ Additionally writes every message printed by `install_qt_message_handler()` to a
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_base](../../examples/base/ex_base.mdx) — Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
+- Full source: [`src/examples/ex_base/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_base/main.cpp)
+- Build target: `ex_base` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_base](../../examples/base/ex_base.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 152"
-UTILSLIB::Log::install_qt_message_handler();                                                // console output
-UTILSLIB::Log::set_file(UTILSLIB::pathFromUtf8(dir.filePath("example.log").toStdString())); // and a plain-text copy
-Log::info("logging to {}", UTILSLIB::utf8FromPath(Log::file()));
+````cpp title="src/examples/ex_base/main.cpp, line 74"
+Log::install_qt_message_handler();  // console output
+Log::set_file(dir / "example.log"); // and a plain-text copy
+Log::info("logging to {}", utf8FromPath(Log::file()));
 Log::set_file({});
-QFile log(dir.filePath("example.log"));
-ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to"), "Log wrote the message to the log file");
+std::ifstream logFile(dir / "example.log");
+const std::string logText{std::istreambuf_iterator<char>(logFile), {}};
+ok &= expect(logText.find("logging to") != std::string::npos, "Log wrote the message to the log file");
 ````
 
 ### [ex_averaging](../../examples/mne/ex_averaging.mdx)
@@ -213,7 +214,7 @@ ok &= expect(log.open(QIODevice::ReadOnly) && log.readAll().contains("logging to
 Average stimulus-locked epochs of a raw FIFF recording into an evoked response, with event selection and EOG rejection.
 
 ````cpp title="src/examples/ex_averaging/main.cpp, line 71"
-UTILSLIB::Log::install_qt_message_handler();
+BASELIB::Log::install_qt_message_handler();
 QApplication a(argc, argv);
 ````
 
@@ -221,8 +222,8 @@ QApplication a(argc, argv);
 
 Build the CTF software gradient compensator that converts an evoked data set between compensation grades.
 
-````cpp title="src/examples/ex_cancel_noise/main.cpp, line 59"
-UTILSLIB::Log::install_qt_message_handler();
+````cpp title="src/examples/ex_cancel_noise/main.cpp, line 58"
+BASELIB::Log::install_qt_message_handler();
 QCoreApplication app(argc, argv);
 ````
 

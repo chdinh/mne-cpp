@@ -451,6 +451,24 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
     },
     {
       type: 'category',
+      label: "Base Library",
+      collapsible: true,
+      collapsed: true,
+      link: {type: 'doc', id: 'api/base/index'},
+      items: [
+        'api/base/circular-buffer',
+        'api/base/log',
+        'api/base/log-capture',
+        'api/base/error',
+        'api/base/expected',
+        'api/base/byte-stream',
+        'api/base/memory-byte-stream',
+        'api/base/file-byte-stream',
+        'api/base/thread-pool'
+      ],
+    },
+    {
+      type: 'category',
       label: "Utilities Library",
       collapsible: true,
       collapsed: true,
@@ -461,7 +479,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/artifact-detect',
         'api/utils/bad-channel-detect',
         'api/utils/channel-derivation',
-        'api/utils/circular-buffer',
         'api/utils/cosine-filter',
         'api/utils/csd',
         'api/utils/dpss',
@@ -494,15 +511,7 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/utils/report-section',
         'api/utils/spectogram-input-data',
         'api/utils/tapered-spectra-input-data',
-        'api/utils/artifact-detect-proj-params',
-        'api/utils/log',
-        'api/utils/log-capture',
-        'api/utils/error',
-        'api/utils/expected',
-        'api/utils/byte-stream',
-        'api/utils/memory-byte-stream',
-        'api/utils/file-byte-stream',
-        'api/utils/thread-pool'
+        'api/utils/artifact-detect-proj-params'
       ],
     },
     {

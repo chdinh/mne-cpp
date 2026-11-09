@@ -20,7 +20,7 @@ Digitizer points with the names of their EEG electrodes, like mne.channels.DigMo
 The points come in the order of mne.channels.make_dig_montage: the cardinal points (LPA, nasion, RPA), HPI coils, head shape points, then the EEG electrodes. Electrodes are numbered by the last three characters of their names when all of those are numbers, and 1..n otherwise; a repeated name keeps its first place and its last position. All points are in digitizer coordinates (FIFFV_COORD_UNKNOWN) and in metres.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-const auto montage = FiffDigMontage::read_neuroscan_dat(datPath); // UTILSLIB::Expected, like mne.channels.read_dig_dat
+const auto montage = FiffDigMontage::read_neuroscan_dat(datPath); // BASELIB::Expected, like mne.channels.read_dig_dat
 ```
 
 ---
@@ -46,7 +46,7 @@ The three fiducials become the cardinal points. The remaining points become HPI 
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if the extension, unit or content is wrong or the number of names does not match the points.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if the extension, unit or content is wrong or the number of names does not match the points.
 
 ---
 
@@ -67,7 +67,7 @@ Reads the points of a Polhemus FastSCAN .txt file, as mne.channels.read_polhemus
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; Eigen::MatrixX3d &gt;* — The points in metres, one per row, or why the file cannot be read: Io if it cannot be opened, Format if the extension, unit or header is wrong or a row is not three numbers.
+- *[Expected](/docs/api/base/expected)&lt; Eigen::MatrixX3d &gt;* — The points in metres, one per row, or why the file cannot be read: Io if it cannot be opened, Format if the extension, unit or header is wrong or a row is not three numbers.
 
 ---
 
@@ -82,7 +82,7 @@ Reads a BrainVision CapTrak .bvct file, as mne.channels.read_dig_captrak does: t
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if it cannot be parsed, an electrode has no position or a fiducial is missing.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if it cannot be parsed, an electrode has no position or a fiducial is missing.
 
 ---
 
@@ -99,7 +99,7 @@ Sensors of type 0 become EEG electrodes named "EEG &lt;number&gt;", the referenc
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if it cannot be parsed, a sensor has no number or position or a fiducial is missing.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if it cannot be parsed, a sensor has no number or position or a fiducial is missing.
 
 ---
 
@@ -123,7 +123,7 @@ Reads a Localite .csv file ("#,name,x,y,z" in millimetres after a header row), a
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if a row is malformed, NotFound if a named fiducial is missing.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if a row is malformed, NotFound if a named fiducial is missing.
 
 ---
 
@@ -138,7 +138,7 @@ Reads a Neuroscan .dat electrode file ("name number x y z" per line), as mne.cha
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if a line does not hold five entries.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigMontage](/docs/api/fiff/fiff-dig-montage) &gt;* — The montage, or why the file cannot be read: Io if it cannot be opened, Format if a line does not hold five entries.
 
 ---
 
@@ -158,7 +158,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 135"
 const std::filesystem::path datPath = tmp.filePath("electrodes.dat").toStdString();
 std::ofstream(datPath) << "Nz 78 0 0.1 0\nLPA 76 -0.08 0 0\nRPA 82 0.08 0 0\nFz 1 0 0.06 0.08\nCz 2 0 0 0.1\n";
-const auto montage = FiffDigMontage::read_neuroscan_dat(datPath); // UTILSLIB::Expected, like mne.channels.read_dig_dat
+const auto montage = FiffDigMontage::read_neuroscan_dat(datPath); // BASELIB::Expected, like mne.channels.read_dig_dat
 ok &= expect(montage && montage->ch_names == std::vector<std::string>{"Fz", "Cz"} && montage->dig.size() == 5 && montage->dig[0].ident == FIFFV_POINT_LPA &&
                  montage->dig[4].kind == FIFFV_POINT_EEG,
              "FiffDigMontage: the Neuroscan .dat file holds Fz and Cz after LPA, nasion and RPA");

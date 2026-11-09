@@ -32,7 +32,7 @@ MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
 bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
-bipolar.pick = (VectorXi(3) << -1, UTILSLIB::indexOf(mneRaw->ch_names, "EEG001"), UTILSLIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
+bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG001"), BASELIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
 mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, ns, rows.data());
@@ -222,7 +222,7 @@ MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
 bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
-bipolar.pick = (VectorXi(3) << -1, UTILSLIB::indexOf(mneRaw->ch_names, "EEG001"), UTILSLIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
+bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG001"), BASELIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
 ````

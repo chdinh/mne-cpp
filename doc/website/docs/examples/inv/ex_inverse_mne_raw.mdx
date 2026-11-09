@@ -12,7 +12,7 @@ Average epochs of a raw recording and compute an MNE, dSPM or sLORETA source est
 
 <ExampleFacts name="ex_inverse_mne_raw" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Math](../../api/math/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Math](../../api/math/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Background
 
@@ -61,7 +61,7 @@ The documented classes this example uses most:
 | [`FiffEvents`](../../api/fiff/fiff-events.mdx) | FIFF I/O |
 | [`InvSourceEstimate`](../../api/inv/inv-source-estimate.mdx) | Inverse |
 | [`BrainTreeModel`](../../api/disp3-d/brain-tree-model.mdx) | 3D Visualization |
-| [`Error`](../../api/utils/error.mdx) | Utilities |
+| [`Error`](../../api/base/error.mdx) | Base |
 | [`FiffCov`](../../api/fiff/fiff-cov.mdx) | FIFF I/O |
 | [`FiffEvoked`](../../api/fiff/fiff-evoked.mdx) | FIFF I/O |
 
@@ -118,7 +118,7 @@ The documented classes this example uses most:
 #include <disp3D/model/braintreemodel.h>
 
 #include <math/linalg.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -139,6 +139,7 @@ using namespace FSLIB;
 using namespace FIFFLIB;
 using namespace INVLIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 using namespace DISP3DLIB;
 
@@ -161,7 +162,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

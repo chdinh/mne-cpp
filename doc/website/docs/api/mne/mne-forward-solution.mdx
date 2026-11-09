@@ -51,7 +51,7 @@ Default constructor.
 
 ### MNEForwardSolution(path)
 
-Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads a forward solution file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -62,7 +62,7 @@ Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/er
 
 ### MNEForwardSolution(path, options)
 
-Reads a forward solution file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads a forward solution file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -269,7 +269,7 @@ Splits the combined MEG/EEG forward matrix back into separate blocks for FIFF st
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -371,7 +371,7 @@ Reads a forward solution file, as mne.read_forward_solution does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;* — The forward solution, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no forward solution, Format if a required part is missing or inconsistent.
+- *[Expected](/docs/api/base/expected)&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;* — The forward solution, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no forward solution, Format if a required part is missing or inconsistent.
 
 ---
 
@@ -391,7 +391,7 @@ Reads a forward solution file and prepares it as `options` ask, e.g.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;* — The forward solution, or why the file cannot be read (see read(path)).
+- *[Expected](/docs/api/base/expected)&lt; [MNEForwardSolution](/docs/api/mne/mne-forward-solution) &gt;* — The forward solution, or why the file cannot be read (see read(path)).
 
 ---
 
@@ -435,7 +435,7 @@ const FiffEvoked evoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16Str
 
 Sensor- or source-level functional connectivity of averaged MEG/EEG data with a selectable metric, shown as a 3D network.
 
-````cpp title="src/examples/ex_connectivity/main.cpp, line 188"
+````cpp title="src/examples/ex_connectivity/main.cpp, line 189"
 MNEForwardSolution t_clusteredFwd;
 MNEForwardSolution t_Fwd;
 ````
@@ -444,7 +444,7 @@ MNEForwardSolution t_Fwd;
 
 Compare connectivity metrics side by side on the same averaged sensor- or source-level data.
 
-````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 189"
+````cpp title="src/examples/ex_connectivity_comparison/main.cpp, line 190"
 MNEForwardSolution t_clusteredFwd;
 MNEForwardSolution t_Fwd;
 ````

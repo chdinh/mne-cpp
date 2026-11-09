@@ -12,7 +12,7 @@ Sensor- or source-level functional connectivity of averaged MEG/EEG data with a 
 
 <ExampleFacts name="ex_connectivity" />
 
-**Libraries:** [Connectivity](../../api/connectivity/index.mdx), [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [Visualization](../../api/disp/index.mdx), [Signal Processing](../../api/dsp/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Connectivity](../../api/connectivity/index.mdx), [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [Visualization](../../api/disp/index.mdx), [Signal Processing](../../api/dsp/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Background
 
@@ -434,7 +434,7 @@ signals:
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_events.h>
 
 #include <disp/viewers/connectivitysettingsview.h>
@@ -467,6 +467,7 @@ using namespace FIFFLIB;
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace FSLIB;
 using namespace DISP3DLIB;
@@ -489,7 +490,7 @@ int main(int argc, char* argv[])
 #ifdef STATICBUILD
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
     QApplication::addLibraryPath(QApplication::applicationDirPath() + "/../lib");
 
@@ -604,7 +605,7 @@ int main(int argc, char* argv[])
     events = FiffEvents::read(sEve.toStdU16String()).value().events;
 
     // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if activate_projections() was called beforehand.
-    UTILSLIB::StringList exludeChs;
+    BASELIB::StringList exludeChs;
     //exludeChs << "EOG061" << "EOG063";
 
     std::map<std::string, double> mapReject;

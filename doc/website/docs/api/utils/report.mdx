@@ -150,7 +150,7 @@ Get the report title.
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 - Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
 - Build target: `ex_utils` (runs under CTest)
 
@@ -158,9 +158,9 @@ Get the report title.
 
 ### [ex_utils](../../examples/utils/ex_utils.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Utilities library: observers, commands, matrix files, montages, layouts, selections and reports.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 303"
+````cpp title="src/examples/ex_utils/main.cpp, line 233"
 Report report("Example report");
 report.addText("Summary", "All utilities were exercised.");
 report.addTable("Montage", {"Electrode", "z (m)"}, {{"Cz", "0.087"}, {"Fp1", "0.033"}});

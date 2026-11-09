@@ -12,7 +12,7 @@ List the evoked data sets (conditions) stored in a FIFF file.
 
 <ExampleFacts name="ex_find_evoked" />
 
-**Libraries:** [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -106,7 +106,7 @@ The documented classes this example uses most:
 | Class | Library |
 |---|---|
 | [`FiffEvokedSet`](../../api/fiff/fiff-evoked-set.mdx) | FIFF I/O |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Source
 
@@ -138,7 +138,7 @@ The documented classes this example uses most:
 #include <fiff/fiff.h>
 #include <mne/mne.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -154,7 +154,6 @@ The documented classes this example uses most:
 
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // MAIN
@@ -171,7 +170,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

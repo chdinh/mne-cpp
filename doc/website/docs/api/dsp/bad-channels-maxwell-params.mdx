@@ -50,8 +50,8 @@ badParams.dZThreshold = 50.0; // robust z-score of the reconstruction residual
 const BadChannelsMaxwellResult bads = findBadChannelsMaxwell(broken, info, badParams);
 int worst = 0;
 bads.zScores.maxCoeff(&worst);
-ok &= expect(worst == 40 && std::ranges::contains(bads.badIndices, meg[40]) && UTILSLIB::contains(bads.badChannels, info.ch_names[meg[40]]),
-             std::format("findBadChannelsMaxwell ranks {} worst (z = {:.0f}), flagged: {}", info.ch_names[meg[worst]], bads.zScores(worst), UTILSLIB::join(bads.badChannels, ", ")));
+ok &= expect(worst == 40 && std::ranges::contains(bads.badIndices, meg[40]) && BASELIB::contains(bads.badChannels, info.ch_names[meg[40]]),
+             std::format("findBadChannelsMaxwell ranks {} worst (z = {:.0f}), flagged: {}", info.ch_names[meg[worst]], bads.zScores(worst), BASELIB::join(bads.badChannels, ", ")));
 ````
 
 ## Authors of this file

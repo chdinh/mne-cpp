@@ -25,7 +25,7 @@ QFile aveFile(data + "/MEG/sample/sample_audvis-ave.fif");
 FiffEvoked ave((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0, {}, false);
 StringList megNames; // the 305 good MEG channels
 for (const std::string& name : ave.info.ch_names) {
-    if (name.starts_with("MEG") && !UTILSLIB::contains(ave.info.bads, name)) {
+    if (name.starts_with("MEG") && !BASELIB::contains(ave.info.bads, name)) {
         megNames.push_back(name);
     }
 }

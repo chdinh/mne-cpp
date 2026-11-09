@@ -25,7 +25,7 @@ FiffAnnotations annotations = annotations_from_events(firstThree, info.sfreq, {{
 annotations.append(0.5, 1.0, "BAD_blink"); // onset s, duration s, description
 const std::filesystem::path csv = tmp.filePath("annot.csv").toStdString();
 const bool annotationsWritten = annotations.write(csv).has_value();
-const FiffAnnotations annotationsBack = FiffAnnotations::read(csv).value(); // value() throws UTILSLIB::Error
+const FiffAnnotations annotationsBack = FiffAnnotations::read(csv).value(); // value() throws BASELIB::Error
 const MatrixXi eventsAgain = events_from_annotations(annotationsBack.select("auditory"), info.sfreq, {{"auditory/left", 1}, {"auditory/right", 2}}, raw.first_samp);
 ```
 

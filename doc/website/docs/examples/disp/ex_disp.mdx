@@ -12,7 +12,7 @@ Disp library widgets: image map, line plot and time-frequency plot of raw data.
 
 <ExampleFacts name="ex_disp" />
 
-**Libraries:** [Visualization](../../api/disp/index.mdx), [Signal Processing](../../api/dsp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Visualization](../../api/disp/index.mdx), [Signal Processing](../../api/dsp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -70,8 +70,7 @@ The documented classes this example uses most:
 | [`Plot`](../../api/disp/plot.mdx) | Visualization |
 | [`TFplot`](../../api/disp/t-fplot.mdx) | Visualization |
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
-| [`Spectrogram`](../../api/utils/spectrogram.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -79,7 +78,6 @@ The documented classes this example uses most:
 - [ImageSc](../../api/disp/image-sc.mdx)
 - [Plot](../../api/disp/plot.mdx)
 - [TFplot](../../api/disp/t-fplot.mdx)
-- [Spectrogram](../../api/utils/spectrogram.mdx)
 
 ## Source
 
@@ -116,7 +114,7 @@ The documented classes this example uses most:
 #include <math.h>
 
 #include <dsp/spectrogram.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // Eigen
@@ -143,6 +141,7 @@ using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace UTILSLIB;
+using namespace BASELIB;
 
 //=============================================================================================================
 // MAIN
@@ -159,7 +158,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

@@ -74,7 +74,7 @@ a file opened without Qt.
 
 **Parameters:**
 
-- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;*
   The byte stream, already open; the fiff stream owns it.
 
 - **name** : *std::string*
@@ -466,7 +466,7 @@ Reads the digitizer data below a node, as MNE-C's load_digitizer_data (digitizer
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) &gt;* — The data, all points active, or NotFound if the node holds no digitizer points.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) &gt;* — The data, all points active, or NotFound if the node holds no digitizer points.
 
 ---
 
@@ -1128,7 +1128,7 @@ Opens a FIFF file for reading and reads its tag directory.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The open stream, or why the file cannot be opened or is not a FIFF file.
+- *[Expected](/docs/api/base/expected)&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The open stream, or why the file cannot be opened or is not a FIFF file.
 
 ---
 
@@ -1146,7 +1146,7 @@ Byte stream over a Qt device, for callers that hold a QIODevice such as a socket
 
 **Returns:**
 
-- *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;* — The byte stream, or nullptr if the device cannot be opened.
+- *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;* — The byte stream, or nullptr if the device cannot be opened.
 
 ---
 
@@ -1252,7 +1252,7 @@ in memory.
 
 **Parameters:**
 
-- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/utils/byte-stream) &gt;*
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;*
   Where to write; the returned stream owns them.
 
 - **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*

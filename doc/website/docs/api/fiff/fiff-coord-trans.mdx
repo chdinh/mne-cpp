@@ -25,7 +25,7 @@ Each transform carries its source (`from`) and destination (`to`) `FIFFV_COORD_*
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();
-const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws UTILSLIB::Error if it is missing
+const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws BASELIB::Error if it is missing
 const FiffCoordTrans devHead = info.dev_head_t;                           // device -> head, from the measurement info
 float r[3] = {0.0f, 0.0f, 0.0f};
 FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
@@ -43,7 +43,7 @@ Constructs the coordinate transformation descriptor.
 
 ### FiffCoordTrans(path)
 
-Reads the first coordinate transform of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads the first coordinate transform of a FIFF file, like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -54,7 +54,7 @@ Reads the first coordinate transform of a FIFF file, like `read()`; throws [`Err
 
 ### FiffCoordTrans(path, from, to)
 
-Reads the transform between two frames, like read(path, from, to); throws [`Error`](/docs/api/utils/error) if there is none.
+Reads the transform between two frames, like read(path, from, to); throws [`Error`](/docs/api/base/error) if there is none.
 
 **Parameters:**
 
@@ -232,7 +232,7 @@ Writes the transform to a new FIFF file, as mne.write_trans.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -290,7 +290,7 @@ Reads the first coordinate transform of a FIFF file, as mne.read_trans.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform, or why the file holds none.
+- *[Expected](/docs/api/base/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform, or why the file holds none.
 
 ---
 
@@ -311,7 +311,7 @@ Reads the transform between two coordinate frames from a FIFF file; one stored t
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform, or why the file holds none between these frames.
+- *[Expected](/docs/api/base/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform, or why the file holds none between these frames.
 
 ---
 
@@ -332,7 +332,7 @@ Reads a transform from a text file of four rows, rotation and translation in mm,
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform with its translation in m, or why the file cannot be read.
+- *[Expected](/docs/api/base/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The transform with its translation in m, or why the file cannot be read.
 
 ---
 
@@ -514,7 +514,7 @@ Reads a coordinate transform from a FIFF stream node.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The coordinate transform, inverted if stored the other way round, or NotFound.
+- *[Expected](/docs/api/base/expected)&lt; [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) &gt;* — The coordinate transform, inverted if stored the other way round, or NotFound.
 
 ---
 
@@ -563,7 +563,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 145"
 const std::filesystem::path trans = (dir + "/all-trans.fif").toStdU16String();
-const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws UTILSLIB::Error if it is missing
+const FiffCoordTrans headToMri(trans, FIFFV_COORD_HEAD, FIFFV_COORD_MRI); // throws BASELIB::Error if it is missing
 const FiffCoordTrans devHead = info.dev_head_t;                           // device -> head, from the measurement info
 float r[3] = {0.0f, 0.0f, 0.0f};
 FiffCoordTrans::apply_trans(r, devHead, true); // the device origin in head coordinates
@@ -579,7 +579,7 @@ const FiffCoordTrans back = devHead.inverted();
 
 Read an evoked data set from FIFF and print its measurement info and coordinate transforms.
 
-````cpp title="src/examples/ex_read_evoked/main.cpp, line 116"
+````cpp title="src/examples/ex_read_evoked/main.cpp, line 115"
 //Select the head coordinate system
 bool use_ctf_head = parser.isSet(useCTFCompOption);
 FiffCoordTrans meg_trans;

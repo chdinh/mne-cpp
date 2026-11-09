@@ -12,7 +12,7 @@ Read a BEM model from FIFF, write it back and verify the round trip.
 
 <ExampleFacts name="ex_read_bem" />
 
-**Libraries:** [MNE Core](../../api/mne/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [MNE Core](../../api/mne/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -64,7 +64,7 @@ The documented classes this example uses most:
 | Class | Library |
 |---|---|
 | [`MNEBem`](../../api/mne/mne-bem.mdx) | MNE Core |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -98,7 +98,7 @@ The documented classes this example uses most:
 #include <mne/mne.h>
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -131,7 +131,7 @@ using namespace UTILSLIB;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication app(argc, argv);
 
     // Command Line Parser

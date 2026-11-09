@@ -59,7 +59,7 @@ Constructs an empty inverse operator with invalid sentinel values.
 
 ### MNEInverseOperator(path)
 
-Reads an inverse operator file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads an inverse operator file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -237,7 +237,7 @@ Writes the inverse operator, as mne.minimum_norm.write_inverse_operator does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -300,7 +300,7 @@ Reads an inverse operator file, as mne.minimum_norm.read_inverse_operator does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) &gt;* — The inverse operator, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no inverse solution, Format if a required part is missing or malformed.
+- *[Expected](/docs/api/base/expected)&lt; [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) &gt;* — The inverse operator, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no inverse solution, Format if a required part is missing or malformed.
 
 ---
 
@@ -342,7 +342,7 @@ QObject::connect(&rtInvOp, &RtInvOp::invOperatorCalculated, [&](const MNEInverse
 rtInvOp.append(noiseCov); // e.g. each new RtCov estimate
 const bool inverseArrived = waitFor(inverseDone, 60000);
 // 306 MEG channels in the forward solution, minus the bad MEG2443
-ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && UTILSLIB::contains(rawInfo->bads, "MEG2443"),
+ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && BASELIB::contains(rawInfo->bads, "MEG2443"),
              std::format("RtInvOp builds a {}-channel operator for {} sources", inverse.nchan, inverse.nsource));
 rtInvOp.stop();
 ````
@@ -351,7 +351,7 @@ rtInvOp.stop();
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 409"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 410"
 MNEInverseOperator inverse_operator(info, t_clusteredFwd, noise_cov, 0.2f, 0.8f);
 ````
 

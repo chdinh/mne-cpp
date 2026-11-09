@@ -12,7 +12,7 @@ Fit continuous HPI coils on raw data with SSP and write the head positions for c
 
 <ExampleFacts name="ex_hpiFit" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [Forward](../../api/fwd/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [Forward](../../api/fwd/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -113,7 +113,7 @@ The documented classes this example uses most:
 | Class | Library |
 |---|---|
 | [`InvHpiFit`](../../api/inv/inv-hpi-fit.mdx) | Inverse |
-| [`Error`](../../api/utils/error.mdx) | Utilities |
+| [`Error`](../../api/base/error.mdx) | Base |
 | [`FiffInfo`](../../api/fiff/fiff-info.mdx) | FIFF I/O |
 | [`InvHpiModelParameters`](../../api/inv/inv-hpi-model-parameters.mdx) | Inverse |
 | [`FiffCoordTrans`](../../api/fiff/fiff-coord-trans.mdx) | FIFF I/O |
@@ -123,12 +123,12 @@ The documented classes this example uses most:
 
 ## Used in the API reference
 
+- [Error](../../api/base/error.mdx)
 - [FiffDigPointSet](../../api/fiff/fiff-dig-point-set.mdx)
 - [HpiFitResult](../../api/inv/hpi-fit-result.mdx)
 - [InvHpiDataUpdater](../../api/inv/inv-hpi-data-updater.mdx)
 - [InvHpiFit](../../api/inv/inv-hpi-fit.mdx)
 - [InvHpiModelParameters](../../api/inv/inv-hpi-model-parameters.mdx)
-- [Error](../../api/utils/error.mdx)
 - [IOUtils](../../api/utils/io-utils.mdx)
 
 ## Source
@@ -156,7 +156,7 @@ The documented classes this example uses most:
 
 #include <iostream>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <vector>
 
 #include <fiff/fiff.h>
@@ -167,7 +167,7 @@ The documented classes this example uses most:
 #include <inv/hpi/inv_hpi_data_updater.h>
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fwd/fwd_coil_set.h>
 
@@ -210,7 +210,7 @@ using namespace Eigen;
 
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QElapsedTimer timer;
     QCoreApplication a(argc, argv);
 
@@ -312,7 +312,7 @@ int main(int argc, char* argv[])
 
     //set columns of matrix to zero depending on bad channels indexes
     for (qint32 j = 0; j < static_cast<int>(infoTemp.bads.size()); ++j) {
-        matProjectors.col(UTILSLIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
+        matProjectors.col(BASELIB::indexOf(infoTemp.ch_names, infoTemp.bads.at(j))).setZero();
     }
 
     // if debugging files are necessary set bDoDebug = true;

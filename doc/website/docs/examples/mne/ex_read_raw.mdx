@@ -12,7 +12,7 @@ Read a segment of a raw FIFF recording with channel picking, SSP projectors and 
 
 <ExampleFacts name="ex_read_raw" />
 
-**Libraries:** [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -78,7 +78,7 @@ The documented classes this example uses most:
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`LinePlot`](../../api/disp/line-plot.mdx) | Visualization |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -114,7 +114,7 @@ The documented classes this example uses most:
 
 #include <fiff/fiff.h>
 #include <mne/mne.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -134,7 +134,7 @@ The documented classes this example uses most:
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -153,7 +153,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

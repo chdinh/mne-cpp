@@ -12,7 +12,7 @@ Read stimulus-locked epochs from a raw FIFF recording with event selection and a
 
 <ExampleFacts name="ex_read_epochs" />
 
-**Libraries:** [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -74,7 +74,7 @@ The documented classes this example uses most:
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`ImageSc`](../../api/disp/image-sc.mdx) | Visualization |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 | [`MNEEpochDataList`](../../api/mne/mne-epoch-data-list.mdx) | MNE Core |
 
 ## Source
@@ -117,7 +117,7 @@ The documented classes this example uses most:
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/imagesc.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -134,7 +134,7 @@ The documented classes this example uses most:
 using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace MNELIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -152,7 +152,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

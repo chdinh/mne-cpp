@@ -111,7 +111,7 @@ const std::vector<Vector3f> points{Vector3f(-4.0f, -4.0f, -4.0f), Vector3f(2.0f,
 const std::vector<std::string> regionsAt = atlas.labels_for_positions(points);
 // nibabel: inv(affine) maps (-4,-4,-4) to voxel (0,0,0) and (2,0,-2) to voxel (3,2,1)
 ok &= expect(atlas.is_loaded() && regionsAt == std::vector<std::string>{"Left-Hippocampus", "Right-Hippocampus", "Unknown"},
-             std::format("atlas lookup: {}", UTILSLIB::join(regionsAt, ", ")));
+             std::format("atlas lookup: {}", BASELIB::join(regionsAt, ", ")));
 ````
 
 ## Authors of this file

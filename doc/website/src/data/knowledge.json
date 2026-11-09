@@ -48,7 +48,8 @@
     "mne": "MNE Core",
     "fiff": "FIFF I/O",
     "math": "Math",
-    "utils": "Utilities"
+    "utils": "Utilities",
+    "base": "Base"
   },
   "examples": [
     {
@@ -164,7 +165,7 @@
         "disp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "preprocessing",
@@ -178,6 +179,25 @@
       "topics": [
         "epochs-averaging"
       ]
+    },
+    {
+      "name": "ex_base",
+      "title": "Log, read binary files and run work on a thread pool",
+      "brief": "Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer",
+      "thumbnail": "",
+      "url": "/docs/examples/base/ex_base/",
+      "library": "base",
+      "libraries": [
+        "base"
+      ],
+      "tasks": [
+        "infrastructure"
+      ],
+      "modalities": [
+        "generic"
+      ],
+      "level": "start",
+      "topics": []
     },
     {
       "name": "ex_bids",
@@ -209,7 +229,7 @@
       "libraries": [
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "preprocessing"
@@ -233,7 +253,7 @@
         "fs",
         "fiff",
         "math",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation"
@@ -262,7 +282,7 @@
         "mne",
         "fiff",
         "math",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation"
@@ -288,7 +308,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -313,7 +333,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -338,7 +358,7 @@
         "fwd",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "forward-modeling"
@@ -369,7 +389,8 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "utils",
+        "base"
       ],
       "tasks": [
         "connectivity",
@@ -399,7 +420,8 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "utils",
+        "base"
       ],
       "tasks": [
         "connectivity"
@@ -468,7 +490,7 @@
       "library": "disp3D",
       "libraries": [
         "disp3D",
-        "utils"
+        "base"
       ],
       "tasks": [
         "anatomy",
@@ -512,7 +534,7 @@
         "dsp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "visualization"
@@ -561,7 +583,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation",
@@ -626,7 +648,7 @@
       "libraries": [
         "dsp",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "preprocessing"
@@ -670,7 +692,7 @@
       "libraries": [
         "dsp",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "preprocessing"
@@ -715,7 +737,7 @@
         "dsp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "real-time"
@@ -762,7 +784,7 @@
       "libraries": [
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "signal-analysis"
@@ -872,7 +894,7 @@
       "libraries": [
         "dsp",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "signal-analysis",
@@ -896,7 +918,7 @@
       "libraries": [
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "io"
@@ -919,7 +941,7 @@
       "library": "fs",
       "libraries": [
         "fs",
-        "utils"
+        "base"
       ],
       "tasks": [
         "anatomy",
@@ -941,7 +963,7 @@
       "libraries": [
         "disp3D",
         "fs",
-        "utils"
+        "base"
       ],
       "tasks": [
         "anatomy",
@@ -963,7 +985,7 @@
       "libraries": [
         "fwd",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "forward-modeling"
@@ -991,7 +1013,7 @@
         "mne",
         "fiff",
         "math",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation"
@@ -1014,7 +1036,8 @@
         "inv",
         "fwd",
         "fiff",
-        "utils"
+        "utils",
+        "base"
       ],
       "tasks": [
         "preprocessing"
@@ -1059,7 +1082,7 @@
         "disp3D",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "visualization"
@@ -1108,7 +1131,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -1207,7 +1230,7 @@
         "disp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation"
@@ -1235,7 +1258,7 @@
         "mne",
         "fiff",
         "math",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation"
@@ -1262,7 +1285,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -1288,7 +1311,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -1333,7 +1356,7 @@
       "libraries": [
         "inv",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-estimation"
@@ -1357,7 +1380,8 @@
       "library": "fiff",
       "libraries": [
         "fiff",
-        "utils"
+        "utils",
+        "base"
       ],
       "tasks": [
         "visualization"
@@ -1436,7 +1460,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "anatomy",
@@ -1479,7 +1503,8 @@
       "library": "mne",
       "libraries": [
         "mne",
-        "utils"
+        "utils",
+        "base"
       ],
       "tasks": [
         "io",
@@ -1504,7 +1529,7 @@
         "disp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "io",
@@ -1530,7 +1555,7 @@
         "disp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "io"
@@ -1554,7 +1579,8 @@
       "libraries": [
         "fs",
         "mne",
-        "utils"
+        "utils",
+        "base"
       ],
       "tasks": [
         "io",
@@ -1580,7 +1606,7 @@
         "disp3D",
         "fs",
         "mne",
-        "utils"
+        "base"
       ],
       "tasks": [
         "forward-modeling",
@@ -1604,7 +1630,7 @@
         "disp",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "io"
@@ -1628,7 +1654,7 @@
       "library": "fiff",
       "libraries": [
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "io"
@@ -1655,7 +1681,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -1678,7 +1704,7 @@
         "disp",
         "mne",
         "math",
-        "utils"
+        "base"
       ],
       "tasks": [
         "signal-analysis"
@@ -1702,7 +1728,7 @@
         "fs",
         "mne",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "source-localization"
@@ -1743,7 +1769,7 @@
         "disp",
         "dsp",
         "fiff",
-        "utils"
+        "base"
       ],
       "tasks": [
         "signal-analysis",
@@ -1759,8 +1785,8 @@
     },
     {
       "name": "ex_utils",
-      "title": "Buffers, logging, montages and reports",
-      "brief": "Utilities library: buffers, observers, logging, file formats, montages, layouts and reports",
+      "title": "Montages, layouts, selections, matrix files and reports",
+      "brief": "Utilities library: observers, commands, matrix files, montages, layouts, selections and reports",
       "thumbnail": "",
       "url": "/docs/examples/utils/ex_utils/",
       "library": "utils",

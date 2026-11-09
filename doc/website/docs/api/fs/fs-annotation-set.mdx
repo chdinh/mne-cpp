@@ -158,7 +158,7 @@ Converts annotation to a label list and colortable
 - **p_qListLabelRGBAs** : *std::vector&lt; Eigen::RowVector4i &gt; &*
   the converted label RGBAs are appended to a given list. Stored data are not affected.
 
-- **lLabelPicks** : *const UTILSLIB::StringList &*
+- **lLabelPicks** : *const BASELIB::StringList &*
   the label names which should be picked.
 
 **Returns:**
@@ -291,7 +291,7 @@ FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parse
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 139"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 140"
 FsSurfaceSet t_surfSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(surfOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 FsAnnotationSet t_annotationSet(parser.value(subjectOption).toStdString(), parser.value(hemiOption).toInt(), parser.value(annotOption).toStdString(), parser.value(subjectPathOption).toStdU16String());
 ````

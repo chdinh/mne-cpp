@@ -12,7 +12,7 @@ Copy a raw FIFF recording buffer by buffer into a new file with FiffStream.
 
 <ExampleFacts name="ex_read_write_raw" />
 
-**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -59,7 +59,7 @@ The documented classes this example uses most:
 |---|---|
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`FiffStream`](../../api/fiff/fiff-stream.mdx) | FIFF I/O |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Source
 
@@ -89,7 +89,7 @@ The documented classes this example uses most:
 #include <math.h>
 
 #include <fiff/fiff.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -104,7 +104,7 @@ The documented classes this example uses most:
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
@@ -122,7 +122,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

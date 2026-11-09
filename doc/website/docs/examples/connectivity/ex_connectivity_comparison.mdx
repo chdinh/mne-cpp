@@ -12,7 +12,7 @@ Compare connectivity metrics side by side on the same averaged sensor- or source
 
 <ExampleFacts name="ex_connectivity_comparison" />
 
-**Libraries:** [Connectivity](../../api/connectivity/index.mdx), [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [Visualization](../../api/disp/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Connectivity](../../api/connectivity/index.mdx), [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [Visualization](../../api/disp/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Background
 
@@ -101,7 +101,7 @@ The documented classes this example uses most:
 
 #include <disp3D/view/brainview.h>
 #include <memory>
-#include <utils/string_utils.h>
+#include <base/string_utils.h>
 #include <disp3D/model/braintreemodel.h>
 #include <disp3D/model/items/networktreeitem.h>
 
@@ -126,7 +126,7 @@ The documented classes this example uses most:
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
 #include <utils/ioutils.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 #include <fiff/fiff_events.h>
 
 #include <disp/viewers/connectivitysettingsview.h>
@@ -154,6 +154,7 @@ using namespace FIFFLIB;
 using namespace CONNECTIVITYLIB;
 using namespace Eigen;
 using namespace UTILSLIB;
+using namespace BASELIB;
 using namespace MNELIB;
 using namespace FSLIB;
 using namespace DISP3DLIB;
@@ -177,7 +178,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     AbstractMetric::m_bStorageModeIsActive = false;
@@ -330,7 +331,7 @@ int main(int argc, char* argv[])
             picks.resize(0);
 
             for (int i = 0; i < picksTmp.cols() - 1; i += 2) {
-                if (!UTILSLIB::contains(raw.info.bads, raw.info.ch_names.at(picksTmp(i)))) {
+                if (!BASELIB::contains(raw.info.bads, raw.info.ch_names.at(picksTmp(i)))) {
                     picks.conservativeResize(picks.cols() + 1);
                     picks(picks.cols() - 1) = picksTmp(i);
                 }

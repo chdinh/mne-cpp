@@ -49,7 +49,7 @@ Constructs an event list.
 
 ### FiffEvents(path)
 
-Reads an event file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads an event file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -72,7 +72,7 @@ Writes the events, like mne.write_events: to FIFF if the name holds ".fif", as t
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -87,7 +87,7 @@ Writes the events to a FIFF file.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written: Format if there are no events, Io otherwise.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written: Format if there are no events, Io otherwise.
 
 ---
 
@@ -105,7 +105,7 @@ Writes the events as text, one "sample time before after" line each, as MNE-C do
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -195,7 +195,7 @@ Reads an event file, like mne.read_events: a FIFF file if its name holds ".fif",
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read.
+- *[Expected](/docs/api/base/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read.
 
 ---
 
@@ -210,7 +210,7 @@ Reads the event list of a FIFF file.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no event list.
+- *[Expected](/docs/api/base/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no event list.
 
 ---
 
@@ -225,7 +225,7 @@ Reads a text event file: one event per line as "sample [time] before after"; lin
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read: Io if it cannot be opened, Format if a line does not start with a sample number.
+- *[Expected](/docs/api/base/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, or why the file cannot be read: Io if it cannot be opened, Format if a line does not start with a sample number.
 
 ---
 
@@ -249,7 +249,7 @@ Finds the trigger events of a stimulus channel, like mne.find_events.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, which may be none, or why there are none: NotFound if the channel is missing, Io if its data cannot be read.
+- *[Expected](/docs/api/base/expected)&lt; [FiffEvents](/docs/api/fiff/fiff-events) &gt;* — The events, which may be none, or why there are none: NotFound if the channel is missing, Io if its data cannot be read.
 
 ---
 
@@ -402,7 +402,7 @@ ok &= expect(evoked.nave == 6 && near(evoked.data.topRows(306).norm(), 6.0801191
 
 Average a raw recording and compute an MNE, dSPM or sLORETA estimate with a parcellation-clustered forward solution.
 
-````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 215"
+````cpp title="src/examples/ex_clustered_inverse_mne_raw/main.cpp, line 216"
     events = FiffEvents::read_fif(t_sEventName.toStdU16String()).value().events;
     printf("Events read from %s\n", t_sEventName.toUtf8().constData());
 } else {

@@ -38,7 +38,7 @@ Constructs a fiff evoked data set.
 
 ### FiffEvokedSet(path, conditions, baseline, proj)
 
-Reads evoked data sets of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads evoked data sets of a FIFF file, like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -161,7 +161,7 @@ Writes the evoked data sets to a FIFF file, like mne.write_evokeds.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -187,7 +187,7 @@ Reads evoked data sets of a FIFF file in one pass, like mne.read_evokeds.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &gt;* — The evoked data sets, or why the file does not hold them.
+- *[Expected](/docs/api/base/expected)&lt; [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) &gt;* — The evoked data sets, or why the file does not hold them.
 
 ---
 

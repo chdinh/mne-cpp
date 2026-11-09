@@ -12,7 +12,7 @@ Assemble MEG+EEG, MEG-only and EEG-only inverse operators from a forward solutio
 
 <ExampleFacts name="ex_make_inverse_operator" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -115,7 +115,7 @@ The documented classes this example uses most:
 | [`FiffCov`](../../api/fiff/fiff-cov.mdx) | FIFF I/O |
 | [`FiffEvoked`](../../api/fiff/fiff-evoked.mdx) | FIFF I/O |
 | [`FiffInfo`](../../api/fiff/fiff-info.mdx) | FIFF I/O |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -148,7 +148,7 @@ The documented classes this example uses most:
 #include <fiff/fiff_evoked.h>
 #include <inv/inv_source_estimate.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <iostream>
 #include <QCommandLineParser>
@@ -167,7 +167,6 @@ The documented classes this example uses most:
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // MAIN
@@ -184,7 +183,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

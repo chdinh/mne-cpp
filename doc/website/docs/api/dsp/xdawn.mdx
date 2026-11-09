@@ -130,7 +130,7 @@ Apply `denoise()` to all epochs in the vector, preserving metadata.
 
 Preprocessing tools of the dsp library on synthetic data with a known ground truth.
 
-````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 186"
+````cpp title="src/examples/ex_dsp_preprocessing/main.cpp, line 187"
 const XdawnResult xdawn = Xdawn::fit(epochs, 1, 1); // enhance the response to event code 1
 const MatrixXd component = Xdawn::apply(epochs[0].epoch, xdawn);
 const VectorXd pattern = xdawn.matPatterns.col(0) / xdawn.matPatterns.col(0).cwiseAbs().maxCoeff();

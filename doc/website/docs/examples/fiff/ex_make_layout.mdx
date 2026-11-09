@@ -12,7 +12,7 @@ Project the 3D sensor positions of a FIFF file onto a 2D channel layout.
 
 <ExampleFacts name="ex_make_layout" />
 
-**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -62,7 +62,7 @@ The documented classes this example uses most:
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
 | [`LayoutLoader`](../../api/utils/layout-loader.mdx) | Utilities |
 | [`LayoutMaker`](../../api/utils/layout-maker.mdx) | Utilities |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -97,7 +97,7 @@ The documented classes this example uses most:
 
 #include <utils/layoutmaker.h>
 #include <utils/layoutloader.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <fiff/fiff.h>
 
@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
     // Please notice that this example only works in release mode.
     // Debug mode somehow corrupts the simplex coder. ToDo: Fix this!
     //
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

@@ -96,7 +96,7 @@ Move assignment.
 
 ### MNESourceSpaces(path)
 
-Reads a source space file like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads a source space file like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -116,7 +116,7 @@ Writes the source spaces, as mne.write_source_spaces does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written (Io).
 
 ---
 
@@ -363,7 +363,7 @@ Reads the source spaces of a file, as mne.read_source_spaces does.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNESourceSpaces](/docs/api/mne/mne-source-spaces) &gt;* — The source spaces, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no source space, Format if a source space is incomplete or inconsistent.
+- *[Expected](/docs/api/base/expected)&lt; [MNESourceSpaces](/docs/api/mne/mne-source-spaces) &gt;* — The source spaces, or why the file cannot be read: Io if it cannot be opened, NotFound if it holds no source space, Format if a source space is incomplete or inconsistent.
 
 ---
 
@@ -381,7 +381,7 @@ Reads the source spaces from an open FIFF stream.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [MNESourceSpaces](/docs/api/mne/mne-source-spaces) &gt;* — The source spaces, or why the stream cannot be read (see read(path)).
+- *[Expected](/docs/api/base/expected)&lt; [MNESourceSpaces](/docs/api/mne/mne-source-spaces) &gt;* — The source spaces, or why the stream cannot be read (see read(path)).
 
 ---
 

@@ -1,25 +1,25 @@
 ---
 id: thread-pool
-title: "UTILSLIB::ThreadPool"
+title: "BASELIB::ThreadPool"
 sidebar_label: ThreadPool
 sidebar_position: 74
 ---
 
 # ThreadPool
 
-**Namespace:** `UTILSLIB` &nbsp;·&nbsp; **Library:** Utilities Library &nbsp;·&nbsp; **Source:** [`utils/thread_pool.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/utils/thread_pool.h)
+**Namespace:** `BASELIB` &nbsp;·&nbsp; **Library:** Base Library &nbsp;·&nbsp; **Source:** [`base/thread_pool.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/base/thread_pool.h)
 
-`#include <utils/thread_pool.h>`
+`#include <base/thread_pool.h>`
 
 ```cpp
-class UTILSLIB::ThreadPool
+class BASELIB::ThreadPool
 ```
 
 Runs tasks on a fixed set of worker threads.
 
 `parallelFor()` and `parallelMap()` block until done, and the calling thread works through the range too, so they may be nested or called from a task of the same pool without deadlocking.
 
-```cpp title="src/examples/ex_utils/main.cpp"
+```cpp title="src/examples/ex_base/main.cpp"
 const std::vector<int> channels = {0, 1, 2, 3};
 const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
 auto background = ThreadPool::global().submit([] { return 42; });
@@ -116,23 +116,23 @@ Calls `body(i)` for every i in [`begin`, `end`) and returns when all calls have 
 
 **Returns:**
 
-- *[ThreadPool](/docs/api/utils/thread-pool) &* — The pool shared by the libraries, with one worker per hardware thread.
+- *[ThreadPool](/docs/api/base/thread-pool) &* — The pool shared by the libraries, with one worker per hardware thread.
 
 ---
 
 ## Example
 
-- Start here: [ex_utils](../../examples/utils/ex_utils.mdx) — Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
-- Full source: [`src/examples/ex_utils/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_utils/main.cpp)
-- Build target: `ex_utils` (runs under CTest)
+- Start here: [ex_base](../../examples/base/ex_base.mdx) — Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
+- Full source: [`src/examples/ex_base/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_base/main.cpp)
+- Build target: `ex_base` (runs under CTest)
 
 ## Used in examples
 
-### [ex_utils](../../examples/utils/ex_utils.mdx)
+### [ex_base](../../examples/base/ex_base.mdx)
 
-Utilities library: buffers, observers, logging, file formats, montages, layouts and reports.
+Base library: logging, byte streams, string and path helpers, the thread pool and the circular buffer.
 
-````cpp title="src/examples/ex_utils/main.cpp, line 194"
+````cpp title="src/examples/ex_base/main.cpp, line 117"
 const std::vector<int> channels = {0, 1, 2, 3};
 const std::vector<double> power = ThreadPool::global().parallelMap(channels, [](int ch) { return 0.5 * ch; }); // in order
 auto background = ThreadPool::global().submit([] { return 42; });

@@ -12,7 +12,7 @@ L2 minimum-norm or dSPM estimate of the sample evoked response from a precompute
 
 <ExampleFacts name="ex_inverse_mne" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [Visualization](../../api/disp/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -118,7 +118,7 @@ The documented classes this example uses most:
 | [`FigureExporter`](../../api/disp/figure-exporter.mdx) | Visualization |
 | [`InvMinimumNorm`](../../api/inv/inv-minimum-norm.mdx) | Inverse |
 | [`LinePlot`](../../api/disp/line-plot.mdx) | Visualization |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 | [`MNEInverseOperator`](../../api/mne/mne-inverse-operator.mdx) | MNE Core |
 
 ## Source
@@ -159,7 +159,7 @@ The documented classes this example uses most:
 #include <inv/inv_source_estimate.h>
 #include <inv/minimum_norm/inv_minimum_norm.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <disp/plots/helpers/figureexporter.h>
 #include <disp/plots/lineplot.h>
@@ -181,7 +181,6 @@ using namespace Eigen;
 using namespace FIFFLIB;
 using namespace MNELIB;
 using namespace INVLIB;
-using namespace UTILSLIB;
 
 //=============================================================================================================
 // MAIN
@@ -198,7 +197,7 @@ using namespace UTILSLIB;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication app(argc, argv);
 
     // Command Line Parser

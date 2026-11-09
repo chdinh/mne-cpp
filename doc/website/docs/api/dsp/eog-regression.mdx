@@ -54,7 +54,7 @@ Ordinary least squares on demeaned signals: beta = T * E^T * (E * E^T)^\{-1\}, T
 - **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   Measurement info (identifies EOG channels by kind == FIFFV_EOG_CH).
 
-- **eogChannels** : *const StringList &*
+- **eogChannels** : *const BASELIB::StringList &*
   Optional explicit EOG channel names. If empty, the good channels of kind FIFFV_EOG_CH.
 
 ---
@@ -109,7 +109,7 @@ Convenience: fit and apply in one step.
 - **info** : *const [FiffInfo](/docs/api/fiff/fiff-info) &*
   Measurement info.
 
-- **eogChannels** : *const StringList &*
+- **eogChannels** : *const BASELIB::StringList &*
   Optional explicit EOG channel names.
 
 ---
@@ -126,7 +126,7 @@ Convenience: fit and apply in one step.
 
 Artifact detection and repair with the dsp library on a recording with planted defects.
 
-````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 183"
+````cpp title="src/examples/ex_dsp_artifacts/main.cpp, line 184"
 MatrixXd cleaned = data;
 EogRegression regression;
 regression.fit(cleaned, info); // EOG channels are found by kind

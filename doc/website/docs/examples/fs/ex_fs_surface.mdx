@@ -12,7 +12,7 @@ Load the pial, inflated, original and white FreeSurfer surfaces of a subject and
 
 <ExampleFacts name="ex_fs_surface" />
 
-**Libraries:** [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [3D Visualization](../../api/disp3-d/index.mdx), [FreeSurfer](../../api/fs/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Build and run
 
@@ -41,7 +41,7 @@ The documented classes this example uses most:
 | [`BrainTreeModel`](../../api/disp3-d/brain-tree-model.mdx) | 3D Visualization |
 | [`BrainView`](../../api/disp3-d/brain-view.mdx) | 3D Visualization |
 | [`FsSurface`](../../api/fs/fs-surface.mdx) | FreeSurfer |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -75,7 +75,7 @@ The documented classes this example uses most:
 
 #include <fs/fs_surfaceset.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QApplication a(argc, argv);
 
     // Command Line Parser

@@ -47,7 +47,7 @@ Constructs a set holding `points`.
 
 ### FiffDigPointSet(path)
 
-Reads the digitizer points of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads the digitizer points of a FIFF file, like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -182,7 +182,7 @@ Writes the points to a FIFF file, replacing it, like mne.io.write_info writes in
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -260,7 +260,7 @@ Reads the digitizer points of a FIFF file, like mne.io.read_info(path)["dig"].
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &gt;* — The points, or why the file cannot be read.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &gt;* — The points, or why the file cannot be read.
 
 ---
 
@@ -275,7 +275,7 @@ Reads the digitizer points of the isotrak block of a FIFF stream, opening it if 
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &gt;* — The points, which are none if the stream holds no isotrak block, or why the stream cannot be read.
+- *[Expected](/docs/api/base/expected)&lt; [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) &gt;* — The points, which are none if the stream holds no isotrak block, or why the stream cannot be read.
 
 ---
 
@@ -304,7 +304,7 @@ ok &= expect(digitizer.size() == 146 && cardinal.size() == 3 && cardinal[0].iden
 
 Compute a clustered MNE, dSPM or sLORETA estimate of the sample evoked response and show it on the cortex with Disp3D.
 
-````cpp title="src/examples/ex_disp_3D/main.cpp, line 259"
+````cpp title="src/examples/ex_disp_3D/main.cpp, line 258"
 // Read and show digitizer points
 FiffDigPointSet t_Dig((QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-ave.fif").toStdString());
 ````

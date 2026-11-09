@@ -12,7 +12,7 @@ Band-pass filter the MEG channels of a raw FIFF recording with a cosine FIR filt
 
 <ExampleFacts name="ex_filtering" />
 
-**Libraries:** [Signal Processing](../../api/dsp/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Signal Processing](../../api/dsp/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -108,7 +108,7 @@ The documented classes this example uses most:
 |---|---|
 | [`FilterKernel`](../../api/dsp/filter-kernel.mdx) | Signal Processing |
 | [`FiffRawData`](../../api/fiff/fiff-raw-data.mdx) | FIFF I/O |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 
 ## Used in the API reference
 
@@ -146,7 +146,7 @@ The documented classes this example uses most:
 #include <fiff/fiff.h>
 
 #include <dsp/filterkernel.h>
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 #include <dsp/rt/rt_filter.h>
 
@@ -182,7 +182,7 @@ using namespace Eigen;
  */
 int main(int argc, char* argv[])
 {
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

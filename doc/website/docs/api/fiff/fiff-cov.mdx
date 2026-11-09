@@ -49,7 +49,7 @@ Constructs the covariance data matrix.
 
 ### FiffCov(path)
 
-Reads the noise covariance of a FIFF file, like `read()`; throws [`Error`](/docs/api/utils/error) if it cannot.
+Reads the noise covariance of a FIFF file, like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 
 **Parameters:**
 
@@ -174,7 +174,7 @@ Writes the covariance to a new FIFF file, like mne.Covariance.save.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
+- *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
 
 ---
 
@@ -206,7 +206,7 @@ Reads the noise covariance stored in a FIFF file, like mne.read_cov.
 
 **Returns:**
 
-- *[Expected](/docs/api/utils/expected)&lt; [FiffCov](/docs/api/fiff/fiff-cov) &gt;* — The covariance, or why the file holds none.
+- *[Expected](/docs/api/base/expected)&lt; [FiffCov](/docs/api/fiff/fiff-cov) &gt;* — The covariance, or why the file holds none.
 
 ---
 

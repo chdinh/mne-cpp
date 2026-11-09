@@ -12,7 +12,7 @@ Map evoked MEG values onto a surface mesh with surface-constrained distances (Ge
 
 <ExampleFacts name="ex_interpolation" />
 
-**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Utilities](../../api/utils/index.mdx)
+**Libraries:** [Inverse](../../api/inv/index.mdx), [3D Visualization](../../api/disp3-d/index.mdx), [MNE Core](../../api/mne/index.mdx), [FIFF I/O](../../api/fiff/index.mdx), [Base](../../api/base/index.mdx)
 
 ## Results
 
@@ -88,7 +88,7 @@ The documented classes this example uses most:
 | [`Interpolation`](../../api/disp3-d/interpolation.mdx) | 3D Visualization |
 | [`FiffChInfo`](../../api/fiff/fiff-ch-info.mdx) | FIFF I/O |
 | [`FiffEvoked`](../../api/fiff/fiff-evoked.mdx) | FIFF I/O |
-| [`Log`](../../api/utils/log.mdx) | Utilities |
+| [`Log`](../../api/base/log.mdx) | Base |
 | [`MNEBem`](../../api/mne/mne-bem.mdx) | MNE Core |
 
 ## Used in the API reference
@@ -132,7 +132,7 @@ The documented classes this example uses most:
 #include <disp3D/helpers/interpolation.h>
 #include <fiff/fiff_constants.h>
 
-#include <utils/logger/log.h>
+#include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 // Q_INIT_RESOURCE(mne_disp3d);
 #endif
 
-    UTILSLIB::Log::install_qt_message_handler();
+    BASELIB::Log::install_qt_message_handler();
     QCoreApplication a(argc, argv);
 
     // Command Line Parser

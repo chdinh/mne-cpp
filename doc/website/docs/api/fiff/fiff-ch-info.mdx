@@ -136,7 +136,7 @@ std::vector<FiffChInfo> eeg;
 for (const FiffChInfo& ch : raw.info.chs) {
     if (ch.kind == FIFFV_MEG_CH) {
         meg.push_back(ch);
-        if (!UTILSLIB::contains(raw.info.bads, ch.ch_name)) {
+        if (!BASELIB::contains(raw.info.bads, ch.ch_name)) {
             goodMeg.push_back(ch);
         }
     } else if (ch.kind == FIFFV_EEG_CH) {
