@@ -182,7 +182,7 @@ private:
 
     QString m_qStringResourcePath;                      /**< The path to the EEG resource directory.*/
     QSharedPointer<GUSBAmpProducer> m_pGUSBAmpProducer; /**< the GUSBAmpProducer.*/
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;      /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;     /**< Fiff measurement info.*/
 
     std::vector<QString> m_vSerials;         /**< vector of all Serials (the first one is the master). */
     int m_iSampleRate;                       /**< the sample rate in Hz (see documentation of the g.USBamp API for details on this value and the NUMBER_OF_SCANS!)*/

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/logger/log.h>
+#include <memory>
 #include <utils/string_utils.h>
 #include <iostream>
 #include <inv/hpi/inv_hpi_data_updater.h>
@@ -78,7 +79,7 @@ private slots:
 private:
     // declare your thresholds, variables and error values here
     FiffRawData m_raw;
-    QSharedPointer<FiffInfo> m_pFiffInfo;
+    std::shared_ptr<FiffInfo> m_pFiffInfo;
     MatrixXd m_matData;
     MatrixXd m_matProjectors;
     std::vector<FIFFLIB::FiffChInfo> m_lChannelsWithoutBads;
@@ -107,7 +108,7 @@ void TestHpiDataUpdater::initTestCase()
 
     // Setup for reading the raw data
     m_raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
-    m_pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_raw.info);
 
     // read data segment (200 samples)
     int iBuffer = 200;
@@ -154,7 +155,7 @@ void TestHpiDataUpdater::initTestCase()
 void TestHpiDataUpdater::init()
 {
     // run at beginning of each test
-    m_pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_raw.info);
 }
 
 //=============================================================================================================

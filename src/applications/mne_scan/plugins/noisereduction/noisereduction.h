@@ -237,7 +237,7 @@ private:
 
     Eigen::RowVectorXi m_lFilterChannelList; /**< The indices of the channels to be filtered.*/
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 

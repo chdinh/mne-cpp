@@ -174,8 +174,8 @@ protected:
     SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSA_FiffSimulator; /**< The RealTimeMultiSampleArray to provide the rt_server Channels.*/
 
     QSharedPointer<FiffSimulatorProducer> m_pFiffSimulatorProducer;           /**< Holds the FiffSimulatorProducer.*/
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                            /**< Fiff measurement info.*/
-    QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigData;                /**< Fiff Digitizer Data. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                           /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pFiffDigData;               /**< Fiff Digitizer Data. */
     std::shared_ptr<COMLIB::RtCmdClient> m_pRtCmdClient;                      /**< The command client.*/
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data. */
 

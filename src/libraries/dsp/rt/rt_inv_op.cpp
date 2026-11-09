@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_inv_op.h"
+#include <memory>
 
 #include <fiff/fiff_info.h>
 
@@ -55,7 +56,7 @@ void RtInvOpWorker::doWork(const RtInvOpInput& inputData)
     // Restrict forward solution as necessary for MEG
     MNEForwardSolution forwardMeg = inputData.pFwd->pick_types(true, false);
 
-    MNEInverseOperator invOpMeg(*inputData.pFiffInfo.data(),
+    MNEInverseOperator invOpMeg(*inputData.pFiffInfo,
                                 forwardMeg,
                                 inputData.noiseCov,
                                 0.2f,
@@ -68,7 +69,7 @@ void RtInvOpWorker::doWork(const RtInvOpInput& inputData)
 // DEFINE MEMBER METHODS RtInvOp
 //=============================================================================================================
 
-RtInvOp::RtInvOp(FiffInfo::SPtr& p_pFiffInfo,
+RtInvOp::RtInvOp(std::shared_ptr<FiffInfo>& p_pFiffInfo,
                  MNEForwardSolution::SPtr& p_pFwd,
                  QObject* parent)
 : QObject(parent)

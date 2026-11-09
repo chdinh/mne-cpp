@@ -231,7 +231,7 @@ const std::string& FwdBemModel::fwd_bem_explain_method(int method)
 
 //=============================================================================================================
 
-int FwdBemModel::get_int(FiffStream& stream, const FiffDirNode::SPtr& node, int what, int* res)
+int FwdBemModel::get_int(FiffStream& stream, const std::shared_ptr<FiffDirNode>& node, int what, int* res)
 /*
      * Wrapper to get int's
      */
@@ -261,7 +261,7 @@ MNESurface* FwdBemModel::fwd_bem_find_surface(int kind)
 
 //=============================================================================================================
 
-FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const std::filesystem::path& name, const std::vector<int>& kinds)
+std::unique_ptr<FwdBemModel> FwdBemModel::fwd_bem_load_surfaces(const std::filesystem::path& name, const std::vector<int>& kinds)
 /*
  * Load a set of surfaces
  */
@@ -327,7 +327,7 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_surfaces(const std::filesystem::path
 
 //=============================================================================================================
 
-FwdBemModel::UPtr FwdBemModel::fwd_bem_load_homog_surface(const std::filesystem::path& name)
+std::unique_ptr<FwdBemModel> FwdBemModel::fwd_bem_load_homog_surface(const std::filesystem::path& name)
 /*
  * Load surfaces for the homogeneous model
  */
@@ -337,7 +337,7 @@ FwdBemModel::UPtr FwdBemModel::fwd_bem_load_homog_surface(const std::filesystem:
 
 //=============================================================================================================
 
-FwdBemModel::UPtr FwdBemModel::fwd_bem_load_three_layer_surfaces(const std::filesystem::path& name)
+std::unique_ptr<FwdBemModel> FwdBemModel::fwd_bem_load_three_layer_surfaces(const std::filesystem::path& name)
 /*
  * Load surfaces for three-layer model
  */
@@ -355,7 +355,7 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
     QFile file(name);
     FiffStream stream(&file);
 
-    FiffDirNode::SPtr bem_node;
+    std::shared_ptr<FiffDirNode> bem_node;
     int method;
     std::optional<FiffTag> t_pTag;
     int nSolutions;
@@ -369,7 +369,7 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
        * Find the BEM data
        */
     {
-        std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
 
         if (nodes.size() == 0) {
             UTILSLIB::Log::warning("No BEM data in {}", UTILSLIB::utf8FromPath(name));
@@ -1698,7 +1698,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_field_coeff(FwdCoilSet* coils) /* Gradiomet
     MNESurface* surf;
     MNETriangle* tri;
     FwdCoil* coil;
-    FwdCoilSet::UPtr tcoils;
+    std::unique_ptr<FwdCoilSet> tcoils;
     int nTriangles;
     int j, k, p, s, off;
     double res;
@@ -1878,7 +1878,7 @@ Eigen::MatrixXf FwdBemModel::fwd_bem_lin_field_coeff(FwdCoilSet* coils, int meth
     MNESurface* surf;
     MNETriangle* tri;
     FwdCoil* coil;
-    FwdCoilSet::UPtr tcoils;
+    std::unique_ptr<FwdCoilSet> tcoils;
     int nTriangles;
     int j, k, p, pp, off, s;
     Eigen::Vector3d res, one;
@@ -2579,7 +2579,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
     int k, p, q, off;
     StringList names; /* Channel names */
     void* client;
-    FwdThreadArg::UPtr one_arg;
+    std::unique_ptr<FwdThreadArg> one_arg;
     int nproc = QThread::idealThreadCount();
     StringList emptyList;
 
@@ -2679,7 +2679,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
 
     if (use_threads) {
         int nthread = (fixed_ori || vec_field) ? nspace : 3 * nspace;
-        std::vector<FwdThreadArg::UPtr> args;
+        std::vector<std::unique_ptr<FwdThreadArg>> args;
         int stat;
         /*
         * We need copies to allocate separate workspace for each thread
@@ -2710,7 +2710,7 @@ int FwdBemModel::compute_forward_meg(std::vector<std::unique_ptr<MNESourceSpace>
         /*
         * Ready to start the threads & Wait for them to complete
         */
-        QtConcurrent::blockingMap(args, [](FwdThreadArg::UPtr& a) {
+        QtConcurrent::blockingMap(args, [](std::unique_ptr<FwdThreadArg>& a) {
             meg_eeg_fwd_one_source_space(a.get());
         });
         /*
@@ -2797,7 +2797,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
     int k, p, q, off;
     StringList names; /* Channel names */
     void* client;
-    FwdThreadArg::UPtr one_arg;
+    std::unique_ptr<FwdThreadArg> one_arg;
     int nproc = QThread::idealThreadCount();
     StringList emptyList;
     /*
@@ -2871,7 +2871,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
 
     if (use_threads) {
         int nthread = (fixed_ori || vec_pot) ? nspace : 3 * nspace;
-        std::vector<FwdThreadArg::UPtr> args;
+        std::vector<std::unique_ptr<FwdThreadArg>> args;
         int stat;
         /*
         * We need copies to allocate separate workspace for each thread
@@ -2902,7 +2902,7 @@ int FwdBemModel::compute_forward_eeg(std::vector<std::unique_ptr<MNESourceSpace>
         /*
         * Ready to start the threads & Wait for them to complete
         */
-        QtConcurrent::blockingMap(args, [](FwdThreadArg::UPtr& a) {
+        QtConcurrent::blockingMap(args, [](std::unique_ptr<FwdThreadArg>& a) {
             meg_eeg_fwd_one_source_space(a.get());
         });
         /*

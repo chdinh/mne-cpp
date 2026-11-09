@@ -88,7 +88,7 @@ public:
     /**
      * Set new fiff info
      */
-    void setFiffInfo(FiffInfo::SPtr& pFiffInfo);
+    void setFiffInfo(std::shared_ptr<FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -160,7 +160,7 @@ private:
 
     QSignalMapper* m_pCompSignalMapper;
 
-    FiffInfo::SPtr m_pFiffInfo; /**< Connected fiff info. */
+    std::shared_ptr<FiffInfo> m_pFiffInfo; /**< Connected fiff info. */
 };
 
 } // NAMESPACE MNEBROWSE

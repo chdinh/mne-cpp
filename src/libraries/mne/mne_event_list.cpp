@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_event_list.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -57,7 +58,7 @@ std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& p
     if (!stream.open()) {
         return std::nullopt;
     }
-    const std::vector<FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
+    const std::vector<std::shared_ptr<FiffDirNode>> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     const auto tag = blocks.empty() ? std::nullopt : blocks.front()->find_tag(stream, FIFF_MNE_EVENT_LIST);
     if (!tag) {
         UTILSLIB::Log::warning("MNEEventList::readFif - No event data in {}", UTILSLIB::utf8FromPath(path));

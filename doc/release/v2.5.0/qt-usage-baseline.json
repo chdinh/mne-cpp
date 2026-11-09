@@ -30,7 +30,7 @@
       "decoding",
       "math"
     ],
-    "tokens": 15319,
+    "tokens": 15234,
     "gui_outside_design": []
   },
   "libraries": {
@@ -150,7 +150,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6259,
+      "tokens": 6227,
       "by_category": {
         "containers": 483,
         "files": 109,
@@ -161,7 +161,7 @@
         "objects_signals": 551,
         "other": 1503,
         "regex": 4,
-        "smart_pointers": 219,
+        "smart_pointers": 187,
         "strings": 1122,
         "threads": 23,
         "time": 11
@@ -207,7 +207,7 @@
       ]
     },
     "dsp": {
-      "tokens": 487,
+      "tokens": 463,
       "by_category": {
         "containers": 79,
         "files": 29,
@@ -215,7 +215,7 @@
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
-        "smart_pointers": 31,
+        "smart_pointers": 7,
         "strings": 97,
         "threads": 21
       },
@@ -229,7 +229,7 @@
       ]
     },
     "fiff": {
-      "tokens": 638,
+      "tokens": 622,
       "by_category": {
         "containers": 3,
         "files": 81,
@@ -239,7 +239,7 @@
         "objects_signals": 14,
         "other": 3,
         "regex": 2,
-        "smart_pointers": 22,
+        "smart_pointers": 6,
         "strings": 66,
         "time": 1
       },
@@ -267,12 +267,12 @@
       ]
     },
     "fwd": {
-      "tokens": 43,
+      "tokens": 38,
       "by_category": {
         "files": 9,
         "global": 4,
         "objects_signals": 6,
-        "smart_pointers": 9,
+        "smart_pointers": 4,
         "strings": 11,
         "threads": 4
       },
@@ -297,7 +297,7 @@
       ]
     },
     "inv": {
-      "tokens": 401,
+      "tokens": 393,
       "by_category": {
         "containers": 86,
         "files": 35,
@@ -305,7 +305,7 @@
         "json": 2,
         "objects_signals": 7,
         "regex": 1,
-        "smart_pointers": 48,
+        "smart_pointers": 40,
         "strings": 183,
         "threads": 2
       },

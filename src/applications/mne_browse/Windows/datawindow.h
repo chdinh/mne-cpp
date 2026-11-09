@@ -146,7 +146,7 @@ public:
     /**
      * Returns the measurement info of the currently loaded FIFF file, or null if none loaded.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> fiffInfo() const;
+    std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo() const;
 
     //=========================================================================================================
     /**

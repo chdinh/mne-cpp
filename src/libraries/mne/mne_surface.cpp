@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_surface.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include "mne_source_space.h"
 #include "mne_triangle.h"
@@ -387,9 +388,9 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
     QFile file(name);
     FiffStream stream(&file);
 
-    std::vector<FiffDirNode::SPtr> surfs;
-    std::vector<FiffDirNode::SPtr> bems;
-    FiffDirNode::SPtr node;
+    std::vector<std::shared_ptr<FiffDirNode>> surfs;
+    std::vector<std::shared_ptr<FiffDirNode>> bems;
+    std::shared_ptr<FiffDirNode> node;
     std::optional<FiffTag> t_pTag;
 
     int id = -1;

@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_ctf_comp_data_set.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -78,8 +79,8 @@ int mne_read_meg_comp_eeg_ch_info_32(const std::filesystem::path& name,
     int nmeg_comp = 0;
     std::vector<FIFFLIB::FiffChInfo> eeg;
     int neeg = 0;
-    std::vector<FiffDirNode::SPtr> nodes;
-    FiffDirNode::SPtr info;
+    std::vector<std::shared_ptr<FiffDirNode>> nodes;
+    std::shared_ptr<FiffDirNode> info;
     std::optional<FiffTag> t_pTag;
     FIFFLIB::FiffChInfo this_ch;
     FiffCoordTrans t;
@@ -321,8 +322,8 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const std::filesystem
     FiffStream stream(&file);
 
     std::unique_ptr<MNECTFCompDataSet> set;
-    std::vector<FiffDirNode::SPtr> nodes;
-    std::vector<FiffDirNode::SPtr> comps;
+    std::vector<std::shared_ptr<FiffDirNode>> nodes;
+    std::vector<std::shared_ptr<FiffDirNode>> comps;
     int ncomp;
     int kind, k;
     std::optional<FiffTag> t_pTag;

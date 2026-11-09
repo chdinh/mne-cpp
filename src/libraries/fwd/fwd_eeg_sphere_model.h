@@ -101,8 +101,6 @@ using fitUser = fitUserRec*;
 class FWDSHARED_EXPORT FwdEegSphereModel
 {
 public:
-    typedef std::unique_ptr<FwdEegSphereModel> UPtr; /**< Unique pointer type for FwdEegSphereModel. */
-
     //=========================================================================================================
     /**
      * Constructs the Forward EEG Sphere Model
@@ -131,10 +129,10 @@ public:
      *
      * @return Pointer to the newly created sphere model.
      */
-    static FwdEegSphereModel::UPtr fwd_create_eeg_sphere_model(const std::string& name,
-                                                               int nlayer,
-                                                               const Eigen::VectorXf& rads,
-                                                               const Eigen::VectorXf& sigmas);
+    static std::unique_ptr<FwdEegSphereModel> fwd_create_eeg_sphere_model(const std::string& name,
+                                                                          int nlayer,
+                                                                          const Eigen::VectorXf& rads,
+                                                                          const Eigen::VectorXf& sigmas);
 
     //=========================================================================================================
     /**
@@ -152,7 +150,7 @@ public:
      *
      * @return the setup eeg sphere model.
      */
-    static FwdEegSphereModel::UPtr setup_eeg_sphere_model(const std::filesystem::path& eeg_model_file, std::string eeg_model_name, float eeg_sphere_rad);
+    static std::unique_ptr<FwdEegSphereModel> setup_eeg_sphere_model(const std::filesystem::path& eeg_model_file, std::string eeg_model_name, float eeg_sphere_rad);
 
     //=========================================================================================================
     /**

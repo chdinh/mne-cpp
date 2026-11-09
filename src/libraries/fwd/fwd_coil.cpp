@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "fwd_coil.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include <fiff/fiff_ch_info.h>
 #include <stdio.h>
@@ -94,7 +95,7 @@ FwdCoil::~FwdCoil()
 
 //=============================================================================================================
 
-FwdCoil::UPtr FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans& t)
+std::unique_ptr<FwdCoil> FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans& t)
 {
     if (ch.kind != FIFFV_EEG_CH) {
         UTILSLIB::Log::warning("{} is not an EEG channel. Cannot create an electrode definition.", ch.ch_name);
@@ -105,7 +106,7 @@ FwdCoil::UPtr FwdCoil::create_eeg_el(const FiffChInfo& ch, const FiffCoordTrans&
         return nullptr;
     }
 
-    FwdCoil::UPtr res;
+    std::unique_ptr<FwdCoil> res;
     if (ch.chpos.ex.norm() < 1e-4)
         res = std::make_unique<FwdCoil>(1); /* No reference electrode */
     else

@@ -68,8 +68,6 @@ class FiffStream;
 class FIFFSHARED_EXPORT FiffCoordTransSet
 {
 public:
-    using UPtr = std::unique_ptr<FiffCoordTransSet>; /**< Unique pointer type for FiffCoordTransSet. */
-
     //=========================================================================================================
     /**
      * Reads the scanner RAS -> MNI Talairach transform of a FreeSurfer/MNI @c .xfm file

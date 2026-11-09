@@ -77,7 +77,7 @@ private:
     QList<Measurement::SPtr> stream(AbstractPlugin& plugin, int outputs = 1);
 
     QString m_rawPath;
-    QSharedPointer<FiffInfo> m_info;
+    std::shared_ptr<FiffInfo> m_info;
     Eigen::MatrixXd m_data;
 };
 
@@ -93,7 +93,7 @@ void TestMneScanPlugins::initTestCase()
     FiffRawData raw(m_rawPath.toStdString());
     Eigen::MatrixXd times;
     QVERIFY(raw.read_raw_segment(m_data, times));
-    m_info = QSharedPointer<FiffInfo>::create(raw.info);
+    m_info = std::make_shared<FiffInfo>(raw.info);
 }
 
 //=============================================================================================================

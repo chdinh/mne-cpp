@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "fiff_sparse_matrix.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_types.h>
@@ -143,7 +144,7 @@ std::vector<int> FiffSparseMatrix::fiff_get_matrix_sparse_dims(const FiffTag& ta
 
 //=============================================================================================================
 
-FiffSparseMatrix::UPtr FiffSparseMatrix::fiff_get_float_sparse_matrix(const FiffTag& tag)
+std::unique_ptr<FiffSparseMatrix> FiffSparseMatrix::fiff_get_float_sparse_matrix(const FiffTag& tag)
 {
     int m, n, nz;
     int cod, correct_size;
@@ -233,7 +234,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::fiff_get_float_sparse_matrix(const Fiff
 
 //=============================================================================================================
 
-FiffSparseMatrix::UPtr FiffSparseMatrix::create_sparse_rcs(int nrow, int ncol, int* nnz, int** colindex, float** vals)
+std::unique_ptr<FiffSparseMatrix> FiffSparseMatrix::create_sparse_rcs(int nrow, int ncol, int* nnz, int** colindex, float** vals)
 {
     int j, k, totalNz;
 
@@ -270,7 +271,7 @@ FiffSparseMatrix::UPtr FiffSparseMatrix::create_sparse_rcs(int nrow, int ncol, i
 
 //=============================================================================================================
 
-FiffSparseMatrix::UPtr FiffSparseMatrix::mne_add_upper_triangle_rcs()
+std::unique_ptr<FiffSparseMatrix> FiffSparseMatrix::mne_add_upper_triangle_rcs()
 /*
  * Fill in upper triangle with the lower triangle values
  */
@@ -330,7 +331,7 @@ FiffSparseMatrix FiffSparseMatrix::fromEigenSparse(const Eigen::SparseMatrix<flo
 
 //=============================================================================================================
 
-FiffSparseMatrix::UPtr FiffSparseMatrix::pickLowerTriangleRcs() const
+std::unique_ptr<FiffSparseMatrix> FiffSparseMatrix::pickLowerTriangleRcs() const
 {
     int nRows = rows();
     int nCols = cols();

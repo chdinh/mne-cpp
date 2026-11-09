@@ -210,8 +210,8 @@ private:
 
     QSharedPointer<INVLIB::HpiFitResult> m_pHpiFitResult; /**< The Hpi fitting result.**/
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
-    FIFFLIB::FiffCoordTrans m_transDevHead;        /**< Updated meg->head transformation. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    FIFFLIB::FiffCoordTrans m_transDevHead;         /**< Updated meg->head transformation. */
 
     std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotationSet; /**< FsAnnotation set. */
 

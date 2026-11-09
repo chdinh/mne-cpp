@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/logger/log.h>
+#include <memory>
 
 #include <iostream>
 #include <vector>
@@ -121,7 +122,7 @@ void TestHpiFitIntegration::initTestCase()
     // Setup for reading the raw data
     FiffRawData raw;
     raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
-    QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(raw.info));
+    std::shared_ptr<FiffInfo> pFiffInfo = std::make_shared<FiffInfo>(raw.info);
 
     // Only filter MEG channels
     RowVectorXi picks = raw.info.pick_types(true, false, false);

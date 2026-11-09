@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_constants.h>
+#include <memory>
 #include <utils/logger/log.h>
 #include <utils/string_utils.h>
 #include <fiff/fiff_tag.h>
@@ -258,15 +259,15 @@ int MNEProjOp::project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complemen
 
 //=============================================================================================================
 
-std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const FiffDirNode::SPtr& start)
+std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const std::shared_ptr<FiffDirNode>& start)
 /*
      * Load all the linear projection data
      */
 {
-    std::vector<FiffDirNode::SPtr> proj;
-    FiffDirNode::SPtr start_node;
-    std::vector<FiffDirNode::SPtr> items;
-    FiffDirNode::SPtr node;
+    std::vector<std::shared_ptr<FiffDirNode>> proj;
+    std::shared_ptr<FiffDirNode> start_node;
+    std::vector<std::shared_ptr<FiffDirNode>> items;
+    std::shared_ptr<FiffDirNode> node;
     int k;
     QString item_desc, desc_tag;
     int global_nchan, item_nchan;
@@ -405,7 +406,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read(const std::filesystem::path& name)
     if (!stream.open())
         return nullptr;
 
-    FiffDirNode::SPtr t_default;
+    std::shared_ptr<FiffDirNode> t_default;
     auto res = read_from_node(stream, t_default);
 
     stream.close();

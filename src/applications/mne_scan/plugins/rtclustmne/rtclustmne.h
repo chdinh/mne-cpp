@@ -245,14 +245,14 @@ protected:
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeSourceEstimate>> m_pRTSEOutput;  /**< The RealTimeSourceEstimate output.*/
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularMatrixBuffer;                 /**< Holds incoming RealTimeMultiSampleArray data.*/
     std::shared_ptr<UTILSLIB::CircularBuffer<FIFFLIB::FiffEvoked>> m_pCircularEvokedBuffer;          /**< Holds incoming RealTimeMultiSampleArray data.*/
-    QSharedPointer<RTPROCESSINGLIB::RtInvOp> m_pRtInvOp;                                             /**< Real-time inverse operator. */
+    std::shared_ptr<RTPROCESSINGLIB::RtInvOp> m_pRtInvOp;                                            /**< Real-time inverse operator. */
     QSharedPointer<MNELIB::MNEForwardSolution> m_pFwd;                                               /**< Forward solution. */
-    QSharedPointer<FIFFLIB::FiffCov> m_pNoiseCov;                                                    /**< Noise Covariance Matrix. */
+    std::shared_ptr<FIFFLIB::FiffCov> m_pNoiseCov;                                                   /**< Noise Covariance Matrix. */
     std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotationSet;                                        /**< FsAnnotation set. */
     std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfaceSet;                                              /**< FsSurface set. */
-    QSharedPointer<FIFFLIB::FiffInfoBase> m_pFiffInfoForward;                                        /**< Fiff information of the forward solution. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                                   /**< Fiff information. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfoInput;                                              /**< Fiff information of the evoked. */
+    std::shared_ptr<FIFFLIB::FiffInfoBase> m_pFiffInfoForward;                                       /**< Fiff information of the forward solution. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                                                  /**< Fiff information. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfoInput;                                             /**< Fiff information of the evoked. */
 
     bool m_bEvokedInput;       /**< Flag whether an evoked input was received. */
     bool m_bRawInput;          /**< Flag whether a raw data input was received. */

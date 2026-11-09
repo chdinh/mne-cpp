@@ -85,9 +85,6 @@ class FiffRawData;
 class FIFFSHARED_EXPORT FiffRawData
 {
 public:
-    using SPtr = QSharedPointer<FiffRawData>;  /**< Shared pointer type for FiffRawData. */
-    using UPtr = std::unique_ptr<FiffRawData>; /**< Unique pointer type for FiffRawData. */
-
     /** Constructs empty raw data. */
     FiffRawData() = default;
 

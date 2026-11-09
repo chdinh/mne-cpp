@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include <dsp/ica.h>
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -90,7 +91,7 @@ public slots:
      * @param[in] firstSample Absolute sample index of column 0.
      */
     void setRawData(const Eigen::MatrixXd& rawData,
-                    QSharedPointer<FIFFLIB::FiffInfo> fiffInfo,
+                    std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo,
                     int firstSample = 0);
 
     void clearIca();
@@ -121,7 +122,7 @@ private:
 
     // Data
     Eigen::MatrixXd m_rawData;
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;
     int m_firstSample = 0;
 
     // ICA result

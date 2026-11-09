@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "fiff_io.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -82,7 +83,7 @@ FiffIO::FiffIO(std::vector<QIODevice*>& p_qlistIODevices)
 
 bool FiffIO::setup_read(QIODevice& pIODevice,
                         FiffInfo& info,
-                        FiffDirNode::SPtr& dirTree)
+                        std::shared_ptr<FiffDirNode>& dirTree)
 {
     //Open the file
     FiffStream p_pStream(&pIODevice);
@@ -106,7 +107,7 @@ bool FiffIO::read(QIODevice& pIODevice)
 {
     //Read dirTree from fiff data (raw,evoked,fwds,cov)
     FiffInfo t_fiffInfo;
-    FiffDirNode::SPtr t_dirTree;
+    std::shared_ptr<FiffDirNode> t_dirTree;
     bool hasRaw = false;
     bool hasEvoked = false; // hasFwds=false;
 
@@ -137,7 +138,7 @@ bool FiffIO::read(QIODevice& pIODevice)
     //raw data
     if (hasRaw) {
         try {
-            QSharedPointer<FiffRawData> p_fiffRawData(new FiffRawData(FiffStream::byteStream(pIODevice, QIODevice::ReadOnly)));
+            std::shared_ptr<FiffRawData> p_fiffRawData(new FiffRawData(FiffStream::byteStream(pIODevice, QIODevice::ReadOnly)));
             pIODevice.close();
 
             //append to corresponding member qlist
@@ -158,7 +159,7 @@ bool FiffIO::read(QIODevice& pIODevice)
         } else {
             if (auto set = FiffEvokedSet::read(file->fileName().toStdU16String())) {
                 for (const FiffEvoked& evoked : set->evoked) {
-                    m_qlistEvoked.push_back(QSharedPointer<FiffEvoked>::create(evoked));
+                    m_qlistEvoked.push_back(std::make_shared<FiffEvoked>(evoked));
                 }
             } else {
                 UTILSLIB::Log::warning("[FiffIO::read] {}", set.error().what());

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "scalewindow.h"
+#include <memory>
 
 #include <vector>
 
@@ -98,7 +99,7 @@ QMap<QString, double> ScaleWindow::genereateScalingMap()
 
 //*************************************************************************************************************
 
-void ScaleWindow::hideSpinBoxes(FiffInfo::SPtr& pCurrentFiffInfo)
+void ScaleWindow::hideSpinBoxes(std::shared_ptr<FiffInfo>& pCurrentFiffInfo)
 {
     //Hide all spin boxes and labels
     ui->m_doubleSpinBox_MEG_grad->hide();

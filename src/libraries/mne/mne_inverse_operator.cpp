@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_inverse_operator.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -855,15 +856,15 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
     //
     //   Find all inverse operators
     //
-    std::vector<FiffDirNode::SPtr> invs_list = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_INVERSE_SOLUTION);
+    std::vector<std::shared_ptr<FiffDirNode>> invs_list = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_INVERSE_SOLUTION);
     if (invs_list.size() == 0) {
         return fail(ErrorCode::NotFound, "no inverse solution in {}", name);
     }
-    FiffDirNode::SPtr invs = invs_list[0];
+    const std::shared_ptr<FiffDirNode>& invs = invs_list[0];
     //
     //   Parent MRI data
     //
-    std::vector<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+    std::vector<std::shared_ptr<FiffDirNode>> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
     if (parent_mri.size() == 0) {
         return fail(ErrorCode::Format, "no parent MRI information in {}", name);
     }

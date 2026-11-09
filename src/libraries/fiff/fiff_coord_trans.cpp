@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_coord_trans.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include "fiff_stream.h"
@@ -567,7 +568,7 @@ FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag& tag)
 //=============================================================================================================
 
 UTILSLIB::Expected<FiffCoordTrans> FiffCoordTrans::read_from_node(FiffStream& stream,
-                                                                  const FiffDirNode::SPtr& node,
+                                                                  const std::shared_ptr<FiffDirNode>& node,
                                                                   int from, int to)
 {
     return find_transform(stream, node->dir, from, to);

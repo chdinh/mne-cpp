@@ -67,7 +67,7 @@ NeuronalConnectivity::NeuronalConnectivity()
 , m_iBlockSize(1)
 , m_sAvrType("1")
 , m_pCircularBuffer(std::make_shared<CircularBuffer<CONNECTIVITYLIB::Network>>(40))
-, m_pRtConnectivity(RtConnectivity::SPtr::create())
+, m_pRtConnectivity(std::make_shared<RtConnectivity>())
 , m_pActionShowYourWidget(nullptr)
 {
     AbstractMetric::m_bStorageModeIsActive = true;
@@ -75,7 +75,7 @@ NeuronalConnectivity::NeuronalConnectivity()
     AbstractMetric::m_iNumberBinAmount = 100;
 
     //Init rt connectivity worker
-    connect(m_pRtConnectivity.data(), &RtConnectivity::newConnectivityResultAvailable,
+    connect(m_pRtConnectivity.get(), &RtConnectivity::newConnectivityResultAvailable,
             this, &NeuronalConnectivity::onNewConnectivityResultAvailable);
 }
 
@@ -349,7 +349,7 @@ void NeuronalConnectivity::updateRTMSA(SCMEASLIB::Measurement::SPtr pMeasurement
 void NeuronalConnectivity::updateRTEV(SCMEASLIB::Measurement::SPtr pMeasurement)
 {
     if (QSharedPointer<RealTimeEvokedSet> pRTEV = pMeasurement.dynamicCast<RealTimeEvokedSet>()) {
-        FiffEvokedSet::SPtr pFiffEvokedSet = pRTEV->getValue();
+        std::shared_ptr<FiffEvokedSet> pFiffEvokedSet = pRTEV->getValue();
         QStringList lResponsibleTriggerTypes = pRTEV->getResponsibleTriggerTypes();
 
         emit responsibleTriggerTypesChaged(lResponsibleTriggerTypes);
@@ -364,7 +364,7 @@ void NeuronalConnectivity::updateRTEV(SCMEASLIB::Measurement::SPtr pMeasurement)
         if (!m_pFiffInfo && pFiffEvokedSet->evoked.size() > 0) {
             for (int i = 0; i < std::ssize(pFiffEvokedSet->evoked); ++i) {
                 if (pFiffEvokedSet->evoked.at(i).comment == m_sAvrType) {
-                    m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo(pFiffEvokedSet->info));
+                    m_pFiffInfo = std::make_shared<FiffInfo>(pFiffEvokedSet->info);
 
                     m_connectivitySettings.setSamplingFrequency(m_pFiffInfo->sfreq);
 

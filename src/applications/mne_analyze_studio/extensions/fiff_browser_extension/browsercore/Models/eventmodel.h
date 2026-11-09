@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "../Utils/rawsettings.h"
+#include <memory>
 
 
 //*************************************************************************************************************
@@ -128,7 +129,7 @@ public:
      *
      * @param[in] pFiffInfo  Fiff info variable.
      */
-    void setFiffInfo(const FiffInfo::SPtr& pFiffInfo);
+    void setFiffInfo(const std::shared_ptr<FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -152,7 +153,7 @@ public:
      * getFiffInfo returns the fiffinfo
      *
      */
-    FiffInfo::SPtr getFiffInfo() const;
+    std::shared_ptr<FiffInfo> getFiffInfo() const;
 
     //=========================================================================================================
     /**
@@ -234,7 +235,7 @@ private:
     QVector<int> m_dataTypes_Filtered;       /**< Filtered Vector that holds the type alues for each loaded event. */
     QVector<int> m_dataIsUserEvent_Filtered; /**< Filtered Vector that holds the flag whether the event is user defined or loaded from file. */
 
-    FiffInfo::SPtr m_pFiffInfo; /**< Fiff info of whole fiff file. */
+    std::shared_ptr<FiffInfo> m_pFiffInfo; /**< Fiff info of whole fiff file. */
 
     int m_iFirstSample;         /**< The first/starting sample of the fiff data file. */
     int m_iLastSample;          /**< The last/ending sample of the fiff data file. */

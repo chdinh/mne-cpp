@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_cov_matrix.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -135,8 +136,8 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
     FiffStream stream(&file);
 
     std::optional<FiffTag> t_pTag;
-    std::vector<FiffDirNode::SPtr> nodes;
-    FiffDirNode::SPtr covnode;
+    std::vector<std::shared_ptr<FiffDirNode>> nodes;
+    std::shared_ptr<FiffDirNode> covnode;
 
     StringList names;
     int nnames = 0;

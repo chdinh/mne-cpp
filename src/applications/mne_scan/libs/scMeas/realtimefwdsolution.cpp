@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "realtimefwdsolution.h"
+#include <memory>
+#include <utility>
 #include <mne/mne_forward_solution.h>
 #include <time.h>
 
@@ -48,14 +50,14 @@ RealTimeFwdSolution::~RealTimeFwdSolution()
 
 //=============================================================================================================
 
-void RealTimeFwdSolution::setFiffInfo(QSharedPointer<FiffInfo> pFiffInfo)
+void RealTimeFwdSolution::setFiffInfo(std::shared_ptr<FiffInfo> pFiffInfo)
 {
-    m_pFiffInfo = pFiffInfo;
+    m_pFiffInfo = std::move(pFiffInfo);
 }
 
 //=============================================================================================================
 
-QSharedPointer<FiffInfo> RealTimeFwdSolution::getFiffInfo()
+std::shared_ptr<FiffInfo> RealTimeFwdSolution::getFiffInfo()
 {
     return m_pFiffInfo;
 }

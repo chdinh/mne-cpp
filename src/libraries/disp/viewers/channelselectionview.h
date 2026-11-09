@@ -170,7 +170,7 @@ public:
      *
      * @param[in] pFiffInfo  Measurement info of the new file (currently unused; the layout is reloaded).
      */
-    void newFiffFileLoaded(QSharedPointer<FIFFLIB::FiffInfo>& pFiffInfo);
+    void newFiffFileLoaded(std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**

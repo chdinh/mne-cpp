@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+#include <memory>
 #include "abstractview.h"
 
 //=============================================================================================================
@@ -107,7 +108,7 @@ public:
      * @param[in] info          The FiffInfo.
      * @param[in] iScaleType    The scale type.
      */
-    void init(QSharedPointer<FIFFLIB::FiffInfo>& info,
+    void init(std::shared_ptr<FIFFLIB::FiffInfo>& info,
               int iScaleType);
 
     //=========================================================================================================

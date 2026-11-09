@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "fiff_evoked.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -175,7 +176,7 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
     FiffStream& stream = file.m_stream;
     Log::info("Reading {} ...\n", file.m_file);
 
-    FiffDirNode::SPtr meas;
+    std::shared_ptr<FiffDirNode> meas;
     if (stream.dirtree()->dir_tree_find(FIFFB_MEAS).empty()) {
         return fail(ErrorCode::NotFound, "No measurement in {}", file.m_file);
     }
@@ -222,12 +223,12 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     FiffInfo info = this->info;
     const std::string& file = m_file;
     FiffEvoked p_FiffEvoked;
-    FiffDirNode::SPtr my_evoked = m_sets[set];
+    std::shared_ptr<FiffDirNode> my_evoked = m_sets[set];
 
     //
     //   Identify the aspects
     //
-    std::vector<FiffDirNode::SPtr> aspects = my_evoked->dir_tree_find(FIFFB_ASPECT);
+    std::vector<std::shared_ptr<FiffDirNode>> aspects = my_evoked->dir_tree_find(FIFFB_ASPECT);
     if (aspects.empty()) {
         return fail(ErrorCode::Format, "Evoked data set {} without data in {}", set, file);
     }
@@ -235,7 +236,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     if (aspects.size() > 1)
         Log::info("\tMultiple ({}) aspects found. Taking first one.\n", aspects.size());
 
-    FiffDirNode::SPtr my_aspect = aspects[0];
+    const std::shared_ptr<FiffDirNode>& my_aspect = aspects[0];
 
     //
     //   Now find the data in the evoked block

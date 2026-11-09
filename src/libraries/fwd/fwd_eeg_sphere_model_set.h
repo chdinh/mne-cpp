@@ -71,8 +71,6 @@ namespace FWDLIB
 class FWDSHARED_EXPORT FwdEegSphereModelSet
 {
 public:
-    typedef std::unique_ptr<FwdEegSphereModelSet> UPtr; /**< Unique pointer type for FwdEegSphereModelSet. */
-
     //=========================================================================================================
     /**
      * Constructs a Forward EEG Sphere Model Set object.
@@ -99,7 +97,7 @@ public:
      *
      * @return The model set.
      */
-    static UPtr fwd_add_to_eeg_sphere_model_set(UPtr s, FwdEegSphereModel::UPtr m);
+    static std::unique_ptr<FwdEegSphereModelSet> fwd_add_to_eeg_sphere_model_set(std::unique_ptr<FwdEegSphereModelSet> s, std::unique_ptr<FwdEegSphereModel> m);
 
     //=========================================================================================================
     /**
@@ -110,7 +108,7 @@ public:
      *
      * @return The model set with the default model (s + default models).
      */
-    static UPtr fwd_add_default_eeg_sphere_model(UPtr s);
+    static std::unique_ptr<FwdEegSphereModelSet> fwd_add_default_eeg_sphere_model(std::unique_ptr<FwdEegSphereModelSet> s);
 
     //=========================================================================================================
     /**
@@ -122,7 +120,7 @@ public:
      *
      * @return The loaded model set (now + loaded models).
      */
-    static UPtr fwd_load_eeg_sphere_models(const std::filesystem::path& p_sFileName, UPtr now);
+    static std::unique_ptr<FwdEegSphereModelSet> fwd_load_eeg_sphere_models(const std::filesystem::path& p_sFileName, std::unique_ptr<FwdEegSphereModelSet> now);
 
     //=========================================================================================================
     /**
@@ -133,7 +131,7 @@ public:
      *
      * @return A duplicat of the found model.
      */
-    FwdEegSphereModel::UPtr fwd_select_eeg_sphere_model(std::string_view p_sName) const;
+    std::unique_ptr<FwdEegSphereModel> fwd_select_eeg_sphere_model(std::string_view p_sName) const;
 
     //=========================================================================================================
     /**
@@ -152,7 +150,7 @@ public:
     }
 
 public:
-    std::vector<FwdEegSphereModel::UPtr> models; /**< Set of EEG sphere model definitions. */
+    std::vector<std::unique_ptr<FwdEegSphereModel>> models; /**< Set of EEG sphere model definitions. */
 };
 
 //=============================================================================================================

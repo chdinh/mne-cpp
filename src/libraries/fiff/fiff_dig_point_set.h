@@ -83,8 +83,6 @@ class FiffDirNode;
 class FIFFSHARED_EXPORT FiffDigPointSet
 {
 public:
-    using SPtr = QSharedPointer<FiffDigPointSet>;                     /**< Shared pointer type for FiffDigPointSet. */
-    using UPtr = std::unique_ptr<FiffDigPointSet>;                    /**< Unique pointer type for FiffDigPointSet. */
     using value_type = FiffDigPoint;                                  /**< Element type. */
     using iterator = std::vector<FiffDigPoint>::iterator;             /**< Iterator. */
     using const_iterator = std::vector<FiffDigPoint>::const_iterator; /**< Constant iterator. */
@@ -278,7 +276,7 @@ Q_DECLARE_METATYPE(FIFFLIB::FiffDigPointSet); /**< Provides QT META type declara
 
 #ifndef metatype_fiffdigpointset_sptr
 #define metatype_fiffdigpointset_sptr
-Q_DECLARE_METATYPE(FIFFLIB::FiffDigPointSet::SPtr); /**< Provides QT META type declaration of the FIFFLIB::FiffDigPointSet::SPtr type. For signal/slot usage.*/
+Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffDigPointSet>); /**< Provides QT META type declaration of the std::shared_ptr<FIFFLIB::FiffDigPointSet> type. For signal/slot usage.*/
 #endif
 
 #endif // FIFFLIB_FIFF_DIG_POINT_SET_H

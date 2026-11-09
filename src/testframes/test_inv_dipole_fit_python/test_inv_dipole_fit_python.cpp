@@ -328,7 +328,7 @@ void TestInvDipoleFitPython::bemForwardMatches()
 
     const QString data = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/";
     std::vector<QString> projnames{m_sampleAve};
-    FwdEegSphereModel::UPtr eegModel = FwdEegSphereModel::setup_eeg_sphere_model(QString().toStdU16String(), QString().toStdString(), 0.09f);
+    std::unique_ptr<FwdEegSphereModel> eegModel = FwdEegSphereModel::setup_eeg_sphere_model(QString().toStdU16String(), QString().toStdString(), 0.09f);
     QVERIFY(eegModel);
     // MEG and EEG through the BEM, with only the diagonal of the noise covariance.
     std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(

@@ -84,9 +84,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffEvoked
 {
 public:
-    using SPtr = QSharedPointer<FiffEvoked>;  /**< Shared pointer type for FiffEvoked. */
-    using UPtr = std::unique_ptr<FiffEvoked>; /**< Unique pointer type for FiffEvoked. */
-
     //=========================================================================================================
     /**
      * Constructs a fiff evoked data.
@@ -318,7 +315,7 @@ Q_DECLARE_METATYPE(FIFFLIB::FiffEvoked); /**< Provides QT META type declaration 
 
 #ifndef metatype_fiffevokedsptr
 #define metatype_fiffevokedsptr
-Q_DECLARE_METATYPE(FIFFLIB::FiffEvoked::SPtr); /**< Provides QT META type declaration of the FIFFLIB::FiffEvoked type. For signal/slot and QVariant usage.*/
+Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffEvoked>); /**< Provides QT META type declaration of the FIFFLIB::FiffEvoked type. For signal/slot and QVariant usage.*/
 #endif
 
 #endif // FIFF_EVOKED_H

@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "covariancewindow.h"
+#include <memory>
 #include <utils/string_utils.h>
 
 #include <QAction>
@@ -37,6 +38,7 @@
 
 #include <cmath>
 #include <limits>
+#include <utility>
 
 using namespace MNEBROWSE;
 
@@ -61,7 +63,7 @@ QString summarizeChannelNames(const std::vector<std::string>& names, int limit =
 
 QString covarianceSummary(const FIFFLIB::FiffCov& covariance,
                           const QString& sourceDescription,
-                          const FIFFLIB::FiffInfo::SPtr& fiffInfo)
+                          const std::shared_ptr<FIFFLIB::FiffInfo>& fiffInfo)
 {
     if (covariance.empty()) {
         return QStringLiteral("No covariance is currently loaded.\n\nCompute or load a covariance matrix to inspect it here and drive whitening from this manager.");
@@ -143,11 +145,11 @@ void CovarianceWindow::init()
 
 void CovarianceWindow::setCovariance(const FIFFLIB::FiffCov& covariance,
                                      const QString& sourceDescription,
-                                     FIFFLIB::FiffInfo::SPtr fiffInfo)
+                                     std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo)
 {
     m_covariance = covariance;
     m_sSourceDescription = sourceDescription;
-    m_pFiffInfo = fiffInfo;
+    m_pFiffInfo = std::move(fiffInfo);
 
     updateSummary();
     updateToggleState();
@@ -159,7 +161,7 @@ void CovarianceWindow::clearCovariance()
 {
     m_covariance.clear();
     m_sSourceDescription.clear();
-    m_pFiffInfo.clear();
+    m_pFiffInfo.reset();
 
     updateSummary();
     updateToggleState();

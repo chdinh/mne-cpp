@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "realtimecov.h"
+#include <memory>
+#include <utility>
 
 #include <time.h>
 
@@ -33,8 +35,8 @@ using namespace FIFFLIB;
 
 RealTimeCov::RealTimeCov(QObject* parent)
 : Measurement(QMetaType::fromName("RealTimeCov::SPtr").id(), parent)
-, m_pFiffCov(FiffCov::SPtr::create())
-, m_pFiffInfo(FiffInfo::SPtr::create())
+, m_pFiffCov(std::make_shared<FiffCov>())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 , m_bInitialized(false)
 {
 }
@@ -47,7 +49,7 @@ RealTimeCov::~RealTimeCov()
 
 //=============================================================================================================
 
-FiffCov::SPtr& RealTimeCov::getValue()
+std::shared_ptr<FiffCov>& RealTimeCov::getValue()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFiffCov;
@@ -55,14 +57,14 @@ FiffCov::SPtr& RealTimeCov::getValue()
 
 //=============================================================================================================
 
-void RealTimeCov::setFiffInfo(QSharedPointer<FiffInfo> pFiffInfo)
+void RealTimeCov::setFiffInfo(std::shared_ptr<FiffInfo> pFiffInfo)
 {
-    m_pFiffInfo = pFiffInfo;
+    m_pFiffInfo = std::move(pFiffInfo);
 }
 
 //=============================================================================================================
 
-QSharedPointer<FiffInfo> RealTimeCov::getFiffInfo()
+std::shared_ptr<FiffInfo> RealTimeCov::getFiffInfo()
 {
     return m_pFiffInfo;
 }

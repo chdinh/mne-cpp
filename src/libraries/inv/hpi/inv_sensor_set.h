@@ -29,6 +29,7 @@
 //=============================================================================================================
 
 #include "../inv_global.h"
+#include <memory>
 
 #include <vector>
 
@@ -99,7 +100,7 @@ public:
      * @param[in] pFwdCoilSet   The FwdCoilSet to extract the data from.
      *
      */
-    explicit InvSensorSet(const QSharedPointer<FWDLIB::FwdCoilSet> pFwdCoilSet);
+    explicit InvSensorSet(const std::shared_ptr<FWDLIB::FwdCoilSet>& pFwdCoilSet);
 
     inline int np() const;
     inline int ncoils() const;
@@ -132,7 +133,7 @@ private:
      * @param[in] pFwdCoilSet Coil set to convert.
      *
      */
-    void initFromFwdCoilSet(const QSharedPointer<FWDLIB::FwdCoilSet> pFwdCoilSet);
+    void initFromFwdCoilSet(const std::shared_ptr<FWDLIB::FwdCoilSet>& pFwdCoilSet);
 
     //=========================================================================================================
     /**
@@ -275,7 +276,7 @@ public:
                                  const Accuracy& accuracy);
 
 private:
-    QSharedPointer<FWDLIB::FwdCoilSet> m_pCoilDefinitions{nullptr}; // the coil definitions as template
+    std::shared_ptr<FWDLIB::FwdCoilSet> m_pCoilDefinitions{nullptr}; // the coil definitions as template
 };
 
 //=============================================================================================================

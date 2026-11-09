@@ -205,7 +205,7 @@ private:
     QString m_sRPA;              /**< The electrode to take to function as the RPA.*/
     QString m_sNasion;           /**< The electrode to take to function as the Nasion.*/
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
     QSharedPointer<BrainAMPProducer> m_pBrainAMPProducer; /**< the BrainAMPProducer.*/
 

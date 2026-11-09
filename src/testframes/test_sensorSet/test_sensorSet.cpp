@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <utils/logger/log.h>
+#include <memory>
 #include <utils/string_utils.h>
 #include <inv/hpi/inv_sensor_set.h>
 #include <fiff/fiff_raw_data.h>
@@ -75,7 +76,7 @@ private slots:
 private:
     // declare your thresholds, variables and error values here
     std::vector<FIFFLIB::FiffChInfo> m_lChannels;
-    QSharedPointer<FWDLIB::FwdCoilSet> m_pCoilDefinitions{nullptr};
+    std::shared_ptr<FWDLIB::FwdCoilSet> m_pCoilDefinitions{nullptr};
 };
 
 //=============================================================================================================
@@ -91,11 +92,11 @@ void TestSensorSet::initTestCase()
     UTILSLIB::Log::install_qt_message_handler();
 
     QString qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
-    m_pCoilDefinitions = FwdCoilSet::SPtr(FwdCoilSet::read_coil_defs(qPath.toStdU16String()).release());
+    m_pCoilDefinitions = std::shared_ptr<FwdCoilSet>(FwdCoilSet::read_coil_defs(qPath.toStdU16String()).release());
 
     // Setup for reading the raw data
     FiffRawData raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
-    FiffInfo::SPtr pFiffInfo = FiffInfo::SPtr(new FiffInfo(raw.info));
+    std::shared_ptr<FiffInfo> pFiffInfo = std::make_shared<FiffInfo>(raw.info);
 
     // create meg channel list
     int iNumCh = pFiffInfo->nchan;
@@ -169,7 +170,7 @@ void TestSensorSet::testSensorSet_constructor_accuracyLow()
     int iNTra = iNChan * iNChan; // size square matrix 204*204
     int iNW = iNp * iNChan;      // one weight for each point
     Accuracy accuracy = Accuracy::low;
-    auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
+    auto pCoilMeg = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
 
     /// act
     InvSensorSet sensorsActual = InvSensorSet(pCoilMeg);
@@ -195,7 +196,7 @@ void TestSensorSet::testSensorSet_constructor_accuracyMedium()
     int iNW = iNp * iNChan;      // one weight for each point
     int iAcc = 1;
 
-    auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), iAcc).release());
+    auto pCoilMeg = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), iAcc).release());
 
     /// act
     InvSensorSet sensorsActual = InvSensorSet(pCoilMeg);
@@ -220,7 +221,7 @@ void TestSensorSet::testSensorSet_constructor_accuracyHigh()
     int iNTra = iNChan * iNChan; // size square matrix 204*204
     int iNW = iNp * iNChan;      // one weight for each point
     Accuracy accuracy = Accuracy::high;
-    auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
+    auto pCoilMeg = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
 
     /// act
     InvSensorSet sensorsActual = InvSensorSet(pCoilMeg);
@@ -239,7 +240,7 @@ void TestSensorSet::testSensorSet_constructor_accuracyHigh()
 void TestSensorSet::testSensorSet_equal()
 {
     Accuracy accuracy = Accuracy::medium;
-    auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
+    auto pCoilMeg = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
     InvSensorSet sensorsA = InvSensorSet(pCoilMeg);
     InvSensorSet sensorsB = InvSensorSet(pCoilMeg);
     QVERIFY(sensorsA == sensorsB);
@@ -251,8 +252,8 @@ void TestSensorSet::testSensorSet_notequal()
     Accuracy accuracy1 = Accuracy::medium;
     Accuracy accuracy2 = Accuracy::high;
 
-    auto pCoilMeg1 = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy1)).release());
-    auto pCoilMeg2 = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy2)).release());
+    auto pCoilMeg1 = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy1)).release());
+    auto pCoilMeg2 = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy2)).release());
 
     InvSensorSet sensorsA = InvSensorSet(pCoilMeg1);
     InvSensorSet sensorsB = InvSensorSet(pCoilMeg2);
@@ -280,7 +281,7 @@ void TestSensorSet::testSensorSetCreator_channelList_empty()
 void TestSensorSet::testSensorSetCreator_channelList_medium()
 {
     Accuracy accuracy = Accuracy::medium;
-    auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
+    auto pCoilMeg = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(m_lChannels, static_cast<int>(m_lChannels.size()), static_cast<int>(accuracy)).release());
     InvSensorSet sensorsExpected(pCoilMeg);
 
     InvSensorSetCreator sensorSetCreator;

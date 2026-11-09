@@ -108,7 +108,7 @@ private slots:
     void writesAnnotationsAndDevice();
 
 private:
-    FiffDirNode::SPtr findBlock(int kind) const;
+    std::shared_ptr<FiffDirNode> findBlock(int kind) const;
 
     QTemporaryDir m_dir;
     QString m_path;
@@ -176,10 +176,10 @@ void TestFiffStreamPython::initTestCase()
 
 //=============================================================================================================
 
-FiffDirNode::SPtr TestFiffStreamPython::findBlock(int kind) const
+std::shared_ptr<FiffDirNode> TestFiffStreamPython::findBlock(int kind) const
 {
-    const std::vector<FiffDirNode::SPtr> nodes = m_stream->dirtree()->dir_tree_find(kind);
-    return nodes.empty() ? FiffDirNode::SPtr() : nodes.front();
+    const std::vector<std::shared_ptr<FiffDirNode>> nodes = m_stream->dirtree()->dir_tree_find(kind);
+    return nodes.empty() ? std::shared_ptr<FiffDirNode>() : nodes.front();
 }
 
 //=============================================================================================================
@@ -285,19 +285,19 @@ void TestFiffStreamPython::copiesProcessingHistory()
     // runs; mne-python reads 10th-order SSS info for the first two and cross-talk
     // compensation (5 entries) for the second.
     const QString src = QStringLiteral(MNE_FIFF_STREAM_DATA_DIR "/sss_history_raw.fif");
-    auto historyOf = [](const QString& path, std::vector<FiffDirNode::SPtr>& runs) {
+    auto historyOf = [](const QString& path, std::vector<std::shared_ptr<FiffDirNode>>& runs) {
         auto file = std::make_shared<QFile>(path);
         FiffStream stream(file.get());
         if (!stream.open())
             return false;
-        const std::vector<FiffDirNode::SPtr> hist = stream.dirtree()->dir_tree_find(FIFFB_PROCESSING_HISTORY);
+        const std::vector<std::shared_ptr<FiffDirNode>> hist = stream.dirtree()->dir_tree_find(FIFFB_PROCESSING_HISTORY);
         if (hist.empty())
             return false;
         runs = hist[0]->dir_tree_find(FIFFB_PROCESSING_RECORD);
         stream.close();
         return true;
     };
-    std::vector<FiffDirNode::SPtr> srcRuns;
+    std::vector<std::shared_ptr<FiffDirNode>> srcRuns;
     QVERIFY(historyOf(src, srcRuns));
     QCOMPARE(srcRuns.size(), 3);
 
@@ -312,7 +312,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
     }
     QVERIFY(FiffStream::copyProcessingHistory(src.toStdU16String(), dst.toStdU16String()));
 
-    std::vector<FiffDirNode::SPtr> dstRuns;
+    std::vector<std::shared_ptr<FiffDirNode>> dstRuns;
     QVERIFY(historyOf(dst, dstRuns));
     QCOMPARE(dstRuns.size(), srcRuns.size());
     for (int k = 0; k < std::ssize(srcRuns); ++k) {
@@ -371,7 +371,7 @@ void TestFiffStreamPython::attachesEnvironment()
     QFile f(path);
     FiffStream r(&f);
     QVERIFY(r.open());
-    const std::vector<FiffDirNode::SPtr> env = r.dirtree()->dir_tree_find(FIFFB_MNE_ENV);
+    const std::vector<std::shared_ptr<FiffDirNode>> env = r.dirtree()->dir_tree_find(FIFFB_MNE_ENV);
     QCOMPARE(env.size(), 1);
     const auto workingDir = env[0]->find_tag(r, FIFF_MNE_ENV_WORKING_DIR);
     QVERIFY(workingDir);
@@ -381,7 +381,7 @@ void TestFiffStreamPython::attachesEnvironment()
     QVERIFY(commandLine);
     QCOMPARE(commandLine->toString(), QString("mne_process --raw a.fif"));
     // The measurement block written before is still there.
-    const std::vector<FiffDirNode::SPtr> meas = r.dirtree()->dir_tree_find(FIFFB_MEAS);
+    const std::vector<std::shared_ptr<FiffDirNode>> meas = r.dirtree()->dir_tree_find(FIFFB_MEAS);
     QCOMPARE(meas.size(), 1);
     const auto nchan = meas[0]->find_tag(r, FIFF_NCHAN);
     QVERIFY(nchan);
@@ -439,7 +439,7 @@ void TestFiffStreamPython::readsMeasInfo()
     FiffStream stream(&file);
     QVERIFY(stream.open());
     FiffInfo info;
-    FiffDirNode::SPtr meas;
+    std::shared_ptr<FiffDirNode> meas;
     QVERIFY(stream.read_meas_info(stream.dirtree(), info, meas));
 
     // The Isotrak's own FIFF_MNE_COORD_FRAME overrides the head-frame default.

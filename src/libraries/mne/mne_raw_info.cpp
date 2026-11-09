@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_raw_info.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -63,9 +64,9 @@ MNERawInfo::~MNERawInfo()
 
 //=============================================================================================================
 
-FiffDirNode::SPtr MNERawInfo::find_meas(const FiffDirNode::SPtr& node)
+std::shared_ptr<FiffDirNode> MNERawInfo::find_meas(const std::shared_ptr<FiffDirNode>& node)
 {
-    FiffDirNode::SPtr block = node;
+    std::shared_ptr<FiffDirNode> block = node;
     while (block && block->type != FIFFB_MEAS) {
         block = block->parent.lock();
     }
@@ -74,22 +75,22 @@ FiffDirNode::SPtr MNERawInfo::find_meas(const FiffDirNode::SPtr& node)
 
 //=============================================================================================================
 
-FiffDirNode::SPtr MNERawInfo::find_meas_info(const FiffDirNode::SPtr& node)
+std::shared_ptr<FiffDirNode> MNERawInfo::find_meas_info(const std::shared_ptr<FiffDirNode>& node)
 {
-    const FiffDirNode::SPtr meas = find_meas(node);
+    const std::shared_ptr<FiffDirNode> meas = find_meas(node);
     if (!meas) {
         return {};
     }
     const auto info = std::ranges::find(meas->children, FIFFB_MEAS_INFO, &FiffDirNode::type);
-    return info != meas->children.end() ? *info : FiffDirNode::SPtr{};
+    return info != meas->children.end() ? *info : std::shared_ptr<FiffDirNode>{};
 }
 
 //=============================================================================================================
 
-FiffDirNode::SPtr MNERawInfo::find_raw(const FiffDirNode::SPtr& node)
+std::shared_ptr<FiffDirNode> MNERawInfo::find_raw(const std::shared_ptr<FiffDirNode>& node)
 {
-    FiffDirNode::SPtr raw;
-    std::vector<FiffDirNode::SPtr> temp;
+    std::shared_ptr<FiffDirNode> raw;
+    std::vector<std::shared_ptr<FiffDirNode>> temp;
     temp = node->dir_tree_find(FIFFB_RAW_DATA);
     if (temp.size() == 0) {
         temp = node->dir_tree_find(FIFFB_CONTINUOUS_DATA);
@@ -102,11 +103,11 @@ FiffDirNode::SPtr MNERawInfo::find_raw(const FiffDirNode::SPtr& node)
 
 //=============================================================================================================
 
-FiffDirNode::SPtr MNERawInfo::find_maxshield(const FiffDirNode::SPtr& node)
+std::shared_ptr<FiffDirNode> MNERawInfo::find_maxshield(const std::shared_ptr<FiffDirNode>& node)
 
 {
-    FiffDirNode::SPtr raw;
-    std::vector<FiffDirNode::SPtr> temp;
+    std::shared_ptr<FiffDirNode> raw;
+    std::vector<std::shared_ptr<FiffDirNode>> temp;
     temp = node->dir_tree_find(FIFFB_SMSH_RAW_DATA);
     if (temp.size() > 0)
         raw = temp[0];
@@ -116,7 +117,7 @@ FiffDirNode::SPtr MNERawInfo::find_maxshield(const FiffDirNode::SPtr& node)
 //=============================================================================================================
 
 int MNERawInfo::get_meas_info(FiffStream& stream,
-                              FiffDirNode::SPtr& node,
+                              std::shared_ptr<FiffDirNode>& node,
                               std::unique_ptr<FiffId>& id,
                               int* nchan,
                               float* sfreq,
@@ -132,7 +133,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 //=============================================================================================================
 
 int MNERawInfo::get_meas_info(FiffStream& stream,
-                              FiffDirNode::SPtr& node,
+                              std::shared_ptr<FiffDirNode>& node,
                               std::unique_ptr<FiffId>& id,
                               int* nchan,
                               float* sfreq,
@@ -148,9 +149,9 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
     FiffCoordTrans t;
     int j, k;
     int to_find = 4;
-    std::vector<FiffDirNode::SPtr> hpi;
-    FiffDirNode::SPtr meas;
-    FiffDirNode::SPtr meas_info;
+    std::vector<std::shared_ptr<FiffDirNode>> hpi;
+    std::shared_ptr<FiffDirNode> meas;
+    std::shared_ptr<FiffDirNode> meas_info;
     fiff_int_t kind, pos;
     bool found_meas_date = false;
 
@@ -318,7 +319,7 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
     float sfreq = 0.0; /* Sampling frequency */
     float highpass;    /* Highpass filter frequency */
     float lowpass;     /* Lowpass filter frequency */
-    FiffDirNode::SPtr raw;
+    std::shared_ptr<FiffDirNode> raw;
     FiffTime start_time;
     int k;
     int maxshield_data = false;

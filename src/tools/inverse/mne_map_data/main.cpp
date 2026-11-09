@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+#include <memory>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_info.h>
@@ -139,7 +140,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     FiffInfo targetInfo;
-    FiffDirNode::SPtr targetNode;
+    std::shared_ptr<FiffDirNode> targetNode;
     if (!toStream.read_meas_info(toStream.dirtree(), targetInfo, targetNode)) {
         qCritical("Cannot read target measurement info: %s", qPrintable(toFile));
         return 1;

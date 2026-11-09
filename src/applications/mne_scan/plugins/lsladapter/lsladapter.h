@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "lsladapter_global.h"
+#include <memory>
 
 #include <scShared/Plugins/abstractsensor.h>
 
@@ -178,7 +179,7 @@ private:
     float m_fSamplingFrequency;
     int m_iNumberChannels;
     int m_iOutputBlockSize;
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA;
 
     // LSL stream management

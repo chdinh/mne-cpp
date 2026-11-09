@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_dig_point_set.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 //=============================================================================================================
@@ -89,7 +90,7 @@ UTILSLIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
 
     FiffDigPointSet dig;
     fiff_int_t coordFrame = FIFFV_COORD_HEAD;
-    const std::vector<FiffDirNode::SPtr> isotrak = stream.dirtree()->dir_tree_find(FIFFB_ISOTRAK);
+    const std::vector<std::shared_ptr<FiffDirNode>> isotrak = stream.dirtree()->dir_tree_find(FIFFB_ISOTRAK);
     if (isotrak.size() == 1) {
         for (const FiffDirEntry& entry : isotrak[0]->dir) {
             if (entry.kind != FIFF_DIG_POINT && entry.kind != FIFF_MNE_COORD_FRAME) {

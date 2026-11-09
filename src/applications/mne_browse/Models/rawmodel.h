@@ -29,6 +29,7 @@
 //=============================================================================================================
 
 #include "../Utils/types.h"
+#include <memory>
 
 #include <vector>
 #include "../Utils/filteroperator.h"
@@ -208,7 +209,7 @@ public:
 
     //=========================================================================================================
     /** Returns the FiffInfo shared pointer for the loaded file. */
-    FiffInfo::SPtr fiffInfo() const
+    std::shared_ptr<FiffInfo> fiffInfo() const
     {
         return m_pFiffInfo;
     }
@@ -281,7 +282,7 @@ private:
 
     bool m_bFileloaded;                                     /**< True when a FIFF raw file is loaded. */
     std::vector<FiffChInfo> m_chInfolist;                   /**< Cached channel metadata for the loaded raw file. */
-    FiffInfo::SPtr m_pFiffInfo;                             /**< Shared measurement info of the loaded raw file. */
+    std::shared_ptr<FiffInfo> m_pFiffInfo;                  /**< Shared measurement info of the loaded raw file. */
     QSharedPointer<FIFFLIB::FiffIO> m_pfiffIO;              /**< Legacy FIFF I/O backend used by the table model path. */
     QSharedPointer<QIODevice> m_pSourceDevice;              /**< Persistent source device used by the legacy raw model. */
     QByteArray m_sourceBuffer;                              /**< In-memory copy for non-file-backed source devices. */
@@ -328,7 +329,7 @@ signals:
      *
      * @param[in]  FiffInfo  Measurement info of the loaded file.
      */
-    void fileLoaded(FiffInfo::SPtr&);
+    void fileLoaded(std::shared_ptr<FiffInfo>&);
 
     //=========================================================================================================
     /**

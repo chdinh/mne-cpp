@@ -12,6 +12,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <utils/string_utils.h>
 #include <QDir>
 #include <QFile>
@@ -182,7 +183,7 @@ void TestFiffIoEvokedInfo::fiffIO_setupRead()
 {
     QFile file(rawPath());
     FiffInfo info;
-    FiffDirNode::SPtr dirTree;
+    std::shared_ptr<FiffDirNode> dirTree;
 
     bool ok = FiffIO::setup_read(file, info, dirTree);
     QVERIFY(ok);

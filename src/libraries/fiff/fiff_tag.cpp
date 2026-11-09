@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_tag.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -135,7 +136,7 @@ fiff_int_t FiffTag::getType() const
 
 Eigen::SparseMatrix<double> FiffTag::toSparseFloatMatrix() const
 {
-    const FiffSparseMatrix::UPtr mat = FiffSparseMatrix::fiff_get_float_sparse_matrix(*this);
+    const std::unique_ptr<FiffSparseMatrix> mat = FiffSparseMatrix::fiff_get_float_sparse_matrix(*this);
     return mat ? Eigen::SparseMatrix<double>(mat->eigen().cast<double>()) : Eigen::SparseMatrix<double>();
 }
 

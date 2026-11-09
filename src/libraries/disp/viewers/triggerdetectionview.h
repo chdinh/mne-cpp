@@ -101,7 +101,7 @@ public:
      *
      * @param[in] pFiffInfo  Measurement info whose STIM channels populate the trigger channel list; ignored if null.
      */
-    void init(const QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void init(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -192,7 +192,7 @@ protected:
 
     std::unique_ptr<Ui::TriggerDetectionViewWidget> m_pUi;
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Connected fiff info. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Connected fiff info. */
 
     QMap<double, QColor> m_qMapTriggerColor; /**< Trigger colors per detected type. */
 

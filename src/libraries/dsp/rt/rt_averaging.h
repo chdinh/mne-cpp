@@ -32,6 +32,7 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <memory>
 
 #include <fiff/fiff_evoked_set.h>
 
@@ -99,7 +100,7 @@ public:
                       qint32 iBaselineFromMSecs,
                       qint32 iBaselineToMSecs,
                       quint32 iTriggerIndex,
-                      FIFFLIB::FiffInfo::SPtr pFiffInfo);
+                      std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -253,8 +254,8 @@ protected:
     QPair<float, float> m_pairBaselineSec;  /**< Baseline information in seconds form where the seconds are seen relative to the trigger, meaning they can also be negative [from to]*/
     QPair<float, float> m_pairBaselineSamp; /**< Baseline information in samples form where the seconds are seen relative to the trigger, meaning they can also be negative [from to]*/
 
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo;    /**< Holds the fiff measurement information. */
-    FIFFLIB::FiffEvokedSet m_stimEvokedSet; /**< Holds the evoked information. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Holds the fiff measurement information. */
+    FIFFLIB::FiffEvokedSet m_stimEvokedSet;         /**< Holds the evoked information. */
 
     std::map<std::string, double> m_mapThresholds;     /**< Holds the current thresholds for artifact rejection. */
     QMap<double, QList<Eigen::MatrixXd>> m_mapStimAve; /**< the current stimulus average buffer. Holds m_iNumAverages vectors. */
@@ -289,9 +290,6 @@ class DSPSHARED_EXPORT RtAveraging : public QObject
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtAveraging> SPtr;            /**< Shared pointer type for RtAveraging. */
-    typedef QSharedPointer<const RtAveraging> ConstSPtr; /**< Const shared pointer type for RtAveraging. */
-
     //=========================================================================================================
     /**
      * Creates the real-time averaging object.
@@ -311,7 +309,7 @@ public:
                          qint32 iBaselineFromMSecs,
                          qint32 iBaselineToMSecs,
                          quint32 iTriggerIndex,
-                         FIFFLIB::FiffInfo::SPtr pFiffInfo,
+                         std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo,
                          QObject* parent = 0);
 
     //=========================================================================================================
@@ -346,7 +344,7 @@ public:
                  qint32 iBaselineFromMSecs,
                  qint32 iBaselineToMSecs,
                  quint32 iTriggerIndex,
-                 FIFFLIB::FiffInfo::SPtr pFiffInfo);
+                 std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo);
 
     //=========================================================================================================
     /**

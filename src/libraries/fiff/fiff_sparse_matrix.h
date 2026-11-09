@@ -73,8 +73,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffSparseMatrix
 {
 public:
-    using UPtr = std::unique_ptr<FiffSparseMatrix>; /**< Unique pointer type for FiffSparseMatrix. */
-
     //=========================================================================================================
     /**
      * Constructs an empty FiffSparseMatrix.
@@ -202,7 +200,7 @@ public:
      *
      * @return A unique pointer to the newly constructed FiffSparseMatrix, or nullptr on error.
      */
-    static FiffSparseMatrix::UPtr fiff_get_float_sparse_matrix(const FIFFLIB::FiffTag& tag);
+    static std::unique_ptr<FiffSparseMatrix> fiff_get_float_sparse_matrix(const FIFFLIB::FiffTag& tag);
 
     //============================= mne_sparse_matop.c =============================
 
@@ -217,25 +215,25 @@ public:
      *
      * @return A unique pointer to the newly constructed FiffSparseMatrix, or nullptr on error.
      */
-    static FiffSparseMatrix::UPtr create_sparse_rcs(int nrow,
-                                                    int ncol,
-                                                    int* nnz,
-                                                    int** colindex,
-                                                    float** vals);
+    static std::unique_ptr<FiffSparseMatrix> create_sparse_rcs(int nrow,
+                                                               int ncol,
+                                                               int* nnz,
+                                                               int** colindex,
+                                                               float** vals);
 
     /**
      * Add the upper triangle to a lower-triangular sparse RCS matrix.
      *
      * @return A unique pointer to the newly constructed FiffSparseMatrix with both triangles.
      */
-    FiffSparseMatrix::UPtr mne_add_upper_triangle_rcs();
+    std::unique_ptr<FiffSparseMatrix> mne_add_upper_triangle_rcs();
 
     /**
      * Extract only the lower triangle (including diagonal) from a square RCS matrix.
      *
      * @return A unique pointer to the newly constructed FiffSparseMatrix with lower-triangle elements.
      */
-    FiffSparseMatrix::UPtr pickLowerTriangleRcs() const;
+    std::unique_ptr<FiffSparseMatrix> pickLowerTriangleRcs() const;
 
     /**
      * Check whether this sparse matrix is empty (no non-zero elements).

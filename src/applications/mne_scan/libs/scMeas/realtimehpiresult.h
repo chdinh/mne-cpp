@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scmeas_global.h"
+#include <memory>
 #include "measurement.h"
 
 #include <inv/hpi/inv_hpi_fit.h>
@@ -86,7 +87,7 @@ public:
      *
      * @param[in] pFiffInfo     the new fiff info.
      */
-    void setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -94,7 +95,7 @@ public:
      *
      * @return     the current fiff info.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> getFiffInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo();
 
     //=========================================================================================================
     /**
@@ -127,7 +128,7 @@ public:
      *
      * @return the current set digitizer data
      */
-    inline QSharedPointer<FIFFLIB::FiffDigitizerData> digitizerData() const;
+    inline std::shared_ptr<FIFFLIB::FiffDigitizerData> digitizerData() const;
 
     //=========================================================================================================
     /**
@@ -135,7 +136,7 @@ public:
      *
      * @param[in] digData   digitizer data from measurment
      */
-    void setDigitizerData(QSharedPointer<FIFFLIB::FiffDigitizerData> digData);
+    void setDigitizerData(std::shared_ptr<FIFFLIB::FiffDigitizerData> digData);
 
     //=========================================================================================================
     /**
@@ -171,9 +172,9 @@ private:
     mutable QMutex m_qMutex; /**< Mutex to ensure thread safety. */
     bool m_bInitialized;     /**< If values are stored.*/
 
-    QSharedPointer<INVLIB::HpiFitResult> m_pHpiFitResult;      /**< The HPI fit result. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;             /**< The Fiff Info. */
-    QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigData; /**< The Fiff Digigtizer Data */
+    QSharedPointer<INVLIB::HpiFitResult> m_pHpiFitResult;       /**< The HPI fit result. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;             /**< The Fiff Info. */
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pFiffDigData; /**< The Fiff Digigtizer Data */
 
     QVector<Eigen::Vector3f> m_vecHeadPositions; /**< Head origin in device coordinates for every fit so far, oldest first. */
     int m_iMaxHeadPositions;                     /**< Ring size of m_vecHeadPositions. Zero disables recording. */
@@ -189,7 +190,7 @@ inline bool RealTimeHpiResult::isInitialized() const
     return m_bInitialized;
 }
 
-inline QSharedPointer<FIFFLIB::FiffDigitizerData> RealTimeHpiResult::digitizerData() const
+inline std::shared_ptr<FIFFLIB::FiffDigitizerData> RealTimeHpiResult::digitizerData() const
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFiffDigData;

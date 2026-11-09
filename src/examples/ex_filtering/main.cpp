@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include <iostream>
+#include <memory>
 #include <vector>
 #include <math.h>
 
@@ -79,7 +80,7 @@ int main(int argc, char* argv[])
     // Init data loading and writing
     QFile fileOut(parser.value(outputOption));
 
-    FiffRawData::SPtr pRaw = FiffRawData::SPtr::create(parser.value(inputOption).toStdString());
+    std::shared_ptr<FiffRawData> pRaw = std::make_shared<FiffRawData>(parser.value(inputOption).toStdString());
 
     // Only filter MEG and EEG channels
     RowVectorXi picks = pRaw->info.pick_types(true, false, false);

@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "batchprocessor.h"
+#include <memory>
 
 #include <algorithm>
 #include <iterator>
@@ -242,7 +243,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                     QFile pFile(QString::fromStdString(projFile));
                     FiffStream pStream(&pFile);
                     if (pStream.open()) {
-                        std::vector<FiffDirNode::SPtr> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
+                        std::vector<std::shared_ptr<FiffDirNode>> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
                         if (!projNodes.empty()) {
                             std::vector<FiffProj> fileProjs = pStream.read_proj(projNodes[0]);
                             std::ranges::move(fileProjs, std::back_inserter(loadedProjs));

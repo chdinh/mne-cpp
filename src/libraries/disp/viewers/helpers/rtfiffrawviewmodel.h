@@ -29,6 +29,7 @@
 //=============================================================================================================
 
 #include "../../disp_global.h"
+#include <memory>
 
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_proj.h>
@@ -161,7 +162,7 @@ public:
      *
      * @param[in] p_pFiffInfo   The corresponding fiff information.
      */
-    void setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo>& p_pFiffInfo);
+    void setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo>& p_pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -617,7 +618,7 @@ private:
     QString m_sCurrentTriggerCh;  /**< Current trigger channel which is beeing scanned. */
     QString m_sFilterChannelType; /**< Kind of channel which is to be filtered. */
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff info. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff info. */
 
     Eigen::RowVectorXi m_vecBadIdcs;                   /**< Idcs of bad channels. */
     Eigen::VectorXd m_vecLastBlockFirstValuesFiltered; /**< The first value of the last complete filtered data display block. */

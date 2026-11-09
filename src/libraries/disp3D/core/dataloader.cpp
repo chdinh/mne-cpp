@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "dataloader.h"
+#include <memory>
 #include "core/surfacekeys.h"
 #include "model/items/sensortreeitem.h"
 #include "renderable/brainsurface.h"
@@ -59,8 +60,8 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
     FiffStream stream(&file);
 
     if (stream.open()) {
-        FiffDirNode::SPtr tree = stream.dirtree();
-        FiffDirNode::SPtr nodeInfo;
+        std::shared_ptr<FiffDirNode> tree = stream.dirtree();
+        std::shared_ptr<FiffDirNode> nodeInfo;
         if (stream.read_meas_info(tree, info, nodeInfo)) {
             result.hasInfo = !info.empty();
         }

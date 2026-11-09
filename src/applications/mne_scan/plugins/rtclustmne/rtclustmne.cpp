@@ -280,7 +280,7 @@ bool RtClustMne::calcFiffInfo()
         //qDebug() << "RtClustMne::calcFiffInfo - m_qListPickChannels.size()" << m_qListPickChannels.size();
         //qDebug() << "RtClustMne::calcFiffInfo - m_qListPickChannels" << m_qListPickChannels;
 
-        m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo(m_pFiffInfoInput->pick_info(sel)));
+        m_pFiffInfo = std::make_shared<FiffInfo>(m_pFiffInfoInput->pick_info(sel));
 
         m_pRTSEOutput->measurementData()->setFiffInfo(m_pFiffInfo);
 
@@ -358,7 +358,7 @@ void RtClustMne::updateRTFS(SCMEASLIB::Measurement::SPtr pMeasurement)
         m_pRTSEOutput->measurementData()->setFwdSolution(m_pFwd);
 
         m_qMutex.lock();
-        m_pFiffInfoForward = QSharedPointer<FiffInfoBase>(new FiffInfoBase(m_pFwd->info));
+        m_pFiffInfoForward = std::make_shared<FiffInfoBase>(m_pFwd->info);
         m_qMutex.unlock();
 
         // update inverse operator
@@ -426,8 +426,8 @@ void RtClustMne::updateRTC(SCMEASLIB::Measurement::SPtr pMeasurement)
         if (pRTC && this->isRunning()) {
             // Init Real-Time inverse estimator
             if (!m_pRtInvOp && m_pFiffInfo && m_pFwd) {
-                m_pRtInvOp = RtInvOp::SPtr(new RtInvOp(m_pFiffInfo, m_pFwd));
-                connect(m_pRtInvOp.data(), &RtInvOp::invOperatorCalculated,
+                m_pRtInvOp = std::make_shared<RtInvOp>(m_pFiffInfo, m_pFwd);
+                connect(m_pRtInvOp.get(), &RtInvOp::invOperatorCalculated,
                         this, &RtClustMne::updateInvOp);
             }
 
@@ -461,7 +461,7 @@ void RtClustMne::updateRTE(SCMEASLIB::Measurement::SPtr pMeasurement)
                 return;
             }
 
-            FiffEvokedSet::SPtr pFiffEvokedSet = pRTES->getValue();
+            std::shared_ptr<FiffEvokedSet> pFiffEvokedSet = pRTES->getValue();
 
             //Fiff Information of the evoked
             if (!m_pFiffInfoInput && pFiffEvokedSet->evoked.size() > 0) {
@@ -469,7 +469,7 @@ void RtClustMne::updateRTE(SCMEASLIB::Measurement::SPtr pMeasurement)
 
                 for (int i = 0; i < std::ssize(pFiffEvokedSet->evoked); ++i) {
                     if (pFiffEvokedSet->evoked.at(i).comment == m_sAvrType) {
-                        m_pFiffInfoInput = QSharedPointer<FiffInfo>(new FiffInfo(pFiffEvokedSet->evoked.at(i).info));
+                        m_pFiffInfoInput = std::make_shared<FiffInfo>(pFiffEvokedSet->evoked.at(i).info);
                         break;
                     }
                 }

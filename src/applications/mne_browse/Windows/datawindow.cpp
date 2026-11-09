@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "datawindow.h"
+#include <memory>
 #include <utils/string_utils.h>
 #include "../Models/virtualchannelmodel.h"
 #include <disp/viewers/helpers/channeldatamodel.h>
@@ -83,7 +84,7 @@ QColor markerColorForIndex(int index)
     return kMarkerColors.at(index % kMarkerColors.size());
 }
 
-QMultiMap<int, QSharedPointer<MNEOperator>> browserAssignedOperators(const QSharedPointer<FIFFLIB::FiffInfo>& info,
+QMultiMap<int, QSharedPointer<MNEOperator>> browserAssignedOperators(const std::shared_ptr<FIFFLIB::FiffInfo>& info,
                                                                      const QSharedPointer<SessionFilter>& filterDefinition)
 {
     QMultiMap<int, QSharedPointer<MNEOperator>> assignedOperators;
@@ -779,7 +780,7 @@ void DataWindow::updateRawWhitener(const FIFFLIB::FiffCov& cov, const WhiteningS
     // Embed into full-channel identity matrix.
     // prepare_noise_cov aligns to info->ch_names, so coreWhitener rows/cols
     // correspond 1:1 to the info channels when dims match.
-    const int nCh = info->chs.size();
+    const int nCh = static_cast<int>(info->chs.size());
     if (preparedCov.dim == nCh) {
         // Simple case: covariance covers all channels
         m_rawWhitener = coreWhitener;
@@ -902,10 +903,10 @@ double DataWindow::fiffFileDurationSeconds() const
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffInfo> DataWindow::fiffInfo() const
+std::shared_ptr<FIFFLIB::FiffInfo> DataWindow::fiffInfo() const
 {
     return (m_pFiffReader && m_pFiffReader->isOpen()) ? m_pFiffReader->fiffInfo()
-                                                      : QSharedPointer<FIFFLIB::FiffInfo>();
+                                                      : std::shared_ptr<FIFFLIB::FiffInfo>();
 }
 
 //=============================================================================================================
@@ -1775,7 +1776,7 @@ void DataWindow::setRangeSampleLabels()
     const int maxSampleRange = minSampleRange + (m_pChannelDataView ? m_pChannelDataView->visibleSampleCount() : 0);
 
     //Set values as string
-    auto fiffInfo = m_pFiffReader ? m_pFiffReader->fiffInfo() : QSharedPointer<FIFFLIB::FiffInfo>();
+    auto fiffInfo = m_pFiffReader ? m_pFiffReader->fiffInfo() : std::shared_ptr<FIFFLIB::FiffInfo>();
     if (!fiffInfo)
         return;
     QString stringTemp;
@@ -1795,7 +1796,7 @@ void DataWindow::setMarkerSampleLabel()
         return;
     }
 
-    auto fiffInfo = m_pFiffReader ? m_pFiffReader->fiffInfo() : QSharedPointer<FIFFLIB::FiffInfo>();
+    auto fiffInfo = m_pFiffReader ? m_pFiffReader->fiffInfo() : std::shared_ptr<FIFFLIB::FiffInfo>();
     if (!fiffInfo)
         return;
 

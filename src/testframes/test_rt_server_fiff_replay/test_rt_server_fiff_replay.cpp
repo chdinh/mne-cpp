@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include <com/rt_client/rt_cmd_client.h>
+#include <memory>
 #include <com/rt_client/rt_data_client.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
@@ -117,7 +118,7 @@ void TestRtServerFiffReplay::streamsTheFile()
     QVERIFY(id >= 0);
     command[QStringLiteral("measinfo")].pValues()[0].setValue(id);
     command[QStringLiteral("measinfo")].send();
-    const FiffInfo::SPtr info = data.readMetadata().m_pInfo;
+    const std::shared_ptr<FiffInfo> info = data.readMetadata().m_pInfo;
     QVERIFY(info);
 
     FiffRawData raw(file.toStdString());

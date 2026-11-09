@@ -93,8 +93,6 @@ inline constexpr bool FWD_IS_MEG_COIL(int x)
 class FWDSHARED_EXPORT FwdCoil
 {
 public:
-    typedef std::unique_ptr<FwdCoil> UPtr; /**< Unique pointer type for FwdCoil. */
-
     //=========================================================================================================
     /**
      * Constructs the Forward Coil
@@ -126,8 +124,8 @@ public:
      *
      * @return   The created coil.
      */
-    static FwdCoil::UPtr create_eeg_el(const FIFFLIB::FiffChInfo& ch,
-                                       const FIFFLIB::FiffCoordTrans& t = FIFFLIB::FiffCoordTrans());
+    static std::unique_ptr<FwdCoil> create_eeg_el(const FIFFLIB::FiffChInfo& ch,
+                                                  const FIFFLIB::FiffCoordTrans& t = FIFFLIB::FiffCoordTrans());
 
     //=========================================================================================================
     /**

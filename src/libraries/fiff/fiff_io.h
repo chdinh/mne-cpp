@@ -33,6 +33,7 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
+#include <memory>
 
 #include <vector>
 #include "fiff_info.h"
@@ -133,7 +134,7 @@ public:
      */
     static bool setup_read(QIODevice& pIODevice,
                            FiffInfo& info,
-                           FiffDirNode::SPtr& dirTree);
+                           std::shared_ptr<FiffDirNode>& dirTree);
 
     //=========================================================================================================
     /**
@@ -217,8 +218,8 @@ public:
     }
 
 public:
-    std::vector<QSharedPointer<FiffRawData>> m_qlistRaw;   /**< List of raw data sets. */
-    std::vector<QSharedPointer<FiffEvoked>> m_qlistEvoked; /**< List of evoked data sets. */
+    std::vector<std::shared_ptr<FiffRawData>> m_qlistRaw;   /**< List of raw data sets. */
+    std::vector<std::shared_ptr<FiffEvoked>> m_qlistEvoked; /**< List of evoked data sets. */
     //    std::vector<QSharedPointer<MNEForwardSolution> > m_qlistFwd;
     //FiffCov, MNEInverseOperator, FsAnnotationSet,
 };

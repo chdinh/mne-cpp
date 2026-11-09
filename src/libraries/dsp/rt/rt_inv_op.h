@@ -30,6 +30,7 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <memory>
 
 #include <fiff/fiff_cov.h>
 
@@ -71,7 +72,7 @@ namespace RTPROCESSINGLIB
  */
 struct RtInvOpInput
 {
-    QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo;
+    std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo;
     QSharedPointer<MNELIB::MNEForwardSolution> pFwd;
     FIFFLIB::FiffCov noiseCov;
 };
@@ -120,9 +121,6 @@ class DSPSHARED_EXPORT RtInvOp : public QObject
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtInvOp> SPtr;            /**< Shared pointer type for RtInvOp. */
-    typedef QSharedPointer<const RtInvOp> ConstSPtr; /**< Const shared pointer type for RtInvOp. */
-
     //=========================================================================================================
     /**
      * Creates the real-time inverse operator estimation object
@@ -131,7 +129,7 @@ public:
      * @param[in] p_pFwd         Forward solution.
      * @param[in] parent         Parent QObject (optional).
      */
-    explicit RtInvOp(QSharedPointer<FIFFLIB::FiffInfo>& p_pFiffInfo,
+    explicit RtInvOp(std::shared_ptr<FIFFLIB::FiffInfo>& p_pFiffInfo,
                      QSharedPointer<MNELIB::MNEForwardSolution>& p_pFwd,
                      QObject* parent = 0);
 
@@ -178,7 +176,7 @@ protected:
      */
     void handleResults(const MNELIB::MNEInverseOperator& invOp);
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;     /**< The fiff measurement information. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;    /**< The fiff measurement information. */
     QSharedPointer<MNELIB::MNEForwardSolution> m_pFwd; /**< The forward solution. */
 
     QThread m_workerThread; /**< The worker thread. */

@@ -222,8 +222,8 @@ private:
 
     int m_iTriggerType; /**< Holds the trigger type | 0 - no trigger activated, 254 - left, 253 - right, 252 - beep.*/
 
-    QString m_sElcFilePath;                        /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    QString m_sElcFilePath;                         /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_float> m_pCircularBuffer; /**< Holds incoming raw data.*/
 

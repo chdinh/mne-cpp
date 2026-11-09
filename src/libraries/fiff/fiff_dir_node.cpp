@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_dir_node.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include "fiff_stream.h"
 #include "fiff_tag.h"
@@ -57,7 +58,7 @@ FiffDirNode::~FiffDirNode()
 
 //=============================================================================================================
 
-bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<const SPtr> p_Nodes, FiffStream& target)
+bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<const std::shared_ptr<FiffDirNode>> p_Nodes, FiffStream& target)
 {
     if (p_Nodes.size() <= 0)
         return false;
@@ -108,21 +109,21 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<c
 
 //=============================================================================================================
 
-std::vector<FiffDirNode::SPtr> FiffDirNode::dir_tree_find(fiff_int_t p_kind)
+std::vector<std::shared_ptr<FiffDirNode>> FiffDirNode::dir_tree_find(fiff_int_t p_kind)
 {
-    std::vector<SPtr> found;
+    std::vector<std::shared_ptr<FiffDirNode>> found;
     collect(p_kind, found);
     return found;
 }
 
 //=============================================================================================================
 
-void FiffDirNode::collect(fiff_int_t kind, std::vector<SPtr>& found)
+void FiffDirNode::collect(fiff_int_t kind, std::vector<std::shared_ptr<FiffDirNode>>& found)
 {
     if (type == kind) {
         found.push_back(shared_from_this());
     }
-    for (const SPtr& child : children) {
+    for (const std::shared_ptr<FiffDirNode>& child : children) {
         child->collect(kind, found);
     }
 }
@@ -152,7 +153,7 @@ bool FiffDirNode::has_kind(fiff_int_t p_kind) const
     if (this->type == p_kind)
         return true;
 
-    std::vector<FiffDirNode::SPtr>::const_iterator i;
+    std::vector<std::shared_ptr<FiffDirNode>>::const_iterator i;
     for (i = this->children.begin(); i != this->children.end(); ++i)
         if ((*i)->has_kind(p_kind))
             return true;
@@ -193,7 +194,7 @@ void FiffDirNode::print(QTextStream& out, int indent) const
         out << '\n';
         j += count;
     }
-    for (const FiffDirNode::SPtr& child : children) {
+    for (const std::shared_ptr<FiffDirNode>& child : children) {
         child->print(out, indent + 5);
     }
     out << pad << "}\n";

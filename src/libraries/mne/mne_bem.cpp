@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_bem.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <math/warp.h>
@@ -52,7 +53,7 @@ using UTILSLIB::fail;
 
 //=============================================================================================================
 
-std::optional<FiffTag> find_tag(FiffStream& stream, const FiffDirNode::SPtr& node, std::initializer_list<fiff_int_t> kinds)
+std::optional<FiffTag> find_tag(FiffStream& stream, const std::shared_ptr<FiffDirNode>& node, std::initializer_list<fiff_int_t> kinds)
 {
     for (const fiff_int_t kind : kinds) {
         if (auto tag = node->find_tag(stream, kind)) {
@@ -64,7 +65,7 @@ std::optional<FiffTag> find_tag(FiffStream& stream, const FiffDirNode::SPtr& nod
 
 //=============================================================================================================
 
-Expected<MNEBemSurface> read_surface(FiffStream& stream, const FiffDirNode::SPtr& node, const std::string& name)
+Expected<MNEBemSurface> read_surface(FiffStream& stream, const std::shared_ptr<FiffDirNode>& node, const std::string& name)
 {
     MNEBemSurface surface;
     const auto id = find_tag(stream, node, {FIFF_BEM_SURF_ID});
@@ -155,14 +156,14 @@ Expected<MNEBem> MNEBem::read(FiffStream& stream, bool patch_stats)
     if (stream.dirtree()->dir_tree_find(FIFFB_BEM).empty()) {
         return fail(ErrorCode::NotFound, "no BEM in {}", name);
     }
-    const std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
+    const std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
     if (nodes.empty()) {
         return fail(ErrorCode::NotFound, "no BEM surfaces in {}", name);
     }
 
     MNEBem bem;
     bem.m_surfaces.reserve(nodes.size());
-    for (const FiffDirNode::SPtr& node : nodes) {
+    for (const std::shared_ptr<FiffDirNode>& node : nodes) {
         auto surface = read_surface(stream, node, name);
         if (!surface) {
             return std::unexpected(surface.error());

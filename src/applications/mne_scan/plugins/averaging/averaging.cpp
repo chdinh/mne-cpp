@@ -260,15 +260,15 @@ void Averaging::initPluginControlWidgets()
         int iBaselineFromSamples = (static_cast<float>(pAveragingSettingsView->getBaselineFromSeconds()) / 1000) * m_pFiffInfo->sfreq;
         int iBaselineToSamples = (static_cast<float>(pAveragingSettingsView->getBaselineToSeconds()) / 1000) * m_pFiffInfo->sfreq;
 
-        m_pRtAve = RtAveraging::SPtr::create(pAveragingSettingsView->getNumAverages(),
-                                             iPreStimSamples,
-                                             iPostStimSamples,
-                                             pAveragingSettingsView->getBaselineFromSeconds(),
-                                             pAveragingSettingsView->getBaselineToSeconds(),
-                                             iCurrentStimChIdx,
-                                             m_pFiffInfo);
+        m_pRtAve = std::make_shared<RtAveraging>(pAveragingSettingsView->getNumAverages(),
+                                                 iPreStimSamples,
+                                                 iPostStimSamples,
+                                                 pAveragingSettingsView->getBaselineFromSeconds(),
+                                                 pAveragingSettingsView->getBaselineToSeconds(),
+                                                 iCurrentStimChIdx,
+                                                 m_pFiffInfo);
 
-        connect(m_pRtAve.data(), &RtAveraging::evokedStim,
+        connect(m_pRtAve.get(), &RtAveraging::evokedStim,
                 this, &Averaging::onNewEvokedSet);
 
         m_pRtAve->setBaselineFrom(iBaselineFromSamples, pAveragingSettingsView->getBaselineFromSeconds());

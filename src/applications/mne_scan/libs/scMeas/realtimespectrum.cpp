@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "realtimespectrum.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -52,7 +53,7 @@ RealTimeSpectrum::~RealTimeSpectrum()
 
 //=============================================================================================================
 
-void RealTimeSpectrum::initFromFiffInfo(FiffInfo::SPtr& p_pFiffInfo)
+void RealTimeSpectrum::initFromFiffInfo(std::shared_ptr<FiffInfo>& p_pFiffInfo)
 {
     m_pFiffInfo = p_pFiffInfo;
 

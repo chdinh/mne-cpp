@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_cov.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <algorithm>
@@ -75,7 +76,7 @@ FiffCov::FiffCov()
 , dim(-1)
 , nfree(-1)
 {
-    qRegisterMetaType<QSharedPointer<FIFFLIB::FiffCov>>("QSharedPointer<FIFFLIB::FiffCov>");
+    qRegisterMetaType<std::shared_ptr<FIFFLIB::FiffCov>>();
     qRegisterMetaType<FIFFLIB::FiffCov>("FIFFLIB::FiffCov");
 }
 
@@ -116,7 +117,7 @@ FiffCov::FiffCov(const FiffCov& p_FiffCov)
 , eig(p_FiffCov.eig)
 , eigvec(p_FiffCov.eigvec)
 {
-    qRegisterMetaType<QSharedPointer<FIFFLIB::FiffCov>>("QSharedPointer<FIFFLIB::FiffCov>");
+    qRegisterMetaType<std::shared_ptr<FIFFLIB::FiffCov>>();
     qRegisterMetaType<FIFFLIB::FiffCov>("FIFFLIB::FiffCov");
 }
 

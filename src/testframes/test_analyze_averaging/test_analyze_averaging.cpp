@@ -111,7 +111,7 @@ void TestAnalyzeAveraging::averagesEveryEventCodeLikePython()
     };
     const Expected expected[2] = {{1, 5.0567231986985656e-14, -6.734846534962558e-08, -4.282182180774749e-09},
                                   {3, -6.863652119640187e-14, 3.3627187038465186e-08, -2.481697357232196e-11}};
-    const QSharedPointer<FIFFLIB::FiffEvokedSet> set = average->getEvokedSet();
+    const std::shared_ptr<FIFFLIB::FiffEvokedSet> set = average->getEvokedSet();
     QCOMPARE(set->evoked.size(), 2);
     for (int k = 0; k < 2; ++k) {
         const FIFFLIB::FiffEvoked& evoked = set->evoked[k];

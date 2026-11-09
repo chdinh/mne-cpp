@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "annotationmodel.h"
+#include <memory>
 
 #include <QBrush>
 #include <QDateTime>
@@ -577,7 +578,7 @@ bool AnnotationModel::removeRows(int position, int rows, const QModelIndex& pare
 
 //=============================================================================================================
 
-void AnnotationModel::setFiffInfo(const FIFFLIB::FiffInfo::SPtr& pFiffInfo)
+void AnnotationModel::setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo)
 {
     m_pFiffInfo = pFiffInfo;
 }
@@ -850,7 +851,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
         return false;
     }
 
-    const std::vector<FIFFLIB::FiffDirNode::SPtr> annotationBlocks =
+    const std::vector<std::shared_ptr<FIFFLIB::FiffDirNode>> annotationBlocks =
         stream.dirtree()->dir_tree_find(FiffBlockMneAnnotations);
 
     if (annotationBlocks.empty()) {

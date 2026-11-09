@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scdisp_global.h"
+#include <memory>
 #include "measurementwidget.h"
 
 //=============================================================================================================
@@ -154,7 +155,7 @@ private:
     QSharedPointer<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< ChannelSelectionView. */
     QPointer<DISPLIB::RtFiffRawView> m_pChannelDataView;                   /**< the QTableView being part of the model/view framework of Qt. */
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo, which is used insteadd of ListChInfo*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo, which is used insteadd of ListChInfo*/
 
     QPointer<QAction> m_pActionHideBad; /**< Hide bad channels. */
 

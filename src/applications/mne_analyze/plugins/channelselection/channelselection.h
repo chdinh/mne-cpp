@@ -133,7 +133,7 @@ private:
      *
      * @param[in] pFiffInfo    FiffInfo for currently loaded file.
      */
-    void setFiffSettings(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void setFiffSettings(std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo);
 
     QPointer<ANSHAREDLIB::Communicator> m_pCommu; /**< To broadcast signals. */
 
@@ -141,7 +141,7 @@ private:
 
     std::unique_ptr<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< View for selecting channels to be displayed. */
     QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel;          /**< Hold channel info - needed to initialize channelselectionview. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                          /**< Hold Information baout currently loaded file. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                         /**< Hold Information baout currently loaded file. */
 
     DISPLIB::ApplyToView* m_pApplyToView;
 

@@ -29,6 +29,8 @@
 
 #include <QSharedPointer>
 #include <QString>
+#include <utility>
+#include <utility>
 
 //=============================================================================================================
 // DEFINE NAMESPACE SCMEASLIB
@@ -172,7 +174,7 @@ private:
 
 inline void RealTimeSampleArrayChInfo::setChannelName(QString p_qStringChName)
 {
-    m_qStringChName = p_qStringChName;
+    m_qStringChName = std::move(std::move(p_qStringChName));
 }
 
 //=============================================================================================================

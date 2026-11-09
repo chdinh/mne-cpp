@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_filter.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <fiff/fiff_raw_data.h>
@@ -30,6 +31,7 @@
 #include <Eigen/Core>
 
 #include <cmath>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -46,7 +48,7 @@ using namespace MNELIB;
 //=============================================================================================================
 
 bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
-                                 QSharedPointer<FiffRawData> pFiffRawData,
+                                 const std::shared_ptr<FiffRawData>& pFiffRawData,
                                  int type,
                                  double dCenterfreq,
                                  double bandwidth,
@@ -82,7 +84,7 @@ bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
 //=============================================================================================================
 
 bool RTPROCESSINGLIB::filterFile(QIODevice& pIODevice,
-                                 QSharedPointer<FiffRawData> pFiffRawData,
+                                 const std::shared_ptr<FiffRawData>& pFiffRawData,
                                  const FilterKernel& filterKernel,
                                  const RowVectorXi& vecPicks,
                                  bool bUseThreads)

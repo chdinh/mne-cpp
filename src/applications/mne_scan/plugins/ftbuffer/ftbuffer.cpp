@@ -39,7 +39,7 @@ using namespace UTILSLIB;
 FtBuffer::FtBuffer()
 : m_bIsConfigured(false)
 , m_pFtBuffProducer(QSharedPointer<FtBuffProducer>::create(this))
-, m_pFiffInfo(QSharedPointer<FiffInfo>::create())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 , m_pCircularBuffer(std::make_shared<CircularBuffer_Matrix_double>(10))
 , m_sBufferAddress("127.0.0.1")
 , m_iBufferPort(1972)
@@ -203,8 +203,8 @@ bool FtBuffer::setupRTMSA()
     if (!QFile::exists("neuromag2ft.fif")) {
         qInfo() << "[FtBuffer::setupRTMSA] Could not open file.  Plugin output won't be based on local fif parameters.";
     } else {
-        m_pNeuromagHeadChunkData = QSharedPointer<FIFFLIB::FiffRawData>(new FiffRawData(std::filesystem::path("neuromag2ft.fif")));
-        m_pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(m_pNeuromagHeadChunkData->info));
+        m_pNeuromagHeadChunkData = std::make_shared<FiffRawData>(std::filesystem::path("neuromag2ft.fif"));
+        m_pFiffInfo = std::make_shared<FiffInfo>(m_pNeuromagHeadChunkData->info);
 
         //Set the RMTSA parameters
         m_pRTMSA_BufferOutput->measurementData()->initFromFiffInfo(m_pFiffInfo);
@@ -229,7 +229,7 @@ bool FtBuffer::setupRTMSA(const FIFFLIB::FiffInfo& FiffInfo)
 
     qInfo().noquote().nospace() << "attempting to init info";
 
-    m_pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FIFFLIB::FiffInfo(FiffInfo));
+    m_pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>(FiffInfo);
 
     qInfo().noquote().nospace() << "init info";
 
@@ -249,13 +249,13 @@ bool FtBuffer::setupRTMSA(const MetaData& metadata)
     if (metadata.info.sfreq < 0) {
         return false;
     } else {
-        m_pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FIFFLIB::FiffInfo(metadata.info));
+        m_pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>(metadata.info);
 
         m_pRTMSA_BufferOutput->measurementData()->initFromFiffInfo(m_pFiffInfo);
         m_pRTMSA_BufferOutput->measurementData()->setMultiArraySize(1);
         m_pRTMSA_BufferOutput->measurementData()->setVisibility(true);
         if (metadata.bFiffDigitizerData) {
-            m_pRTMSA_BufferOutput->measurementData()->setDigitizerData(QSharedPointer<FIFFLIB::FiffDigitizerData>(new FIFFLIB::FiffDigitizerData(metadata.dig)));
+            m_pRTMSA_BufferOutput->measurementData()->setDigitizerData(std::make_shared<FIFFLIB::FiffDigitizerData>(metadata.dig));
         }
         m_bIsConfigured = true;
     }

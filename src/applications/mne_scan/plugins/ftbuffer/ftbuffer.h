@@ -223,8 +223,8 @@ private:
     QThread m_pProducerThread; /**< Producer thread for the FtBuffProducer object. */
 
     QSharedPointer<FtBuffProducer> m_pFtBuffProducer;                                                         /**< Pointer to producer object that handles data from FtConnector*/
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                                                            /**< Fiff measurement info.*/
-    QSharedPointer<FIFFLIB::FiffRawData> m_pNeuromagHeadChunkData;                                            /**< Fiff into parser for header data collected from Neuromag extended header. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                                                           /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffRawData> m_pNeuromagHeadChunkData;                                           /**< Fiff into parser for header data collected from Neuromag extended header. */
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_BufferOutput; /**< The RealTimeSampleArray to provide the plugin output data.*/
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer;                                /**< Holds incoming raw data. */
 

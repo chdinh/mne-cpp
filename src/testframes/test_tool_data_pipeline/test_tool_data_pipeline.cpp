@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include <inv/inv_source_estimate.h>
+#include <memory>
 #include <inv/dipole_fit/inv_ecd_set.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_evoked_set.h>
@@ -2128,7 +2129,7 @@ private slots:
         QFile solFile(outPath);
         FIFFLIB::FiffStream stream(&solFile);
         QVERIFY(stream.open());
-        const std::vector<FIFFLIB::FiffDirNode::SPtr> bemNodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        const std::vector<std::shared_ptr<FIFFLIB::FiffDirNode>> bemNodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         QCOMPARE(bemNodes.size(), 1);
         const auto approx = bemNodes[0]->find_tag(stream, FIFF_BEM_APPROX);
         QVERIFY(approx);

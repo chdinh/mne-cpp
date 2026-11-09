@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <dsp/rt/rt_averaging.h>
+#include <memory>
 #include <utils/string_utils.h>
 #include <dsp/rt/rt_connectivity.h>
 #include <dsp/rt/rt_cov.h>
@@ -104,9 +105,9 @@ bool waitFor(const bool& done, int msec)
 }
 
 /** Two MEG magnetometers and one stimulus channel at @p sfreq. */
-FiffInfo::SPtr makeInfo(double sfreq)
+std::shared_ptr<FiffInfo> makeInfo(double sfreq)
 {
-    FiffInfo::SPtr info = FiffInfo::SPtr::create();
+    std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>();
     info->sfreq = sfreq;
     for (const QString& name : {QStringLiteral("MEG0111"), QStringLiteral("MEG0121"), QStringLiteral("STI014")}) {
         FiffChInfo ch;
@@ -143,7 +144,7 @@ int main(int argc, char* argv[])
 
     // ---------------------------------------------------------------------------------------------------------
     // Averaging: every block holds one trigger at sample 50; epoch k carries amplitude k on MEG0111
-    const FiffInfo::SPtr info = makeInfo(1000.0);
+    const std::shared_ptr<FiffInfo> info = makeInfo(1000.0);
     const int nBlocks = 4;
     QList<MatrixXd> blocks;
     for (int k = 1; k <= nBlocks; ++k) {
@@ -208,7 +209,7 @@ int main(int argc, char* argv[])
 
     // ---------------------------------------------------------------------------------------------------------
     // Noise spectrum: sin(25 Hz) + 0.1 cos(50 Hz) at 200 Hz in ten 64-sample blocks
-    const FiffInfo::SPtr info200 = makeInfo(200.0);
+    const std::shared_ptr<FiffInfo> info200 = makeInfo(200.0);
     MatrixXd tones(3, 640);
     for (int t = 0; t < tones.cols(); ++t) {
         tones(0, t) = std::sin(2.0 * kPi * 25.0 * t / 200.0) + 0.1 * std::cos(2.0 * kPi * 50.0 * t / 200.0);
@@ -277,7 +278,7 @@ int main(int argc, char* argv[])
     // ---------------------------------------------------------------------------------------------------------
     // HPI: fit the four coils of the test recording on the worker and directly
     FiffRawData hpiRaw((dataDir + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
-    const FiffInfo::SPtr hpiInfo = FiffInfo::SPtr::create(hpiRaw.info);
+    const std::shared_ptr<FiffInfo> hpiInfo = std::make_shared<FiffInfo>(hpiRaw.info);
     MatrixXd hpiData;
     MatrixXd hpiTimes;
     ok &= hpiRaw.read_raw_segment(hpiData, hpiTimes, hpiRaw.first_samp, hpiRaw.first_samp + 399);
@@ -306,7 +307,7 @@ int main(int argc, char* argv[])
     // ---------------------------------------------------------------------------------------------------------
     // Inverse operator from the sample forward solution and the covariance of the sample raw data
     FiffRawData raw((dataDir + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-    FiffInfo::SPtr rawInfo = FiffInfo::SPtr::create(raw.info);
+    std::shared_ptr<FiffInfo> rawInfo = std::make_shared<FiffInfo>(raw.info);
     QSharedPointer<MNEForwardSolution> fwd = QSharedPointer<MNEForwardSolution>::create((dataDir + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
     MatrixXd rawData;
     MatrixXd rawTimes;

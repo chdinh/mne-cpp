@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "channeldataview.h"
+#include <memory>
 #include "helpers/channeldatamodel.h"
 #include "helpers/channellabelpanel.h"
 #include "helpers/channelrhiview.h"
@@ -375,7 +376,7 @@ void ChannelDataView::setupLayout()
 
 //=============================================================================================================
 
-void ChannelDataView::init(QSharedPointer<FiffInfo> pInfo)
+void ChannelDataView::init(const std::shared_ptr<FiffInfo>& pInfo)
 {
     m_pFiffInfo = pInfo;
     m_pModel->init(pInfo);

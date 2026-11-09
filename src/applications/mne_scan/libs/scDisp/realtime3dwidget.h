@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "scdisp_global.h"
+#include <memory>
 
 #include "measurementwidget.h"
 
@@ -137,7 +138,7 @@ protected:
      *
      * @param[in] pDigData      New digitizer data
      */
-    void alignFiducials(QSharedPointer<FIFFLIB::FiffDigitizerData> pDigData);
+    void alignFiducials(const std::shared_ptr<FIFFLIB::FiffDigitizerData>& pDigData);
 
     //=========================================================================================================
     /**
@@ -156,7 +157,7 @@ protected:
      *
      * @return
      */
-    QMatrix4x4 calculateInverseMatrix(const QSharedPointer<FIFFLIB::FiffDigitizerData> pDigData,
+    QMatrix4x4 calculateInverseMatrix(const std::shared_ptr<FIFFLIB::FiffDigitizerData>& pDigData,
                                       float scale) const;
 
     //=========================================================================================================
@@ -179,8 +180,8 @@ protected:
      */
     void createGUI();
 
-    QString m_sFilePathDigitizers;                                   /**< Path to loaded fiff file with digitizer data. */
-    QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigitizerData; /**< Fiff digitizer data for current measurement. */
+    QString m_sFilePathDigitizers;                                    /**< Path to loaded fiff file with digitizer data. */
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pFiffDigitizerData; /**< Fiff digitizer data for current measurement. */
 
     int m_iNumberBadChannels; /**< The last received number of bad channels. */
 

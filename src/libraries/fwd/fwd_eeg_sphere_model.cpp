@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "math/simplex_algorithm.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include "fwd_eeg_sphere_model.h"
@@ -72,10 +73,10 @@ FwdEegSphereModel::FwdEegSphereModel(const FwdEegSphereModel& p_FwdEegSphereMode
 
 //=============================================================================================================
 
-FwdEegSphereModel::UPtr FwdEegSphereModel::fwd_create_eeg_sphere_model(const std::string& name,
-                                                                       int nlayer,
-                                                                       const VectorXf& rads,
-                                                                       const VectorXf& sigmas)
+std::unique_ptr<FwdEegSphereModel> FwdEegSphereModel::fwd_create_eeg_sphere_model(const std::string& name,
+                                                                                  int nlayer,
+                                                                                  const VectorXf& rads,
+                                                                                  const VectorXf& sigmas)
 /*
       * Produce a new sphere model structure
       */
@@ -115,15 +116,15 @@ FwdEegSphereModel::~FwdEegSphereModel()
 
 //=============================================================================================================
 
-FwdEegSphereModel::UPtr FwdEegSphereModel::setup_eeg_sphere_model(const std::filesystem::path& eeg_model_file, std::string eeg_model_name, float eeg_sphere_rad)
+std::unique_ptr<FwdEegSphereModel> FwdEegSphereModel::setup_eeg_sphere_model(const std::filesystem::path& eeg_model_file, std::string eeg_model_name, float eeg_sphere_rad)
 {
     if (eeg_model_name.empty())
         eeg_model_name = "Default";
 
-    FwdEegSphereModelSet::UPtr eeg_models = FwdEegSphereModelSet::fwd_load_eeg_sphere_models(eeg_model_file, nullptr);
+    std::unique_ptr<FwdEegSphereModelSet> eeg_models = FwdEegSphereModelSet::fwd_load_eeg_sphere_models(eeg_model_file, nullptr);
     eeg_models->fwd_list_eeg_sphere_models();
 
-    FwdEegSphereModel::UPtr eeg_model = eeg_models->fwd_select_eeg_sphere_model(eeg_model_name);
+    std::unique_ptr<FwdEegSphereModel> eeg_model = eeg_models->fwd_select_eeg_sphere_model(eeg_model_name);
     if (!eeg_model) {
         return nullptr;
     }

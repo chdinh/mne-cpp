@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include <iostream>
+#include <memory>
 #include <utils/string_utils.h>
 #include <vector>
 
@@ -121,7 +122,7 @@ int main(int argc, char* argv[])
 
     // Init data loading and writing
     FiffRawData raw(parser.value(inFile).toStdString());
-    QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
+    std::shared_ptr<FiffInfo> pFiffInfo = std::make_shared<FiffInfo>(raw.info);
 
     // Setup comparison of transformation matrices
     FiffCoordTrans transDevHead = pFiffInfo->dev_head_t; // transformation that only updates after big head movements
@@ -161,7 +162,7 @@ int main(int argc, char* argv[])
     MatrixXd matProjectors = MatrixXd::Identity(pFiffInfo->chs.size(), pFiffInfo->chs.size());
 
     //Do a copy here because we are going to change the activity flags of the SSP's
-    FiffInfo infoTemp = *(pFiffInfo.data());
+    FiffInfo infoTemp = *(pFiffInfo.get());
 
     //Turn on all SSP
     for (int i = 0; i < std::ssize(infoTemp.projs); ++i) {

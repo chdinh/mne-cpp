@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <QAbstractTableModel>
+#include <memory>
 #include <QColor>
 #include <QFile>
 #include <QPair>
@@ -151,7 +152,7 @@ public:
      *
      * @param[in] pFiffInfo  Measurement info of the currently loaded raw file.
      */
-    void setFiffInfo(const FIFFLIB::FiffInfo::SPtr& pFiffInfo);
+    void setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -442,11 +443,11 @@ private:
      */
     QVector<AnnotationEntry> exportEntries() const;
 
-    FIFFLIB::FiffAnnotations m_fiffAnnotations; /**< Canonical annotation storage (time-based). */
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo;        /**< Measurement info used for sample/time conversion. */
-    int m_iFirstSample = 0;                     /**< First sample of the loaded raw file. */
-    int m_iLastSample = 0;                      /**< Last sample of the loaded raw file. */
-    bool m_bFileLoaded = false;                 /**< True if annotations were loaded from disk. */
+    FIFFLIB::FiffAnnotations m_fiffAnnotations;     /**< Canonical annotation storage (time-based). */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Measurement info used for sample/time conversion. */
+    int m_iFirstSample = 0;                         /**< First sample of the loaded raw file. */
+    int m_iLastSample = 0;                          /**< Last sample of the loaded raw file. */
+    bool m_bFileLoaded = false;                     /**< True if annotations were loaded from disk. */
 };
 
 } // namespace MNEBROWSE

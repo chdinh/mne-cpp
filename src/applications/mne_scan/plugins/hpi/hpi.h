@@ -253,7 +253,7 @@ private:
      *
      * @param[in] info      input fiff info objcts
      */
-    void initFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> info);
+    void initFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> info);
 
     //=========================================================================================================
     /**
@@ -261,7 +261,7 @@ private:
      *
      * @param[in] fiffDig   input fiff digitizer information
      */
-    void initFiffDigitizers(QSharedPointer<FIFFLIB::FiffDigitizerData> fiffDig);
+    void initFiffDigitizers(const std::shared_ptr<FIFFLIB::FiffDigitizerData>& fiffDig);
 
     //=========================================================================================================
     /**
@@ -293,8 +293,8 @@ private:
     Eigen::MatrixXd m_matData;           /**< The last data block.*/
     Eigen::MatrixXd m_matCompProjectors; /**< Holds the matrix with the SSP and compensator projectors.*/
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
-    QSharedPointer<FIFFLIB::FiffDigitizerData> m_pFiffDigitizerData;
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pFiffDigitizerData;
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Holds incoming raw data. */
 
     SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pHpiInput; /**< The RealTimeMultiSampleArray of the Hpi input.*/

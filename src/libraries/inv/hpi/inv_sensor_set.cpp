@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "inv_sensor_set.h"
+#include <memory>
 
 #include <vector>
 #include <iostream>
@@ -56,7 +57,7 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-InvSensorSet::InvSensorSet(const FwdCoilSet::SPtr pFwdSensorSet)
+InvSensorSet::InvSensorSet(const std::shared_ptr<FwdCoilSet>& pFwdSensorSet)
 {
     if (pFwdSensorSet != nullptr) {
         initFromFwdCoilSet(pFwdSensorSet);
@@ -65,7 +66,7 @@ InvSensorSet::InvSensorSet(const FwdCoilSet::SPtr pFwdSensorSet)
 
 //=============================================================================================================
 
-void InvSensorSet::initFromFwdCoilSet(const QSharedPointer<FWDLIB::FwdCoilSet> pFwdSensorSet)
+void InvSensorSet::initFromFwdCoilSet(const std::shared_ptr<FWDLIB::FwdCoilSet>& pFwdSensorSet)
 {
     m_ncoils = pFwdSensorSet->ncoil();
     m_np = pFwdSensorSet->coils[0]->np;
@@ -118,7 +119,7 @@ void InvSensorSet::initMatrices(int ncoils, int np)
 InvSensorSetCreator::InvSensorSetCreator()
 {
     const QString qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
-    m_pCoilDefinitions = FwdCoilSet::SPtr(FwdCoilSet::read_coil_defs(qPath.toStdU16String()).release());
+    m_pCoilDefinitions = std::shared_ptr<FwdCoilSet>(FwdCoilSet::read_coil_defs(qPath.toStdU16String()).release());
 }
 
 //=============================================================================================================
@@ -129,7 +130,7 @@ InvSensorSet InvSensorSetCreator::updateSensorSet(const std::vector<FIFFLIB::Fif
     if (channelList.empty()) {
         return InvSensorSet();
     } else {
-        auto pCoilMeg = FwdCoilSet::SPtr(m_pCoilDefinitions->create_meg_coils(channelList, static_cast<int>(channelList.size()), static_cast<int>(accuracy)).release());
+        auto pCoilMeg = std::shared_ptr<FwdCoilSet>(m_pCoilDefinitions->create_meg_coils(channelList, static_cast<int>(channelList.size()), static_cast<int>(accuracy)).release());
         return InvSensorSet(pCoilMeg);
     }
 }

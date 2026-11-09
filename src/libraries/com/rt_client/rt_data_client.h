@@ -40,6 +40,7 @@
 //=============================================================================================================
 
 #include "../com_global.h"
+#include <memory>
 
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_info.h>
@@ -77,13 +78,13 @@ namespace COMLIB
  */
 struct MetaData
 {
-    MetaData(FIFFLIB::FiffInfo::SPtr pInfo,
-             FIFFLIB::FiffDigitizerData::SPtr pDigitizerData)
-    : m_pInfo(pInfo)
-    , m_pDigitizerData(pDigitizerData) {};
+    MetaData(std::shared_ptr<FIFFLIB::FiffInfo> pInfo,
+             std::shared_ptr<FIFFLIB::FiffDigitizerData> pDigitizerData)
+    : m_pInfo(std::move(pInfo))
+    , m_pDigitizerData(std::move(pDigitizerData)) {};
 
-    FIFFLIB::FiffInfo::SPtr m_pInfo;                   /**< Measurement information (channel layout, sampling rate, etc.). */
-    FIFFLIB::FiffDigitizerData::SPtr m_pDigitizerData; /**< Head-shape digitizer point set. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pInfo;                   /**< Measurement information (channel layout, sampling rate, etc.). */
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pDigitizerData; /**< Head-shape digitizer point set. */
 };
 
 //=============================================================================================================
@@ -134,7 +135,7 @@ public:
      *
      * @return the read fiff measurement information.
      */
-    FIFFLIB::FiffInfo::SPtr readInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> readInfo();
 
     //=========================================================================================================
     /**

@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scmeas_global.h"
+#include <memory>
 #include "measurement.h"
 
 #include <mne/mne_forward_solution.h>
@@ -88,7 +89,7 @@ public:
      *
      * @param[in] pFiffInfo     The new fiff info.
      */
-    void setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -96,7 +97,7 @@ public:
      *
      * @return     The current fiff info.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> getFiffInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo();
 
     //=========================================================================================================
     /**
@@ -169,7 +170,7 @@ private:
     bool m_bClustered;       /**< If fwd is clustered.*/
 
     QSharedPointer<MNELIB::MNEForwardSolution> m_pFwdSolution; /**< The Mne Forward Solution. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;             /**< The Fiff Info. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;            /**< The Fiff Info. */
 
     QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_pNamedMatSol;     /**< The solution matrix (LF). */
     QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_pNamedMatSolGrad; /**< The gradient solution matrix (LF). */

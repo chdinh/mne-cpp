@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "inv_hpi_data_updater.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -54,7 +55,7 @@ using namespace Eigen;
 
 //=============================================================================================================
 
-InvHpiDataUpdater::InvHpiDataUpdater(const FiffInfo::SPtr pFiffInfo)
+InvHpiDataUpdater::InvHpiDataUpdater(const std::shared_ptr<FiffInfo>& pFiffInfo)
 : m_sensors(InvSensorSet())
 {
     updateBadChannels(pFiffInfo);
@@ -65,14 +66,14 @@ InvHpiDataUpdater::InvHpiDataUpdater(const FiffInfo::SPtr pFiffInfo)
 
 //=============================================================================================================
 
-void InvHpiDataUpdater::updateBadChannels(FiffInfo::SPtr pFiffInfo)
+void InvHpiDataUpdater::updateBadChannels(const std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     m_lBads = pFiffInfo->bads;
 }
 
 //=============================================================================================================
 
-void InvHpiDataUpdater::updateChannels(FiffInfo::SPtr pFiffInfo)
+void InvHpiDataUpdater::updateChannels(const std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     // Get the indices of inner layer channels and exclude bad channels and create channellist
     const int iNumCh = pFiffInfo->nchan;
@@ -118,7 +119,7 @@ void InvHpiDataUpdater::updateHpiDigitizer(const FiffDigPointSet& dig)
 
 //=============================================================================================================
 
-void InvHpiDataUpdater::checkForUpdate(const FiffInfo::SPtr pFiffInfo)
+void InvHpiDataUpdater::checkForUpdate(const std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     const bool bUpdate = checkIfChanged(pFiffInfo->bads, pFiffInfo->chs);
     if (bUpdate) {

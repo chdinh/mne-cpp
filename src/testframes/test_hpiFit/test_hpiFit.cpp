@@ -18,6 +18,7 @@
 
 
 #include <iostream>
+#include <memory>
 #include <utils/string_utils.h>
 #include <vector>
 #include <math.h>
@@ -86,7 +87,7 @@ private slots:
 
 private:
     FiffRawData m_raw;
-    QSharedPointer<FiffInfo> m_pFiffInfo;
+    std::shared_ptr<FiffInfo> m_pFiffInfo;
     MatrixXd m_matData;
     double dErrorTol;
     double dErrorEqualTol;
@@ -118,7 +119,7 @@ void TestHpiFit::initTestCase()
 
     // Setup for reading the raw data
     m_raw = FiffRawData((QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/test_hpiFit_raw.fif").toStdString());
-    m_pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_raw.info);
 
     // read data segment (200 samples)
     int iBuffer = 200;
@@ -131,7 +132,7 @@ void TestHpiFit::initTestCase()
     m_matProjectors = MatrixXd::Identity(m_pFiffInfo->chs.size(), m_pFiffInfo->chs.size());
 
     //Do a copy here because we are going to change the activity flags of the SSP's
-    FiffInfo infoTemp = *(m_pFiffInfo.data());
+    FiffInfo infoTemp = *(m_pFiffInfo.get());
 
     //Turn on all SSP
     for (int i = 0; i < std::ssize(infoTemp.projs); ++i) {
@@ -152,7 +153,7 @@ void TestHpiFit::initTestCase()
 void TestHpiFit::init()
 {
     // run at beginning of each test
-    m_pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_raw.info);
 }
 
 //=============================================================================================================

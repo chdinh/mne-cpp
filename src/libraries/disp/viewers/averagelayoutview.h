@@ -29,6 +29,7 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+#include <memory>
 #include "abstractview.h"
 
 //=============================================================================================================
@@ -210,7 +211,7 @@ public:
      *
      * @param[in] pFiffInfo    shared pointer to Fiff Info of currently loaded data.
      */
-    void setFiffInfo(const QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -273,7 +274,7 @@ protected:
     QSharedPointer<DISPLIB::EvokedSetModel> m_pEvokedSetModel;     /**< The data model. */
     QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel; /**< Channel info model. */
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo for currently loaded file. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo for currently loaded file. */
 
     QPointer<QGraphicsView> m_pAverageLayoutView; /**< View for 2D average layout scene. */
 

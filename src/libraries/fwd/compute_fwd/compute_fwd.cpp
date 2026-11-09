@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "compute_fwd.h"
+#include <memory>
 
 #include <vector>
 #include <mne/mne_forward_solution.h>
@@ -216,13 +217,13 @@ void ComputeFwd::initFwd()
             UTILSLIB::Log::critical("{}", pStream.error().what());
             return;
         }
-        FIFFLIB::FiffDirNode::SPtr DirNode;
+        std::shared_ptr<FIFFLIB::FiffDirNode> DirNode;
         FIFFLIB::FiffInfo fiffInfo;
         if (!pStream->read_meas_info(pStream->dirtree(), fiffInfo, DirNode)) {
             UTILSLIB::Log::critical("Could not find the channel information.");
             return;
         }
-        m_pInfoBase = QSharedPointer<FIFFLIB::FiffInfo>(new FiffInfo(fiffInfo));
+        m_pInfoBase = std::make_shared<FiffInfo>(fiffInfo);
     } else {
         m_pInfoBase = m_pSettings->pFiffInfo;
     }

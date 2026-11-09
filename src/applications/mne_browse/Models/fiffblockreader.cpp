@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "fiffblockreader.h"
+#include <memory>
 #include <utils/byte_stream.h>
 #include <utils/string_utils.h>
 
@@ -91,7 +92,7 @@ bool FiffBlockReader::open(const QString& path)
     }
 
     try {
-        m_raw = QSharedPointer<FiffRawData>(new FiffRawData(path.toStdU16String()));
+        m_raw = std::make_shared<FiffRawData>(path.toStdU16String());
     } catch (const std::exception& e) {
         qWarning() << "[FiffBlockReader] Exception constructing FiffRawData:" << e.what();
         return false;
@@ -102,7 +103,7 @@ bool FiffBlockReader::open(const QString& path)
         return false;
     }
 
-    m_fiffInfo = QSharedPointer<FiffInfo>(new FiffInfo(m_raw->info));
+    m_fiffInfo = std::make_shared<FiffInfo>(m_raw->info);
     m_firstSample = m_raw->first_samp;
     m_lastSample = m_raw->last_samp;
 
@@ -125,7 +126,7 @@ bool FiffBlockReader::openBuffer(const QByteArray& data, const QString& displayN
 
     const auto* begin = reinterpret_cast<const std::byte*>(data.constData());
     try {
-        m_raw = QSharedPointer<FiffRawData>(new FiffRawData(std::make_unique<UTILSLIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + data.size()))));
+        m_raw = std::make_shared<FiffRawData>(std::make_unique<UTILSLIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + data.size())));
     } catch (const std::exception& e) {
         qWarning() << "[FiffBlockReader] Exception constructing FiffRawData from buffer:" << e.what();
         return false;
@@ -137,7 +138,7 @@ bool FiffBlockReader::openBuffer(const QByteArray& data, const QString& displayN
         return false;
     }
 
-    m_fiffInfo = QSharedPointer<FiffInfo>(new FiffInfo(m_raw->info));
+    m_fiffInfo = std::make_shared<FiffInfo>(m_raw->info);
     m_firstSample = m_raw->first_samp;
     m_lastSample = m_raw->last_samp;
 
@@ -231,11 +232,11 @@ MatrixXd FiffBlockReader::doRead(int from, int to)
 
 void FiffBlockReader::updateProjections()
 {
-    if (m_raw.isNull() || !m_fiffInfo)
+    if (!m_raw || !m_fiffInfo)
         return;
 
     qWarning() << "[FiffBlockReader] updateProjections called. FiffInfo ptr="
-               << reinterpret_cast<void*>(m_fiffInfo.data());
+               << reinterpret_cast<void*>(m_fiffInfo.get());
 
     // Count active projectors for diagnostics
     int nActive = 0;

@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "mne_source_spaces.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -51,7 +52,7 @@ using UTILSLIB::ErrorCode;
 using UTILSLIB::Expected;
 using UTILSLIB::fail;
 
-Expected<MNEHemisphere> read_source_space(FiffStream& stream, const FiffDirNode::SPtr& p_Tree, const std::string& name)
+Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_ptr<FiffDirNode>& p_Tree, const std::string& name)
 {
     MNEHemisphere p_Hemisphere;
 
@@ -460,14 +461,14 @@ Expected<MNESourceSpaces> MNESourceSpaces::read(FiffStream& stream, bool add_geo
     if (!stream.isOpen() && !stream.open()) {
         return fail(ErrorCode::Io, "cannot open {}", name);
     }
-    const std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
+    const std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);
     if (nodes.empty()) {
         return fail(ErrorCode::NotFound, "no source spaces in {}", name);
     }
 
     MNESourceSpaces spaces;
     spaces.m_sourceSpaces.reserve(nodes.size());
-    for (const FiffDirNode::SPtr& node : nodes) {
+    for (const std::shared_ptr<FiffDirNode>& node : nodes) {
         auto hemisphere = read_source_space(stream, node, name);
         if (!hemisphere) {
             return std::unexpected(hemisphere.error());

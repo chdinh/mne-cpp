@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+#include <memory>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_evoked_set.h>
@@ -152,7 +153,7 @@ void TestFiffCoverage::testGetEvokedEntries()
     QVERIFY(stream.open());
 
     // Find evoked nodes in the directory tree
-    std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
+    std::vector<std::shared_ptr<FiffDirNode>> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     UTILSLIB::StringList comments;
     std::vector<fiff_int_t> aspect_kinds;
     std::string t;
@@ -172,7 +173,7 @@ void TestFiffCoverage::testGetEvokedEntriesCount()
     FiffStream stream(&file);
     QVERIFY(stream.open());
 
-    std::vector<FiffDirNode::SPtr> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
+    std::vector<std::shared_ptr<FiffDirNode>> evoked_nodes = stream.dirtree()->dir_tree_find(FIFFB_EVOKED);
     UTILSLIB::StringList comments;
     std::vector<fiff_int_t> aspect_kinds;
     std::string t;
@@ -373,8 +374,8 @@ void TestFiffCoverage::testReadNamedMatrix()
 
     // The forward solution file should contain named matrices
     // Search for a named matrix in the directory tree
-    FiffDirNode::SPtr megNode;
-    std::vector<FiffDirNode::SPtr> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+    std::shared_ptr<FiffDirNode> megNode;
+    std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
     if (!nodes.empty()) {
         megNode = nodes[0];
         FiffNamedMatrix namedMat;
@@ -403,7 +404,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
 
     std::vector<FiffCtfComp> comps;
     FiffInfo info;
-    FiffDirNode::SPtr nodeInfo;
+    std::shared_ptr<FiffDirNode> nodeInfo;
     stream.read_meas_info(stream.dirtree(), info, nodeInfo);
     comps = info.comps;
     stream.close();

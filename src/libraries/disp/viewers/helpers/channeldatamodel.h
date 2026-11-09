@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include "../../disp_global.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -113,7 +114,7 @@ public:
      *
      * @param[in] pFiffInfo  The FiffInfo describing the channels.
      */
-    void init(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void init(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -301,7 +302,7 @@ private:
 
     mutable QReadWriteLock m_lock;
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;
     QVector<QVector<float>> m_channelData; // [ch][sample]
     int m_firstSample = 0;
     int m_maxStoredSamples = 0; // 0 = unlimited

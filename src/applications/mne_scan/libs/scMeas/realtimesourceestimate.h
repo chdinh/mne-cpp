@@ -43,6 +43,7 @@
 #include <QList>
 #include <QMutex>
 #include <QMutexLocker>
+#include <utility>
 
 //=============================================================================================================
 // DEFINE NAMESPACE SCMEASLIB
@@ -173,7 +174,7 @@ public:
      *
      * @param[in] p_fiffInfo the new FiffInfo..
      */
-    void setFiffInfo(FIFFLIB::FiffInfo::SPtr p_fiffInfo);
+    void setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> p_fiffInfo);
 
     //=========================================================================================================
     /**
@@ -181,7 +182,7 @@ public:
      *
      * @return the current FiffInfo.
      */
-    FIFFLIB::FiffInfo::SPtr getFiffInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo();
 
     //=========================================================================================================
     /**
@@ -202,8 +203,8 @@ public:
 private:
     mutable QMutex m_qMutex; /**< Mutex to ensure thread safety. */
 
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo;    /**< The Fiff info. */
-    FIFFLIB::FiffCoordTrans m_mriHeadTrans; /**< Mri to head transformation. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff info. */
+    FIFFLIB::FiffCoordTrans m_mriHeadTrans;         /**< Mri to head transformation. */
 
     std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotSet; /**< FsAnnotation set. */
     std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfSet;     /**< FsSurface set. */
@@ -290,15 +291,15 @@ inline bool RealTimeSourceEstimate::isInitialized() const
 
 //=============================================================================================================
 
-inline void RealTimeSourceEstimate::setFiffInfo(FIFFLIB::FiffInfo::SPtr p_fiffInfo)
+inline void RealTimeSourceEstimate::setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> p_fiffInfo)
 {
     QMutexLocker locker(&m_qMutex);
-    m_pFiffInfo = p_fiffInfo;
+    m_pFiffInfo = std::move(p_fiffInfo);
 }
 
 //=============================================================================================================
 
-inline FIFFLIB::FiffInfo::SPtr RealTimeSourceEstimate::getFiffInfo()
+inline std::shared_ptr<FIFFLIB::FiffInfo> RealTimeSourceEstimate::getFiffInfo()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFiffInfo;

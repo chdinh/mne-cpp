@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include <inv/hpi/inv_hpi_data_updater.h>
+#include <memory>
 
 #include <vector>
 #include <inv/hpi/inv_hpi_fit.h>
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
     bool ok = true;
 
     FiffRawData raw((data + "/MEG/sample/test_hpiFit_raw.fif").toStdString());
-    const FiffInfo::SPtr info = FiffInfo::SPtr::create(raw.info);
+    const std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>(raw.info);
     MatrixXd segment;
     MatrixXd times;
     ok &= raw.read_raw_segment(segment, times, raw.first_samp, raw.first_samp + static_cast<int>(std::ceil(0.2 * info->sfreq)));

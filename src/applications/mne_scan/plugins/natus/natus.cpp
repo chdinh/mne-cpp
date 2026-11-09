@@ -51,7 +51,7 @@ Natus::Natus()
 , m_iSamplesPerBlock(256)
 , m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/natus/")
 , m_pRMTSA_Natus(PluginOutputData<RealTimeMultiSampleArray>::create(this, "Natus", "EEG output data"))
-, m_pFiffInfo(QSharedPointer<FiffInfo>::create())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 {
     m_pRMTSA_Natus->measurementData()->setName(this->getName()); //Provide name to auto store widget settings
 }

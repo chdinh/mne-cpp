@@ -32,6 +32,7 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <memory>
 
 #include "../filterkernel.h"
 
@@ -101,7 +102,7 @@ struct FilterObject
  * @return Returns true if successful, false otherwise.
  */
 DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
-                                 QSharedPointer<FIFFLIB::FiffRawData> pFiffRawData,
+                                 const std::shared_ptr<FIFFLIB::FiffRawData>& pFiffRawData,
                                  int type,
                                  double dCenterfreq,
                                  double dBandwidth,
@@ -126,7 +127,7 @@ DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
  * @return Returns true if successful, false otherwise.
  */
 DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
-                                 QSharedPointer<FIFFLIB::FiffRawData> pFiffRawData,
+                                 const std::shared_ptr<FIFFLIB::FiffRawData>& pFiffRawData,
                                  const UTILSLIB::FilterKernel& filterKernel,
                                  const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),
                                  bool bUseThreads = false);
@@ -252,9 +253,6 @@ DSPSHARED_EXPORT FIFFLIB::FiffEvoked computeFilteredAverage(const FIFFLIB::FiffR
 class DSPSHARED_EXPORT FilterOverlapAdd
 {
 public:
-    typedef QSharedPointer<FilterOverlapAdd> SPtr;            /**< Shared pointer type for FilterOverlapAdd. */
-    typedef QSharedPointer<const FilterOverlapAdd> ConstSPtr; /**< Const shared pointer type for FilterOverlapAdd. */
-
     //=========================================================================================================
     /**
      * Creates a user designed filter kernel and filters the raw input data

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_stream.h>
+#include <memory>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_coord_trans.h>
@@ -103,7 +104,7 @@ int main(int argc, char* argv[])
     }
 
     FiffInfo info;
-    FiffDirNode::SPtr infoNode;
+    std::shared_ptr<FiffDirNode> infoNode;
     if (!stream.read_meas_info(stream.dirtree(), info, infoNode)) {
         qCritical("Cannot read measurement info from: %s", qPrintable(measFile));
         return 1;

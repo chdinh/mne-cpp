@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "rtfiffrawview.h"
+#include <memory>
 
 #include <vector>
 
@@ -112,7 +113,7 @@ void RtFiffRawView::setSettingsPath(const QString& sSettingsPath)
 
 //=============================================================================================================
 
-void RtFiffRawView::init(QSharedPointer<FIFFLIB::FiffInfo>& info)
+void RtFiffRawView::init(std::shared_ptr<FIFFLIB::FiffInfo>& info)
 {
     m_pFiffInfo = info;
     m_fSamplingRate = m_pFiffInfo->sfreq;

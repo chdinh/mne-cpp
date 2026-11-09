@@ -261,8 +261,8 @@ void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
         peer->write(serverMeasInfo(info));
         QVERIFY(peer->waitForBytesWritten(5000));
 
-        FiffInfo::SPtr got;
-        FiffDigitizerData::SPtr dig;
+        std::shared_ptr<FiffInfo> got;
+        std::shared_ptr<FiffDigitizerData> dig;
         if (pass == 0) {
             got = client.readInfo();
         } else {
@@ -429,8 +429,8 @@ void TestComRtClient::testRtClientConnectionChangedSignal()
 
 void TestComRtClient::testMetaDataConstruction()
 {
-    FIFFLIB::FiffInfo::SPtr pInfo = FIFFLIB::FiffInfo::SPtr::create();
-    FIFFLIB::FiffDigitizerData::SPtr pDigData = FIFFLIB::FiffDigitizerData::SPtr::create();
+    std::shared_ptr<FIFFLIB::FiffInfo> pInfo = std::make_shared<FIFFLIB::FiffInfo>();
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> pDigData = std::make_shared<FIFFLIB::FiffDigitizerData>();
 
     MetaData meta(pInfo, pDigData);
     QVERIFY(meta.m_pInfo != nullptr);

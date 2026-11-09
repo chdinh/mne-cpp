@@ -110,7 +110,7 @@ void TMSI::init()
 
     m_sElcFilePath = QString("../resources/general/3DLayouts/standard_waveguard128_duke.elc");
 
-    m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo());
+    m_pFiffInfo = std::make_shared<FiffInfo>();
 
     //Initialise matrix used to perform a very simple high pass filter operation
     m_matOldMatrix = MatrixXf::Zero(m_iNumberOfChannels, m_iSamplesPerBlock);

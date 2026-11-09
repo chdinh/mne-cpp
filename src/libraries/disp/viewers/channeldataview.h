@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+#include <memory>
 #include "abstractview.h"
 
 //=============================================================================================================
@@ -116,7 +117,7 @@ public:
      *
      * @param[in] pInfo  Shared pointer to FiffInfo.
      */
-    void init(QSharedPointer<FIFFLIB::FiffInfo> pInfo);
+    void init(const std::shared_ptr<FIFFLIB::FiffInfo>& pInfo);
 
     // ── Data management ───────────────────────────────────────────────
 
@@ -521,7 +522,7 @@ private:
 
     bool m_channelScrollBarUpdating = false;
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;
     QMap<qint32, float> m_scaleMap;
     QColor m_signalColor{Qt::darkGreen};
     QColor m_bgColor{250, 250, 250};

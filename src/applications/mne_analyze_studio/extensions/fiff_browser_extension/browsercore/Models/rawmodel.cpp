@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "rawmodel.h"
+#include <memory>
 #include <utils/string_utils.h>
 
 #include <math/numerics.h>
@@ -58,7 +59,7 @@ using namespace UTILSLIB;
 RawModel::RawModel(QObject* parent)
 : QAbstractTableModel(parent)
 , m_bFileloaded(false)
-, m_pFiffInfo(FiffInfo::SPtr::create())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 , m_pfiffIO(QSharedPointer<FiffIO>(new FiffIO()))
 , m_bStartReached(false)
 , m_bEndReached(false)
@@ -110,7 +111,7 @@ RawModel::~RawModel()
 RawModel::RawModel(QFile& qFile, QObject* parent)
 : QAbstractTableModel(parent)
 , m_bFileloaded(false)
-, m_pFiffInfo(FiffInfo::SPtr::create())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 , m_pfiffIO(QSharedPointer<FiffIO>(new FiffIO()))
 , m_bStartReached(false)
 , m_bEndReached(false)
@@ -480,7 +481,7 @@ void RawModel::loadFiffInfos()
         m_chInfolist.push_back(m_pfiffIO->m_qlistRaw[0]->info.chs[i]);
 
     //loads fiffInfo
-    m_pFiffInfo = FiffInfo::SPtr(new FiffInfo(m_pfiffIO->m_qlistRaw[0]->info));
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_pfiffIO->m_qlistRaw[0]->info);
 }
 
 
@@ -495,7 +496,7 @@ void RawModel::clearModel()
         m_pSourceDevice.clear();
     }
     m_sourceBuffer.clear();
-    m_pFiffInfo = FiffInfo::SPtr(new FiffInfo());
+    m_pFiffInfo = std::make_shared<FiffInfo>();
     m_bFileloaded = false;
     m_chInfolist.clear();
 

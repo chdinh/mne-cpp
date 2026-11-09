@@ -78,8 +78,6 @@ class FwdCoilSet;
 class FWDSHARED_EXPORT FwdThreadArg
 {
 public:
-    typedef std::unique_ptr<FwdThreadArg> UPtr; /**< Unique pointer type for FwdThreadArg. */
-
     //=========================================================================================================
     /**
      * Constructs the Forward Thread Argument
@@ -101,7 +99,7 @@ public:
      *
      * @return Thread-safe duplicate.
      */
-    static FwdThreadArg::UPtr create_eeg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model);
+    static std::unique_ptr<FwdThreadArg> create_eeg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model);
 
     //=========================================================================================================
     /**
@@ -112,7 +110,7 @@ public:
      *
      * @return Thread-safe duplicate.
      */
-    static FwdThreadArg::UPtr create_meg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model);
+    static std::unique_ptr<FwdThreadArg> create_meg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model);
 
 public:
     Eigen::MatrixXf* res;              /**< Destination for the solution (ncoil x nsources). */

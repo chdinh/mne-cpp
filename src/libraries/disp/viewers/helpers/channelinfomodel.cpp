@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "channelinfomodel.h"
+#include <memory>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -52,7 +53,7 @@ static QStringList toQStringList(const StringList& names)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-ChannelInfoModel::ChannelInfoModel(FiffInfo::SPtr& pFiffInfo, QObject* parent)
+ChannelInfoModel::ChannelInfoModel(std::shared_ptr<FiffInfo>& pFiffInfo, QObject* parent)
 : QAbstractTableModel(parent)
 , m_pFiffInfo(pFiffInfo)
 {
@@ -63,7 +64,7 @@ ChannelInfoModel::ChannelInfoModel(FiffInfo::SPtr& pFiffInfo, QObject* parent)
 
 ChannelInfoModel::ChannelInfoModel(QObject* parent)
 : QAbstractTableModel(parent)
-, m_pFiffInfo(FiffInfo::SPtr(new FiffInfo))
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 {
 }
 
@@ -519,7 +520,7 @@ bool ChannelInfoModel::setData(const QModelIndex& index, const QVariant& value, 
 
 //=============================================================================================================
 
-void ChannelInfoModel::setFiffInfo(FiffInfo::SPtr& pFiffInfo)
+void ChannelInfoModel::setFiffInfo(std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     beginResetModel();
 
@@ -637,7 +638,7 @@ void ChannelInfoModel::clearModel()
 {
     beginResetModel();
 
-    m_pFiffInfo = FiffInfo::SPtr(new FiffInfo);
+    m_pFiffInfo = std::make_shared<FiffInfo>();
     m_layoutMap.clear();
     m_aliasNames.clear();
     m_mappedLayoutChNames.clear();

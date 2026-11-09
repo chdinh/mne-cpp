@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "mne_forward_solution.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -1103,7 +1104,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     //
     //   Find all forward solutions
     //
-    std::vector<FiffDirNode::SPtr> fwds = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
+    std::vector<std::shared_ptr<FiffDirNode>> fwds = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_FORWARD_SOLUTION);
 
     if (fwds.size() == 0) {
         return fail(ErrorCode::NotFound, "no forward solution in {}", name);
@@ -1111,7 +1112,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     //
     //   Parent MRI data
     //
-    std::vector<FiffDirNode::SPtr> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+    std::vector<std::shared_ptr<FiffDirNode>> parent_mri = t_pStream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
     if (parent_mri.size() == 0) {
         return fail(ErrorCode::Format, "no parent MRI information in {}", name);
     }
@@ -1143,8 +1144,8 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     //   Locate and read the forward solutions
     //
     std::optional<FiffTag> t_pTag;
-    FiffDirNode::SPtr megnode;
-    FiffDirNode::SPtr eegnode;
+    std::shared_ptr<FiffDirNode> megnode;
+    std::shared_ptr<FiffDirNode> eegnode;
     for (const auto& fwd : fwds) {
         if (t_pTag = fwd->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS); !t_pTag) {
             return fail(ErrorCode::Format, "a forward solution in {} lists no methods", name);
@@ -1341,7 +1342,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
 //=============================================================================================================
 
 bool MNEForwardSolution::read_one(FiffStream& stream,
-                                  const FiffDirNode::SPtr& p_Node,
+                                  const std::shared_ptr<FiffDirNode>& p_Node,
                                   MNEForwardSolution& one)
 {
     //

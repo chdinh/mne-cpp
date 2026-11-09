@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
+#include <memory>
 
 #include <fiff/fiff.h>
 #include <mne/mne.h>
@@ -127,7 +128,7 @@ int main(int argc, char* argv[])
 
         if (stream.open()) {
             FIFFLIB::FiffInfo FifInfo;
-            FIFFLIB::FiffDirNode::SPtr DirNode;
+            std::shared_ptr<FIFFLIB::FiffDirNode> DirNode;
 
             FIFFLIB::FiffDigitizerData digData;
 

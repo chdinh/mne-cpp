@@ -11,6 +11,7 @@
  */
 
 #include <QtTest/QtTest>
+#include <memory>
 
 #include <dsp/rt/rt_cov.h>
 #include <fiff/fiff_ch_info.h>
@@ -23,9 +24,9 @@ using namespace Eigen;
 namespace
 {
 
-QSharedPointer<FiffInfo> makeSyntheticInfo()
+std::shared_ptr<FiffInfo> makeSyntheticInfo()
 {
-    QSharedPointer<FiffInfo> info(new FiffInfo);
+    std::shared_ptr<FiffInfo> info(new FiffInfo);
 
     for (int i = 0; i < 2; ++i) {
         FiffChInfo ch;

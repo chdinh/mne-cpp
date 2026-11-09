@@ -94,8 +94,6 @@ struct FIFFSHARED_EXPORT FiffAnnotation
 class FIFFSHARED_EXPORT FiffAnnotations
 {
 public:
-    using SPtr = QSharedPointer<FiffAnnotations>;                       /**< Shared pointer type. */
-    using ConstSPtr = QSharedPointer<const FiffAnnotations>;            /**< Const shared pointer type. */
     using value_type = FiffAnnotation;                                  /**< Element type. */
     using iterator = std::vector<FiffAnnotation>::iterator;             /**< Iterator. */
     using const_iterator = std::vector<FiffAnnotation>::const_iterator; /**< Constant iterator. */

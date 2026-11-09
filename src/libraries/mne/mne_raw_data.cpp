@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "mne_raw_data.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -443,10 +444,10 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
 //============================= mne_process_bads.c =============================
 
 int mne_read_bad_channel_list_from_node(FiffStream& stream,
-                                        const FiffDirNode::SPtr& pNode, StringList& listp, int& nlistp)
+                                        const std::shared_ptr<FiffDirNode>& pNode, StringList& listp, int& nlistp)
 {
-    FiffDirNode::SPtr node, bad;
-    std::vector<FiffDirNode::SPtr> temp;
+    std::shared_ptr<FiffDirNode> node, bad;
+    std::vector<std::shared_ptr<FiffDirNode>> temp;
     StringList list;
     int nlist = 0;
     std::optional<FiffTag> t_pTag;

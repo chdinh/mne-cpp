@@ -303,9 +303,9 @@ void answerNextInputDialog(const QString& sText)
     });
 }
 
-QSharedPointer<FiffInfo> createBrowserTestInfo()
+std::shared_ptr<FiffInfo> createBrowserTestInfo()
 {
-    QSharedPointer<FiffInfo> info(new FiffInfo);
+    std::shared_ptr<FiffInfo> info(new FiffInfo);
     info->sfreq = 1000.0f;
     info->nchan = 4;
     info->ch_names = {"MEG0111", "MEG0112", "MEG0113", "STI014"};
@@ -1845,7 +1845,7 @@ void TestDispViewers2::butterflyView_lifecycle()
 void TestDispViewers2::butterflyView_drawsAveragesAcrossTheFullWidth()
 {
     // One magnetometer average of 3 * width samples: the curve is decimated, and must still span the width
-    auto set = QSharedPointer<FiffEvokedSet>::create();
+    auto set = std::make_shared<FiffEvokedSet>();
     set->info = *createBrowserTestInfo();
     set->info.bads.clear();
     FiffEvoked evoked;
@@ -2259,7 +2259,7 @@ void TestDispViewers2::rtFiffRawViewModel_projectionWrapFilterAndRoles()
 void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
 {
     // A positive step on MEG0111 and a negative one on MEG0113, both from the stimulus onset
-    auto set = QSharedPointer<FiffEvokedSet>::create();
+    auto set = std::make_shared<FiffEvokedSet>();
     set->info = *createBrowserTestInfo();
     FiffEvoked evoked;
     evoked.comment = QStringLiteral("aud").toStdString();
@@ -2272,7 +2272,7 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
     set->evoked.push_back(evoked);
     auto model = QSharedPointer<EvokedSetModel>::create();
     model->setEvokedSet(set);
-    auto pInfo = QSharedPointer<FiffInfo>::create(set->info);
+    auto pInfo = std::make_shared<FiffInfo>(set->info);
 
     AverageLayoutView view(QStringLiteral("test_disp_viewers2_average_layout"));
     view.setFiffInfo(pInfo);
@@ -2358,7 +2358,7 @@ void TestDispViewers2::evokedSetModel_basics()
 
     // Set empty evoked set — must not crash
     FiffEvokedSet emptySet;
-    model.setEvokedSet(QSharedPointer<FiffEvokedSet>::create(emptySet));
+    model.setEvokedSet(std::make_shared<FiffEvokedSet>(emptySet));
 
     QApplication::processEvents();
 }
@@ -2367,7 +2367,7 @@ void TestDispViewers2::evokedSetModel_basics()
 
 void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
 {
-    auto set = QSharedPointer<FiffEvokedSet>::create();
+    auto set = std::make_shared<FiffEvokedSet>();
     set->info = *createBrowserTestInfo();
     set->info.bads.clear();
     for (const QString& comment : {QStringLiteral("aud"), QStringLiteral("vis")}) {
@@ -2598,7 +2598,7 @@ void TestDispViewers2::channelInfoModel_basics()
     QVERIFY(model.rowCount() == 0);
 
     // setFiffInfo with empty FiffInfo — calls mapLayoutToChannels (no channels)
-    FiffInfo::SPtr pInfo(new FiffInfo);
+    std::shared_ptr<FiffInfo> pInfo(new FiffInfo);
     model.setFiffInfo(pInfo);
 
     QApplication::processEvents();
@@ -3474,7 +3474,7 @@ void TestDispViewers2::channelRhiView_rendersAndDrawsOverlays()
 
 void TestDispViewers2::channelDataModel_bufferDetrendAndDecimation()
 {
-    QSharedPointer<FiffInfo> info(new FiffInfo);
+    std::shared_ptr<FiffInfo> info(new FiffInfo);
     const QVector<std::pair<int, int>> kinds = {{FIFFV_MEG_CH, FIFF_UNIT_T_M}, {FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_EEG_CH, FIFF_UNIT_V}, {FIFFV_EOG_CH, FIFF_UNIT_V}, {FIFFV_ECG_CH, FIFF_UNIT_V}, {FIFFV_EMG_CH, FIFF_UNIT_V}, {FIFFV_STIM_CH, FIFF_UNIT_NONE}, {FIFFV_MISC_CH, FIFF_UNIT_NONE}};
     info->sfreq = 500.0f;
     info->nchan = kinds.size();
@@ -4459,7 +4459,7 @@ void TestDispViewers2::evokedSetModel_extended()
     QVERIFY(model.rowCount() >= 0);
 
     // setEvokedSet with empty shared pointer — should not crash
-    QSharedPointer<FiffEvokedSet> emptySet;
+    std::shared_ptr<FiffEvokedSet> emptySet;
     model.setEvokedSet(emptySet);
 
     // isInit before data — false
@@ -4524,7 +4524,7 @@ void TestDispViewers2::frequencySpectrumModel_basics()
     model.data(QModelIndex(), Qt::DisplayRole);
 
     // setInfo with an empty FiffInfo
-    QSharedPointer<FiffInfo> pInfo(new FiffInfo);
+    std::shared_ptr<FiffInfo> pInfo(new FiffInfo);
     model.setInfo(pInfo);
 
     // Scale type
@@ -4558,7 +4558,7 @@ void TestDispViewers2::frequencySpectrumModel_basics()
 void TestDispViewers2::spectrumView_scalesBoundsAndPaints()
 {
     // 4 channels at 1000 Hz, 100 frequency bins of 5 Hz up to Nyquist (500 Hz)
-    QSharedPointer<FiffInfo> info = createBrowserTestInfo();
+    std::shared_ptr<FiffInfo> info = createBrowserTestInfo();
     Eigen::MatrixXd psd(4, 100);
     for (int b = 0; b < 100; ++b) {
         psd.col(b).setConstant(1.0 + 0.1 * b);

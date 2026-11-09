@@ -140,7 +140,7 @@ private:
 
     std::shared_ptr<UTILSLIB::CircularBuffer_Matrix_double> m_pCircularBuffer; /**< Matrix data circular buffer. */
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
     QSharedPointer<SCSHAREDLIB::PluginInputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pCovarianceInput; /**< The RealTimeMultiSampleArray of the Covariance input.*/
     QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeCov>> m_pCovarianceOutput;            /**< The RealTimeCov of the Covariance output.*/

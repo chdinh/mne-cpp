@@ -101,9 +101,6 @@ class DSPSHARED_EXPORT RtConnectivity : public QObject
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtConnectivity> SPtr;            /**< Shared pointer type for RtConnectivity. */
-    typedef QSharedPointer<const RtConnectivity> ConstSPtr; /**< Const shared pointer type for RtConnectivity. */
-
     //=========================================================================================================
     /**
      * Creates the real-time connectivity estimation object.

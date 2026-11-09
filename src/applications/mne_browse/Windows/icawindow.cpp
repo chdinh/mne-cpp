@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "icawindow.h"
+#include <memory>
 
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
@@ -32,6 +33,7 @@
 #include <QScrollArea>
 #include <QSpinBox>
 #include <QVBoxLayout>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -124,11 +126,11 @@ void IcaWindow::setupUi()
 //=============================================================================================================
 
 void IcaWindow::setRawData(const MatrixXd& rawData,
-                           QSharedPointer<FIFFLIB::FiffInfo> fiffInfo,
+                           std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo,
                            int firstSample)
 {
     m_rawData = rawData;
-    m_pFiffInfo = fiffInfo;
+    m_pFiffInfo = std::move(fiffInfo);
     m_firstSample = firstSample;
     m_bHasResult = false;
 

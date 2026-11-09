@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_noise.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -33,6 +34,7 @@
 //=============================================================================================================
 
 #include <cmath>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -47,7 +49,7 @@ using namespace Eigen;
 //=============================================================================================================
 
 RtNoiseWorker::RtNoiseWorker(qint32 iFftLength,
-                             FiffInfo::SPtr pFiffInfo,
+                             const std::shared_ptr<FiffInfo>& pFiffInfo,
                              qint32 iDataLength)
 : m_iFftLength(iFftLength)
 , m_dFs(pFiffInfo->sfreq)
@@ -172,7 +174,7 @@ QVector<float> RtNoiseWorker::hanning(int N, short itype)
 //=============================================================================================================
 
 RtNoise::RtNoise(qint32 iFftLength,
-                 FiffInfo::SPtr pFiffInfo,
+                 const std::shared_ptr<FiffInfo>& pFiffInfo,
                  qint32 iDataLength,
                  QObject* parent)
 : QObject(parent)

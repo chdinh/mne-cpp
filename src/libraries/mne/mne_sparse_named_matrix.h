@@ -62,7 +62,7 @@ public:
      * @return The matrix, or nullptr if it is missing or its name lists do not fit.
      */
     static std::unique_ptr<MNESparseNamedMatrix> read(FIFFLIB::FiffStream& stream,
-                                                      const FIFFLIB::FiffDirNode::SPtr& node,
+                                                      const std::shared_ptr<FIFFLIB::FiffDirNode>& node,
                                                       int kind);
 
     //=========================================================================================================

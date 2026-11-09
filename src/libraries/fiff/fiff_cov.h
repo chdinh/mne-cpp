@@ -92,7 +92,6 @@ struct RejectionParams;
 class FIFFSHARED_EXPORT FiffCov : public QSharedData
 {
 public:
-    using SPtr = QSharedPointer<FiffCov>;      /**< Shared pointer type for FiffCov. */
     using SDPtr = QSharedDataPointer<FiffCov>; /**< Shared data pointer type for FiffCov. */
 
     //=========================================================================================================
@@ -396,7 +395,7 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
 
 #ifndef metatype_fiffcovsptr
 #define metatype_fiffcovsptr
-Q_DECLARE_METATYPE(QSharedPointer<FIFFLIB::FiffCov>); /**< Provides QT META type declaration of the QSharedPointer<FIFFLIB::FiffCov> type. For signal/slot usage.*/
+Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffCov>); /**< Provides QT META type declaration of the std::shared_ptr<FIFFLIB::FiffCov> type. For signal/slot usage.*/
 #endif
 
 #ifndef metatype_fiffcov

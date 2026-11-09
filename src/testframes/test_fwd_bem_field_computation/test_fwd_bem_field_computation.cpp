@@ -700,7 +700,7 @@ private slots:
         pSettings->solname = (tmpDir + "/test_fwd_coverage_output.fif").toStdString();
 
         FiffRawData raw(rawPath().toStdString());
-        pSettings->pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
+        pSettings->pFiffInfo = std::make_shared<FiffInfo>(raw.info);
         pSettings->checkIntegrity();
 
         auto pFwdComputer = std::make_shared<ComputeFwd>(pSettings);

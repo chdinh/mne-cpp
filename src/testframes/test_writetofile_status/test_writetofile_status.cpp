@@ -13,6 +13,7 @@
  */
 
 #include <writetofile/writetofile.h>
+#include <memory>
 #include <writetofile/FormFiles/writetofilestatuswidget.h>
 
 #include <fiff/fiff_dir_node.h>
@@ -165,7 +166,7 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
 {
     QTemporaryDir tmpDir;
     WriteToFile plugin;
-    plugin.m_pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>::create();
+    plugin.m_pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>();
     plugin.m_pFiffInfo->sfreq = 1000.0;
     FIFFLIB::FiffChInfo ch;
     ch.ch_name = "EEG001";

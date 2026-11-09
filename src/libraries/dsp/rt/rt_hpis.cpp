@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_hpis.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <inv/hpi/inv_hpi_fit.h>
@@ -78,7 +79,7 @@ RtHpi::RtHpi(const InvSensorSet sensorSet, QObject* parent)
 {
     qRegisterMetaType<INVLIB::HpiFitResult>("INVLIB::HpiFitResult");
     qRegisterMetaType<QVector<int>>("QVector<int>");
-    qRegisterMetaType<QSharedPointer<FIFFLIB::FiffInfo>>("QSharedPointer<FIFFLIB::FiffInfo>");
+    qRegisterMetaType<std::shared_ptr<FIFFLIB::FiffInfo>>();
     qRegisterMetaType<Eigen::MatrixXd>("Eigen::MatrixXd");
 
     RtHpiWorker* worker = new RtHpiWorker(m_sensorSet);

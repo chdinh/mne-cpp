@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_averaging.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <format>
@@ -30,6 +31,7 @@
 //=============================================================================================================
 
 #include <QDebug>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -51,7 +53,7 @@ RtAveragingWorker::RtAveragingWorker(quint32 numAverages,
                                      qint32 iBaselineFromMSecs,
                                      qint32 iBaselineToMSecs,
                                      quint32 iTriggerIndex,
-                                     FiffInfo::SPtr pFiffInfo)
+                                     std::shared_ptr<FiffInfo> pFiffInfo)
 : QObject()
 , m_iNumAverages(numAverages)
 , m_iPreStimSamples(iPreStimSamples)
@@ -62,11 +64,11 @@ RtAveragingWorker::RtAveragingWorker(quint32 numAverages,
 , m_bActivateThreshold(false)
 , m_bDoBaselineCorrection(false)
 , m_pairBaselineSec(std::make_pair(float(iBaselineFromMSecs) / 1000.0f, float(iBaselineToMSecs) / 1000.0f))
-, m_pFiffInfo(pFiffInfo)
+, m_pFiffInfo(std::move(pFiffInfo))
 {
     m_mapThresholds["eog"] = 300e-6;
 
-    m_stimEvokedSet.info = *m_pFiffInfo.data();
+    m_stimEvokedSet.info = *m_pFiffInfo;
 
     m_iNewPreStimSamples = m_iPreStimSamples;
     m_iNewPostStimSamples = m_iPostStimSamples;
@@ -360,9 +362,9 @@ void RtAveragingWorker::generateEvoked(double dTriggerType)
     }
 
     //Init evoked
-    m_stimEvokedSet.info = *m_pFiffInfo.data();
+    m_stimEvokedSet.info = *m_pFiffInfo;
     FiffEvoked evoked;
-    evoked.setInfo(*m_pFiffInfo.data());
+    evoked.setInfo(*m_pFiffInfo);
     int iEvokedIdx = -1;
 
     for (int i = 0; i < std::ssize(m_stimEvokedSet.evoked); ++i) {
@@ -445,7 +447,7 @@ RtAveraging::RtAveraging(quint32 numAverages,
                          qint32 iBaselineFromMSecs,
                          qint32 iBaselineToMSecs,
                          quint32 iTriggerIndex,
-                         FiffInfo::SPtr pFiffInfo,
+                         std::shared_ptr<FiffInfo> pFiffInfo,
                          QObject* parent)
 : QObject(parent)
 {
@@ -457,7 +459,7 @@ RtAveraging::RtAveraging(quint32 numAverages,
                                                       iBaselineFromMSecs,
                                                       iBaselineToMSecs,
                                                       iTriggerIndex,
-                                                      pFiffInfo);
+                                                      std::move(pFiffInfo));
     worker->moveToThread(&m_workerThread);
 
     connect(&m_workerThread, &QThread::finished,
@@ -522,7 +524,7 @@ void RtAveraging::restart(quint32 numAverages,
                           qint32 iBaselineFromMSecs,
                           qint32 iBaselineToMSecs,
                           quint32 iTriggerIndex,
-                          FiffInfo::SPtr pFiffInfo)
+                          std::shared_ptr<FiffInfo> pFiffInfo)
 {
     stop();
 
@@ -532,7 +534,7 @@ void RtAveraging::restart(quint32 numAverages,
                                                       iBaselineFromMSecs,
                                                       iBaselineToMSecs,
                                                       iTriggerIndex,
-                                                      pFiffInfo);
+                                                      std::move(pFiffInfo));
     worker->moveToThread(&m_workerThread);
 
     connect(&m_workerThread, &QThread::finished,

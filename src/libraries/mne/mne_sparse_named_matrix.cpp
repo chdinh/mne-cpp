@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_sparse_named_matrix.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <fiff/fiff_constants.h>
@@ -32,17 +33,17 @@ using namespace FIFFLIB;
 //=============================================================================================================
 
 std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& stream,
-                                                                 const FiffDirNode::SPtr& node,
+                                                                 const std::shared_ptr<FiffDirNode>& node,
                                                                  int kind)
 {
-    FiffDirNode::SPtr block;
+    std::shared_ptr<FiffDirNode> block;
     std::optional<FiffTag> tag;
     if (node->type == FIFFB_MNE_NAMED_MATRIX) {
         if (tag = node->find_tag(stream, kind); tag) {
             block = node;
         }
     } else {
-        for (const FiffDirNode::SPtr& child : node->children) {
+        for (const std::shared_ptr<FiffDirNode>& child : node->children) {
             if (child->type != FIFFB_MNE_NAMED_MATRIX) {
                 continue;
             }
@@ -55,7 +56,7 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
     if (!block) {
         return nullptr;
     }
-    FiffSparseMatrix::UPtr data = FiffSparseMatrix::fiff_get_float_sparse_matrix(*tag);
+    std::unique_ptr<FiffSparseMatrix> data = FiffSparseMatrix::fiff_get_float_sparse_matrix(*tag);
     if (!data) {
         return nullptr;
     }

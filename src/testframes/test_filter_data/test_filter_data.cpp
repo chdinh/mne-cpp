@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <utils/string_utils.h>
 #include <QTemporaryDir>
 #include <Eigen/Dense>
@@ -192,7 +193,7 @@ private slots:
         if (!QFile::exists(rawPath)) {
             QSKIP("Sample raw file not found");
         }
-        FiffRawData::SPtr raw(new FiffRawData(rawPath.toStdString()));
+        std::shared_ptr<FiffRawData> raw(new FiffRawData(rawPath.toStdString()));
 
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());

@@ -130,9 +130,6 @@ class DSPSHARED_EXPORT RtHpi : public QObject
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtHpi> SPtr;            /**< Shared pointer type for RtHpi. */
-    typedef QSharedPointer<const RtHpi> ConstSPtr; /**< Const shared pointer type for RtHpi. */
-
     //=========================================================================================================
     /**
      * Creates the real-time HPIS estimation object.

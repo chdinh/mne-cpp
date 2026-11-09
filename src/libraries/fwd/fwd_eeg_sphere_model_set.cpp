@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "fwd_eeg_sphere_model_set.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 //=============================================================================================================
@@ -57,7 +58,7 @@ FwdEegSphereModelSet::~FwdEegSphereModelSet()
 
 //=============================================================================================================
 
-FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_add_to_eeg_sphere_model_set(UPtr s, FwdEegSphereModel::UPtr m)
+std::unique_ptr<FwdEegSphereModelSet> FwdEegSphereModelSet::fwd_add_to_eeg_sphere_model_set(std::unique_ptr<FwdEegSphereModelSet> s, std::unique_ptr<FwdEegSphereModel> m)
 {
     if (!s)
         s = std::make_unique<FwdEegSphereModelSet>();
@@ -68,7 +69,7 @@ FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_add_to_eeg_sphere_model_set
 
 //=============================================================================================================
 //fwd_eeg_sphere_models.c
-FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_add_default_eeg_sphere_model(UPtr s)
+std::unique_ptr<FwdEegSphereModelSet> FwdEegSphereModelSet::fwd_add_default_eeg_sphere_model(std::unique_ptr<FwdEegSphereModelSet> s)
 {
     static const int def_nlayer = 4;
     VectorXf def_unit_rads(def_nlayer);
@@ -81,7 +82,7 @@ FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_add_default_eeg_sphere_mode
 
 //=============================================================================================================
 //fwd_eeg_sphere_models.c
-FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_load_eeg_sphere_models(const std::filesystem::path& filename, UPtr now)
+std::unique_ptr<FwdEegSphereModelSet> FwdEegSphereModelSet::fwd_load_eeg_sphere_models(const std::filesystem::path& filename, std::unique_ptr<FwdEegSphereModelSet> now)
 {
     if (!now)
         now = fwd_add_default_eeg_sphere_model(nullptr);
@@ -128,7 +129,7 @@ FwdEegSphereModelSet::UPtr FwdEegSphereModelSet::fwd_load_eeg_sphere_models(cons
 
 //=============================================================================================================
 //fwd_eeg_sphere_models.c
-FwdEegSphereModel::UPtr FwdEegSphereModelSet::fwd_select_eeg_sphere_model(std::string_view p_sName) const
+std::unique_ptr<FwdEegSphereModel> FwdEegSphereModelSet::fwd_select_eeg_sphere_model(std::string_view p_sName) const
 {
     const std::string_view name = p_sName.empty() ? std::string_view("Default") : p_sName;
 

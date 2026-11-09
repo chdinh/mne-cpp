@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <fwd/fwd_bem_model.h>
+#include <memory>
 #include <mne/mne_surface.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_constants.h>
@@ -100,7 +101,7 @@ int main(int argc, char* argv[])
 
     // Determine how many layers we have
     // Try three-layer first, fall back to single-layer
-    FwdBemModel::UPtr bemModel;
+    std::unique_ptr<FwdBemModel> bemModel;
     bemModel = FwdBemModel::fwd_bem_load_three_layer_surfaces(bemFile.toStdU16String());
     if (!bemModel) {
         qInfo("Not a three-layer model, trying single-layer (homogeneous)...");

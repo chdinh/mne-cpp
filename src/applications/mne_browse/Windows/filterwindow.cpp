@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "filterwindow.h"
+#include <memory>
 
 #include <QSignalBlocker>
 
@@ -63,7 +64,7 @@ FilterWindow::~FilterWindow()
 
 //*************************************************************************************************************
 
-void FilterWindow::newFileLoaded(FiffInfo::SPtr& pFiffInfo)
+void FilterWindow::newFileLoaded(std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     //Update min max of spin boxes to nyquist
     if (!pFiffInfo) {
@@ -393,7 +394,7 @@ void FilterWindow::filterParametersChanged()
 
 void FilterWindow::applyFilter()
 {
-    if (m_pMainWindow->dataWindow()->fiffInfo().isNull()) {
+    if (!m_pMainWindow->dataWindow()->fiffInfo()) {
         return;
     }
 

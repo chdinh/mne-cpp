@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include "../inv_global.h"
+#include <memory>
 
 #include <vector>
 #include "inv_sensor_set.h"
@@ -85,7 +86,7 @@ public:
     *
     * @param[in] pFiffInfo     Measurement info used to initialize channels, bads, HPI digitizer points and sensors.
     */
-    InvHpiDataUpdater(const QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    InvHpiDataUpdater(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -94,7 +95,7 @@ public:
      * @param[in] pFiffInfo     The FiffInfo to check for changes.
      *
      */
-    void checkForUpdate(const QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void checkForUpdate(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -127,7 +128,7 @@ private:
      * @param[in] pFiffInfo         The FiffInfo file from the measurement.
      *
      */
-    void updateChannels(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void updateChannels(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -136,7 +137,7 @@ private:
      * @param[in] pFiffInfo         The FiffInfo file from the measurement.
      *
      */
-    void updateBadChannels(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void updateBadChannels(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**

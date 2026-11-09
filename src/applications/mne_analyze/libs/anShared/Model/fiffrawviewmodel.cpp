@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "fiffrawviewmodel.h"
+#include <memory>
 #include <utils/string_utils.h>
 
 #include "../Utils/metatypes.h"
@@ -88,7 +89,7 @@ FiffRawViewModel::FiffRawViewModel(const QString& sFilePath,
 , m_bEndOfFileReached(false)
 , m_blockLoadFutureWatcher()
 , m_bCurrentlyLoading(false)
-, m_pRtFilter(FilterOverlapAdd::SPtr::create())
+, m_pRtFilter(std::make_shared<FilterOverlapAdd>())
 , m_bPerformFiltering(false)
 , m_iDistanceTimerSpacer(1000)
 , m_iScroller(0)
@@ -145,7 +146,7 @@ bool FiffRawViewModel::initFiffData(QIODevice& p_IODevice)
     }
 
     // load FiffInfo
-    m_pFiffInfo = FiffInfo::SPtr(new FiffInfo(m_pFiffIO->m_qlistRaw[0]->info));
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_pFiffIO->m_qlistRaw[0]->info);
 
     // build datastructure that is to be filled with data from the file
     MatrixXd data, times;
@@ -325,7 +326,7 @@ bool FiffRawViewModel::hasChildren(const QModelIndex& parent) const
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffInfo> FiffRawViewModel::getFiffInfo() const
+std::shared_ptr<FIFFLIB::FiffInfo> FiffRawViewModel::getFiffInfo() const
 {
     return m_pFiffInfo;
 }

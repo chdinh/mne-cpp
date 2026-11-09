@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff.h>
+#include <memory>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_info.h>
@@ -90,7 +91,7 @@ static bool isRawFile(const QString& fileName)
         return false;
     }
 
-    FiffDirNode::SPtr dirTree = stream.dirtree();
+    std::shared_ptr<FiffDirNode> dirTree = stream.dirtree();
 
     // Check for evoked data first — evoked files also use FIFFB_PROCESSED_DATA
     bool hasEvoked = dirTree->has_kind(FIFFB_EVOKED);

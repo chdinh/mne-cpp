@@ -209,9 +209,9 @@ private:
 
     QMutex m_qMutex; /**< Provides access serialization between threads. */
 
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
-    QSharedPointer<RTPROCESSINGLIB::RtAveraging> m_pRtAve; /**< Real-time average object. */
+    std::shared_ptr<RTPROCESSINGLIB::RtAveraging> m_pRtAve; /**< Real-time average object. */
 
     QStringList m_lResponsibleTriggerTypes; /**< List of all trigger types which lead to the recent emit of a new evoked set. */
 

@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "../anshared_global.h"
+#include <memory>
 
 #include <vector>
 #include "../Utils/types.h"
@@ -295,7 +296,7 @@ public:
      *
      * @return Shared Pointer pointing to m_pFiffInfo.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> getFiffInfo() const;
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo() const;
 
     //=========================================================================================================
     /**
@@ -614,16 +615,16 @@ private:
     QBuffer m_buffer;
 
     // Filter stuff
-    qint32 m_iMaxFilterLength;                                     /**< Max order of the current filters. */
-    QString m_sFilterChannelType;                                  /**< Kind of channel which is to be filtered. */
-    QSharedPointer<RTPROCESSINGLIB::FilterOverlapAdd> m_pRtFilter; /**< The filter object. */
-    Eigen::RowVectorXi m_lFilterChannelList;                       /**< The indices of the channels to be filtered.*/
-    bool m_bPerformFiltering;                                      /**< Flag whether to activate/deactivate filtering. */
-    UTILSLIB::FilterKernel m_filterKernel;                         /**< List of currently active filters. */
+    qint32 m_iMaxFilterLength;                                      /**< Max order of the current filters. */
+    QString m_sFilterChannelType;                                   /**< Kind of channel which is to be filtered. */
+    std::shared_ptr<RTPROCESSINGLIB::FilterOverlapAdd> m_pRtFilter; /**< The filter object. */
+    Eigen::RowVectorXi m_lFilterChannelList;                        /**< The indices of the channels to be filtered.*/
+    bool m_bPerformFiltering;                                       /**< Flag whether to activate/deactivate filtering. */
+    UTILSLIB::FilterKernel m_filterKernel;                          /**< List of currently active filters. */
 
     // fiff stuff
     QSharedPointer<FIFFLIB::FiffIO> m_pFiffIO;          /**< Fiff IO. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;      /**< Fiff info of whole fiff file. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;     /**< Fiff info of whole fiff file. */
     std::vector<FIFFLIB::FiffChInfo> m_ChannelInfoList; /**< List of FiffChInfo objects that holds the corresponding channels information. */
 
     QMap<qint32, float> m_qMapChScaling; /**< Channel scaling map. */
@@ -842,7 +843,7 @@ public:
             return *this;
         }
 
-        bool operator!=(ChannelIterator rhs)
+        bool operator!=(const ChannelIterator& rhs)
         {
             return currentIndex != rhs.currentIndex;
         }

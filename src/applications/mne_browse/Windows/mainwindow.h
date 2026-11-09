@@ -516,7 +516,7 @@ protected:
      * This keeps selection/layout-driven UI responsive directly from the fast
      * FiffBlockReader session state.
      */
-    void syncAuxWindowsToFiffInfo(FIFFLIB::FiffInfo::SPtr fiffInfo,
+    void syncAuxWindowsToFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo,
                                   int firstSample,
                                   int lastSample);
 
@@ -554,29 +554,29 @@ protected:
 
     std::unique_ptr<Ui::MainWindowWidget> ui; /**< Pointer to the qt designer generated ui class.*/
 
-    QLabel* m_pStatusLabel;                             /**< Persistent status bar label, updated in place to avoid repeated allocation. */
-    QAction* m_pRemoveDCAction;                         /**< The action which is used to control DC removal. */
-    QAction* m_pHideBadAction;                          /**< The action which is used to control hide bad channel functionality. */
-    QAction* m_pCrosshairAction;                        /**< Toggle crosshair cursor overlay. */
-    QAction* m_pButterflyAction;                        /**< Toggle butterfly mode. */
-    QAction* m_pScalebarsAction;                        /**< Toggle scalebars. */
-    QAction* m_pEventsVisibleAction;                    /**< Toggle event marker visibility (E). */
-    QAction* m_pAnnotationsVisibleAction;               /**< Toggle annotation span visibility (Shift+A). */
-    QAction* m_pOverviewBarAction;                      /**< Toggle overview bar visibility (O). */
-    QAction* m_pEpochMarkersAction;                     /**< Toggle epoch grid lines (G). */
-    QAction* m_pClippingAction;                         /**< Toggle clipping detection (C). */
-    QAction* m_pZScoreAction;                           /**< Toggle z-score normalization (Z). */
-    QAction* m_pWhitenButterflyAction;                  /**< Toggle whitening in the average butterfly plot. */
-    QAction* m_pGFPAction;                              /**< Toggle GFP overlay in the butterfly plot. */
-    QAction* m_pDarkModeAction;                         /**< Toggle dark mode palette. */
-    QAction* m_pAnnotationModeAction;                   /**< Toggle right-drag annotation selection in the raw browser. */
-    QMenu* m_pRecentFilesMenu = nullptr;                /**< "Open Recent" submenu. */
-    QStringList m_recentFiles;                          /**< Most-recently-used file paths (newest first). */
-    QList<MNELIB::MNEEpochDataList> m_epochReviewLists; /**< Reviewed epochs grouped by event code. */
-    QList<int> m_epochReviewEventCodes;                 /**< Event codes for the current review session. */
-    QStringList m_epochReviewComments;                  /**< Display comments for the current review session. */
-    FIFFLIB::FiffInfo::SPtr m_pEpochReviewInfo;         /**< Raw info used to rebuild evoked responses from reviewed epochs. */
-    QPair<float, float> m_epochReviewBaseline;          /**< Baseline metadata of the current review session. */
+    QLabel* m_pStatusLabel;                                /**< Persistent status bar label, updated in place to avoid repeated allocation. */
+    QAction* m_pRemoveDCAction;                            /**< The action which is used to control DC removal. */
+    QAction* m_pHideBadAction;                             /**< The action which is used to control hide bad channel functionality. */
+    QAction* m_pCrosshairAction;                           /**< Toggle crosshair cursor overlay. */
+    QAction* m_pButterflyAction;                           /**< Toggle butterfly mode. */
+    QAction* m_pScalebarsAction;                           /**< Toggle scalebars. */
+    QAction* m_pEventsVisibleAction;                       /**< Toggle event marker visibility (E). */
+    QAction* m_pAnnotationsVisibleAction;                  /**< Toggle annotation span visibility (Shift+A). */
+    QAction* m_pOverviewBarAction;                         /**< Toggle overview bar visibility (O). */
+    QAction* m_pEpochMarkersAction;                        /**< Toggle epoch grid lines (G). */
+    QAction* m_pClippingAction;                            /**< Toggle clipping detection (C). */
+    QAction* m_pZScoreAction;                              /**< Toggle z-score normalization (Z). */
+    QAction* m_pWhitenButterflyAction;                     /**< Toggle whitening in the average butterfly plot. */
+    QAction* m_pGFPAction;                                 /**< Toggle GFP overlay in the butterfly plot. */
+    QAction* m_pDarkModeAction;                            /**< Toggle dark mode palette. */
+    QAction* m_pAnnotationModeAction;                      /**< Toggle right-drag annotation selection in the raw browser. */
+    QMenu* m_pRecentFilesMenu = nullptr;                   /**< "Open Recent" submenu. */
+    QStringList m_recentFiles;                             /**< Most-recently-used file paths (newest first). */
+    QList<MNELIB::MNEEpochDataList> m_epochReviewLists;    /**< Reviewed epochs grouped by event code. */
+    QList<int> m_epochReviewEventCodes;                    /**< Event codes for the current review session. */
+    QStringList m_epochReviewComments;                     /**< Display comments for the current review session. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pEpochReviewInfo; /**< Raw info used to rebuild evoked responses from reviewed epochs. */
+    QPair<float, float> m_epochReviewBaseline;             /**< Baseline metadata of the current review session. */
 
     MNALIB::MnaProject m_mnxProject;             /**< Currently open MNA/MNX project (empty if loading standalone files). */
     std::unique_ptr<QTemporaryDir> m_mnxTempDir; /**< Temp dir for extracted .mnx embedded files. */

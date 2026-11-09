@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "fwd_thread_arg.h"
+#include <memory>
 #include <mne/mne_source_space.h>
 #include "fwd_coil_set.h"
 #include "fwd_bem_model.h"
@@ -60,7 +61,7 @@ FwdThreadArg::~FwdThreadArg()
 
 //=============================================================================================================
 
-FwdThreadArg::UPtr FwdThreadArg::create_eeg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model)
+std::unique_ptr<FwdThreadArg> FwdThreadArg::create_eeg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model)
 {
     auto res = std::make_unique<FwdThreadArg>();
 
@@ -79,7 +80,7 @@ FwdThreadArg::UPtr FwdThreadArg::create_eeg_multi_thread_duplicate(FwdThreadArg&
 
 //=============================================================================================================
 
-FwdThreadArg::UPtr FwdThreadArg::create_meg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model)
+std::unique_ptr<FwdThreadArg> FwdThreadArg::create_meg_multi_thread_duplicate(FwdThreadArg& one, bool bem_model)
 {
     auto res = std::make_unique<FwdThreadArg>();
     FwdCompData* orig = static_cast<FwdCompData*>(one.client);

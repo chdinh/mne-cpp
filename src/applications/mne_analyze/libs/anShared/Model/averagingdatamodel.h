@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "../anshared_global.h"
+#include <memory>
 #include "../Utils/types.h"
 
 #include <fiff/fiff_info.h>
@@ -69,7 +70,7 @@ public:
      * @param[in] pEvokedSet   sets saved evoked set to pEvokedSet. NULL if left empty.
      * @param[in] parent       sets parent of the object. NULL if left empty.
      */
-    AveragingDataModel(QSharedPointer<FIFFLIB::FiffEvokedSet> pEvokedSet = nullptr,
+    AveragingDataModel(std::shared_ptr<FIFFLIB::FiffEvokedSet> pEvokedSet = nullptr,
                        QObject* parent = nullptr);
 
     //=========================================================================================================
@@ -125,7 +126,7 @@ public:
      *
      * @param[in] pEvokedSet   new evoked set to be saved.
      */
-    void setEvokedSet(QSharedPointer<FIFFLIB::FiffEvokedSet> pEvokedSet);
+    void setEvokedSet(std::shared_ptr<FIFFLIB::FiffEvokedSet> pEvokedSet);
 
     //=========================================================================================================
     /**
@@ -133,7 +134,7 @@ public:
      *
      * @return the stored FiffEvokedSet.
      */
-    QSharedPointer<FIFFLIB::FiffEvokedSet> getEvokedSet();
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> getEvokedSet();
 
     //=========================================================================================================
     /**
@@ -190,10 +191,10 @@ public:
      *
      * @return  Shared pointer to FiffInfo of m_pFiffEvokedSet.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> getFiffInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo();
 
 private:
-    QSharedPointer<FIFFLIB::FiffEvokedSet> m_pFiffEvokedSet; /**<  Pointer to FiffEvokedData for the calculated average*/
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> m_pFiffEvokedSet; /**<  Pointer to FiffEvokedData for the calculated average*/
 
     bool m_bFromFile;
 };

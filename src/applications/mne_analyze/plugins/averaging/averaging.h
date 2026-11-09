@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "averaging_global.h"
+#include <memory>
 
 #include <anShared/Plugins/abstractplugin.h>
 
@@ -220,10 +221,10 @@ private:
      *
      * @return Retruns FiffEvoked setwith averaged data.
      */
-    QSharedPointer<FIFFLIB::FiffEvokedSet> averageCalculation(const FIFFLIB::FiffRawData& pFiffRaw,
-                                                              MatrixXi matEvents,
-                                                              UTILSLIB::FilterKernel filterKernel,
-                                                              FIFFLIB::FiffInfo fiffInfo);
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> averageCalculation(const FIFFLIB::FiffRawData& pFiffRaw,
+                                                               MatrixXi matEvents,
+                                                               UTILSLIB::FilterKernel filterKernel,
+                                                               FIFFLIB::FiffInfo fiffInfo);
 
     //=========================================================================================================
     /**
@@ -241,7 +242,7 @@ private:
     /**
      *  Loads averging GUI components that are dependent on FiffRawModel to be initialized
      */
-    void loadFullGui(QSharedPointer<FIFFLIB::FiffInfo> pInfo);
+    void loadFullGui(std::shared_ptr<FIFFLIB::FiffInfo> pInfo);
 
     //=========================================================================================================
     /**
@@ -297,7 +298,7 @@ private:
     QSharedPointer<QList<QPair<int, double>>> m_pTriggerList;      /**< Pointer to list of stim triggers. */
     QSharedPointer<DISPLIB::EvokedSetModel> m_pEvokedModel;        /**< Pointer to model used to display averaging data from m_pFiffEvokedSet and m_pFiffEvoked. */
     QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel; /**< Pointer to model that holds channel info data. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                 /**< Pointer to info about loaded fiff data. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                /**< Pointer to info about loaded fiff data. */
 
     QPointer<ANSHAREDLIB::Communicator> m_pCommu;              /**< To broadcst signals. */
     QPointer<DISPLIB::ButterflyView> m_pButterflyView;         /**< The butterfly plot view. */
@@ -323,8 +324,8 @@ private:
 
     UTILSLIB::FilterKernel m_filterKernel; /**< List of currently active filters. */
 
-    QFutureWatcher<QSharedPointer<FIFFLIB::FiffEvokedSet>> m_FutureWatcher; /**< Future watcher for notifing of completed average calculations. */
-    QFuture<QSharedPointer<FIFFLIB::FiffEvokedSet>> m_Future;               /**< Future for performing average calculations of separate thread. */
+    QFutureWatcher<std::shared_ptr<FIFFLIB::FiffEvokedSet>> m_FutureWatcher; /**< Future watcher for notifing of completed average calculations. */
+    QFuture<std::shared_ptr<FIFFLIB::FiffEvokedSet>> m_Future;               /**< Future for performing average calculations of separate thread. */
 
     QMutex m_ParameterMutex; /**< Mutex for thread-safing. */
 };

@@ -10,6 +10,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <QFile>
 #include <QTemporaryFile>
 #include <QThread>
@@ -373,7 +374,7 @@ void TestInvRtLibrary::rtHpi_lifecycle()
 
 void TestInvRtLibrary::rtInvOp_lifecycle()
 {
-    auto pInfo = QSharedPointer<FiffInfo>::create();
+    auto pInfo = std::make_shared<FiffInfo>();
     pInfo->sfreq = 1000.0;
     pInfo->nchan = 10;
 
@@ -396,7 +397,7 @@ void TestInvRtLibrary::rtInvOp_lifecycle()
 
 void TestInvRtLibrary::rtAveraging_moreWorkerOps()
 {
-    auto pInfo = FiffInfo::SPtr::create();
+    auto pInfo = std::make_shared<FiffInfo>();
     pInfo->sfreq = 1000.0;
     pInfo->nchan = 10;
     for (int i = 0; i < 10; i++) {
@@ -439,7 +440,7 @@ void TestInvRtLibrary::rtAveraging_moreWorkerOps()
 
 void TestInvRtLibrary::rtNoise_hanningWindow()
 {
-    auto pInfo = FiffInfo::SPtr::create();
+    auto pInfo = std::make_shared<FiffInfo>();
     pInfo->sfreq = 1000.0;
     pInfo->nchan = 5;
     for (int i = 0; i < 5; i++) {
@@ -477,7 +478,7 @@ void TestInvRtLibrary::rtNoise_hanningWindow()
 
 void TestInvRtLibrary::rtNoise_lifecycle()
 {
-    auto pInfo = FiffInfo::SPtr::create();
+    auto pInfo = std::make_shared<FiffInfo>();
     pInfo->sfreq = 600.0;
     pInfo->nchan = 3;
     for (int i = 0; i < 3; i++) {
@@ -509,7 +510,7 @@ void TestInvRtLibrary::rtprocessing_filterFile()
 {
     if (!hasData())
         QSKIP("No test data");
-    FiffRawData::SPtr pRaw(new FiffRawData(rawPath().toStdString()));
+    std::shared_ptr<FiffRawData> pRaw(new FiffRawData(rawPath().toStdString()));
 
     QTemporaryFile tmpFile;
     tmpFile.setAutoRemove(true);
@@ -762,7 +763,7 @@ void TestInvRtLibrary::filter_applyWithChannelSelection()
 
 void TestInvRtLibrary::rtAveragingWorker_doWork()
 {
-    FiffInfo::SPtr pInfo(new FiffInfo());
+    std::shared_ptr<FiffInfo> pInfo(new FiffInfo());
     pInfo->sfreq = 1000.0;
     FiffChInfo chData;
     chData.ch_name = "MEG0111";

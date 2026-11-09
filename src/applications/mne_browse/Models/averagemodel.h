@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "../Utils/rawsettings.h"
+#include <memory>
 
 #include <vector>
 #include "../Utils/types.h"
@@ -150,9 +151,9 @@ public:
     }
 
 protected:
-    bool m_bFileloaded;                   /**< true when a Fiff evoked file is loaded. */
-    FiffEvokedSet::SPtr m_pEvokedDataSet; /**< std::vector<FiffEvoked> that holds the evoked data sets which are to be organised and handled by this model. */
-    QSharedPointer<FiffIO> m_pfiffIO;     /**< FiffIO objects, which holds all the information of the fiff data (excluding the samples!). */
+    bool m_bFileloaded;                              /**< true when a Fiff evoked file is loaded. */
+    std::shared_ptr<FiffEvokedSet> m_pEvokedDataSet; /**< std::vector<FiffEvoked> that holds the evoked data sets which are to be organised and handled by this model. */
+    QSharedPointer<FiffIO> m_pfiffIO;                /**< FiffIO objects, which holds all the information of the fiff data (excluding the samples!). */
 
     //=========================================================================================================
     /**

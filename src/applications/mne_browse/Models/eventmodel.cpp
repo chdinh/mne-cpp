@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "eventmodel.h"
+#include <memory>
 
 #include <fiff/fiff_events.h>
 #include <utils/string_utils.h>
@@ -388,7 +389,7 @@ bool EventModel::saveEventData(QFile& qFile)
 
 //*************************************************************************************************************
 
-void EventModel::setFiffInfo(const FiffInfo::SPtr& pFiffInfo)
+void EventModel::setFiffInfo(const std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     m_pFiffInfo = pFiffInfo;
 }
@@ -414,7 +415,7 @@ void EventModel::setCurrentMarkerPos(int markerPos)
 
 //*************************************************************************************************************
 
-FiffInfo::SPtr EventModel::getFiffInfo() const
+std::shared_ptr<FiffInfo> EventModel::getFiffInfo() const
 {
     return m_pFiffInfo;
 }

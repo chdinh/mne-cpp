@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_info.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -339,7 +340,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
         return false;
 
     FiffInfo info;
-    FiffDirNode::SPtr infoNode;
+    std::shared_ptr<FiffDirNode> infoNode;
     if (!stream.read_meas_info(stream.dirtree(), info, infoNode)) {
         Log::critical("{} : could not read measurement info", name);
         stream.close();

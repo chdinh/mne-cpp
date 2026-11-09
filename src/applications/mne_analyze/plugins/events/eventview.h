@@ -227,7 +227,7 @@ private slots:
      *
      * @param[in] info  data for the trigger view to get a list of the stim channels.
      */
-    void initTriggerDetect(const QSharedPointer<FIFFLIB::FiffInfo> info);
+    void initTriggerDetect(const std::shared_ptr<FIFFLIB::FiffInfo> info);
 
     //=========================================================================================================
     /**

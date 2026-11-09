@@ -118,7 +118,7 @@ void TestMneForwardSolution::computeForward()
 
 
     FIFFLIB::FiffRawData raw(pSettingsMEGEEG->measname);
-    QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FIFFLIB::FiffInfo(raw.info));
+    std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>(raw.info);
 
     pSettingsMEGEEG->pFiffInfo = pFiffInfo;
     pSettingsMEGEEG->checkIntegrity();

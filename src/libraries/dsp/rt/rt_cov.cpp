@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "rt_cov.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 //=============================================================================================================
@@ -42,7 +43,7 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-RtCov::RtCov(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo)
+RtCov::RtCov(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo)
 : m_iSamples(0)
 , m_fiffInfo(*pFiffInfo)
 , m_bPicksReady(false)

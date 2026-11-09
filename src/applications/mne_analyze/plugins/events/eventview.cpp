@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "eventview.h"
+#include <memory>
 #include "ui_eventview.h"
 
 #include <fiff/fiff.h>
@@ -453,7 +454,7 @@ void EventView::onStimButtonClicked()
 
 //=============================================================================================================
 
-void EventView::initTriggerDetect(const QSharedPointer<FIFFLIB::FiffInfo> info)
+void EventView::initTriggerDetect(const std::shared_ptr<FIFFLIB::FiffInfo> info)
 {
     m_pTriggerDetectView->init(info);
 }
@@ -476,7 +477,7 @@ void EventView::onDetectTriggers(const QString& sChannelName,
 
     // The arguments are temporaries of the emitting call, so the worker gets copies
     m_sDetectedStimChannel = sChannelName;
-    QSharedPointer<FIFFLIB::FiffRawData> raw = m_pFiffRawModel->getFiffIO()->m_qlistRaw.front();
+    std::shared_ptr<FIFFLIB::FiffRawData> raw = m_pFiffRawModel->getFiffIO()->m_qlistRaw.front();
     m_Future = QtConcurrent::run([sChannelName = QString(sChannelName), dThreshold, raw] {
         return detectTriggerCalculations(sChannelName, dThreshold, *raw);
     });

@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "../Utils/types.h"
+#include <memory>
 
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_info.h>
@@ -52,7 +53,7 @@ public:
 
     void setCovariance(const FIFFLIB::FiffCov& covariance,
                        const QString& sourceDescription = QString(),
-                       FIFFLIB::FiffInfo::SPtr fiffInfo = FIFFLIB::FiffInfo::SPtr());
+                       std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo = std::shared_ptr<FIFFLIB::FiffInfo>());
     void clearCovariance();
 
     void setWhiteningSettings(const WhiteningSettings& settings);
@@ -88,7 +89,7 @@ private:
     QDoubleSpinBox* m_pRegEegSpinBox = nullptr;
 
     FIFFLIB::FiffCov m_covariance;
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo;
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;
     QString m_sSourceDescription;
 };
 

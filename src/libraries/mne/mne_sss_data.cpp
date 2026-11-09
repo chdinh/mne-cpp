@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "mne_sss_data.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_constants.h>
@@ -100,11 +101,11 @@ std::unique_ptr<MNESssData> MNESssData::read(const std::filesystem::path& name)
 
 //=============================================================================================================
 
-std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const FiffDirNode::SPtr& start)
+std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const std::shared_ptr<FiffDirNode>& start)
 {
     auto s = std::make_unique<MNESssData>();
-    std::vector<FiffDirNode::SPtr> sss;
-    FiffDirNode::SPtr node;
+    std::vector<std::shared_ptr<FiffDirNode>> sss;
+    std::shared_ptr<FiffDirNode> node;
     std::optional<FiffTag> t_pTag;
     const float* r0;
     int j, p, q, n;

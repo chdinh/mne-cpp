@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include <fwd/fwd_types.h>
+#include <memory>
 #include <utils/logger/log.h>
 
 #include "inv_dipole_fit_data.h"
@@ -663,7 +664,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
             if (!compStream.open())
                 return nullptr;
             FiffInfo compInfo;
-            FiffDirNode::SPtr compInfoNode;
+            std::shared_ptr<FiffDirNode> compInfoNode;
             if (!compStream.read_meas_info(compStream.dirtree(), compInfo, compInfoNode)) {
                 compStream.close();
                 return nullptr;

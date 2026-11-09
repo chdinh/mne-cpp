@@ -100,7 +100,7 @@ public:
      * @return Shared pointer to the enclosing FIFFB_MEAS node, or an empty
      *         shared pointer if no such node is found.
      */
-    static FIFFLIB::FiffDirNode::SPtr find_meas(const FIFFLIB::FiffDirNode::SPtr& node);
+    static std::shared_ptr<FIFFLIB::FiffDirNode> find_meas(const std::shared_ptr<FIFFLIB::FiffDirNode>& node);
 
     /**
      * Finds the FIFFB_MEAS_INFO child node within the nearest FIFFB_MEAS block.
@@ -114,7 +114,7 @@ public:
      * @return Shared pointer to the FIFFB_MEAS_INFO node, or an empty shared
      *         pointer if not found.
      */
-    static FIFFLIB::FiffDirNode::SPtr find_meas_info(const FIFFLIB::FiffDirNode::SPtr& node);
+    static std::shared_ptr<FIFFLIB::FiffDirNode> find_meas_info(const std::shared_ptr<FIFFLIB::FiffDirNode>& node);
 
     /**
      * Finds the raw data block in the FIFF directory tree.
@@ -127,7 +127,7 @@ public:
      * @return Shared pointer to the raw data directory node, or an empty shared
      *         pointer if neither raw nor continuous data blocks are found.
      */
-    static FIFFLIB::FiffDirNode::SPtr find_raw(const FIFFLIB::FiffDirNode::SPtr& node);
+    static std::shared_ptr<FIFFLIB::FiffDirNode> find_raw(const std::shared_ptr<FIFFLIB::FiffDirNode>& node);
 
     /**
      * Finds the MaxShield raw data block in the FIFF directory tree.
@@ -140,7 +140,7 @@ public:
      * @return Shared pointer to the MaxShield raw data directory node, or an
      *         empty shared pointer if no such block is found.
      */
-    static FIFFLIB::FiffDirNode::SPtr find_maxshield(const FIFFLIB::FiffDirNode::SPtr& node);
+    static std::shared_ptr<FIFFLIB::FiffDirNode> find_maxshield(const std::shared_ptr<FIFFLIB::FiffDirNode>& node);
 
     /**
      * Reads measurement information from the nearest FIFFB_MEAS_INFO parent of a node.
@@ -166,7 +166,7 @@ public:
      * @return 0 on success, -1 on failure.
      */
     static int get_meas_info(FIFFLIB::FiffStream& stream,
-                             FIFFLIB::FiffDirNode::SPtr& node,
+                             std::shared_ptr<FIFFLIB::FiffDirNode>& node,
                              std::unique_ptr<FIFFLIB::FiffId>& id,
                              int* nchan,
                              float* sfreq,
@@ -193,7 +193,7 @@ public:
      * @return 0 on success, -1 on failure.
      */
     static int get_meas_info(FIFFLIB::FiffStream& stream,
-                             FIFFLIB::FiffDirNode::SPtr& node,
+                             std::shared_ptr<FIFFLIB::FiffDirNode>& node,
                              std::unique_ptr<FIFFLIB::FiffId>& id,
                              int* nchan,
                              float* sfreq,

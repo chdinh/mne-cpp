@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_evoked_set.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <format>
@@ -70,7 +71,7 @@ using namespace UTILSLIB;
 FiffEvokedSet::FiffEvokedSet()
 {
     qRegisterMetaType<FIFFLIB::FiffEvokedSet>("FIFFLIB::FiffEvokedSet");
-    qRegisterMetaType<FIFFLIB::FiffEvokedSet::SPtr>("FIFFLIB::FiffEvokedSet::SPtr");
+    qRegisterMetaType<std::shared_ptr<FIFFLIB::FiffEvokedSet>>();
 }
 
 //=============================================================================================================

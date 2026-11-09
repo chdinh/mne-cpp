@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_deriv_set.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -152,8 +153,8 @@ std::optional<MNEDerivSet> MNEDerivSet::read(const std::filesystem::path& path)
         return std::nullopt;
     }
     MNEDerivSet set;
-    for (const FiffDirNode::SPtr& block : stream.dirtree()->dir_tree_find(FIFFB_MNE_DERIVATIONS)) {
-        for (const FiffDirNode::SPtr& matrix : block->dir_tree_find(FIFFB_MNE_NAMED_MATRIX)) {
+    for (const std::shared_ptr<FiffDirNode>& block : stream.dirtree()->dir_tree_find(FIFFB_MNE_DERIVATIONS)) {
+        for (const std::shared_ptr<FiffDirNode>& matrix : block->dir_tree_find(FIFFB_MNE_NAMED_MATRIX)) {
             auto data = MNESparseNamedMatrix::read(stream, matrix, FIFF_MNE_DERIVATION_DATA);
             if (!data) {
                 UTILSLIB::Log::warning("MNEDerivSet::read - Bad derivation data in {}", UTILSLIB::utf8FromPath(path));

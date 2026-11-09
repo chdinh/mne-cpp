@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <Windows/averagewindow.h>
+#include <memory>
 #include <utils/string_utils.h>
 #include <Windows/datawindow.h>
 #include <Windows/eventwindow.h>
@@ -526,7 +527,7 @@ void TestMneBrowseApp::annotatesDraggedRangeLikePython()
     QFile annotFile(annotPath);
     FIFFLIB::FiffStream stream(&annotFile);
     QVERIFY(stream.open());
-    const std::vector<FIFFLIB::FiffDirNode::SPtr> blocks = stream.dirtree()->dir_tree_find(3810);
+    const std::vector<std::shared_ptr<FIFFLIB::FiffDirNode>> blocks = stream.dirtree()->dir_tree_find(3810);
     QCOMPARE(blocks.size(), 1);
     QMap<int, QVector<float>> times;
     for (const auto& entry : blocks.front()->dir) {

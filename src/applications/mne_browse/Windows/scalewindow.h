@@ -92,7 +92,7 @@ public:
      *
      * @param [in] currentFiffInfo the fiff info file used to hide the spin boxes for not loaded channel types
      */
-    void hideSpinBoxes(FiffInfo::SPtr& pCurrentFiffInfo);
+    void hideSpinBoxes(std::shared_ptr<FiffInfo>& pCurrentFiffInfo);
 
     //=========================================================================================================
     /**

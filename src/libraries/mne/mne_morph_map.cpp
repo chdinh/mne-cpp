@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_morph_map.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <fiff/fiff_constants.h>
@@ -285,7 +286,7 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const std::filesystem::path& path, 
         return std::nullopt;
     }
     std::optional<FiffTag> tag;
-    for (const FiffDirNode::SPtr& node : stream.dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
+    for (const std::shared_ptr<FiffDirNode>& node : stream.dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
         const auto hemiTag = node->find_tag(stream, FIFF_MNE_HEMI);
         if (!hemiTag || *hemiTag->toInt() != kHemiKind[hemi]) {
             continue;

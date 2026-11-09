@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
     // bring in dev_head transformation and FiffInfo
     // Init data loading and writing
     FiffRawData raw(pSettings->measname);
-    QSharedPointer<FiffInfo> pFiffInfo = QSharedPointer<FiffInfo>::create(raw.info);
+    std::shared_ptr<FiffInfo> pFiffInfo = std::make_shared<FiffInfo>(raw.info);
 
     FiffCoordTrans meg_head_t = pFiffInfo->dev_head_t;
 

@@ -286,7 +286,7 @@ namespace
 // Six channels: MEG0..MEG2 (one bad), EEG0, EEG1, STI; 1000 Hz, samples 0..1999.
 std::unique_ptr<ChannelDataModel> labelTestModel()
 {
-    QSharedPointer<FIFFLIB::FiffInfo> info(new FIFFLIB::FiffInfo);
+    std::shared_ptr<FIFFLIB::FiffInfo> info(new FIFFLIB::FiffInfo);
     info->sfreq = 1000.0f;
     const QVector<std::pair<int, int>> kinds = {{FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_MEG_CH, FIFF_UNIT_T}, {FIFFV_EEG_CH, FIFF_UNIT_V}, {FIFFV_EEG_CH, FIFF_UNIT_V}, {FIFFV_STIM_CH, FIFF_UNIT_NONE}};
     const StringList names = {"MEG0", "MEG1", "MEG2", "EEG0", "EEG1", "STI"};

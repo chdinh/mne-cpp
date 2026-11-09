@@ -165,8 +165,6 @@ struct FIFFSHARED_EXPORT AverageDescription
 class FIFFSHARED_EXPORT FiffEvokedSet
 {
 public:
-    using SPtr = QSharedPointer<FiffEvokedSet>; /**< Shared pointer type for FiffEvokedSet. */
-
     //=========================================================================================================
     /**
      * Constructs a fiff evoked data set.
@@ -357,7 +355,7 @@ Q_DECLARE_METATYPE(FIFFLIB::FiffEvokedSet); /**< Provides QT META type declarati
 
 #ifndef metatype_fiffevokedsetsptr
 #define metatype_fiffevokedsetsptr
-Q_DECLARE_METATYPE(FIFFLIB::FiffEvokedSet::SPtr); /**< Provides QT META type declaration of the FIFFLIB::FiffEvokedSet type. For signal/slot and QVariant usage.*/
+Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffEvokedSet>); /**< Provides QT META type declaration of the FIFFLIB::FiffEvokedSet type. For signal/slot and QVariant usage.*/
 #endif
 
 #endif // FIFF_EVOKED_SET_H

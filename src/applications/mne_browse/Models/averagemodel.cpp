@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "averagemodel.h"
+#include <memory>
 #include <fiff/fiff_io.h>
 #include <utils/string_utils.h>
 
@@ -60,7 +61,7 @@ QString baselineTextForEvoked(const FiffEvoked& evoked)
 AverageModel::AverageModel(QObject* parent)
 : QAbstractTableModel(parent)
 , m_bFileloaded(false)
-, m_pEvokedDataSet(FiffEvokedSet::SPtr(new FiffEvokedSet))
+, m_pEvokedDataSet(std::make_shared<FiffEvokedSet>())
 , m_pfiffIO(QSharedPointer<FiffIO>(new FiffIO()))
 {
 }
@@ -71,7 +72,7 @@ AverageModel::AverageModel(QObject* parent)
 AverageModel::AverageModel(QFile& qFile, QObject* parent)
 : QAbstractTableModel(parent)
 , m_bFileloaded(false)
-, m_pEvokedDataSet(FiffEvokedSet::SPtr(new FiffEvokedSet))
+, m_pEvokedDataSet(std::make_shared<FiffEvokedSet>())
 , m_pfiffIO(QSharedPointer<FiffIO>(new FiffIO()))
 {
     //read evoked fiff data

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "frequencyspectrummodel.h"
+#include <memory>
 
 #include <fiff/fiff_info.h>
 
@@ -143,7 +144,7 @@ QVariant FrequencySpectrumModel::headerData(int section, Qt::Orientation orienta
 
 //=============================================================================================================
 
-void FrequencySpectrumModel::setInfo(FiffInfo::SPtr& info)
+void FrequencySpectrumModel::setInfo(std::shared_ptr<FiffInfo>& info)
 {
     beginResetModel();
     m_pFiffInfo = info;

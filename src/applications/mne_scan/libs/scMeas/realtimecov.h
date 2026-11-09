@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scmeas_global.h"
+#include <memory>
 #include "measurement.h"
 #include "realtimesamplearraychinfo.h"
 
@@ -75,7 +76,7 @@ public:
      *
      * @param[in] pFiffInfo     the new fiff info.
      */
-    void setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    void setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -83,7 +84,7 @@ public:
      *
      * @return     the current fiff info.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> getFiffInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo();
 
     //=========================================================================================================
     /**
@@ -100,7 +101,7 @@ public:
      *
      * @return the last attached value.
      */
-    virtual FIFFLIB::FiffCov::SPtr& getValue();
+    virtual std::shared_ptr<FIFFLIB::FiffCov>& getValue();
 
     //=========================================================================================================
     /**
@@ -113,8 +114,8 @@ public:
 private:
     mutable QMutex m_qMutex; /**< Mutex to ensure thread safety. */
 
-    FIFFLIB::FiffCov::SPtr m_pFiffCov;   /**< Covariance data set. */
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo; /**< The Fiff Info. */
+    std::shared_ptr<FIFFLIB::FiffCov> m_pFiffCov;   /**< Covariance data set. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff Info. */
 
     bool m_bInitialized; /**< If values are stored.*/
 };

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "averaging.h"
+#include <memory>
 
 #include <anShared/Management/communicator.h>
 #include <anShared/Management/analyzedata.h>
@@ -386,7 +387,7 @@ void Averaging::computeAverage()
     triggerLoadingStart("Calculating average...");
 
     m_Future = QtConcurrent::run([&, this] {
-        return this->averageCalculation(*this->m_pFiffRawModel->getFiffIO()->m_qlistRaw.front().data(),
+        return this->averageCalculation(*this->m_pFiffRawModel->getFiffIO()->m_qlistRaw.front().get(),
                                         m_pFiffRawModel->getEventModel()->getEventMatrix(),
                                         m_filterKernel,
                                         *m_pFiffRawModel->getFiffInfo());
@@ -396,10 +397,10 @@ void Averaging::computeAverage()
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFLIB::FiffRawData& FiffRaw,
-                                                                     MatrixXi matEvents,
-                                                                     UTILSLIB::FilterKernel filterKernel,
-                                                                     FIFFLIB::FiffInfo fiffInfo)
+std::shared_ptr<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFLIB::FiffRawData& FiffRaw,
+                                                                      MatrixXi matEvents,
+                                                                      UTILSLIB::FilterKernel filterKernel,
+                                                                      FIFFLIB::FiffInfo fiffInfo)
 {
     std::map<std::string, double> mapReject;
     mapReject.emplace("eog", 300e-06);
@@ -416,7 +417,7 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFL
     }
     std::sort(eventCodes.begin(), eventCodes.end());
 
-    QSharedPointer<FIFFLIB::FiffEvokedSet> pFiffEvokedSet = QSharedPointer<FIFFLIB::FiffEvokedSet>(new FIFFLIB::FiffEvokedSet());
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> pFiffEvokedSet = std::make_shared<FIFFLIB::FiffEvokedSet>();
     pFiffEvokedSet->info = fiffInfo;
 
     QMutexLocker lock(&m_ParameterMutex);
@@ -445,7 +446,7 @@ QSharedPointer<FIFFLIB::FiffEvokedSet> Averaging::averageCalculation(const FIFFL
 
 void Averaging::createNewAverage()
 {
-    QSharedPointer<FIFFLIB::FiffEvokedSet> pEvokedSet = m_Future.result();
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> pEvokedSet = m_Future.result();
 
     if (pEvokedSet) {
         if (m_bSavingAverage) {
@@ -467,7 +468,7 @@ void Averaging::createNewAverage()
 
 //=============================================================================================================
 
-void Averaging::loadFullGui(QSharedPointer<FIFFLIB::FiffInfo> pInfo)
+void Averaging::loadFullGui(std::shared_ptr<FIFFLIB::FiffInfo> pInfo)
 {
     m_pFiffInfo = pInfo;
     m_pAverageLayoutView->setFiffInfo(m_pFiffInfo);
@@ -646,7 +647,7 @@ void Averaging::setViewSettings(ANSHAREDLIB::ViewParameters viewParams)
 
 void Averaging::onNewAveragingModel(QSharedPointer<ANSHAREDLIB::AveragingDataModel> pAveragingModel)
 {
-    m_pEvokedModel->setEvokedSet(pAveragingModel->data(QModelIndex()).value<QSharedPointer<FIFFLIB::FiffEvokedSet>>());
+    m_pEvokedModel->setEvokedSet(pAveragingModel->data(QModelIndex()).value<std::shared_ptr<FIFFLIB::FiffEvokedSet>>());
 
     updateEvokedSetModel();
 }
@@ -671,10 +672,10 @@ void Averaging::onModelRemoved(QSharedPointer<ANSHAREDLIB::AbstractModel> pRemov
 {
     //Butterfly view
     if (pRemovedModel->getType() == MODEL_TYPE::ANSHAREDLIB_AVERAGING_MODEL) {
-        if (m_pButterflyView->getEvokedSetModel()->getEvokedSet().data() == qSharedPointerCast<AveragingDataModel>(pRemovedModel)->getEvokedSet().data()) {
+        if (m_pButterflyView->getEvokedSetModel()->getEvokedSet().get() == qSharedPointerCast<AveragingDataModel>(pRemovedModel)->getEvokedSet().get()) {
             m_pButterflyView->clearView();
         }
-        if (m_pAverageLayoutView->getEvokedSetModel()->getEvokedSet().data() == qSharedPointerCast<AveragingDataModel>(pRemovedModel)->getEvokedSet().data()) {
+        if (m_pAverageLayoutView->getEvokedSetModel()->getEvokedSet().get() == qSharedPointerCast<AveragingDataModel>(pRemovedModel)->getEvokedSet().get()) {
             m_pAverageLayoutView->clearView();
         }
     }

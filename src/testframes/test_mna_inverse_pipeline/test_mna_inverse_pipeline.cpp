@@ -26,6 +26,7 @@
 //=============================================================================================================
 
 #include <mna/mna_graph.h>
+#include <memory>
 #include <mna/mna_graph_executor.h>
 #include <mna/mna_op_registry.h>
 #include <mna/mna_node.h>
@@ -77,7 +78,7 @@ using namespace Eigen;
 // QVariant metatype declarations for types not already registered in library headers
 //=============================================================================================================
 
-// Note: QSharedPointer<FiffCov> and QSharedPointer<MNEInverseOperator> are already
+// Note: std::shared_ptr<FiffCov> and QSharedPointer<MNEInverseOperator> are already
 // declared in fiff_cov.h and mne_inverse_operator.h respectively.
 // Only declare types that are missing from upstream headers.
 #ifndef Q_MOC_RUN
@@ -172,7 +173,7 @@ void TestMnaInversePipeline::registerRealOps()
                            rawPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
 
                            FiffRawData raw(rawPath.toStdString());
-                           auto info = QSharedPointer<FiffInfo>::create(raw.info);
+                           auto info = std::make_shared<FiffInfo>(raw.info);
 
                            return {
                                {QStringLiteral("raw_data"), QVariant()},
@@ -189,7 +190,7 @@ void TestMnaInversePipeline::registerRealOps()
                            int setno = attrs.value(QStringLiteral("setno"), 0).toInt();
 
                            QPair<float, float> noBaseline(-1.0f, -1.0f);
-                           auto evoked = QSharedPointer<FiffEvoked>::create(evkPath.toStdString(), setno, noBaseline);
+                           auto evoked = std::make_shared<FiffEvoked>(evkPath.toStdString(), setno, noBaseline);
 
                            return {{QStringLiteral("evoked"), QVariant::fromValue(evoked)}};
                        });
@@ -202,7 +203,7 @@ void TestMnaInversePipeline::registerRealOps()
                            QString covPath = attrs.value(QStringLiteral("cov_path")).toString();
                            covPath.replace(QLatin1String("${TEST_DATA}"), dataPath);
 
-                           auto cov = QSharedPointer<FiffCov>::create(covPath.toStdString());
+                           auto cov = std::make_shared<FiffCov>(covPath.toStdString());
 
                            return {{QStringLiteral("noise_cov"), QVariant::fromValue(cov)}};
                        });
@@ -225,9 +226,9 @@ void TestMnaInversePipeline::registerRealOps()
     //
     reg.registerOpFunc(QStringLiteral("make_inverse_operator"),
                        [](const QVariantMap& inputs, const QVariantMap& attrs) -> QVariantMap {
-                           auto info = inputs.value(QStringLiteral("info")).value<QSharedPointer<FiffInfo>>();
+                           auto info = inputs.value(QStringLiteral("info")).value<std::shared_ptr<FiffInfo>>();
                            auto fwd = inputs.value(QStringLiteral("forward")).value<QSharedPointer<MNEForwardSolution>>();
-                           auto cov = inputs.value(QStringLiteral("noise_cov")).value<QSharedPointer<FiffCov>>();
+                           auto cov = inputs.value(QStringLiteral("noise_cov")).value<std::shared_ptr<FiffCov>>();
 
                            float loose = attrs.value(QStringLiteral("loose"), 0.2).toFloat();
                            float depth = attrs.value(QStringLiteral("depth"), 0.8).toFloat();
@@ -246,7 +247,7 @@ void TestMnaInversePipeline::registerRealOps()
     reg.registerOpFunc(QStringLiteral("apply_inverse"),
                        [](const QVariantMap& inputs, const QVariantMap& attrs) -> QVariantMap {
                            auto invOp = inputs.value(QStringLiteral("inverse_operator")).value<QSharedPointer<MNEInverseOperator>>();
-                           auto evoked = inputs.value(QStringLiteral("evoked")).value<QSharedPointer<FiffEvoked>>();
+                           auto evoked = inputs.value(QStringLiteral("evoked")).value<std::shared_ptr<FiffEvoked>>();
 
                            QString method = attrs.value(QStringLiteral("method"), QStringLiteral("dSPM")).toString();
                            float snr = attrs.value(QStringLiteral("snr"), 3.0).toFloat();
@@ -361,8 +362,8 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
     {
         QVariant v = ctx.results.value(QStringLiteral("load_raw::info"));
         QVERIFY2(v.isValid(), "load_raw::info not in results");
-        auto info = v.value<QSharedPointer<FiffInfo>>();
-        QVERIFY2(!info.isNull(), "FiffInfo is null");
+        auto info = v.value<std::shared_ptr<FiffInfo>>();
+        QVERIFY2(info != nullptr, "FiffInfo is null");
         QVERIFY2(info->nchan > 0,
                  qPrintable(QString("nchan = %1, expected > 0").arg(info->nchan)));
         QVERIFY(info->sfreq > 0.0);
@@ -374,8 +375,8 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
     {
         QVariant v = ctx.results.value(QStringLiteral("load_evoked::evoked"));
         QVERIFY2(v.isValid(), "load_evoked::evoked not in results");
-        auto evoked = v.value<QSharedPointer<FiffEvoked>>();
-        QVERIFY2(!evoked.isNull(), "FiffEvoked is null");
+        auto evoked = v.value<std::shared_ptr<FiffEvoked>>();
+        QVERIFY2(evoked != nullptr, "FiffEvoked is null");
         QVERIFY2(evoked->data.rows() > 0,
                  qPrintable(QString("evoked rows = %1").arg(evoked->data.rows())));
         QVERIFY2(evoked->data.cols() > 0,
@@ -391,8 +392,8 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
     {
         QVariant v = ctx.results.value(QStringLiteral("load_cov::noise_cov"));
         QVERIFY2(v.isValid(), "load_cov::noise_cov not in results");
-        auto cov = v.value<QSharedPointer<FiffCov>>();
-        QVERIFY2(!cov.isNull(), "FiffCov is null");
+        auto cov = v.value<std::shared_ptr<FiffCov>>();
+        QVERIFY2(cov != nullptr, "FiffCov is null");
         QVERIFY2(!cov->empty(), "Noise covariance is empty");
         QVERIFY2(cov->data.rows() > 0, "Covariance matrix has 0 rows");
         QCOMPARE(cov->data.rows(), cov->data.cols()); // must be square
@@ -408,7 +409,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVariant v = ctx.results.value(QStringLiteral("load_fwd::forward"));
         QVERIFY2(v.isValid(), "load_fwd::forward not in results");
         auto fwd = v.value<QSharedPointer<MNEForwardSolution>>();
-        QVERIFY2(!fwd.isNull(), "MNEForwardSolution is null");
+        QVERIFY2(fwd != nullptr, "MNEForwardSolution is null");
         QVERIFY2(!fwd->empty(), "Forward solution is empty");
         QVERIFY2(fwd->nsource > 0,
                  qPrintable(QString("nsource = %1, expected > 0").arg(fwd->nsource)));
@@ -426,7 +427,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVariant v = ctx.results.value(QStringLiteral("make_inv::inverse_operator"));
         QVERIFY2(v.isValid(), "make_inv::inverse_operator not in results");
         auto invOp = v.value<QSharedPointer<MNEInverseOperator>>();
-        QVERIFY2(!invOp.isNull(), "MNEInverseOperator is null");
+        QVERIFY2(invOp != nullptr, "MNEInverseOperator is null");
         QVERIFY2(invOp->nchan > 0,
                  qPrintable(QString("nchan = %1, expected > 0").arg(invOp->nchan)));
         QVERIFY2(invOp->nsource > 0,
@@ -444,7 +445,7 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVariant v = ctx.results.value(QStringLiteral("apply_dspm::source_estimate"));
         QVERIFY2(v.isValid(), "apply_dspm::source_estimate not in results");
         auto stc = v.value<QSharedPointer<InvSourceEstimate>>();
-        QVERIFY2(!stc.isNull(), "InvSourceEstimate is null");
+        QVERIFY2(stc != nullptr, "InvSourceEstimate is null");
         QVERIFY2(!stc->empty(), "Source estimate is empty");
 
         // Dimensions: nsources x ntimes

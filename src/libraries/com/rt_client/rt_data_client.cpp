@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "rt_data_client.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include <fiff/fiff_file.h>
 
@@ -97,9 +98,9 @@ qint32 RtDataClient::getClientId()
 
 //=============================================================================================================
 
-FiffInfo::SPtr RtDataClient::readInfo()
+std::shared_ptr<FiffInfo> RtDataClient::readInfo()
 {
-    FiffInfo::SPtr p_pFiffInfo(new FiffInfo());
+    std::shared_ptr<FiffInfo> p_pFiffInfo(new FiffInfo());
     bool t_bReadMeasBlockStart = false;
     bool t_bReadMeasBlockEnd = false;
     std::string col_names, row_names;
@@ -347,8 +348,8 @@ FiffInfo::SPtr RtDataClient::readInfo()
 
 MetaData RtDataClient::readMetadata()
 {
-    FiffDigitizerData::SPtr p_pDigData(new FiffDigitizerData());
-    FiffInfo::SPtr p_pFiffInfo(new FiffInfo());
+    std::shared_ptr<FiffDigitizerData> p_pDigData(new FiffDigitizerData());
+    std::shared_ptr<FiffInfo> p_pFiffInfo(new FiffInfo());
 
     bool t_bReadMeasBlockStart = false;
     bool t_bReadMeasBlockEnd = false;

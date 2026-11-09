@@ -138,7 +138,7 @@ void EEGoSports::init()
     m_bUseTrackedCardinalMode = settings.value(QString("EEGOSPORTS/useTrackedCardinalsMode"), true).toBool();
     m_bUseElectrodeShiftMode = settings.value(QString("EEGOSPORTS/useElectrodeshiftMode"), false).toBool();
 
-    m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo());
+    m_pFiffInfo = std::make_shared<FiffInfo>();
 }
 
 //=============================================================================================================

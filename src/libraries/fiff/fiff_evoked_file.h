@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "fiff_dir_node.h"
+#include <memory>
 
 #include <vector>
 #include "fiff_evoked.h"
@@ -83,7 +84,7 @@ private:
 
     FiffStream m_stream;
     std::string m_file;
-    std::vector<FiffDirNode::SPtr> m_sets;
+    std::vector<std::shared_ptr<FiffDirNode>> m_sets;
     UTILSLIB::StringList m_comments;
     std::vector<fiff_int_t> m_kinds;
 };

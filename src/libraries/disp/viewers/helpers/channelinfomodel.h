@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include "../../disp_global.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -101,7 +102,7 @@ public:
     typedef QSharedPointer<ChannelInfoModel> SPtr;            /**< Shared pointer type for ChannelInfoModel. */
     typedef QSharedPointer<const ChannelInfoModel> ConstSPtr; /**< Const shared pointer type for ChannelInfoModel. */
 
-    ChannelInfoModel(QSharedPointer<FIFFLIB::FiffInfo>& pFiffInfo, QObject* parent = 0);
+    ChannelInfoModel(std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo, QObject* parent = 0);
     ChannelInfoModel(QObject* parent = 0);
 
     //=========================================================================================================
@@ -127,7 +128,7 @@ public:
      *
      * @param[in] pFiffInfo fiff info variabel.
      */
-    void setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo>& pFiffInfo);
+    void setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**
@@ -192,7 +193,7 @@ protected:
      */
     void mapLayoutToChannels();
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The fiff info of the currently loaded fiff file. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The fiff info of the currently loaded fiff file. */
 
     QMultiMap<int, QSharedPointer<MNEOperator>> m_assignedOperators; /**< Map of MNEOperator types to channels.*/
     QMap<QString, QPointF> m_layoutMap;                              /**< The current layout map with a position for all MEG and EEG channels. */

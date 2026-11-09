@@ -275,7 +275,7 @@ void BabyMEG::initConnector()
 
 void BabyMEG::setFiffInfo(const FiffInfo& p_FiffInfo)
 {
-    m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo(p_FiffInfo));
+    m_pFiffInfo = std::make_shared<FiffInfo>(p_FiffInfo);
 
     if (!readProjectors()) {
         qWarning() << "[BabyMEG::setFiffInfo] Not able to read projectors";

@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mainwindow.h"
+#include <memory>
 
 #include <fiff/fiff_stream.h>
 
@@ -2611,7 +2612,7 @@ void MainWindow::setWindowStatus()
 
 //*************************************************************************************************************
 
-void MainWindow::syncAuxWindowsToFiffInfo(FiffInfo::SPtr fiffInfo,
+void MainWindow::syncAuxWindowsToFiffInfo(std::shared_ptr<FiffInfo> fiffInfo,
                                           int firstSample,
                                           int lastSample)
 {
@@ -3586,7 +3587,7 @@ void MainWindow::clearEpochReviewSession()
     m_epochReviewLists.clear();
     m_epochReviewEventCodes.clear();
     m_epochReviewComments.clear();
-    m_pEpochReviewInfo.clear();
+    m_pEpochReviewInfo.reset();
     m_epochReviewBaseline = QPair<float, float>(0.0f, 0.0f);
 
     if (m_pEpochWindow) {
@@ -3835,7 +3836,7 @@ bool MainWindow::runEvokedComputation(bool promptForSettings)
     m_epochReviewLists = epochLists;
     m_epochReviewEventCodes = epochEventCodes;
     m_epochReviewComments = epochComments;
-    m_pEpochReviewInfo = FIFFLIB::FiffInfo::SPtr(new FIFFLIB::FiffInfo(raw.info));
+    m_pEpochReviewInfo = std::make_shared<FIFFLIB::FiffInfo>(raw.info);
     m_epochReviewBaseline = applyBaseline ? baseline : QPair<float, float>(0.0f, 0.0f);
     {
         QSignalBlocker blocker(m_pEpochWindow->getEpochModel());
@@ -4231,7 +4232,7 @@ void MainWindow::computeCovariance()
     m_pAverageWindow->setNoiseCovariance(m_covariance);
     m_pCovarianceWindow->setCovariance(m_covariance,
                                        QStringLiteral("Computed from %1").arg(QFileInfo(m_qFileRaw.fileName()).fileName()),
-                                       FIFFLIB::FiffInfo::SPtr(new FIFFLIB::FiffInfo(raw.info)));
+                                       std::make_shared<FIFFLIB::FiffInfo>(raw.info));
 
     // Update raw-trace whitener
     if (m_pDataWindow) {
@@ -4273,7 +4274,7 @@ void MainWindow::computeIca()
         return;
     }
 
-    QSharedPointer<FIFFLIB::FiffInfo> pInfo(new FIFFLIB::FiffInfo(raw.info));
+    std::shared_ptr<FIFFLIB::FiffInfo> pInfo(new FIFFLIB::FiffInfo(raw.info));
     m_pIcaWindow->setRawData(matData, pInfo, raw.first_samp);
 
     if (!m_pIcaWindow->isVisible()) {

@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scmeas_global.h"
+#include <memory>
 #include "measurement.h"
 
 //=============================================================================================================
@@ -181,7 +182,7 @@ public:
      *
      * @param[in] p_fiffInfo the new FiffInfo..
      */
-    void setFiffInfo(const QSharedPointer<FIFFLIB::FiffInfo>& p_fiffInfo);
+    void setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& p_fiffInfo);
 
     //=========================================================================================================
     /**
@@ -189,12 +190,12 @@ public:
      *
      * @return the current FiffInfo.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> getFiffInfo();
+    std::shared_ptr<FIFFLIB::FiffInfo> getFiffInfo();
 
 private:
     mutable QMutex m_qMutex; /**< Mutex to ensure thread safety. */
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff info. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff info. */
 
     std::shared_ptr<FSLIB::FsAnnotationSet> m_pAnnotSet;       /**< FsAnnotation set. Needed for visualization. */
     std::shared_ptr<FSLIB::FsSurfaceSet> m_pSurfSet;           /**< FsSurface set. Needed for visualization. */
@@ -281,7 +282,7 @@ inline bool RealTimeConnectivityEstimate::isInitialized() const
 
 //=============================================================================================================
 
-inline void RealTimeConnectivityEstimate::setFiffInfo(const QSharedPointer<FIFFLIB::FiffInfo>& p_fiffInfo)
+inline void RealTimeConnectivityEstimate::setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& p_fiffInfo)
 {
     QMutexLocker locker(&m_qMutex);
     m_pFiffInfo = p_fiffInfo;
@@ -289,7 +290,7 @@ inline void RealTimeConnectivityEstimate::setFiffInfo(const QSharedPointer<FIFFL
 
 //=============================================================================================================
 
-inline QSharedPointer<FIFFLIB::FiffInfo> RealTimeConnectivityEstimate::getFiffInfo()
+inline std::shared_ptr<FIFFLIB::FiffInfo> RealTimeConnectivityEstimate::getFiffInfo()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFiffInfo;

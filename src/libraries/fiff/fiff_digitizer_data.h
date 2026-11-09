@@ -63,8 +63,6 @@ namespace FIFFLIB
 class FIFFSHARED_EXPORT FiffDigitizerData
 {
 public:
-    using SPtr = QSharedPointer<FiffDigitizerData>; /**< Shared pointer type for FiffDigitizerData. */
-
     /** Constructs empty digitizer data. */
     FiffDigitizerData() = default;
 

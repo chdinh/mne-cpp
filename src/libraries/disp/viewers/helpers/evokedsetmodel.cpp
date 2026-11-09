@@ -17,7 +17,9 @@
 //=============================================================================================================
 
 #include "evokedsetmodel.h"
+#include <memory>
 
+#include <utility>
 #include <vector>
 #include <utils/string_utils.h>
 
@@ -228,9 +230,9 @@ QVariant EvokedSetModel::headerData(int section, Qt::Orientation orientation, in
 
 //=============================================================================================================
 
-void EvokedSetModel::setEvokedSet(QSharedPointer<FiffEvokedSet> pEvokedSet)
+void EvokedSetModel::setEvokedSet(std::shared_ptr<FiffEvokedSet> pEvokedSet)
 {
-    m_pEvokedSet = pEvokedSet;
+    m_pEvokedSet = std::move(pEvokedSet);
 
     if (!m_bIsInit) {
         init();
@@ -775,7 +777,7 @@ void EvokedSetModel::toggleFreeze()
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffEvokedSet> EvokedSetModel::getEvokedSet()
+std::shared_ptr<FIFFLIB::FiffEvokedSet> EvokedSetModel::getEvokedSet()
 {
     if (!m_pEvokedSet) {
         return nullptr;

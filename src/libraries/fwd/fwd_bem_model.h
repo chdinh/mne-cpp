@@ -131,8 +131,6 @@ class FwdThreadArg;
 class FWDSHARED_EXPORT FwdBemModel
 {
 public:
-    typedef std::unique_ptr<FwdBemModel> UPtr; /**< Unique pointer type for FwdBemModel. */
-
     //=========================================================================================================
     /**
      * @brief Constructs an empty BEM model.
@@ -195,7 +193,7 @@ public:
      * @param[out] res    Receives the integer value on success.
      * @return OK if the tag was found and is of type FIFFT_INT, FAIL otherwise.
      */
-    static int get_int(FIFFLIB::FiffStream& stream, const FIFFLIB::FiffDirNode::SPtr& node, int what, int* res);
+    static int get_int(FIFFLIB::FiffStream& stream, const std::shared_ptr<FIFFLIB::FiffDirNode>& node, int what, int* res);
 
     /**
      * @brief Find a surface of the given kind in this BEM model.
@@ -213,8 +211,8 @@ public:
      * @param[in] kinds  FsSurface IDs to load (e.g. FIFFV_BEM_SURF_ID_BRAIN).
      * @return BEM model containing the requested surfaces, or nullptr on failure.
      */
-    static FwdBemModel::UPtr fwd_bem_load_surfaces(const std::filesystem::path& name,
-                                                   const std::vector<int>& kinds);
+    static std::unique_ptr<FwdBemModel> fwd_bem_load_surfaces(const std::filesystem::path& name,
+                                                              const std::vector<int>& kinds);
 
     //=========================================================================================================
     /**
@@ -225,7 +223,7 @@ public:
      * @param[in] name  Path to the BEM FIFF file.
      * @return BEM model, or nullptr on failure.
      */
-    static FwdBemModel::UPtr fwd_bem_load_homog_surface(const std::filesystem::path& name);
+    static std::unique_ptr<FwdBemModel> fwd_bem_load_homog_surface(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**
@@ -234,7 +232,7 @@ public:
      * @param[in] name  Path to the BEM FIFF file.
      * @return BEM model, or nullptr on failure.
      */
-    static FwdBemModel::UPtr fwd_bem_load_three_layer_surfaces(const std::filesystem::path& name);
+    static std::unique_ptr<FwdBemModel> fwd_bem_load_three_layer_surfaces(const std::filesystem::path& name);
 
     //=========================================================================================================
     /**

@@ -205,7 +205,7 @@ public:
      *         or NULL on error. Caller takes ownership.
      */
     static std::unique_ptr<MNEProjOp> read_from_node(FIFFLIB::FiffStream& stream,
-                                                     const FIFFLIB::FiffDirNode::SPtr& start);
+                                                     const std::shared_ptr<FIFFLIB::FiffDirNode>& start);
 
     /**
      * Read a projection operator from a FIFF file by path.

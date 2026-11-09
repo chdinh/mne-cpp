@@ -39,6 +39,7 @@
 
 #include <QDir>
 #include <QDebug>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -144,8 +145,8 @@ void Hpi::resetState()
     m_bPluginControlWidgetsInit = false;
     m_pCircularBuffer->clear();
 
-    m_pFiffInfo.clear();
-    m_pFiffDigitizerData.clear();
+    m_pFiffInfo.reset();
+    m_pFiffDigitizerData.reset();
 }
 
 //=============================================================================================================
@@ -226,10 +227,10 @@ void Hpi::manageInitialization(QSharedPointer<SCMEASLIB::RealTimeMultiSampleArra
 
 //=============================================================================================================
 
-void Hpi::initFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> info)
+void Hpi::initFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> info)
 {
     m_mutex.lock();
-    m_pFiffInfo = info;
+    m_pFiffInfo = std::move(info);
     m_pHpiOutput->measurementData()->setFiffInfo(m_pFiffInfo);
 
     // Take the HPI coil excitation frequencies from the file when it provides
@@ -249,7 +250,7 @@ void Hpi::initFiffInfo(QSharedPointer<FIFFLIB::FiffInfo> info)
 
 //=============================================================================================================
 
-void Hpi::initFiffDigitizers(QSharedPointer<FIFFLIB::FiffDigitizerData> fiffDig)
+void Hpi::initFiffDigitizers(const std::shared_ptr<FIFFLIB::FiffDigitizerData>& fiffDig)
 {
     if (fiffDig) {
         m_mutex.lock();
@@ -335,7 +336,7 @@ void Hpi::initPluginControlWidgets()
         // in which case the newDigitizerList signal was emitted with nobody
         // connected to it. Push the current list so they show up right away.
         m_mutex.lock();
-        const bool bHaveDigitizers = !m_pFiffDigitizerData.isNull();
+        const bool bHaveDigitizers = !!m_pFiffDigitizerData;
         const FIFFLIB::FiffDigPointSet digitizers = bHaveDigitizers ? m_pFiffDigitizerData->points : FIFFLIB::FiffDigPointSet();
         m_mutex.unlock();
 
@@ -371,7 +372,7 @@ void Hpi::updateProjections()
         if (m_bUseSSP) {
             // Use SSP + SGM + calibration
             //Do a copy here because we are going to change the activity flags of the SSP's
-            FiffInfo infoTemp = *(m_pFiffInfo.data());
+            FiffInfo infoTemp = *(m_pFiffInfo.get());
 
             //Turn on all SSP
             for (int i = 0; i < std::ssize(infoTemp.projs); ++i) {

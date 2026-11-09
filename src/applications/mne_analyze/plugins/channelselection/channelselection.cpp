@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "channelselection.h"
+#include <memory>
 
 #include <disp/viewers/helpers/selectionsceneitem.h>
 #include <disp/viewers/helpers/channelinfomodel.h>
@@ -33,6 +34,7 @@
 
 #include <QListWidgetItem>
 #include <QDebug>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -170,9 +172,9 @@ void ChannelSelection::onModelChanged(QSharedPointer<ANSHAREDLIB::AbstractModel>
 
 //=============================================================================================================
 
-void ChannelSelection::setFiffSettings(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo)
+void ChannelSelection::setFiffSettings(std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo)
 {
-    m_pFiffInfo = pFiffInfo;
+    m_pFiffInfo = std::move(pFiffInfo);
 
     if (m_bIsInit) {
         m_pChannelInfoModel->setFiffInfo(m_pFiffInfo);

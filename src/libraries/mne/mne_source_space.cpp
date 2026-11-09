@@ -1660,8 +1660,8 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
 
     std::vector<std::unique_ptr<MNESourceSpace>> local_spaces;
     std::unique_ptr<MNESourceSpace> new_space;
-    std::vector<FiffDirNode::SPtr> sources;
-    FiffDirNode::SPtr node;
+    std::vector<std::shared_ptr<FiffDirNode>> sources;
+    std::shared_ptr<FiffDirNode> node;
     std::optional<FiffTag> t_pTag;
     int j, k, p, q;
     int ntri;
@@ -1884,7 +1884,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 Eigen::Map<Eigen::Vector3i>(new_space->vol_dims) = volDimsMap;
             }
             {
-                std::vector<FiffDirNode::SPtr> mris = node->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
+                std::vector<std::shared_ptr<FiffDirNode>> mris = node->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);
 
                 if (mris.size() == 0) { /* The old way */
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());

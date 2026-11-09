@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "triggerdetectionview.h"
+#include <memory>
 
 #include "ui_triggerdetectionview.h"
 
@@ -68,7 +69,7 @@ TriggerDetectionView::~TriggerDetectionView()
 
 //=============================================================================================================
 
-void TriggerDetectionView::init(const FiffInfo::SPtr pFiffInfo)
+void TriggerDetectionView::init(const std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     if (pFiffInfo) {
         m_pFiffInfo = pFiffInfo;

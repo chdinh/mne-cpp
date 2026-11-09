@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "mne_named_matrix.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_stream.h>
@@ -182,7 +183,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowli
 //=============================================================================================================
 
 std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
-                                                     const FiffDirNode::SPtr& node,
+                                                     const std::shared_ptr<FiffDirNode>& node,
                                                      int kind)
 {
     StringList colnames;
@@ -195,7 +196,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     std::optional<FiffTag> t_pTag;
     bool dataFound = false;
 
-    FiffDirNode::SPtr tmp_node = node;
+    std::shared_ptr<FiffDirNode> tmp_node = node;
 
     /*
      * If the node itself is a FIFFB_MNE_NAMED_MATRIX block, read from it.

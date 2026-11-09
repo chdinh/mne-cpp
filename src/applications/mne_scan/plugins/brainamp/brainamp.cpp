@@ -121,7 +121,7 @@ void BrainAMP::init()
     m_bUseTrackedCardinalMode = settings.value(QString("BRAINAMP/useTrackedCardinalsMode"), true).toBool();
     m_bUseElectrodeShiftMode = settings.value(QString("BRAINAMP/useElectrodeshiftMode"), false).toBool();
 
-    m_pFiffInfo = QSharedPointer<FiffInfo>(new FiffInfo());
+    m_pFiffInfo = std::make_shared<FiffInfo>();
 }
 
 //=============================================================================================================

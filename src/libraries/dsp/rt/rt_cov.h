@@ -31,6 +31,7 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <memory>
 
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_info.h>
@@ -90,7 +91,7 @@ class DSPSHARED_EXPORT RtCov : public QObject
     Q_OBJECT
 
 public:
-    RtCov(QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo);
+    RtCov(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**

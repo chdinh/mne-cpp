@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "averagelayoutview.h"
+#include <memory>
 
 #include "helpers/averagescene.h"
 #include "helpers/evokedsetmodel.h"
@@ -400,7 +401,7 @@ void AverageLayoutView::updateProcessingMode(ProcessingMode mode)
 
 //=============================================================================================================
 
-void AverageLayoutView::setFiffInfo(const QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo)
+void AverageLayoutView::setFiffInfo(const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo)
 {
     m_pFiffInfo = pFiffInfo;
 }

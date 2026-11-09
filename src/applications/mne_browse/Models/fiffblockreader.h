@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_raw_data.h>
+#include <memory>
 #include <fiff/fiff_info.h>
 
 //=============================================================================================================
@@ -115,7 +116,7 @@ public:
      */
     bool isOpen() const
     {
-        return !m_raw.isNull() && !m_raw->empty();
+        return !!m_raw && !m_raw->empty();
     }
 
     // ── File metadata ─────────────────────────────────────────────────
@@ -126,7 +127,7 @@ public:
      *
      * @return Shared measurement info pointer.
      */
-    QSharedPointer<FIFFLIB::FiffInfo> fiffInfo() const
+    std::shared_ptr<FIFFLIB::FiffInfo> fiffInfo() const
     {
         return m_fiffInfo;
     }
@@ -216,11 +217,11 @@ private:
      */
     Eigen::MatrixXd doRead(int from, int to);
 
-    QFile* m_file = nullptr;                      /**< File-backed source device for desktop paths. */
-    QSharedPointer<FIFFLIB::FiffRawData> m_raw;   /**< Raw FIFF reader used for header and block access. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_fiffInfo; /**< Cached measurement information of the open file. */
-    int m_firstSample = 0;                        /**< First sample index of the open raw file. */
-    int m_lastSample = 0;                         /**< Last sample index of the open raw file. */
+    QFile* m_file = nullptr;                       /**< File-backed source device for desktop paths. */
+    std::shared_ptr<FIFFLIB::FiffRawData> m_raw;   /**< Raw FIFF reader used for header and block access. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_fiffInfo; /**< Cached measurement information of the open file. */
+    int m_firstSample = 0;                         /**< First sample index of the open raw file. */
+    int m_lastSample = 0;                          /**< Last sample index of the open raw file. */
 
     QFutureWatcher<Eigen::MatrixXd> m_watcher; /**< Watcher for the currently running async block read. */
     int m_inFlightFrom = 0;                    /**< First sample of the currently running async read. */

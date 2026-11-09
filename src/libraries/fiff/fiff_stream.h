@@ -247,7 +247,7 @@ public:
      *
      * @return the compiled directory.
      */
-    const FiffDirNode::SPtr& dirtree() const;
+    const std::shared_ptr<FiffDirNode>& dirtree() const;
 
     //=========================================================================================================
     /**
@@ -284,7 +284,7 @@ public:
      *
      * @return true if information is available, false otherwise.
      */
-    bool get_evoked_entries(const std::vector<FiffDirNode::SPtr>& evoked_node, StringList& comments, std::vector<fiff_int_t>& aspect_kinds, std::string& t);
+    bool get_evoked_entries(const std::vector<std::shared_ptr<FiffDirNode>>& evoked_node, StringList& comments, std::vector<fiff_int_t>& aspect_kinds, std::string& t);
 
     //=========================================================================================================
     /**
@@ -322,7 +322,7 @@ public:
      *
      * @return The block, or null if a tag cannot be read.
      */
-    FiffDirNode::SPtr make_subtree(const std::vector<FiffDirEntry>& dentry, qsizetype current);
+    std::shared_ptr<FiffDirNode> make_subtree(const std::vector<FiffDirEntry>& dentry, qsizetype current);
 
     //=========================================================================================================
     /**
@@ -336,7 +336,7 @@ public:
      *
      * @return the bad channel list.
      */
-    StringList read_bad_channels(const FiffDirNode::SPtr& p_Node);
+    StringList read_bad_channels(const std::shared_ptr<FiffDirNode>& p_Node);
 
     //=========================================================================================================
     /**
@@ -356,7 +356,7 @@ public:
      *
      * @return false if there is no annotations block.
      */
-    bool read_annotations(const FiffDirNode::SPtr& p_Node, FiffAnnotations& annotations, fiff_int_t origTime[2]);
+    bool read_annotations(const std::shared_ptr<FiffDirNode>& p_Node, FiffAnnotations& annotations, fiff_int_t origTime[2]);
 
     //=========================================================================================================
     /**
@@ -408,7 +408,7 @@ public:
      *
      * @return true if succeeded, false otherwise.
      */
-    bool read_cov(const FiffDirNode::SPtr& p_Node, fiff_int_t cov_kind, FiffCov& p_covData);
+    bool read_cov(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t cov_kind, FiffCov& p_covData);
 
     //=========================================================================================================
     /**
@@ -422,7 +422,7 @@ public:
      * @return the CTF software compensation data, or none if a compensator is incomplete or names a
      *         channel that is missing from, or ambiguous in, p_Chs.
      */
-    std::vector<FiffCtfComp> read_ctf_comp(const FiffDirNode::SPtr& p_Node, const std::vector<FiffChInfo>& p_Chs);
+    std::vector<FiffCtfComp> read_ctf_comp(const std::shared_ptr<FiffDirNode>& p_Node, const std::vector<FiffChInfo>& p_Chs);
 
     //=========================================================================================================
     /**
@@ -433,7 +433,7 @@ public:
      *
      * @return The data, all points active, or NotFound if the node holds no digitizer points.
      */
-    [[nodiscard]] UTILSLIB::Expected<FiffDigitizerData> read_digitizer_data(const FiffDirNode::SPtr& node);
+    [[nodiscard]] UTILSLIB::Expected<FiffDigitizerData> read_digitizer_data(const std::shared_ptr<FiffDirNode>& node);
 
     //=========================================================================================================
     /**
@@ -448,7 +448,7 @@ public:
      *
      * @return true if successful.
      */
-    bool read_meas_info(const FiffDirNode::SPtr& p_Node, FiffInfo& p_Info, FiffDirNode::SPtr& p_NodeInfo);
+    bool read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, FiffInfo& p_Info, std::shared_ptr<FiffDirNode>& p_NodeInfo);
 
     //=========================================================================================================
     /**
@@ -461,7 +461,7 @@ public:
      *
      * @return true when successful.
      */
-    bool read_meas_info_base(const FiffDirNode::SPtr& p_Node, FiffInfoBase& p_InfoForward);
+    bool read_meas_info_base(const std::shared_ptr<FiffDirNode>& p_Node, FiffInfoBase& p_InfoForward);
 
     //=========================================================================================================
     /**
@@ -475,7 +475,7 @@ public:
      *
      * @return true if succeeded, false otherwise.
      */
-    bool read_named_matrix(const FiffDirNode::SPtr& p_Node, fiff_int_t matkind, FiffNamedMatrix& mat);
+    bool read_named_matrix(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t matkind, FiffNamedMatrix& mat);
 
     //=========================================================================================================
     /**
@@ -485,7 +485,7 @@ public:
      *
      * @return a list of SSP projectors.
      */
-    std::vector<FiffProj> read_proj(const FiffDirNode::SPtr& p_Node);
+    std::vector<FiffProj> read_proj(const std::shared_ptr<FiffDirNode>& p_Node);
 
     //=========================================================================================================
     /**
@@ -1038,10 +1038,10 @@ private:
     bool m_readFailed = false;
     //    char         *file_name;    /**< Name of the file. */ -> Use streamName() instead
     //    FILE         *fd;           /**< The normal file descriptor. */ -> file descitpion is part of the stream: stream->device()
-    FiffId m_id;                     /**< The file identifier. */
-    std::vector<FiffDirEntry> m_dir; /**< This is the directory. If no directory exists, open automatically scans the file to create one. */
-                                     //    int         nent;           /**< How many entries? */ -> Use nent() instead
-    FiffDirNode::SPtr m_dirtree;     /**< Directory compiled into a tree. */
+    FiffId m_id;                            /**< The file identifier. */
+    std::vector<FiffDirEntry> m_dir;        /**< This is the directory. If no directory exists, open automatically scans the file to create one. */
+                                            //    int         nent;           /**< How many entries? */ -> Use nent() instead
+    std::shared_ptr<FiffDirNode> m_dirtree; /**< Directory compiled into a tree. */
     //    char        *ext_file_name; /**< Name of the file holding the external data. */
     //    FILE        *ext_fd;        /**< The file descriptor of the above file if open . */
 };

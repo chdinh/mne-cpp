@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "fwd_coil_set.h"
+#include <memory>
 #include <utils/logger/log.h>
 
 #include <vector>
@@ -118,7 +119,7 @@ FwdCoilSet::~FwdCoilSet()
 
 //=============================================================================================================
 
-FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const FiffCoordTrans& t)
+std::unique_ptr<FwdCoil> FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const FiffCoordTrans& t)
 {
     if (ch.kind != FIFFV_MEG_CH && ch.kind != FIFFV_REF_MEG_CH) {
         UTILSLIB::Log::warning("{} is not a MEG channel. Cannot create a coil definition.", ch.ch_name);
@@ -178,10 +179,10 @@ FwdCoil::UPtr FwdCoilSet::create_meg_coil(const FiffChInfo& ch, int acc, const F
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::create_meg_coils(const std::vector<FIFFLIB::FiffChInfo>& chs,
-                                              int nch,
-                                              int acc,
-                                              const FiffCoordTrans& t)
+std::unique_ptr<FwdCoilSet> FwdCoilSet::create_meg_coils(const std::vector<FIFFLIB::FiffChInfo>& chs,
+                                                         int nch,
+                                                         int acc,
+                                                         const FiffCoordTrans& t)
 {
     auto res = std::make_unique<FwdCoilSet>();
 
@@ -198,9 +199,9 @@ FwdCoilSet::UPtr FwdCoilSet::create_meg_coils(const std::vector<FIFFLIB::FiffChI
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::create_eeg_els(const std::vector<FIFFLIB::FiffChInfo>& chs,
-                                            int nch,
-                                            const FiffCoordTrans& t)
+std::unique_ptr<FwdCoilSet> FwdCoilSet::create_eeg_els(const std::vector<FIFFLIB::FiffChInfo>& chs,
+                                                       int nch,
+                                                       const FiffCoordTrans& t)
 {
     auto res = std::make_unique<FwdCoilSet>();
 
@@ -217,7 +218,7 @@ FwdCoilSet::UPtr FwdCoilSet::create_eeg_els(const std::vector<FIFFLIB::FiffChInf
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
+std::unique_ptr<FwdCoilSet> FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
 {
     std::ifstream file(name);
     if (!file) {
@@ -289,9 +290,9 @@ FwdCoilSet::UPtr FwdCoilSet::read_coil_defs(const std::filesystem::path& name)
 
 //=============================================================================================================
 
-FwdCoilSet::UPtr FwdCoilSet::dup_coil_set(const FiffCoordTrans& t) const
+std::unique_ptr<FwdCoilSet> FwdCoilSet::dup_coil_set(const FiffCoordTrans& t) const
 {
-    FwdCoilSet::UPtr res;
+    std::unique_ptr<FwdCoilSet> res;
 
     if (!t.empty()) {
         if (this->coord_frame != t.from) {

@@ -43,6 +43,7 @@
 //=============================================================================================================
 
 #include "../com_global.h"
+#include <memory>
 
 #include <fiff/fiff_info.h>
 
@@ -111,7 +112,7 @@ public:
      *
      * @return Reference to the shared pointer holding the measurement info received from the server.
      */
-    inline FIFFLIB::FiffInfo::SPtr& getFiffInfo();
+    inline std::shared_ptr<FIFFLIB::FiffInfo>& getFiffInfo();
 
     //=========================================================================================================
     /**
@@ -139,13 +140,13 @@ protected:
     virtual void run();
 
 private:
-    QMutex mutex;                        /**< Provides access serialization between threads*/
-    bool m_bIsConnected;                 /**< Is Connected. */
-    bool m_bIsMeasuring;                 /**< Is Measuring. */
-    bool m_bIsRunning;                   /**< Holds whether RtClient is running.*/
-    QString m_sClientAlias;              /**< The clien alias of the data client. */
-    QString m_sRtServerHostName;         /**< The IP Adress of mne_rt_server.*/
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo; /**< Fiff measurement info.*/
+    QMutex mutex;                                   /**< Provides access serialization between threads*/
+    bool m_bIsConnected;                            /**< Is Connected. */
+    bool m_bIsMeasuring;                            /**< Is Measuring. */
+    bool m_bIsRunning;                              /**< Holds whether RtClient is running.*/
+    QString m_sClientAlias;                         /**< The clien alias of the data client. */
+    QString m_sRtServerHostName;                    /**< The IP Adress of mne_rt_server.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
     quint16 m_iDefaultPort;
 signals:
     //=========================================================================================================
@@ -169,7 +170,7 @@ signals:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline FIFFLIB::FiffInfo::SPtr& RtClient::getFiffInfo()
+inline std::shared_ptr<FIFFLIB::FiffInfo>& RtClient::getFiffInfo()
 {
     return m_pFiffInfo;
 }

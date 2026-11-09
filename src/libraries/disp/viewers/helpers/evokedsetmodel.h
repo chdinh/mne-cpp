@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include "../../disp_global.h"
+#include <memory>
 
 #include <vector>
 
@@ -198,10 +199,10 @@ public:
      *
      * @param[in] pEvokedSet      The evoked set.
      */
-    void setEvokedSet(QSharedPointer<FIFFLIB::FiffEvokedSet> pEvokedSet);
+    void setEvokedSet(std::shared_ptr<FIFFLIB::FiffEvokedSet> pEvokedSet);
 
     //=========================================================================================================
-    QSharedPointer<FIFFLIB::FiffEvokedSet> getEvokedSet();
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> getEvokedSet();
 
     //=========================================================================================================
     /**
@@ -382,7 +383,7 @@ public:
     void toggleFreeze();
 
 private:
-    QSharedPointer<FIFFLIB::FiffEvokedSet> m_pEvokedSet; /**< The evoked set measurement. */
+    std::shared_ptr<FIFFLIB::FiffEvokedSet> m_pEvokedSet; /**< The evoked set measurement. */
 
     QMap<qint32, qint32> m_qMapIdxRowSelection;                     /**< Selection mapping.*/
     QSharedPointer<QMap<QString, QColor>> m_qMapAverageColor;       /**< Average colors. */

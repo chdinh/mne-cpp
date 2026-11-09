@@ -110,8 +110,6 @@ struct FiffDeviceInfo
 class FIFFSHARED_EXPORT FiffInfo : public FiffInfoBase
 {
 public:
-    using SPtr = QSharedPointer<FiffInfo>; /**< Shared pointer type for FiffInfo. */
-
     //=========================================================================================================
     /**
      * Constructors the fiff measurement file information.

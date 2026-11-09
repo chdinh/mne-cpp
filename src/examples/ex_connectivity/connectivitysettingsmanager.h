@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include <dsp/rt/rt_connectivity.h>
+#include <memory>
 
 #include <connectivity/metrics/abstractmetric.h>
 #include <connectivity/connectivitysettings.h>
@@ -69,9 +70,9 @@ class ConnectivitySettingsManager : public QObject
 public:
     ConnectivitySettingsManager(QObject* parent = 0)
     : QObject(parent)
-    , m_pRtConnectivity(RtConnectivity::SPtr::create())
+    , m_pRtConnectivity(std::make_shared<RtConnectivity>())
     {
-        QObject::connect(m_pRtConnectivity.data(), &RtConnectivity::newConnectivityResultAvailable,
+        QObject::connect(m_pRtConnectivity.get(), &RtConnectivity::newConnectivityResultAvailable,
                          this, &ConnectivitySettingsManager::onNewConnectivityResultAvailable);
 
         // Default frequency range
@@ -91,7 +92,7 @@ public:
     }
 
     ConnectivitySettings m_settings;
-    RtConnectivity::SPtr m_pRtConnectivity;
+    std::shared_ptr<RtConnectivity> m_pRtConnectivity;
     std::vector<Network> m_rawNetworkData; /**< Results as computed. */
     std::vector<Network> m_networkData;    /**< Results averaged over the selected band and normalized. */
     std::map<std::string, Eigen::Vector4i> mColor;

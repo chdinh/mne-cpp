@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "fiff_events.h"
+#include <memory>
 
 #include "fiff_evoked_set.h"
 #include "fiff_raw_data.h"
@@ -101,7 +102,7 @@ Expected<FiffEvents> FiffEvents::read_fif(const std::filesystem::path& path)
     if (!stream) {
         return std::unexpected(stream.error());
     }
-    const std::vector<FiffDirNode::SPtr> blocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
+    const std::vector<std::shared_ptr<FiffDirNode>> blocks = stream->dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     if (blocks.empty()) {
         return fail(ErrorCode::NotFound, "{} holds no events", UTILSLIB::utf8FromPath(path));
     }

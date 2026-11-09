@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <Eigen/Dense>
 #include <cmath>
 
@@ -256,7 +257,7 @@ private slots:
         ch.chpos.r0[2] = 0.09f;
         ch.chpos.coil_type = FIFFV_COIL_EEG;
 
-        FwdCoil::UPtr el = FwdCoil::create_eeg_el(ch);
+        std::unique_ptr<FwdCoil> el = FwdCoil::create_eeg_el(ch);
         QVERIFY(el != nullptr);
         QCOMPARE(el->chname, QString("EEG001"));
         QCOMPARE(el->coil_class, FWD_COILC_EEG);

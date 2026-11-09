@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "channeldatamodel.h"
+#include <memory>
 #include <utils/string_utils.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_constants.h>
@@ -77,7 +78,7 @@ ChannelDataModel::ChannelDataModel(QObject* parent)
 
 //=============================================================================================================
 
-void ChannelDataModel::init(QSharedPointer<FiffInfo> pFiffInfo)
+void ChannelDataModel::init(const std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     QWriteLocker lk(&m_lock);
     m_pFiffInfo = pFiffInfo;

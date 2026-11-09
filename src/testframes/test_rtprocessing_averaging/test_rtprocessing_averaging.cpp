@@ -3,6 +3,7 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <utils/string_utils.h>
 #include <Eigen/Dense>
 #include <format>
@@ -39,9 +40,9 @@ using namespace UTILSLIB;
 using namespace Eigen;
 
 // Helper to create a minimal synthetic FiffInfo
-static FiffInfo::SPtr createSyntheticFiffInfo(int nChannels, float sfreq)
+static std::shared_ptr<FiffInfo> createSyntheticFiffInfo(int nChannels, float sfreq)
 {
-    FiffInfo::SPtr info = FiffInfo::SPtr::create();
+    std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>();
     info->sfreq = sfreq;
 
     for (int i = 0; i < nChannels; ++i) {
@@ -178,7 +179,7 @@ private slots:
     void rtAveraging_baselineAndTimes()
     {
         // 1 kHz, trigger row 1; pre-stimulus 1.0 on the MEG channel, post-stimulus k for epoch k = 1..4
-        FiffInfo::SPtr info = createSyntheticFiffInfo(1, 1000.0f);
+        std::shared_ptr<FiffInfo> info = createSyntheticFiffInfo(1, 1000.0f);
         RtAveragingWorker worker(10, 20, 80, -20, -5, 1, info);
         worker.setBaselineActive(true);
         FiffEvokedSet result;
@@ -209,7 +210,7 @@ private slots:
 
     void rtAveraging_settersReachTheWorkerThread()
     {
-        FiffInfo::SPtr info = createSyntheticFiffInfo(1, 1000.0f);
+        std::shared_ptr<FiffInfo> info = createSyntheticFiffInfo(1, 1000.0f);
         RtAveraging avg(10, 20, 80, 0, 0, 1, info);
         QList<FiffEvokedSet> results;
         connect(&avg, &RtAveraging::evokedStim, this, [&](const FiffEvokedSet& set, const QStringList&) { results << set; });
@@ -246,7 +247,7 @@ private slots:
     //=========================================================================
     void fiffInfo_syntheticChannels()
     {
-        FiffInfo::SPtr info = createSyntheticFiffInfo(20, 1000.0f);
+        std::shared_ptr<FiffInfo> info = createSyntheticFiffInfo(20, 1000.0f);
         QCOMPARE(info->nchan, 21); // 20 MEG + 1 STI
         QVERIFY(qFuzzyCompare(info->sfreq, 1000.0f));
     }
@@ -259,7 +260,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
-        FiffInfo::SPtr info = FiffInfo::SPtr::create(raw.info);
+        std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>(raw.info);
         const int stiIdx = UTILSLIB::indexOf(info->ch_names, "STI014");
         QVERIFY(stiIdx >= 0);
         MatrixXd data, times;

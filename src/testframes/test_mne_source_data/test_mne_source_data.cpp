@@ -13,6 +13,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <ranges>
 
 #include <QFile>
@@ -482,7 +483,7 @@ private slots:
         FiffStream stream(&file);
         QVERIFY(stream.open());
 
-        std::vector<FiffDirNode::SPtr> bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
+        std::vector<std::shared_ptr<FiffDirNode>> bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         if (bemSolBlocks.empty())
             bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
 

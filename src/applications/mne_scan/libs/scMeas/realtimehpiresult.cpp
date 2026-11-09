@@ -17,6 +17,8 @@
 //=============================================================================================================
 
 #include "realtimehpiresult.h"
+#include <memory>
+#include <utility>
 
 #include <time.h>
 #include <fiff/fiff_digitizer_data.h>
@@ -57,14 +59,14 @@ QSharedPointer<INVLIB::HpiFitResult>& RealTimeHpiResult::getValue()
 
 //=============================================================================================================
 
-void RealTimeHpiResult::setFiffInfo(QSharedPointer<FiffInfo> pFiffInfo)
+void RealTimeHpiResult::setFiffInfo(std::shared_ptr<FiffInfo> pFiffInfo)
 {
-    m_pFiffInfo = pFiffInfo;
+    m_pFiffInfo = std::move(pFiffInfo);
 }
 
 //=============================================================================================================
 
-QSharedPointer<FiffInfo> RealTimeHpiResult::getFiffInfo()
+std::shared_ptr<FiffInfo> RealTimeHpiResult::getFiffInfo()
 {
     return m_pFiffInfo;
 }
@@ -124,8 +126,8 @@ void RealTimeHpiResult::setHeadPositionHistorySize(int iMaxPositions)
 
 //=============================================================================================================
 
-void RealTimeHpiResult::setDigitizerData(QSharedPointer<FIFFLIB::FiffDigitizerData> digData)
+void RealTimeHpiResult::setDigitizerData(std::shared_ptr<FIFFLIB::FiffDigitizerData> digData)
 {
     QMutexLocker lock(&m_qMutex);
-    m_pFiffDigData = digData;
+    m_pFiffDigData = std::move(digData);
 }

@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "channelselectionview.h"
+#include <memory>
 #include "ui_channelselectionview.h"
 #include "helpers/selectionsceneitem.h"
 #include "helpers/channelinfomodel.h"
@@ -285,7 +286,7 @@ const QMap<QString, QPointF>& ChannelSelectionView::getLayoutMap()
 
 //=============================================================================================================
 
-void ChannelSelectionView::newFiffFileLoaded(QSharedPointer<FiffInfo>& pFiffInfo)
+void ChannelSelectionView::newFiffFileLoaded(std::shared_ptr<FiffInfo>& pFiffInfo)
 {
     Q_UNUSED(pFiffInfo);
 

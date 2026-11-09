@@ -10,6 +10,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -92,7 +93,7 @@ private slots:
 
         QFile file(m_sRawFile);
         FiffInfo info;
-        FiffDirNode::SPtr dirTree;
+        std::shared_ptr<FiffDirNode> dirTree;
         bool ok = FiffIO::setup_read(file, info, dirTree);
         QVERIFY(ok);
         QVERIFY(info.ch_names.size() > 0);
@@ -156,16 +157,16 @@ private slots:
         if (!stream.open())
             QSKIP("Could not open FIFF stream");
 
-        FiffDirNode::SPtr meas = MNERawInfo::find_meas(stream.dirtree());
+        std::shared_ptr<FiffDirNode> meas = MNERawInfo::find_meas(stream.dirtree());
         // find_meas may return null depending on tree structure; code path exercised
 
-        FiffDirNode::SPtr measInfo = MNERawInfo::find_meas_info(stream.dirtree());
+        std::shared_ptr<FiffDirNode> measInfo = MNERawInfo::find_meas_info(stream.dirtree());
         // find_meas_info may return null; code path exercised
 
-        FiffDirNode::SPtr raw = MNERawInfo::find_raw(stream.dirtree());
+        std::shared_ptr<FiffDirNode> raw = MNERawInfo::find_raw(stream.dirtree());
         // Raw might be null if structure differs, but code path is exercised
 
-        FiffDirNode::SPtr maxshield = MNERawInfo::find_maxshield(stream.dirtree());
+        std::shared_ptr<FiffDirNode> maxshield = MNERawInfo::find_maxshield(stream.dirtree());
         // MaxShield block may not be present; code path is exercised
 
         stream.close();
@@ -181,7 +182,7 @@ private slots:
         if (!stream.open())
             QSKIP("Could not open FIFF stream");
 
-        FiffDirNode::SPtr meas = MNERawInfo::find_meas(stream.dirtree());
+        std::shared_ptr<FiffDirNode> meas = MNERawInfo::find_meas(stream.dirtree());
         if (meas) {
             std::unique_ptr<FiffId> id;
             int nchan = 0;

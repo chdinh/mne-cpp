@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "spectrumview.h"
+#include <memory>
 
 #include "helpers/frequencyspectrummodel.h"
 #include "helpers/frequencyspectrumdelegate.h"
@@ -76,7 +77,7 @@ SpectrumView::~SpectrumView()
 
 //=============================================================================================================
 
-void SpectrumView::init(FiffInfo::SPtr& info,
+void SpectrumView::init(std::shared_ptr<FiffInfo>& info,
                         int iScaleType)
 {
     m_pFSModel = new FrequencySpectrumModel(this);

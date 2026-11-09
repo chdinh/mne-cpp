@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
     QFile structureFile(dir + "/sample_audvis-ave.fif");
     FiffStream stream(&structureFile);
     const bool opened = stream.open();
-    const std::vector<FiffDirNode::SPtr> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
+    const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
     const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
     const FiffId fileId = stream.id();
     stream.close();

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <fwd/fwd_coil_set.h>
+#include <memory>
 #include <fwd/fwd_coil.h>
 
 #include <utils/logger/log.h>
@@ -122,7 +123,7 @@ int main(int argc, char* argv[])
 
     qInfo("Reading coil definitions from: %s", qPrintable(coildefName));
 
-    FwdCoilSet::UPtr coilSet = FwdCoilSet::read_coil_defs(coildefName.toStdU16String());
+    std::unique_ptr<FwdCoilSet> coilSet = FwdCoilSet::read_coil_defs(coildefName.toStdU16String());
     if (!coilSet) {
         qCritical("Cannot read coil definitions from: %s", qPrintable(coildefName));
         return 1;

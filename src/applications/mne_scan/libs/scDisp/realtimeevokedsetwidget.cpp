@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "realtimeevokedsetwidget.h"
+#include <memory>
 
 #include <disp/viewers/channelselectionview.h>
 #include <disp/viewers/helpers/channelinfomodel.h>
@@ -170,8 +171,8 @@ void RealTimeEvokedSetWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
                 }
             }
 
-            FiffEvokedSet::SPtr pEvokedSet = m_pRTESet->getValue();
-            pEvokedSet->info = *(m_pFiffInfo.data());
+            std::shared_ptr<FiffEvokedSet> pEvokedSet = m_pRTESet->getValue();
+            pEvokedSet->info = *(m_pFiffInfo.get());
             m_pEvokedSetModel->setEvokedSet(pEvokedSet);
         }
     }
@@ -202,8 +203,8 @@ void RealTimeEvokedSetWidget::initDisplayControllWidgets()
 
         // Init data model and set first data
         m_pEvokedSetModel = EvokedSetModel::SPtr::create(this);
-        FiffEvokedSet::SPtr pEvokedSet = m_pRTESet->getValue();
-        pEvokedSet->info = *m_pFiffInfo.data();
+        std::shared_ptr<FiffEvokedSet> pEvokedSet = m_pRTESet->getValue();
+        pEvokedSet->info = *m_pFiffInfo.get();
         m_pEvokedSetModel->setEvokedSet(pEvokedSet);
         m_pButterflyView->setEvokedSetModel(m_pEvokedSetModel);
 

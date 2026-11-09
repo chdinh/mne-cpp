@@ -1228,7 +1228,7 @@ void TestFiffCorePython::sparse_createAndConvert()
     int* cols[2] = {row0, row1};
     float* vals[2] = {val0, val1};
 
-    const FiffSparseMatrix::UPtr m = FiffSparseMatrix::create_sparse_rcs(2, 3, nnz, cols, vals);
+    const std::unique_ptr<FiffSparseMatrix> m = FiffSparseMatrix::create_sparse_rcs(2, 3, nnz, cols, vals);
     QVERIFY(m != nullptr);
     QCOMPARE(m->nonZeros(), 3);
     const MatrixXf dense = MatrixXf(m->eigen());
@@ -1254,7 +1254,7 @@ void TestFiffCorePython::sparse_createAndConvert()
     QCOMPARE(MatrixXf(fromD.eigen())(2, 0), 0.25f);
 
     // The full symmetric matrix keeps the diagonal once.
-    const FiffSparseMatrix::UPtr full = fromD.mne_add_upper_triangle_rcs();
+    const std::unique_ptr<FiffSparseMatrix> full = fromD.mne_add_upper_triangle_rcs();
     QVERIFY(full != nullptr);
     const MatrixXf f = MatrixXf(full->eigen());
     QCOMPARE(f(0, 2), 0.25f);
@@ -1281,9 +1281,9 @@ void TestFiffCorePython::sparse_createAndConvert()
         return tag;
     };
     const QList<float> values{1.5f, -2.0f, 4.0f};
-    const FiffSparseMatrix::UPtr rcs = FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2, 3}));
+    const std::unique_ptr<FiffSparseMatrix> rcs = FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2, 3}));
     QVERIFY(rcs && MatrixXf(rcs->eigen()) == dense);
-    const FiffSparseMatrix::UPtr ccs = FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_CCS_MATRIX_FLOAT, {1.5f, 4.0f, -2.0f}, {0, 1, 0}, {0, 1, 2, 3}));
+    const std::unique_ptr<FiffSparseMatrix> ccs = FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_CCS_MATRIX_FLOAT, {1.5f, 4.0f, -2.0f}, {0, 1, 0}, {0, 1, 2, 3}));
     QVERIFY(ccs && MatrixXf(ccs->eigen()) == dense);
     QVERIFY(!FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2, 3})));
     QVERIFY(!FiffSparseMatrix::fiff_get_float_sparse_matrix(sparseTag(FIFFT_RCS_MATRIX_FLOAT, values, {0, 2, 1}, {0, 2})));

@@ -61,8 +61,6 @@ namespace FWDLIB
 class FWDSHARED_EXPORT FwdBemSolution
 {
 public:
-    typedef std::unique_ptr<FwdBemSolution> UPtr; /**< Unique pointer type for FwdBemSolution. */
-
     //=========================================================================================================
     /**
      * Constructs the Forward BEM Solution

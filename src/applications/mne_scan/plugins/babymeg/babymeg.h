@@ -284,7 +284,7 @@ protected:
 
     QList<int> m_lTriggerChannelIndices; /**< List of all trigger channel indices. */
 
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
     qint32 m_iBufferSize; /**< The raw data buffer size.*/
 

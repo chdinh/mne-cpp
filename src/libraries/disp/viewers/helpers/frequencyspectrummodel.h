@@ -27,6 +27,7 @@
 //=============================================================================================================
 
 #include "../../disp_global.h"
+#include <memory>
 
 #include <fiff/fiff_types.h>
 
@@ -138,7 +139,7 @@ public:
      *
      * @param[in] info       The corresponding fiff information object.
      */
-    void setInfo(QSharedPointer<FIFFLIB::FiffInfo>& info);
+    void setInfo(std::shared_ptr<FIFFLIB::FiffInfo>& info);
 
     //=========================================================================================================
     /**
@@ -162,7 +163,7 @@ public:
      *
      * @return the fiff info.
      */
-    inline QSharedPointer<FIFFLIB::FiffInfo> getInfo() const;
+    inline std::shared_ptr<FIFFLIB::FiffInfo> getInfo() const;
 
     //=========================================================================================================
     /**
@@ -261,7 +262,7 @@ signals:
     void newSelection(QList<qint32> selection);
 
 private:
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff Information.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff Information.*/
 
     QMap<qint32, qint32> m_qMapIdxRowSelection; /**< Selection mapping.*/
 
@@ -283,7 +284,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffInfo> FrequencySpectrumModel::getInfo() const
+std::shared_ptr<FIFFLIB::FiffInfo> FrequencySpectrumModel::getInfo() const
 {
     return m_pFiffInfo;
 }

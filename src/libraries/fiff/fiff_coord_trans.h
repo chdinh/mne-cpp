@@ -503,7 +503,7 @@ public:
      * @return The coordinate transform, inverted if stored the other way round, or NotFound.
      */
     [[nodiscard]] static UTILSLIB::Expected<FiffCoordTrans> read_from_node(FiffStream& stream,
-                                                                           const FiffDirNode::SPtr& node,
+                                                                           const std::shared_ptr<FiffDirNode>& node,
                                                                            int from, int to);
 
     //========================================================================================================

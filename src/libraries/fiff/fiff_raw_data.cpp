@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_raw_data.h"
+#include <memory>
 #include <utils/logger/log.h>
 #include "fiff_events.h"
 #include "fiff_tag.h"
@@ -93,13 +94,13 @@ UTILSLIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<FiffStream> st
     }
     FiffRawData data;
     FiffInfo& info = data.info;
-    FiffDirNode::SPtr meas;
+    std::shared_ptr<FiffDirNode> meas;
     if (!stream->read_meas_info(stream->dirtree(), info, meas)) {
         return fail(ErrorCode::Format, "cannot read the measurement info of {}", name);
     }
 
     // The block of interest, as mne.io.read_raw_fif looks for it
-    std::vector<FiffDirNode::SPtr> blocks = meas->dir_tree_find(FIFFB_RAW_DATA);
+    std::vector<std::shared_ptr<FiffDirNode>> blocks = meas->dir_tree_find(FIFFB_RAW_DATA);
     if (blocks.empty()) {
         blocks = meas->dir_tree_find(FIFFB_CONTINUOUS_DATA);
     }

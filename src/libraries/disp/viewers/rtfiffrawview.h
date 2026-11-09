@@ -28,6 +28,7 @@
 //=============================================================================================================
 
 #include "../disp_global.h"
+#include <memory>
 
 #include <vector>
 #include "abstractview.h"
@@ -139,7 +140,7 @@ public:
      *
      * @param[in] info    The FiffInfo.
      */
-    void init(QSharedPointer<FIFFLIB::FiffInfo>& info);
+    void init(std::shared_ptr<FIFFLIB::FiffInfo>& info);
 
     //=========================================================================================================
     /**
@@ -512,16 +513,16 @@ protected:
 
     QMap<qint32, float> m_qMapChScaling; /**< Channel scaling values. */
 
-    qint32 m_iT;                                   /**< Display window size in seconds. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo, which is used insteadd of ListChInfo*/
-    float m_fSamplingRate;                         /**< Sampling rate. */
-    float m_fZoomFactor;                           /**< Zoom factor. */
-    QList<qint32> m_qListBadChannels;              /**< Current list of bad channels . */
-    QList<qint32> m_qListCurrentSelection;         /**< Current selection list -> hack around C++11 lambda . */
-    bool m_bHideBadChannels;                       /**< hide bad channels flag. */
-    QStringList m_slSelectedChannels;              /**< the currently selected channels from the selection manager window. */
-    QColor m_backgroundColor;                      /**< Current background color. */
-    int m_iDistanceTimeSpacer;                     /**< Current distance between time spacer. */
+    qint32 m_iT;                                    /**< Display window size in seconds. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< FiffInfo, which is used insteadd of ListChInfo*/
+    float m_fSamplingRate;                          /**< Sampling rate. */
+    float m_fZoomFactor;                            /**< Zoom factor. */
+    QList<qint32> m_qListBadChannels;               /**< Current list of bad channels . */
+    QList<qint32> m_qListCurrentSelection;          /**< Current selection list -> hack around C++11 lambda . */
+    bool m_bHideBadChannels;                        /**< hide bad channels flag. */
+    QStringList m_slSelectedChannels;               /**< the currently selected channels from the selection manager window. */
+    QColor m_backgroundColor;                       /**< Current background color. */
+    int m_iDistanceTimeSpacer;                      /**< Current distance between time spacer. */
     int m_iClickPosX;
     bool m_bCrosshairEnabled; /**< Whether the crosshair follows the mouse. */
 

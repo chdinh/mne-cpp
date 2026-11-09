@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scdisp_global.h"
+#include <memory>
 
 #include "measurementwidget.h"
 
@@ -156,7 +157,7 @@ private:
     QSharedPointer<SCMEASLIB::RealTimeEvokedSet> m_pRTESet;                /**< The real-time evoked measurement. */
     QSharedPointer<DISPLIB::ChannelSelectionView> m_pChannelSelectionView; /**< ChannelSelectionView. */
     QSharedPointer<DISPLIB::ChannelInfoModel> m_pChannelInfoModel;         /**< Channel info model. */
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo;                         /**< FiffInfo, which is used instead of ListChInfo*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                        /**< FiffInfo, which is used instead of ListChInfo*/
     QPointer<DISPLIB::AverageLayoutView> m_pAverageLayoutView;             /**< 2D layout view for plotting averages*/
     QPointer<DISPLIB::ButterflyView> m_pButterflyView;                     /**< Butterfly plot. */
 

@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "realtimeevokedset.h"
+#include <memory>
 
 #include <time.h>
 
@@ -53,7 +54,7 @@ RealTimeEvokedSet::~RealTimeEvokedSet()
 
 //=============================================================================================================
 
-void RealTimeEvokedSet::init(FiffInfo::SPtr p_fiffInfo)
+void RealTimeEvokedSet::init(const std::shared_ptr<FiffInfo>& p_fiffInfo)
 {
     QMutexLocker locker(&m_qMutex);
     m_qListChInfo.clear();
@@ -90,7 +91,7 @@ void RealTimeEvokedSet::init(FiffInfo::SPtr p_fiffInfo)
 
 //=============================================================================================================
 
-FiffEvokedSet::SPtr& RealTimeEvokedSet::getValue()
+std::shared_ptr<FiffEvokedSet>& RealTimeEvokedSet::getValue()
 {
     QMutexLocker locker(&m_qMutex);
     return m_pFiffEvokedSet;
@@ -107,7 +108,7 @@ const QStringList& RealTimeEvokedSet::getResponsibleTriggerTypes()
 //=============================================================================================================
 
 void RealTimeEvokedSet::setValue(const FiffEvokedSet& v,
-                                 const FiffInfo::SPtr& p_fiffinfo,
+                                 const std::shared_ptr<FiffInfo>& p_fiffinfo,
                                  const QStringList& lResponsibleTriggerTypes)
 {
     //Store

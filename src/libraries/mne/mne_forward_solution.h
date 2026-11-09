@@ -479,7 +479,7 @@ private:
      * @return True if succeeded, false otherwise.
      */
     static bool read_one(FIFFLIB::FiffStream& stream,
-                         const FIFFLIB::FiffDirNode::SPtr& p_Node,
+                         const std::shared_ptr<FIFFLIB::FiffDirNode>& p_Node,
                          MNEForwardSolution& one);
 
 public:

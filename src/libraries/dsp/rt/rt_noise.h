@@ -32,6 +32,7 @@
 //=============================================================================================================
 
 #include "../dsp_global.h"
+#include <memory>
 
 #include <fiff/fiff_info.h>
 
@@ -76,7 +77,7 @@ public:
      * @param[in] iDataLength   Number of blocks to accumulate before computing the spectrum.
      */
     explicit RtNoiseWorker(qint32 iFftLength,
-                           FIFFLIB::FiffInfo::SPtr pFiffInfo,
+                           const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo,
                            qint32 iDataLength);
 
     //=========================================================================================================
@@ -122,9 +123,6 @@ class DSPSHARED_EXPORT RtNoise : public QObject
     Q_OBJECT
 
 public:
-    typedef QSharedPointer<RtNoise> SPtr;            /**< Shared pointer type for RtNoise. */
-    typedef QSharedPointer<const RtNoise> ConstSPtr; /**< Const shared pointer type for RtNoise. */
-
     //=========================================================================================================
     /**
      * Creates the real-time noise estimation object.
@@ -135,7 +133,7 @@ public:
      * @param[in] parent        Parent QObject (optional).
      */
     explicit RtNoise(qint32 iFftLength,
-                     FIFFLIB::FiffInfo::SPtr pFiffInfo,
+                     const std::shared_ptr<FIFFLIB::FiffInfo>& pFiffInfo,
                      qint32 iDataLength,
                      QObject* parent = nullptr);
 

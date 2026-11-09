@@ -20,6 +20,7 @@
 //=============================================================================================================
 
 #include "scdisp_global.h"
+#include <memory>
 #include "measurementwidget.h"
 
 //=============================================================================================================
@@ -131,7 +132,7 @@ protected:
     QPointer<QVBoxLayout> m_pRtcLayout; /**< Widget layout. */
     QPointer<QLabel> m_pLabelInit;      /**< Initialization label. */
 
-    QSharedPointer<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff Info. */
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< The Fiff Info. */
 
     QMap<QString, bool> m_modalityMap; /**< Map of different modalities. */
 

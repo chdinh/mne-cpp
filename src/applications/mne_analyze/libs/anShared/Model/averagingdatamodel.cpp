@@ -16,6 +16,7 @@
 //=============================================================================================================
 
 #include "averagingdatamodel.h"
+#include <memory>
 
 #include <fiff/fiff_evoked_set.h>
 #include <utils/string_utils.h>
@@ -25,6 +26,7 @@
 //=============================================================================================================
 
 #include <QFile>
+#include <utility>
 #ifdef WASMBUILD
 #include <QFileDialog>
 #include <QTemporaryDir>
@@ -44,10 +46,10 @@ using namespace ANSHAREDLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-AveragingDataModel::AveragingDataModel(QSharedPointer<FIFFLIB::FiffEvokedSet> pEvokedSet,
+AveragingDataModel::AveragingDataModel(std::shared_ptr<FIFFLIB::FiffEvokedSet> pEvokedSet,
                                        QObject* parent)
 : AbstractModel(parent)
-, m_pFiffEvokedSet(pEvokedSet)
+, m_pFiffEvokedSet(std::move(pEvokedSet))
 , m_bFromFile(false)
 {
 }
@@ -62,7 +64,7 @@ AveragingDataModel::AveragingDataModel(const QString& sFilePath,
 {
     Q_UNUSED(byteLoadedData);
 
-    m_pFiffEvokedSet = QSharedPointer<FIFFLIB::FiffEvokedSet>::create(sFilePath.toStdU16String());
+    m_pFiffEvokedSet = std::make_shared<FIFFLIB::FiffEvokedSet>(sFilePath.toStdU16String());
 }
 
 //=============================================================================================================
@@ -107,9 +109,9 @@ int AveragingDataModel::columnCount(const QModelIndex& parent) const
 
 //=============================================================================================================
 
-void AveragingDataModel::setEvokedSet(QSharedPointer<FIFFLIB::FiffEvokedSet> pEvokedSet)
+void AveragingDataModel::setEvokedSet(std::shared_ptr<FIFFLIB::FiffEvokedSet> pEvokedSet)
 {
-    m_pFiffEvokedSet = pEvokedSet;
+    m_pFiffEvokedSet = std::move(pEvokedSet);
 }
 
 //=============================================================================================================
@@ -121,15 +123,15 @@ bool AveragingDataModel::isFromFile()
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffInfo> AveragingDataModel::getFiffInfo()
+std::shared_ptr<FIFFLIB::FiffInfo> AveragingDataModel::getFiffInfo()
 {
-    QSharedPointer<FIFFLIB::FiffInfo> pInfo = QSharedPointer<FIFFLIB::FiffInfo>(new FIFFLIB::FiffInfo(m_pFiffEvokedSet->info));
+    std::shared_ptr<FIFFLIB::FiffInfo> pInfo = std::make_shared<FIFFLIB::FiffInfo>(m_pFiffEvokedSet->info);
     return pInfo;
 }
 
 //=============================================================================================================
 
-QSharedPointer<FIFFLIB::FiffEvokedSet> AveragingDataModel::getEvokedSet()
+std::shared_ptr<FIFFLIB::FiffEvokedSet> AveragingDataModel::getEvokedSet()
 {
     return m_pFiffEvokedSet;
 }

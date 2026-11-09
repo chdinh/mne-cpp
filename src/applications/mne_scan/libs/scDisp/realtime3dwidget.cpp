@@ -243,14 +243,14 @@ void RealTime3DWidget::alignFiducials(const QString& sFilePath)
 {
     m_sFilePathDigitizers = sFilePath;
 
-    QSharedPointer<FIFFLIB::FiffDigitizerData> t_digData = QSharedPointer<FIFFLIB::FiffDigitizerData>::create(sFilePath.toStdU16String());
+    std::shared_ptr<FIFFLIB::FiffDigitizerData> t_digData = std::make_shared<FIFFLIB::FiffDigitizerData>(sFilePath.toStdU16String());
 
     alignFiducials(t_digData);
 }
 
 //=============================================================================================================
 
-void RealTime3DWidget::alignFiducials(QSharedPointer<FIFFLIB::FiffDigitizerData> pDigData)
+void RealTime3DWidget::alignFiducials(const std::shared_ptr<FIFFLIB::FiffDigitizerData>& pDigData)
 {
     std::unique_ptr<MNEMshDisplaySurfaceSet> pMneMshDisplaySurfaceSet = std::make_unique<MNEMshDisplaySurfaceSet>();
     pMneMshDisplaySurfaceSet->add_bem_surface((QCoreApplication::applicationDirPath() + "/../resources/general/hpiAlignment/fsaverage-head.fif").toStdU16String(),
@@ -290,7 +290,7 @@ void RealTime3DWidget::applyAlignmentTransform(QMatrix4x4& invMat)
 
 //=============================================================================================================
 
-QMatrix4x4 RealTime3DWidget::calculateInverseMatrix(const QSharedPointer<FIFFLIB::FiffDigitizerData> pDigData,
+QMatrix4x4 RealTime3DWidget::calculateInverseMatrix(const std::shared_ptr<FIFFLIB::FiffDigitizerData>& pDigData,
                                                     float scale) const
 {
     QMatrix4x4 invMat;

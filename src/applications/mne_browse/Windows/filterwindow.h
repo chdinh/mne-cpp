@@ -84,7 +84,7 @@ public:
     /**
      * On new file loaded.
      */
-    void newFileLoaded(FiffInfo::SPtr& pFiffInfo);
+    void newFileLoaded(std::shared_ptr<FiffInfo>& pFiffInfo);
 
     //=========================================================================================================
     /**

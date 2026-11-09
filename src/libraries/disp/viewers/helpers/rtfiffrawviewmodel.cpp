@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "rtfiffrawviewmodel.h"
+#include <memory>
 
 #include <vector>
 #include <utils/string_utils.h>
@@ -105,7 +106,7 @@ RtFiffRawViewModel::RtFiffRawViewModel(QObject* parent)
 , m_iDistanceTimerSpacer(1000)
 , m_iDetectedTriggers(0)
 , m_sFilterChannelType("MEG")
-, m_pFiffInfo(FiffInfo::SPtr::create())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 , m_colBackground(Qt::white)
 {
 }
@@ -296,7 +297,7 @@ void RtFiffRawViewModel::initSphara()
 
 //=============================================================================================================
 
-void RtFiffRawViewModel::setFiffInfo(QSharedPointer<FIFFLIB::FiffInfo>& p_pFiffInfo)
+void RtFiffRawViewModel::setFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo>& p_pFiffInfo)
 {
     if (p_pFiffInfo) {
         RowVectorXi sel; // = RowVectorXi(0,0);

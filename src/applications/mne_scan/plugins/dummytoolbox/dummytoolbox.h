@@ -116,7 +116,7 @@ protected:
     virtual void run();
 
 private:
-    FIFFLIB::FiffInfo::SPtr m_pFiffInfo; /**< Fiff measurement info.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
 
     QSharedPointer<DummyYourWidget> m_pYourWidget; /**< The widget used to control this plugin by the user.*/
 

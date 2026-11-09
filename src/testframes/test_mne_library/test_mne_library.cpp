@@ -12,6 +12,7 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <memory>
 #include <QFile>
 #include <QBuffer>
 #include <QTemporaryDir>
@@ -1372,7 +1373,7 @@ void TestMneLibrary::epochData_pickChannels()
 
 void TestMneLibrary::epochData_average()
 {
-    auto pInfo = FiffInfo::SPtr::create();
+    auto pInfo = std::make_shared<FiffInfo>();
     pInfo->sfreq = 1000.0;
     pInfo->nchan = 3;
     for (int i = 0; i < 3; i++) {

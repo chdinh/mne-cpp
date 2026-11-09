@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "acq_fiff.h"
+#include <memory>
 
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
@@ -192,7 +193,7 @@ bool deserialize(const std::vector<std::byte>& data, FiffInfo& info)
     if (!stream.open()) {
         return false;
     }
-    FiffDirNode::SPtr node;
+    std::shared_ptr<FiffDirNode> node;
     return stream.read_meas_info(stream.dirtree(), info, node);
 }
 

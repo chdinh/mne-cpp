@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "lsladapter.h"
+#include <memory>
 #include "lsladapterproducer.h"
 #include "FormFiles/lsladaptersetup.h"
 
@@ -70,7 +71,7 @@ LSLAdapter::LSLAdapter()
 , m_fSamplingFrequency(-1.0f)
 , m_iNumberChannels(-1)
 , m_iOutputBlockSize(100)
-, m_pFiffInfo(QSharedPointer<FiffInfo>::create())
+, m_pFiffInfo(std::make_shared<FiffInfo>())
 , m_pRTMSA(PluginOutputData<RealTimeMultiSampleArray>::create(this, "LSL Adapter", "LSL stream data"))
 , m_updateStreamsFutureWatcher()
 , m_vAvailableStreams()

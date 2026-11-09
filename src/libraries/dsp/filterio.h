@@ -66,9 +66,6 @@ class FilterKernel;
 class DSPSHARED_EXPORT FilterIO
 {
 public:
-    typedef QSharedPointer<FilterIO> SPtr;            /**< Shared pointer type for FilterIO. */
-    typedef QSharedPointer<const FilterIO> ConstSPtr; /**< Const shared pointer type for FilterIO. */
-
     //=========================================================================================================
     /**
      * Constructs a FilterIO object.

@@ -17,6 +17,7 @@
 //=============================================================================================================
 
 #include "ftheaderparser.h"
+#include <memory>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -56,7 +57,7 @@ void FTBUFFERPLUGIN::parseNeuromagHeader(MetaData& data, QBuffer& neuromagBuffer
 
     if (pStream.open()) {
         FIFFLIB::FiffInfo FifInfo;
-        FIFFLIB::FiffDirNode::SPtr DirNode;
+        std::shared_ptr<FIFFLIB::FiffDirNode> DirNode;
         if (pStream.read_meas_info(pStream.dirtree(), FifInfo, DirNode)) {
             data.setFiffinfo(FifInfo);
         }

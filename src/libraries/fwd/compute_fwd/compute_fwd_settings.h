@@ -120,8 +120,8 @@ public:
     bool use_equiv_eeg;         /**< Use the equivalent source approach for the EEG sphere model. */
     bool use_threads;           /**< Parallelize? */
 
-    QSharedPointer<FIFFLIB::FiffInfo> pFiffInfo; /**< The FiffInfo file from the measurement.*/
-    FIFFLIB::FiffCoordTrans meg_head_t;          /**< The meg <-> head transformation.*/
+    std::shared_ptr<FIFFLIB::FiffInfo> pFiffInfo; /**< The FiffInfo file from the measurement.*/
+    FIFFLIB::FiffCoordTrans meg_head_t;           /**< The meg <-> head transformation.*/
 
 private:
     void initMembers();

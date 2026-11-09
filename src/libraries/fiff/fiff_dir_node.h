@@ -84,8 +84,6 @@ class FiffTag;
 class FIFFSHARED_EXPORT FiffDirNode : public std::enable_shared_from_this<FiffDirNode>
 {
 public:
-    using SPtr = std::shared_ptr<FiffDirNode>; /**< Shared pointer type for FiffDirNode. */
-
     //=========================================================================================================
     /**
      * Constructors the directory tree structure.
@@ -109,7 +107,7 @@ public:
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool copy_tree(FiffStream& source, const FiffId& in_id, std::span<const SPtr> p_Nodes, FiffStream& target);
+    static bool copy_tree(FiffStream& source, const FiffId& in_id, std::span<const std::shared_ptr<FiffDirNode>> p_Nodes, FiffStream& target);
 
     //=========================================================================================================
     /**
@@ -130,7 +128,7 @@ public:
      *
      * @return The blocks of the tree itself, not copies.
      */
-    std::vector<SPtr> dir_tree_find(fiff_int_t p_kind);
+    std::vector<std::shared_ptr<FiffDirNode>> dir_tree_find(fiff_int_t p_kind);
 
 
     //=========================================================================================================
@@ -191,15 +189,15 @@ public:
     fiff_int_t nchild() const;
 
 public:
-    fiff_int_t type;                   /**< Block type for this directory. */
-    FiffId id;                         /**< Id of this block if any. */
-    std::vector<FiffDirEntry> dir;     /**< Directory of tags in this node. */
-    std::weak_ptr<FiffDirNode> parent; /**< Parent node; weak, since the parent owns its children. */
-    FiffId parent_id;                  /**< Newly added to stay consistent with MATLAB implementation. */
-    std::vector<SPtr> children;        /**< Child nodes. */
+    fiff_int_t type;                                    /**< Block type for this directory. */
+    FiffId id;                                          /**< Id of this block if any. */
+    std::vector<FiffDirEntry> dir;                      /**< Directory of tags in this node. */
+    std::weak_ptr<FiffDirNode> parent;                  /**< Parent node; weak, since the parent owns its children. */
+    FiffId parent_id;                                   /**< Newly added to stay consistent with MATLAB implementation. */
+    std::vector<std::shared_ptr<FiffDirNode>> children; /**< Child nodes. */
 
 private:
-    void collect(fiff_int_t kind, std::vector<SPtr>& found);
+    void collect(fiff_int_t kind, std::vector<std::shared_ptr<FiffDirNode>>& found);
 };
 
 //=============================================================================================================

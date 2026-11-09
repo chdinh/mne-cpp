@@ -320,7 +320,7 @@ std::shared_ptr<ComputeFwdSettings> TestFwdPython::settings(bool fixedOri, bool 
     // The second name has no hemisphere tag and is skipped with a warning, as in MNE-C.
     s->labels = {m_labelPath.toStdU16String(), m_dir.filePath("unassigned.label").toStdU16String()};
     s->nlabel = static_cast<int>(s->labels.size());
-    s->pFiffInfo = QSharedPointer<FiffInfo>::create(m_raw.info);
+    s->pFiffInfo = std::make_shared<FiffInfo>(m_raw.info);
     s->checkIntegrity();
     return s;
 }
