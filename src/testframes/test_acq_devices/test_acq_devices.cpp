@@ -907,6 +907,141 @@ private:
 };
 
 /**
+ * A BabyMEG server: its command port answers INFO with MEG001 (cal 1e-13, gain 0.5), the trigger line TRG001 and
+ * DTRG01 at 600 Hz in packages of four samples; its data port answers the first two DATA requests with a package
+ * each (MEG001 counting 1 to 8, TRG001 high at samples 2 to 4 and 7), and QUIT with QUIT. It records the commands.
+ */
+class FakeBabyMeg
+{
+public:
+    FakeBabyMeg()
+    {
+        for (auto [fd, port] : {std::pair{&m_data, &m_data_port}, std::pair{&m_command, &m_command_port}}) {
+            *fd = ::socket(AF_INET, SOCK_STREAM, 0);
+            sockaddr_in tcp{};
+            tcp.sin_family = AF_INET;
+            tcp.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+            socklen_t length = sizeof(tcp);
+            if (*fd >= 0 && ::bind(*fd, reinterpret_cast<sockaddr*>(&tcp), sizeof(tcp)) == 0 && ::listen(*fd, 2) == 0 &&
+                ::getsockname(*fd, reinterpret_cast<sockaddr*>(&tcp), &length) == 0) {
+                *port = ntohs(tcp.sin_port);
+            }
+        }
+        m_threads.emplace_back([this] { serve_commands(); });
+        m_threads.emplace_back([this] { serve_data(); });
+    }
+
+    ~FakeBabyMeg()
+    {
+        for (const int fd : {m_data, m_command}) {
+            ::shutdown(fd, SHUT_RDWR);
+            ::close(fd);
+        }
+        for (std::thread& thread : m_threads) {
+            thread.join();
+        }
+    }
+
+    FakeBabyMeg(const FakeBabyMeg&) = delete;
+    FakeBabyMeg& operator=(const FakeBabyMeg&) = delete;
+
+    [[nodiscard]] int data_port() const
+    {
+        return m_data_port;
+    }
+
+    [[nodiscard]] int command_port() const
+    {
+        return m_command_port;
+    }
+
+    [[nodiscard]] std::vector<std::string> commands()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_commands;
+    }
+
+private:
+    static void send_message(int fd, std::string_view command, const std::vector<std::byte>& body)
+    {
+        std::vector<std::byte> out;
+        const auto chars = std::as_bytes(std::span(command));
+        out.insert(out.end(), chars.begin(), chars.end());
+        append_value(out, static_cast<std::uint32_t>(body.size()), true);
+        out.insert(out.end(), body.begin(), body.end());
+        static_cast<void>(::send(fd, out.data(), out.size(), 0));
+    }
+
+    /** @return The next 4-character command, empty when the client left. */
+    std::string command(int fd)
+    {
+        std::array<char, 4> text{};
+        std::size_t got = 0;
+        while (got < text.size()) {
+            const ssize_t n = ::recv(fd, text.data() + got, text.size() - got, 0);
+            if (n <= 0) {
+                return {};
+            }
+            got += static_cast<std::size_t>(n);
+        }
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_commands.emplace_back(text.data(), text.size());
+    }
+
+    void serve_commands()
+    {
+        const int fd = ::accept(m_command, nullptr, nullptr);
+        if (fd < 0) {
+            return;
+        }
+        if (command(fd) == "INFO") {
+            const std::string text = "INFO:3:4:600:MEG001|1,0.07,0,0,1,0,0,0,1,0,0,0,1,7002,1e-13,0.5;"
+                                     "TRG001|1,0,0,0,0,0,0,0,0,0,0,0,0,3,1,1;DTRG01|1,0,0,0,0,0,0,0,0,0,0,0,0,3,1,1;";
+            const auto chars = std::as_bytes(std::span(text));
+            send_message(fd, "INFO", std::vector<std::byte>(chars.begin(), chars.end()));
+        }
+        ::close(fd);
+    }
+
+    void serve_data()
+    {
+        const int fd = ::accept(m_data, nullptr, nullptr);
+        if (fd < 0) {
+            return;
+        }
+        int packages = 0;
+        while (true) {
+            const std::string request = command(fd);
+            if (request.empty() || request == "QREL") {
+                break;
+            }
+            if (request == "QUIT") {
+                send_message(fd, "QUIT", {});
+            } else if (request == "DATA" && packages < 2) {
+                std::vector<std::byte> body = {std::byte{'4'}};
+                for (int i = 0; i < 4; ++i) {
+                    const int s = 4 * packages + i;
+                    for (const float v : {static_cast<float>(s + 1), s == 2 || s == 3 || s == 4 || s == 7 ? 5.0F : 0.0F, 0.0F}) {
+                        append_value(body, v, true);
+                    }
+                }
+                send_message(fd, "DATR", body);
+                ++packages;
+            }
+        }
+        ::close(fd);
+    }
+
+    int m_data = -1;
+    int m_command = -1;
+    int m_data_port = 0;
+    int m_command_port = 0;
+    std::mutex m_mutex;
+    std::vector<std::string> m_commands;
+    std::vector<std::thread> m_threads;
+};
+
+/**
  * A Fastrak at the far end of a pseudo-terminal: it records the commands it receives, answers the first "C"
  * with two updates of stations 1 and 2 (between them a station that is not used and lines that are no
  * records), then falls silent like a pressed stylus button, and answers the next "C" with one more update.
@@ -1092,6 +1227,12 @@ private slots:
     void testNatusInvalidParameters_data();
     void testNatusInvalidParameters();
     void testNatusReceivesDatagrams();
+    void testBabyMegStreamLayout();
+    void testBabyMegMatchesSynthetic();
+    void testBabyMegInvalidParameters_data();
+    void testBabyMegInvalidParameters();
+    void testBabyMegServerUnavailable();
+    void testBabyMegReadsTheServer();
 };
 
 //=============================================================================================================
@@ -1107,6 +1248,7 @@ void TestAcqDevices::initTestCase()
     QVERIFY(register_ftbuffer_scheme().ok());
     QVERIFY(register_rtserver_scheme().ok());
     QVERIFY(register_natus_scheme().ok());
+    QVERIFY(register_babymeg_scheme().ok());
 }
 
 //=============================================================================================================
@@ -2581,6 +2723,125 @@ void TestAcqDevices::testNatusReceivesDatagrams()
     QCOMPARE(device->lastError().code(), AcqErrorCode::DeviceIo);
     QVERIFY(device->lastError().text().find("3 channels") != std::string::npos);
     ::close(sender);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBabyMegStreamLayout()
+{
+    auto device = AcqDevice::open("babymeg://?simulate=1&meg=6&ref=2&rate=500");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().backend, std::string("babymeg"));
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float32);
+    QCOMPARE(info->sfreq, 500.0);
+    QCOMPARE(info->channelCount(), std::size_t(17)); // 8 magnetometers, 8 trigger lines, the trigger word
+    QCOMPARE(info->channels[0].name, std::string("MEG001"));
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Meg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Tesla);
+    QCOMPARE(info->channels[0].fiff->coilType, 7002);
+    QCOMPARE(info->channels[6].fiff->coilType, 7003);
+    QCOMPARE(info->channels[6].fiff->kind, 301);
+    QCOMPARE(info->channels[0].scale, double(1e-13F) * double(1.0F / 0.5F));
+    QCOMPARE(info->channels[8].name, std::string("TRG001"));
+    QCOMPARE(info->channels[16].name, std::string("DTRG01"));
+    QCOMPARE(info->channels[16].kind, AcqChannelKind::Stim);
+    // The sensor positions reach the measurement info: r0 of the first sensor lies on the 7.5 cm sphere
+    const auto& loc = info->channels[0].fiff->loc;
+    QVERIFY(std::abs(std::hypot(loc[0], loc[1], loc[2]) - 0.075) < 1e-6);
+    QCOMPARE(info->extensions.size(), std::size_t(1));
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBabyMegMatchesSynthetic()
+{
+    // The server sends the session's tesla divided by cal / gain; its trigger lines carry the session's trigger word
+    const Recording meg = record("babymeg://?simulate=1&meg=3&ref=1&rate=500&samples=50&seed=5&realtime=0&duration=2");
+    const Recording direct = record("synthetic://?sfreq=500&meg=4&eeg=0&stim=1&block=50&seed=5&realtime=0&duration=2");
+    QCOMPARE(meg.channels, std::size_t(13));
+    QCOMPARE(meg.frames(), std::size_t(1000));
+    QCOMPARE(direct.frames(), meg.frames());
+    for (std::size_t s = 0; s < meg.frames(); ++s) {
+        for (std::size_t c = 0; c < 4; ++c) {
+            QVERIFY(std::abs(meg.at(s, c) - direct.at(s, c)) <= 1e-6 * std::abs(direct.at(s, c)) + 1e-20);
+        }
+        QCOMPARE(meg.at(s, 12), direct.at(s, 4)); // DTRG01 is the trigger word
+    }
+    QVERIFY(!direct.events.empty());
+    QCOMPARE(meg.events.size(), direct.events.size());
+    for (std::size_t e = 0; e < direct.events.size(); ++e) {
+        QCOMPARE(meg.events[e].sample, direct.events[e].sample);
+        QCOMPARE(meg.events[e].code, direct.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBabyMegInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("target") << "babymeg://localhost?simulate=1";
+    QTest::newRow("port") << "babymeg://?port=0";
+    QTest::newRow("command port") << "babymeg://?command_port=70000";
+    QTest::newRow("sensors") << "babymeg://?simulate=1&meg=0&ref=0";
+    QTest::newRow("rate") << "babymeg://?simulate=1&rate=0";
+    QTest::newRow("samples") << "babymeg://?simulate=1&samples=0";
+}
+
+void TestAcqDevices::testBabyMegInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBabyMegServerUnavailable()
+{
+    auto device = AcqDevice::open("babymeg://127.0.0.1?port=1&timeout=0.5");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::DeviceNotFound);
+    QVERIFY(device.error().text().find("127.0.0.1:1") != std::string::npos);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBabyMegReadsTheServer()
+{
+#if defined(_WIN32)
+    QSKIP("the fake server uses POSIX sockets");
+#else
+    FakeBabyMeg server;
+    QVERIFY(server.data_port() > 0 && server.command_port() > 0);
+    auto device = AcqDevice::open(std::format("babymeg://127.0.0.1?port={}&command_port={}", server.data_port(), server.command_port()));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
+    QCOMPARE(info->sfreq, 600.0);
+    QCOMPARE(info->channelCount(), std::size_t(3));
+    QCOMPARE(info->channels[0].name, std::string("MEG001"));
+    QCOMPARE(info->channels[1].kind, AcqChannelKind::Stim);
+
+    // Two packages of four samples; the third request finds the server idle until QUIT
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::array<float, 24> got{};
+    const auto read = reader->read(AcqMatrixRef<float>::columnMajor(got.data(), 3, 8), 2s);
+    QVERIFY2(read, read ? "" : read.error().text().c_str());
+    for (std::size_t s = 0; s < 8; ++s) {
+        QVERIFY(std::abs(got[3 * s] - 2e-13F * static_cast<float>(s + 1)) < 1e-18F); // raw s + 1 times 1e-13 / 0.5
+    }
+    const std::array<float, 8> word = {0, 0, 1, 1, 1, 0, 0, 1};
+    for (std::size_t s = 0; s < 8; ++s) {
+        QCOMPARE(got[3 * s + 2], word[s]);
+    }
+    device->close();
+
+    const std::vector<std::string> expected = {"INFO", "DATA", "DATA", "DATA", "QUIT", "QREL"};
+    QVERIFY(QTest::qWaitFor([&] { return server.commands().size() >= expected.size(); }, 2000));
+    QCOMPARE(server.commands(), expected);
 #endif
 }
 

@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include <averaging/averaging.h>
+#include <babymeg/babymeg.h>
 #include <brainamp/brainamp.h>
 #include <covariance/covariance.h>
 #include <eegosports/eegosports.h>
@@ -91,6 +92,7 @@ private slots:
     void ftbufferStreamsTheSimulatedRelay();
     void fiffSimulatorStreamsTheSimulatedServer();
     void natusStreamsTheSimulatedAmplifier();
+    void babyMegStreamsTheSimulatedSystem();
     void eegoImpedanceViewShowsTheMeasuredElectrodes();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
@@ -592,6 +594,55 @@ void TestMneScanPlugins::natusStreamsTheSimulatedAmplifier()
         QCOMPARE(data.cols(), 64);
         QVERIFY(data.cwiseAbs().maxCoeff() < 1e-3);
         QVERIFY(data.cwiseAbs().maxCoeff() > 0.0);
+    }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::babyMegStreamsTheSimulatedSystem()
+{
+    BABYMEGPLUGIN::BabyMEG plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* host = setup->findChild<QLineEdit*>("m_lineEdit_Host");
+        auto* port = setup->findChild<QSpinBox*>("m_spinBox_Port");
+        auto* commandPort = setup->findChild<QSpinBox*>("m_spinBox_CommandPort");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        QVERIFY(host && port && commandPort && block && simulate);
+        QCOMPARE(host->text(), QString("localhost"));
+        QCOMPARE(port->value(), 6340);
+        QCOMPARE(commandPort->value(), 6341);
+        block->setValue(100);
+        simulate->click();
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // 384 magnetometers in the device frame, eight trigger lines and the trigger word, in tesla and volts
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(393));
+    QCOMPARE(info->sfreq, 1000.0);
+    QCOMPARE(info->chs[0].kind, FIFFV_MEG_CH);
+    QCOMPARE(info->chs[0].chpos.coil_type, FIFFV_COIL_BABY_MAG);
+    QCOMPARE(info->chs[300].kind, FIFFV_REF_MEG_CH);
+    QCOMPARE(info->chs[392].ch_name, std::string("DTRG01"));
+    QVERIFY(!info->projs.empty()); // from the plugin's header.fif
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 393);
+        QCOMPARE(data.cols(), 100);
+        QVERIFY(data.topRows(384).cwiseAbs().maxCoeff() < 1e-9);
+        QVERIFY(data.topRows(384).cwiseAbs().maxCoeff() > 0.0);
     }
 }
 

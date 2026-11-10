@@ -27,6 +27,10 @@ set(SOURCES
   ftbuffer/ftbuffer_backend.cpp
   ftbuffer/ftbuffer_client.cpp
   ftbuffer/ftbuffer_simulator.cpp
+  babymeg/babymeg_backend.cpp
+  babymeg/babymeg_client.cpp
+  babymeg/babymeg_info.cpp
+  babymeg/babymeg_simulator.cpp
   natus/natus_backend.cpp
   natus/natus_simulator.cpp
   rtserver/rtserver_backend.cpp
@@ -45,6 +49,7 @@ set(PRIVATE_HEADERS
   polhemus/fastrak_record.h
   polhemus/polhemus_transport.h
   ftbuffer/ftbuffer_transport.h
+  babymeg/babymeg_transport.h
   natus/natus_transport.h
   rtserver/rtserver_transport.h
   transport_error.h

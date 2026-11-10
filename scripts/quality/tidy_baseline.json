@@ -639,43 +639,6 @@
     "src/applications/mne_scan/plugins/averaging/averaging.h": {
       "modernize-use-override": 11
     },
-    "src/applications/mne_scan/plugins/babymeg/FormFiles/babymegsetupwidget.h": {
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 1
-    },
-    "src/applications/mne_scan/plugins/babymeg/FormFiles/babymegsquidcontroldgl.cpp": {
-      "performance-unnecessary-copy-initialization": 1,
-      "performance-unnecessary-value-param": 8
-    },
-    "src/applications/mne_scan/plugins/babymeg/FormFiles/babymegsquidcontroldgl.h": {
-      "bugprone-forward-declaration-namespace": 2,
-      "bugprone-reserved-identifier": 1,
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 2
-    },
-    "src/applications/mne_scan/plugins/babymeg/FormFiles/globalobj.cpp": {
-      "bugprone-throwing-static-initialization": 16
-    },
-    "src/applications/mne_scan/plugins/babymeg/FormFiles/plotter.h": {
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 4
-    },
-    "src/applications/mne_scan/plugins/babymeg/babymeg.cpp": {
-      "performance-unnecessary-value-param": 3
-    },
-    "src/applications/mne_scan/plugins/babymeg/babymeg.h": {
-      "modernize-use-override": 11
-    },
-    "src/applications/mne_scan/plugins/babymeg/babymegclient.cpp": {
-      "performance-unnecessary-value-param": 2
-    },
-    "src/applications/mne_scan/plugins/babymeg/babymegclient.h": {
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 2
-    },
-    "src/applications/mne_scan/plugins/babymeg/babymeginfo.cpp": {
-      "performance-unnecessary-value-param": 2
-    },
     "src/applications/mne_scan/plugins/covariance/FormFiles/covariancesetupwidget.h": {
       "modernize-use-nullptr": 1,
       "modernize-use-override": 1
@@ -685,22 +648,6 @@
     },
     "src/applications/mne_scan/plugins/covariance/covariance.h": {
       "modernize-use-override": 13
-    },
-    "src/applications/mne_scan/plugins/fiffsimulator/FormFiles/fiffsimulatorsetupwidget.cpp": {
-      "performance-unnecessary-value-param": 1
-    },
-    "src/applications/mne_scan/plugins/fiffsimulator/FormFiles/fiffsimulatorsetupwidget.h": {
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 1
-    },
-    "src/applications/mne_scan/plugins/fiffsimulator/fiffsimulator.h": {
-      "modernize-use-override": 11
-    },
-    "src/applications/mne_scan/plugins/fiffsimulator/fiffsimulatorproducer.cpp": {
-      "performance-unnecessary-value-param": 1
-    },
-    "src/applications/mne_scan/plugins/fiffsimulator/fiffsimulatorproducer.h": {
-      "modernize-use-override": 2
     },
     "src/applications/mne_scan/plugins/ftbuffer/FormFiles/ftbuffersetupwidget.h": {
       "modernize-use-nullptr": 1,
@@ -736,19 +683,6 @@
     },
     "src/applications/mne_scan/plugins/lsladapter/lsladapterproducer.h": {
       "modernize-use-override": 1
-    },
-    "src/applications/mne_scan/plugins/natus/FormFiles/natussetup.h": {
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 1
-    },
-    "src/applications/mne_scan/plugins/natus/natus.cpp": {
-      "bugprone-integer-division": 1
-    },
-    "src/applications/mne_scan/plugins/natus/natus.h": {
-      "modernize-use-override": 11
-    },
-    "src/applications/mne_scan/plugins/natus/natusproducer.h": {
-      "modernize-use-nullptr": 1
     },
     "src/applications/mne_scan/plugins/neuronalconnectivity/FormFiles/neuronalconnectivitysetupwidget.h": {
       "modernize-use-nullptr": 1,

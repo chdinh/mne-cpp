@@ -159,6 +159,16 @@ aliases; replace the old spelling as below.
   and `SerialPort` (raw 8N1, `list_serial_ports()`), each reporting
   `std::error_code`s through `std::expected`. The acquisition devices use it
   for their network and serial connections; `ex_com` shows it.
+- `babymeg://` reads the acquisition server of a BabyMEG system without Qt:
+  its channels, sensor positions, coil types and current gains from the
+  command port, the data from the data port, and the trigger lines
+  `TRG001` to `TRG008` as a trigger word in `DTRG01` and as events.
+  `babymeg://?simulate=1` serves a synthetic session. The BabyMEG MNE Scan
+  plugin reads through it and gains host, port and simulation settings; it
+  used to connect only to `localhost` and to give every sensor the x
+  coordinate as its whole position in the coil transform. Its SQUID control
+  dialog, which no button opened, and the `Update Fiff Info` action are
+  gone: the gains are read at every start.
 - `natus://` receives a Natus Quantum amplifier from the UDP datagrams of
   its streaming machine without Qt, in volts, and stops with a message when
   the machine sends other channels than set. `natus://?simulate=1` streams a

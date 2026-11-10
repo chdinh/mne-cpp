@@ -17,19 +17,16 @@
 //=============================================================================================================
 
 #include "babymegsetupwidget.h"
-
-#include "babymegsquidcontroldgl.h"
-
 #include "../babymeg.h"
-#include "../babymegclient.h"
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDir>
-#include <QDebug>
-#include <QComboBox>
+#include <QCheckBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QSpinBox>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -41,29 +38,42 @@ using namespace BABYMEGPLUGIN;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-BabyMEGSetupWidget::BabyMEGSetupWidget(BabyMEG* p_pBabyMEG,
-                                       QWidget* parent)
+BabyMEGSetupWidget::BabyMEGSetupWidget(BabyMEG* pBabyMEG, QWidget* parent)
 : QWidget(parent)
-, m_pBabyMEG(p_pBabyMEG)
 {
-    ui.setupUi(this);
+    auto* host = new QLineEdit(QString::fromStdString(pBabyMEG->m_host));
+    host->setObjectName("m_lineEdit_Host");
+    host->setToolTip(tr("The computer that runs the BabyMEG acquisition server"));
+    connect(host, &QLineEdit::textChanged, this, [pBabyMEG](const QString& text) { pBabyMEG->m_host = text.trimmed().toStdString(); });
 
-    //rt server fiffInfo received
-    connect(m_pBabyMEG, &BabyMEG::fiffInfoAvailable, this,
-            &BabyMEGSetupWidget::setSamplingFrequency);
-}
+    auto* port = new QSpinBox;
+    port->setObjectName("m_spinBox_Port");
+    port->setRange(1, 65535);
+    port->setValue(pBabyMEG->m_port);
+    connect(port, &QSpinBox::valueChanged, this, [pBabyMEG](int value) { pBabyMEG->m_port = static_cast<std::uint16_t>(value); });
 
-//=============================================================================================================
+    auto* commandPort = new QSpinBox;
+    commandPort->setObjectName("m_spinBox_CommandPort");
+    commandPort->setRange(1, 65535);
+    commandPort->setValue(pBabyMEG->m_commandPort);
+    commandPort->setToolTip(tr("The port on which the server describes its channels and gains"));
+    connect(commandPort, &QSpinBox::valueChanged, this, [pBabyMEG](int value) { pBabyMEG->m_commandPort = static_cast<std::uint16_t>(value); });
 
-BabyMEGSetupWidget::~BabyMEGSetupWidget()
-{
-}
+    auto* block = new QSpinBox;
+    block->setObjectName("m_spinBox_SamplesPerBlock");
+    block->setRange(1, 100000);
+    block->setValue(pBabyMEG->m_iSamplesPerBlock);
+    connect(block, &QSpinBox::valueChanged, this, [pBabyMEG](int value) { pBabyMEG->m_iSamplesPerBlock = value; });
 
-//=============================================================================================================
+    auto* simulate = new QCheckBox(tr("Simulate the acquisition server"));
+    simulate->setObjectName("m_checkBox_Simulate");
+    simulate->setChecked(pBabyMEG->m_bSimulate);
+    connect(simulate, &QCheckBox::toggled, this, [pBabyMEG](bool on) { pBabyMEG->m_bSimulate = on; });
 
-void BabyMEGSetupWidget::setSamplingFrequency()
-{
-    if (m_pBabyMEG->m_pFiffInfo) {
-        this->ui.m_qLabel_sps->setText(QString("%1").arg(m_pBabyMEG->m_pFiffInfo->sfreq));
-    }
+    auto* form = new QFormLayout(this);
+    form->addRow(tr("Host"), host);
+    form->addRow(tr("Data port"), port);
+    form->addRow(tr("Command port"), commandPort);
+    form->addRow(tr("Samples per block"), block);
+    form->addRow(simulate);
 }

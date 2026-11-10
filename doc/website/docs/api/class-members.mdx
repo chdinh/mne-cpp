@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6352 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6372 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -444,6 +444,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **cachedResultHash** `[var]` in [MnaPort](/docs/api/mna/mna-port) — SHA-256 for invalidation.
 - **cachedResultPath** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Relative path to cached result.
 - **cal** `[var]` in `AcqFiffChannel` — FIFF cal.
+- **cal** `[var]` in `BabyMegChannel`
 - **cal** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Calibration from volts to units used.
 - **cal** `[var]` in `NeuromagChannel`
 - **calc_beta** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Compute the beta angle used in the linear collocation integration.
@@ -570,6 +571,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **channelRms** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Compute the RMS amplitude of a channel over a sample window.
 - **channels** `[var]` in [AcqConvertOptions](/docs/api/acq/acq-convert-options) — Channels of the view mapped to rows 0..count-1.
 - **channels** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — One entry per channel, in ring order; may be empty for event-only streams.
+- **channels** `[var]` in `BabyMegInfo`
 - **channels** `[var]` in `BrainAmpSetup` — Physical channels, amplifier * 32 + input.
 - **channels** `[var]` in [ChannelSelection](/docs/api/channels/channel-selection) — Channel names, in file order.
 - **channels** `[fn]` in `EegoTransport`
@@ -769,6 +771,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **Coherency** `[fn]` in [Coherency](/docs/api/connectivity/coherency) — Constructs a [`Coherency`](/docs/api/connectivity/coherency) object.
 - **coil_class** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Coil class.
 - **coil_trans** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Coil coordinate system transformation.
+- **coil_type** `[var]` in `BabyMegChannel` — A FIFF coil type, or FIFFV_STIM_CH, FIFFV_EEG_CH, FIFFV_QUAT_x, FIFFV_HPI_G.
 - **coil_type** `[var]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — What kind of coil.
 - **coil_type** `[var]` in `NeuromagChannel`
 - **coilFrequenciesChanged** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever the coil frequencies changed.
@@ -1178,6 +1181,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **description** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
 - **description** `[var]` in [AcqParameterInfo](/docs/api/acq/acq-parameter-info) — One sentence.
 - **description** `[var]` in [AcqSchemeInfo](/docs/api/acq/acq-scheme-info) — One sentence.
+- **description** `[fn]` in `BabyMegTransport`
 - **description** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Free-text description (OPTIONAL).
 - **description** `[var]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Description of the coordinate system (RECOMMENDED).
 - **description** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Description label.
@@ -1373,6 +1377,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **dup_coil_set** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Make a coil set duplicate.
 - **dup_light_set** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Deep-copy a light set including all individual light entries.
 - **duration** `[var]` in [AcqEvent](/docs/api/acq/acq-event) — Duration in samples, 0 for an instantaneous event.
+- **duration** `[var]` in `BabyMegSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [BidsEvent](/docs/api/bids/bids-event) — Duration of the event in seconds.
 - **duration** `[var]` in `BrainAmpSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Duration in samples (0 = point marker).
@@ -2068,6 +2073,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 
 ## G {#g}
 
+- **gain** `[var]` in `BabyMegChannel`
 - **gain** `[var]` in `BrainAmpSimulation` — Amplitude factor of the simulated signal.
 - **gain** `[var]` in `EegoSimulation` — Amplitude factor of the simulated signal.
 - **gain** `[var]` in `GusbampSimulation` — Amplitude factor of the simulated signal.
@@ -2542,6 +2548,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **iNfft** `[var]` in [TaperedSpectraInputData](/docs/api/math/tapered-spectra-input-data)
 - **info** `[fn]` in [AcqError](/docs/api/acq/acq-error)
 - **info** `[fn]` in [AcqStream](/docs/api/acq/acq-stream)
+- **info** `[fn]` in `BabyMegTransport`
 - **info** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Measurement info.
 - **info** `[var]` in `FiffEvokedFile` — The measurement info shared by all data sets.
 - **info** `[var]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — FIFF measurement information.
@@ -2986,6 +2993,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **loadTrans** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the transformation should be loaded.
 - **loadTransformation** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Load a coordinate transformation from a FIF file.
 - **loc** `[var]` in `AcqFiffChannel` — Position r0 and orientation ex, ey, ez.
+- **loc** `[var]` in `BabyMegChannel` — r0, ex, ey, ez in the device frame.
 - **loc** `[var]` in `NeuromagChannel` — r0, ex, ey, ez.
 - **lock** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — See `AcqLockState`.
 - **lockMemory** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — mlock / VirtualLock; best effort, reported in stats.
@@ -3200,6 +3208,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **measure** `[var]` in [InvConnectivity](/docs/api/inv/inv-connectivity) — Metric name, e.g.
 - **measureImpedances** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Measures electrode impedances.
 - **measureImpedances** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Measures the electrode impedances (control path, allocates).
+- **meg** `[var]` in `BabyMegSimulation` — Inner layer magnetometers.
 - **meg** `[var]` in `FtBufferSimulation` — Magnetometers of the relayed Neuromag system.
 - **meg** `[var]` in `NeuromagSimulation` — Magnetometer channels.
 - **meg** `[var]` in `RtServerSimulation` — Magnetometers of the replayed recording.
@@ -3440,6 +3449,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **name** `[var]` in [AcqErrorInfo](/docs/api/acq/acq-error-info) — Stable identifier, e.g.
 - **name** `[var]` in [AcqParameterInfo](/docs/api/acq/acq-parameter-info) — Query key.
 - **name** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Unique within its source (e.g.
+- **name** `[var]` in `BabyMegChannel`
 - **name** `[var]` in [BidsChannel](/docs/api/bids/bids-channel) — Channel name (REQUIRED).
 - **name** `[var]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — Human-readable dataset name (REQUIRED).
 - **name** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Electrode name (REQUIRED).
@@ -3559,6 +3569,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **newSensorColorsAvailable** `[signal]` in [RtSensorDataController](/docs/api/disp3-d/rt-sensor-data-controller) — Emitted when new per-vertex color data for a sensor surface is available.
 - **newSmoothedDataAvailable** `[signal]` in [RtSourceDataController](/docs/api/disp3-d/rt-source-data-controller) — Emitted when new interpolated per-vertex color data is available for rendering.
 - **newSubject** `[signal]` in [ProjectSettingsView](/docs/api/disp/project-settings-view)
+- **next** `[fn]` in `BabyMegTransport`
 - **next** `[var]` in [FiffTag](/docs/api/fiff/fiff-tag) — Pointer to the next object.
 - **next** `[fn]` in `NeuromagTransport`
 - **next** `[fn]` in `RtServerTransport`
@@ -4250,6 +4261,8 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **rasGood** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Whether the direction cosines in the header are valid.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index using a volume's transform.
+- **rate** `[var]` in `BabyMegInfo`
+- **rate** `[var]` in `BabyMegSimulation` — Hz.
 - **rate** `[var]` in `EegoSetup` — Sampling rate in Hz, one of the amplifier's.
 - **rate** `[var]` in `FtBufferSimulation` — Hz.
 - **rate** `[var]` in `GusbampSetup` — Sampling rate in Hz, one the amplifier supports.
@@ -4404,6 +4417,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **readTsv** `[fn]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Read a BIDS *_electrodes.tsv file.
 - **readTsv** `[fn]` in [BidsEvent](/docs/api/bids/bids-event) — Read a BIDS *_events.tsv file.
 - **readTsv** `[fn]` in [BidsTsv](/docs/api/bids/bids-tsv) — Reads a TSV file into an ordered list of row maps.
+- **realtime** `[var]` in `BabyMegSimulation`
 - **realtime** `[var]` in `BrainAmpSimulation`
 - **realtime** `[var]` in `EegoSimulation`
 - **realtime** `[var]` in `FtBufferSimulation`
@@ -4428,6 +4442,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **redrawGUI** `[fn]` in [ProjectorsView](/docs/api/disp/projectors-view) — Redraw the view.
 - **reduce** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **reduce_forward_solution** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — reduces the forward solution and stores the result to p_fwdOut.
+- **ref** `[var]` in `BabyMegSimulation` — Outer layer and reference magnetometers.
 - **reference** `[var]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info)
 - **reference** `[var]` in `EegoSimulation` — Referential inputs.
 - **reference_range** `[var]` in `EegoSetup` — Input range of the referential inputs in volts, one of the amplifier's.
@@ -4649,6 +4664,8 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **samples** `[var]` in [AcqPart](/docs/api/acq/acq-part) — Samples per channel in the run.
 - **samples** `[var]` in [AcqReadResult](/docs/api/acq/acq-read-result) — Columns written.
 - **samples** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — Samples per channel flushed to disk, including zero-filled lost ones.
+- **samples** `[var]` in `BabyMegInfo` — Samples per data package.
+- **samples** `[var]` in `BabyMegSimulation` — Samples per data package.
 - **samples** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
 - **samples_available** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Check whether new samples are available in the internal buffer.
 - **samplesChanged** `[signal]` in [CovarianceSettingsView](/docs/api/disp/covariance-settings-view)
@@ -4780,6 +4797,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **second** `[var]` in [AcqSpanPair](/docs/api/acq/acq-span-pair) — Elements from the start of the ring; empty without wrap.
 - **secs** `[var]` in [FiffTime](/docs/api/fiff/fiff-time) — GMT time in seconds since epoch.
 - **section_count** `[fn]` in [Report](/docs/api/report/report-class)
+- **seed** `[var]` in `BabyMegSimulation`
 - **seed** `[var]` in `BrainAmpSimulation`
 - **seed** `[var]` in `EegoSimulation`
 - **seed** `[var]` in `FtBufferSimulation`
@@ -5552,6 +5570,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **start** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Starts acquisition and output.
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` to `path` from its next sample; the measurement info is on disk on return.
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` into a BIDS dataset; `stop()` writes the sidecars (channels.tsv, events.tsv, meg.json, dataset_description.json) as mne-bids does.
+- **start** `[fn]` in `BabyMegTransport` — Asks for data packages; `next()` returns them.
 - **start** `[fn]` in `BrainAmpTransport`
 - **start** `[fn]` in `EegoTransport` — Opens the EEG stream.
 - **start** `[fn]` in `GusbampTransport` — Sets up the units and starts the slaves, then the master.
@@ -5612,6 +5631,7 @@ Index of 6352 public class members (functions, variables, typedefs, enums) acros
 - **stop** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Stops and joins every backend thread before returning.
 - **stop** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Stops acquisition and output and joins the backend threads.
 - **stop** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Records every sample committed until now, writes the annotations and closes the files (and writes the BIDS sidecars).
+- **stop** `[fn]` in `BabyMegTransport` — Says goodbye to the server ("QUIT", "QREL") and disconnects.
 - **stop** `[fn]` in `BrainAmpTransport`
 - **stop** `[fn]` in `EegoTransport`
 - **stop** `[fn]` in `GusbampTransport`

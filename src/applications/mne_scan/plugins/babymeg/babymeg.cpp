@@ -10,7 +10,7 @@
  *           Limin Sun <limin.sun@childrens.harvard.edu>;
  *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>
  * @since    0.1.0
- * @date     February, 2013
+ * @date     April, 2013
  * @brief    BabyMEG class definition.
  */
 
@@ -19,28 +19,30 @@
 //=============================================================================================================
 
 #include "babymeg.h"
-#include <memory>
 
-#include <vector>
-#include <base/string_utils.h>
 #include "FormFiles/babymegsetupwidget.h"
-#include "FormFiles/babymegsquidcontroldgl.h"
-#include "babymegclient.h"
-#include "babymeginfo.h"
 
-#include <fiff/fiff_byte_swap.h>
-#include <dsp/rt/rt_detect_trigger.h>
-#include <fiff/fiff_types.h>
-#include <fiff/fiff_dig_point_set.h>
-#include <disp/viewers/projectsettingsview.h>
+#include <acq/acq_device_registry.h>
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <fiff/fiff_info.h>
+#include <fiff/fiff_stream.h>
 #include <scMeas/realtimemultisamplearray.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QQuaternion>
-#include <QFile>
+#include <QCoreApplication>
+#include <QDebug>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
+#include <filesystem>
+#include <fstream>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -49,48 +51,21 @@
 using namespace BABYMEGPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace DISPLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
-using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-BabyMEG::BabyMEG()
-: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(40))
-, m_iBufferSize(-1)
-, m_sFiffProjections(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/header.fif")
-, m_sFiffCompensators(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/compensator.fif")
-, m_sBadChannels(QCoreApplication::applicationDirPath() + "/../resources/mne_scan/plugins/babymeg/babymeg_bad_channels.txt")
-{
-    m_pActionSqdCtrl = new QAction(QIcon(":/images/sqdctrl.png"), tr("Squid Control"), this);
-    //    m_pActionSetupProject->setShortcut(tr("F12"));
-    m_pActionSqdCtrl->setStatusTip(tr("Squid Control"));
-    connect(m_pActionSqdCtrl.data(), &QAction::triggered,
-            this, &BabyMEG::showSqdCtrlDialog);
-    //addPluginAction(m_pActionSqdCtrl);
-
-    m_pActionUpdateFiffInfo = new QAction(QIcon(":/images/latestFiffInfo.png"), tr("Update Fiff Info"), this);
-    m_pActionUpdateFiffInfo->setStatusTip(tr("Update Fiff Info"));
-    connect(m_pActionUpdateFiffInfo.data(), &QAction::triggered,
-            this, &BabyMEG::updateFiffInfo);
-    addPluginAction(m_pActionUpdateFiffInfo);
-}
+BabyMEG::BabyMEG() = default;
 
 //=============================================================================================================
 
 BabyMEG::~BabyMEG()
 {
-    if (this->isRunning()) {
+    if (isRunning()) {
         stop();
-    }
-
-    if (m_pMyClient) {
-        if (m_pMyClient->isConnected()) {
-            m_pMyClient->DisconnectBabyMEG();
-        }
     }
 }
 
@@ -98,58 +73,15 @@ BabyMEG::~BabyMEG()
 
 QSharedPointer<AbstractPlugin> BabyMEG::clone() const
 {
-    QSharedPointer<BabyMEG> pBabyMEGClone(new BabyMEG());
-    return pBabyMEGClone;
+    return QSharedPointer<BabyMEG>(new BabyMEG());
 }
 
 //=============================================================================================================
 
 void BabyMEG::init()
 {
-    //BabyMEGData Path
-    QString sBabyMEGDataPath = QDir::homePath() + "/BabyMEGData";
-    if (!QDir(sBabyMEGDataPath).exists()) {
-        QDir().mkdir(sBabyMEGDataPath);
-    }
-
-    //Test Project
-    QSettings settings("MNECPP");
-    QString sCurrentProject = settings.value(QString("Plugin/%1/currentProject").arg(getName()), "TestProject").toString();
-    if (!QDir(sBabyMEGDataPath + "/" + sCurrentProject).exists()) {
-        QDir().mkdir(sBabyMEGDataPath + "/" + sCurrentProject);
-    }
-
-    //Test Subject
-    QString sCurrentSubject = settings.value(QString("Plugin/%1/currentSubject").arg(getName()), "TestSubject").toString();
-    if (!QDir(sBabyMEGDataPath + "/" + sCurrentProject + "/" + sCurrentSubject).exists()) {
-        QDir().mkdir(sBabyMEGDataPath + "/" + sCurrentProject + "/" + sCurrentSubject);
-    }
-
-    //BabyMEG Inits
-    m_pInfo = QSharedPointer<BabyMEGInfo>(new BabyMEGInfo());
-
-    connect(m_pInfo.data(), &BabyMEGInfo::fiffInfoAvailable,
-            this, &BabyMEG::setFiffInfo);
-    connect(m_pInfo.data(), &BabyMEGInfo::SendDataPackage,
-            this, &BabyMEG::setFiffData);
-    connect(m_pInfo.data(), &BabyMEGInfo::SendCMDPackage,
-            this, &BabyMEG::setCMDData);
-    connect(m_pInfo.data(), &BabyMEGInfo::GainInfoUpdate,
-            this, &BabyMEG::setFiffGainInfo);
-
-    m_pMyClient = QSharedPointer<BabyMEGClient>(new BabyMEGClient(6340, this));
-    m_pMyClient->SetInfo(m_pInfo);
-    m_pMyClient->start();
-    m_pMyClientComm = QSharedPointer<BabyMEGClient>(new BabyMEGClient(6341, this));
-    m_pMyClientComm->SetInfo(m_pInfo);
-    m_pMyClientComm->start();
-
-    //init channels when fiff info is available
-    connect(this, &BabyMEG::fiffInfoAvailable,
-            this, &BabyMEG::initConnector);
-
     m_pRTMSABabyMEG = PluginOutputData<RealTimeMultiSampleArray>::create(this, "BabyMEG Output", "BabyMEG");
-    m_pRTMSABabyMEG->measurementData()->setName(this->getName()); //Provide name to auto store widget settings
+    m_pRTMSABabyMEG->measurementData()->setName(getName()); //Provide name to auto store widget settings
     m_outputConnectors.append(m_pRTMSABabyMEG);
 }
 
@@ -161,31 +93,75 @@ void BabyMEG::unload()
 
 //=============================================================================================================
 
-void BabyMEG::clear()
+std::string BabyMEG::uri() const
 {
-    m_pFiffInfo.reset();
-    m_iBufferSize = -1;
+    ACQLIB::AcqUri uri{.scheme = "babymeg", .target = {}, .params = {}};
+    if (m_bSimulate) {
+        uri.params.emplace_back("simulate", "1");
+    } else {
+        uri.target = m_host;
+        uri.params = {{"port", std::to_string(m_port)}, {"command_port", std::to_string(m_commandPort)}};
+    }
+    return uri.toString();
+}
+
+//=============================================================================================================
+
+void BabyMEG::addSystemInfo(FiffInfo& info)
+{
+    const std::filesystem::path resources = QCoreApplication::applicationDirPath().toStdString() + "/../resources/mne_scan/plugins/babymeg";
+    if (auto header = FiffStream::open(resources / "header.fif")) {
+        info.projs = header->read_proj(header->dirtree());
+        for (FiffProj& proj : info.projs) {
+            proj.active = false;
+        }
+    }
+    if (auto compensators = FiffStream::open(resources / "compensator.fif")) {
+        info.comps = compensators->read_ctf_comp(compensators->dirtree(), info.chs);
+    }
+    std::ifstream bads(resources / "babymeg_bad_channels.txt");
+    for (std::string channel; std::getline(bads, channel);) {
+        if (channel.ends_with('\r')) {
+            channel.pop_back();
+        }
+        if (!channel.empty()) {
+            info.bads.push_back(channel);
+        }
+    }
 }
 
 //=============================================================================================================
 
 bool BabyMEG::start()
 {
-    m_pMyClientComm->SendCommandToBabyMEGShortConnection("INFO");
-
-    m_pMyClient->ConnectToBabyMEG();
-
-    if (!m_pMyClient->isConnected()) {
-        qInfo() << "BabyMEG::start - Not connected to BabyMEG device. Try connecting manually via the Connection tab.";
-
+    ACQLIB::register_babymeg_scheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[BabyMEG::start]" << QString::fromStdString(device.error().text());
+        return false;
+    }
+    m_device = std::move(*device);
+    auto fiffInfo = ACQLIB::toFiffInfo(*m_device.stream().info());
+    auto reader = m_device.stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[BabyMEG::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        m_device.close();
         return false;
     }
 
-    initConnector();
+    //The server sends its current gains on every start, so the output is set up here and not in init()
+    auto info = std::make_shared<FiffInfo>(std::move(*fiffInfo));
+    addSystemInfo(*info);
+    m_pRTMSABabyMEG->measurementData()->initFromFiffInfo(info);
+    m_pRTMSABabyMEG->measurementData()->setMultiArraySize(1);
 
-    // Start thread
+    if (ACQLIB::AcqError e = m_device.start(); !e.ok()) {
+        qWarning() << "[BabyMEG::start]" << QString::fromStdString(e.text());
+        m_device.close();
+        return false;
+    }
+    m_reader = std::move(*reader);
     QThread::start();
-
     return true;
 }
 
@@ -194,12 +170,12 @@ bool BabyMEG::start()
 bool BabyMEG::stop()
 {
     requestInterruption();
-    wait(2000);
+    wait();
+    m_reader = ACQLIB::AcqReader();
+    m_device.close();
 
     // Clear all data in the buffer connected to displays and other plugins
     m_pRTMSABabyMEG->measurementData()->clear();
-    m_pCircularBuffer->clear();
-
     return true;
 }
 
@@ -221,361 +197,27 @@ QString BabyMEG::getName() const
 
 QWidget* BabyMEG::setupWidget()
 {
-    BabyMEGSetupWidget* widget = new BabyMEGSetupWidget(this); //widget is later distroyed by CentralWidget - so it has to be created everytime new
-
-    if (m_pFiffInfo) {
-        widget->setSamplingFrequency();
-    }
-
-    return widget;
+    return new BabyMEGSetupWidget(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
 }
 
 //=============================================================================================================
 
 void BabyMEG::run()
 {
-    MatrixXf matValue;
-
+    const std::size_t channels = m_device.stream().info()->channelCount();
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
     while (!isInterruptionRequested()) {
-        //pop matrix
-        if (m_pCircularBuffer->pop(matValue)) {
-            //Create digital trigger information
-            createDigTrig(matValue);
-
-            if (!isInterruptionRequested()) {
-                m_pRTMSABabyMEG->measurementData()->setValue(this->calibrate(matValue));
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (!read) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+                continue;
             }
+            qWarning() << "[BabyMEG::run]" << QString::fromStdString(read.error().text());
+            return;
         }
+        m_pRTMSABabyMEG->measurementData()->setValue(block);
     }
-}
-
-//=============================================================================================================
-
-void BabyMEG::initConnector()
-{
-    if (m_pFiffInfo) {
-        m_pRTMSABabyMEG->measurementData()->initFromFiffInfo(m_pFiffInfo);
-        m_pRTMSABabyMEG->measurementData()->setMultiArraySize(1);
-
-        //Look for trigger channels and initialise detected trigger map
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG001"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG002"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG003"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG004"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG005"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG006"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG007"));
-        m_lTriggerChannelIndices.append(BASELIB::indexOf(m_pFiffInfo->ch_names, "TRG008"));
-    }
-}
-
-//=============================================================================================================
-
-void BabyMEG::setFiffInfo(const FiffInfo& p_FiffInfo)
-{
-    m_pFiffInfo = std::make_shared<FiffInfo>(p_FiffInfo);
-
-    if (!readProjectors()) {
-        qWarning() << "[BabyMEG::setFiffInfo] Not able to read projectors";
-    }
-
-    if (!readCompensators()) {
-        qWarning() << "[BabyMEG::setFiffInfo] Not able to read compensators";
-    }
-
-    if (!readBadChannels()) {
-        qWarning() << "[BabyMEG::setFiffInfo] Not able to read bad channels";
-    }
-
-    m_iBufferSize = m_pInfo->dataLength;
-
-    // Add the calibration factors
-    m_cals = RowVectorXd(m_pFiffInfo->nchan);
-    m_cals.setZero();
-    for (qint32 k = 0; k < m_pFiffInfo->nchan; ++k)
-        m_cals[k] = static_cast<double>(m_pFiffInfo->chs[k].range) *
-            static_cast<double>(m_pFiffInfo->chs[k].cal);
-
-    // Initialize the data and calibration vector
-    typedef Eigen::Triplet<double> T;
-    std::vector<T> tripletList;
-    tripletList.reserve(static_cast<unsigned long>(m_pFiffInfo->nchan));
-    for (qint32 i = 0; i < m_pFiffInfo->nchan; ++i)
-        tripletList.push_back(T(i, i, this->m_cals[i]));
-
-    m_sparseMatCals = SparseMatrix<double>(m_pFiffInfo->nchan, m_pFiffInfo->nchan);
-    m_sparseMatCals.setFromTriplets(tripletList.begin(), tripletList.end());
-
-    emit fiffInfoAvailable();
-}
-
-//=============================================================================================================
-
-void BabyMEG::setFiffData(QByteArray data)
-{
-    //get the first byte -- the data format
-    int dformat = data.left(1).toInt();
-
-    data.remove(0, 1);
-    qint32 rows = m_pFiffInfo->nchan;
-    qint32 cols = (data.size() / dformat) / rows;
-
-    qInfo() << "[BabyMEG::setFiffData] Matrix " << rows << "x" << cols << " [Data bytes:" << dformat << "]";
-
-    MatrixXf rawData(Map<MatrixXf>(reinterpret_cast<float*>(data.data()), rows, cols));
-
-    for (qint32 i = 0; i < rows * cols; ++i) {
-        FIFFLIB::swap_floatp(rawData.data() + i);
-    }
-
-    if (this->isRunning()) {
-        while (!m_pCircularBuffer->push(rawData)) {
-            //Do nothing until the circular buffer is ready to accept new data again
-        }
-    }
-
-    emit dataToSquidCtrlGUI(rawData);
-}
-
-//=============================================================================================================
-
-void BabyMEG::setCMDData(QByteArray DATA)
-{
-    //    m_commandManager["FLL"].reply(DATA);
-    emit sendCMDDataToSQUIDControl(DATA);
-    qInfo() << "[BabyMEG::setCMDData] Data has been received.";
-}
-
-//=============================================================================================================
-
-void BabyMEG::setFiffGainInfo(QStringList GainInfo)
-{
-    if (!m_pFiffInfo) {
-        QMessageBox msgBox;
-        msgBox.setText("FiffInfo missing!");
-        msgBox.exec();
-        return;
-    } else {
-        //set up the gain info
-        qInfo() << "Set Gain Info";
-        for (qint32 i = 0; i < m_pFiffInfo->nchan; i++) {
-            m_pFiffInfo->chs[i].range = 1.0f / GainInfo.at(i).toFloat(); //1; // set gain
-            m_cals[i] = static_cast<double>(m_pFiffInfo->chs[i].range * m_pFiffInfo->chs[i].cal);
-            //qInfo()<<[BabyMEG::setFiffGainInfo] i<<"="<<m_pFiffInfo->chs[i].ch_name<<","<<m_pFiffInfo->chs[i].range;
-        }
-
-        // Initialize the data and calibration vector
-        typedef Eigen::Triplet<double> T;
-        std::vector<T> tripletList;
-        tripletList.reserve(static_cast<unsigned long>(m_pFiffInfo->nchan));
-        for (qint32 i = 0; i < m_pFiffInfo->nchan; ++i) {
-            tripletList.push_back(T(i, i, this->m_cals[i]));
-        }
-
-        m_sparseMatCals = SparseMatrix<double>(m_pFiffInfo->nchan, m_pFiffInfo->nchan);
-        m_sparseMatCals.setFromTriplets(tripletList.begin(), tripletList.end());
-    }
-}
-
-//=============================================================================================================
-
-void BabyMEG::comFLL(QString t_sFLLControlCommand)
-{
-    qInfo() << "[BabyMEG::comFLL] FLL commands";
-
-    qInfo() << "[BabyMEG::comFLL] BabyMeg Received" << t_sFLLControlCommand;
-    int strlen = t_sFLLControlCommand.size();
-    QByteArray Scmd = m_pMyClientComm->MGH_LM_Int2Byte(strlen);
-    QByteArray SC = QByteArray("COMS") + Scmd;
-    SC.append(t_sFLLControlCommand.toUtf8());
-    m_pMyClientComm->SendCommandToBabyMEGShortConnection(SC);
-}
-
-//=============================================================================================================
-
-void BabyMEG::updateFiffInfo()
-{
-    // read gain info and save them to the m_pFiffInfo.range
-    m_pMyClientComm->SendCommandToBabyMEGShortConnection("INFG");
-
-    //sleep(0.5);
-
-    //m_pActionRecordFile->setEnabled(true);
-}
-
-//=============================================================================================================
-
-void BabyMEG::showSqdCtrlDialog()
-{
-    // Start Squid control widget
-    if (!m_pSQUIDCtrlDlg) {
-        m_pSQUIDCtrlDlg = QSharedPointer<BabyMEGSQUIDControlDgl>(new BabyMEGSQUIDControlDgl(this));
-    }
-
-    if (!m_pSQUIDCtrlDlg->isVisible()) {
-        m_pSQUIDCtrlDlg->show();
-        m_pSQUIDCtrlDlg->raise();
-        m_pSQUIDCtrlDlg->Init();
-    }
-}
-
-//=============================================================================================================
-
-void BabyMEG::createDigTrig(MatrixXf& data)
-{
-    //Look for triggers in all trigger channels
-    //m_qMapDetectedTrigger = DSPLIB::detectTriggerFlanksMax(data.at(b), m_lTriggerChannelIndices, m_iCurrentSample-nCol, m_dTriggerThreshold, true);
-    QMap<int, QList<QPair<int, double>>> qMapDetectedTrigger = DSPLIB::detectTriggerFlanksGrad(data.cast<double>(),
-                                                                                               m_lTriggerChannelIndices,
-                                                                                               0,
-                                                                                               1.0,
-                                                                                               false,
-                                                                                               "Rising",
-                                                                                               400);
-
-    //Combine and write results into data block's digital trigger channel
-    QMapIterator<int, QList<QPair<int, double>>> i(qMapDetectedTrigger);
-    int counter = 0;
-    int idxDigTrig = BASELIB::indexOf(m_pFiffInfo->ch_names, "DTRG01");
-
-    while (i.hasNext()) {
-        i.next();
-
-        QList<QPair<int, double>> lDetectedTriggers = i.value();
-
-        for (int k = 0; k < lDetectedTriggers.size(); ++k) {
-            if (lDetectedTriggers.at(k).first < data.cols() && lDetectedTriggers.at(k).first >= 0) {
-                data(idxDigTrig, lDetectedTriggers.at(k).first) = data(idxDigTrig, lDetectedTriggers.at(k).first) + powf(2, counter);
-            }
-        }
-
-        counter++;
-    }
-}
-
-//=============================================================================================================
-
-MatrixXd BabyMEG::calibrate(const MatrixXf& data)
-{
-    MatrixXd one;
-    if (m_pFiffInfo && m_sparseMatCals.cols() == m_pFiffInfo->nchan) {
-        one = m_sparseMatCals * data.cast<double>();
-    } else {
-        one = data.cast<double>();
-    }
-
-    return one;
-}
-
-//=============================================================================================================
-
-bool BabyMEG::readProjectors()
-{
-    QFile t_projFiffFile(m_sFiffProjections);
-
-    // Open the file
-    FiffStream t_pStream(&t_projFiffFile);
-    QString t_sFileName = QString::fromStdString(t_pStream.streamName());
-
-    qInfo("[BabyMEG::readProjectors] Opening header data %s...", t_sFileName.toUtf8().constData());
-
-    if (!t_pStream.open()) {
-        return false;
-    }
-
-    std::vector<FiffProj> q_ListProj = t_pStream.read_proj(t_pStream.dirtree());
-
-    //Set all projectors to zero
-    for (int i = 0; i < std::ssize(q_ListProj); i++)
-        q_ListProj[i].active = false;
-
-    if (q_ListProj.size() == 0) {
-        qInfo("[BabyMEG::readProjectors] Could not find projectors");
-        return false;
-    }
-
-    m_pFiffInfo->projs = q_ListProj;
-
-    //garbage collecting
-    t_pStream.close();
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool BabyMEG::readCompensators()
-{
-    QFile t_compFiffFile(m_sFiffCompensators);
-
-    // Open the file
-    FiffStream t_pStream(&t_compFiffFile);
-    QString t_sFileName = QString::fromStdString(t_pStream.streamName());
-
-    qInfo("[BabyMEG::readCompensators] Opening compensator data %s...", t_sFileName.toUtf8().constData());
-
-    if (!t_pStream.open()) {
-        return false;
-    }
-
-    std::vector<FiffCtfComp> q_ListComp = t_pStream.read_ctf_comp(t_pStream.dirtree(), m_pFiffInfo->chs);
-
-    if (q_ListComp.size() == 0) {
-        qInfo("[BabyMEG::readCompensators] Could not find compensators");
-        return false;
-    }
-
-    m_pFiffInfo->comps = q_ListComp;
-
-    //garbage collecting
-    t_pStream.close();
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool BabyMEG::readBadChannels()
-{
-    // Bad Channels
-    //    //Read bad channels from header/projection fif
-    //    QFile t_headerFiffFile(m_sFiffProjections);
-
-    //    if(!t_headerFiffFile.exists()) {
-    //        qInfo("[BabyMEG::readBadChannels] Could not open fif file for copying bad channels to babyMEG fiff_info");
-    //        return false;
-    //    }
-
-    //    FiffRawData raw(t_headerFiffFile);
-    //    m_pFiffInfo->bads = raw.info.bads;
-
-    //    t_headerFiffFile.close();
-
-    //    return true;
-
-    //Read bad channels from
-    QFile t_badChannelsFile(m_sBadChannels);
-
-    if (!t_badChannelsFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        return false;
-
-    qInfo("[BabyMEG::readBadChannels] Reading bad channels from %s...", m_sBadChannels.toUtf8().constData());
-
-    QTextStream in(&t_badChannelsFile);
-    qint32 count = 0;
-    StringList t_sListbads;
-    while (!in.atEnd()) {
-        QString channel = in.readLine();
-        if (channel.isEmpty())
-            continue;
-        ++count;
-        qInfo("[BabyMEG::readBadChannels] Channel %i: %s", count, channel.toUtf8().constData());
-        t_sListbads.push_back(channel.toStdString());
-    }
-
-    m_pFiffInfo->bads = t_sListbads;
-
-    return true;
 }
 
 //=============================================================================================================

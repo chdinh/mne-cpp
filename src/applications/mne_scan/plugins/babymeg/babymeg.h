@@ -4,12 +4,13 @@
  * Copyright (c) 2013-2026 MNE-CPP Authors
  *
  * @file     babymeg.h
- * @author   Gabriel Motta <gabrielbenmotta@gmail.com>;
+ * @author   Andreas Griesshammer <ag@fieldlineinc.com>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>;
  *           Limin Sun <limin.sun@childrens.harvard.edu>;
  *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>
  * @since    0.1.0
- * @date     February, 2013
+ * @date     April, 2013
  * @brief    BabyMEG class declaration.
  */
 
@@ -21,30 +22,16 @@
 //=============================================================================================================
 
 #include "babymeg_global.h"
-#include <memory>
 
-#include <fiff/fiff_info.h>
-#include <fiff/fiff_stream.h>
-
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <base/circular_buffer.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QMessageBox>
-#include <QScrollBar>
-#include <QTime>
-#include <QPointer>
-#include <QFile>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
-
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
+#include <cstdint>
+#include <string>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -55,13 +42,10 @@ namespace SCMEASLIB
 class RealTimeMultiSampleArray;
 }
 
-namespace DISPLIB
+namespace FIFFLIB
 {
-class ProjectSettingsView;
+class FiffInfo;
 }
-
-inline constexpr auto MAX_DATA_LEN = 2000000000L;
-inline constexpr auto MAX_POS = 2000000000L;
 
 //=============================================================================================================
 // DEFINE NAMESPACE BABYMEGPLUGIN
@@ -71,19 +55,9 @@ namespace BABYMEGPLUGIN
 {
 
 //=============================================================================================================
-// BABYMEGPLUGIN FORWARD DECLARATIONS
-//=============================================================================================================
-
-class BabyMEGClient;
-class BabyMEGInfo;
-class BabyMEGSetupWidget;
-class BabyMEGSQUIDControlDgl;
-
-//=============================================================================================================
 /**
- * The BabyMEG class provides a connection to the babyMEG system.
- *
- * @brief The BabyMEG class provides a connection to the babyMEG system.
+ * @brief Streams the acquisition server of a BabyMEG system through the babymeg:// source of mne_acq_devices, which
+ *        can also simulate it, with the system's projectors, compensators and bad channels.
  */
 class BABYMEGSHARED_EXPORT BabyMEG : public SCSHAREDLIB::AbstractSensor
 {
@@ -93,243 +67,56 @@ class BABYMEGSHARED_EXPORT BabyMEG : public SCSHAREDLIB::AbstractSensor
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
     friend class BabyMEGSetupWidget;
-    friend class BabyMEGSQUIDControlDgl;
 
 public:
-    //=========================================================================================================
-    /**
-     * Constructs a BabyMEG.
-     */
     BabyMEG();
+    ~BabyMEG() override;
+
+    QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const override;
+    void init() override;
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Destroys the BabyMEG.
+     * Connects to the server (or its simulator), reads its channels and gains and starts streaming.
      */
-    virtual ~BabyMEG();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Clone the plugin
-     *
-     * @return Returns the cloned widget.
+     * Stops streaming and says goodbye to the server.
      */
-    virtual QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const;
+    bool stop() override;
 
-    //=========================================================================================================
-    /**
-     * Initialise the BabyMEG.
-     */
-    virtual void init();
-
-    //=========================================================================================================
-    /**
-     * Is called when plugin is detached of the stage. Can be used to safe settings.
-     */
-    virtual void unload();
-
-    //=========================================================================================================
-    /**
-     * Clears the babymeg
-     */
-    void clear();
-
-    //=========================================================================================================
-    /**
-     * Start the thread.
-     */
-    virtual bool start();
-
-    //=========================================================================================================
-    /**
-     * Stop the thread.
-     */
-    virtual bool stop();
-
-    //=========================================================================================================
-    /**
-     * Get plugin type.
-     *
-     * @return the plugin type in form of a AbstractPlugin::PluginType.
-     */
-    virtual SCSHAREDLIB::AbstractPlugin::PluginType getType() const;
-
-    //=========================================================================================================
-    /**
-     * Get plugin name.
-     *
-     * @return the plugin name as a QString.
-     */
-    virtual QString getName() const;
-
-    //=========================================================================================================
-    /**
-     * Setups this widgets and returns a pointer to it.
-     *
-     * @return a QWidget pointer to the set up QWidget.
-     */
-    virtual QWidget* setupWidget();
-
-    virtual QString getBuildInfo();
+    SCSHAREDLIB::AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+    QWidget* setupWidget() override;
+    QString getBuildInfo() override;
 
 protected:
-    virtual void run();
-
     //=========================================================================================================
     /**
-     * Initialize the connector.
+     * Hands the system's blocks to the connected plugins until stop().
      */
-    void initConnector();
+    void run() override;
 
-    //=========================================================================================================
-    /**
-     * Sets the Fiff Info.
-     *
-     * @param[in] p_FiffInfo    the Fiff Info.
-     */
-    void setFiffInfo(const FIFFLIB::FiffInfo& p_FiffInfo);
+private:
+    /** @return The babymeg:// URI of the current settings. */
+    std::string uri() const;
 
-    //=========================================================================================================
-    /**
-     * Sets the Fiff Info data.
-     *
-     * @param[in] DATA    the Fiff Info data.
-     */
-    void setFiffData(QByteArray DATA);
+    /** Adds the system's projectors, compensators and bad channels from the plugin's resources to @p info. */
+    static void addSystemInfo(FIFFLIB::FiffInfo& info);
 
-    //=========================================================================================================
-    /**
-     * Sets the CMD data.
-     *
-     * @param[in] DATA    the CMD data.
-     */
-    void setCMDData(QByteArray DATA);
+    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSABabyMEG; /**< The data. */
 
-    //=========================================================================================================
-    /**
-     * Sets the gain info.
-     *
-     * @param[in] GainInfo    a QStringList with all the gain information.
-     */
-    void setFiffGainInfo(QStringList GainInfo);
+    ACQLIB::AcqDevice m_device; /**< The system while streaming. */
+    ACQLIB::AcqReader m_reader; /**< Reads its stream in run(). */
 
-    //=========================================================================================================
-    /**
-     * Returns information from FLL hardware.
-     *
-     * @param[in] t_sFLLControlCommand  FLL command.
-     */
-    void comFLL(QString t_sFLLControlCommand);
-
-    //=========================================================================================================
-    /**
-     * Update fiff information.
-     */
-    void updateFiffInfo();
-
-    //=========================================================================================================
-    /**
-     * Shows the project squid control dialog.
-     */
-    void showSqdCtrlDialog();
-
-    //=========================================================================================================
-    /**
-     * Combines all analog trigger signals to one single digital trigger line.
-     *
-     * @param[out] data  the data matrix.
-     */
-    void createDigTrig(Eigen::MatrixXf& data);
-
-    //=========================================================================================================
-    /**
-     * Calibrate matrix.
-     *
-     * @param[out] data  the data matrix.
-     */
-    Eigen::MatrixXd calibrate(const Eigen::MatrixXf& data);
-
-    //=========================================================================================================
-    /**
-     * Read projections from fiff file.
-     *
-     * @return true if successful, false otherwise.
-     */
-    bool readProjectors();
-
-    //=========================================================================================================
-    /**
-     * Read compensators from fiff file.
-     *
-     * @return true if successful, false otherwise.
-     */
-    bool readCompensators();
-
-    //=========================================================================================================
-    /**
-     * Read bad channels from fiff file.
-     *
-     * @return true if successful, false otherwise.
-     */
-    bool readBadChannels();
-
-    SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSABabyMEG; /**< The RealTimeMultiSampleArray to provide the rt_server Channels.*/
-
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXf>> m_pCircularBuffer; /**< Holds incoming raw data. */
-
-    QSharedPointer<BabyMEGClient> m_pMyClient;              /**< TCP/IP communication between Qt and Labview. */
-    QSharedPointer<BabyMEGClient> m_pMyClientComm;          /**< TCP/IP communication between Qt and Labview - communication. */
-    QSharedPointer<BabyMEGInfo> m_pInfo;                    /**< Set up the babyMEG info. */
-    QSharedPointer<BabyMEGSQUIDControlDgl> m_pSQUIDCtrlDlg; /**< Nonmodal dialog for squid control. */
-
-    QList<int> m_lTriggerChannelIndices; /**< List of all trigger channel indices. */
-
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
-
-    qint32 m_iBufferSize; /**< The raw data buffer size.*/
-
-    QString m_sFiffProjections;  /**< Fiff projection information. */
-    QString m_sFiffCompensators; /**< Fiff compensator information. */
-    QString m_sBadChannels;      /**< Filename which contains a list of bad channels. */
-
-    QMutex m_mutex; /**< Mutex to guarantee thread safety.*/
-
-    Eigen::RowVectorXd m_cals;                   /**< Calibration vector.*/
-    Eigen::SparseMatrix<double> m_sparseMatCals; /**< Sparse calibration matrix.*/
-
-    QPointer<QAction> m_pActionSqdCtrl;        /**< show squid control. */
-    QPointer<QAction> m_pActionUpdateFiffInfo; /**< Update Fiff Info action. */
-
-signals:
-    //=========================================================================================================
-    /**
-     * Emitted when command clients connection status changed.
-     *
-     * @param[in] p_bStatus  connection status.
-     */
-    void cmdConnectionChanged(bool p_bStatus);
-
-    //=========================================================================================================
-    /**
-     * Emitted when fiffInfo is available.
-     */
-    void fiffInfoAvailable();
-
-    //=========================================================================================================
-    /**
-     * Emitted when data is ready.
-     *
-     * @param[in] tmp    data to squid control.
-     */
-    void dataToSquidCtrlGUI(Eigen::MatrixXf tmp);
-
-    //=========================================================================================================
-    /**
-     * Emitted when data received from tcp/ip socket.
-     *
-     * @param[in] DATA    data to squid control.
-     */
-    void sendCMDDataToSQUIDControl(QByteArray DATA);
+    std::string m_host = "localhost";   /**< Host of the acquisition server. */
+    std::uint16_t m_port = 6340;        /**< Its data port. */
+    std::uint16_t m_commandPort = 6341; /**< Its command port. */
+    int m_iSamplesPerBlock = 1000;      /**< Samples per block handed to the connected plugins. */
+    bool m_bSimulate = false;           /**< Simulate the server. */
 };
 } // NAMESPACE
 

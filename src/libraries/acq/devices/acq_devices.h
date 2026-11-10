@@ -115,6 +115,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_rtserver_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_natus_scheme();
 
+/**
+ * Registers the babymeg:// scheme (the acquisition server of a BabyMEG system) with AcqDeviceRegistry::instance(), as
+ * registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_babymeg_scheme();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H
