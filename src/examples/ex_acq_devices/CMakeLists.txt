@@ -3,7 +3,7 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 cmake_minimum_required(VERSION 3.14)
-project(ex_acq_studio LANGUAGES CXX)
+project(ex_acq_devices LANGUAGES CXX)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)

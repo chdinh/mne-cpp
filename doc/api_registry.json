@@ -16287,8 +16287,8 @@
         "level": "start",
         "library": "acq"
       },
-      "ex_acq_studio": {
-        "title": "Pick a source or its simulator, record it and play it back",
+      "ex_acq_devices": {
+        "title": "Try every acquisition device or its simulator: watch, record, play back",
         "tasks": [
           "real-time"
         ],

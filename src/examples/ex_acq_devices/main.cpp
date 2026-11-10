@@ -139,15 +139,15 @@ struct Field
     }
 };
 
-/** The studio window: device and settings, transport, recordings and the sweep display. */
-class Studio : public QMainWindow
+/** The window: device and settings, transport, recordings and the sweep display. */
+class DeviceWindow : public QMainWindow
 {
 public:
-    explicit Studio(std::filesystem::path folder)
+    explicit DeviceWindow(std::filesystem::path folder)
     : m_folder(std::move(folder))
     , m_schemes(AcqDeviceRegistry::instance().schemes())
     {
-        setWindowTitle("MNE-CPP acquisition studio");
+        setWindowTitle("MNE-CPP acquisition devices");
         resize(1500, 900);
 
         // Device
@@ -191,18 +191,20 @@ public:
         m_stop = new QPushButton("■  Stop");
         auto* transportBox = new QGroupBox("2  Acquire");
         auto* transport = new QHBoxLayout(transportBox);
+        transport->addWidget(m_start);
+        transport->addWidget(m_record);
+        transport->addWidget(m_stop);
         for (QPushButton* button : {m_start, m_record, m_stop}) {
             button->setMinimumHeight(34);
-            transport->addWidget(button);
         }
 
         // Recordings
         m_recordings = new QListWidget;
         m_play = new QPushButton("▶  Play selected recording");
         m_play->setMinimumHeight(34);
-        auto* open = new QPushButton("Open FIFF file…");
-        auto* reveal = new QPushButton("Show folder");
         auto* recordingsBox = new QGroupBox("3  Recordings");
+        auto* open = new QPushButton("Open FIFF file…", recordingsBox);
+        auto* reveal = new QPushButton("Show folder", recordingsBox);
         auto* recordingsLayout = new QVBoxLayout(recordingsBox);
         recordingsLayout->addWidget(m_recordings, 1);
         recordingsLayout->addWidget(m_play);
@@ -223,7 +225,7 @@ public:
         m_badge->setObjectName("badge");
         m_info = new QLabel;
         m_info->setObjectName("info");
-        m_view = new ChannelDataView("MNEACQ/studio");
+        m_view = new ChannelDataView("MNEACQ/devices");
         m_view->setOverviewBarVisible(false);
         auto* display = new QWidget;
         auto* displayLayout = new QVBoxLayout(display);
@@ -281,13 +283,13 @@ public:
         m_timer.start(33);
     }
 
-    ~Studio() override
+    ~DeviceWindow() override
     {
         stop_source();
     }
 
-    Studio(const Studio&) = delete;
-    Studio& operator=(const Studio&) = delete;
+    DeviceWindow(const DeviceWindow&) = delete;
+    DeviceWindow& operator=(const DeviceWindow&) = delete;
 
     /** Shows @p uri in the settings: its device, simulation, target and parameters. @return false if no device has its scheme. */
     bool apply_uri(const std::string& uri)
@@ -664,10 +666,10 @@ int main(int argc, char* argv[])
     static_cast<void>(register_device_schemes());
 
     const std::filesystem::path folder = parser.isSet(folderOpt) ? std::filesystem::path(parser.value(folderOpt).toStdString())
-                                                                 : std::filesystem::temp_directory_path() / "mne_acq_studio";
+                                                                 : std::filesystem::temp_directory_path() / "mne_acq_recordings";
     std::filesystem::create_directories(folder);
-    Studio studio(folder);
-    studio.show();
+    DeviceWindow window(folder);
+    window.show();
     if (!parser.isSet(sourceOpt)) {
         return QApplication::exec();
     }
@@ -675,22 +677,22 @@ int main(int argc, char* argv[])
     // Unattended: record, then play the recording back
     const double seconds = parser.value(recordOpt).toDouble();
     const QString shot = parser.value(shotOpt);
-    if (!studio.apply_uri(parser.value(sourceOpt).toStdString()) || !studio.start(true)) {
+    if (!window.apply_uri(parser.value(sourceOpt).toStdString()) || !window.start(true)) {
         return 1;
     }
     runFor(seconds);
     if (!shot.isEmpty()) {
-        studio.grab().save(shot + "_record.png");
+        window.grab().save(shot + "_record.png");
     }
-    studio.stop_source();
-    if (studio.selectedRecording().isEmpty() || !studio.play(studio.selectedRecording())) {
+    window.stop_source();
+    if (window.selectedRecording().isEmpty() || !window.play(window.selectedRecording())) {
         return 1;
     }
     runFor(seconds);
     if (!shot.isEmpty()) {
-        studio.grab().save(shot + "_playback.png");
+        window.grab().save(shot + "_playback.png");
     }
-    const bool replayed = studio.shown() > 0;
-    studio.stop_source();
+    const bool replayed = window.shown() > 0;
+    window.stop_source();
     return replayed ? 0 : 1;
 }
