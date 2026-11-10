@@ -15,6 +15,9 @@ set(SOURCES
   tmsi/tmsi_simulator.cpp
   gusbamp/gusbamp_backend.cpp
   gusbamp/gusbamp_simulator.cpp
+  eego/eego_backend.cpp
+  eego/eego_simulator.cpp
+  eego/eego_driver.cpp
 )
 
 set(PRIVATE_HEADERS
@@ -22,6 +25,7 @@ set(PRIVATE_HEADERS
   brainamp/brainamp_transport.h
   tmsi/tmsi_transport.h
   gusbamp/gusbamp_transport.h
+  eego/eego_transport.h
 )
 
 set(HEADERS

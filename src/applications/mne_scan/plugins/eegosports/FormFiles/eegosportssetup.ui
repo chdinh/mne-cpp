@@ -270,9 +270,9 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="3" column="0">
-         <widget class="QCheckBox" name="m_checkBox_WriteDriverDebugToFile">
+         <widget class="QCheckBox" name="m_checkBox_Simulate">
           <property name="text">
-           <string>Driver Debug File</string>
+           <string>Simulate the amplifier</string>
           </property>
          </widget>
         </item>

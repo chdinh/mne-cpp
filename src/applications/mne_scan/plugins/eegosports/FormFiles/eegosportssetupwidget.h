@@ -20,12 +20,19 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "ui_eegosportssetup.h"
+#include <QWidget>
+
+#include <memory>
 #include <QPixmap>
 
 //=============================================================================================================
 // DEFINE NAMESPACE EEGOSPORTSPLUGIN
 //=============================================================================================================
+
+namespace Ui
+{
+class EEGoSportsSetupClass;
+}
 
 namespace EEGOSPORTSPLUGIN
 {
@@ -54,14 +61,14 @@ public:
      * @param[in] parent pointer to parent widget; If parent is 0, the new EEGoSportsSetupWidget becomes a window. If parent is another widget, EEGoSportsSetupWidget becomes a child window inside parent. EEGoSportsSetupWidget is deleted when its parent is deleted.
      * @param[in] pEEGoSports a pointer to the corresponding ECGSimulator.
      */
-    EEGoSportsSetupWidget(EEGoSports* pEEGoSports, QWidget* parent = 0);
+    EEGoSportsSetupWidget(EEGoSports* pEEGoSports, QWidget* parent = nullptr);
 
     //=========================================================================================================
     /**
      * Destroys the EEGoSportsSetupWidget.
      * All EEGoSportsSetupWidget's children are deleted first. The application exits if EEGoSportsSetupWidget is the main widget.
      */
-    ~EEGoSportsSetupWidget();
+    ~EEGoSportsSetupWidget() override;
 
     //=========================================================================================================
     /**
@@ -78,23 +85,9 @@ private:
      */
     void setDeviceSamplingProperties();
 
-    //=========================================================================================================
-    /**
-     * Open the impedance measurement dialog.
-     *
-     */
-    void onImpedanceButtonClicked();
-
-    //=========================================================================================================
-    /**
-     * Sets flag for writing to a file.
-     *
-     */
-    void setWriteToFile();
-
     EEGoSports* m_pEEGoSports; /**< a pointer to corresponding EEGoSports.*/
 
-    Ui::EEGoSportsSetupClass ui; /**< the user interface for the EEGoSportsSetupWidget.*/
+    std::unique_ptr<Ui::EEGoSportsSetupClass> m_pUi; /**< the user interface for the EEGoSportsSetupWidget.*/
 };
 } // NAMESPACE
 

@@ -20,7 +20,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <eegosportselectrodeitem.h>
+#include "eegosportselectrodeitem.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -52,26 +52,26 @@ public:
     /**
      *  Constructs a EEGoSportsImpedanceScene.
      */
-    explicit EEGoSportsImpedanceScene(QGraphicsView* view, QObject* parent = 0);
+    explicit EEGoSportsImpedanceScene(QGraphicsView* view, QObject* parent = nullptr);
 
 private:
     //=========================================================================================================
     /**
      *  Reimplemented mouse press event handler.
      */
-    void mousePressEvent(QGraphicsSceneMouseEvent* event);
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
     //=========================================================================================================
     /**
      *  Reimplemented mouse move event handler.
      */
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
     //=========================================================================================================
     /**
      *  Reimplemented mouse release event handler.
      */
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
     //=========================================================================================================
     /**

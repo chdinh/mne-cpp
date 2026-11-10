@@ -76,9 +76,6 @@ aliases; replace the old spelling as below.
   instead of reading them as zero. `SelectionIO::write_mon` refuses group names
   that would leave the target directory.
 - `ex_make_layout` honours `--mirrorY`; it used to mirror x twice.
-- The EEGoSports MNE Scan plugin (Windows, off by default) compiles again. Configuring it without its vendor header now
-  stops with a message naming the missing file. Closing the EEGoSports
-  impedance widget no longer switches the plugin into impedance mode.
 - New `mne_acq_devices` library with the `brainamp://` source for Brain
   Products BrainAmp amplifiers. `brainamp://?simulate=1` emits the amplifier's
   int16 wire format from `synthetic://` signals, so it runs without hardware
@@ -113,6 +110,21 @@ aliases; replace the old spelling as below.
   matched no Qt 6 signal) and print every sample. Its setup takes the serial
   numbers and inputs as text, the block size, the trigger line and a
   simulate switch; the empty project dialog is removed.
+- `eego://` streams ANT Neuro eego amplifiers as doubles in volts: the
+  referential and bipolar inputs, the trigger input as `STI 014` with its
+  changes as events, and the sample counter. It measures impedances and
+  checks the rate and input ranges against the amplifier. It loads the eego
+  SDK library at run time on Windows and Linux (`sdk=` or
+  `MNE_CPP_EEGO_SDK`), so building no longer needs the SDK; it is tested
+  against a stand-in SDK library. `eego://?simulate=1` simulates an
+  amplifier on every platform.
+- The EEGoSports MNE Scan plugin reads through `eego://` and is built by
+  default (`WITH_EEGO` is gone), with a simulate switch instead of the driver
+  debug file. Its streams no longer carry an `EEG REF` channel that was
+  always zero. The impedance view used to stay empty unless MNE Scan was
+  started from `bin/` and the cap had no more electrodes than the amplifier
+  inputs; it now finds its layouts next to the application and colours the
+  measured electrodes.
 - The TMSI impedance view finds its cap layouts wherever MNE Scan was
   started; it stayed empty unless the working directory was `bin/`. With a
   cap of more electrodes than the amplifier measures it colours the measured

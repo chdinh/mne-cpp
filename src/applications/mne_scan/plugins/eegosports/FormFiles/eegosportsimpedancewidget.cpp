@@ -19,9 +19,11 @@
 //=============================================================================================================
 
 #include "eegosportsimpedancewidget.h"
+#include <fstream>
 #include <memory>
 #include "ui_eegosportsimpedancewidget.h"
 
+#include <base/string_utils.h>
 #include <channels/layoutloader.h>
 #include <channels/layoutmaker.h>
 
@@ -31,6 +33,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QCoreApplication>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QString>
@@ -42,6 +45,20 @@
 //=============================================================================================================
 
 using namespace EEGOSPORTSPLUGIN;
+
+//=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+QString layoutDirectory()
+{
+    return QCoreApplication::applicationDirPath() + "/../resources/general/3DLayouts/";
+}
+
+} // anonymous namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -87,33 +104,17 @@ EEGoSportsImpedanceWidget::~EEGoSportsImpedanceWidget()
 
 void EEGoSportsImpedanceWidget::updateGraphicScene(const VectorXd& matValue)
 {
-    // Get scene items
-    QList<QGraphicsItem*> itemList = m_qGScene->items();
+    const double threshold = m_pUi->m_doubleSpinBox_manualImpedanceThreshold->value();
+    const double colormapmax = m_pUi->m_doubleSpinBox_manualImpedanceColormapMax->value();
 
-    // Update color and impedance values for each electrode item
-    int matIndex = 0;
-    double impedanceValue = 0.0;
-    int numberItems = itemList.size();
-
-    if (itemList.size() > matValue.rows()) {
-        qDebug() << "EEGoSportsImpedanceWidget - ERROR - There were more items in the scene than samples received from the device - Check the current layout! Only available channels will be displayed!";
-        //     qDebug()<<"itemlist.size() " << itemList.size() << " matValue.rows() " << matValue.rows();
-        numberItems = matValue.rows();
-        return;
-    }
-
-    // For testing purposes only!
-    //impedanceValue = m_pUi->m_verticalSlider_manualImpedanceValue->value();
-
-    double threshold = m_pUi->m_doubleSpinBox_manualImpedanceThreshold->value();
-    double colormapmax = m_pUi->m_doubleSpinBox_manualImpedanceColormapMax->value();
-
-    for (int i = 0; i < numberItems; i++) {
-        EEGoSportsElectrodeItem* item = (EEGoSportsElectrodeItem*)itemList.at(i);
-
-        // find matrix index for given electrode name
-        matIndex = m_qmElectrodeNameIndex[item->getElectrodeName()];
-        impedanceValue = matValue[matIndex];
+    // Electrodes of the layout beyond the amplifier's inputs keep their colour
+    for (QGraphicsItem* graphicsItem : m_qGScene->items()) {
+        auto* item = static_cast<EEGoSportsElectrodeItem*>(graphicsItem);
+        const int matIndex = m_qmElectrodeNameIndex.value(item->getElectrodeName(), -1);
+        if (matIndex < 0 || matIndex >= matValue.size()) {
+            continue;
+        }
+        double impedanceValue = matValue[matIndex];
 
         // set new color and impedance value. Clip received impedance value if > predefined max impedance value
         if (impedanceValue > 3 * threshold || impedanceValue < 0)
@@ -152,7 +153,7 @@ void EEGoSportsImpedanceWidget::initGraphicScene()
     m_qGScene->clear();
 
     // Load standard layout file
-    const auto layout = CHANNELSLIB::LayoutLoader::read_elc("../resources/general/3DLayouts/standard_waveguard66.elc");
+    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8((layoutDirectory() + "standard_waveguard66.elc").toStdString()));
     if (!layout) {
         qDebug() << "Error: Reading elc file.";
         return;
@@ -196,7 +197,7 @@ void EEGoSportsImpedanceWidget::startImpedanceMeasurement()
         m_pUi->m_pushButton_start->setEnabled(false);
     } else {
         m_pEEGoSports->m_bCheckImpedances = false;
-        QMessageBox::information(0, tr("MNE Scan - Start"), QString(QObject::tr("Not able to start impedance measurement!\nEither the device is turned off (check your OS device manager) or the driver DLL (EEGO-SDK.dll) is not installed in one of the monitored dll paths.")), QMessageBox::Ok);
+        QMessageBox::information(this, tr("MNE Scan - Start"), tr("Not able to start the impedance measurement.\nSwitch the amplifier on and check that the eego SDK is installed."), QMessageBox::Ok);
         return;
     }
 }
@@ -257,7 +258,7 @@ void EEGoSportsImpedanceWidget::loadLayout()
 {
     QString sElcFilePath = QFileDialog::getOpenFileName(this,
                                                         tr("Open Layout"),
-                                                        "../resources/mne_scan/plugins/eegosports/loc_files/",
+                                                        layoutDirectory(),
                                                         tr("ELC layout file (*.elc)"));
 
     // Load standard layout file

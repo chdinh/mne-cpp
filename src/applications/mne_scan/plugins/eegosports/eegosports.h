@@ -22,28 +22,19 @@
 //=============================================================================================================
 
 #include "eegosports_global.h"
-#include <memory>
 
-#include "eegosportsproducer.h"
 #include "FormFiles/eegosportsimpedancewidget.h"
-#include "FormFiles/eegosportssetupwidget.h"
 #include "FormFiles/eegosportssetupprojectwidget.h"
+#include "FormFiles/eegosportssetupwidget.h"
 
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <base/circular_buffer.h>
-#include <fstream>
 
 //=============================================================================================================
-// EIGEN INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <Eigen/Core>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QFile>
+#include <string>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -56,7 +47,6 @@ class RealTimeMultiSampleArray;
 
 namespace FIFFLIB
 {
-class FiffStream;
 class FiffInfo;
 }
 
@@ -67,17 +57,12 @@ class FiffInfo;
 namespace EEGOSPORTSPLUGIN
 {
 
-typedef unsigned long DWORD;
-
-//=============================================================================================================
-// EEGOSPORTSPLUGIN FORWARD DECLARATIONS
-//=============================================================================================================
-
 //=============================================================================================================
 /**
  * EEGoSports.
  *
- * @brief The EEGoSports class provides an EEG connector.
+ * @brief EEG connector for ANT Neuro eego amplifiers through the eego:// source of mne_acq_devices, which can also
+ *        simulate the amplifier.
  */
 class EEGOSPORTSSHARED_EXPORT EEGoSports : public SCSHAREDLIB::AbstractSensor
 {
@@ -86,82 +71,34 @@ class EEGOSPORTSSHARED_EXPORT EEGoSports : public SCSHAREDLIB::AbstractSensor
     // Use the Q_INTERFACES() macro to tell Qt's meta-object system about the interfaces
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
-    friend class EEGoSportsProducer;
     friend class EEGoSportsImpedanceWidget;
     friend class EEGoSportsSetupWidget;
     friend class EEGoSportsSetupProjectWidget;
 
 public:
-    //=========================================================================================================
-    /**
-     * Constructs a EEGoSports.
-     */
     EEGoSports();
+    ~EEGoSports() override;
+
+    QSharedPointer<AbstractPlugin> clone() const override;
+    void init() override;
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Destroys the EEGoSports.
+     * Opens the amplifier (or its simulator) and starts streaming, or measuring impedances.
      */
-    virtual ~EEGoSports();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Clone the plugin
+     * Stops streaming and releases the amplifier.
      */
-    virtual QSharedPointer<AbstractPlugin> clone() const;
+    bool stop() override;
 
-    //=========================================================================================================
-    /**
-     * Initialise input and output connectors.
-     */
-    virtual void init();
-
-    //=========================================================================================================
-    /**
-     * Is called when plugin is detached of the stage. Can be used to safe settings.
-     */
-    virtual void unload();
-
-    //=========================================================================================================
-    /**
-     * Sets up the fiff info with the current data chosen by the user.
-     */
-    void setUpFiffInfo();
-
-    //=========================================================================================================
-    /**
-    * Sets up the fiff info with the current data chosen by the user.
-    */
-    void setNumberOfChannels(int iNumberOfChannels,
-                             int iNumberOfEEGChannels,
-                             int iNumberOfBipolarChannels);
-
-    //=========================================================================================================
-    /**
-    * Starts the EEGoSports by starting the thread.
-    */
-    virtual bool start();
-
-    //=========================================================================================================
-    /**
-     * Stops the EEGoSports by stopping the thread.
-     */
-    virtual bool stop();
-
-    //=========================================================================================================
-    /**
-     * Set/Add received samples to the circular buffer.
-     */
-    void setSampleData(Eigen::MatrixXd& matData);
-
-    //=========================================================================================================
-
-    virtual AbstractPlugin::PluginType getType() const;
-    virtual QString getName() const;
-
-    virtual QWidget* setupWidget();
-
-    virtual QString getBuildInfo();
+    AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+    QWidget* setupWidget() override;
+    QString getBuildInfo() override;
 
 protected slots:
     //=========================================================================================================
@@ -185,59 +122,56 @@ protected slots:
 protected:
     //=========================================================================================================
     /**
-    * Opens a dialog to setup the project to check the impedance values
-    */
+     * Opens a widget to check the impedance values.
+     */
     void showImpedanceDialog();
 
     //=========================================================================================================
     /**
-    * Opens a dialog to setup the project to check the impedance values
-    */
+     * Opens a dialog to set up the electrode layout and the cardinal points.
+     */
     void showSetupProjectDialog();
 
     //=========================================================================================================
     /**
-    * The starting point for the thread. After calling start(), the newly created thread calls this function.
-    * Returning from this method will end the execution of the thread.
-    * Pure virtual method inherited by QThread.
-    */
-    virtual void run();
+     * Hands the amplifier's blocks, or its impedances, to the connected plugins and widgets until stop().
+     */
+    void run() override;
 
 private:
-    SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRMTSA_EEGoSports; /**< The RealTimeSampleArray to provide the EEG data.*/
-    QSharedPointer<EEGoSportsImpedanceWidget> m_pEEGoSportsImpedanceWidget;                       /**< Widget for checking the impedances*/
-    QSharedPointer<EEGoSportsSetupProjectWidget> m_pEEGoSportsSetupProjectWidget;                 /**< Widget for checking the impedances*/
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer;                  /**< Holds incoming raw data. */
+    /** @return The eego:// URI of the current settings. */
+    std::string uri() const;
 
-    QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
+    /** Names and places the EEG channels after the cap's .elc file and sets the cardinal points. */
+    void applyElectrodeLayout(FIFFLIB::FiffInfo& info) const;
 
-    int m_iSamplingFreq;            /**< The sampling frequency defined by the user via the GUI (in Hertz).*/
-    int m_iNumberOfChannels;        /**< The number of channels.*/
-    int m_iNumberOfEEGChannels;     /**< The number of EEG channels.*/
-    int m_iNumberOfBipolarChannels; /**< The number of Bipolar channels.*/
+    /** Stores the settings for the next session. */
+    void saveSettings() const;
 
-    int m_iSamplesPerBlock; /**< The samples per block defined by the user via the GUI.*/
+    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_EEGoSports; /**< The EEG data. */
+    QSharedPointer<EEGoSportsImpedanceWidget> m_pEEGoSportsImpedanceWidget;                                 /**< Widget for checking the impedances. */
+    QSharedPointer<EEGoSportsSetupProjectWidget> m_pEEGoSportsSetupProjectWidget;                           /**< Widget for the layout and cardinals. */
 
-    double m_dLPAShift;    /**< The shift in m in to generate the LPA.*/
-    double m_dRPAShift;    /**< The shift in m in to generate the RPA.*/
-    double m_dNasionShift; /**< The shift in m in to generate the Nasion.*/
+    ACQLIB::AcqDevice m_device; /**< The amplifier while streaming or measuring impedances. */
+    ACQLIB::AcqReader m_reader; /**< Reads the amplifier's stream in run(). */
 
-    bool m_bWriteDriverDebugToFile; /**< Flag for for writing driver debug informstions to a file. Defined by the user via the GUI.*/
-    bool m_bCheckImpedances;        /**< Flag for checking the impedances of the EEG amplifier.*/
-    bool m_bUseTrackedCardinalMode; /**< Flag for using the tracked cardinal mode.*/
-    bool m_bUseElectrodeShiftMode;  /**< Flag for using the electrode shift mode.*/
+    int m_iSamplingFreq = 512;       /**< Sampling rate in Hz, one the amplifier supports. */
+    int m_iSamplesPerBlock = 512;    /**< Samples per block handed to the connected plugins. */
+    bool m_bSimulate = false;        /**< Simulate the amplifier. */
+    bool m_bCheckImpedances = false; /**< Measure impedances instead of streaming. */
 
-    QString m_sElcFilePath;      /**< Holds the path for the .elc file (electrode positions). Defined by the user via the GUI.*/
-    QString m_sCardinalFilePath; /**< Holds the path for the .elc file holding the cardinals/fiducials (electrode positions). Defined by the user via the GUI.*/
-    QString m_sLPA;              /**< The electrode to take to function as the LPA.*/
-    QString m_sRPA;              /**< The electrode to take to function as the RPA.*/
-    QString m_sNasion;           /**< The electrode to take to function as the Nasion.*/
+    double m_dLPAShift = 0.0;    /**< Lowering of the LPA electrode in m (electrode shift mode). */
+    double m_dRPAShift = 0.0;    /**< Lowering of the RPA electrode in m (electrode shift mode). */
+    double m_dNasionShift = 0.0; /**< Lowering of the nasion electrode in m (electrode shift mode). */
 
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo; /**< Fiff measurement info.*/
+    bool m_bUseTrackedCardinalMode = true; /**< Take the cardinal points from the cardinal file. */
+    bool m_bUseElectrodeShiftMode = false; /**< Take the cardinal points from lowered electrodes. */
 
-    QSharedPointer<EEGoSportsProducer> m_pEEGoSportsProducer; /**< The EEGoSportsProducer.*/
-
-    QMutex m_mutex; /**< Holds the threads mutex.*/
+    QString m_sElcFilePath;      /**< The cap's .elc file (electrode positions). */
+    QString m_sCardinalFilePath; /**< The .elc file of the tracked cardinal points LPA, Nasion and RPA. */
+    QString m_sLPA;              /**< The electrode taken as the LPA. */
+    QString m_sRPA;              /**< The electrode taken as the RPA. */
+    QString m_sNasion;           /**< The electrode taken as the nasion. */
 };
 } // NAMESPACE
 

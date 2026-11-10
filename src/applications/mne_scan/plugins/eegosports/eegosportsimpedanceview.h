@@ -21,7 +21,7 @@
 //=============================================================================================================
 
 #include <iostream>
-#include <eegosportselectrodeitem.h>
+#include "eegosportselectrodeitem.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -52,26 +52,26 @@ public:
     /**
      *  Constructs a EEGoSportsImpedanceView.
      */
-    explicit EEGoSportsImpedanceView(QWidget* parent = 0);
+    explicit EEGoSportsImpedanceView(QWidget* parent = nullptr);
 
 private:
     //=========================================================================================================
     /**
      *  Reimplemented wheel event used for zoomin in and out of the scene.
      */
-    void wheelEvent(QWheelEvent* event);
+    void wheelEvent(QWheelEvent* event) override;
 
     //=========================================================================================================
     /**
      *  Reimplemented resize event used scaling fitting the scene into the view after a resize occured.
      */
-    void resizeEvent(QResizeEvent* event);
+    void resizeEvent(QResizeEvent* event) override;
 
     //=========================================================================================================
     /**
      *  Reimplemented mouse press event handler.
      */
-    void mouseDoubleClickEvent(QMouseEvent* event);
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
 };
 } // NAMESPACE
 

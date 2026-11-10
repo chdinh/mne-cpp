@@ -76,9 +76,7 @@ Q_IMPORT_PLUGIN(Hpi)
 //Q_IMPORT_PLUGIN(DummyToolbox)
 Q_IMPORT_PLUGIN(GUSBAmp)
 Q_IMPORT_PLUGIN(BrainAMP)
-#ifdef WITHEEGOSPORTS
 Q_IMPORT_PLUGIN(EEGoSports)
-#endif
 #ifdef WITHLSL
 Q_IMPORT_PLUGIN(LSLAdapter)
 #endif
@@ -110,9 +108,7 @@ int main(int argc, char* argv[])
     Q_INIT_RESOURCE(writetofile);
     Q_INIT_RESOURCE(hpi);
     Q_INIT_RESOURCE(brainamp);
-#ifdef WITHEEGOSPORTS
     Q_INIT_RESOURCE(eegosports);
-#endif
     Q_INIT_RESOURCE(tmsi);
 #endif
 

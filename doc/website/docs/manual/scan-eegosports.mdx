@@ -4,54 +4,39 @@ sidebar_label: EEGoSports
 ---
 # EEGoSports
 
-This page describes the installation and usage of the EEGoSports driver plugin for MNE Scan.
+The EEGoSports plugin streams ANT Neuro eego amplifiers into MNE Scan through the `eego://` source of the
+`mne_acq_devices` library. Without an amplifier it simulates one.
 
-## Building the EEGoSports Plugin
+## Building and running
 
-In order to build the EEGoSports driver plugin, the `eemagine` folder from the SDK has to be added to the EEGoSports folder in the mne-cpp repository in a first step. This location can be found in the mne-cpp repository under:
+The plugin is built by default. At run time the source loads the eego SDK library (`eego-SDK.dll` on Windows,
+`libeego-SDK.so` on Linux), which ANT Neuro ships with the amplifier, from the path in the environment variable
+`MNE_CPP_EEGO_SDK` or else through the system loader. Switch the amplifier on before starting the acquisition. The
+setup widget sets
 
-`\mne-cpp\applications\mne_scan\plugins\eegosports\`
+- **Sampling frequency**: one of the amplifier's rates, 512 Hz by default.
+- **Block size**: the samples per block handed to the connected plugins.
+- **Simulate the amplifier**: 64 referential and 24 bipolar inputs that stream synthetic EEG and trigger codes in the
+  SDK's format.
 
-The `eemagine` folder includes another folder called `sdk` which holds the necessary header and source files like: `amplifier.h, buffer.h, channel.h, exceptions.h, factory.h, stream.h, version.h, wrapper.cpp` and `wrapper.h`.
+The referential inputs are named and placed after the electrodes of the cap layout chosen in the project setup,
+which also sets the cardinal points: tracked ones from their own `.elc` file, or electrodes of the cap lowered by a
+given distance. The bipolar inputs are `BIP 1` onwards, the trigger input `STI 014`, and the amplifier's sample counter
+`COUNTER`. The **Check impedance values** action measures the electrode impedances, also of the simulated amplifier.
 
-In a second step, the eegosports subproject has to be reintegrated into the mne-cpp project. This can be achieved by adding `MNECPP_CONFIG += withEego` in the `mne-cpp.pri` file.
+## Simulation and scripting
 
-Now, the whole EEGoSports plugin can be rebuilt. MNE Scan will then contain the EEGoSports plugin in its Sensor plugin section.
+The same source is available to every program that links `mne_acq_devices`:
 
-## Running the EEGoSports Plugin
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
 
-For a correct recognition of the EEGoSports device, the operating system compatible driver has to be installed with the delivered software. Furthermore the two files `eego-SDK.lib` and `eego-SDK.dll` from the driver's library have to be copied to the location:
+ACQLIB::register_eego_scheme();
+auto device = ACQLIB::AcqDevice::open("eego://?simulate=1&reference=32&bipolar=0&rate=1000");
+auto impedances = device->measureImpedances();
+```
 
-`\mne-cpp\out\Release\apps\`
-
-In a last step, for older SDK versions the license files which are delivered with the device have to be copied to
-
-`C:\Users\Username\Documents\Eego`
-
-The license files should be named like `EE225-020032-000001`.
-
-For recent versions of the SDK, this step is not necessary.
-
-After that, the device can be connected to the computer and be switched on and MNE Scan can be started. It is now possible to use the EEGoSports plugin in the MNE Scan environment. Via drag & drop the plugin can be added to the plugin box and connected to other processing items like shown in the following figure.
-
-![](/img/1280px-EEGoSportsGUI.jpg "GUI of the EEGoSports EEG plugin")
-
-The GUI of the EEGoSports EEG plugin allows the adjustment of sample frequency and block size. A FIFF-data-stream is now streamed to the real-time display and subsequenty connected plugins.
-
-Besides the electrode measurements, the FIFF-data-stream additionally contains one channel for the reference electrode, the trigger channel, and the sample count channel.
-
-## Impedance Measurements
-
-Selecting the <img src="/img/impedances.png" alt="impedance widget symbol" width="32"/> symbol opens the widget for impedance measurements.
-
-![](/img/EEGoSportsImpedanceWidget.jpg "GUI of the EEGoSports EEG plugin")
-
-To display the electrode positions, the correct electrode layout has to be loaded via `Load Layout`. This file has to be in the `ELC` format and must contain the electrode labels and positions in the order, in which they are transmitted to the amplifier (see amplifier/eeg cap documentation).
-
-At the end of the list of electrodes, the positions of reference and ground electrodes should be added with the labels `REF` and `GND`.
-
-Two options exist for the color coding of the impedance values:
-
-* For `Threshold`, green color indicates an impedance value below the selected threshold, yellow color an impedance value below double the selected thresold, orange color an impedance value below three times the selected threshold, and dark red color an even higher impedance value.
-
-* For `Colormap`, the electrodes impedances are color-coded following a `Jet` colormap with the maximum of the colormap at the selected value.
+The target selects an amplifier by serial number (`eego://000123`); `sdk=` gives the SDK library's path, and
+`reference_range` and `bipolar_range` the input ranges in volts. `simulate=1` also accepts `seed`, `realtime=0` (as fast
+as possible), `duration` in seconds and `gain`.

@@ -107,6 +107,10 @@ Recording record(const std::string& uri)
                         std::int32_t raw = 0;
                         std::memcpy(&raw, part.at(c, s), sizeof(raw));
                         out.samples.push_back(raw * out.scale[c] + info->channels[c].offset);
+                    } else if (info->format == AcqSampleFormat::Float64) {
+                        double v = 0.0;
+                        std::memcpy(&v, part.at(c, s), sizeof(v));
+                        out.samples.push_back(v * out.scale[c] + info->channels[c].offset);
                     } else {
                         float v = 0.0F;
                         std::memcpy(&v, part.at(c, s), sizeof(v));
@@ -172,6 +176,14 @@ private slots:
     void testGusbampInvalidParameters_data();
     void testGusbampInvalidParameters();
     void testGusbampHardwareUnavailable();
+    void testEegoStreamLayout();
+    void testEegoMatchesSynthetic();
+    void testEegoImpedances();
+    void testEegoWaitsForGatingReader();
+    void testEegoInvalidParameters_data();
+    void testEegoInvalidParameters();
+    void testEegoHardwareUnavailable();
+    void testEegoDriverReadsTheSdk();
 };
 
 //=============================================================================================================
@@ -181,6 +193,7 @@ void TestAcqDevices::initTestCase()
     QVERIFY(registerBrainAmpScheme().ok());
     QVERIFY(registerTmsiScheme().ok());
     QVERIFY(register_gusbamp_scheme().ok());
+    QVERIFY(register_eego_scheme().ok());
 }
 
 //=============================================================================================================
@@ -721,6 +734,195 @@ void TestAcqDevices::testGusbampHardwareUnavailable()
     QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
     QVERIFY(device.error().text().find("simulate=1") != std::string::npos);
 #endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoStreamLayout()
+{
+    auto device = AcqDevice::open("eego://?simulate=1&reference=8&bipolar=2");
+    QVERIFY(device);
+    QCOMPARE(device->description().backend, std::string("eego"));
+    QVERIFY(device->description().device.find("simulated EE") != std::string::npos);
+
+    // The SDK's format: doubles in volts; referential and bipolar inputs, trigger word, sample counter
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float64);
+    QCOMPARE(info->layout, AcqLayout::Interleaved);
+    QCOMPARE(info->sfreq, 512.0);
+    QCOMPARE(info->channelCount(), std::size_t(12));
+    const std::vector<std::pair<std::size_t, std::string>> names = {{0, "EEG 001"}, {7, "EEG 008"}, {8, "BIP 1"}, {9, "BIP 2"}, {10, "STI 014"}, {11, "COUNTER"}};
+    for (const auto& [index, name] : names) {
+        QCOMPARE(info->channels[index].name, name);
+    }
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Volt);
+    QCOMPARE(info->channels[0].scale, 1.0);
+    QCOMPARE(info->channels[8].unit, AcqUnit::Volt);
+    QCOMPARE(info->channels[10].kind, AcqChannelKind::Stim);
+    QCOMPARE(info->channels[10].unit, AcqUnit::None);
+    QCOMPARE(info->channels[11].kind, AcqChannelKind::Misc);
+    const std::vector<std::pair<std::string, std::string>> ranges = {{"reference_range", "1 V"}, {"bipolar_range", "4 V"}};
+    QVERIFY(info->properties == ranges);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoMatchesSynthetic()
+{
+    // The simulated amplifier digitises the synthetic session of the same seed
+    const Recording amp = record("eego://?simulate=1&reference=8&bipolar=2&rate=500&seed=3&realtime=0&duration=2");
+    const Recording ref = record("synthetic://?eeg=10&sfreq=500&seed=3&realtime=0&duration=2&block=5");
+    QCOMPARE(amp.channels, std::size_t(12));
+    QCOMPARE(ref.channels, std::size_t(11));
+    QCOMPARE(amp.frames(), std::size_t(1000));
+    QCOMPARE(ref.frames(), amp.frames());
+
+    for (std::size_t s = 0; s < amp.frames(); ++s) {
+        for (std::size_t c = 0; c < 11; ++c) {
+            QCOMPARE(amp.at(s, c), ref.at(s, c));
+        }
+        QCOMPARE(amp.at(s, 11), static_cast<double>(s)); // the sample counter
+    }
+    QVERIFY(ref.events.size() >= 1);
+    QCOMPARE(amp.events.size(), ref.events.size());
+    for (std::size_t e = 0; e < ref.events.size(); ++e) {
+        QCOMPARE(amp.events[e].sample, ref.events[e].sample);
+        QCOMPARE(amp.events[e].code, ref.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoImpedances()
+{
+    auto device = AcqDevice::open("eego://?simulate=1&reference=8&bipolar=2&seed=5");
+    QVERIFY(device);
+    auto impedances = device->measureImpedances();
+    QVERIFY(impedances);
+    QCOMPARE(impedances->size(), std::size_t(8));
+    for (std::size_t i = 0; i < impedances->size(); ++i) {
+        QCOMPARE((*impedances)[i].channel, i);
+        QVERIFY((*impedances)[i].ohms >= 1e3 && (*impedances)[i].ohms <= 20e3);
+    }
+    QVERIFY(device->start().ok());
+    QCOMPARE(device->measureImpedances().error().code(), AcqErrorCode::InvalidState);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoWaitsForGatingReader()
+{
+    // Four seconds are more than the ring holds; the replay waits while the reader is busy
+    auto device = AcqDevice::open("eego://?simulate=1&reference=4&bipolar=0&rate=1000&realtime=0&duration=4");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(4000));
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("rate") << "eego://?simulate=1&rate=600";
+    QTest::newRow("reference range") << "eego://?simulate=1&reference_range=2";
+    QTest::newRow("bipolar range") << "eego://?simulate=1&bipolar_range=9";
+    QTest::newRow("no inputs") << "eego://?simulate=1&reference=0";
+    QTest::newRow("realtime") << "eego://?simulate=1&realtime=maybe";
+}
+
+void TestAcqDevices::testEegoInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoHardwareUnavailable()
+{
+    auto device = AcqDevice::open("eego://?sdk=/no/such/dir/eego-SDK");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
+    QVERIFY(device.error().text().find("simulate=1") != std::string::npos);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testEegoDriverReadsTheSdk()
+{
+    // The driver against a stand-in SDK library with known samples
+    const std::string sdk = "eego://?sdk=" EEGO_SDK_STUB;
+    auto device = AcqDevice::open(sdk + "&rate=1000&reference_range=0.75");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().device, std::string("ANT Neuro EE-STUB STUB-1"));
+    const auto info = device->stream().info();
+    QCOMPARE(info->sfreq, 1000.0);
+    QCOMPARE(info->channelCount(), std::size_t(7));
+    QCOMPARE(info->channels[4].name, std::string("BIP 1"));
+    QCOMPARE(info->channels[5].name, std::string("STI 014"));
+
+    auto impedances = device->measureImpedances();
+    QVERIFY(impedances);
+    QCOMPARE(impedances->size(), std::size_t(4));
+    QCOMPARE((*impedances)[3].ohms, 4e3);
+
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::vector<double> frames;
+    std::vector<AcqEvent> events;
+    while (frames.size() < 7 * 100) {
+        auto view = reader->acquire(1, 5s);
+        QVERIFY(view);
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            const AcqBlockPart& part = view->part(p);
+            for (std::size_t s = 0; s < part.samples; ++s) {
+                for (std::size_t c = 0; c < 7; ++c) {
+                    double v = 0.0;
+                    std::memcpy(&v, part.at(c, s), sizeof(v));
+                    frames.push_back(v);
+                }
+            }
+        }
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            events.push_back(view->events()[e]);
+        }
+        QVERIFY(reader->release(*view).ok());
+    }
+    QVERIFY(device->stop().ok());
+    for (std::size_t s = 0; s < 100; ++s) {
+        QCOMPARE(frames[s * 7 + 0], 1e-6 + static_cast<double>(s) * 1e-9);
+        QCOMPARE(frames[s * 7 + 4], 5e-6 + static_cast<double>(s) * 1e-9);
+        QCOMPARE(frames[s * 7 + 6], static_cast<double>(s));
+    }
+    QVERIFY(!events.empty());
+    QCOMPARE(events.front().sample, std::uint64_t(20));
+    QCOMPARE(events.front().code, 3);
+
+    // The SDK's own refusals
+    QCOMPARE(openError(sdk + "&rate=512"), AcqErrorCode::InvalidParameter);
+    QCOMPARE(openError("eego://OTHER-2?sdk=" EEGO_SDK_STUB), AcqErrorCode::DeviceNotFound);
 }
 
 //=============================================================================================================

@@ -19,44 +19,37 @@
 //=============================================================================================================
 
 #include "eegosports.h"
-#include <memory>
-#include "eegosportsproducer.h"
 
-#include "FormFiles/eegosportssetupwidget.h"
-#include "FormFiles/eegosportssetupprojectwidget.h"
-
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <base/string_utils.h>
 #include <channels/layoutloader.h>
-
-#include <scMeas/realtimemultisamplearray.h>
-
 #include <fiff/fiff.h>
-
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
+#include <scMeas/realtimemultisamplearray.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSettings>
-#include <QDate>
-#include <QVector3D>
-#include <QTimer>
-#include <QMessageBox>
-#include <QDir>
+#include <QCoreApplication>
 #include <QDebug>
-#include <QRegularExpression>
+#include <QSettings>
+
+//=============================================================================================================
+// EIGEN INCLUDES
+//=============================================================================================================
+
+#include <Eigen/Geometry>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <algorithm>
+#include <chrono>
 #include <format>
-#include <iostream>
 #include <numbers>
+#include <optional>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -65,7 +58,6 @@
 using namespace EEGOSPORTSPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace CHANNELSLIB;
 using namespace FIFFLIB;
 using namespace Eigen;
 
@@ -76,19 +68,37 @@ using namespace Eigen;
 namespace
 {
 
-// The electrodes of an .elc file, in the containers the channel set-up works on
-bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& positions3d, QList<QVector<float>>& positions2d)
+/** The positions of an .elc file in metres, turned by 90 degrees into RAS. */
+std::optional<CHANNELSLIB::ElectrodeLayout> readLayout(const QString& path)
 {
-    const auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(path.toStdString()));
-    if (!layout)
-        return false;
-    for (const std::string& name : layout->names)
-        names << QString::fromStdString(name);
-    for (const Eigen::Vector3d& r : layout->positions_3d)
-        positions3d.append({static_cast<float>(r.x()), static_cast<float>(r.y()), static_cast<float>(r.z())});
-    for (const Eigen::Vector2d& r : layout->positions_2d)
-        positions2d.append({static_cast<float>(r.x()), static_cast<float>(r.y())});
-    return true;
+    auto layout = CHANNELSLIB::LayoutLoader::read_elc(BASELIB::pathFromUtf8(path.toStdString()));
+    if (layout) {
+        const Matrix3d rotation = AngleAxisd(std::numbers::pi / 2, Vector3d::UnitZ()).toRotationMatrix();
+        for (Vector3d& r : layout->positions_3d) {
+            r = rotation * r * 0.001;
+        }
+    }
+    return layout;
+}
+
+std::optional<Vector3d> find(const CHANNELSLIB::ElectrodeLayout& layout, const QString& name)
+{
+    const auto it = std::find(layout.names.begin(), layout.names.end(), name.toStdString());
+    if (it == layout.names.end()) {
+        return std::nullopt;
+    }
+    return layout.positions_3d[static_cast<std::size_t>(it - layout.names.begin())];
+}
+
+FiffDigPoint digPoint(int kind, int ident, const Vector3d& r)
+{
+    FiffDigPoint point;
+    point.kind = kind;
+    point.ident = ident;
+    for (int k = 0; k < 3; ++k) {
+        point.r[k] = static_cast<float>(r[k]);
+    }
+    return point;
 }
 
 } // anonymous namespace
@@ -97,28 +107,14 @@ bool readElc(const QString& path, QStringList& names, QList<QVector<float>>& pos
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-EEGoSports::EEGoSports()
-: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10))
-, m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/eegosports/")
-, m_dLPAShift(0.01)
-, m_dRPAShift(0.01)
-, m_dNasionShift(0.06)
-, m_bUseTrackedCardinalMode(true)
-, m_bUseElectrodeShiftMode(false)
-, m_sLPA("2LD")
-, m_sRPA("2RD")
-, m_sNasion("0Z")
-, m_pEEGoSportsProducer(new EEGoSportsProducer(this))
-{
-}
+EEGoSports::EEGoSports() = default;
 
 //=============================================================================================================
 
 EEGoSports::~EEGoSports()
 {
-    //If the program is closed while the sampling is in process
-    if (this->isRunning()) {
-        this->stop();
+    if (isRunning()) {
+        stop();
     }
 }
 
@@ -126,8 +122,7 @@ EEGoSports::~EEGoSports()
 
 QSharedPointer<AbstractPlugin> EEGoSports::clone() const
 {
-    QSharedPointer<EEGoSports> pEEGoSportsClone(new EEGoSports());
-    return pEEGoSportsClone;
+    return QSharedPointer<EEGoSports>(new EEGoSports());
 }
 
 //=============================================================================================================
@@ -135,33 +130,23 @@ QSharedPointer<AbstractPlugin> EEGoSports::clone() const
 void EEGoSports::init()
 {
     m_pRMTSA_EEGoSports = PluginOutputData<RealTimeMultiSampleArray>::create(this, "EEGoSports", "EEG output data");
-    m_pRMTSA_EEGoSports->measurementData()->setName(this->getName()); //Provide name to auto store widget settings
-
+    m_pRMTSA_EEGoSports->measurementData()->setName(getName()); //Provide name to auto store widget settings
     m_outputConnectors.append(m_pRMTSA_EEGoSports);
 
-    //default values used by the setupGUI class must be set here
-    QSettings settings("MNECPP");
-    m_iSamplingFreq = settings.value(QString("EEGOSPORTS/sFreq"), 512).toInt();
-    m_iNumberOfChannels = 90;
-    m_iNumberOfEEGChannels = 64;
-    m_iSamplesPerBlock = settings.value(QString("EEGOSPORTS/samplesPerBlock"), 512).toInt();
-    m_bWriteDriverDebugToFile = false;
-    m_bCheckImpedances = false;
-
-    m_sElcFilePath = settings.value(QString("EEGOSPORTS/elcFilePath"), QString(QCoreApplication::applicationDirPath() + "/../resources/general/3DLayouts/standard_waveguard66.elc")).toString();
-
-    m_sCardinalFilePath = settings.value(QString("EEGOSPORTS/cardinalFilePath"), QString("")).toString();
-
-    m_dLPAShift = settings.value(QString("EEGOSPORTS/LPAShift"), 0.0).toFloat();
-    m_dRPAShift = settings.value(QString("EEGOSPORTS/RPAShift"), 0.0).toFloat();
-    m_dNasionShift = settings.value(QString("EEGOSPORTS/NasionShift"), 0.0).toFloat();
-    m_sLPA = settings.value(QString("EEGOSPORTS/LPAElectrode"), QString("")).toString();
-    m_sRPA = settings.value(QString("EEGOSPORTS/RPAElectrode"), QString("")).toString();
-    m_sNasion = settings.value(QString("EEGOSPORTS/NasionElectrode"), QString("")).toString();
-    m_bUseTrackedCardinalMode = settings.value(QString("EEGOSPORTS/useTrackedCardinalsMode"), true).toBool();
-    m_bUseElectrodeShiftMode = settings.value(QString("EEGOSPORTS/useElectrodeshiftMode"), false).toBool();
-
-    m_pFiffInfo = std::make_shared<FiffInfo>();
+    const QSettings settings("MNECPP");
+    m_iSamplingFreq = settings.value("EEGOSPORTS/sFreq", 512).toInt();
+    m_iSamplesPerBlock = settings.value("EEGOSPORTS/samplesPerBlock", 512).toInt();
+    m_bSimulate = settings.value("EEGOSPORTS/simulate", false).toBool();
+    m_sElcFilePath = settings.value("EEGOSPORTS/elcFilePath", QCoreApplication::applicationDirPath() + "/../resources/general/3DLayouts/standard_waveguard66.elc").toString();
+    m_sCardinalFilePath = settings.value("EEGOSPORTS/cardinalFilePath", QString()).toString();
+    m_dLPAShift = settings.value("EEGOSPORTS/LPAShift", 0.0).toDouble();
+    m_dRPAShift = settings.value("EEGOSPORTS/RPAShift", 0.0).toDouble();
+    m_dNasionShift = settings.value("EEGOSPORTS/NasionShift", 0.0).toDouble();
+    m_sLPA = settings.value("EEGOSPORTS/LPAElectrode", QString()).toString();
+    m_sRPA = settings.value("EEGOSPORTS/RPAElectrode", QString()).toString();
+    m_sNasion = settings.value("EEGOSPORTS/NasionElectrode", QString()).toString();
+    m_bUseTrackedCardinalMode = settings.value("EEGOSPORTS/useTrackedCardinalsMode", true).toBool();
+    m_bUseElectrodeShiftMode = settings.value("EEGOSPORTS/useElectrodeshiftMode", false).toBool();
 }
 
 //=============================================================================================================
@@ -172,440 +157,150 @@ void EEGoSports::unload()
 
 //=============================================================================================================
 
-void EEGoSports::setUpFiffInfo()
+std::string EEGoSports::uri() const
 {
-    //Clear old fiff info data
-    m_pFiffInfo->clear();
-
-    //Set number of channels, sampling frequency and high/-lowpass
-    m_pFiffInfo->nchan = m_iNumberOfChannels;
-    m_pFiffInfo->sfreq = m_iSamplingFreq;
-
-    //Get amplifier data
-    /*QList<uint> channellist = m_pEEGoSportsProducer->getChannellist();
-
-    for(QList<uint>::iterator i=channellist.begin(); i!=channellist.end(); ++i)
-        std::cout << *i << std::endl;*/
-
-    //Read electrode positions from .elc file
-    QList<QVector<float>> elcLocation3D;
-    QList<QVector<float>> elcLocation2D;
-    QStringList elcChannelNames;
-
-    if (!readElc(m_sElcFilePath, elcChannelNames, elcLocation3D, elcLocation2D)) {
-        qWarning() << "Unable to read elc file.";
-    }
-
-    bool breflocation = elcChannelNames.contains("ref", Qt::CaseInsensitive);
-    bool bgndlocation = elcChannelNames.contains("gnd", Qt::CaseInsensitive);
-
-    //qDebug() << elcLocation3D;
-    //qDebug() << elcLocation2D;
-    //qDebug() << elcChannelNames;
-
-    //The positions read from the asa elc file do not correspond to a RAS coordinate system - use a simple 90° z transformation to fix this
-    Matrix3f rotation_z;
-    rotation_z = AngleAxisf(std::numbers::pi_v<float> / 2, Vector3f::UnitZ());
-    QVector3D center_pos;
-
-    for (int i = 0; i < elcLocation3D.size(); i++) {
-        Vector3f point;
-        point << elcLocation3D[i][0], elcLocation3D[i][1], elcLocation3D[i][2];
-        Vector3f point_rot = rotation_z * point;
-        //        cout<<"point: "<<endl<<point<<endl<<endl;
-        //        cout<<"matrix: "<<endl<<rotation_z<<endl<<endl;
-        //        cout<<"point_rot: "<<endl<<point_rot<<endl<<endl;
-        //        cout<<"-----------------------------"<<endl;
-        elcLocation3D[i][0] = point_rot[0];
-        elcLocation3D[i][1] = point_rot[1];
-        elcLocation3D[i][2] = point_rot[2];
-
-        //Also calculate the center position of the electrode positions in this for routine
-        center_pos.setX(center_pos.x() + elcLocation3D[i][0]);
-        center_pos.setY(center_pos.y() + elcLocation3D[i][1]);
-        center_pos.setZ(center_pos.z() + elcLocation3D[i][2]);
-    }
-
-    center_pos.setX(center_pos.x() / elcLocation3D.size());
-    center_pos.setY(center_pos.y() / elcLocation3D.size());
-    center_pos.setZ(center_pos.z() / elcLocation3D.size());
-
-    //
-    //Write electrode positions to the digitizer info in the fiffinfo
-    //
-    FiffDigPointSet digitizerInfo;
-
-    //Only write the EEG channel positions to the fiff info. The Refa devices have next to the EEG input channels 10 other input channels (Bipolar, Auxilary, Digital, Test)
-    //Check if channel size by user corresponds with read channel informations from the elc file. Adding 1 for reference channel. If not append zeros and string 'unknown' until the size matches.
-    if ((m_iNumberOfEEGChannels + int(breflocation) + int(bgndlocation && m_bCheckImpedances)) > elcLocation3D.size()) {
-        qWarning() << "[EEGoSports::setUpFiffInfo] Not enough positions read from the elc file. Filling missing channel names and positions with zeroes and 'unknown' strings.";
-
-        QVector<float> tempA(3, 0.0);
-        QVector<float> tempB(2, 0.0);
-        int size = (m_iNumberOfEEGChannels + int(breflocation) + int(bgndlocation && m_bCheckImpedances)) - elcLocation3D.size();
-
-        for (int i = 0; i < size; i++) {
-            elcLocation3D.push_back(tempA);
-            elcLocation2D.push_back(tempB);
-            elcChannelNames.append(QString("Unknown"));
-        }
-    }
-
-    //Append cardinal points LPA RPA Nasion
-    QList<QVector<float>> cardinals3D;
-    QList<QVector<float>> cardinals2D;
-    QStringList cardinalNames;
-
-    if (!readElc(m_sCardinalFilePath, cardinalNames, cardinals3D, cardinals2D)) {
-        qWarning() << "[EEGoSports::setUpFiffInfo] Unable to read elc cardinal file.";
-    }
-
-    //Rotate cardinal points
-    for (int i = 0; i < cardinals3D.size(); i++) {
-        Vector3f point;
-        point << cardinals3D[i][0], cardinals3D[i][1], cardinals3D[i][2];
-        Vector3f point_rot = rotation_z * point;
-
-        cardinals3D[i][0] = point_rot[0];
-        cardinals3D[i][1] = point_rot[1];
-        cardinals3D[i][2] = point_rot[2];
-    }
-
-    //    qDebug()<<"cardinals3D"<<cardinals3D;
-    //    qDebug()<<"cardinals2D"<<cardinals2D;
-    //    qDebug()<<"cardinalNames"<<cardinalNames;
-
-    //Append LAP value to digitizer data.
-    FiffDigPoint digPoint;
-    int indexLPA = elcChannelNames.indexOf(m_sLPA);
-    digPoint.kind = FIFFV_POINT_CARDINAL;
-    digPoint.ident = FIFFV_POINT_LPA; //digitizerInfo.size();
-
-    //Set EEG electrode location - Convert from mm to m
-    if (m_bUseTrackedCardinalMode && !m_sCardinalFilePath.isEmpty() && cardinals3D.size() == 3 && cardinalNames.contains("LPA")) {
-        indexLPA = cardinalNames.indexOf("LPA");
-
-        digPoint.r[0] = cardinals3D[indexLPA][0] * 0.001;
-        digPoint.r[1] = cardinals3D[indexLPA][1] * 0.001;
-        digPoint.r[2] = cardinals3D[indexLPA][2] * 0.001;
-        digitizerInfo.push_back(digPoint);
-    } else if (m_bUseElectrodeShiftMode) {
-        if (indexLPA != -1) {
-            digPoint.r[0] = elcLocation3D[indexLPA][0] * 0.001;
-            digPoint.r[1] = elcLocation3D[indexLPA][1] * 0.001;
-            digPoint.r[2] = (elcLocation3D[indexLPA][2] - m_dLPAShift * 10) * 0.001;
-            digitizerInfo.push_back(digPoint);
-        } else {
-            qWarning() << "[EEGoSports::setUpFiffInfo] LPA" << m_sLPA << " not found. Check loaded layout.";
-        }
-    }
-
-    //Append nasion value to digitizer data.
-    int indexNasion = elcChannelNames.indexOf(m_sNasion);
-    digPoint.kind = FIFFV_POINT_CARDINAL; //FIFFV_POINT_NASION;
-    digPoint.ident = FIFFV_POINT_NASION;  //digitizerInfo.size();
-
-    //Set EEG electrode location - Convert from mm to m
-    if (m_bUseTrackedCardinalMode && !m_sCardinalFilePath.isEmpty() && cardinals3D.size() == 3 && cardinalNames.contains("Nasion")) {
-        indexNasion = cardinalNames.indexOf("Nasion");
-
-        digPoint.r[0] = cardinals3D[indexNasion][0] * 0.001;
-        digPoint.r[1] = cardinals3D[indexNasion][1] * 0.001;
-        digPoint.r[2] = cardinals3D[indexNasion][2] * 0.001;
-        digitizerInfo.push_back(digPoint);
-    } else if (m_bUseElectrodeShiftMode) {
-        if (indexNasion != -1) {
-            digPoint.r[0] = elcLocation3D[indexNasion][0] * 0.001;
-            digPoint.r[1] = elcLocation3D[indexNasion][1] * 0.001;
-            digPoint.r[2] = (elcLocation3D[indexNasion][2] - m_dNasionShift * 10) * 0.001;
-            digitizerInfo.push_back(digPoint);
-        } else {
-            qWarning() << "[EEGoSports::setUpFiffInfo] Nasion" << m_sNasion << " not found. Check loaded layout.";
-        }
-    }
-
-    //Append RAP value to digitizer data.
-    int indexRPA = elcChannelNames.indexOf(m_sRPA);
-    digPoint.kind = FIFFV_POINT_CARDINAL;
-    digPoint.ident = FIFFV_POINT_RPA; //digitizerInfo.size();
-
-    //Set EEG electrode location - Convert from mm to m
-    if (m_bUseTrackedCardinalMode && !m_sCardinalFilePath.isEmpty() && cardinals3D.size() == 3 && cardinalNames.contains("RPA")) {
-        indexRPA = cardinalNames.indexOf("RPA");
-
-        digPoint.r[0] = cardinals3D[indexRPA][0] * 0.001;
-        digPoint.r[1] = cardinals3D[indexRPA][1] * 0.001;
-        digPoint.r[2] = cardinals3D[indexRPA][2] * 0.001;
-        digitizerInfo.push_back(digPoint);
-    } else if (m_bUseElectrodeShiftMode) {
-        if (indexRPA != -1) {
-            digPoint.r[0] = elcLocation3D[indexRPA][0] * 0.001;
-            digPoint.r[1] = elcLocation3D[indexRPA][1] * 0.001;
-            digPoint.r[2] = (elcLocation3D[indexRPA][2] - m_dRPAShift * 10) * 0.001;
-            digitizerInfo.push_back(digPoint);
-        } else {
-            qWarning() << "[EEGoSports::setUpFiffInfo] RPA" << m_sRPA << " not found. Check loaded layout.";
-        }
-    }
-
-    //Add EEG electrode positions as digitizers
-    for (int i = 0; i < (m_iNumberOfEEGChannels + int(breflocation) + int(bgndlocation && m_bCheckImpedances)); i++) {
-        FiffDigPoint digPoint;
-        digPoint.kind = FIFFV_POINT_EEG;
-        digPoint.ident = i;
-
-        //Set EEG electrode location - Convert from mm to m
-        digPoint.r[0] = elcLocation3D[i][0] * 0.001;
-        digPoint.r[1] = elcLocation3D[i][1] * 0.001;
-        digPoint.r[2] = elcLocation3D[i][2] * 0.001;
-        digitizerInfo.push_back(digPoint);
-    }
-
-    //Set the final digitizer values to the fiff info
-    m_pFiffInfo->dig = std::move(digitizerInfo);
-
-    //
-    //Set up the channel info
-    //
-    m_pFiffInfo->chs.clear();
-    m_pFiffInfo->ch_names.clear();
-
-    for (int i = 0; i < m_iNumberOfChannels; i++) {
-        //Create information for each channel
-        FiffChInfo fChInfo;
-
-        //EEG Channels
-        if (i < m_iNumberOfEEGChannels || (i > (m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels) && m_bCheckImpedances)) {
-            //Set channel name
-            if (!elcChannelNames.empty() && i < elcChannelNames.size()) {
-                fChInfo.ch_name = "EEG " + elcChannelNames.at(i).toStdString();
-            } else {
-                fChInfo.ch_name = std::format("EEG {:03}", i);
-            }
-
-            //Set channel type
-            fChInfo.kind = FIFFV_EEG_CH;
-
-            //Set logno
-            fChInfo.logNo = i;
-
-            //Set coord frame
-            fChInfo.coord_frame = FIFFV_COORD_HEAD;
-
-            //Set unit
-            fChInfo.unit = FIFF_UNIT_V;
-            fChInfo.unit_mul = 0;
-
-            //Set EEG electrode location - Convert from mm to m
-            fChInfo.eeg_loc(0, 0) = elcLocation3D[i][0] * 0.001;
-            fChInfo.eeg_loc(1, 0) = elcLocation3D[i][1] * 0.001;
-            fChInfo.eeg_loc(2, 0) = elcLocation3D[i][2] * 0.001;
-
-            //Set EEG electrode direction - Convert from mm to m
-            fChInfo.eeg_loc(0, 1) = center_pos.x() * 0.001;
-            fChInfo.eeg_loc(1, 1) = center_pos.y() * 0.001;
-            fChInfo.eeg_loc(2, 1) = center_pos.z() * 0.001;
-
-            //Also write the eeg electrode locations into the meg loc variable (mne_ex_read_raw() matlab function wants this)
-            fChInfo.chpos.r0(0) = elcLocation3D[i][0] * 0.001;
-            fChInfo.chpos.r0(1) = elcLocation3D[i][1] * 0.001;
-            fChInfo.chpos.r0(2) = elcLocation3D[i][2] * 0.001;
-
-            fChInfo.chpos.ex(0) = center_pos.x() * 0.001;
-            fChInfo.chpos.ex(1) = center_pos.y() * 0.001;
-            fChInfo.chpos.ex(2) = center_pos.z() * 0.001;
-
-            fChInfo.chpos.ey(0) = 0;
-            fChInfo.chpos.ey(1) = 1;
-            fChInfo.chpos.ey(2) = 0;
-
-            fChInfo.chpos.ez(0) = 0;
-            fChInfo.chpos.ez(1) = 0;
-            fChInfo.chpos.ez(2) = 1;
-
-            //cout<<i<<endl<<fChInfo.eeg_loc<<endl;
-        }
-        //Bipolar channels -- no idea how this behaves for impedance measurement
-        else if (!m_bCheckImpedances && (i >= m_iNumberOfEEGChannels && i < m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels)) {
-            //Set channel type
-            fChInfo.kind = FIFFV_MISC_CH;
-
-            fChInfo.ch_name = std::format("BIPO {}", i - m_iNumberOfEEGChannels);
-        }
-        //Digital input channel
-        else if (!m_bCheckImpedances && i == m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels) {
-            //Set channel type
-            fChInfo.kind = FIFFV_STIM_CH;
-
-            fChInfo.ch_name = "STIM";
-        }
-        //Internally generated test signal - ramp signal
-        else if (!m_bCheckImpedances && i == m_iNumberOfEEGChannels + m_iNumberOfBipolarChannels + 1) {
-            //Set channel type
-            fChInfo.kind = FIFFV_MISC_CH;
-
-            fChInfo.ch_name = "TEST";
-        }
-        //Add reference channel for EEG measurement
-        //Set channel name
-        else if (!m_bCheckImpedances && i == m_iNumberOfChannels - 1) {
-            int refindex = elcChannelNames.indexOf(QRegularExpression("ref", QRegularExpression::CaseInsensitiveOption));
-
-            fChInfo.ch_name = "EEG REF";
-
-            //Set channel type
-            fChInfo.kind = FIFFV_EEG_CH;
-
-            //Set logno
-            fChInfo.logNo = m_iNumberOfChannels;
-
-            //Set coord frame
-            fChInfo.coord_frame = FIFFV_COORD_HEAD;
-
-            //Set unit
-            fChInfo.unit = FIFF_UNIT_V;
-            fChInfo.unit_mul = 0;
-
-            //Set EEG electrode location - Convert from mm to m
-            if (refindex > -1) {
-                fChInfo.eeg_loc(0, 0) = elcLocation3D[refindex][0] * 0.001;
-                fChInfo.eeg_loc(1, 0) = elcLocation3D[refindex][1] * 0.001;
-                fChInfo.eeg_loc(2, 0) = elcLocation3D[refindex][2] * 0.001;
-            } else {
-                fChInfo.eeg_loc(0, 0) = 0.0;
-                fChInfo.eeg_loc(1, 0) = 0.0;
-                fChInfo.eeg_loc(2, 0) = 0.0;
-            }
-
-            //Set EEG electrode direction - Convert from mm to m
-            fChInfo.eeg_loc(0, 1) = center_pos.x() * 0.001;
-            fChInfo.eeg_loc(1, 1) = center_pos.y() * 0.001;
-            fChInfo.eeg_loc(2, 1) = center_pos.z() * 0.001;
-
-            //Also write the eeg electrode locations into the meg loc variable (mne_ex_read_raw() matlab function wants this)
-            if (refindex > -1) {
-                fChInfo.chpos.r0(0) = elcLocation3D[refindex][0] * 0.001;
-                fChInfo.chpos.r0(1) = elcLocation3D[refindex][1] * 0.001;
-                fChInfo.chpos.r0(2) = elcLocation3D[refindex][2] * 0.001;
-            } else {
-                fChInfo.chpos.r0(0) = 0.0;
-                fChInfo.chpos.r0(1) = 0.0;
-                fChInfo.chpos.r0(2) = 0.0;
-            }
-
-            fChInfo.chpos.ex(0) = center_pos.x() * 0.001;
-            fChInfo.chpos.ex(1) = center_pos.y() * 0.001;
-            fChInfo.chpos.ex(2) = center_pos.z() * 0.001;
-
-            fChInfo.chpos.ey(0) = 0;
-            fChInfo.chpos.ey(1) = 1;
-            fChInfo.chpos.ey(2) = 0;
-
-            fChInfo.chpos.ez(0) = 0;
-            fChInfo.chpos.ez(1) = 0;
-            fChInfo.chpos.ez(2) = 1;
-        }
-
-        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
-        m_pFiffInfo->chs.push_back(fChInfo);
-    }
-
-    qInfo() << "[EEGoSports::setUpFiffInfo] Number of Channels " << m_pFiffInfo->ch_names.size();
-
-    //
-    //Set head projection
-    //
-    m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->dev_head_t.to = FIFFV_COORD_HEAD;
-    m_pFiffInfo->ctf_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->ctf_head_t.to = FIFFV_COORD_HEAD;
+    return std::format("eego://?rate={}&simulate={}", m_iSamplingFreq, m_bSimulate ? 1 : 0);
 }
 
 //=============================================================================================================
 
-void EEGoSports::setNumberOfChannels(int iNumberOfChannels, int iNumberOfEEGChannels, int iNumberOfBipolarChannels)
+void EEGoSports::applyElectrodeLayout(FiffInfo& info) const
 {
-    m_iNumberOfChannels = iNumberOfChannels;
-    m_iNumberOfEEGChannels = iNumberOfEEGChannels;
-    m_iNumberOfBipolarChannels = iNumberOfBipolarChannels;
+    const auto layout = readLayout(m_sElcFilePath);
+    if (!layout) {
+        qWarning() << "[EEGoSports] Cannot read the electrode positions in" << m_sElcFilePath;
+        return;
+    }
+    Vector3d center = Vector3d::Zero();
+    for (const Vector3d& r : layout->positions_3d) {
+        center += r;
+    }
+    if (!layout->positions_3d.empty()) {
+        center /= static_cast<double>(layout->positions_3d.size());
+    }
+
+    // Cardinal points: tracked ones from their own file, or electrodes lowered by the set shifts
+    FiffDigPointSet dig;
+    const std::vector<std::tuple<int, QString, QString, double>> cardinals = {
+        {FIFFV_POINT_LPA, "LPA", m_sLPA, m_dLPAShift}, {FIFFV_POINT_NASION, "Nasion", m_sNasion, m_dNasionShift}, {FIFFV_POINT_RPA, "RPA", m_sRPA, m_dRPAShift}};
+    const auto tracked = m_bUseTrackedCardinalMode && !m_sCardinalFilePath.isEmpty() ? readLayout(m_sCardinalFilePath) : std::nullopt;
+    for (const auto& [ident, trackedName, electrode, shift] : cardinals) {
+        std::optional<Vector3d> r;
+        if (tracked) {
+            r = find(*tracked, trackedName);
+        } else if (m_bUseElectrodeShiftMode) {
+            r = find(*layout, electrode);
+            if (r) {
+                r->z() -= shift;
+            }
+        }
+        if (r) {
+            dig.push_back(digPoint(FIFFV_POINT_CARDINAL, ident, *r));
+        } else if (tracked || m_bUseElectrodeShiftMode) {
+            qWarning() << "[EEGoSports]" << (tracked ? trackedName : electrode) << "not found. Check the loaded layout.";
+        }
+    }
+
+    std::size_t electrode = 0;
+    for (std::size_t c = 0; c < info.chs.size() && electrode < layout->positions_3d.size(); ++c) {
+        FiffChInfo& ch = info.chs[c];
+        if (ch.kind != FIFFV_EEG_CH) {
+            continue;
+        }
+        const Vector3d& r = layout->positions_3d[electrode];
+        ch.ch_name = "EEG " + layout->names[electrode];
+        info.ch_names[c] = ch.ch_name;
+        ch.coord_frame = FIFFV_COORD_HEAD;
+        ch.chpos.coil_type = FIFFV_COIL_EEG;
+        for (int k = 0; k < 3; ++k) {
+            ch.eeg_loc(k, 0) = r[k];
+            ch.eeg_loc(k, 1) = center[k];
+            ch.chpos.r0[k] = static_cast<float>(r[k]);
+            ch.chpos.ex[k] = static_cast<float>(center[k]);
+        }
+        ch.chpos.ey << 0.0f, 1.0f, 0.0f;
+        ch.chpos.ez << 0.0f, 0.0f, 1.0f;
+        dig.push_back(digPoint(FIFFV_POINT_EEG, static_cast<int>(electrode), r));
+        ++electrode;
+    }
+    info.dig = std::move(dig);
 }
 
 //=============================================================================================================
 
 bool EEGoSports::start()
 {
-    //Initialize amplifier
-    if (!m_pEEGoSportsProducer->init(m_bWriteDriverDebugToFile,
-                                     m_bCheckImpedances)) {
-        qWarning() << "[EEGoSports::start] EEGoSportsProducer thread could not be started - Either the device is turned off (check your OS device manager) or the driver DLL (EEGO-SDK.dll) is not installed in one of the monitored dll path.";
+    ACQLIB::register_eego_scheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[EEGoSports::start]" << QString::fromStdString(device.error().text());
         return false;
     }
-
-    if (!m_bCheckImpedances) {
-        //Setup fiff info
-        setUpFiffInfo();
-
-        //Set the channel size of the RMTSA - this needs to be done here and NOT in the init() function because the user can change the number of channels during runtime
-        m_pRMTSA_EEGoSports->measurementData()->initFromFiffInfo(m_pFiffInfo);
-        m_pRMTSA_EEGoSports->measurementData()->setMultiArraySize(1);
-        m_pRMTSA_EEGoSports->measurementData()->setSamplingRate(m_iSamplingFreq);
-    }
-
-    m_pEEGoSportsProducer->start(m_iSamplesPerBlock,
-                                 m_iSamplingFreq,
-                                 m_bCheckImpedances);
-
-    if (m_pEEGoSportsProducer->isRunning()) {
+    m_device = std::move(*device);
+    if (m_bCheckImpedances) {
         QThread::start();
         return true;
-    } else {
-        qWarning() << "[EEGoSports::start] EEGoSports thread could not be started - Either the device is turned off (check your OS device manager) or the driver DLL (EEGO-SDK.dll) is not installed in one of the monitored dll path.";
+    }
+
+    auto fiffInfo = ACQLIB::toFiffInfo(*m_device.stream().info());
+    auto reader = m_device.stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[EEGoSports::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        m_device.close();
         return false;
     }
+    applyElectrodeLayout(*fiffInfo);
+
+    //The user can change the channels between runs, so the measurement is set up here and not in init()
+    m_pRMTSA_EEGoSports->measurementData()->initFromFiffInfo(std::make_shared<FiffInfo>(std::move(*fiffInfo)));
+    m_pRMTSA_EEGoSports->measurementData()->setMultiArraySize(1);
+
+    if (ACQLIB::AcqError e = m_device.start(); !e.ok()) {
+        qWarning() << "[EEGoSports::start]" << QString::fromStdString(e.text());
+        m_device.close();
+        return false;
+    }
+    m_reader = std::move(*reader);
+    QThread::start();
+    return true;
 }
 
 //=============================================================================================================
 
 bool EEGoSports::stop()
 {
-    // Stop this (consumer) thread first
     requestInterruption();
-    wait(500);
+    wait();
 
-    //Stop the producer thread
-    m_pEEGoSportsProducer->stop();
+    m_reader = ACQLIB::AcqReader();
+    m_device.close();
 
     if (!m_bCheckImpedances) {
         // Clear all data in the buffer connected to displays and other plugins
         m_pRMTSA_EEGoSports->measurementData()->clear();
-        m_pCircularBuffer->clear();
-
-        //Store settings for next use. Do this in stop() since it will crash if we do it in the destructor.
-        QSettings settings("MNECPP");
-        settings.setValue(QString("EEGOSPORTS/sFreq"), m_iSamplingFreq);
-        settings.setValue(QString("EEGOSPORTS/samplesPerBlock"), m_iSamplesPerBlock);
-        settings.setValue(QString("EEGOSPORTS/LPAShift"), m_dLPAShift);
-        settings.setValue(QString("EEGOSPORTS/RPAShift"), m_dRPAShift);
-        settings.setValue(QString("EEGOSPORTS/NasionShift"), m_dNasionShift);
-        settings.setValue(QString("EEGOSPORTS/LPAElectrode"), m_sLPA);
-        settings.setValue(QString("EEGOSPORTS/RPAElectrode"), m_sRPA);
-        settings.setValue(QString("EEGOSPORTS/NasionElectrode"), m_sNasion);
-        settings.setValue(QString("EEGOSPORTS/elcFilePath"), m_sElcFilePath);
-        settings.setValue(QString("EEGOSPORTS/cardinalFilePath"), m_sCardinalFilePath);
-        settings.setValue(QString("EEGOSPORTS/useTrackedCardinalsMode"), m_bUseTrackedCardinalMode);
-        settings.setValue(QString("EEGOSPORTS/useElectrodeshiftMode"), m_bUseElectrodeShiftMode);
     }
-
+    saveSettings();
     return true;
 }
 
 //=============================================================================================================
 
-void EEGoSports::setSampleData(MatrixXd& matData)
+void EEGoSports::saveSettings() const
 {
-    while (!m_pCircularBuffer->push(matData)) {
-        //Do nothing until the circular buffer is ready to accept new data again
-    }
+    QSettings settings("MNECPP");
+    settings.setValue("EEGOSPORTS/sFreq", m_iSamplingFreq);
+    settings.setValue("EEGOSPORTS/samplesPerBlock", m_iSamplesPerBlock);
+    settings.setValue("EEGOSPORTS/simulate", m_bSimulate);
+    settings.setValue("EEGOSPORTS/LPAShift", m_dLPAShift);
+    settings.setValue("EEGOSPORTS/RPAShift", m_dRPAShift);
+    settings.setValue("EEGOSPORTS/NasionShift", m_dNasionShift);
+    settings.setValue("EEGOSPORTS/LPAElectrode", m_sLPA);
+    settings.setValue("EEGOSPORTS/RPAElectrode", m_sRPA);
+    settings.setValue("EEGOSPORTS/NasionElectrode", m_sNasion);
+    settings.setValue("EEGOSPORTS/elcFilePath", m_sElcFilePath);
+    settings.setValue("EEGOSPORTS/cardinalFilePath", m_sCardinalFilePath);
+    settings.setValue("EEGOSPORTS/useTrackedCardinalsMode", m_bUseTrackedCardinalMode);
+    settings.setValue("EEGOSPORTS/useElectrodeshiftMode", m_bUseElectrodeShiftMode);
 }
 
 //=============================================================================================================
@@ -626,11 +321,8 @@ QString EEGoSports::getName() const
 
 QWidget* EEGoSports::setupWidget()
 {
-    EEGoSportsSetupWidget* widget = new EEGoSportsSetupWidget(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
-
-    //init properties dialog
+    auto* widget = new EEGoSportsSetupWidget(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
     widget->initGui();
-
     return widget;
 }
 
@@ -641,7 +333,6 @@ void EEGoSports::onUpdateCardinalPoints(const QString& sLPA, double dLPA, const 
     m_dLPAShift = dLPA;
     m_dRPAShift = dRPA;
     m_dNasionShift = dNasion;
-
     m_sLPA = sLPA;
     m_sRPA = sRPA;
     m_sNasion = sNasion;
@@ -652,17 +343,15 @@ void EEGoSports::onUpdateCardinalPoints(const QString& sLPA, double dLPA, const 
 void EEGoSports::showImpedanceDialog()
 {
     // Open Impedance dialog only if no sampling process is active
-    if (!this->isRunning()) {
+    if (!isRunning()) {
         if (m_pEEGoSportsImpedanceWidget == nullptr) {
             m_pEEGoSportsImpedanceWidget = QSharedPointer<EEGoSportsImpedanceWidget>(new EEGoSportsImpedanceWidget(this));
         }
-
         if (!m_pEEGoSportsImpedanceWidget->isVisible()) {
             m_pEEGoSportsImpedanceWidget->setWindowTitle("EEGoSports - Measure impedances");
             m_pEEGoSportsImpedanceWidget->show();
             m_pEEGoSportsImpedanceWidget->raise();
         }
-
         m_pEEGoSportsImpedanceWidget->initGraphicScene();
     }
 }
@@ -671,14 +360,10 @@ void EEGoSports::showImpedanceDialog()
 
 void EEGoSports::showSetupProjectDialog()
 {
-    // Open setup project widget
     if (m_pEEGoSportsSetupProjectWidget == nullptr) {
         m_pEEGoSportsSetupProjectWidget = QSharedPointer<EEGoSportsSetupProjectWidget>(new EEGoSportsSetupProjectWidget(this));
-
-        connect(m_pEEGoSportsSetupProjectWidget.data(), &EEGoSportsSetupProjectWidget::cardinalPointsChanged,
-                this, &EEGoSports::onUpdateCardinalPoints);
+        connect(m_pEEGoSportsSetupProjectWidget.data(), &EEGoSportsSetupProjectWidget::cardinalPointsChanged, this, &EEGoSports::onUpdateCardinalPoints);
     }
-
     if (!m_pEEGoSportsSetupProjectWidget->isVisible()) {
         m_pEEGoSportsSetupProjectWidget->setWindowTitle("EEGoSports EEG Connector - Setup project");
         m_pEEGoSportsSetupProjectWidget->show();
@@ -690,24 +375,42 @@ void EEGoSports::showSetupProjectDialog()
 
 void EEGoSports::run()
 {
-    MatrixXd matData;
-
-    while (!isInterruptionRequested()) {
-        if (m_pEEGoSportsProducer->isRunning()) {
-            // Check impedances - send new impedance values to graphic scene
-            if (m_bCheckImpedances) {
-                //pop matrix
-                if (m_pCircularBuffer->pop(matData)) {
-                    m_pEEGoSportsImpedanceWidget->updateGraphicScene(matData.col(0));
-                }
-            } else {
-                if (m_pCircularBuffer->pop(matData)) {
-                    //emit values to real time multi sample array
-                    //qDebug()<<"EEGoSports::run - mat size"<<matValue.rows()<<"x"<<matValue.cols();
-                    m_pRMTSA_EEGoSports->measurementData()->setValue(matData);
+    if (m_bCheckImpedances) {
+        while (!isInterruptionRequested()) {
+            const auto impedances = m_device.measureImpedances(std::chrono::seconds(5));
+            if (!impedances) {
+                qWarning() << "[EEGoSports::run]" << QString::fromStdString(impedances.error().text());
+                return;
+            }
+            // Electrode i of the cap is referential input i, and those lead the stream
+            VectorXd ohms = VectorXd::Zero(static_cast<Index>(impedances->size()));
+            for (const ACQLIB::AcqImpedance& impedance : *impedances) {
+                if (impedance.channel < impedances->size()) {
+                    ohms[static_cast<Index>(impedance.channel)] = impedance.ohms;
                 }
             }
+            if (m_pEEGoSportsImpedanceWidget) {
+                EEGoSportsImpedanceWidget* widget = m_pEEGoSportsImpedanceWidget.data();
+                QMetaObject::invokeMethod(widget, [widget, ohms] { widget->updateGraphicScene(ohms); }, Qt::QueuedConnection);
+            }
+            QThread::msleep(200);
         }
+        return;
+    }
+
+    const std::size_t channels = m_device.stream().info()->channelCount();
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
+    while (!isInterruptionRequested()) {
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (!read) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+                continue;
+            }
+            qWarning() << "[EEGoSports::run]" << QString::fromStdString(read.error().text());
+            return;
+        }
+        m_pRMTSA_EEGoSports->measurementData()->setValue(block);
     }
 }
 

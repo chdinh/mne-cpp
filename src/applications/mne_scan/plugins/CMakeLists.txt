@@ -38,6 +38,7 @@ add_subdirectory(natus)
 add_subdirectory(brainamp)
 add_subdirectory(tmsi)
 add_subdirectory(gusbamp)
+add_subdirectory(eegosports)
 
 # Algorithm Plugin
 add_subdirectory(rtclustmne)
@@ -48,11 +49,5 @@ add_subdirectory(neuronalconnectivity)
 add_subdirectory(writetofile)
 add_subdirectory(hpi)
 add_subdirectory(rtfwd)
-
-option(WITH_EEGO        "Build Eego Sport plugin"   OFF)
-
-if(WITH_EEGO)
-    add_subdirectory(eegosports)
-endif()
 
 add_subdirectory(lsladapter)

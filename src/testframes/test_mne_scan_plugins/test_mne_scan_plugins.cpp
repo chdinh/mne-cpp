@@ -17,6 +17,8 @@
 #include <averaging/averaging.h>
 #include <brainamp/brainamp.h>
 #include <covariance/covariance.h>
+#include <eegosports/eegosports.h>
+#include <eegosports/eegosportselectrodeitem.h>
 #include <gusbamp/gusbamp.h>
 #include <hpi/hpi.h>
 #include <neuronalconnectivity/neuronalconnectivity.h>
@@ -80,6 +82,8 @@ private slots:
     void brainAmpStreamsTheSimulatedAmplifier();
     void tmsiStreamsTheSimulatedAmplifier();
     void gusbampStreamsTheSimulatedAmplifiers();
+    void eegoStreamsTheSimulatedAmplifier();
+    void eegoImpedanceViewShowsTheMeasuredElectrodes();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
 
@@ -443,6 +447,78 @@ void TestMneScanPlugins::gusbampStreamsTheSimulatedAmplifiers()
         QVERIFY(data.topRows(8).cwiseAbs().maxCoeff() < 1e-3);
         QVERIFY(data.topRows(8).cwiseAbs().maxCoeff() > 0.0);
     }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::eegoStreamsTheSimulatedAmplifier()
+{
+    EEGOSPORTSPLUGIN::EEGoSports plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        auto* rate = setup->findChild<QComboBox*>("m_comboBox_SamplingFreq");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_BlockSize");
+        QVERIFY(simulate && rate && block);
+        simulate->setChecked(true);
+        rate->setCurrentText("1000");
+        block->setValue(100);
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+    QSettings("MNECPP").remove("EEGOSPORTS");
+
+    // 64 referential inputs named and placed after the cap, 24 bipolar inputs, STI 014, the sample counter
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->sfreq, 1000.0);
+    QCOMPARE(info->chs.size(), std::size_t(90));
+    QCOMPARE(info->chs[0].kind, FIFFV_EEG_CH);
+    QVERIFY(info->chs[0].ch_name != "EEG 001");
+    QVERIFY(info->chs[0].chpos.r0.norm() > 0.05); // on the head, in metres
+    QCOMPARE(info->chs[64].ch_name, std::string("BIP 1"));
+    QCOMPARE(info->chs[88].kind, FIFFV_STIM_CH);
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 90);
+        QCOMPARE(data.cols(), 100);
+        QVERIFY(data.topRows(64).cwiseAbs().maxCoeff() < 1e-3);
+        QVERIFY(data.topRows(64).cwiseAbs().maxCoeff() > 0.0);
+    }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::eegoImpedanceViewShowsTheMeasuredElectrodes()
+{
+    EEGOSPORTSPLUGIN::EEGoSports plugin;
+    plugin.init();
+    EEGOSPORTSPLUGIN::EEGoSportsImpedanceWidget widget(&plugin);
+    widget.initGraphicScene();
+    auto* view = widget.findChild<QGraphicsView*>("m_graphicsView_impedanceView");
+    QVERIFY(view && view->scene());
+    QCOMPARE(view->scene()->items().size(), 66); // the 66-electrode cap, wherever MNE Scan was started
+
+    // A 32-input amplifier measures the first 32 electrodes of the cap
+    Eigen::VectorXd ohms = Eigen::VectorXd::LinSpaced(32, 1e3, 4e3);
+    widget.updateGraphicScene(ohms);
+    int measured = 0;
+    for (QGraphicsItem* graphicsItem : view->scene()->items()) {
+        auto* item = static_cast<EEGOSPORTSPLUGIN::EEGoSportsElectrodeItem*>(graphicsItem);
+        if (item->getChannelIndex() < 32) {
+            QCOMPARE(item->getImpedanceValue(), ohms[item->getChannelIndex()]);
+            ++measured;
+        }
+    }
+    QCOMPARE(measured, 32);
 }
 
 //=============================================================================================================

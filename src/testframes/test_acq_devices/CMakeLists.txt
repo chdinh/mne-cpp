@@ -19,6 +19,12 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Test mne_acq_devices)
 
+# A stand-in for the eego SDK library, loaded by the eego:// driver under test
+add_library(eego_sdk_stub SHARED eego_sdk_stub.cpp)
+set_target_properties(eego_sdk_stub PROPERTIES PREFIX "" OUTPUT_NAME "eego-SDK-stub")
+add_dependencies(${PROJECT_NAME} eego_sdk_stub)
+target_compile_definitions(${PROJECT_NAME} PRIVATE EEGO_SDK_STUB="$<TARGET_FILE:eego_sdk_stub>")
+
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE FALSE MACOSX_BUNDLE FALSE)
 
 if(QT_VERSION_MAJOR EQUAL 6)

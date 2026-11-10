@@ -80,8 +80,8 @@ class EEGoSportsImpedanceWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit EEGoSportsImpedanceWidget(EEGoSports* pEEGoSports, QWidget* parent = 0);
-    ~EEGoSportsImpedanceWidget();
+    explicit EEGoSportsImpedanceWidget(EEGoSports* pEEGoSports, QWidget* parent = nullptr);
+    ~EEGoSportsImpedanceWidget() override;
 
     //=========================================================================================================
     /**
@@ -140,7 +140,7 @@ private:
     /**
     * Reimplemnted closing event handler. Used to stop the measurement when closing the widget.
     */
-    void closeEvent(QCloseEvent* event);
+    void closeEvent(QCloseEvent* event) override;
 
     //=========================================================================================================
     /**
