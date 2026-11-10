@@ -815,8 +815,8 @@ void TestBids::testBrainVisionReaderVariants()
         QVERIFY2(info.kind == kind && info.unit_mul == mul, qPrintable(name));
         QCOMPARE(info.unit, unit == "C" ? FIFF_UNIT_NONE : FIFF_UNIT_V);
     }
-    QCOMPARE(BrainVisionReader::unitScale("nV"), 1e-9f);
-    QCOMPARE(BrainVisionReader::unitScale("uS"), 1e-6f);
+    QVERIFY(qFuzzyCompare(BrainVisionReader::unitScale("nV"), 1e-9f));
+    QVERIFY(qFuzzyCompare(BrainVisionReader::unitScale("uS"), 1e-6f));
 
     // INT_32, multiplexed and vectorized, with the NeurOne "Common infos" spelling, a missing channel table and a comment
     QTemporaryDir dir;

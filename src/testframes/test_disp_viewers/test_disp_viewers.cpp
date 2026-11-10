@@ -236,8 +236,8 @@ void TestDispViewers::scalingView_constructAndGetSet()
     customMap[FIFFV_EEG_CH] = 1e-6f;
     view.setScaleMap(customMap);
     QMap<qint32, float> returned = view.getScaleMap();
-    QCOMPARE(returned.value(FIFFV_MEG_CH, 0.0f), 1e-12f);
-    QCOMPARE(returned.value(FIFFV_EEG_CH, 0.0f), 1e-6f);
+    QVERIFY(qFuzzyCompare(returned.value(FIFFV_MEG_CH, 0.0f), 1e-12f));
+    QVERIFY(qFuzzyCompare(returned.value(FIFFV_EEG_CH, 0.0f), 1e-6f));
 
     view.setGuiMode(AbstractView::GuiMode::Clinical);
     view.setGuiMode(AbstractView::GuiMode::Research);

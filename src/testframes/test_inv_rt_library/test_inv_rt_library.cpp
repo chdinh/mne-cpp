@@ -654,7 +654,7 @@ void TestInvRtLibrary::hpiFitData_defaultConstruction()
     // InvHpiFit's documented defaults: 500 iterations, abort at an error of 1e-9
     InvHpiFitData data;
     QCOMPARE(data.m_iMaxIterations, 500);
-    QCOMPARE(data.m_fAbortError, 1e-9f);
+    QVERIFY(qFuzzyCompare(data.m_fAbortError, 1e-9f));
     QCOMPARE(data.m_errorInfo.numIterations, 0);
 }
 

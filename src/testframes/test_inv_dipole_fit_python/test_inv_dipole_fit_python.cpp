@@ -780,9 +780,9 @@ void TestInvDipoleFitPython::commandLine()
     QCOMPARE(s.tmax, 0.25f);
     QCOMPARE(s.tstep, 0.005f);
     QCOMPARE(s.integ, 0.002f);
-    QCOMPARE(s.grad_std, 8e-13f);
-    QCOMPARE(s.mag_std, 30e-15f);
-    QCOMPARE(s.eeg_std, 0.5e-6f);
+    QVERIFY(qFuzzyCompare(s.grad_std, 8e-13f));
+    QVERIFY(qFuzzyCompare(s.mag_std, 30e-15f));
+    QVERIFY(qFuzzyCompare(s.eeg_std, 0.5e-6f));
     QCOMPARE(s.grad_reg, 0.2f);
     QCOMPARE(s.mag_reg, 0.2f);
     QCOMPARE(s.eeg_reg, 0.2f);

@@ -154,16 +154,16 @@ average {
     QCOMPARE(d.eventFile, QString("out.eve"));
     QVERIFY(d.fixSkew);
 
-    QCOMPARE(d.rej.megGradReject, 2000e-13f);
-    QCOMPARE(d.rej.megMagReject, 4e-12f);
+    QVERIFY(qFuzzyCompare(d.rej.megGradReject, 2000e-13f));
+    QVERIFY(qFuzzyCompare(d.rej.megMagReject, 4e-12f));
     QCOMPARE(d.rej.eegReject, 0.0f);
     QCOMPARE(d.rej.eogReject, 150e-6f);
     QCOMPARE(d.rej.ecgReject, 1e-3f);
-    QCOMPARE(d.rej.megGradFlat, 1e-13f);
-    QCOMPARE(d.rej.megMagFlat, 1e-15f);
-    QCOMPARE(d.rej.eegFlat, 1e-7f);
-    QCOMPARE(d.rej.eogFlat, 2e-7f);
-    QCOMPARE(d.rej.ecgFlat, 3e-7f);
+    QVERIFY(qFuzzyCompare(d.rej.megGradFlat, 1e-13f));
+    QVERIFY(qFuzzyCompare(d.rej.megMagFlat, 1e-15f));
+    QVERIFY(qFuzzyCompare(d.rej.eegFlat, 1e-7f));
+    QVERIFY(qFuzzyCompare(d.rej.eogFlat, 2e-7f));
+    QVERIFY(qFuzzyCompare(d.rej.ecgFlat, 3e-7f));
     QCOMPARE(d.rej.stimIgnore, 0.05f);
 
     QCOMPARE(d.categories.size(), 3);
@@ -342,7 +342,7 @@ void TestMneDescriptionParser::covariance_full()
     QCOMPARE(d.eventFile, QString("audvis.eve"));
     QVERIFY(!d.removeSampleMean);
     QVERIFY(d.fixSkew);
-    QCOMPARE(d.rej.megGradReject, 4000e-13f);
+    QVERIFY(qFuzzyCompare(d.rej.megGradReject, 4000e-13f));
     QCOMPARE(d.rej.eegReject, 80e-6f);
 
     QCOMPARE(d.defs.size(), 2);

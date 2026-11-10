@@ -598,7 +598,7 @@ void TestAcqRecorder::refusesInfoWithoutFiff()
     QCOMPARE(fiff->chs[0].kind, FIFFV_EEG_CH);
     QCOMPARE(fiff->chs[0].chpos.coil_type, FIFFV_COIL_EEG);
     QCOMPARE(fiff->chs[0].unit, FIFF_UNIT_V);
-    QCOMPARE(fiff->chs[1].cal, 0.5e-6f);
+    QVERIFY(qFuzzyCompare(fiff->chs[1].cal, 0.5e-6f));
     QCOMPARE(fiff->chs[2].kind, FIFFV_STIM_CH);
     QCOMPARE(fiff->chs[2].unit, FIFF_UNIT_NONE);
     QCOMPARE(fiff->chs[3].chpos.coil_type, FIFFV_COIL_FNIRS_HBO);
