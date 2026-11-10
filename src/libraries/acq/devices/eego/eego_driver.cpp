@@ -1,13 +1,16 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2020-2026 MNE-CPP Authors
+ * Copyright (c) 2014-2026 MNE-CPP Authors
  *
  * @file     eego_driver.cpp
- * @author   Johannes Vorwerk <johannes.vorwerk@umit.at>;
+ * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Johannes Vorwerk <johannes.vorwerk@umit.at>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @since    0.1.0
+ * @date     July, 2014
  * @brief    The eego SDK library (eego-SDK.dll, libeego-SDK.so) behind EegoTransport, loaded at run time.
  */
 

@@ -1,12 +1,14 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2013-2026 MNE-CPP Authors
  *
  * @file     tmsi_transport.h
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     September, 2013
  * @brief    The TMSi SDK interface as the backend uses it, with a Windows driver and a simulator behind it.
  *
  * A TMSi Refa or Porti delivers every channel as a 32-bit integer; the physical value is

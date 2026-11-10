@@ -1,12 +1,16 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2014-2026 MNE-CPP Authors
  *
  * @file     eego_backend.cpp
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Johannes Vorwerk <johannes.vorwerk@umit.at>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     July, 2014
  * @brief    eego:// : ANT Neuro eego amplifiers, or their simulator.
  *
  * One input stream "eeg" in the SDK's format: a double per channel, in volts for the inputs. The referential

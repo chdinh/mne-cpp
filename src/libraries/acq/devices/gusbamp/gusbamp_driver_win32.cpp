@@ -5,9 +5,11 @@
  *
  * @file     gusbamp_driver_win32.cpp
  * @author   Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @since    0.1.0
+ * @date     November, 2015
  * @brief    The g.USBamp API (gUSBamp.dll, installed with the amplifier's driver) behind GusbampTransport.
  */
 

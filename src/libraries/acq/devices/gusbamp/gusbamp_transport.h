@@ -1,12 +1,15 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2015-2026 MNE-CPP Authors
  *
  * @file     gusbamp_transport.h
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @author   Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     November, 2015
  * @brief    The g.USBamp API as the backend uses it, with a Windows driver and a simulator behind it.
  *
  * Up to four g.USBamps run synchronised, the first one as master. Every unit delivers its transfers

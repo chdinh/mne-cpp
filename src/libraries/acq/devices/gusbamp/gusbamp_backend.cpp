@@ -1,12 +1,15 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2015-2026 MNE-CPP Authors
  *
  * @file     gusbamp_backend.cpp
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @author   Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     November, 2015
  * @brief    gusbamp:// : g.tec g.USBamp amplifiers, up to four synchronised, or their simulator.
  *
  * One input stream "eeg" in the API's format: a float per channel in microvolts, so with 1e-6 as scale. The

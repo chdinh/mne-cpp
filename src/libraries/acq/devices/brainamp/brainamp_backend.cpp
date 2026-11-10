@@ -1,12 +1,15 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2016-2026 MNE-CPP Authors
  *
  * @file     brainamp_backend.cpp
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @author   Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     October, 2016
  * @brief    brainamp:// : Brain Products BrainAmp amplifiers, or their simulator.
  *
  * One input stream "eeg" in the amplifier's wire format: int16 channels EEG 001..EEG nnn (volts, scale = the

@@ -1,13 +1,15 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2014-2026 MNE-CPP Authors
+ * Copyright (c) 2016-2026 MNE-CPP Authors
  *
  * @file     brainamp_driver_win32.cpp
- * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ * @author   Viktor Klueber <Viktor.Klueber@tu-ilmenau.de>;
+ *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @since    0.1.0
+ * @date     October, 2016
  * @brief    The BrainAmp Windows driver (USB adapter or ISA/PCI host adapter) behind BrainAmpTransport.
  *
  * Talks to the kernel driver through DeviceIoControl with the codes and BA_SETUP layout of Brain Products'

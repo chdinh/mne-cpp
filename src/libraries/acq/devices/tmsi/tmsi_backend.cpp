@@ -1,12 +1,14 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2013-2026 MNE-CPP Authors
  *
  * @file     tmsi_backend.cpp
- * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
+ *           Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    0.1.0
+ * @date     September, 2013
  * @brief    tmsi:// : TMSi Refa and Porti amplifiers, or their simulator.
  *
  * One input stream "eeg" in the SDK's format: an int32 per channel, with each channel's gain, offset and

@@ -5,9 +5,10 @@
  *
  * @file     tmsi_driver_win32.cpp
  * @author   Lorenz Esch <lorenz.esch@tu-ilmenau.de>;
+ *           Gabriel Motta <gabrielbenmotta@gmail.com>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.5.0
- * @date     November 2026
+ * @since    0.1.0
+ * @date     September, 2013
  * @brief    The TMSi SDK (TMSiSDK.dll, installed with the amplifier's driver) behind TmsiTransport.
  */
 
