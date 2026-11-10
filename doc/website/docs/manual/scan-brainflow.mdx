@@ -1,0 +1,32 @@
+---
+title: BrainFlow
+sidebar_label: BrainFlow
+---
+# BrainFlow
+
+The BrainFlow plugin streams any board [BrainFlow](https://brainflow.org) supports (OpenBCI Cyton and Ganglion,
+g.tec Unicorn, Muse, ANT Neuro eego, the synthetic board, ...). MNE-CPP does not ship BrainFlow: it uses an installed
+BrainFlow 5 at run time, found in this order:
+
+1. the path entered as **BrainFlow library**,
+2. the environment variable `MNE_CPP_BRAINFLOW_LIB` (path of `BoardController`),
+3. the library of the Python package, after `pip install brainflow`,
+4. the system library paths.
+
+Follow the steps below to stream a board:
+
+* Install BrainFlow, e.g. `pip install brainflow`.
+* Start MNE Scan and add the BrainFlow plugin.
+* Enter the **Board**: a BrainFlow board id (`-1`) or name (`synthetic`, `cyton_daisy`, `CYTON_DAISY_BOARD`).
+  `synthetic` needs no hardware.
+* Enter the BrainFlow input parameters the board needs, as in BrainFlow's documentation: e.g. **Serial port** for a
+  Cyton (`/dev/ttyUSB0`, `COM3`), **MAC address** for a Muse, **IP address** and **IP port** for WiFi boards.
+* Start the pipeline.
+
+Every row of the board becomes a channel: EEG, EMG, ECG and EOG in volts (BrainFlow reports microvolts), the
+accelerometer, gyroscope and other rows as BrainFlow delivers them, the timestamp row in seconds and the marker row
+as a trigger channel. A board that this platform's BrainFlow does not include, or another BrainFlow version than 5,
+is refused with the reason in the log.
+
+The plugin reads the board through the `brainflow://` source of the acquisition library, so the same board opens
+with `mne_acq`, e.g. `mne_acq view "brainflow://cyton?serial_port=/dev/ttyUSB0"`.

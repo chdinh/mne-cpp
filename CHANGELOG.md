@@ -167,6 +167,10 @@ aliases; replace the old spelling as below.
   Every row is a channel in BrainFlow's units, the timestamp row is the
   clock and the marker row gives events. Other BrainFlow versions and
   boards this platform's BrainFlow lacks are refused with the reason.
+- The BrainFlow MNE Scan plugin is back as a client of `brainflow://`: it
+  streams any BrainFlow board through an installed BrainFlow, set up by
+  board name or id and BrainFlow's input parameters, with every row of the
+  board as a channel. It no longer builds BrainFlow as a submodule.
 - `mne_acq` offers the device schemes (`brainflow://`, `eego://`,
   `natus://`, ...); it registered only `synthetic://`, `fiff://` and
   `lsl://`. Its BrainFlow output finds BrainFlow through

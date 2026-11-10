@@ -60,6 +60,7 @@ const sidebars: SidebarsConfig = {
                                 'manual/scan-headmonitoring',
                                 'manual/scan-forward',
                                 'manual/scan-brainamp',
+                                'manual/scan-brainflow',
                                 'manual/scan-gusbamp',
                                 'manual/scan-eegosports',
                                 'manual/scan-natus',

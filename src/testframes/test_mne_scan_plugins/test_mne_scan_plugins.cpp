@@ -17,6 +17,7 @@
 #include <averaging/averaging.h>
 #include <babymeg/babymeg.h>
 #include <brainamp/brainamp.h>
+#include <brainflowboard/brainflowboard.h>
 #include <covariance/covariance.h>
 #include <eegosports/eegosports.h>
 #include <eegosports/eegosportselectrodeitem.h>
@@ -93,6 +94,7 @@ private slots:
     void fiffSimulatorStreamsTheSimulatedServer();
     void natusStreamsTheSimulatedAmplifier();
     void babyMegStreamsTheSimulatedSystem();
+    void brainFlowStreamsTheBoard();
     void eegoImpedanceViewShowsTheMeasuredElectrodes();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
@@ -595,6 +597,63 @@ void TestMneScanPlugins::natusStreamsTheSimulatedAmplifier()
         QVERIFY(data.cwiseAbs().maxCoeff() < 1e-3);
         QVERIFY(data.cwiseAbs().maxCoeff() > 0.0);
     }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::brainFlowStreamsTheBoard()
+{
+#ifndef BRAINFLOW_STUB
+    QSKIP("needs the stand-in BrainFlow library of test_acq_devices");
+#else
+    BRAINFLOWBOARDPLUGIN::BrainFlowBoard plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* board = setup->findChild<QLineEdit*>("m_lineEdit_Board");
+        auto* serialPort = setup->findChild<QLineEdit*>("m_lineEdit_SerialPort");
+        auto* library = setup->findChild<QLineEdit*>("m_lineEdit_Library");
+        auto* ipPort = setup->findChild<QSpinBox*>("m_spinBox_IpPort");
+        auto* ipProtocol = setup->findChild<QComboBox*>("m_comboBox_IpProtocol");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        QVERIFY(board && serialPort && library && ipPort && ipProtocol && block);
+        QCOMPARE(board->text(), QString("synthetic"));
+        library->setText(BRAINFLOW_STUB);
+        // The stand-in's Cyton opens only on its serial port
+        board->setText("cyton");
+        QVERIFY(!plugin.start());
+        serialPort->setText("COM-STUB");
+        block->setValue(25);
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // The board's rows: EEG in volts, the marker row as a trigger channel
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(12));
+    QCOMPARE(info->sfreq, 250.0);
+    QCOMPARE(info->chs[1].ch_name, std::string("Fz"));
+    QCOMPARE(info->chs[1].kind, FIFFV_EEG_CH);
+    QCOMPARE(info->chs[11].ch_name, std::string("MARKER"));
+    QCOMPARE(info->chs[11].kind, FIFFV_STIM_CH);
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 12);
+        QCOMPARE(data.cols(), 25);
+    }
+    // Sample k of Fz is 1 + k / 1000 microvolts
+    QVERIFY(std::abs(blocks.front()(1, 0) - 1e-6) < 1e-12);
+    QVERIFY(std::abs(blocks[1](1, 0) - 1.025e-6) < 1e-12);
+    QCOMPARE(blocks[1](11, 5), 7.0); // the marker at sample 30
+#endif
 }
 
 //=============================================================================================================

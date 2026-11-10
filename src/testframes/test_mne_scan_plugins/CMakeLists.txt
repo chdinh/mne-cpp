@@ -11,7 +11,7 @@ set(QT_REQUIRED_COMPONENTS Core Test Widgets)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
-set(SCAN_PLUGINS scan_averaging scan_brainamp scan_covariance scan_hpi scan_neuronalconnectivity scan_noisereduction scan_rtclustmne scan_rtfwd scan_tmsi scan_gusbamp scan_eegosports scan_neuromag scan_ftbuffer scan_fiffsimulator scan_natus scan_babymeg)
+set(SCAN_PLUGINS scan_averaging scan_brainamp scan_covariance scan_hpi scan_neuronalconnectivity scan_noisereduction scan_rtclustmne scan_rtfwd scan_tmsi scan_gusbamp scan_eegosports scan_neuromag scan_ftbuffer scan_fiffsimulator scan_natus scan_babymeg scan_brainflowboard)
 
 enable_testing()
 mne_add_test(${PROJECT_NAME}
@@ -48,6 +48,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     mne_base
     Eigen3::Eigen
 )
+
+# A stand-in for BrainFlow's library, from test_acq_devices
+if(TARGET brainflow_stub)
+    add_dependencies(${PROJECT_NAME} brainflow_stub)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE BRAINFLOW_STUB="$<TARGET_FILE:brainflow_stub>")
+endif()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     WIN32_EXECUTABLE FALSE

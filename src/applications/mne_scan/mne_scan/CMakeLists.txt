@@ -95,6 +95,7 @@ if(NOT BUILD_SHARED_LIBS)
         scan_averaging
         scan_babymeg
         scan_brainamp
+        scan_brainflowboard
         scan_covariance
         scan_eegosports
         scan_fiffsimulator

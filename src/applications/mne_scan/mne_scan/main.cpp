@@ -65,6 +65,7 @@ using namespace MNESCAN;
 Q_IMPORT_PLUGIN(BabyMEG)
 Q_IMPORT_PLUGIN(FiffSimulator)
 Q_IMPORT_PLUGIN(Natus)
+Q_IMPORT_PLUGIN(BrainFlowBoard)
 Q_IMPORT_PLUGIN(Covariance)
 Q_IMPORT_PLUGIN(NoiseReduction)
 Q_IMPORT_PLUGIN(RtClustMne)
