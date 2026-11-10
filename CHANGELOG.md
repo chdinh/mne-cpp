@@ -167,6 +167,10 @@ aliases; replace the old spelling as below.
   Every row is a channel in BrainFlow's units, the timestamp row is the
   clock and the marker row gives events. Other BrainFlow versions and
   boards this platform's BrainFlow lacks are refused with the reason.
+- `mne_acq` offers the device schemes (`brainflow://`, `eego://`,
+  `natus://`, ...); it registered only `synthetic://`, `fiff://` and
+  `lsl://`. Its BrainFlow output finds BrainFlow through
+  `MNE_CPP_BRAINFLOW_LIB`, formerly `MNE_CPP_BRAINFLOW`.
 - `babymeg://` reads the acquisition server of a BabyMEG system without Qt:
   its channels, sensor positions, coil types and current gains from the
   command port, the data from the data port, and the trigger lines

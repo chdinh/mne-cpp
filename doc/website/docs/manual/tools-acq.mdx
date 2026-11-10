@@ -57,6 +57,25 @@ mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]
 | `fiff:///data/sample_raw.fif?loop=1&speed=2` | Replay of a raw FIFF file, paced in real time |
 | `lsl://NAME` | A Lab Streaming Layer stream by name |
 | `rtserver://127.0.0.1:4217?simfile=/data/run_raw.fif` | The active connector of an `mne_rt_server`, here its FIFF file simulator replaying a file on the server's computer |
+| `brainflow://cyton?serial_port=/dev/ttyUSB0` | Any board BrainFlow supports, through an installed BrainFlow 5 (see below) |
+
+The vendor amplifiers (`eego://`, `natus://`, `babymeg://`, ...) are listed by `mne_acq list`, each with its
+parameters.
+
+## BrainFlow Input
+
+`brainflow://<board>` opens a board through BrainFlow's `BoardController` library, which is loaded when the
+source is opened and is never part of MNE-CPP: `library=` names it, otherwise `MNE_CPP_BRAINFLOW_LIB`, then the
+library of `pip install brainflow`, then the system loader. BrainFlow 5 is required. The board is BrainFlow's id
+(`-1`) or name (`synthetic`, `cyton_daisy`, `CYTON_DAISY_BOARD`); the parameters are BrainFlow's input parameters
+(`serial_port`, `mac_address`, `ip_address`, `ip_port`, `ip_protocol`, `other_info`, `timeout`, `serial_number`,
+`file`, `master_board`, ...). Every row of the board becomes a channel in BrainFlow's units: EEG, EMG, ECG and EOG in
+microvolts (scaled to volts), temperature in degrees Celsius, the timestamp row in seconds since 1970. The timestamp
+row is the stream's clock, and a nonzero value in the marker row is an event.
+
+```bash
+mne_acq record "brainflow://cyton_daisy?serial_port=/dev/ttyUSB0" session_raw.fif --duration 60
+```
 
 ## BrainFlow Output
 
@@ -64,7 +83,7 @@ BrainFlow's `STREAMING_BOARD` interprets every packet with the row layout of a *
 sends that layout: the source's channels fill the board's EEG rows in order (volts as microvolts, as BrainFlow
 reports EEG), the package row counts samples modulo 256 and the timestamp row holds Unix time. Channels beyond the
 board's EEG rows are not sent. The layout comes from BrainFlow when it is installed (`pip install brainflow`, or
-`MNE_CPP_BRAINFLOW` pointing to its `BoardController` library); without it, only the synthetic board (-1, 16 EEG
+`MNE_CPP_BRAINFLOW_LIB` pointing to its `BoardController` library); without it, only the synthetic board (-1, 16 EEG
 rows) is known. Triggers are sent in the stim channel's row: `STREAMING_BOARD` fills the marker row from its own
 `insert_marker()`. Both sides must use the same `BRAINFLOW_BATCH_SIZE` (default 3).
 

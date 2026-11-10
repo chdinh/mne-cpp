@@ -9,6 +9,7 @@ project(mne_acq_devices
 )
 
 set(SOURCES
+  acq_devices.cpp
   brainamp/brainamp_backend.cpp
   brainamp/brainamp_simulator.cpp
   tmsi/tmsi_backend.cpp

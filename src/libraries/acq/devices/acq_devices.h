@@ -131,6 +131,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_babymeg_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_brainflow_scheme();
 
+/**
+ * Registers every scheme of this library, as the functions above do one by one; for programs that offer all
+ * sources, such as mne_acq.
+ *
+ * @return Success, or the first error of a registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_device_schemes();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H

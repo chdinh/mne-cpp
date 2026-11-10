@@ -26,6 +26,7 @@
 
 #include <acq/acq.h>
 #include <acq/detail/acq_shared_library.h>
+#include <acq/devices/acq_devices.h>
 #include <acq/fiff/acq_fiff_replay.h>
 #include <acq/fiff/acq_recorder.h>
 #include <acq/lsl/acq_lsl.h>
@@ -138,11 +139,18 @@ std::string unitName(const AcqChannelInfo& channel)
     return unit;
 }
 
-/** Opens @p uri, printing the error; schemes of the bridge libraries are registered first. */
-AcqExpected<AcqDevice> openSource(const QString& uri)
+/** Registers the schemes of the bridge and device libraries, which a link may otherwise drop. */
+void registerSchemes()
 {
     registerFiffScheme();
     registerLslScheme();
+    static_cast<void>(register_device_schemes());
+}
+
+/** Opens @p uri, printing the error; all schemes are registered first. */
+AcqExpected<AcqDevice> openSource(const QString& uri)
+{
+    registerSchemes();
     auto device = AcqDevice::open(uri.toStdString());
     if (!device) {
         err() << QString::asprintf("mne_acq: %s: %s\n", qPrintable(uri), device.error().text().c_str());
@@ -164,8 +172,7 @@ void waitUntil(double seconds, Done done)
 
 int list(double timeout)
 {
-    registerFiffScheme();
-    registerLslScheme();
+    registerSchemes();
     AcqDeviceRegistry& registry = AcqDeviceRegistry::instance();
     out() << QString::asprintf("Schemes:\n");
     for (const AcqSchemeInfo& scheme : registry.schemes()) {
@@ -333,7 +340,7 @@ std::optional<BrainFlowLayout> brainFlowLayout(int board)
 {
     QJsonObject descr;
     std::vector<std::string> candidates;
-    if (const std::string path = detail::acqEnvironment("MNE_CPP_BRAINFLOW"); !path.empty()) {
+    if (const std::string path = detail::acqEnvironment("MNE_CPP_BRAINFLOW_LIB"); !path.empty()) {
         candidates.push_back(path);
     }
     if (const std::string dir = detail::acqPythonPackageDir("brainflow", "lib"); !dir.empty()) {
@@ -384,7 +391,7 @@ int streamBrainFlow(AcqDevice& device, AcqReader& reader, const QString& target,
     const auto layout = brainFlowLayout(board);
     if (!layout || layout->rows <= 0) {
         err() << QString::asprintf("mne_acq: the layout of BrainFlow board %d needs BrainFlow (pip install brainflow or "
-                                   "MNE_CPP_BRAINFLOW); without it only the synthetic board (-1) is known\n",
+                                   "MNE_CPP_BRAINFLOW_LIB); without it only the synthetic board (-1) is known\n",
                                    board);
         return kRunError;
     }

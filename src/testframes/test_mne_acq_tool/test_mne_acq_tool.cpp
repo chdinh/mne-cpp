@@ -229,7 +229,7 @@ void TestMneAcqTool::listShowsSchemesAndSources()
 {
     const ToolResult list = runTool({QStringLiteral("list"), QStringLiteral("--timeout"), QStringLiteral("0.2")});
     QCOMPARE(list.exitCode, 0);
-    for (const char* scheme : {"synthetic://", "fiff://", "lsl://"}) {
+    for (const char* scheme : {"synthetic://", "fiff://", "lsl://", "brainflow://", "eego://", "natus://", "babymeg://", "rtserver://"}) {
         QVERIFY2(list.out.contains(QLatin1String(scheme)), qPrintable(list.out));
     }
     // The synthetic source is always reachable.

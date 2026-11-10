@@ -19,7 +19,7 @@ else()
     add_executable(${PROJECT_NAME} main.cpp)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network mne_acq mne_acq_fiff mne_acq_lsl mne_lsl)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Network mne_acq mne_acq_devices mne_acq_fiff mne_acq_lsl mne_lsl)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     OUTPUT_NAME mne_acq
