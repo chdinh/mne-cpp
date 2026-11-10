@@ -5,30 +5,60 @@ sidebar_label: FieldTrip Buffer
 
 # FieldTrip Buffer
 
-The plugin interface with a FieldTrip Buffer running at a given address. It does not implement the buffer itself, only a client. It is non-invasive, and does not even have access to the MEG device directly, only the data pushed to the buffer.
+The FtBuffer plugin reads a FieldTrip buffer server through the `ftbuffer://` source of the `mne_acq_devices` library.
+It is only a client: it reads what a producer puts into the buffer and has no access to the device itself. Without a
+server it simulates `neuromag2ft` on a Neuromag system.
 
-## Running with Neuromag/Elekta/MEGIN
+The setup widget sets
+
+- **Host** and **Port** of the buffer server (default `localhost` and `1972`).
+- **Samples per block**: the block size handed to the connected plugins.
+- **Simulate neuromag2ft and its buffer**: a 306-channel Neuromag system relayed into a simulated buffer.
+
+On start the plugin waits for the producer's header and then streams the samples put after that moment. With the
+Neuromag header of `neuromag2ft`, the channels, their coil types and positions, the measurement info and the
+digitizer points of the acquisition are used, the samples are already in tesla and volts, and changes of `STI 014`
+(or `STI101`) become events. Other producers give the channel names of their header, or numbered channels. Events put
+into the buffer with a numeric value become events with that code. When the producer puts a new header, i.e. starts a
+new measurement, the stream ends; start the plugin again.
+
+## Running with Neuromag / Elekta / MEGIN
 
 1. Download FieldTrip `neuromag2ft`
 
-   Download the fieldtrip source code on your acquisition computer, either from their [website](http://www.fieldtriptoolbox.org/download/) or their [GitHub page](https://github.com/fieldtrip/fieldtrip). We are interested in the executable `neuromag2ft`, which will serve as both our buffer host and interface to push data to the buffer.
+   Download the FieldTrip source code on your acquisition computer, either from their
+   [website](http://www.fieldtriptoolbox.org/download/) or their [GitHub page](https://github.com/fieldtrip/fieldtrip).
+   The executable `neuromag2ft` both hosts the buffer and puts the acquisition's data into it.
 
 2. Get `neuromag2ft` set up
 
-   We will need to be able to run `neuromag2ft` on the acquisition computer for the Neuromag. Depending on your system, you might have to build it locally. You can do so by running the makefile in `/realtime/src/acquisition/neuromag/` with the command `make`. If in doubt, follow the [documentation](http://www.fieldtriptoolbox.org/development/realtime/neuromag/) on the fieldtrip buffer website.
+   Depending on your system, you might have to build it locally with `make` in `/realtime/src/acquisition/neuromag/`.
+   If in doubt, follow the [documentation](http://www.fieldtriptoolbox.org/development/realtime/neuromag/) of the
+   FieldTrip buffer.
 
 3. Run `neuromag2ft`
 
-   Run `neuromag2ft` on the aquisition computer. `neuromag2ft` can be run with different parameters, but for this example we will be running it with all default settings. For more options, run it with the `--help` flag. Run the executable in `/realtime/src/acquisition/neuromag/bin/<YOUR_OS>`. This should both create a buffer and start an interface with the neuromag. This buffer will, by default, be hosted on port `1972`.
+   Run `neuromag2ft` on the acquisition computer before the measurement starts; `--help` lists its options. By
+   default the buffer listens on port `1972`.
 
-4. Start data collection
+4. Set up the plugin in MNE Scan
 
-   Start collecting data and ensure it is being sent into the buffer through `neuromag2ft`. It is important that `neuromag2ft` already be running before data collection starts, otherwise `neuromag2ft` will not work.
+   Select the `FtBuffer` plugin, enter the address of the acquisition computer and the port, and start MNE Scan.
 
-5. Set up plugin in MNE Scan
+The [Neuromag](./scan-neuromag.mdx) plugin reads the acquisition directly, without `neuromag2ft`, but runs on the
+acquisition computer itself.
 
-   Run MNE Scan and select the `FtBuffer` plugin from the toolbar on the left. Set the buffer address, which will be the IP address of your aquisition computer, and port, which by default is `1972`. Click the `Set` button. This sets the `Address` and `Port` fields, and attempts to acquire a sample fif file created by `neuromag2ft`.
+## Simulation and scripting
 
-6. Receive data
+The same source is available to every program that links `mne_acq_devices`:
 
-   In MNE Scan, click the green start button on the top left to start the plugin.
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
+
+ACQLIB::register_ftbuffer_scheme();
+auto device = ACQLIB::AcqDevice::open("ftbuffer://megacq:1972");
+```
+
+`timeout` is how long to wait for the connection and the producer's header. `ftbuffer://?simulate=1` accepts `meg`,
+`eeg`, `rate`, `block` (samples per put), `seed`, `realtime=0` (as fast as possible) and `duration` in seconds.

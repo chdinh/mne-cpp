@@ -50,6 +50,7 @@ inline constexpr int kGalvanic = 1300;
 namespace fiff_unit
 {
 inline constexpr int kNone = -1;
+inline constexpr int kMeter = 1;
 inline constexpr int kSecond = 3;
 inline constexpr int kAmpere = 4;
 inline constexpr int kMol = 6;
@@ -116,6 +117,7 @@ inline constexpr AcqFiffUnit kAcqFiffUnits[] = {
     {AcqUnit::Watt, fiff_unit::kWatt},
     {AcqUnit::Pascal, fiff_unit::kPascal},
     {AcqUnit::Molar, fiff_unit::kMol},
+    {AcqUnit::Meter, fiff_unit::kMeter},
 };
 
 /** @return The FIFF kind of @p kind, FIFFV_MISC_CH if it has none. */

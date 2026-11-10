@@ -9,22 +9,18 @@ project(mne_acq_polhemus
 
 set(CMAKE_AUTOMOC ON)
 
-# Qt SerialPort for the device; poses and positions are Eigen types.
-set(QT_REQUIRED_COMPONENTS Core SerialPort)
+# Head-device coregistration of digitized points; the digitizer itself is polhemus:// in mne_acq_devices.
+set(QT_REQUIRED_COMPONENTS Core)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
-  fastrak_parser.cpp
-  polhemus_connection.cpp
   polhemus_coregistration.cpp
 )
 
 set(HEADERS
   acq_polhemus_global.h
   acquired_points.h
-  fastrak_parser.h
-  polhemus_connection.h
   polhemus_coregistration.h
 )
 
@@ -35,7 +31,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURR
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::SerialPort
   PRIVATE
     Eigen3::Eigen
     mne_base)

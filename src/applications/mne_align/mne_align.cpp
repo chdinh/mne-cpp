@@ -54,14 +54,14 @@ MneAlign::MneAlign(QWidget* parent)
     resize(1100, 720);
 
     m_pPoints = new AcquiredPoints(this);
-    m_pDigitizer = new PolhemusConnection(this);
+    m_pDigitizer = new Digitizer(this);
 
     buildUi();
     buildMenus();
 
-    connect(m_pDigitizer, &PolhemusConnection::connectedChanged,
+    connect(m_pDigitizer, &Digitizer::connectedChanged,
             this, &MneAlign::onDigitizerConnectedChanged);
-    connect(m_pDigitizer, &PolhemusConnection::errorOccurred, this,
+    connect(m_pDigitizer, &Digitizer::errorOccurred, this,
             [this](const QString& msg) {
                 statusBar()->showMessage(QStringLiteral("Digitizer: %1").arg(msg), 5000);
             });
@@ -124,9 +124,9 @@ void MneAlign::buildUi()
     statusBar()->addPermanentWidget(m_pStatusDigitizer);
 
     if (m_pDigitizer && m_pView3d) {
-        connect(m_pDigitizer, &PolhemusConnection::pointReceived,
+        connect(m_pDigitizer, &Digitizer::pointReceived,
                 m_pView3d, &Align3DView::setLiveDigitizerPose);
-        connect(m_pDigitizer, &PolhemusConnection::connectedChanged,
+        connect(m_pDigitizer, &Digitizer::connectedChanged,
                 m_pView3d, &Align3DView::setDigitizerConnected);
     }
     if (m_pView3d && m_pWizard) {
@@ -354,36 +354,22 @@ void MneAlign::onWizardBemPathChanged(const QString& path)
 
 void MneAlign::onConnectDigitizer()
 {
-    // Auto-scan first: pick a likely Fastrak/FastSCAN by USB vendor id so
-    // the user doesn't have to type a device path. If detection fails, fall
-    // back to a chooser populated with every visible serial port (plus a
-    // "Mock backend" entry that maps to an empty port name).
-    const QString detected = PolhemusConnection::autoDetectPortName();
+    // A Fastrak sits on a USB-serial adapter, which comes first; the simulator needs no hardware.
+    QStringList items = Digitizer::availablePorts();
+    items << QStringLiteral("Simulated digitizer (no hardware)");
 
-    QString port;
-    if (!detected.isEmpty()) {
-        port = detected;
-        statusBar()->showMessage(
-            QStringLiteral("Detected digitizer on '%1' \u2014 connecting\u2026").arg(port), 3000);
-    } else {
-        QStringList items;
-        items << QStringLiteral("Mock backend (no hardware)");
-        items += PolhemusConnection::availablePorts();
-
-        bool ok = false;
-        const QString choice = QInputDialog::getItem(
-            this, QStringLiteral("Connect digitizer"),
-            QStringLiteral("No Fastrak auto-detected. Pick a serial port:"),
-            items, /*current*/ 0, /*editable*/ false, &ok);
-        if (!ok)
-            return;
-        port = (choice == items.first()) ? QString() : choice;
-    }
+    bool ok = false;
+    const QString choice = QInputDialog::getItem(this, QStringLiteral("Connect digitizer"),
+                                                 QStringLiteral("Serial port of the Fastrak:"), items, /*current*/ 0,
+                                                 /*editable*/ true, &ok);
+    if (!ok)
+        return;
+    const QString port = choice == items.last() ? QString() : choice;
 
     if (!m_pDigitizer->open(port)) {
         QMessageBox::warning(this, windowTitle(),
                              QStringLiteral("Failed to open digitizer on '%1'.")
-                                 .arg(port.isEmpty() ? QStringLiteral("mock") : port));
+                                 .arg(port.isEmpty() ? QStringLiteral("simulator") : port));
     }
 }
 
@@ -397,7 +383,7 @@ void MneAlign::onDigitizerConnectedChanged(bool connected)
     if (!m_pStatusDigitizer)
         return;
     m_pStatusDigitizer->setText(connected
-                                    ? QStringLiteral("Digitizer: %1").arg(m_pDigitizer->backendName())
+                                    ? QStringLiteral("Digitizer: %1").arg(m_pDigitizer->description())
                                     : QStringLiteral("Digitizer: disconnected"));
 }
 

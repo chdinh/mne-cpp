@@ -5,6 +5,12 @@
 cmake_minimum_required(VERSION 3.14)
 project(test_polhemus_coregistration LANGUAGES CXX)
 
+# Code-coverage instrumentation for MNE Align's digitizer, compiled into this test
+if(WITH_CODE_COV)
+  add_compile_options("--coverage" "-O1" "-g")
+  add_link_options("--coverage")
+endif()
+
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -14,8 +20,11 @@ set(QT_REQUIRED_COMPONENTS Core Gui Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
+# MNE Align's digitizer adapter feeds the coregistration from polhemus://
 set(SOURCES
     test_polhemus_coregistration.cpp
+    ${CMAKE_SOURCE_DIR}/src/applications/mne_align/digitizer.cpp
+    ${CMAKE_SOURCE_DIR}/src/applications/mne_align/digitizer.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -29,6 +38,7 @@ list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED
   mne_acq_polhemus
+  mne_acq_devices
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -36,6 +46,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${MNE_LIBS_REQUIRED}
   Eigen3::Eigen
 )
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/applications/mne_align)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
   WIN32_EXECUTABLE FALSE

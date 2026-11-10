@@ -17,33 +17,47 @@ class ACQLIB::PolhemusCoregistration
 
 Head–device coregistration engine driven by a Polhemus Fastrak.
 
-The class wires itself to a [`PolhemusConnection`](/docs/api/acq/polhemus-connection) and maintains:
+It takes the station poses and stylus button presses of a polhemus:// stream (`on_pose()`, `on_button()`) and maintains:
 
 - A continuously updated device-to-world transform (from the tracker station + user-supplied calibration offset).
 - An [`AcquiredPoints`](/docs/api/acq/acquired-points) store filled by explicit capture calls or automatically on pen-button press.
 - The computed head–device transform after `computeRegistration`.
 
 ```cpp title="src/examples/ex_acq_polhemus/main.cpp"
-PolhemusConnection connection;
-PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
-connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak
-PolhemusCoregistration coreg;
-coreg.setConnection(&connection); // station 1 = pen, station 2 = head tracker
-
+PolhemusCoregistration coreg; // station 1 = pen, station 2 = head tracker
 // Model fiducials are the pen fiducials turned 90 deg about z and moved 5 cm in x; the registration must find that transform
 const Eigen::Affine3f truth = Eigen::Translation3f(0.05f, 0.0f, 0.0f) * Eigen::AngleAxisf(0.5f * static_cast<float>(EIGEN_PI), Eigen::Vector3f::UnitZ());
-const QList<FiducialId> fiducials = {FiducialId::NAS, FiducialId::LPA, FiducialId::RPA};
-QList<Eigen::Vector3f> penAt;
-for (const FiducialId id : fiducials) {
-    QEventLoop wait; // let the next mock pen sample arrive, as the user would move the pen
-    QTimer::singleShot(350, &wait, &QEventLoop::quit);
-    wait.exec();
-    coreg.captureCurrentPenPositionAsFiducial(id);
-    penAt.append(coreg.penPosition());
-    coreg.setModelFiducial(id, truth * coreg.penPosition());
+const FiducialId fiducials[] = {FiducialId::NAS, FiducialId::LPA, FiducialId::RPA};
+std::vector<Eigen::Vector3f> penAt;
+constexpr std::size_t kWidth = 14;
+while (penAt.size() < 3) {
+    auto view = reader->lease(1, 2s);
+    if (!view) {
+        break;
+    }
+    const AcqBlockView& block = **view;
+    std::vector<float> frames(kWidth * block.sampleCount());
+    if (!decode(block, AcqMatrixRef<float>::columnMajor(frames.data(), kWidth, block.sampleCount())).ok()) {
+        break;
+    }
+    for (std::size_t i = 0; i < block.sampleCount(); ++i) {
+        const float* f = &frames[i * kWidth];
+        for (int station : {1, 2}) {
+            const float* p = f + (station - 1) * 7;
+            coreg.on_pose(station, Eigen::Vector3f(p[0], p[1], p[2]), Eigen::Quaternionf(p[3], p[4], p[5], p[6]));
+        }
+        for (std::size_t e = 0; e < block.events().size(); ++e) {
+            if (block.events()[e].sample == block.firstSample() + i && penAt.size() < 3) { // a stylus button press
+                const FiducialId id = fiducials[penAt.size()];
+                coreg.captureCurrentPenPositionAsFiducial(id);
+                penAt.push_back(coreg.penPosition());
+                coreg.setModelFiducial(id, truth * coreg.penPosition());
+            }
+        }
+    }
 }
-const bool registered = coreg.computeRegistration();
-connection.close();
+device->close();
+const bool registered = penAt.size() == 3 && coreg.computeRegistration();
 ```
 
 ### Inheritance
@@ -387,11 +401,37 @@ This is the tracker's local Y axis rotated into the world frame, orthogonalised 
 
 ---
 
-### setConnection(conn)
+### on_pose(station, position, orientation)
+
+Takes the pose of a station, as a polhemus:// stream delivers it.
+
+**Parameters:**
+
+- **station** : *int*
+  Station 1..4.
+
+- **position** : *const Eigen::Vector3f &*
+  Position in metres in the transmitter frame.
+
+- **orientation** : *const Eigen::Quaternionf &*
+  Orientation of the sensor.
 
 ---
 
-### connection()
+### on_button(station, position, orientation)
+
+Takes a stylus button press (event code 1 of a polhemus:// stream) at the pose of the station.
+
+**Parameters:**
+
+- **station** : *int*
+  Station whose button was pressed; only the pen station counts.
+
+- **position** : *const Eigen::Vector3f &*
+  Position in metres in the transmitter frame.
+
+- **orientation** : *const Eigen::Quaternionf &*
+  Orientation of the sensor.
 
 ---
 
@@ -523,7 +563,7 @@ Call this when the user clears all fiducials.
 
 ## Example
 
-- Start here: [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx) — Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
+- Start here: [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx) — Polhemus digitiser: stream stylus poses, register fiducials captured with the button, collect points.
 - Full source: [`src/examples/ex_acq_polhemus/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_acq_polhemus/main.cpp)
 - Build target: `ex_acq_polhemus` (runs under CTest)
 
@@ -531,14 +571,23 @@ Call this when the user clears all fiducials.
 
 ### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
 
-Polhemus digitiser: parse Fastrak records, register captured fiducials and collect digitised points.
+Polhemus digitiser: stream stylus poses, register fiducials captured with the button, collect points.
 
-````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 79"
-PolhemusConnection connection;
-PolhemusSerialConfig serial;        // 115200 baud, inches; the hemisphere and stream command a Fastrak needs
-connection.open(QString(), serial); // empty port name = mock backend sweeping a 10 cm sphere; e.g. "/dev/tty.usbserial" for a Fastrak
-PolhemusCoregistration coreg;
-coreg.setConnection(&connection); // station 1 = pen, station 2 = head tracker
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 77"
+PolhemusCoregistration coreg; // station 1 = pen, station 2 = head tracker
+// Model fiducials are the pen fiducials turned 90 deg about z and moved 5 cm in x; the registration must find that transform
+const Eigen::Affine3f truth = Eigen::Translation3f(0.05f, 0.0f, 0.0f) * Eigen::AngleAxisf(0.5f * static_cast<float>(EIGEN_PI), Eigen::Vector3f::UnitZ());
+const FiducialId fiducials[] = {FiducialId::NAS, FiducialId::LPA, FiducialId::RPA};
+std::vector<Eigen::Vector3f> penAt;
+constexpr std::size_t kWidth = 14;
+while (penAt.size() < 3) {
+    auto view = reader->lease(1, 2s);
+    if (!view) {
+        break;
+    }
+    const AcqBlockView& block = **view;
+    std::vector<float> frames(kWidth * block.sampleCount());
+    if (!decode(block, AcqMatrixRef<float>::columnMajor(frames.data(), kWidth, block.sampleCount())).ok()) {
 ````
 
 ## Authors of this file

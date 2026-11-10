@@ -8,7 +8,7 @@
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
  * @date     January, 2020
- * @brief    Contains the Natus plugin library export/import macros.
+ * @brief    Contains the FtBuffer plugin library export/import macros.
  */
 
 #ifndef FTBUFFER_GLOBAL_H

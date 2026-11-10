@@ -62,7 +62,7 @@ static_assert(detail::fiff_kind::kMeg == FIFFV_MEG_CH && detail::fiff_kind::kEeg
               detail::fiff_kind::kSeeg == FIFFV_SEEG_CH && detail::fiff_kind::kDbs == FIFFV_DBS_CH && detail::fiff_kind::kEcog == FIFFV_ECOG_CH &&
               detail::fiff_kind::kFnirs == FIFFV_FNIRS_CH && detail::fiff_kind::kTemperature == FIFFV_TEMPERATURE_CH &&
               detail::fiff_kind::kGalvanic == FIFFV_GALVANIC_CH);
-static_assert(detail::fiff_unit::kNone == FIFF_UNIT_NONE && detail::fiff_unit::kSecond == FIFF_UNIT_SEC && detail::fiff_unit::kAmpere == FIFF_UNIT_A &&
+static_assert(detail::fiff_unit::kNone == FIFF_UNIT_NONE && detail::fiff_unit::kMeter == FIFF_UNIT_M && detail::fiff_unit::kSecond == FIFF_UNIT_SEC && detail::fiff_unit::kAmpere == FIFF_UNIT_A &&
               detail::fiff_unit::kMol == FIFF_UNIT_MOL && detail::fiff_unit::kPascal == FIFF_UNIT_PA && detail::fiff_unit::kWatt == FIFF_UNIT_W &&
               detail::fiff_unit::kVolt == FIFF_UNIT_V && detail::fiff_unit::kOhm == FIFF_UNIT_OHM && detail::fiff_unit::kTesla == FIFF_UNIT_T &&
               detail::fiff_unit::kCelsius == FIFF_UNIT_CEL && detail::fiff_unit::kTeslaPerMeter == FIFF_UNIT_T_M &&

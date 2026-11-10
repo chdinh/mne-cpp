@@ -17,9 +17,27 @@
 //=============================================================================================================
 
 #include "ftbuffer.h"
-#include <memory>
-#include "ftbuffproducer.h"
+
+#include "FormFiles/ftbuffersetupwidget.h"
+
+#include <acq/acq_device_registry.h>
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <fiff/fiff_digitizer_data.h>
+#include <fiff/fiff_info.h>
+#include <scMeas/realtimemultisamplearray.h>
+
+//=============================================================================================================
+// QT INCLUDES
+//=============================================================================================================
+
 #include <QDebug>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -28,44 +46,36 @@
 using namespace FTBUFFERPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace FIFFLIB;
 using namespace Eigen;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FtBuffer::FtBuffer()
-: m_bIsConfigured(false)
-, m_pFtBuffProducer(QSharedPointer<FtBuffProducer>::create(this))
-, m_pFiffInfo(std::make_shared<FiffInfo>())
-, m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10))
-, m_sBufferAddress("127.0.0.1")
-, m_iBufferPort(1972)
-{
-}
+FtBuffer::FtBuffer() = default;
 
 //=============================================================================================================
 
 FtBuffer::~FtBuffer()
 {
+    if (isRunning()) {
+        stop();
+    }
 }
 
 //=============================================================================================================
 
 QSharedPointer<AbstractPlugin> FtBuffer::clone() const
 {
-    QSharedPointer<FtBuffer> pFtBufferClone(new FtBuffer);
-    return pFtBufferClone;
+    return QSharedPointer<FtBuffer>(new FtBuffer());
 }
 
 //=============================================================================================================
 
 void FtBuffer::init()
 {
-    qInfo() << "[FtBuffer::init] Initializing FtBuffer plugin...";
-    m_pRTMSA_BufferOutput = PluginOutputData<RealTimeMultiSampleArray>::create(this, "FtBuffer", "FtBuffer Output");
-    m_pRTMSA_BufferOutput->measurementData()->setName(this->getName()); //Provide name to auto store widget settings
+    m_pRTMSA_BufferOutput = PluginOutputData<RealTimeMultiSampleArray>::create(this, "FtBuffer", "Output data");
+    m_pRTMSA_BufferOutput->measurementData()->setName(getName()); //Provide name to auto store widget settings
     m_outputConnectors.append(m_pRTMSA_BufferOutput);
 }
 
@@ -77,36 +87,56 @@ void FtBuffer::unload()
 
 //=============================================================================================================
 
+std::string FtBuffer::uri() const
+{
+    ACQLIB::AcqUri uri{.scheme = "ftbuffer", .target = {}, .params = {{"simulate", "1"}}};
+    if (!m_bSimulate) {
+        uri.target = m_host + ":" + std::to_string(m_port);
+        uri.params.clear();
+    }
+    return uri.toString();
+}
+
+//=============================================================================================================
+
 bool FtBuffer::start()
 {
-    if (!m_bIsConfigured) {
-        m_pFtBuffProducer->connectToBuffer(m_sBufferAddress,
-                                           m_iBufferPort);
-        if (!m_bIsConfigured) {
-            return false;
-        }
+    ACQLIB::register_ftbuffer_scheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[FtBuffer::start]" << QString::fromStdString(device.error().text());
+        return false;
+    }
+    m_device = std::move(*device);
+    auto fiffInfo = ACQLIB::toFiffInfo(*m_device.stream().info());
+    auto reader = m_device.stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[FtBuffer::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        m_device.close();
+        return false;
     }
 
-    qInfo() << "[FtBuffer::start] Starting FtBuffer...";
+    //The buffer can hold another measurement on every start, so it is set up here and not in init()
+    auto info = std::make_shared<FIFFLIB::FiffInfo>(std::move(*fiffInfo));
+    if (info->dig.size() > 0) {
+        // neuromag2ft puts the acquisition's isotrak, which the HPI plugin fits the coils to
+        auto digitizers = std::make_shared<FIFFLIB::FiffDigitizerData>();
+        digitizers->points = info->dig;
+        digitizers->coord_frame = FIFFV_COORD_HEAD;
+        digitizers->active.assign(info->dig.size(), true);
+        digitizers->discard.assign(info->dig.size(), false);
+        m_pRTMSA_BufferOutput->measurementData()->setDigitizerData(digitizers);
+    }
+    m_pRTMSA_BufferOutput->measurementData()->initFromFiffInfo(info);
+    m_pRTMSA_BufferOutput->measurementData()->setMultiArraySize(1);
 
-    //Move relevant objects to new thread
-    m_pFtBuffProducer->m_pFtConnector->m_pSocket->moveToThread(&m_pProducerThread);
-    m_pFtBuffProducer->m_pFtConnector->moveToThread(&m_pProducerThread);
-    m_pFtBuffProducer->moveToThread(&m_pProducerThread);
-
-    //Connect signals to communicate with new thread
-    connect(m_pFtBuffProducer.data(), &FtBuffProducer::newDataAvailable,
-            this, &FtBuffer::onNewDataAvailable, Qt::DirectConnection);
-    connect(this, &FtBuffer::workCommand,
-            m_pFtBuffProducer.data(), &FtBuffProducer::doWork);
-
-    m_pProducerThread.start();
-
-    qInfo() << "[FtBuffer::start] Producer thread created, sending work command...";
-    emit workCommand();
-
+    if (ACQLIB::AcqError e = m_device.start(); !e.ok()) {
+        qWarning() << "[FtBuffer::start]" << QString::fromStdString(e.text());
+        m_device.close();
+        return false;
+    }
+    m_reader = std::move(*reader);
     QThread::start();
-
     return true;
 }
 
@@ -114,33 +144,13 @@ bool FtBuffer::start()
 
 bool FtBuffer::stop()
 {
-    qInfo() << "[FtBuffer::stop] Stopping.";
-
-    m_bIsConfigured = false;
-
     requestInterruption();
-    wait(500);
-
-    //stops separate producer/client thread first
-    m_pProducerThread.requestInterruption();
-    int itries = 0;
-    while (m_pProducerThread.isRunning()) {
-        msleep(10);
-        if (itries > 10) {
-            break;
-        }
-        ++itries;
-    }
-
-    //Reset ftproducer and sample received list
-    m_pFtBuffProducer.clear();
-    m_pFtBuffProducer = QSharedPointer<FtBuffProducer>::create(this);
+    wait();
+    m_reader = ACQLIB::AcqReader();
+    m_device.close();
 
     // Clear all data in the buffer connected to displays and other plugins
     m_pRTMSA_BufferOutput->measurementData()->clear();
-    m_pCircularBuffer->clear();
-
-    qInfo() << "[FtBuffer::stop] Stopped.";
     return true;
 }
 
@@ -162,118 +172,27 @@ QString FtBuffer::getName() const
 
 QWidget* FtBuffer::setupWidget()
 {
-    FtBufferSetupWidget* setupWidget = new FtBufferSetupWidget(this, QString("MNESCAN/%1").arg(this->getName()));
-    return setupWidget;
+    return new FtBufferSetupWidget(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
 }
 
 //=============================================================================================================
 
 void FtBuffer::run()
 {
-    MatrixXd matData;
-
+    const std::size_t channels = m_device.stream().info()->channelCount();
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
     while (!isInterruptionRequested()) {
-        //qDebug() << "[FtBuffer::run] m_pFiffInfo->dig.size()" << m_pFiffInfo->dig.size();
-        //pop matrix
-        if (m_pCircularBuffer->pop(matData)) {
-            //emit values
-            if (!isInterruptionRequested()) {
-                m_pRTMSA_BufferOutput->measurementData()->setValue(matData);
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (!read) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+                continue;
             }
+            qWarning() << "[FtBuffer::run]" << QString::fromStdString(read.error().text());
+            return;
         }
+        m_pRTMSA_BufferOutput->measurementData()->setValue(block);
     }
-}
-
-//=============================================================================================================
-
-void FtBuffer::onNewDataAvailable(const Eigen::MatrixXd& matData)
-{
-    while (!m_pCircularBuffer->push(matData)) {
-        //Do nothing until the circular buffer is ready to accept new data again
-    }
-}
-
-//=============================================================================================================
-
-bool FtBuffer::setupRTMSA()
-{
-    qInfo() << "[FtBuffer::setupRTMSA] Attempting to set up parameters from .fif file...";
-
-    if (!QFile::exists("neuromag2ft.fif")) {
-        qInfo() << "[FtBuffer::setupRTMSA] Could not open file.  Plugin output won't be based on local fif parameters.";
-    } else {
-        m_pNeuromagHeadChunkData = std::make_shared<FiffRawData>(std::filesystem::path("neuromag2ft.fif"));
-        m_pFiffInfo = std::make_shared<FiffInfo>(m_pNeuromagHeadChunkData->info);
-
-        //Set the RMTSA parameters
-        m_pRTMSA_BufferOutput->measurementData()->initFromFiffInfo(m_pFiffInfo);
-        m_pRTMSA_BufferOutput->measurementData()->setMultiArraySize(1);
-        m_pRTMSA_BufferOutput->measurementData()->setVisibility(true);
-
-        qInfo() << "[FtBuffer::setupRTMSA] Successfully acquired fif info from file.";
-        return m_bIsConfigured = true;
-    }
-
-    return false;
-}
-
-//=============================================================================================================
-
-bool FtBuffer::setupRTMSA(const FIFFLIB::FiffInfo& FiffInfo)
-{
-    //Check for FiffInfo that has not changed its default values and return early
-    if (FiffInfo.sfreq < 0) {
-        return false;
-    }
-
-    qInfo().noquote().nospace() << "attempting to init info";
-
-    m_pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>(FiffInfo);
-
-    qInfo().noquote().nospace() << "init info";
-
-    //Set the RMTSA parameters
-    m_pRTMSA_BufferOutput->measurementData()->initFromFiffInfo(m_pFiffInfo);
-    m_pRTMSA_BufferOutput->measurementData()->setMultiArraySize(1);
-    m_pRTMSA_BufferOutput->measurementData()->setVisibility(true);
-
-    qInfo() << "[FtBuffer::setupRTMSA] Successfully acquired fif info from buffer.";
-    return m_bIsConfigured = true;
-}
-
-//=============================================================================================================
-
-bool FtBuffer::setupRTMSA(const MetaData& metadata)
-{
-    if (metadata.info.sfreq < 0) {
-        return false;
-    } else {
-        m_pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>(metadata.info);
-
-        m_pRTMSA_BufferOutput->measurementData()->initFromFiffInfo(m_pFiffInfo);
-        m_pRTMSA_BufferOutput->measurementData()->setMultiArraySize(1);
-        m_pRTMSA_BufferOutput->measurementData()->setVisibility(true);
-        if (metadata.bFiffDigitizerData) {
-            m_pRTMSA_BufferOutput->measurementData()->setDigitizerData(std::make_shared<FIFFLIB::FiffDigitizerData>(metadata.dig));
-        }
-        m_bIsConfigured = true;
-    }
-
-    return m_bIsConfigured;
-}
-
-//=============================================================================================================
-
-void FtBuffer::setBufferAddress(const QString& sAddress)
-{
-    m_sBufferAddress = sAddress;
-}
-
-//=============================================================================================================
-
-void FtBuffer::setBufferPort(int iPort)
-{
-    m_iBufferPort = iPort;
 }
 
 //=============================================================================================================

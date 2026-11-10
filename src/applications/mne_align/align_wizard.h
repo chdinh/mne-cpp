@@ -11,7 +11,7 @@
  *
  *           Steps: Setup → Fiducials → EegCap → HeadShape → Verify → Save → Done.
  *           Each digitisation step listens to a single
- *           @ref ACQLIB::PolhemusConnection signal for the live cursor and
+ *           @ref MNEALIGN::Digitizer signal for the live cursor and
  *           appends to a shared @ref ACQLIB::AcquiredPoints store on demand.
  *           Digitisation can alternatively be imported from a FIFF .fif
  *           file via the Fiducials page.
@@ -25,7 +25,7 @@
 //=============================================================================================================
 
 #include <acq/devices/polhemus/acquired_points.h>
-#include <acq/devices/polhemus/polhemus_connection.h>
+#include "digitizer.h"
 
 #include <channels/standard_montage.h>
 
@@ -71,7 +71,7 @@ enum class AlignStep
  * @brief Seven-step coregistration wizard for the MNE Align workflow.
  *
  * Steps: Setup → Fiducials → EegCap → HeadShape → Verify → Save → Done.
- * Each digitisation step listens to the @ref ACQLIB::PolhemusConnection for the
+ * Each digitisation step listens to the @ref MNEALIGN::Digitizer for the
  * live cursor and appends to a shared @ref ACQLIB::AcquiredPoints store. The
  * Fiducials page also exposes a “Load digitisation (FIFF …)” action
  * which imports an existing ISOTRAK point set in lieu of live capture.
@@ -90,7 +90,7 @@ public:
      * @param[in] parent      Parent widget.
      */
     AlignWizard(ACQLIB::AcquiredPoints* acquired,
-                ACQLIB::PolhemusConnection* digitizer,
+                Digitizer* digitizer,
                 QWidget* parent = nullptr);
 
     //=========================================================================================================
@@ -248,7 +248,7 @@ private:
     QString nextEegLabel(int* outIdent) const;
 
     ACQLIB::AcquiredPoints* m_pPoints = nullptr;
-    ACQLIB::PolhemusConnection* m_pDigitizer = nullptr;
+    Digitizer* m_pDigitizer = nullptr;
 
     QString m_bemPath;
     CHANNELSLIB::StandardMontage::System m_capSystem = CHANNELSLIB::StandardMontage::System::Standard_1020;

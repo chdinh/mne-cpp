@@ -20,36 +20,25 @@
 //=============================================================================================================
 
 #include "ftbuffer_global.h"
-#include <memory>
 
-#include "FormFiles/ftbuffersetupwidget.h"
-
-#include "ftbuffproducer.h"
-
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <scShared/Plugins/abstractalgorithm.h>
-
-#include <scMeas/realtimemultisamplearray.h>
-
-#include <fiff/fiff_raw_data.h>
-
-#include <base/circular_buffer.h>
-
-#include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QtWidgets>
-#include <QtCore/QtPlugin>
-#include <QDebug>
-#include <QSharedPointer>
-#include <QThread>
+#include <cstdint>
+#include <string>
 
 //=============================================================================================================
-// FORWARD DECLARATION
+// FORWARD DECLARATIONS
 //=============================================================================================================
+
+namespace SCMEASLIB
+{
+class RealTimeMultiSampleArray;
+}
 
 //=============================================================================================================
 // DEFINE NAMESPACE FTBUFFERPLUGIN
@@ -59,180 +48,67 @@ namespace FTBUFFERPLUGIN
 {
 
 //=============================================================================================================
-// FTBUFFERPLUGIN FORWARD DECLARATION
-//=============================================================================================================
-
-class FtBuffProducer;
-
-//=============================================================================================================
 /**
- * Starts new thread for FtBuffProducer which collects data, then outputs that data.
+ * FtBuffer...
  *
- * @brief Handles Ftbuffer data received from FtBuffProducer and outputs it.
+ * @brief Reads a FieldTrip buffer server, e.g. the one neuromag2ft fills on a Neuromag acquisition computer,
+ *        through the ftbuffer:// source of mne_acq_devices, which can also simulate it.
  */
 class FTBUFFER_EXPORT FtBuffer : public SCSHAREDLIB::AbstractSensor
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "scsharedlib/1.0" FILE "ftbuffer.json")
+    Q_PLUGIN_METADATA(IID "scsharedlib/1.0" FILE "ftbuffer.json") //New Qt5 Plugin system replaces Q_EXPORT_PLUGIN2 macro
+    // Use the Q_INTERFACES() macro to tell Qt's meta-object system about the interfaces
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
     friend class FtBufferSetupWidget;
-    friend class FtBuffProducer;
-    friend class FtConnector;
 
 public:
-    //=========================================================================================================
-    /**
-     * Creates an instance of FtBuffer
-     */
     FtBuffer();
+    ~FtBuffer() override;
+
+    QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const override;
+    void init() override;
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Destroys an instace of FtBuffer
+     * Connects to the buffer (or its simulator), waits for the producer's header and starts streaming.
      */
-    ~FtBuffer();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Clone the plugin
+     * Stops streaming and disconnects.
      */
-    virtual QSharedPointer<AbstractPlugin> clone() const;
+    bool stop() override;
 
+    SCSHAREDLIB::AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+    QWidget* setupWidget() override;
+    QString getBuildInfo() override;
+
+protected:
     //=========================================================================================================
     /**
-     * Initializes the plugin.
+     * Hands the buffer's blocks to the connected plugins until stop().
      */
-    virtual void init();
-
-    //=========================================================================================================
-    /**
-     * Is called when plugin is detached of the stage. Can be used to safe settings.
-     */
-    virtual void unload();
-
-    //=========================================================================================================
-    /**
-     * Starts the AbstractSensor.
-     * Pure virtual method inherited by IModule.
-     *
-     * @return true if success, false otherwise.
-     */
-    virtual bool start();
-
-    //=========================================================================================================
-    /**
-     * Stops the AbstractSensor.
-     * Pure virtual method inherited by IModule.
-     *
-     * @return true if success, false otherwise.
-     */
-    virtual bool stop();
-
-    //=========================================================================================================
-    /**
-     * Returns the plugin type.
-     * Pure virtual method inherited by IModule.
-     *
-     * @return type of the AbstractSensor.
-     */
-    virtual PluginType getType() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the plugin name.
-     * Pure virtual method inherited by IModule.
-     *
-     * @return the name of the AbstractSensor.
-     */
-    virtual QString getName() const;
-
-    //=========================================================================================================
-    /**
-     * Returns the set up widget for configuration of AbstractSensor.
-     * Pure virtual method inherited by IModule.
-     *
-     * @return the setup widget.
-     */
-    virtual QWidget* setupWidget();
-
-    virtual QString getBuildInfo();
-
-    //=========================================================================================================
-    /**
-     * Sets address used to connect to buffer (if starting plugin without an established connection).
-     *
-     * @param[in] sAddress      IP address of the FieldTrip buffer
-     */
-    void setBufferAddress(const QString& sAddress);
-
-    //=========================================================================================================
-    /**
-     * Sets port used to connect to buffer (if starting plugin without an established connection).
-     *
-     * @param[in] iPort         Port of the FieldTrip buffer
-     */
-    void setBufferPort(int iPort);
-
-signals:
-    //=========================================================================================================
-    /**
-     * Sends signal to FtBuffProducer to start data aquisition
-     */
-    void workCommand();
+    void run() override;
 
 private:
-    //=========================================================================================================
-    /**
-     * Gets extecuted after start(), currently does nothing
-     */
-    virtual void run();
+    /** @return The ftbuffer:// URI of the current settings. */
+    std::string uri() const;
 
-    //=========================================================================================================
-    /**
-     * Receives new data from producer, publishes to plugin output rtmsa
-     *
-     * @param[in] matData   New data from FtBuffProducer.
-     */
-    void onNewDataAvailable(const Eigen::MatrixXd& matData);
+    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_BufferOutput; /**< The data. */
 
-    //=========================================================================================================
-    /**
-     * Sets up Fiff info from and uses it to initialize m_pRTMSA_BufferOutput
-     */
-    bool setupRTMSA();
+    ACQLIB::AcqDevice m_device; /**< The buffer while streaming. */
+    ACQLIB::AcqReader m_reader; /**< Reads the buffer's stream in run(). */
 
-    //=========================================================================================================
-    /**
-     * Sets up Fiff info from passed FiffInfo and uses it to initialize m_pRTMSA_BufferOutput
-     *
-     * @param[in] FiffInfo  FiffInfo used to set up buffer output.
-     */
-    bool setupRTMSA(const FIFFLIB::FiffInfo& FiffInfo);
-
-    //=========================================================================================================
-    /**
-     * Initializes output based on input measuremnt data object
-     *
-     * @param[in] metadata  object with fiffinfo and optionally digitizer data
-     */
-    bool setupRTMSA(const MetaData& metadata);
-
-    bool m_bIsConfigured; /**< Whether the buffer output has been configured. */
-
-    QMutex m_mutex; /**< Guards shared data from being accessed at the same time. */
-
-    QThread m_pProducerThread; /**< Producer thread for the FtBuffProducer object. */
-
-    QSharedPointer<FtBuffProducer> m_pFtBuffProducer;                                                         /**< Pointer to producer object that handles data from FtConnector*/
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                                                           /**< Fiff measurement info.*/
-    std::shared_ptr<FIFFLIB::FiffRawData> m_pNeuromagHeadChunkData;                                           /**< Fiff into parser for header data collected from Neuromag extended header. */
-    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_BufferOutput; /**< The RealTimeSampleArray to provide the plugin output data.*/
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer;                              /**< Holds incoming raw data. */
-
-    QString m_sBufferAddress; /**< The address used to connect to the buffer if starting without being connected */
-    int m_iBufferPort;        /**< The port used to connect to the buffer if starting without being connected */
+    std::string m_host = "localhost"; /**< Host of the buffer server. */
+    std::uint16_t m_port = 1972;      /**< Port of the buffer server. */
+    int m_iSamplesPerBlock = 100;     /**< Samples per block handed to the connected plugins. */
+    bool m_bSimulate = false;         /**< Simulate neuromag2ft and its buffer. */
 };
-} //namespace end brace
+} // NAMESPACE
 
 #endif // FTBUFFER_H

@@ -8033,28 +8033,6 @@
       "python_url": null
     },
     {
-      "name": "FastrakParser",
-      "module": "acq",
-      "header": "acq/devices/polhemus/fastrak_parser.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": "ex_acq_polhemus",
-      "example_snippet": [
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 56,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
       "name": "FilterIO",
       "module": "dsp",
       "header": "dsp/filterio.h",
@@ -8470,28 +8448,6 @@
       "skigen_candidate": false,
       "documented": true,
       "sidebar_position": 76,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
-      "name": "PolhemusConnection",
-      "module": "acq",
-      "header": "acq/devices/polhemus/polhemus_connection.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": "ex_acq_polhemus",
-      "example_snippet": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 51,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -11381,28 +11337,6 @@
       "python_url": null
     },
     {
-      "name": "FastrakSample",
-      "module": "acq",
-      "header": "acq/devices/polhemus/fastrak_parser.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": "ex_acq_polhemus",
-      "example_snippet": [
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 57,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
       "name": "FilterChpiParams",
       "module": "dsp",
       "header": "dsp/filter_chpi.h",
@@ -11697,28 +11631,6 @@
       "skigen_candidate": false,
       "documented": true,
       "sidebar_position": 60,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
-      "name": "PolhemusSerialConfig",
-      "module": "acq",
-      "header": "acq/devices/polhemus/polhemus_connection.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": null,
-      "example": "ex_acq_polhemus",
-      "example_snippet": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 53,
       "guide": null,
       "python_equiv": null,
       "python_url": null

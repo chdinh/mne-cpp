@@ -19,10 +19,13 @@
 
 #include "neuromag_fiff.h"
 
+#include "../../detail/acq_fiff_codes.h"
+
 #include <algorithm>
 #include <bit>
 #include <chrono>
 #include <cstring>
+#include <format>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -113,20 +116,30 @@ void store(std::vector<std::byte>& out, T value)
     out.insert(out.end(), bytes, bytes + sizeof(T));
 }
 
-/** Appends a tag in big-endian byte order. */
-void append_tag(std::vector<std::byte>& file, int kind, int type, std::span<const std::byte> native, int next = 0)
+constexpr bool kNativeBig = std::endian::native == std::endian::big;
+
+/** Appends a tag in big-endian byte order, or little-endian if @p big_endian is false. */
+void append_tag(std::vector<std::byte>& file, int kind, int type, std::span<const std::byte> native, int next = 0, bool big_endian = true)
 {
     std::vector<std::byte> data(native.begin(), native.end());
-    if constexpr (std::endian::native == std::endian::little) {
-        swap_tag_bytes(type, data, false);
+    const bool swap = big_endian != kNativeBig;
+    if (swap) {
+        swap_tag_bytes(type, data, kNativeBig);
     }
     for (std::int32_t word : {kind, type, static_cast<std::int32_t>(data.size()), next}) {
-        if constexpr (std::endian::native == std::endian::little) {
-            word = byteswap(word);
-        }
-        store(file, word);
+        store(file, swap ? byteswap(word) : word);
     }
     file.insert(file.end(), data.begin(), data.end());
+}
+
+std::vector<std::byte> file_id()
+{
+    std::vector<std::byte> id;
+    const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    for (const std::int32_t word : {kFileVersion, 0, 0, static_cast<std::int32_t>(seconds), 0}) {
+        store(id, word);
+    }
+    return id;
 }
 
 std::vector<std::byte> int_data(std::int32_t value)
@@ -274,12 +287,7 @@ void ACQLIB::detail::big_to_native(int type, std::span<std::byte> data) noexcept
 std::vector<std::byte> ACQLIB::detail::meas_info_file(std::span<const NeuromagTag> meas_info)
 {
     std::vector<std::byte> file;
-    std::vector<std::byte> id;
-    const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    for (const std::int32_t word : {kFileVersion, 0, 0, static_cast<std::int32_t>(seconds), 0}) {
-        store(id, word);
-    }
-    append_tag(file, fiff::kFileId, fiff::kTypeId, id);
+    append_tag(file, fiff::kFileId, fiff::kTypeId, file_id());
     append_tag(file, fiff::kDirPointer, fiff::kTypeInt, int_data(fiff::kNextNone));
     append_tag(file, fiff::kBlockStart, fiff::kTypeInt, int_data(fiff::kBlockMeas));
     for (const NeuromagTag& tag : meas_info) {
@@ -288,4 +296,132 @@ std::vector<std::byte> ACQLIB::detail::meas_info_file(std::span<const NeuromagTa
     append_tag(file, fiff::kBlockEnd, fiff::kTypeInt, int_data(fiff::kBlockMeas));
     append_tag(file, fiff::kNop, fiff::kTypeVoid, {}, fiff::kNextNone);
     return file;
+}
+
+//=============================================================================================================
+
+std::vector<NeuromagTag> ACQLIB::detail::parse_tags(std::span<const std::byte> file, bool big_endian)
+{
+    constexpr std::size_t kHeader = 4 * sizeof(std::int32_t);
+    const bool swap = big_endian != kNativeBig;
+    std::vector<NeuromagTag> tags;
+    std::size_t at = 0;
+    while (at + kHeader <= file.size()) {
+        std::array<std::int32_t, 3> words{};
+        for (std::size_t w = 0; w < words.size(); ++w) {
+            const auto word = load<std::int32_t>(file, at + 4 * w);
+            words[w] = swap ? byteswap(word) : word;
+        }
+        const auto [kind, type, size] = words;
+        if (size < 0 || static_cast<std::size_t>(size) > file.size() - at - kHeader) {
+            break;
+        }
+        const auto data = file.subspan(at + kHeader, static_cast<std::size_t>(size));
+        NeuromagTag& tag = tags.emplace_back(NeuromagTag{kind, type, {data.begin(), data.end()}});
+        if (swap) {
+            swap_tag_bytes(type, tag.data, big_endian);
+        }
+        at += kHeader + static_cast<std::size_t>(size);
+    }
+    return tags;
+}
+
+//=============================================================================================================
+
+std::vector<std::byte> ACQLIB::detail::tag_file(std::span<const NeuromagTag> tags, bool big_endian)
+{
+    std::vector<std::byte> file;
+    append_tag(file, fiff::kFileId, fiff::kTypeId, file_id(), 0, big_endian);
+    append_tag(file, fiff::kDirPointer, fiff::kTypeInt, int_data(fiff::kNextNone), 0, big_endian);
+    for (const NeuromagTag& tag : tags) {
+        append_tag(file, tag.kind, tag.type, tag.data, 0, big_endian);
+    }
+    return file;
+}
+
+//=============================================================================================================
+
+std::vector<NeuromagTag> ACQLIB::detail::block_of(std::span<const NeuromagTag> tags, int block)
+{
+    const auto is = [block](const NeuromagTag& tag, int edge) {
+        return tag.kind == edge && tag.as_int() == block;
+    };
+    const auto begin = std::find_if(tags.begin(), tags.end(), [&](const NeuromagTag& t) { return is(t, fiff::kBlockStart); });
+    const auto end = std::find_if(begin, tags.end(), [&](const NeuromagTag& t) { return is(t, fiff::kBlockEnd); });
+    if (end == tags.end()) {
+        return {};
+    }
+    return {begin, end + 1};
+}
+
+//=============================================================================================================
+
+ACQLIB::AcqExpected<ACQLIB::AcqStreamInfo> ACQLIB::detail::stream_info(std::span<const NeuromagTag> meas_info, const std::string& source,
+                                                                       AcqSampleFormat format)
+{
+    AcqStreamInfo info;
+    info.name = "raw";
+    info.sourceId = source;
+    info.format = format;
+    info.layout = AcqLayout::Interleaved;
+    std::optional<std::int32_t> nchan;
+    int depth = 0; // only tags of the measurement info itself, not of its sub-blocks
+    for (const NeuromagTag& tag : meas_info) {
+        if (tag.kind == fiff::kBlockStart) {
+            ++depth;
+        } else if (tag.kind == fiff::kBlockEnd) {
+            --depth;
+        } else if (depth == 1 && tag.kind == fiff::kNchan) {
+            nchan = tag.as_int();
+        } else if (depth == 1 && tag.kind == fiff::kSfreq) {
+            info.sfreq = tag.as_float().value_or(0.0F);
+        } else if (depth == 1 && tag.kind == fiff::kChInfo) {
+            const auto ch = NeuromagChannel::parse(tag.data);
+            if (!ch) {
+                return AcqError(AcqErrorCode::UnsupportedFormat, "the measurement info holds a truncated channel record");
+            }
+            AcqChannelInfo channel;
+            channel.name = ch->name;
+            channel.kind = acq_kind_of(ch->kind);
+            channel.unit = acq_unit_of(ch->unit);
+            channel.unitExponent = ch->unit_mul;
+            channel.scale = format == AcqSampleFormat::Int32 ? static_cast<double>(ch->cal) * static_cast<double>(ch->range) : 1.0;
+            AcqFiffChannel fiff;
+            fiff.kind = ch->kind;
+            fiff.coilType = ch->coil_type;
+            fiff.logicalNo = ch->log_no;
+            fiff.scannerNo = ch->scan_no;
+            fiff.unit = ch->unit;
+            fiff.unitMul = ch->unit_mul;
+            fiff.coordFrame = fiff_coord_frame_of(ch->kind);
+            fiff.cal = ch->cal;
+            fiff.range = ch->range;
+            fiff.loc = ch->loc;
+            channel.fiff = fiff;
+            info.channels.push_back(std::move(channel));
+        }
+    }
+    if (info.channels.empty() || (nchan && static_cast<std::size_t>(*nchan) != info.channels.size())) {
+        return AcqError(AcqErrorCode::UnsupportedFormat,
+                        std::format("the measurement info describes {} of {} channels", info.channels.size(), nchan.value_or(0)));
+    }
+    if (info.sfreq <= 0.0) {
+        return AcqError(AcqErrorCode::UnsupportedFormat, "the measurement info has no sampling rate");
+    }
+    info.extensions.push_back({kMeasInfoSchema, meas_info_file(meas_info)});
+    return info;
+}
+
+//=============================================================================================================
+
+std::optional<std::size_t> ACQLIB::detail::trigger_channel(const AcqStreamInfo& info)
+{
+    for (const char* name : {"STI 014", "STI101"}) {
+        const auto it = std::find_if(info.channels.begin(), info.channels.end(), [&](const AcqChannelInfo& c) { return c.name == name; });
+        if (it != info.channels.end()) {
+            return static_cast<std::size_t>(it - info.channels.begin());
+        }
+    }
+    const auto it = std::find_if(info.channels.begin(), info.channels.end(), [](const AcqChannelInfo& c) { return c.kind == AcqChannelKind::Stim; });
+    return it == info.channels.end() ? std::nullopt : std::optional<std::size_t>(static_cast<std::size_t>(it - info.channels.begin()));
 }

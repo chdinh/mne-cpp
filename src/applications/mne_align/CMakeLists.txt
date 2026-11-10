@@ -20,6 +20,7 @@ list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
 set(MNE_LIBS_REQUIRED
     mne_acq_polhemus
+    mne_acq_devices
     mne_channels
     mne_base
     mne_math
@@ -39,12 +40,14 @@ set(MNE_LIBS_REQUIRED
 #---------------------------------------------------------------------------
 set(MNE_ALIGN_CORE_SOURCES
     mne_align.cpp
+    digitizer.cpp
     align_wizard.cpp
     align_3d_view.cpp
 )
 
 set(MNE_ALIGN_CORE_HEADERS
     mne_align.h
+    digitizer.h
     align_wizard.h
     align_3d_view.h
     qt_conversions.h

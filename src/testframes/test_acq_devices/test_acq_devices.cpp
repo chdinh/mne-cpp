@@ -14,6 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <acq/acq_convert.h>
 #include <acq/acq_device.h>
 #include <acq/acq_device_registry.h>
 #include <acq/devices/acq_devices.h>
@@ -27,6 +28,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <format>
 #include <string>
@@ -35,6 +37,7 @@
 
 #if !defined(_WIN32)
 #include <arpa/inet.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <sys/socket.h>
@@ -384,6 +387,371 @@ private:
     std::vector<std::string> m_commands;
     std::vector<std::thread> m_threads;
 };
+
+/** Appends @p value to @p out, big-endian if @p big. */
+template<typename T>
+void append_value(std::vector<std::byte>& out, T value, bool big = false)
+{
+    std::array<std::byte, sizeof(T)> bytes{};
+    std::memcpy(bytes.data(), &value, sizeof(T));
+    if (big) {
+        std::reverse(bytes.begin(), bytes.end());
+    }
+    out.insert(out.end(), bytes.begin(), bytes.end());
+}
+
+/** Appends a FIFF tag whose data are words (or a channel record's words and name). */
+void append_fiff_tag(std::vector<std::byte>& out, std::int32_t kind, std::int32_t type, const std::vector<std::byte>& data, bool big)
+{
+    for (const std::int32_t word : {kind, type, static_cast<std::int32_t>(data.size()), 0}) {
+        append_value(out, word, big);
+    }
+    out.insert(out.end(), data.begin(), data.end());
+}
+
+std::vector<std::byte> fiff_words(std::initializer_list<std::int32_t> words, bool big)
+{
+    std::vector<std::byte> out;
+    for (const std::int32_t word : words) {
+        append_value(out, word, big);
+    }
+    return out;
+}
+
+/** A channel record (fiffChInfoRec) in little-endian byte order. */
+std::vector<std::byte> fiff_channel(std::int32_t kind, std::int32_t coil, std::int32_t unit, float cal, const char* name)
+{
+    std::vector<std::byte> out;
+    for (const std::int32_t word : {1, 1, kind}) {
+        append_value(out, word);
+    }
+    append_value(out, 1.0F); // range
+    append_value(out, cal);
+    append_value(out, coil);
+    for (int i = 0; i < 12; ++i) {
+        append_value(out, i == 11 ? 1.0F : 0.0F);
+    }
+    append_value(out, unit);
+    append_value(out, std::int32_t{0});
+    std::array<char, 16> chars{};
+    std::strncpy(chars.data(), name, chars.size() - 1);
+    for (const char c : chars) {
+        out.push_back(static_cast<std::byte>(c));
+    }
+    return out;
+}
+
+/**
+ * A FieldTrip buffer server as neuromag2ft fills it: a header with the channel names, the Neuromag measurement
+ * info (little-endian tags) and an isotrak file (big-endian FIFF) for two MEG channels and STI 014 at 600 Hz,
+ * float32. After the stream started it holds 8 samples and two events (one with a string value), then it gets
+ * a new header.
+ */
+class FakeFtBuffer
+{
+public:
+    FakeFtBuffer()
+    {
+        m_listener = ::socket(AF_INET, SOCK_STREAM, 0);
+        sockaddr_in tcp{};
+        tcp.sin_family = AF_INET;
+        tcp.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        socklen_t length = sizeof(tcp);
+        if (m_listener < 0 || ::bind(m_listener, reinterpret_cast<sockaddr*>(&tcp), sizeof(tcp)) != 0 || ::listen(m_listener, 4) != 0 ||
+            ::getsockname(m_listener, reinterpret_cast<sockaddr*>(&tcp), &length) != 0) {
+            return;
+        }
+        m_port = ntohs(tcp.sin_port);
+        m_thread = std::thread([this] { serve(); });
+    }
+
+    ~FakeFtBuffer()
+    {
+        m_stop = true;
+        ::shutdown(m_listener, SHUT_RDWR);
+        ::close(m_listener);
+        m_thread.join();
+    }
+
+    FakeFtBuffer(const FakeFtBuffer&) = delete;
+    FakeFtBuffer& operator=(const FakeFtBuffer&) = delete;
+
+    [[nodiscard]] int port() const
+    {
+        return m_port;
+    }
+
+    [[nodiscard]] std::vector<std::uint16_t> commands()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_commands;
+    }
+
+private:
+    static std::vector<std::byte> header()
+    {
+        std::vector<std::byte> meas; // the acquisition's tags in its (little-endian) byte order
+        append_fiff_tag(meas, 100, 31, std::vector<std::byte>(20), false);
+        append_fiff_tag(meas, 101, 3, fiff_words({-1}, false), false);
+        append_fiff_tag(meas, 104, 3, fiff_words({100}, false), false);
+        append_fiff_tag(meas, 104, 3, fiff_words({101}, false), false);
+        append_fiff_tag(meas, 200, 3, fiff_words({3}, false), false);
+        std::vector<std::byte> sfreq;
+        append_value(sfreq, 600.0F);
+        append_fiff_tag(meas, 201, 4, sfreq, false);
+        append_fiff_tag(meas, 203, 30, fiff_channel(1, 3022, 112, 1e-13F, "MEG 0111"), false);
+        append_fiff_tag(meas, 203, 30, fiff_channel(1, 3012, 201, 2e-13F, "MEG 0112"), false);
+        append_fiff_tag(meas, 203, 30, fiff_channel(3, 0, -1, 1.0F, "STI 014"), false);
+        append_fiff_tag(meas, 105, 3, fiff_words({101}, false), false);
+        append_fiff_tag(meas, 104, 3, fiff_words({102}, false), false);
+
+        std::vector<std::byte> isotrak; // a FIFF file with one cardinal point
+        append_fiff_tag(isotrak, 100, 31, std::vector<std::byte>(20), true);
+        append_fiff_tag(isotrak, 104, 3, fiff_words({107}, true), true);
+        std::vector<std::byte> point = fiff_words({1, 2}, true);
+        for (const float r : {0.0F, 0.1F, 0.0F}) {
+            append_value(point, r, true);
+        }
+        append_fiff_tag(isotrak, 213, 33, point, true);
+        append_fiff_tag(isotrak, 105, 3, fiff_words({107}, true), true);
+
+        const std::string names("MEG 0111\0MEG 0112\0STI 014\0", 26);
+        std::vector<std::byte> chunks;
+        const auto chunk = [&](std::uint32_t type, std::span<const std::byte> data) {
+            append_value(chunks, type);
+            append_value(chunks, static_cast<std::uint32_t>(data.size()));
+            chunks.insert(chunks.end(), data.begin(), data.end());
+        };
+        chunk(1, std::as_bytes(std::span(names)));
+        chunk(8, meas);
+        chunk(9, isotrak);
+
+        std::vector<std::byte> out;
+        for (const std::uint32_t word : {3U, 0U, 0U}) {
+            append_value(out, word);
+        }
+        append_value(out, 600.0F);
+        append_value(out, std::uint32_t{9}); // float32
+        append_value(out, static_cast<std::uint32_t>(chunks.size()));
+        out.insert(out.end(), chunks.begin(), chunks.end());
+        return out;
+    }
+
+    static std::vector<std::byte> events()
+    {
+        std::vector<std::byte> out;
+        const auto event = [&](std::uint32_t value_type, std::span<const std::byte> value, std::int32_t sample) {
+            const std::string type = "trigger";
+            for (const std::uint32_t word : {0U, static_cast<std::uint32_t>(type.size()), value_type, 1U}) {
+                append_value(out, word);
+            }
+            for (const std::int32_t word : {sample, 0, 0}) {
+                append_value(out, word);
+            }
+            append_value(out, static_cast<std::uint32_t>(type.size() + value.size()));
+            const auto chars = std::as_bytes(std::span(type));
+            out.insert(out.end(), chars.begin(), chars.end());
+            out.insert(out.end(), value.begin(), value.end());
+        };
+        const std::int32_t code = 7;
+        event(7, std::as_bytes(std::span(&code, 1)), 2);
+        const std::string text = "start";
+        event(0, std::as_bytes(std::span(text)), 4);
+        return out;
+    }
+
+    static std::vector<std::byte> samples()
+    {
+        std::vector<std::byte> out;
+        for (const std::uint32_t word : {3U, 8U, 9U, 8U * 3U * 4U}) {
+            append_value(out, word);
+        }
+        for (int s = 0; s < 8; ++s) {
+            for (const float v : {1e-12F * static_cast<float>(100 + s), -1e-11F * static_cast<float>(s), s >= 5 ? 3.0F : 0.0F}) {
+                append_value(out, v);
+            }
+        }
+        return out;
+    }
+
+    static bool read_all(int fd, std::byte* data, std::size_t size)
+    {
+        while (size > 0) {
+            const ssize_t got = ::recv(fd, data, size, 0);
+            if (got <= 0) {
+                return false;
+            }
+            data += got;
+            size -= static_cast<std::size_t>(got);
+        }
+        return true;
+    }
+
+    void answer(int fd, std::uint16_t command, const std::vector<std::byte>& payload)
+    {
+        std::vector<std::byte> out;
+        append_value(out, std::uint16_t{1});
+        append_value(out, command);
+        append_value(out, static_cast<std::uint32_t>(payload.size()));
+        out.insert(out.end(), payload.begin(), payload.end());
+        static_cast<void>(::send(fd, out.data(), out.size(), 0));
+    }
+
+    void serve()
+    {
+        const int fd = ::accept(m_listener, nullptr, nullptr);
+        if (fd < 0) {
+            return;
+        }
+        int waits = 0;
+        while (!m_stop) {
+            std::array<std::byte, 8> def{};
+            if (!read_all(fd, def.data(), def.size())) {
+                break;
+            }
+            std::uint16_t command = 0;
+            std::uint32_t size = 0;
+            std::memcpy(&command, def.data() + 2, 2);
+            std::memcpy(&size, def.data() + 4, 4);
+            std::vector<std::byte> payload(size);
+            if (!read_all(fd, payload.data(), size)) {
+                break;
+            }
+            {
+                std::lock_guard<std::mutex> lock(m_mutex);
+                m_commands.push_back(command);
+            }
+            if (command == 0x201) {
+                answer(fd, 0x204, header());
+            } else if (command == 0x402) {
+                // The stream starts empty; then the samples and events arrive; then a new header resets the counts
+                const std::uint32_t samples = waits == 0 ? 0 : waits == 1 ? 8
+                                                                          : 0;
+                const std::uint32_t count = waits == 0 ? 0 : waits == 1 ? 2
+                                                                        : 0;
+                ++waits;
+                std::vector<std::byte> counts;
+                append_value(counts, samples);
+                append_value(counts, count);
+                answer(fd, 0x404, counts);
+            } else if (command == 0x203) {
+                answer(fd, 0x204, events());
+            } else if (command == 0x202) {
+                answer(fd, 0x204, samples());
+            } else {
+                answer(fd, 0x205, {});
+            }
+        }
+        ::close(fd);
+    }
+
+    int m_listener = -1;
+    int m_port = 0;
+    std::atomic<bool> m_stop{false};
+    std::mutex m_mutex;
+    std::vector<std::uint16_t> m_commands;
+    std::thread m_thread;
+};
+
+/**
+ * A Fastrak at the far end of a pseudo-terminal: it records the commands it receives, answers the first "C"
+ * with two updates of stations 1 and 2 (between them a station that is not used and lines that are no
+ * records), then falls silent like a pressed stylus button, and answers the next "C" with one more update.
+ */
+class FakeFastrak
+{
+public:
+    FakeFastrak()
+    {
+        m_master = ::posix_openpt(O_RDWR | O_NOCTTY);
+        if (m_master < 0 || ::grantpt(m_master) != 0 || ::unlockpt(m_master) != 0 || ::ptsname(m_master) == nullptr) {
+            return;
+        }
+        m_port = ::ptsname(m_master);
+        m_thread = std::thread([this] { serve(); });
+    }
+
+    ~FakeFastrak()
+    {
+        m_stop.store(true);
+        if (m_thread.joinable()) {
+            m_thread.join();
+        }
+        if (m_master >= 0) {
+            ::close(m_master);
+        }
+    }
+
+    FakeFastrak(const FakeFastrak&) = delete;
+    FakeFastrak& operator=(const FakeFastrak&) = delete;
+
+    [[nodiscard]] const std::string& port() const
+    {
+        return m_port;
+    }
+
+    [[nodiscard]] std::vector<std::string> commands()
+    {
+        std::lock_guard lock(m_mutex);
+        return m_commands;
+    }
+
+private:
+    void send(std::string_view text) const
+    {
+        static_cast<void>(::write(m_master, text.data(), text.size()));
+    }
+
+    void serve()
+    {
+        std::string pending;
+        int starts = 0;
+        while (!m_stop.load()) {
+            pollfd p{m_master, POLLIN, 0};
+            if (::poll(&p, 1, 20) <= 0 || (p.revents & POLLIN) == 0) {
+                std::this_thread::sleep_for(5ms); // no reader on the terminal yet
+                continue;
+            }
+            std::array<char, 256> chunk{};
+            const ssize_t got = ::read(m_master, chunk.data(), chunk.size());
+            if (got <= 0) {
+                continue;
+            }
+            pending.append(chunk.data(), static_cast<std::size_t>(got));
+            for (std::size_t end = pending.find('\r'); end != std::string::npos; end = pending.find('\r')) {
+                const std::string command = pending.substr(0, end);
+                pending.erase(0, end + 1);
+                {
+                    std::lock_guard lock(m_mutex);
+                    m_commands.push_back(command);
+                }
+                if (command != "C") {
+                    continue;
+                }
+                if (++starts == 1) {
+                    // Inches; station 1 with Euler angles, station 2 with a quaternion and fields run together
+                    send("01   1.0000   2.0000  -3.0000   90.000    0.000    0.000\r\n"
+                         "\r\n"
+                         "03   9.0000   9.0000   9.0000    0.000    0.000    0.000\r\n"
+                         "02 0.8829-0.3055-1.0000 0 0 0 2\r\n"
+                         "bad record\r\n"
+                         "01   0.0000   0.0000   1.0000\r\n"
+                         "02   0.0000   1.0000   0.0000   0.000   0.000   0.000\r\n");
+                } else {
+                    send("01   2.0000   0.0000   0.0000    0.000    0.000    0.000\r\n"
+                         "02   0.0000   2.0000   0.0000    0.000    0.000    0.000\r\n");
+                }
+            }
+        }
+    }
+
+    int m_master = -1;
+    std::string m_port;
+    std::atomic<bool> m_stop{false};
+    std::mutex m_mutex;
+    std::vector<std::string> m_commands;
+    std::thread m_thread;
+};
 #endif
 
 } // namespace
@@ -444,6 +812,20 @@ private slots:
     void testNeuromagInvalidParameters();
     void testNeuromagHardwareUnavailable();
     void testNeuromagReadsTheDataServer();
+    void testPolhemusStreamLayout();
+    void testPolhemusSimulatorSweepsTheStylus();
+    void testPolhemusButtonPressIsAnEvent();
+    void testPolhemusInvalidParameters_data();
+    void testPolhemusInvalidParameters();
+    void testPolhemusHardwareUnavailable();
+    void testPolhemusReadsTheSerialPort();
+    void testFtBufferStreamLayout();
+    void testFtBufferMatchesNeuromag();
+    void testFtBufferWaitsForGatingReader();
+    void testFtBufferInvalidParameters_data();
+    void testFtBufferInvalidParameters();
+    void testFtBufferServerUnavailable();
+    void testFtBufferReadsTheServer();
 };
 
 //=============================================================================================================
@@ -455,6 +837,8 @@ void TestAcqDevices::initTestCase()
     QVERIFY(register_gusbamp_scheme().ok());
     QVERIFY(register_eego_scheme().ok());
     QVERIFY(register_neuromag_scheme().ok());
+    QVERIFY(register_polhemus_scheme().ok());
+    QVERIFY(register_ftbuffer_scheme().ok());
 }
 
 //=============================================================================================================
@@ -1345,6 +1729,321 @@ void TestAcqDevices::testNeuromagReadsTheDataServer()
     const std::vector<std::string> expected = {"pass", "name", "vara maxBuflen 4", "setu", "meas", "stop",
                                                "pass", "name", "vara maxBuflen 4", "setu", "meas", "stop"};
     QCOMPARE(dacq.commands(), expected);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testPolhemusStreamLayout()
+{
+    auto device = AcqDevice::open("polhemus://?simulate=1&stations=4,1,2");
+    QVERIFY(device);
+    QCOMPARE(device->description().backend, std::string("polhemus"));
+    const auto info = device->stream().info();
+    QCOMPARE(info->name, std::string("poses"));
+    QCOMPARE(info->format, AcqSampleFormat::Float32);
+    QCOMPARE(info->sfreq, 40.0); // 120 records per second shared by three stations
+    QCOMPARE(info->channelCount(), std::size_t(21));
+    const std::array<const char*, 7> names = {"X", "Y", "Z", "QW", "QX", "QY", "QZ"};
+    for (std::size_t c = 0; c < 21; ++c) {
+        const AcqChannelInfo& channel = info->channels[c];
+        QCOMPARE(channel.name, std::format("{} {}", std::array{1, 2, 4}[c / 7], names[c % 7]));
+        QCOMPARE(channel.kind, c % 7 < 3 ? AcqChannelKind::Position : AcqChannelKind::Orientation);
+        QCOMPARE(channel.unit, c % 7 < 3 ? AcqUnit::Meter : AcqUnit::None);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testPolhemusSimulatorSweepsTheStylus()
+{
+    // One second of 120 records for two stations; centimetres and inches describe the same sweep
+    const Recording cm = record("polhemus://?simulate=1&units=cm&realtime=0&duration=1&seed=7");
+    const Recording in = record("polhemus://?simulate=1&units=in&realtime=0&duration=1&seed=7");
+    QCOMPARE(cm.channels, std::size_t(14));
+    QCOMPARE(cm.frames(), std::size_t(60));
+    QCOMPARE(in.frames(), cm.frames());
+    QVERIFY(cm.events.empty());
+    for (std::size_t f = 0; f < cm.frames(); ++f) {
+        for (std::size_t c = 0; c < 14; ++c) {
+            QVERIFY2(std::abs(cm.at(f, c) - in.at(f, c)) < 2e-5, qPrintable(QString("frame %1 channel %2").arg(f).arg(c)));
+        }
+        // The tracker circles at 10 cm without turning; the stylus turns about z as it sweeps
+        QVERIFY(std::abs(std::hypot(cm.at(f, 7), cm.at(f, 8)) - 0.10) < 1e-4);
+        QVERIFY(std::abs(cm.at(f, 10) - 1.0) < 1e-6);
+        QVERIFY(std::abs(std::hypot(cm.at(f, 3), cm.at(f, 6)) - 1.0) < 1e-5);
+        QVERIFY(std::abs(cm.at(f, 4)) < 1e-6 && std::abs(cm.at(f, 5)) < 1e-6);
+    }
+    // The stylus moves from frame to frame
+    QVERIFY(std::abs(cm.at(1, 0) - cm.at(0, 0)) > 1e-3);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testPolhemusButtonPressIsAnEvent()
+{
+    // A press every quarter second (15 updates) pauses the output; the pause repeats the last poses in a frame
+    // with the event, and the output starts again. The press with the last record ends the session instead.
+    const Recording r = record("polhemus://?simulate=1&button=0.25&pause=80&duration=1");
+    QCOMPARE(r.frames(), std::size_t(63));
+    QCOMPARE(r.events.size(), std::size_t(3));
+    for (std::size_t e = 0; e < r.events.size(); ++e) {
+        const std::size_t at = 16 * e + 15;
+        QCOMPARE(r.events[e].sample, std::uint64_t(at));
+        QCOMPARE(r.events[e].code, 1);
+        for (std::size_t c = 0; c < r.channels; ++c) {
+            QCOMPARE(r.at(at, c), r.at(at - 1, c));
+        }
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testPolhemusInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("target") << "polhemus://COM3?simulate=1";
+    QTest::newRow("station") << "polhemus://?simulate=1&stations=5";
+    QTest::newRow("repeated station") << "polhemus://?simulate=1&stations=1,1";
+    QTest::newRow("no station") << "polhemus://?simulate=1&stations=";
+    QTest::newRow("units") << "polhemus://?simulate=1&units=mm";
+    QTest::newRow("hemisphere zero") << "polhemus://?simulate=1&hemisphere=0,0,0";
+    QTest::newRow("hemisphere short") << "polhemus://?simulate=1&hemisphere=1,2";
+    QTest::newRow("baud") << "polhemus://?simulate=1&baud=0";
+    QTest::newRow("pause") << "polhemus://?simulate=1&pause=0";
+}
+
+void TestAcqDevices::testPolhemusInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testPolhemusHardwareUnavailable()
+{
+#if defined(_WIN32)
+    QCOMPARE(openError("polhemus://COM250"), AcqErrorCode::DeviceNotFound);
+#else
+    auto device = AcqDevice::open("polhemus:///no/such/port");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::DeviceNotFound);
+    QVERIFY(device.error().text().find("/no/such/port") != std::string::npos);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testPolhemusReadsTheSerialPort()
+{
+#if defined(_WIN32)
+    QSKIP("pseudo-terminals are POSIX");
+#else
+    FakeFastrak fastrak;
+    QVERIFY(!fastrak.port().empty());
+    auto device = AcqDevice::open(std::format("polhemus://{}?hemisphere=0,0,1", fastrak.port()));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QVERIFY(device->description().device.find(fastrak.port()) != std::string::npos);
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+
+    std::vector<float> frames;
+    std::vector<AcqEvent> events;
+    const auto deadline = std::chrono::steady_clock::now() + 5s;
+    while (frames.size() < 4 * 14 && std::chrono::steady_clock::now() < deadline) {
+        auto view = reader->acquire(1, 100ms);
+        if (!view) {
+            continue;
+        }
+        const std::size_t first = frames.size();
+        frames.resize(first + 14 * view->sampleCount());
+        QVERIFY(decode(*view, AcqMatrixRef<float>::columnMajor(frames.data() + first, 14, view->sampleCount())).ok());
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            events.push_back(view->events()[e]);
+        }
+        QVERIFY(reader->release(*view).ok());
+    }
+    device->close();
+    QCOMPARE(frames.size(), std::size_t(4 * 14));
+
+    // Inches to metres; azimuth 90 degrees turns about z; the quaternion 0 0 0 2 is normalised
+    const auto at = [&](std::size_t frame, std::size_t channel) {
+        return static_cast<double>(frames[frame * 14 + channel]);
+    };
+    const std::array<double, 14> first = {0.0254, 0.0508, -0.0762, std::sqrt(0.5), 0, 0, std::sqrt(0.5),
+                                          0.8829 * 0.0254, -0.3055 * 0.0254, -0.0254, 0, 0, 0, 1};
+    for (std::size_t c = 0; c < 14; ++c) {
+        QVERIFY2(std::abs(at(0, c) - first[c]) < 1e-6, qPrintable(QString::number(c)));
+    }
+    // A record without angles keeps the identity
+    QVERIFY(std::abs(at(1, 2) - 0.0254) < 1e-6 && at(1, 3) == 1.0);
+    QVERIFY(std::abs(at(1, 8) - 0.0254) < 1e-6);
+    // The silence after the second update was a button press: a frame at its poses, then the next update
+    QCOMPARE(events.size(), std::size_t(1));
+    QCOMPARE(events[0].sample, std::uint64_t(2));
+    QCOMPARE(events[0].code, 1);
+    for (std::size_t c = 0; c < 14; ++c) {
+        QCOMPARE(at(2, c), at(1, c));
+    }
+    QVERIFY(std::abs(at(3, 0) - 0.0508) < 1e-6 && std::abs(at(3, 8) - 0.0508) < 1e-6);
+
+    const std::vector<std::string> expected = {"P", "l1,1", "l2,1", "l3,0", "l4,0", "O1,2,4,1", "H1,0,0,1", "O2,2,4,1", "H2,0,0,1", "C", "C", "P"};
+    QVERIFY(QTest::qWaitFor([&] { return fastrak.commands().size() >= expected.size(); }, 2000));
+    QCOMPARE(fastrak.commands(), expected);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testFtBufferStreamLayout()
+{
+    auto device = AcqDevice::open("ftbuffer://?simulate=1&meg=4&eeg=2&rate=500");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().backend, std::string("ftbuffer"));
+    // neuromag2ft puts the acquisition's channels and measurement info, and floats in physical units
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float32);
+    QCOMPARE(info->sfreq, 500.0);
+    QCOMPARE(info->channelCount(), std::size_t(7));
+    QCOMPARE(info->channels[0].name, std::string("MEG 0001"));
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Meg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Tesla);
+    QCOMPARE(info->channels[0].scale, 1.0);
+    QVERIFY(info->channels[0].fiff.has_value());
+    QCOMPARE(info->channels[4].name, std::string("EEG 001"));
+    QCOMPARE(info->channels[6].name, std::string("STI 014"));
+    QCOMPARE(info->channels[6].kind, AcqChannelKind::Stim);
+    QCOMPARE(info->extensions.size(), std::size_t(1));
+    QCOMPARE(info->extensions[0].schema, std::string("fiff.MeasInfo/1"));
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testFtBufferMatchesNeuromag()
+{
+    // The relay puts the acquisition's samples times calibration and range
+    const Recording relayed = record("ftbuffer://?simulate=1&meg=4&eeg=2&rate=500&block=100&seed=3&realtime=0&duration=2");
+    const Recording direct = record("neuromag://?simulate=1&meg=4&eeg=2&rate=500&seed=3&realtime=0&duration=2");
+    QCOMPARE(relayed.channels, std::size_t(7));
+    QCOMPARE(relayed.frames(), std::size_t(1000));
+    QCOMPARE(direct.frames(), relayed.frames());
+    for (std::size_t s = 0; s < relayed.frames(); ++s) {
+        for (std::size_t c = 0; c < 7; ++c) {
+            QVERIFY2(std::abs(relayed.at(s, c) - direct.at(s, c)) <= 1e-6 * std::abs(direct.at(s, c)) + 1e-30, qPrintable(QString::number(c)));
+        }
+    }
+    QVERIFY(!direct.events.empty());
+    QCOMPARE(relayed.events.size(), direct.events.size());
+    for (std::size_t e = 0; e < direct.events.size(); ++e) {
+        QCOMPARE(relayed.events[e].sample, direct.events[e].sample);
+        QCOMPARE(relayed.events[e].code, direct.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testFtBufferWaitsForGatingReader()
+{
+    // Six seconds are more than the stream's ring holds; the relay waits while the reader is busy
+    auto device = AcqDevice::open("ftbuffer://?simulate=1&meg=4&realtime=0&duration=6");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(6000));
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testFtBufferInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("target") << "ftbuffer://localhost?simulate=1";
+    QTest::newRow("port") << "ftbuffer://localhost:0";
+    QTest::newRow("port text") << "ftbuffer://localhost:ft";
+    QTest::newRow("host") << "ftbuffer://:1972";
+    QTest::newRow("timeout") << "ftbuffer://?simulate=1&timeout=0";
+    QTest::newRow("channels") << "ftbuffer://?simulate=1&meg=0";
+    QTest::newRow("rate") << "ftbuffer://?simulate=1&rate=0";
+}
+
+void TestAcqDevices::testFtBufferInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testFtBufferServerUnavailable()
+{
+    auto device = AcqDevice::open("ftbuffer://127.0.0.1:1?timeout=0.5");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::DeviceNotFound);
+    QVERIFY(device.error().text().find("127.0.0.1:1") != std::string::npos);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testFtBufferReadsTheServer()
+{
+#if defined(_WIN32)
+    QSKIP("the fake server uses POSIX sockets");
+#else
+    FakeFtBuffer buffer;
+    QVERIFY(buffer.port() > 0);
+    auto device = AcqDevice::open(std::format("ftbuffer://127.0.0.1:{}", buffer.port()));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
+    QCOMPARE(info->sfreq, 600.0);
+    QCOMPARE(info->channelCount(), std::size_t(3));
+    QCOMPARE(info->channels[0].name, std::string("MEG 0111"));
+    QCOMPARE(info->channels[1].unit, AcqUnit::TeslaPerMeter);
+    QCOMPARE(info->channels[1].scale, 1.0);
+    QCOMPARE(info->channels[2].kind, AcqChannelKind::Stim);
+
+    // The isotrak point joined the measurement info: a big-endian FIFF_DIG_POINT tag of 20 bytes
+    const std::vector<std::byte>& file = info->extensions.at(0).data;
+    std::vector<std::byte> dig;
+    for (const std::int32_t word : {213, 33, 20}) {
+        append_value(dig, word, true);
+    }
+    QVERIFY(std::search(file.begin(), file.end(), dig.begin(), dig.end()) != file.end());
+
+    const Recording recorded = record_device(*device);
+    QCOMPARE(recorded.frames(), std::size_t(8));
+    for (std::size_t s = 0; s < 8; ++s) {
+        QCOMPARE(static_cast<float>(recorded.at(s, 0)), 1e-12F * static_cast<float>(100 + s));
+        QCOMPARE(static_cast<float>(recorded.at(s, 1)), -1e-11F * static_cast<float>(s));
+    }
+    // The numeric event of the buffer, then the change of STI 014; the event with a text value is not one
+    QCOMPARE(recorded.events.size(), std::size_t(2));
+    QCOMPARE(recorded.events[0].sample, std::uint64_t(2));
+    QCOMPARE(recorded.events[0].code, 7);
+    QCOMPARE(recorded.events[1].sample, std::uint64_t(5));
+    QCOMPARE(recorded.events[1].code, 3);
+    device->close();
+
+    // Header, the counts at start, the counts with data, events, samples, and the new header's counts
+    const std::vector<std::uint16_t> expected = {0x201, 0x402, 0x402, 0x203, 0x202, 0x402};
+    QCOMPARE(buffer.commands(), expected);
 #endif
 }
 

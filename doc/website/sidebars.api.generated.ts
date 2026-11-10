@@ -803,13 +803,9 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/acq/acq-recorder-options',
         'api/acq/acq-recorder-stats',
         'api/acq/acq-bids-path',
-        'api/acq/polhemus-connection',
         'api/acq/polhemus-coregistration',
-        'api/acq/polhemus-serial-config',
         'api/acq/acquired-points',
-        'api/acq/digitized-point',
-        'api/acq/fastrak-parser',
-        'api/acq/fastrak-sample'
+        'api/acq/digitized-point'
       ],
     }
 ];

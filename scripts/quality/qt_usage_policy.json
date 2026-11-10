@@ -39,11 +39,10 @@
       "modules": []
     },
     "acq/devices/polhemus": {
-      "tokens": 164,
-      "public_header_includes": 14,
+      "tokens": 85,
+      "public_header_includes": 6,
       "modules": [
-        "Core",
-        "SerialPort"
+        "Core"
       ]
     },
     "acq/fiff": {

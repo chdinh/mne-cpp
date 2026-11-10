@@ -99,22 +99,6 @@ void PolhemusCoregistration::setTrackerToDeviceOffset(const Eigen::Vector3f& tra
 
 //=============================================================================================================
 
-void PolhemusCoregistration::setConnection(PolhemusConnection* conn)
-{
-    if (m_pConn) {
-        disconnect(m_pConn, nullptr, this, nullptr);
-    }
-    m_pConn = conn;
-    if (m_pConn) {
-        connect(m_pConn, &PolhemusConnection::pointReceived,
-                this, &PolhemusCoregistration::onPointReceived);
-        connect(m_pConn, &PolhemusConnection::penButtonPressed,
-                this, &PolhemusCoregistration::onPenButtonPressedFromConn);
-    }
-}
-
-//=============================================================================================================
-
 bool PolhemusCoregistration::captureCurrentPenPositionAsFiducial(FiducialId id)
 {
     if (!m_havePenPos) {
@@ -371,9 +355,7 @@ bool PolhemusCoregistration::computeRegistration()
 
 //=============================================================================================================
 
-void PolhemusCoregistration::onPointReceived(int station,
-                                             const Eigen::Vector3f& position,
-                                             const Eigen::Quaternionf& orientation)
+void PolhemusCoregistration::on_pose(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation)
 {
     // Apply axis mirroring to compensate for transmitter placement
     const Eigen::Vector3f pos(m_mirrorX ? -position.x() : position.x(),
@@ -452,9 +434,7 @@ void PolhemusCoregistration::onPointReceived(int station,
     }
 }
 
-void PolhemusCoregistration::onPenButtonPressedFromConn(int station,
-                                                        const Eigen::Vector3f& position,
-                                                        const Eigen::Quaternionf& orientation)
+void PolhemusCoregistration::on_button(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation)
 {
     if (station == m_penStation) {
         // Apply axis mirroring to compensate for transmitter placement

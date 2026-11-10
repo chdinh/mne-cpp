@@ -47,7 +47,6 @@
 
 #include "acq_polhemus_global.h"
 #include "acquired_points.h"
-#include "polhemus_connection.h"
 
 //=============================================================================================================
 // QT INCLUDES
@@ -72,7 +71,7 @@ namespace ACQLIB
 /**
  * @brief Head–device coregistration engine driven by a Polhemus Fastrak.
  *
- * The class wires itself to a @ref PolhemusConnection and maintains:
+ * It takes the station poses and stylus button presses of a polhemus:// stream (on_pose(), on_button()) and maintains:
  *   - A continuously updated device-to-world transform (from the tracker
  *     station + user-supplied calibration offset).
  *   - An @ref AcquiredPoints store filled by explicit capture calls or
@@ -404,14 +403,26 @@ public:
     bool opticalUpInWorld(Eigen::Vector3f& up) const;
 
     //=========================================================================================================
-    // Digitizer connection
+    // Digitizer input
     //=========================================================================================================
 
-    void setConnection(PolhemusConnection* conn);
-    PolhemusConnection* connection() const
-    {
-        return m_pConn;
-    }
+    /**
+     * Takes the pose of a station, as a polhemus:// stream delivers it.
+     *
+     * @param[in] station       Station 1..4.
+     * @param[in] position      Position in metres in the transmitter frame.
+     * @param[in] orientation   Orientation of the sensor.
+     */
+    void on_pose(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
+
+    /**
+     * Takes a stylus button press (event code 1 of a polhemus:// stream) at the pose of the station.
+     *
+     * @param[in] station       Station whose button was pressed; only the pen station counts.
+     * @param[in] position      Position in metres in the transmitter frame.
+     * @param[in] orientation   Orientation of the sensor.
+     */
+    void on_button(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
 
     //=========================================================================================================
     // Digitized-point store
@@ -556,10 +567,6 @@ signals:
     void pivotSampleCollected(int sampleCount, float angularSpanDeg);
     void opticalCalibrationChanged();
 
-private slots:
-    void onPointReceived(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
-    void onPenButtonPressedFromConn(int station, const Eigen::Vector3f& position, const Eigen::Quaternionf& orientation);
-
 private:
     Eigen::Matrix4f buildDevicePose(const Eigen::Vector3f& trackerPos,
                                     const Eigen::Quaternionf& trackerOri) const;
@@ -576,7 +583,6 @@ private:
     bool m_mirrorX = false; // negate X of incoming Polhemus positions
     bool m_mirrorY = false; // negate Y of incoming Polhemus positions
 
-    PolhemusConnection* m_pConn = nullptr;
     AcquiredPoints* m_pPoints = nullptr;
 
     Eigen::Vector3f m_penPosition = Eigen::Vector3f::Zero();

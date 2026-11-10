@@ -6,7 +6,7 @@ sidebar_label: MNE Align
 
 `mne_align` is the standalone coregistration helper that ships with mne-cpp (since v2.3.0). It walks an operator through a seven-step wizard that takes a subject's head BEM, the corresponding live or recorded digitisation, and produces a `-trans.fif` head→MRI transform suitable for downstream forward / inverse modelling.
 
-The app is built on the same `MultimodalScene` foundation as `mne_inspect`, and integrates direct serial capture from a Polhemus FASTRAK digitiser via the shared `ACQLIB::PolhemusConnection` driver. It also accepts a previously recorded digitisation FIFF file when no hardware is available.
+The app is built on the same `MultimodalScene` foundation as `mne_inspect`, and integrates direct serial capture from a Polhemus FASTRAK digitiser through the `polhemus://` source of `mne_acq_devices`. It also accepts a previously recorded digitisation FIFF file when no hardware is available.
 
 ![mne_align overview](/img/manual/auto/mne-align/overview.png)
 
@@ -81,10 +81,7 @@ A summary lists the BEM, cap, captured counts, ICP source / RMSE, and the path o
 
 ## Hardware: Polhemus FASTRAK
 
-`mne_align` talks to the FASTRAK over a serial port via the shared `ACQLIB::PolhemusConnection` driver (`src/libraries/acq/polhemus/`). Use **Digitizer → Connect…** to attach:
-
-- The wizard first scans known FASTRAK / FastSCAN USB vendor ids; if a device is detected its port name is pre-selected.
-- If auto-detection fails, a dialog lists every visible serial port plus a *Mock backend* option that emits scripted samples for offline testing.
+`mne_align` talks to the FASTRAK over a serial port through the `polhemus://` source of `mne_acq_devices` (`src/libraries/acq/devices/polhemus/`). Use **Digitizer → Connect…** to attach: a dialog lists the serial ports, USB-serial adapters first, and a *Simulated digitizer* that sweeps a stylus over a head for offline testing. A port not listed can be typed in.
 
 The active pen station (1 – 4) is selected from the toolbar `Pen:` combo. Only samples from the active station are treated as captures — additional sensors (e.g. a reference attached to the subject's forehead) can stream concurrently without polluting the capture buffer.
 
@@ -93,7 +90,7 @@ On capture, the page reacts to either:
 - the physical **pen button** on the stylus (preferred — guarantees the point is taken at the exact instant the operator is steady on the landmark), or
 - the on-screen `Capture` button (fallback if the pen button is unavailable).
 
-If no hardware is connected, the **Mock backend** still drives the wizard end-to-end with synthetic samples — useful for training and CI.
+If no hardware is connected, the **Simulated digitizer** still drives the wizard end-to-end with synthetic samples — useful for training and CI.
 
 ## Output: -trans.fif
 
@@ -130,8 +127,8 @@ The digitisation `.fif` written in parallel can be merged back into a raw record
 - `src/applications/mne_align/mne_align.{h,cpp}` — `QMainWindow` shell.
 - `src/applications/mne_align/align_wizard.{h,cpp}` — seven-step wizard.
 - `src/applications/mne_align/align_3d_view.{h,cpp}` — 3D scene + camera presets.
-- `src/applications/mne_align/polhemus_connection.h` — re-export of `ACQLIB::PolhemusConnection`.
-- `src/libraries/acq/polhemus/` — shared FASTRAK parser, connection driver, `AcquiredPoints` store.
+- `src/applications/mne_align/digitizer.{h,cpp}` — the `polhemus://` stream as Qt signals.
+- `src/libraries/acq/devices/polhemus/` — the `polhemus://` source (FASTRAK records, serial port, simulator), the `AcquiredPoints` store and `PolhemusCoregistration`.
 - `src/libraries/mne/mne_icp.{h,cpp}` — ICP refinement entry point (`MNELIB::performIcp`).
 
 ## Related manual pages

@@ -7,7 +7,7 @@
  * @author   Gabriel Motta <gabrielbenmotta@gmail.com>;
  *           Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    0.1.0
- * @date     Janurary, 2020
+ * @date     January, 2020
  * @brief    Contains the declaration of the FtBufferSetupWidget class.
  */
 
@@ -15,50 +15,27 @@
 #define FTBUFFERSETUPWIDGET_H
 
 //=============================================================================================================
-// INCLUDES
-//=============================================================================================================
-
-#include "../ftbuffer.h"
-#include "../ftbuffproducer.h"
-#include "../ftconnector.h"
-
-//=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtWidgets>
-
-#include <memory>
+#include <QWidget>
 
 //=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
-
-namespace Ui
-{
-class FtBufferSetupUi;
-}
-
-//=============================================================================================================
-// DEFINE NAMESPACE FtBufferPlugin
+// DEFINE NAMESPACE FTBUFFERPLUGIN
 //=============================================================================================================
 
 namespace FTBUFFERPLUGIN
 {
 
 //=============================================================================================================
-// FTBUFFERPLUGIN FORWARD DECLARATIONS
+// FORWARD DECLARATIONS
 //=============================================================================================================
 
 class FtBuffer;
-class FtProducer;
-class FtConnector;
 
 //=============================================================================================================
 /**
- * DECLARE CLASS FtBufferSetupWidget
- *
- * @brief The FtBufferSetupWidget class provides the FtBuffer configuration window.
+ * @brief Settings of the FtBuffer plugin: host and port of the buffer server, block size, simulation.
  */
 class FtBufferSetupWidget : public QWidget
 {
@@ -67,65 +44,14 @@ class FtBufferSetupWidget : public QWidget
 public:
     //=========================================================================================================
     /**
-     * Constructs a FtBufferSetupWidget which is a child of parent.
+     * Shows the settings of @p pFtBuffer and writes every change back to it.
      *
-     * @param[in] toolbox  a pointer to the corresponding FtBuffer.
-     * @param[in] parent   pointer to parent widget; If parent is 0, the new FtBufferSetupWidget becomes a window. If parent is another widget, FtBufferSetupWidget becomes a child window inside parent. FtBufferSetupWidget is deleted when its parent is deleted.
+     * @param[in] pFtBuffer   The plugin.
+     * @param[in] parent      Parent widget.
      */
-    FtBufferSetupWidget(FtBuffer* toolbox,
-                        const QString& sSettingsPath = "",
-                        QWidget* parent = 0);
-
-    //=========================================================================================================
-    /**
-     * Destroys the FtBufferSetupWidget.
-     * All FtBufferSetupWidget's children are deleted first. The application exits if FtBufferSetupWidget is the main widget.
-     */
-    ~FtBufferSetupWidget();
-
-    //=========================================================================================================
-    /**
-     * Saves all important settings of this view via QSettings.
-     */
-    void saveSettings();
-
-    //=========================================================================================================
-    /**
-     * Loads and inits all important settings of this view via QSettings.
-     */
-    void loadSettings();
-
-    //=========================================================================================================
-    /**
-     * Attempts to connect to and receive fiff data from buffer. As a backup tried to read from local file.
-     */
-    void pressedConnect();
-
-    /**
-     * Updates window depending on whether connection was successful
-     *
-     * @param[in] stat  Whether connection and retrieval of fiff data was successful.
-     */
-    void isConnected(bool stat);
-
-signals:
-    /**
-     * Sends a singal with the cooresponding port and address information
-     *
-     * @param[in] Addr  An IP address where a buffer is hosted.
-     * @param[in] port  The port where the buffer is hosted.
-     */
-    void connectAtAddr(QString Addr,
-                       int port);
-
-private:
-    FtBuffer* m_pFtBuffer; /**< Holds a pointer to corresponding FtBuffer.*/
-
-    QString m_sSettingsPath; /**< The settings path to store the GUI settings to. */
-
-    std::unique_ptr<Ui::FtBufferSetupUi> m_pUi; /**< Holds the user interface for the FtBufferSetupWidget.*/
+    explicit FtBufferSetupWidget(FtBuffer* pFtBuffer, QWidget* parent = nullptr);
 };
 
-} // NAMESPACE
+} // NAMESPACE FTBUFFERPLUGIN
 
 #endif // FTBUFFERSETUPWIDGET_H

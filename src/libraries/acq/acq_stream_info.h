@@ -139,7 +139,9 @@ enum class AcqChannelKind : std::uint8_t
     MrGradient,   /**< Gradient waveform channel. */
     RfSwitch,     /**< T/R switch, RF blanking or ADC gate line. */
     ClockSync,    /**< Recorded sync / reference marker used to verify a clock domain (verify()). */
-    Misc
+    Misc,
+    Position,   /**< Coordinate of a tracked sensor, e.g. a digitizer stylus (metres). */
+    Orientation /**< Quaternion component of a tracked sensor's orientation. */
 };
 
 //=============================================================================================================
@@ -162,7 +164,8 @@ enum class AcqUnit : std::uint8_t
     Ohm,
     Watt,
     Pascal, /**< Sound pressure. */
-    Molar   /**< fNIRS concentrations. */
+    Molar,  /**< fNIRS concentrations. */
+    Meter
 };
 
 //=============================================================================================================

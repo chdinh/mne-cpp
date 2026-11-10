@@ -91,7 +91,7 @@ QString systemLabel(StandardMontage::System sys)
 //=============================================================================================================
 
 AlignWizard::AlignWizard(AcquiredPoints* acquired,
-                         PolhemusConnection* digitizer,
+                         Digitizer* digitizer,
                          QWidget* parent)
 : QStackedWidget(parent)
 , m_pPoints(acquired)
@@ -108,9 +108,9 @@ AlignWizard::AlignWizard(AcquiredPoints* acquired,
     addWidget(buildDonePage());
 
     if (m_pDigitizer) {
-        connect(m_pDigitizer, &PolhemusConnection::pointReceived,
+        connect(m_pDigitizer, &Digitizer::pointReceived,
                 this, &AlignWizard::onLivePoint);
-        connect(m_pDigitizer, &PolhemusConnection::penButtonPressed,
+        connect(m_pDigitizer, &Digitizer::penButtonPressed,
                 this, &AlignWizard::onPenButtonPressed);
     }
     connect(m_pPoints, &AcquiredPoints::pointsChanged,

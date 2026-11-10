@@ -129,6 +129,27 @@ for (std::size_t e = 0; e < samples.events().size(); ++e) {
     const AcqEvent& event = samples.events()[e];
 ````
 
+### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
+
+Polhemus digitiser: stream stylus poses, register fiducials captured with the button, collect points.
+
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 88"
+const AcqBlockView& block = **view;
+std::vector<float> frames(kWidth * block.sampleCount());
+if (!decode(block, AcqMatrixRef<float>::columnMajor(frames.data(), kWidth, block.sampleCount())).ok()) {
+    break;
+}
+for (std::size_t i = 0; i < block.sampleCount(); ++i) {
+    const float* f = &frames[i * kWidth];
+    for (int station : {1, 2}) {
+        const float* p = f + (station - 1) * 7;
+        coreg.on_pose(station, Eigen::Vector3f(p[0], p[1], p[2]), Eigen::Quaternionf(p[3], p[4], p[5], p[6]));
+    }
+    for (std::size_t e = 0; e < block.events().size(); ++e) {
+        if (block.events()[e].sample == block.firstSample() + i && penAt.size() < 3) { // a stylus button press
+            const FiducialId id = fiducials[penAt.size()];
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

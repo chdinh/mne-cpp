@@ -83,6 +83,22 @@ ACQDEVICESSHARED_EXPORT AcqError register_eego_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_neuromag_scheme();
 
+/**
+ * Registers the polhemus:// scheme (Polhemus Fastrak and FastSCAN digitizers on a serial port) with
+ * AcqDeviceRegistry::instance(), as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_polhemus_scheme();
+
+/**
+ * Registers the ftbuffer:// scheme (a FieldTrip buffer server, e.g. filled by neuromag2ft) with
+ * AcqDeviceRegistry::instance(), as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_ftbuffer_scheme();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H

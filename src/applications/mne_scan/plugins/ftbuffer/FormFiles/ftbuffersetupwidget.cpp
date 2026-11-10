@@ -16,13 +16,16 @@
 //=============================================================================================================
 
 #include "ftbuffersetupwidget.h"
-#include "ui_ftbuffersetup.h"
+#include "../ftbuffer.h"
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
+#include <QCheckBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QSpinBox>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -34,91 +37,34 @@ using namespace FTBUFFERPLUGIN;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FtBufferSetupWidget::FtBufferSetupWidget(FtBuffer* toolbox,
-                                         const QString& sSettingsPath,
-                                         QWidget* parent)
+FtBufferSetupWidget::FtBufferSetupWidget(FtBuffer* pFtBuffer, QWidget* parent)
 : QWidget(parent)
-, m_pFtBuffer(toolbox)
-, m_sSettingsPath(sSettingsPath)
-, m_pUi(std::make_unique<Ui::FtBufferSetupUi>())
 {
-    m_pUi->setupUi(this);
+    auto* host = new QLineEdit(QString::fromStdString(pFtBuffer->m_host));
+    host->setObjectName("m_lineEdit_Host");
+    host->setToolTip(tr("The computer that runs the buffer, e.g. the Neuromag acquisition computer with neuromag2ft"));
+    connect(host, &QLineEdit::textChanged, this, [pFtBuffer](const QString& text) { pFtBuffer->m_host = text.trimmed().toStdString(); });
 
-    this->m_pUi->m_lineEditIP->setText(toolbox->m_pFtBuffProducer->m_pFtConnector->getAddr());
+    auto* port = new QSpinBox;
+    port->setObjectName("m_spinBox_Port");
+    port->setRange(1, 65535);
+    port->setValue(pFtBuffer->m_port);
+    connect(port, &QSpinBox::valueChanged, this, [pFtBuffer](int value) { pFtBuffer->m_port = static_cast<std::uint16_t>(value); });
 
-    loadSettings();
+    auto* block = new QSpinBox;
+    block->setObjectName("m_spinBox_SamplesPerBlock");
+    block->setRange(1, 100000);
+    block->setValue(pFtBuffer->m_iSamplesPerBlock);
+    connect(block, &QSpinBox::valueChanged, this, [pFtBuffer](int value) { pFtBuffer->m_iSamplesPerBlock = value; });
 
-    //Always connect GUI elemts after m_pUi->setpUi has been called
-    connect(m_pUi->m_qPushButton_Connect, &QPushButton::released,
-            this, &FtBufferSetupWidget::pressedConnect); // Connect/Disconnect button
+    auto* simulate = new QCheckBox(tr("Simulate neuromag2ft and its buffer"));
+    simulate->setObjectName("m_checkBox_Simulate");
+    simulate->setChecked(pFtBuffer->m_bSimulate);
+    connect(simulate, &QCheckBox::toggled, this, [pFtBuffer](bool on) { pFtBuffer->m_bSimulate = on; });
 
-    connect(this, &FtBufferSetupWidget::connectAtAddr,
-            m_pFtBuffer->m_pFtBuffProducer.data(), &FtBuffProducer::connectToBuffer);
-    connect(m_pFtBuffer->m_pFtBuffProducer.data(), &FtBuffProducer::connecStatus,
-            this, &FtBufferSetupWidget::isConnected);
-
-    connect(m_pUi->m_lineEditIP, &QLineEdit::textChanged,
-            toolbox, &FtBuffer::setBufferAddress);
-    connect(m_pUi->m_spinBoxPort, QOverload<int>::of(&QSpinBox::valueChanged),
-            toolbox, &FtBuffer::setBufferPort);
-    toolbox->setBufferAddress(m_pUi->m_lineEditIP->text());
-    toolbox->setBufferPort(m_pUi->m_spinBoxPort->value());
-}
-
-//=============================================================================================================
-
-FtBufferSetupWidget::~FtBufferSetupWidget()
-{
-    saveSettings();
-}
-
-//=============================================================================================================
-
-void FtBufferSetupWidget::saveSettings()
-{
-    if (m_sSettingsPath.isEmpty()) {
-        return;
-    }
-
-    // Save Settings
-    QSettings settings("MNECPP");
-
-    settings.setValue(m_sSettingsPath + QString("/IP"), m_pUi->m_lineEditIP->text());
-}
-
-//=============================================================================================================
-
-void FtBufferSetupWidget::loadSettings()
-{
-    if (m_sSettingsPath.isEmpty()) {
-        return;
-    }
-
-    // Load Settings
-    QSettings settings("MNECPP");
-
-    m_pUi->m_lineEditIP->setText(settings.value(m_sSettingsPath + QString("/IP"), "127.0.0.1").toString());
-}
-
-//=============================================================================================================
-
-void FtBufferSetupWidget::pressedConnect()
-{
-    emit connectAtAddr(m_pUi->m_lineEditIP->text(),
-                       m_pUi->m_spinBoxPort->value());
-}
-
-//=============================================================================================================
-
-void FtBufferSetupWidget::isConnected(bool stat)
-{
-    if (stat) {
-        m_pUi->m_qPushButton_Connect->setText("Set");
-    } else {
-        qWarning() << "[FtBufferSetupWidget::isConnected] Unable to find relevant fiff info.";
-
-        QMessageBox msgBox;
-        msgBox.setText("Unable to find relevant fiff info. Is there header data in the buffer?");
-        msgBox.exec();
-    }
+    auto* form = new QFormLayout(this);
+    form->addRow(tr("Host"), host);
+    form->addRow(tr("Port"), port);
+    form->addRow(tr("Samples per block"), block);
+    form->addRow(simulate);
 }

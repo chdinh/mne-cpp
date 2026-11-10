@@ -268,23 +268,26 @@ if (auto impedances = device->measureImpedances()) {
         }
 ````
 
-### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
+### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
 
-Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
+Polhemus digitiser: stream stylus poses, register fiducials captured with the button, collect points.
 
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 783"
-auto device = AcqDevice::open(uri);
+````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 62"
+register_polhemus_scheme();
+// Stylus on station 1, head tracker on station 2; the simulated stylus button is pressed every 0.4 s.
+// A Fastrak on a serial port: "polhemus:///dev/cu.usbserial-1?stations=1,2"
+auto device = AcqDevice::open("polhemus://?simulate=1&stations=1,2&button=0.4");
 if (!device) {
-    std::fprintf(stderr, "Cannot open %s: %s\n", uri.c_str(), device.error().text().c_str());
-    return 1;
+    std::fprintf(stderr, "Cannot open the digitizer: %s\n", device.error().text().c_str());
+    return EXIT_FAILURE;
 }
-const auto info = device->stream().info();
-if (isComplex(info->format) || info->sfreq <= 0.0) {
-    std::fprintf(stderr, "%s needs a regularly sampled real-valued stream\n", uri.c_str());
-    return 1;
+auto reader = device->stream().reader(AcqReader::ReadMode::Lossless); // 14 channels: per station X Y Z (m), QW QX QY QZ
+if (!reader || !device->start().ok()) {
+    return EXIT_FAILURE;
 }
-const double sfreq = info->sfreq;
 ````
+
+Also used in [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx).
 
 ## Authors of this file
 

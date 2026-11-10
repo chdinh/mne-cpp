@@ -29,7 +29,6 @@
 #include "../../acq_backend.h"
 #include "../../acq_device_registry.h"
 #include "../../acq_thread.h"
-#include "../../detail/acq_fiff_codes.h"
 #include "../../detail/acq_uri_params.h"
 
 #include <algorithm>
@@ -56,7 +55,6 @@ namespace
 
 constexpr std::chrono::milliseconds kWait(100);
 constexpr std::chrono::microseconds kPoll(500);
-constexpr const char* kMeasInfoSchema = "fiff.MeasInfo/1";
 
 struct Config
 {
@@ -157,76 +155,6 @@ AcqExpected<std::vector<NeuromagTag>> read_meas_info(NeuromagTransport& transpor
     }
 }
 
-/** @return The stream of a measurement info. */
-AcqExpected<AcqStreamInfo> stream_info(const std::vector<NeuromagTag>& meas_info, const std::string& source)
-{
-    AcqStreamInfo info;
-    info.name = "raw";
-    info.sourceId = source;
-    info.format = AcqSampleFormat::Int32;
-    info.layout = AcqLayout::Interleaved;
-    std::optional<std::int32_t> nchan;
-    int depth = 0; // only tags of the measurement info itself, not of its sub-blocks
-    for (const NeuromagTag& tag : meas_info) {
-        if (tag.kind == fiff::kBlockStart) {
-            ++depth;
-        } else if (tag.kind == fiff::kBlockEnd) {
-            --depth;
-        } else if (depth == 1 && tag.kind == fiff::kNchan) {
-            nchan = tag.as_int();
-        } else if (depth == 1 && tag.kind == fiff::kSfreq) {
-            info.sfreq = tag.as_float().value_or(0.0F);
-        } else if (depth == 1 && tag.kind == fiff::kChInfo) {
-            const auto ch = NeuromagChannel::parse(tag.data);
-            if (!ch) {
-                return AcqError(AcqErrorCode::UnsupportedFormat, "the Neuromag acquisition sent a truncated channel record");
-            }
-            AcqChannelInfo channel;
-            channel.name = ch->name;
-            channel.kind = acq_kind_of(ch->kind);
-            channel.unit = acq_unit_of(ch->unit);
-            channel.unitExponent = ch->unit_mul;
-            channel.scale = static_cast<double>(ch->cal) * static_cast<double>(ch->range);
-            AcqFiffChannel fiff;
-            fiff.kind = ch->kind;
-            fiff.coilType = ch->coil_type;
-            fiff.logicalNo = ch->log_no;
-            fiff.scannerNo = ch->scan_no;
-            fiff.unit = ch->unit;
-            fiff.unitMul = ch->unit_mul;
-            fiff.coordFrame = fiff_coord_frame_of(ch->kind);
-            fiff.cal = ch->cal;
-            fiff.range = ch->range;
-            fiff.loc = ch->loc;
-            channel.fiff = fiff;
-            info.channels.push_back(std::move(channel));
-        }
-    }
-    if (info.channels.empty() || (nchan && static_cast<std::size_t>(*nchan) != info.channels.size())) {
-        return AcqError(AcqErrorCode::UnsupportedFormat,
-                        std::format("the Neuromag measurement info describes {} of {} channels", info.channels.size(), nchan.value_or(0)));
-    }
-    if (info.sfreq <= 0.0) {
-        return AcqError(AcqErrorCode::UnsupportedFormat, "the Neuromag measurement info has no sampling rate");
-    }
-    const std::vector<std::byte> file = meas_info_file(meas_info);
-    info.extensions.push_back({kMeasInfoSchema, file});
-    return info;
-}
-
-/** @return The trigger channel: STI 014, else STI101, else the first stimulus channel. */
-std::optional<std::size_t> trigger_channel(const AcqStreamInfo& info)
-{
-    for (const char* name : {"STI 014", "STI101"}) {
-        const auto it = std::find_if(info.channels.begin(), info.channels.end(), [&](const AcqChannelInfo& c) { return c.name == name; });
-        if (it != info.channels.end()) {
-            return static_cast<std::size_t>(it - info.channels.begin());
-        }
-    }
-    const auto it = std::find_if(info.channels.begin(), info.channels.end(), [](const AcqChannelInfo& c) { return c.kind == AcqChannelKind::Stim; });
-    return it == info.channels.end() ? std::nullopt : std::optional<std::size_t>(static_cast<std::size_t>(it - info.channels.begin()));
-}
-
 class NeuromagBackend final : public AcqBackend
 {
 public:
@@ -256,7 +184,7 @@ public:
         if (!meas_info) {
             return meas_info.error();
         }
-        auto info = stream_info(*meas_info, transport->description());
+        auto info = stream_info(*meas_info, transport->description(), AcqSampleFormat::Int32);
         if (!info) {
             return info.error();
         }
@@ -299,7 +227,7 @@ public:
         // A new measurement repeats its info; its channels must be those of the stream
         auto meas_info = read_meas_info(*m_transport, m_config.timeout);
         if (meas_info) {
-            if (auto info = stream_info(*meas_info, m_transport->description()); !info || info->channelCount() != m_width) {
+            if (auto info = stream_info(*meas_info, m_transport->description(), AcqSampleFormat::Int32); !info || info->channelCount() != m_width) {
                 meas_info = AcqError(AcqErrorCode::InvalidState, "the Neuromag measurement has other channels than when it was opened");
             }
         }

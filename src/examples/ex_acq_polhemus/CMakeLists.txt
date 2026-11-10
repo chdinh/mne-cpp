@@ -5,8 +5,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(ex_acq_polhemus LANGUAGES CXX)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core SerialPort)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core SerialPort)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 if(QT_VERSION_MAJOR GREATER_EQUAL 6)
     qt_add_executable(${PROJECT_NAME} main.cpp)
@@ -18,6 +18,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Qt${QT_VERSION_MAJOR}::Core
   Eigen3::Eigen
   mne_acq_polhemus
+  mne_acq_devices
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE FALSE WIN32_EXECUTABLE FALSE)

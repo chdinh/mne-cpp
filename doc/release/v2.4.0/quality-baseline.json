@@ -247,12 +247,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 578,
+      "public_api_units": 574,
       "exported_not_registered": 1,
-      "example_eligible": 414,
+      "example_eligible": 410,
       "eligible_backed_percent": 99.76,
-      "snippets": 452,
-      "registered_test_percent": 41.42
+      "snippets": 448,
+      "registered_test_percent": 41.71
     },
     "G4_screenshots": {
       "referenced_images": 19,
@@ -270,7 +270,7 @@
       "raw_delete": 50,
       "console_io": 0,
       "numeric_define": 0,
-      "qt_new_unparented": 903
+      "qt_new_unparented": 902
     },
     "G6_parity": {
       "reference": "1.11.0",

@@ -34,7 +34,7 @@
       "ml",
       "report"
     ],
-    "tokens": 14474,
+    "tokens": 14395,
     "gui_outside_design": []
   },
   "libraries": {
@@ -51,26 +51,23 @@
       "by_category": {},
       "public_header_includes": 0,
       "q_object": 0,
-      "files": 25,
+      "files": 33,
       "modules": []
     },
     "acq/devices/polhemus": {
-      "tokens": 164,
+      "tokens": 85,
       "by_category": {
-        "containers": 5,
-        "files": 11,
-        "global": 7,
-        "objects_signals": 57,
-        "other": 15,
-        "strings": 65,
-        "time": 4
+        "containers": 3,
+        "files": 10,
+        "global": 2,
+        "objects_signals": 40,
+        "strings": 30
       },
-      "public_header_includes": 14,
-      "q_object": 3,
-      "files": 8,
+      "public_header_includes": 6,
+      "q_object": 2,
+      "files": 9,
       "modules": [
-        "Core",
-        "SerialPort"
+        "Core"
       ]
     },
     "acq/fiff": {

@@ -49,6 +49,8 @@ aliases; replace the old spelling as below.
 | `utils/generics/circularbuffer.h`, `CircularBuffer_Matrix_double` | `base/circular_buffer.h`, `BASELIB::CircularBuffer<Eigen::MatrixXd>` |
 | `CircularBuffer::push(ptr, n)`, `getFreeElementsRead()`, `pause()` | `push(std::span)`, `size()`; `pause` is removed |
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
+| `ACQLIB::PolhemusConnection`, `PolhemusSerialConfig`, `FastrakParser`, `FastrakSample` (Qt SerialPort) | `AcqDevice::open("polhemus://<port>?stations=1,2")`: a stream of positions and quaternions per station, stylus button presses as event code 1 |
+| `PolhemusCoregistration::setConnection(conn)`, `connection()` | feed the stream: `on_pose(station, position, orientation)`, `on_button(station, position, orientation)` |
 
 - `mne_utils` is gone. Its contents moved to `mne_base`, `mne_math`,
   `mne_channels`, `mne_pybridge`, `mne_report` and `mne_com`, so each library
@@ -134,6 +136,22 @@ aliases; replace the old spelling as below.
   changes become events. `neuromag://?simulate=1` simulates a system on
   every platform.
 - The Neuromag MNE Scan plugin is back and reads through `neuromag://`.
+- `polhemus://` reads Polhemus Fastrak and FastSCAN digitizers on a serial
+  port without Qt: the positions in metres and orientation quaternions of
+  every station, and stylus button presses as events. It sets up the
+  stations, the output list and the tracking hemisphere.
+  `polhemus://?simulate=1` sweeps a stylus over a head. MNE Align reads its
+  digitizer through it; `mne_acq_polhemus` no longer needs Qt SerialPort.
+- Channel kinds `Position` and `Orientation` and the unit `Meter` describe
+  tracked sensors.
+- `ftbuffer://` reads FieldTrip buffer servers without Qt. With the Neuromag
+  header of `neuromag2ft` it carries the acquisition's channels, measurement
+  info and digitizer points, and `STI 014` changes as events; numeric events
+  of the buffer become events. `ftbuffer://?simulate=1` relays a simulated
+  Neuromag system. The FtBuffer MNE Scan plugin reads through it; it used to
+  treat every sample as float32 whatever the buffer held, call every
+  channel MEG without the Neuromag header, and hand on half a second of
+  samples at a time.
 - `acq_fiff` maps channel kinds, units and coordinate frames through one
   table shared with the devices that speak FIFF.
 - The TMSI impedance view finds its cap layouts wherever MNE Scan was

@@ -21,6 +21,9 @@
 // INCLUDES
 //=============================================================================================================
 
+#include "../../acq_error.h"
+#include "../../acq_stream_info.h"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -57,6 +60,7 @@ inline constexpr int kDataBuffer = 300;
 inline constexpr int kBlockMeas = 100;
 inline constexpr int kBlockMeasInfo = 101;
 inline constexpr int kBlockRawData = 102;
+inline constexpr int kBlockIsotrak = 107;
 
 inline constexpr int kTypeVoid = 0;
 inline constexpr int kTypeInt = 3;
@@ -134,6 +138,51 @@ void big_to_native(int type, std::span<std::byte> data) noexcept;
  * @return A FIFF file (big-endian) that holds the measurement info in a FIFFB_MEAS block, as FIFF readers expect.
  */
 [[nodiscard]] std::vector<std::byte> meas_info_file(std::span<const NeuromagTag> meas_info);
+
+/**
+ * @param[in] file         Tags one after the other, each a header of kind, type, size and next, then its data.
+ * @param[in] big_endian   The byte order of @p file: big-endian as in FIFF files, else little-endian.
+ *
+ * @return The tags in native byte order, up to the first truncated one.
+ */
+[[nodiscard]] std::vector<NeuromagTag> parse_tags(std::span<const std::byte> file, bool big_endian);
+
+/**
+ * @param[in] tags         Tags in native byte order.
+ * @param[in] big_endian   Write big-endian as in FIFF files, else little-endian.
+ *
+ * @return The tags one after the other, after a file id and a directory pointer.
+ */
+[[nodiscard]] std::vector<std::byte> tag_file(std::span<const NeuromagTag> tags, bool big_endian);
+
+/**
+ * @param[in] tags    Tags in native byte order.
+ * @param[in] block   Block kind, e.g. fiff::kBlockMeasInfo.
+ *
+ * @return The tags of the first such block, from its start to its end tag; empty if it is not complete.
+ */
+[[nodiscard]] std::vector<NeuromagTag> block_of(std::span<const NeuromagTag> tags, int block);
+
+/** Schema of the AcqExtension that holds the measurement-info file. */
+inline constexpr const char* kMeasInfoSchema = "fiff.MeasInfo/1";
+
+/**
+ * @param[in] meas_info   The tags of a FIFFB_MEAS_INFO block, in native byte order.
+ * @param[in] source      Source id of the stream.
+ * @param[in] format      Int32 for the acquisition's integers, scaled by calibration and range; a floating-point
+ *                        format for values that are already physical.
+ *
+ * @return The stream "raw" with the channels and the measurement-info file as extension, or UnsupportedFormat.
+ */
+[[nodiscard]] AcqExpected<AcqStreamInfo> stream_info(std::span<const NeuromagTag> meas_info, const std::string& source,
+                                                     AcqSampleFormat format);
+
+/**
+ * @param[in] info   A stream.
+ *
+ * @return The trigger channel: STI 014, else STI101, else the first stimulus channel.
+ */
+[[nodiscard]] std::optional<std::size_t> trigger_channel(const AcqStreamInfo& info);
 
 } // namespace ACQLIB::detail
 

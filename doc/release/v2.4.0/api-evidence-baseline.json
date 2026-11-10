@@ -3,37 +3,37 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 481,
-    "exported_free_functions": 179,
-    "registered_classes": 577,
+    "exported_classes": 477,
+    "exported_free_functions": 181,
+    "registered_classes": 573,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
     "registered_header_only": 83,
     "registered_stale": 0,
     "registered_with_test": 239,
     "registered_test_unresolved": 0,
-    "registered_with_example": 418,
+    "registered_with_example": 414,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 97,
     "registered_without_api_page": 0,
-    "with_snippet": 452,
-    "public_api_units": 578,
-    "example_eligible": 414,
+    "with_snippet": 448,
+    "public_api_units": 574,
+    "example_eligible": 410,
     "example_exempt": 164,
-    "eligible_backed_by_registry_example": 413,
-    "eligible_used_by_some_example": 354,
+    "eligible_backed_by_registry_example": 409,
+    "eligible_used_by_some_example": 353,
     "examples_on_disk": 79,
     "examples_built": 79
   },
   "by_library": {
     "acq": {
-      "public": 58,
-      "registered": 57,
+      "public": 54,
+      "registered": 53,
       "with_test": 50,
-      "eligible": 40,
-      "eligible_with_registry_example": 39,
-      "eligible_used_by_example": 11,
-      "with_snippet": 53
+      "eligible": 36,
+      "eligible_with_registry_example": 35,
+      "eligible_used_by_example": 10,
+      "with_snippet": 49
     },
     "base": {
       "public": 9,
@@ -371,6 +371,16 @@
     },
     {
       "name": "register_neuromag_scheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "register_polhemus_scheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "register_ftbuffer_scheme",
       "header": "acq/devices/acq_devices.h",
       "library": "acq"
     },
@@ -1420,7 +1430,9 @@
       "test_resolves": true,
       "example": null,
       "example_state": "none",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
       "snippets": [
         "ex_acq_oddball/main.cpp#acq_epoch_stream",
         "ex_acq_scope/main.cpp#acq_scope_stimulate"
@@ -1442,7 +1454,9 @@
       "test_resolves": true,
       "example": null,
       "example_state": "none",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
       "snippets": [
         "ex_acq_oddball/main.cpp#acq_epoch_stream",
         "ex_acq_scope/main.cpp#acq_scope_stimulate"
@@ -1464,7 +1478,9 @@
       "test_resolves": true,
       "example": "ex_acq_scope",
       "example_state": "built",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
       "snippets": [
         "ex_acq_oddball/main.cpp#acq_epoch_stream",
         "ex_acq_scope/main.cpp#acq_scope_stimulate"
@@ -1486,7 +1502,9 @@
       "test_resolves": true,
       "example": "ex_acq_oddball",
       "example_state": "built",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
       "snippets": [
         "ex_acq_oddball/main.cpp#acq_epoch_stream",
         "ex_acq_scope/main.cpp#acq_scope_stimulate"
@@ -1508,7 +1526,9 @@
       "test_resolves": true,
       "example": "ex_acq_oddball",
       "example_state": "built",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
       "snippets": [
         "ex_acq_oddball/main.cpp#acq_device_open"
       ],
@@ -1529,7 +1549,9 @@
       "test_resolves": true,
       "example": null,
       "example_state": "none",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_polhemus"
+      ],
       "snippets": [
         "ex_acq_oddball/main.cpp#acq_device_open"
       ],
@@ -2264,102 +2286,6 @@
         "ex_acq_polhemus/main.cpp#acquired_points_usage"
       ],
       "api_page": "doc/website/docs/api/acq/digitized-point.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "FastrakParser",
-      "header": "acq/devices/polhemus/fastrak_parser.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage",
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/fastrak-parser.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "FastrakSample",
-      "header": "acq/devices/polhemus/fastrak_parser.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage",
-        "ex_acq_polhemus/main.cpp#fastrak_parser_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/fastrak-sample.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PolhemusConnection",
-      "header": "acq/devices/polhemus/polhemus_connection.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage",
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/polhemus-connection.mdx",
-      "python_equiv": null,
-      "example_eligible": true,
-      "exempt_reason": null
-    },
-    {
-      "name": "PolhemusSerialConfig",
-      "header": "acq/devices/polhemus/polhemus_connection.h",
-      "library": "acq",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": "ex_acq_polhemus",
-      "example_state": "built",
-      "including_examples": [
-        "ex_acq_polhemus"
-      ],
-      "snippets": [
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage",
-        "ex_acq_polhemus/main.cpp#polhemus_coregistration_usage"
-      ],
-      "api_page": "doc/website/docs/api/acq/polhemus-serial-config.mdx",
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
