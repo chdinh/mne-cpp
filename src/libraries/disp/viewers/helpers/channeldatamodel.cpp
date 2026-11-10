@@ -67,7 +67,8 @@ ChannelDataModel::ChannelDataModel(QObject* parent)
 : QObject(parent)
 {
     // Default scales
-    m_scaleMap[FIFFV_MEG_CH] = kScaleMEGGrad;
+    m_scaleMap[kMEGGradKind] = kScaleMEGGrad;
+    m_scaleMap[kMEGMagKind] = kScaleMEGMag;
     m_scaleMap[FIFFV_EEG_CH] = kScaleEEG;
     m_scaleMap[FIFFV_EOG_CH] = kScaleEOG;
     m_scaleMap[FIFFV_EMG_CH] = kScaleEMG;

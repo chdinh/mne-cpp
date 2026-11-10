@@ -1941,7 +1941,7 @@ void TestDispViewers2::rtFiffRawViewModel_basics()
     QMap<qint32, float> scaleMap;
     scaleMap[FIFFV_MEG_CH] = 1e-12f;
     model.setScaling(scaleMap);
-    QCOMPARE(model.getScaling().value(FIFFV_MEG_CH, 0.0f), 1e-12f);
+    QVERIFY(qFuzzyCompare(model.getScaling().value(FIFFV_MEG_CH, 0.0f), 1e-12f));
 
     QApplication::processEvents();
 }
@@ -3502,15 +3502,20 @@ void TestDispViewers2::channelDataModel_bufferDetrendAndDecimation()
         QCOMPARE(model.channelInfo(i).bad, i == 2);
         QVERIFY(model.channelInfo(i).color.isValid());
     }
-    QCOMPARE(model.channelInfo(0).amplitudeMax, scales[0]);
-    QCOMPARE(model.channelInfo(1).amplitudeMax, 400e-13f);
+    // QCOMPARE takes any two floats below 1e-5 as equal, so tesla scales are compared relatively
+    const auto sameScale = [](float a, float b) {
+        return std::abs(a - b) <= 1e-6f * std::abs(b);
+    };
+    for (int i = 0; i < 8; ++i) {
+        QVERIFY2(sameScale(model.channelInfo(i).amplitudeMax, scales[i]), qPrintable(labels[i]));
+    }
     QCOMPARE(model.channelInfo(99).name, QString());
 
     // The browser's string-keyed scales map onto grad/mag/EEG/... separately
     model.setScaleMapFromStrings({{"MEG_grad", 1e-10}, {"MEG_mag", 2e-12}, {"MEG_EEG", 5e-5}, {"MEG_EOG", 2e-4}, {"MEG_EMG", 3e-3}, {"MEG_ECG", 4e-3}, {"MEG_MISC", 2.0}, {"MEG_STIM", 7.0}});
     const QVector<float> userScales = {1e-10f, 2e-12f, 5e-5f, 2e-4f, 4e-3f, 3e-3f, 7.0f, 2.0f};
     for (int i = 0; i < 8; ++i) {
-        QCOMPARE(model.channelInfo(i).amplitudeMax, userScales[i]);
+        QVERIFY2(sameScale(model.channelInfo(i).amplitudeMax, userScales[i]), qPrintable(labels[i]));
     }
 
     // Bad flags round-trip into the FiffInfo
@@ -5024,7 +5029,7 @@ void TestDispViewers2::rtFiffRawViewModel_extended()
     QMap<qint32, float> scaleMap;
     scaleMap[FIFFV_EEG_CH] = 1e-6f;
     model.setScaling(scaleMap);
-    QCOMPARE(model.getScaling().value(FIFFV_EEG_CH, 0.0f), 1e-6f);
+    QVERIFY(qFuzzyCompare(model.getScaling().value(FIFFV_EEG_CH, 0.0f), 1e-6f));
 
     QApplication::processEvents();
 }
