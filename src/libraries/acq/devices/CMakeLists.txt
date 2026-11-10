@@ -27,6 +27,8 @@ set(SOURCES
   ftbuffer/ftbuffer_backend.cpp
   ftbuffer/ftbuffer_client.cpp
   ftbuffer/ftbuffer_simulator.cpp
+  natus/natus_backend.cpp
+  natus/natus_simulator.cpp
   rtserver/rtserver_backend.cpp
   rtserver/rtserver_client.cpp
   rtserver/rtserver_simulator.cpp
@@ -43,6 +45,7 @@ set(PRIVATE_HEADERS
   polhemus/fastrak_record.h
   polhemus/polhemus_transport.h
   ftbuffer/ftbuffer_transport.h
+  natus/natus_transport.h
   rtserver/rtserver_transport.h
   transport_error.h
 )

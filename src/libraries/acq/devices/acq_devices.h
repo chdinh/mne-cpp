@@ -107,6 +107,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_ftbuffer_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_rtserver_scheme();
 
+/**
+ * Registers the natus:// scheme (a Natus Quantum amplifier through the datagrams of its streaming machine) with
+ * AcqDeviceRegistry::instance(), as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_natus_scheme();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H

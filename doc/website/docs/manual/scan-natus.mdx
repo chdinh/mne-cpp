@@ -11,4 +11,11 @@ Follow the steps below to connect to a Natus amplifier:
 * Select streaming machine. If not present add it to the SelectStreamingMachine Visual studio project and rebuild.
 * Start the startDataTransmit.bat .
 * Check if it connects and streams data based on the message in the left lower corner.
-* Start MNE Scan. Find out number of channels and sampling frequency. Start the Natus plugin.
+* Start MNE Scan and add the Natus plugin. Enter the number of channels and the sampling rate set on the amplifier;
+  the datagrams carry the channel count, so a wrong one stops the stream with a message, but not the rate. The
+  streaming machine sends to UDP port 50000 by default; set the address and port where MNE Scan receives them.
+  `Simulate the streaming machine` streams a synthetic session without the amplifier.
+
+The plugin reads the amplifier through the `natus://` source of the acquisition library, which works on every
+platform, e.g. `mne_acq view "natus://0.0.0.0?port=50000&channels=46&rate=2048"`. The streaming machine sends its
+values in units of 0.1 µV; the source turns them into volts.

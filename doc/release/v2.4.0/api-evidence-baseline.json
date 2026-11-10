@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 473,
-    "exported_free_functions": 183,
+    "exported_free_functions": 184,
     "registered_classes": 565,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
@@ -386,6 +386,11 @@
     },
     {
       "name": "register_rtserver_scheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "register_natus_scheme",
       "header": "acq/devices/acq_devices.h",
       "library": "acq"
     },

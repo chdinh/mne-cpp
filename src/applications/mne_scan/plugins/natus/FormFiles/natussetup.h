@@ -16,16 +16,10 @@
 #define NATUSSETUP_H
 
 //=============================================================================================================
-// INCLUDES
-//=============================================================================================================
-
-#include "ui_natussetup.h"
-
-//=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtWidgets>
+#include <QWidget>
 
 //=============================================================================================================
 // DEFINE NAMESPACE NATUSPLUGIN
@@ -42,9 +36,8 @@ class Natus;
 
 //=============================================================================================================
 /**
- * DECLARE CLASS NatusSetup
- *
- * @brief The NatusSetup class provides the Natus configuration window.
+ * @brief Settings of the Natus plugin: where the datagrams arrive, the amplifier's channels and rate, the block size,
+ *        simulation.
  */
 class NatusSetup : public QWidget
 {
@@ -53,54 +46,14 @@ class NatusSetup : public QWidget
 public:
     //=========================================================================================================
     /**
-     * Constructs a NatusSetup which is a child of parent.
+     * Shows the settings of @p pNatus and writes every change back to it.
      *
-     * @param[in] parent pointer to parent widget; If parent is 0, the new NatusSetup becomes a window. If parent is another widget, NatusSetup becomes a child window inside parent. NatusSetup is deleted when its parent is deleted.
-     * @param[in] pNatus a pointer to the corresponding parent.
+     * @param[in] pNatus   The plugin.
+     * @param[in] parent   Parent widget.
      */
-    NatusSetup(Natus* pNatus, QWidget* parent = 0);
-
-    //=========================================================================================================
-    /**
-     * Destroys the NatusSetup.
-     * All NatusSetup's children are deleted first. The application exits if NatusSetup is the main widget.
-     */
-    ~NatusSetup();
-
-    //=========================================================================================================
-    /**
-     * Initializes the Connector's GUI properties.
-     */
-    void initGui();
-
-private:
-    //=========================================================================================================
-    /**
-     * Sets the device sampling properties.
-     */
-    void setDeviceSamplingProperties();
-
-    //=========================================================================================================
-    /**
-     * Forward the device sampling frequency.
-     */
-    void setSamplingFreq();
-
-    //=========================================================================================================
-    /**
-     * Forward the device number of channels.
-     */
-    void setNumberChannels();
-
-    //=========================================================================================================
-    /**
-     * Forward the device samples per block.
-     */
-    void setSamplesPerBlock();
-
-    Natus* m_pNatus;         /**< A pointer to corresponding Natus.*/
-    Ui::NatusSetupWidget ui; /**< The user interface for the NatusSetup.*/
+    explicit NatusSetup(Natus* pNatus, QWidget* parent = nullptr);
 };
-} // NAMESPACE
+
+} // NAMESPACE NATUSPLUGIN
 
 #endif // NATUSSETUP_H

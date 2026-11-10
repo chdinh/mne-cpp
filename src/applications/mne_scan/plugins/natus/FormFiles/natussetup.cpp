@@ -9,7 +9,7 @@
  *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>
  * @since    0.1.0
  * @date     June, 2018
- * @brief    Contains the implementation of the NatusSetup class.
+ * @brief    Definition of the NatusSetup class.
  */
 
 //=============================================================================================================
@@ -23,7 +23,10 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
+#include <QCheckBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QSpinBox>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -37,52 +40,49 @@ using namespace NATUSPLUGIN;
 
 NatusSetup::NatusSetup(Natus* pNatus, QWidget* parent)
 : QWidget(parent)
-, m_pNatus(pNatus)
 {
-    ui.setupUi(this);
+    auto* address = new QLineEdit(QString::fromStdString(pNatus->m_address));
+    address->setObjectName("m_lineEdit_Address");
+    address->setToolTip(tr("Local IPv4 address the datagrams arrive on; 0.0.0.0 for all"));
+    connect(address, &QLineEdit::textChanged, this, [pNatus](const QString& text) { pNatus->m_address = text.trimmed().toStdString(); });
 
-    //Connect device sampling properties
-    connect(ui.m_comboBox_SamplingFreq, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &NatusSetup::setSamplingFreq);
-    connect(ui.m_comboBox_blockSize, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-            this, &NatusSetup::setSamplesPerBlock);
-    connect(ui.m_spinBox_numberChannels, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-            this, &NatusSetup::setNumberChannels);
-}
+    auto* port = new QSpinBox;
+    port->setObjectName("m_spinBox_Port");
+    port->setRange(1, 65535);
+    port->setValue(pNatus->m_port);
+    port->setToolTip(tr("The port the streaming machine sends to"));
+    connect(port, &QSpinBox::valueChanged, this, [pNatus](int value) { pNatus->m_port = static_cast<std::uint16_t>(value); });
 
-//=============================================================================================================
+    auto* channels = new QSpinBox;
+    channels->setObjectName("m_spinBox_NumberChannels");
+    channels->setRange(1, 1024);
+    channels->setValue(pNatus->m_iNumberChannels);
+    connect(channels, &QSpinBox::valueChanged, this, [pNatus](int value) { pNatus->m_iNumberChannels = value; });
 
-NatusSetup::~NatusSetup()
-{
-}
+    auto* rate = new QSpinBox;
+    rate->setObjectName("m_spinBox_SamplingFreq");
+    rate->setRange(1, 100000);
+    rate->setSuffix(" Hz");
+    rate->setValue(pNatus->m_iSamplingFreq);
+    rate->setToolTip(tr("The sampling rate set on the amplifier; the datagrams do not carry it"));
+    connect(rate, &QSpinBox::valueChanged, this, [pNatus](int value) { pNatus->m_iSamplingFreq = value; });
 
-//=============================================================================================================
+    auto* block = new QSpinBox;
+    block->setObjectName("m_spinBox_SamplesPerBlock");
+    block->setRange(1, 100000);
+    block->setValue(pNatus->m_iSamplesPerBlock);
+    connect(block, &QSpinBox::valueChanged, this, [pNatus](int value) { pNatus->m_iSamplesPerBlock = value; });
 
-void NatusSetup::initGui()
-{
-    //Init device sampling properties
-    ui.m_comboBox_SamplingFreq->setCurrentText(QString::number(m_pNatus->m_iSamplingFreq));
-    ui.m_comboBox_blockSize->setCurrentText(QString::number(m_pNatus->m_iSamplesPerBlock));
-    ui.m_spinBox_numberChannels->setValue(m_pNatus->m_iNumberChannels);
-}
+    auto* simulate = new QCheckBox(tr("Simulate the streaming machine"));
+    simulate->setObjectName("m_checkBox_Simulate");
+    simulate->setChecked(pNatus->m_bSimulate);
+    connect(simulate, &QCheckBox::toggled, this, [pNatus](bool on) { pNatus->m_bSimulate = on; });
 
-//=============================================================================================================
-
-void NatusSetup::setSamplingFreq()
-{
-    m_pNatus->m_iSamplingFreq = ui.m_comboBox_SamplingFreq->currentText().toInt();
-}
-
-//=============================================================================================================
-
-void NatusSetup::setNumberChannels()
-{
-    m_pNatus->m_iNumberChannels = ui.m_spinBox_numberChannels->value();
-}
-
-//=============================================================================================================
-
-void NatusSetup::setSamplesPerBlock()
-{
-    m_pNatus->m_iSamplesPerBlock = ui.m_comboBox_blockSize->currentText().toInt();
+    auto* form = new QFormLayout(this);
+    form->addRow(tr("Address"), address);
+    form->addRow(tr("Port"), port);
+    form->addRow(tr("Channels"), channels);
+    form->addRow(tr("Sampling rate"), rate);
+    form->addRow(tr("Samples per block"), block);
+    form->addRow(simulate);
 }

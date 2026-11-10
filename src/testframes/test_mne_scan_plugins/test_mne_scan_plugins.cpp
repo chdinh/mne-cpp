@@ -23,6 +23,7 @@
 #include <ftbuffer/ftbuffer.h>
 #include <gusbamp/gusbamp.h>
 #include <hpi/hpi.h>
+#include <natus/natus.h>
 #include <neuromag/neuromag.h>
 #include <neuronalconnectivity/neuronalconnectivity.h>
 #include <noisereduction/noisereduction.h>
@@ -89,6 +90,7 @@ private slots:
     void neuromagStreamsTheSimulatedAcquisition();
     void ftbufferStreamsTheSimulatedRelay();
     void fiffSimulatorStreamsTheSimulatedServer();
+    void natusStreamsTheSimulatedAmplifier();
     void eegoImpedanceViewShowsTheMeasuredElectrodes();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
@@ -542,6 +544,54 @@ void TestMneScanPlugins::fiffSimulatorStreamsTheSimulatedServer()
         QCOMPARE(data.cols(), 40);
         QVERIFY(data.topRows(306).cwiseAbs().maxCoeff() < 1e-9);
         QVERIFY(data.topRows(306).cwiseAbs().maxCoeff() > 0.0);
+    }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::natusStreamsTheSimulatedAmplifier()
+{
+    NATUSPLUGIN::Natus plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* address = setup->findChild<QLineEdit*>("m_lineEdit_Address");
+        auto* port = setup->findChild<QSpinBox*>("m_spinBox_Port");
+        auto* channels = setup->findChild<QSpinBox*>("m_spinBox_NumberChannels");
+        auto* rate = setup->findChild<QSpinBox*>("m_spinBox_SamplingFreq");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        QVERIFY(address && port && channels && rate && block && simulate);
+        QCOMPARE(address->text(), QString("0.0.0.0"));
+        QCOMPARE(port->value(), 50000);
+        channels->setValue(8);
+        rate->setValue(1024);
+        block->setValue(64);
+        simulate->click();
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // Eight EEG channels in volts at 1024 Hz
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(8));
+    QCOMPARE(info->sfreq, 1024.0);
+    QCOMPARE(info->chs[0].kind, FIFFV_EEG_CH);
+    QCOMPARE(info->chs[0].ch_name, std::string("EEG 001"));
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 8);
+        QCOMPARE(data.cols(), 64);
+        QVERIFY(data.cwiseAbs().maxCoeff() < 1e-3);
+        QVERIFY(data.cwiseAbs().maxCoeff() > 0.0);
     }
 }
 

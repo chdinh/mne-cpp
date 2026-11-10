@@ -9,7 +9,7 @@
  *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>
  * @since    0.1.0
  * @date     June, 2018
- * @brief    Contains the definition of the Natus class.
+ * @brief    Definition of the Natus class.
  */
 
 //=============================================================================================================
@@ -17,18 +17,26 @@
 //=============================================================================================================
 
 #include "natus.h"
-#include <memory>
-#include "natusproducer.h"
+
 #include "FormFiles/natussetup.h"
 
-#include <fiff/fiff.h>
+#include <acq/acq_device_registry.h>
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <fiff/fiff_info.h>
 #include <scMeas/realtimemultisamplearray.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSettings>
+#include <QDebug>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -37,32 +45,20 @@
 using namespace NATUSPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace FIFFLIB;
 using namespace Eigen;
-using namespace BASELIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-Natus::Natus()
-: m_iSamplingFreq(2048)
-, m_iNumberChannels(46)
-, m_iSamplesPerBlock(256)
-, m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/natus/")
-, m_pRMTSA_Natus(PluginOutputData<RealTimeMultiSampleArray>::create(this, "Natus", "EEG output data"))
-, m_pFiffInfo(std::make_shared<FiffInfo>())
-{
-    m_pRMTSA_Natus->measurementData()->setName(this->getName()); //Provide name to auto store widget settings
-}
+Natus::Natus() = default;
 
 //=============================================================================================================
 
 Natus::~Natus()
 {
-    //If the program is closed while the sampling is in process
-    if (this->isRunning()) {
-        this->stop();
+    if (isRunning()) {
+        stop();
     }
 }
 
@@ -70,14 +66,15 @@ Natus::~Natus()
 
 QSharedPointer<AbstractPlugin> Natus::clone() const
 {
-    QSharedPointer<AbstractPlugin> pNatusClone(new Natus());
-    return pNatusClone;
+    return QSharedPointer<Natus>(new Natus());
 }
 
 //=============================================================================================================
 
 void Natus::init()
 {
+    m_pRMTSA_Natus = PluginOutputData<RealTimeMultiSampleArray>::create(this, "Natus", "EEG output data");
+    m_pRMTSA_Natus->measurementData()->setName(getName()); //Provide name to auto store widget settings
     m_outputConnectors.append(m_pRMTSA_Natus);
 }
 
@@ -89,131 +86,51 @@ void Natus::unload()
 
 //=============================================================================================================
 
-void Natus::setUpFiffInfo()
+std::string Natus::uri() const
 {
-    //Clear old fiff info data
-    m_pFiffInfo->clear();
-
-    //Set number of channels, sampling frequency and high/-lowpass
-    m_pFiffInfo->nchan = m_iNumberChannels;
-    m_pFiffInfo->sfreq = m_iSamplingFreq;
-    m_pFiffInfo->highpass = 0.001f;
-    m_pFiffInfo->lowpass = m_iSamplingFreq / 2;
-
-    //Set up the channel info
-    StringList QSLChNames;
-    m_pFiffInfo->chs.clear();
-
-    for (int i = 0; i < m_pFiffInfo->nchan; ++i) {
-        //Create information for each channel
-        QString sChType;
-        FiffChInfo fChInfo;
-
-        //        //EEG Channels
-        //        if(i <= m_pFiffInfo->nchan-2)
-        //        {
-        //Set channel name
-        sChType = QString("EEG ");
-        if (i < 10) {
-            sChType.append("00");
-        }
-
-        if (i >= 10 && i < 100) {
-            sChType.append("0");
-        }
-
-        fChInfo.ch_name = sChType.append(sChType.number(i)).toStdString();
-
-        //Set channel type
-        fChInfo.kind = FIFFV_EEG_CH;
-
-        //Set logno
-        fChInfo.logNo = i;
-
-        //Set coord frame
-        fChInfo.coord_frame = FIFFV_COORD_HEAD;
-
-        //Set unit
-        fChInfo.unit = FIFF_UNIT_V;
-
-        //Set EEG electrode location - Convert from mm to m
-        fChInfo.eeg_loc(0, 0) = 0;
-        fChInfo.eeg_loc(1, 0) = 0;
-        fChInfo.eeg_loc(2, 0) = 0;
-
-        //Set EEG electrode direction - Convert from mm to m
-        fChInfo.eeg_loc(0, 1) = 0;
-        fChInfo.eeg_loc(1, 1) = 0;
-        fChInfo.eeg_loc(2, 1) = 0;
-
-        //Also write the eeg electrode locations into the meg loc variable (mne_ex_read_raw() matlab function wants this)
-        fChInfo.chpos.r0(0) = 0;
-        fChInfo.chpos.r0(1) = 0;
-        fChInfo.chpos.r0(2) = 0;
-
-        fChInfo.chpos.ex(0) = 1;
-        fChInfo.chpos.ex(1) = 0;
-        fChInfo.chpos.ex(2) = 0;
-
-        fChInfo.chpos.ey(0) = 0;
-        fChInfo.chpos.ey(1) = 1;
-        fChInfo.chpos.ey(2) = 0;
-
-        fChInfo.chpos.ez(0) = 0;
-        fChInfo.chpos.ez(1) = 0;
-        fChInfo.chpos.ez(2) = 1;
-        //        }
-
-        //        //Digital input channel
-        //        if(i == m_pFiffInfo->nchan-1)
-        //        {
-        //            //Set channel type
-        //            fChInfo.kind = FIFFV_STIM_CH;
-
-        //            sChType = QString("STIM");
-        //            fChInfo.ch_name = sChType;
-        //        }
-
-        QSLChNames.push_back(sChType.toStdString());
-
-        m_pFiffInfo->chs.push_back(fChInfo);
+    ACQLIB::AcqUri uri{.scheme = "natus",
+                       .target = {},
+                       .params = {{"channels", std::to_string(m_iNumberChannels)}, {"rate", std::to_string(m_iSamplingFreq)}}};
+    if (m_bSimulate) {
+        uri.params.emplace_back("simulate", "1");
+    } else {
+        uri.target = m_address;
+        uri.params.emplace_back("port", std::to_string(m_port));
     }
-
-    //Set channel names in fiff_info_base
-    m_pFiffInfo->ch_names = QSLChNames;
-
-    //Set head projection
-    m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->dev_head_t.to = FIFFV_COORD_HEAD;
-    m_pFiffInfo->ctf_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->ctf_head_t.to = FIFFV_COORD_HEAD;
+    return uri.toString();
 }
 
 //=============================================================================================================
 
 bool Natus::start()
 {
-    // Init circular buffer to transmit data from the producer to this thread
-    if (!m_pCircularBuffer) {
-        m_pCircularBuffer = std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXd>>(10);
+    ACQLIB::register_natus_scheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[Natus::start]" << QString::fromStdString(device.error().text());
+        return false;
+    }
+    m_device = std::move(*device);
+    auto fiffInfo = ACQLIB::toFiffInfo(*m_device.stream().info());
+    auto reader = m_device.stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[Natus::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        m_device.close();
+        return false;
     }
 
-    //Setup fiff info before setting up the RMTSA because we need it to init the RTMSA
-    setUpFiffInfo();
-
-    //Set the channel size of the RMTSA - this needs to be done here and NOT in the init() function because the user can change the number of channels during runtime
-    m_pRMTSA_Natus->measurementData()->initFromFiffInfo(m_pFiffInfo);
+    //The channels and rate can change on every start, so the output is set up here and not in init()
+    m_pRMTSA_Natus->measurementData()->initFromFiffInfo(std::make_shared<FIFFLIB::FiffInfo>(std::move(*fiffInfo)));
     m_pRMTSA_Natus->measurementData()->setMultiArraySize(1);
+    m_pRMTSA_Natus->measurementData()->setVisibility(true);
 
+    if (ACQLIB::AcqError e = m_device.start(); !e.ok()) {
+        qWarning() << "[Natus::start]" << QString::fromStdString(e.text());
+        m_device.close();
+        return false;
+    }
+    m_reader = std::move(*reader);
     QThread::start();
-
-    // Start the producer
-    m_pNatusProducer = QSharedPointer<NatusProducer>::create(m_iSamplesPerBlock, m_iNumberChannels);
-    m_pNatusProducer->moveToThread(&m_pProducerThread);
-    connect(m_pNatusProducer.data(), &NatusProducer::newDataAvailable,
-            this, &Natus::onNewDataAvailable, Qt::DirectConnection);
-    m_pProducerThread.start();
-
     return true;
 }
 
@@ -222,15 +139,12 @@ bool Natus::start()
 bool Natus::stop()
 {
     requestInterruption();
-    wait(500);
+    wait();
+    m_reader = ACQLIB::AcqReader();
+    m_device.close();
 
     // Clear all data in the buffer connected to displays and other plugins
     m_pRMTSA_Natus->measurementData()->clear();
-    m_pCircularBuffer->clear();
-
-    m_pProducerThread.quit();
-    m_pProducerThread.wait();
-
     return true;
 }
 
@@ -252,36 +166,26 @@ QString Natus::getName() const
 
 QWidget* Natus::setupWidget()
 {
-    NatusSetup* widget = new NatusSetup(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
-
-    //init properties dialog
-    widget->initGui();
-
-    return widget;
-}
-
-//=============================================================================================================
-
-void Natus::onNewDataAvailable(const Eigen::MatrixXd& matData)
-{
-    while (!m_pCircularBuffer->push(matData)) {
-        //Do nothing until the circular buffer is ready to accept new data again
-    }
+    return new NatusSetup(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
 }
 
 //=============================================================================================================
 
 void Natus::run()
 {
-    MatrixXd matData;
-
+    const std::size_t channels = m_device.stream().info()->channelCount();
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
     while (!isInterruptionRequested()) {
-        if (m_pCircularBuffer->pop(matData)) {
-            //emit values
-            if (!isInterruptionRequested()) {
-                m_pRMTSA_Natus->measurementData()->setValue(matData);
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (!read) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+                continue;
             }
+            qWarning() << "[Natus::run]" << QString::fromStdString(read.error().text());
+            return;
         }
+        m_pRMTSA_Natus->measurementData()->setValue(block);
     }
 }
 

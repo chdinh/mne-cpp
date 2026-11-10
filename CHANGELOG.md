@@ -159,6 +159,12 @@ aliases; replace the old spelling as below.
   and `SerialPort` (raw 8N1, `list_serial_ports()`), each reporting
   `std::error_code`s through `std::expected`. The acquisition devices use it
   for their network and serial connections; `ex_com` shows it.
+- `natus://` receives a Natus Quantum amplifier from the UDP datagrams of
+  its streaming machine without Qt, in volts, and stops with a message when
+  the machine sends other channels than set. `natus://?simulate=1` streams a
+  synthetic session. The Natus MNE Scan plugin reads through it; it used to
+  start every block one sample late and drop the samples of the datagram
+  that completed a block.
 - `rtserver://` reads the active connector of an `mne_rt_server` without Qt:
   it selects the connector, the replayed file and the buffer size, takes the
   measurement info with projectors, compensators and digitizer points, and

@@ -20,23 +20,16 @@
 //=============================================================================================================
 
 #include "natus_global.h"
-#include <memory>
 
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <base/circular_buffer.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QObject>
-#include <QDebug>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
-
-#include <Eigen/Core>
+#include <cstdint>
+#include <string>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -47,11 +40,6 @@ namespace SCMEASLIB
 class RealTimeMultiSampleArray;
 }
 
-namespace FIFFLIB
-{
-class FiffInfo;
-}
-
 //=============================================================================================================
 // DEFINE NAMESPACE NATUSPLUGIN
 //=============================================================================================================
@@ -60,17 +48,9 @@ namespace NATUSPLUGIN
 {
 
 //=============================================================================================================
-// NATUSPLUGIN FORWARD DECLARATIONS
-//=============================================================================================================
-
-class NatusProducer;
-class NatusSetup;
-
-//=============================================================================================================
 /**
- * The Natus class provides a EEG connector for receiving data from Natus UDP SDK.
- *
- * @brief The Natus class provides a EEG connector for receiving data from Natus UDP SDK.
+ * @brief Receives a Natus Quantum amplifier from the datagrams of its streaming machine through the natus:// source
+ *        of mne_acq_devices, which can also simulate it.
  */
 class NATUSSHARED_EXPORT Natus : public SCSHAREDLIB::AbstractSensor
 {
@@ -82,88 +62,52 @@ class NATUSSHARED_EXPORT Natus : public SCSHAREDLIB::AbstractSensor
     friend class NatusSetup;
 
 public:
-    //=========================================================================================================
-    /**
-     * Constructs a Natus.
-     */
     Natus();
+    ~Natus() override;
+
+    QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const override;
+    void init() override;
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Destroys the Natus.
+     * Receives the streaming machine's datagrams (or simulates them) and starts streaming.
      */
-    virtual ~Natus();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Clone the plugin
+     * Stops streaming and releases the port.
      */
-    virtual QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const;
+    bool stop() override;
 
-    //=========================================================================================================
-    /**
-     * Initialise input and output connectors.
-     */
-    virtual void init();
-
-    //=========================================================================================================
-    /**
-     * Is called when plugin is detached of the stage. Can be used to safe settings.
-     */
-    virtual void unload();
-
-    //=========================================================================================================
-    /**
-     * Sets up the fiff info with the current data chosen by the user.
-     */
-    void setUpFiffInfo();
-
-    //=========================================================================================================
-    /**
-     * Starts the Natus by starting the tmsi's thread.
-     */
-    virtual bool start();
-
-    //=========================================================================================================
-    /**
-     * Stops the Natus by stopping the tmsi's thread.
-     */
-    virtual bool stop();
-
-    virtual AbstractPlugin::PluginType getType() const;
-    virtual QString getName() const;
-    virtual QWidget* setupWidget();
-    virtual QString getBuildInfo();
+    SCSHAREDLIB::AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+    QWidget* setupWidget() override;
+    QString getBuildInfo() override;
 
 protected:
     //=========================================================================================================
     /**
-     * Call this function whenenver you received new data.
-     *
-     * @param[in] matData The new data.
+     * Hands the amplifier's blocks to the connected plugins until stop().
      */
-    void onNewDataAvailable(const Eigen::MatrixXd& matData);
+    void run() override;
 
-    //=========================================================================================================
-    /**
-     * The starting point for the thread. After calling start(), the newly created thread calls this function.
-     * Returning from this method will end the execution of the thread.
-     * Pure virtual method inherited by QThread.
-     */
-    virtual void run();
+private:
+    /** @return The natus:// URI of the current settings. */
+    std::string uri() const;
 
-    int m_iSamplingFreq;    /**< The sampling frequency defined by the user via the GUI (in Hertz).*/
-    int m_iNumberChannels;  /**< The number of channels to be received.*/
-    int m_iSamplesPerBlock; /**< The number of samples per block to be received.*/
+    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_Natus; /**< The data. */
 
-    QString m_qStringResourcePath; /**< The path to the EEG resource directory.*/
+    ACQLIB::AcqDevice m_device; /**< The amplifier while streaming. */
+    ACQLIB::AcqReader m_reader; /**< Reads its stream in run(). */
 
-    QThread m_pProducerThread;                                                   /**< The thread used to host the producer.*/
-    QSharedPointer<NATUSPLUGIN::NatusProducer> m_pNatusProducer;                 /**< The producer object.*/
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXd>> m_pCircularBuffer; /**< Holds incoming raw data. */
-
-    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRMTSA_Natus; /**< The RealTimeSampleArray to provide the EEG data.*/
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                                                    /**< Fiff measurement info.*/
+    std::string m_address = "0.0.0.0"; /**< Local address the datagrams arrive on. */
+    std::uint16_t m_port = 50000;      /**< Port the streaming machine sends to. */
+    int m_iNumberChannels = 46;        /**< Channels the streaming machine sends. */
+    int m_iSamplingFreq = 2048;        /**< Sampling rate set on the amplifier. */
+    int m_iSamplesPerBlock = 256;      /**< Samples per block handed to the connected plugins. */
+    bool m_bSimulate = false;          /**< Simulate the streaming machine. */
 };
 } // NAMESPACE
 

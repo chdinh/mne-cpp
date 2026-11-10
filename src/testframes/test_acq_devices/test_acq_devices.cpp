@@ -1086,6 +1086,12 @@ private slots:
     void testRtServerInvalidParameters();
     void testRtServerServerUnavailable();
     void testRtServerReadsTheServer();
+    void testNatusStreamLayout();
+    void testNatusMatchesSynthetic();
+    void testNatusWaitsForGatingReader();
+    void testNatusInvalidParameters_data();
+    void testNatusInvalidParameters();
+    void testNatusReceivesDatagrams();
 };
 
 //=============================================================================================================
@@ -1100,6 +1106,7 @@ void TestAcqDevices::initTestCase()
     QVERIFY(register_polhemus_scheme().ok());
     QVERIFY(register_ftbuffer_scheme().ok());
     QVERIFY(register_rtserver_scheme().ok());
+    QVERIFY(register_natus_scheme().ok());
 }
 
 //=============================================================================================================
@@ -2447,6 +2454,136 @@ void TestAcqDevices::testRtServerReadsTheServer()
 
 //=============================================================================================================
 // MAIN
+//=============================================================================================================
+
+void TestAcqDevices::testNatusStreamLayout()
+{
+    auto device = AcqDevice::open("natus://?simulate=1&channels=8&rate=1024");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().backend, std::string("natus"));
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float32);
+    QCOMPARE(info->sfreq, 1024.0);
+    QCOMPARE(info->channelCount(), std::size_t(8));
+    QCOMPARE(info->channels[0].name, std::string("EEG 001"));
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Volt);
+    QCOMPARE(info->channels[7].scale, 1e-7);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNatusMatchesSynthetic()
+{
+    // The streaming machine sends the amplifier's volts in units of 0.1 uV
+    const Recording natus = record("natus://?simulate=1&channels=6&rate=512&block=32&seed=4&realtime=0&duration=2");
+    const Recording direct = record("synthetic://?sfreq=512&stim=0&eeg=6&block=32&seed=4&realtime=0&duration=2");
+    QCOMPARE(natus.channels, std::size_t(6));
+    QCOMPARE(natus.frames(), std::size_t(1024));
+    QCOMPARE(direct.frames(), natus.frames());
+    for (std::size_t s = 0; s < natus.frames(); ++s) {
+        for (std::size_t c = 0; c < 6; ++c) {
+            QVERIFY(std::abs(natus.at(s, c) - direct.at(s, c)) <= 1e-6 * std::abs(direct.at(s, c)) + 1e-13);
+        }
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNatusWaitsForGatingReader()
+{
+    auto device = AcqDevice::open("natus://?simulate=1&channels=4&rate=2048&realtime=0&duration=6");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(6 * 2048));
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNatusInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("target") << "natus://0.0.0.0?simulate=1";
+    QTest::newRow("port") << "natus://?port=0";
+    QTest::newRow("channels") << "natus://?simulate=1&channels=0";
+    QTest::newRow("rate") << "natus://?simulate=1&rate=0";
+    QTest::newRow("datagram") << "natus://?simulate=1&channels=1024&block=64";
+    QTest::newRow("address") << "natus://localhost";
+}
+
+void TestAcqDevices::testNatusInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNatusReceivesDatagrams()
+{
+#if defined(_WIN32)
+    QSKIP("the sender uses POSIX sockets");
+#else
+    // A free port: bind one, note it, let it go
+    const int probe = ::socket(AF_INET, SOCK_DGRAM, 0);
+    sockaddr_in to{};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    socklen_t length = sizeof(to);
+    QVERIFY(::bind(probe, reinterpret_cast<sockaddr*>(&to), sizeof(to)) == 0);
+    QVERIFY(::getsockname(probe, reinterpret_cast<sockaddr*>(&to), &length) == 0);
+    ::close(probe);
+
+    auto device = AcqDevice::open(std::format("natus://127.0.0.1?port={}&channels=2&rate=2048", ntohs(to.sin_port)));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QVERIFY(openError(std::format("natus://127.0.0.1?port={}", ntohs(to.sin_port))) == AcqErrorCode::DeviceIo); // taken
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+
+    const int sender = ::socket(AF_INET, SOCK_DGRAM, 0);
+    const auto send = [&](std::initializer_list<float> values) {
+        std::vector<std::byte> datagram;
+        for (const float v : values) {
+            append_value(datagram, v);
+        }
+        ::sendto(sender, datagram.data(), datagram.size(), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+    };
+    send({0.0F, 2.0F, 2.0F, 10.0F, -20.0F, 30.0F, -40.0F}); // two samples of two channels
+    send({1.0F, 1.0F, 2.0F, 50.0F, -60.0F});
+    std::array<float, 6> got{};
+    const auto read = reader->read(AcqMatrixRef<float>::columnMajor(got.data(), 2, 3), 2s);
+    QVERIFY2(read, read ? "" : read.error().text().c_str());
+    const std::array<float, 6> expected = {1e-6F, -2e-6F, 3e-6F, -4e-6F, 5e-6F, -6e-6F};
+    for (std::size_t i = 0; i < got.size(); ++i) {
+        QVERIFY(std::abs(got[i] - expected[i]) < 1e-12F);
+    }
+
+    // A streaming machine set up for other channels ends the stream with the reason
+    send({2.0F, 1.0F, 3.0F, 1.0F, 2.0F, 3.0F});
+    QVERIFY(QTest::qWaitFor([&] { return !device->lastError().ok(); }, 2000));
+    QCOMPARE(device->lastError().code(), AcqErrorCode::DeviceIo);
+    QVERIFY(device->lastError().text().find("3 channels") != std::string::npos);
+    ::close(sender);
+#endif
+}
+
 //=============================================================================================================
 
 QTEST_GUILESS_MAIN(TestAcqDevices)
