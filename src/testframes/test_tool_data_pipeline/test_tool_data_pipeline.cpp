@@ -104,6 +104,58 @@ private:
         return QFile::exists(path);
     }
 
+    /** Writes @p data (channels x samples) as two raw buffers of @p type; stim channels get range @p stimRange. */
+    static bool writeTriggerRaw(const QString& path, FIFFLIB::fiff_int_t type, const BASELIB::StringList& names, const Eigen::MatrixXd& data,
+                                float stimRange)
+    {
+        FIFFLIB::FiffInfo info;
+        for (const std::string& name : names) {
+            FIFFLIB::FiffChInfo ch;
+            ch.ch_name = name;
+            ch.scanNo = ch.logNo = static_cast<int>(info.chs.size()) + 1;
+            ch.kind = name.starts_with("STI") ? FIFFV_STIM_CH : FIFFV_EEG_CH;
+            ch.unit = ch.kind == FIFFV_STIM_CH ? FIFF_UNIT_NONE : FIFF_UNIT_V;
+            ch.cal = 1.0f;
+            ch.range = ch.kind == FIFFV_STIM_CH ? stimRange : 1.0f;
+            info.chs.push_back(ch);
+            info.ch_names.push_back(name);
+        }
+        info.nchan = static_cast<int>(names.size());
+        info.sfreq = 1000.0f;
+        Eigen::RowVectorXd cals;
+        auto out = FIFFLIB::FiffStream::start_writing_raw(path.toStdString(), info, cals, FIFFLIB::defaultMatrixXi, false, type);
+        if (!out) {
+            return false;
+        }
+        const int size = type == FIFFT_DAU_PACK16 || type == FIFFT_SHORT ? 2 : 4;
+        const Eigen::Index half = data.cols() / 2;
+        for (const Eigen::MatrixXd& buffer : {Eigen::MatrixXd(data.leftCols(half)), Eigen::MatrixXd(data.rightCols(data.cols() - half))}) {
+            FIFFLIB::FiffTag tag;
+            tag.kind = FIFF_DATA_BUFFER;
+            tag.type = type;
+            tag.next = FIFFV_NEXT_SEQ;
+            tag.resize(static_cast<int>(buffer.size()) * size);
+            char* at = tag.data();
+            for (Eigen::Index s = 0; s < buffer.cols(); ++s) {
+                for (Eigen::Index c = 0; c < buffer.rows(); ++c, at += size) {
+                    if (size == 2) {
+                        const auto v = static_cast<std::int16_t>(buffer(c, s));
+                        std::memcpy(at, &v, 2);
+                    } else if (type == FIFFT_INT) {
+                        const auto v = static_cast<std::int32_t>(buffer(c, s));
+                        std::memcpy(at, &v, 4);
+                    } else {
+                        const auto v = static_cast<float>(buffer(c, s));
+                        std::memcpy(at, &v, 4);
+                    }
+                }
+            }
+            out->write_tag(tag);
+        }
+        out->finish_writing_raw();
+        return true;
+    }
+
 private slots:
 
     void initTestCase()
@@ -508,27 +560,77 @@ private slots:
     // mne_fix_stim14
     //=========================================================================================================
 
-    void testFixStim14FindsStimChannels()
+    void testFixStim14KeepsLowByteOfSti014()
     {
         if (!toolExists("mne_fix_stim14"))
             QSKIP("mne_fix_stim14 not found");
-        const QString rawFile = m_sResourcePath + "MEG/sample/sample_audvis_trunc_raw.fif";
-        if (!QFile::exists(rawFile))
-            QSKIP("Raw data not available");
 
-        const QString outFile = m_tempDir.filePath("raw-fixed-stim14.fif");
-        const QString output = runTool("mne_fix_stim14", {"--raw", rawFile, "--out", outFile}, 120000);
-        QVERIFY2(m_lastProcessFinished, qPrintable(output));
-        QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
-        QCOMPARE(m_lastExitCode, 0);
+        // As MNE-C: in place, STI 014 gets range 1 and only the low byte of each 16-bit sample; EEG is untouched.
+        Eigen::MatrixXd data(2, 4);
+        data << 0x0105, -7, 3, 0x7F00, //
+            0, 5, 0x0105, -1;
+        for (const FIFFLIB::fiff_int_t type : {FIFFT_DAU_PACK16, FIFFT_SHORT}) {
+            const QString path = m_tempDir.filePath(QString("stim14-%1-raw.fif").arg(type));
+            QVERIFY(writeTriggerRaw(path, type, {"EEG 001", "STI 014"}, data, 0.5f));
+            const QString output = runTool("mne_fix_stim14", {path});
+            QVERIFY2(m_lastProcessFinished && m_lastExitCode == 0, qPrintable(output));
 
-        // The sample file names its stim lines "STI 001" ... "STI 014"; all are found.
-        QVERIFY(output.contains("Found STI 001"));
-        QVERIFY(output.contains("Found STI 014"));
-        FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
-        FIFFLIB::FiffRawData outputRaw(outFile.toStdString());
-        QCOMPARE(outputRaw.info.ch_names, inputRaw.info.ch_names);
-        QCOMPARE(outputRaw.last_samp - outputRaw.first_samp, inputRaw.last_samp - inputRaw.first_samp);
+            FIFFLIB::FiffRawData raw(path.toStdString());
+            QCOMPARE(raw.info.chs[1].range, 1.0f);
+            Eigen::MatrixXd fixed, times;
+            QVERIFY(raw.read_raw_segment(fixed, times));
+            QCOMPARE(fixed.row(0), data.row(0));
+            QCOMPARE(fixed.row(1), Eigen::RowVector4d(0, 5, 5, 255));
+        }
+
+        // Float buffers and files without STI 014 are refused and left as they are.
+        Eigen::MatrixXd eeg(1, 4);
+        eeg << 1, 2, 3, 4;
+        const QString floats = m_tempDir.filePath("stim14-float-raw.fif");
+        const QString noStim = m_tempDir.filePath("stim14-nostim-raw.fif");
+        QVERIFY(writeTriggerRaw(floats, FIFFT_FLOAT, {"EEG 001", "STI 014"}, data, 0.5f));
+        QVERIFY(writeTriggerRaw(noStim, FIFFT_DAU_PACK16, {"EEG 001"}, eeg, 0.5f));
+        for (const QString& path : {floats, noStim}) {
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            const QByteArray before = file.readAll();
+            file.close();
+            const QString output = runTool("mne_fix_stim14", {path});
+            QVERIFY2(m_lastProcessFinished && m_lastExitCode == 1, qPrintable(output));
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            QCOMPARE(file.readAll(), before);
+        }
+    }
+
+    void testFixStim14KeepsLow16BitsOfSti101()
+    {
+        if (!toolExists("mne_fix_stim14"))
+            QSKIP("mne_fix_stim14 not found");
+
+        // --32 keeps the low 16 bits of STI101 and STI201 in 32-bit integer and float buffers.
+        Eigen::MatrixXd data(3, 4);
+        data << 0x10003, -2, 7, 0x40000, //
+            0x10003, 1, 0x20100, -2,     //
+            0x10003, 3, 0x30001, 9;
+        for (const FIFFLIB::fiff_int_t type : {FIFFT_INT, FIFFT_FLOAT}) {
+            const QString path = m_tempDir.filePath(QString("stim32-%1-raw.fif").arg(type));
+            QVERIFY(writeTriggerRaw(path, type, {"EEG 001", "STI101", "STI201"}, data, 1.0f));
+            const QString output = runTool("mne_fix_stim14", {"--32", path});
+            QVERIFY2(m_lastProcessFinished && m_lastExitCode == 0, qPrintable(output));
+
+            FIFFLIB::FiffRawData raw(path.toStdString());
+            Eigen::MatrixXd fixed, times;
+            QVERIFY(raw.read_raw_segment(fixed, times));
+            QCOMPARE(fixed.row(0), data.row(0));
+            QCOMPARE(fixed.row(1), Eigen::RowVector4d(3, 1, 0x100, 65534));
+            QCOMPARE(fixed.row(2), Eigen::RowVector4d(3, 3, 1, 9));
+        }
+
+        const QString noStim = m_tempDir.filePath("stim32-nostim-raw.fif");
+        QVERIFY(writeTriggerRaw(noStim, FIFFT_INT, {"EEG 001", "STI 014"}, data.topRows(2), 1.0f));
+        const QString output = runTool("mne_fix_stim14", {"--32", noStim});
+        QVERIFY2(m_lastProcessFinished && m_lastExitCode == 1, qPrintable(output));
+        QVERIFY(output.contains("Neither STI101 nor STI201"));
     }
 
     //=========================================================================================================

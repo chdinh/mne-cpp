@@ -7,35 +7,35 @@ sidebar_label: mne_fix_stim14
 
 ## Overview
 
-`mne_fix_stim14` recomputes the `STI 014` stimulus channel by combining channels `STI 001` through `STI 006` using binary weighting. This is needed when the combined stimulus channel was not properly recorded or has become corrupted.
+`mne_fix_stim14` fixes the trigger channels of raw FIFF files in place, as the MNE-C tool of the same name by
+Matti Hämäläinen does.
 
-The formula is:
+- By default the digital trigger channel `STI 014` gets the range 1 and keeps only the low byte of each sample, which
+  removes stray high bits from the trigger codes. This works on 16-bit data buffers.
+- With `--32`, `STI101` and `STI201` keep only the low 16 bits of each sample, for 32-bit integer and float data.
 
-```
-STI014 = STI001 + 2×STI002 + 4×STI003 + 8×STI004 + 16×STI005 + 32×STI006
-```
-
-This is a C++ port of the original MNE-C tool by Matti Hämäläinen.
+A file is checked completely before anything in it changes: a file without the trigger channels, or with data buffers
+of another type, stays as it was, and the tool exits with 1.
 
 ## Usage
 
 ```bash
-mne_fix_stim14 [options]
+mne_fix_stim14 [--32] <file> ...
 ```
 
 ## Options
 
 | Option | Description |
 |---|---|
-| `--raw <file>` | Input raw FIFF file |
-| `--out <file>` | Output FIFF file |
+| `--32` | Keep only the two lowest bytes of `STI101` and `STI201` (32-bit integer and float data) |
 | `--help` | Print help |
 | `--version` | Print version |
 
 ## Example
 
 ```bash
-mne_fix_stim14 --raw sam-raw.fif --out sam-fixed-raw.fif
+cp sam-raw.fif sam-fixed-raw.fif
+mne_fix_stim14 sam-fixed-raw.fif
 ```
 
 ## See Also

@@ -7,7 +7,11 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.2.0
  * @date     April, 2026
- * @brief    Fix STI 014 channel by combining STI 001-006.
+ * @brief    Fixes the trigger channels of raw FIFF files in place, as MNE-C's mne_fix_stim14 does.
+ *
+ * By default STI 014 gets the range 1.0 and keeps only the low byte of its 16-bit samples; with --32 STI101
+ * and STI201 keep the low 16 bits of their 32-bit integer or float samples. A file is checked completely
+ * before anything in it changes.
  */
 
 //=============================================================================================================
@@ -15,36 +19,35 @@
 //=============================================================================================================
 
 #include <fiff/fiff_ch_name.h>
-#include <fiff/fiff_raw_data.h>
-#include <base/string_utils.h>
-#include <fiff/fiff_stream.h>
+#include <fiff/fiff_dir_node.h>
 #include <fiff/fiff_info.h>
-#include <fiff/fiff_ch_info.h>
-#include <fiff/fiff_file.h>
+#include <fiff/fiff_stream.h>
+#include <fiff/fiff_tag.h>
 #include <base/log.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QCoreApplication>
-#include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QFile>
-#include <QDebug>
 
 //=============================================================================================================
-// EIGEN INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <Eigen/Core>
+#include <cstdint>
+#include <cstring>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace FIFFLIB;
-using namespace Eigen;
 
 //=============================================================================================================
 // STATIC DEFINITIONS
@@ -52,12 +55,109 @@ using namespace Eigen;
 
 #define PROGRAM_VERSION MNE_CPP_VERSION
 
-//=============================================================================================================
-
-static int findChannelByName(const FiffInfo& info, const QString& name)
+namespace
 {
-    return FIFFLIB::channel_index(info.ch_names, std::string(BASELIB::trimmed(name.toStdString())));
+
+constexpr int kRangeOffset = 3 * sizeof(fiff_int_t); // scanNo, logNo, kind, then range in a channel info
+
+/** Rewrites sample @p channel of every frame in @p tag with @p fix; @return the number of samples changed. */
+template<typename T, typename Fix>
+int fixSamples(FiffTag& tag, int channel, int nchan, Fix fix)
+{
+    int changed = 0;
+    char* data = tag.data();
+    const int frames = static_cast<int>(tag.size() / (sizeof(T) * nchan));
+    for (int frame = 0; frame < frames; ++frame) {
+        char* at = data + (static_cast<std::size_t>(frame) * nchan + channel) * sizeof(T);
+        T value;
+        std::memcpy(&value, at, sizeof(T));
+        const T fixed = fix(value);
+        if (fixed != value) {
+            std::memcpy(at, &fixed, sizeof(T));
+            ++changed;
+        }
+    }
+    return changed;
 }
+
+/** Fixes @p path in place; @return the error, empty on success. */
+std::string fixFile(const QString& path, bool fix32)
+{
+    QFile file(path);
+    auto stream = FiffStream::open_update(file);
+    if (!stream) {
+        return "cannot open the file for update";
+    }
+    FiffInfo info;
+    std::shared_ptr<FiffDirNode> infoNode;
+    if (!stream->read_meas_info(stream->dirtree(), info, infoNode)) {
+        return "no measurement info";
+    }
+
+    // Check everything first, so a refused file stays as it was
+    const std::vector<int> channels = fix32 ? std::vector<int>{channel_index(info.ch_names, "STI101"), channel_index(info.ch_names, "STI201")}
+                                            : std::vector<int>{channel_index(info.ch_names, "STI 014")};
+    if (channels.front() < 0 && channels.back() < 0) {
+        return fix32 ? "Neither STI101 nor STI201 found" : "Digital trigger channel STI 014 not found";
+    }
+    std::vector<FiffDirEntry> buffers;
+    for (const FiffDirEntry& entry : stream->dir()) {
+        if (entry.kind != FIFF_DATA_BUFFER) {
+            continue;
+        }
+        const bool fits = fix32 ? entry.type == FIFFT_INT || entry.type == FIFFT_FLOAT : entry.type == FIFFT_SHORT || entry.type == FIFFT_DAU_PACK16;
+        if (!fits) {
+            return fix32 ? "--32 fixes 32-bit integer and float buffers only" : "STI 014 can be fixed in 16-bit buffers only";
+        }
+        buffers.push_back(entry);
+    }
+
+    if (!fix32) {
+        for (const FiffDirEntry& entry : stream->dir()) {
+            if (entry.kind != FIFF_CH_INFO) {
+                continue;
+            }
+            std::optional<FiffTag> tag = stream->read_tag(entry.pos);
+            if (!tag || !same_channel(tag->toChInfo().ch_name, "STI 014") || tag->toChInfo().range == 1.0f) {
+                continue;
+            }
+            const float range = 1.0f;
+            std::memcpy(tag->data() + kRangeOffset, &range, sizeof(range));
+            stream->write_tag(*tag, entry.pos);
+            qInfo("  STI 014 range set to 1");
+        }
+    }
+
+    int changed = 0;
+    for (const FiffDirEntry& entry : buffers) {
+        std::optional<FiffTag> tag = stream->read_tag(entry.pos);
+        if (!tag) {
+            return "cannot read a data buffer";
+        }
+        int inTag = 0;
+        for (const int channel : channels) {
+            if (channel < 0) {
+                continue;
+            }
+            if (entry.type == FIFFT_INT) {
+                inTag += fixSamples<std::int32_t>(*tag, channel, info.nchan, [](std::int32_t v) { return static_cast<std::int32_t>(static_cast<std::uint16_t>(v)); });
+            } else if (entry.type == FIFFT_FLOAT) {
+                inTag += fixSamples<float>(*tag, channel, info.nchan, [](float v) { return static_cast<float>(static_cast<std::uint16_t>(static_cast<std::int32_t>(v))); });
+            } else {
+                inTag += fixSamples<std::int16_t>(*tag, channel, info.nchan, [](std::int16_t v) { return static_cast<std::int16_t>(static_cast<std::uint16_t>(v) & 0xFF); });
+            }
+        }
+        if (inTag > 0) {
+            stream->write_tag(*tag, entry.pos);
+            changed += inTag;
+        }
+    }
+    qInfo("  %d samples fixed", changed);
+    stream->close();
+    return {};
+}
+
+} // namespace
 
 //=============================================================================================================
 
@@ -69,97 +169,27 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("Fix STI 014 channel by combining STI 001-006.\n\n"
-                                     "STI014 = STI001 + 2*STI002 + 4*STI003 + 8*STI004 + 16*STI005 + 32*STI006");
+    parser.setApplicationDescription("Fix the trigger channels of raw FIFF files in place.\n\n"
+                                     "STI 014 gets the range 1 and keeps only the low byte of its samples.\n"
+                                     "With --32, STI101 and STI201 keep only the low 16 bits of their 32-bit samples.");
     parser.addHelpOption();
     parser.addVersionOption();
-
-    QCommandLineOption rawOpt("raw", "Input raw FIFF file.", "file");
-    parser.addOption(rawOpt);
-
-    QCommandLineOption outOpt("out", "Output FIFF file.", "file");
-    parser.addOption(outOpt);
-
+    const QCommandLineOption fix32Opt("32", "Keep only the two lowest bytes of STI101 and STI201 (32-bit integer and float data).");
+    parser.addOption(fix32Opt);
+    parser.addPositionalArgument("files", "Raw FIFF files, fixed in place.", "<file>...");
     parser.process(app);
 
-    QString rawFile = parser.value(rawOpt);
-    QString outFile = parser.value(outOpt);
-
-    if (rawFile.isEmpty()) {
-        qCritical("--raw is required.");
-        return 1;
+    const QStringList files = parser.positionalArguments();
+    if (files.isEmpty()) {
+        parser.showHelp(1);
     }
-    if (outFile.isEmpty()) {
-        qCritical("--out is required.");
-        return 1;
-    }
-
-    // Open raw data
-    FiffRawData raw(rawFile.toStdU16String());
-    if (raw.info.empty()) {
-        qCritical("Cannot read raw data from: %s", qPrintable(rawFile));
-        return 1;
-    }
-
-    // Find STI channels
-    const QStringList stiNames = {"STI 001", "STI 002", "STI 003", "STI 004", "STI 005", "STI 006"};
-    const double weights[] = {1.0, 2.0, 4.0, 8.0, 16.0, 32.0};
-
-    int stiIndices[6];
-    for (int i = 0; i < 6; ++i) {
-        stiIndices[i] = findChannelByName(raw.info, stiNames[i]);
-        if (stiIndices[i] < 0) {
-            qCritical("Cannot find channel: %s", qPrintable(stiNames[i]));
-            return 1;
-        }
-        qInfo("Found %s at index %d", qPrintable(stiNames[i]), stiIndices[i]);
-    }
-
-    const int sti14Idx = findChannelByName(raw.info, "STI 014");
-    if (sti14Idx < 0) {
-        qCritical("Cannot find STI 014 channel.");
-        return 1;
-    }
-    qInfo("Found STI 014 at index %d", sti14Idx);
-
-    // Read all data
-    MatrixXd data;
-    MatrixXd times;
-    if (!raw.read_raw_segment(data, times)) {
-        qCritical("Cannot read raw data segment.");
-        return 1;
-    }
-
-    // Combine: STI014 = STI001 + 2*STI002 + 4*STI003 + 8*STI004 + 16*STI005 + 32*STI006
-    data.row(sti14Idx).setZero();
-    for (int i = 0; i < 6; ++i) {
-        for (int s = 0; s < data.cols(); ++s) {
-            if (data(stiIndices[i], s) > 0.5) {
-                data(sti14Idx, s) += weights[i];
-            }
+    int failed = 0;
+    for (const QString& path : files) {
+        qInfo("%s", qPrintable(path));
+        if (const std::string error = fixFile(path, parser.isSet(fix32Opt)); !error.empty()) {
+            qCritical("  %s: %s", qPrintable(path), error.c_str());
+            ++failed;
         }
     }
-    qInfo("STI 014 recomputed from STI 001-006.");
-
-    // Write output
-    RowVectorXd cals;
-    auto outStream = FiffStream::start_writing_raw(outFile.toStdU16String(), raw.info, cals);
-    if (!outStream) {
-        qCritical("Cannot open output file: %s", qPrintable(outFile));
-        return 1;
-    }
-
-    fiff_int_t firstSample = raw.first_samp;
-    outStream->write_int(FIFF_FIRST_SAMPLE, &firstSample);
-
-    int chunkSize = 10000;
-    for (int start = 0; start < data.cols(); start += chunkSize) {
-        int end = std::min(start + chunkSize, static_cast<int>(data.cols()));
-        MatrixXd chunk = data.block(0, start, data.rows(), end - start);
-        outStream->write_raw_buffer(chunk, cals);
-    }
-    outStream->finish_writing_raw();
-
-    qInfo("Written fixed raw data to: %s", qPrintable(outFile));
-    return 0;
+    return failed == 0 ? 0 : 1;
 }
