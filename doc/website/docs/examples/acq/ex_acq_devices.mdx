@@ -267,9 +267,11 @@ public:
         m_stop = new QPushButton("■  Stop");
         auto* transportBox = new QGroupBox("2  Acquire");
         auto* transport = new QHBoxLayout(transportBox);
+        transport->addWidget(m_start);
+        transport->addWidget(m_record);
+        transport->addWidget(m_stop);
         for (QPushButton* button : {m_start, m_record, m_stop}) {
             button->setMinimumHeight(34);
-            transport->addWidget(button);
         }
 
         // Recordings

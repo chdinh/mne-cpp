@@ -236,6 +236,19 @@ aliases; replace the old spelling as below.
   inline.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella
   headers for their library.
+- `lsl://?simulate=1` publishes a synthetic EEG session as an LSL stream
+  (`channels=`, `sfreq=`, `seed=`) and reads it, through liblsl or the in-tree
+  LSL. It used to fail for want of a stream.
+- `ChannelDataView` draws magnetometers at their own default scale (1.2 pT);
+  they used the gradiometer scale, 33 times larger, so the traces of
+  magnetometer systems such as BabyMEG looked flat.
+- `mne_fix_stim14` does what MNE-C's tool does: in place, `STI 014` gets the
+  range 1 and keeps the low byte of its 16-bit samples; `--32` keeps the low
+  16 bits of `STI101` and `STI201`. It used to rebuild `STI 014` from
+  `STI 001` to `STI 006` into a copy, with a threshold the calibrated lines
+  never reached, and so cleared `STI 014`. A refused file stays unchanged and
+  the tool exits with 1. Migration: `mne_fix_stim14 --raw in.fif --out
+  out.fif` becomes `cp in.fif out.fif && mne_fix_stim14 out.fif`.
 
 ## [2.4.0] - 2026-10-27
 
