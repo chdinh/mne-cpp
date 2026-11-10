@@ -51,7 +51,7 @@
       "by_category": {},
       "public_header_includes": 0,
       "q_object": 0,
-      "files": 10,
+      "files": 15,
       "modules": []
     },
     "acq/devices/polhemus": {

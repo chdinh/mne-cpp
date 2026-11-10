@@ -11,11 +11,12 @@
  *
  * Each amplifier is a URI scheme of AcqDeviceRegistry. The streams carry the amplifier's own sample format
  * (BrainAmp: 16-bit channels in steps of the chosen resolution, then the marker word, at 5 kHz; TMSi: a 32-bit
- * integer per channel with the SDK's gain, offset and exponent), so readers see exactly what the driver delivers. simulate=1 replaces the vendor driver with a simulator that digitises
+ * integer per channel with the SDK's gain, offset and exponent; g.USBamp: a float per channel in microvolts), so readers
+ * see exactly what the driver delivers. simulate=1 replaces the vendor driver with a simulator that digitises
  * a synthetic:// session in that format, which runs on every platform and needs no hardware; seed, realtime
  * and duration work as for synthetic://. The real driver interfaces are Windows-only: BrainAmp's is compiled when
- * the vendor's SDK header is found (CMake variable MNE_BRAINAMP_SDK_DIR), TMSi's loads the SDK's system DLL at
- * run time. Without them, opening without simulate=1 fails with BackendUnavailable.
+ * the vendor's SDK header is found (CMake variable MNE_BRAINAMP_SDK_DIR), TMSi's and g.USBamp's load the vendor's
+ * system DLL at run time. Without them, opening without simulate=1 fails with BackendUnavailable.
  *
  * @code
  * ACQLIB::registerBrainAmpScheme(); // needed only where static linking drops the library's initialiser
@@ -56,6 +57,14 @@ ACQDEVICESSHARED_EXPORT AcqError registerBrainAmpScheme();
  * @return Success, or the error of the registration.
  */
 ACQDEVICESSHARED_EXPORT AcqError registerTmsiScheme();
+
+/**
+ * Registers the gusbamp:// scheme (g.tec g.USBamp, up to four synchronised) with AcqDeviceRegistry::instance(), as
+ * registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_gusbamp_scheme();
 
 } // namespace ACQLIB
 

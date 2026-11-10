@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 481,
-    "exported_free_functions": 176,
+    "exported_free_functions": 177,
     "registered_classes": 577,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
@@ -356,6 +356,11 @@
     },
     {
       "name": "registerTmsiScheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "register_gusbamp_scheme",
       "header": "acq/devices/acq_devices.h",
       "library": "acq"
     },

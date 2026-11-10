@@ -110,7 +110,7 @@ Recording record(const std::string& uri)
                     } else {
                         float v = 0.0F;
                         std::memcpy(&v, part.at(c, s), sizeof(v));
-                        out.samples.push_back(v);
+                        out.samples.push_back(v * out.scale[c] + info->channels[c].offset);
                     }
                 }
             }
@@ -164,6 +164,14 @@ private slots:
     void testTmsiInvalidParameters_data();
     void testTmsiInvalidParameters();
     void testTmsiHardwareUnavailable();
+    void testGusbampStreamLayout();
+    void testGusbampChainsUnits();
+    void testGusbampMatchesSynthetic();
+    void testGusbampImpedances();
+    void testGusbampWaitsForGatingReader();
+    void testGusbampInvalidParameters_data();
+    void testGusbampInvalidParameters();
+    void testGusbampHardwareUnavailable();
 };
 
 //=============================================================================================================
@@ -172,6 +180,7 @@ void TestAcqDevices::initTestCase()
 {
     QVERIFY(registerBrainAmpScheme().ok());
     QVERIFY(registerTmsiScheme().ok());
+    QVERIFY(register_gusbamp_scheme().ok());
 }
 
 //=============================================================================================================
@@ -554,6 +563,160 @@ void TestAcqDevices::testTmsiHardwareUnavailable()
     QSKIP("Windows looks for the TMSi SDK");
 #else
     auto device = AcqDevice::open("tmsi://");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
+    QVERIFY(device.error().text().find("simulate=1") != std::string::npos);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampStreamLayout()
+{
+    auto device = AcqDevice::open("gusbamp://?simulate=1&inputs=1-4&trigger=1");
+    QVERIFY(device);
+    QCOMPARE(device->description().backend, std::string("gusbamp"));
+    QVERIFY(device->description().device.find("simulated g.USBamp") != std::string::npos);
+
+    // The API's format: a float per channel in microvolts, the master's trigger line last
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float32);
+    QCOMPARE(info->layout, AcqLayout::Interleaved);
+    QCOMPARE(info->sfreq, 1200.0);
+    QCOMPARE(info->channelCount(), std::size_t(5));
+    QCOMPARE(info->channels[0].name, std::string("EEG 001"));
+    QCOMPARE(info->channels[3].name, std::string("EEG 004"));
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Volt);
+    QCOMPARE(info->channels[0].scale, 1e-6);
+    QCOMPARE(info->channels[4].name, std::string("STI 014"));
+    QCOMPARE(info->channels[4].kind, AcqChannelKind::Stim);
+    QCOMPARE(info->channels[4].scale, 1.0);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampChainsUnits()
+{
+    // The inputs of the master come first, then those of each slave
+    auto device = AcqDevice::open("gusbamp://UB-1,UB-2,UB-3?simulate=1&inputs=2,5");
+    QVERIFY(device);
+    QVERIFY(device->description().device.find("UB-1 (master), UB-2, UB-3") != std::string::npos);
+    const auto info = device->stream().info();
+    QCOMPARE(info->channelCount(), std::size_t(6));
+    QCOMPARE(info->channels.back().name, std::string("EEG 006"));
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampMatchesSynthetic()
+{
+    // Two simulated units digitise the synthetic session of the same seed; the transfer headers are skipped
+    const Recording amp = record("gusbamp://UB-1,UB-2?simulate=1&inputs=1-4&trigger=1&rate=256&seed=3&realtime=0&duration=2");
+    const Recording ref = record("synthetic://?eeg=8&sfreq=256&seed=3&realtime=0&duration=2&block=16");
+    QCOMPARE(amp.channels, std::size_t(9));
+    QCOMPARE(ref.channels, std::size_t(9));
+    QCOMPARE(amp.frames(), std::size_t(512));
+    QCOMPARE(ref.frames(), amp.frames());
+
+    for (std::size_t s = 0; s < amp.frames(); ++s) {
+        for (std::size_t c = 0; c < 9; ++c) {
+            QVERIFY2(std::abs(amp.at(s, c) - ref.at(s, c)) <= 1e-6 * std::abs(ref.at(s, c)) + 1e-15, qPrintable(QString::number(c)));
+        }
+    }
+    QVERIFY(ref.events.size() >= 1);
+    QCOMPARE(amp.events.size(), ref.events.size());
+    for (std::size_t e = 0; e < ref.events.size(); ++e) {
+        QCOMPARE(amp.events[e].sample, ref.events[e].sample);
+        QCOMPARE(amp.events[e].code, ref.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampImpedances()
+{
+    auto device = AcqDevice::open("gusbamp://UB-1,UB-2?simulate=1&seed=5");
+    QVERIFY(device);
+    auto impedances = device->measureImpedances();
+    QVERIFY(impedances);
+    QCOMPARE(impedances->size(), std::size_t(32));
+    for (std::size_t i = 0; i < impedances->size(); ++i) {
+        QCOMPARE((*impedances)[i].channel, i);
+        QVERIFY((*impedances)[i].ohms >= 1e3 && (*impedances)[i].ohms <= 20e3);
+    }
+
+    // Each unit measures the set-up inputs, and not while streaming
+    auto subset = AcqDevice::open("gusbamp://UB-1,UB-2?simulate=1&seed=5&inputs=3");
+    QVERIFY(subset);
+    auto two = subset->measureImpedances();
+    QVERIFY(two);
+    QCOMPARE(two->size(), std::size_t(2));
+    QCOMPARE((*two)[0].ohms, (*impedances)[2].ohms);
+    QCOMPARE((*two)[1].ohms, (*impedances)[18].ohms);
+    QVERIFY(subset->start().ok());
+    QCOMPARE(subset->measureImpedances().error().code(), AcqErrorCode::InvalidState);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampWaitsForGatingReader()
+{
+    // Four seconds are more than the ring holds; the replay waits while the reader is busy
+    auto device = AcqDevice::open("gusbamp://?simulate=1&inputs=1-4&rate=256&realtime=0&duration=4");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(1024));
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("rate") << "gusbamp://?simulate=1&rate=1000";
+    QTest::newRow("input 0") << "gusbamp://?simulate=1&inputs=0";
+    QTest::newRow("input 17") << "gusbamp://?simulate=1&inputs=1-17";
+    QTest::newRow("descending range") << "gusbamp://?simulate=1&inputs=5-3";
+    QTest::newRow("not a number") << "gusbamp://?simulate=1&inputs=x";
+    QTest::newRow("empty inputs") << "gusbamp://?simulate=1&inputs=";
+    QTest::newRow("trigger") << "gusbamp://?simulate=1&trigger=maybe";
+    QTest::newRow("five units") << "gusbamp://A,B,C,D,E?simulate=1";
+    QTest::newRow("twice the same unit") << "gusbamp://A,B,A?simulate=1";
+    QTest::newRow("empty serial") << "gusbamp://A,,B?simulate=1";
+}
+
+void TestAcqDevices::testGusbampInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testGusbampHardwareUnavailable()
+{
+#if defined(_WIN32)
+    QSKIP("Windows looks for the g.USBamp API");
+#else
+    auto device = AcqDevice::open("gusbamp://");
     QVERIFY(!device);
     QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
     QVERIFY(device.error().text().find("simulate=1") != std::string::npos);

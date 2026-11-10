@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6335 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6353 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -528,6 +528,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **changeBaselineActive** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **changeBaselineFrom** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **changeBaselineTo** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
+- **changed** `[fn]` in `TriggerWord`
 - **changeDropActive** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **changeNumAverages** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **changePostStim** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
@@ -1191,6 +1192,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **description** `[fn]` in [Command](/docs/api/com/command) — Gets the help text or description of this command.
 - **description** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Label: "BAD", "BAD_ACQ_SKIP", etc.
 - **description** `[var]` in [FiffInfo](/docs/api/fiff/fiff-info) — (Textual) Description of an object.
+- **description** `[fn]` in `GusbampTransport`
 - **description** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — What the operation does.
 - **description** `[var]` in [MnaOpSchemaAttr](/docs/api/mna/mna-op-schema-attr) — Human-readable description.
 - **description** `[var]` in [MnaOpSchemaPort](/docs/api/mna/mna-op-schema-port) — Human-readable description.
@@ -1378,6 +1380,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **duration** `[var]` in `BrainAmpSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [BrainVisionMarker](/docs/api/bids/brain-vision-marker) — Duration in samples (0 = point marker).
 - **duration** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Duration in seconds (0 for point events).
+- **duration** `[var]` in `GusbampSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Duration (seconds).
 - **duration** `[var]` in `TmsiSimulation` — Seconds; 0 runs until stopped.
 - **dVarZThresh** `[var]` in [BadChannelDetectParams](/docs/api/dsp/bad-channel-detect-params) — Z-score of std-dev above this -&gt; noisy.
@@ -2068,6 +2071,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 ## G {#g}
 
 - **gain** `[var]` in `BrainAmpSimulation` — Amplitude factor of the simulated signal.
+- **gain** `[var]` in `GusbampSimulation` — Amplitude factor of the simulated signal.
 - **gain** `[var]` in `TmsiChannel` — Physical = (raw * gain + offset) * 10^exponent.
 - **gain** `[var]` in `TmsiSimulation` — Amplitude factor of the simulated signal.
 - **gainVector** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Magnetometer calibration factors.
@@ -2512,6 +2516,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **imbalanceMatrix** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Gradiometer imbalance terms.
 - **iMinDistance** `[var]` in [PeakFinderParams](/docs/api/dsp/peak-finder-params) — Minimum distance between peaks (samples).
 - **impedance** `[var]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Impedance value or "n/a" (OPTIONAL).
+- **impedances** `[fn]` in `GusbampTransport` — Measures the electrode impedances.
 - **impedances** `[fn]` in `TmsiTransport` — Measures the electrode impedances.
 - **implantation** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **in_nuse** `[var]` in [MNESssData](/docs/api/mne/mne-sss-data) — How many components included in the inside expansion.
@@ -2575,6 +2580,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **iNout** `[var]` in `Basis` — N_out = iOrderOut*(iOrderOut+2).
 - **inputHashes** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — portName → SHA-256
 - **inputPorts** `[var]` in [MnaOpSchema](/docs/api/mna/mna-op-schema) — Expected input ports.
+- **inputs** `[var]` in `GusbampSetup` — Inputs 1..16 of every unit, ascending.
 - **inputs** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Input ports.
 - **inputWeights** `[var]` in [DerivationRule](/docs/api/dsp/derivation-rule) — Map of input channel name → weight.
 - **insert** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Inserts commands encoded in a json document.
@@ -4261,6 +4267,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **rasGood** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Whether the direction cosines in the header are valid.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index.
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index using a volume's transform.
+- **rate** `[var]` in `GusbampSetup` — Sampling rate in Hz, one the amplifier supports.
 - **rate** `[var]` in `TmsiSetup` — Requested sampling rate in Hz.
 - **rateCorrection** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Estimated actual / nominal rate.
 - **raw** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Raw data with fully populated FiffInfo.
@@ -4310,6 +4317,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **read** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — mne_read_surface
 - **read** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — mne_read_surface
 - **read** `[fn]` in [FsSurfaceSet](/docs/api/fs/fs-surface-set) — Reads different surface files and assembles them to a [`FsSurfaceSet`](/docs/api/fs/fs-surface-set).
+- **read** `[fn]` in `GusbampTransport` — Waits for the next transfer of every unit.
 - **read** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reads an .stc file, as mne.read_source_estimate does for one hemisphere.
 - **read** `[fn]` in [MemoryByteStream](/docs/api/base/memory-byte-stream) — Reads up to `bytes` bytes at the current position and advances past them.
 - **read** `[fn]` in [MnaIO](/docs/api/mna/mna-io) — Read an MNA project from file.
@@ -4411,6 +4419,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **readTsv** `[fn]` in [BidsEvent](/docs/api/bids/bids-event) — Read a BIDS *_events.tsv file.
 - **readTsv** `[fn]` in [BidsTsv](/docs/api/bids/bids-tsv) — Reads a TSV file into an ordered list of row maps.
 - **realtime** `[var]` in `BrainAmpSimulation`
+- **realtime** `[var]` in `GusbampSimulation`
 - **realtime** `[var]` in `TmsiSimulation`
 - **realtimeColorsAvailable** `[signal]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Emitted when the real-time pipeline produces a new set of per-vertex colours.
 - **rearrange_source_space** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Rearrange source space after filtering: recount nuse, rebuild vertno, and recompute patch statistics if nearest info is available.
@@ -4507,6 +4516,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **reset** `[fn]` in [IirStreamFilter](/docs/api/dsp/iir-stream-filter) — Returns every channel to rest (zero state), as before the first block.
 - **reset** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Reset the data processing in the real-time worker.
 - **reset** `[fn]` in [RtAveragingWorker](/docs/api/dsp/rt-averaging-worker) — Resets the averaged data stored.
+- **reset** `[fn]` in `TriggerWord` — Forgets the idle value, for a new start.
 - **resetAllSubViewState** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Reset all per-pane [`SubView`](/docs/api/disp3-d/sub-view) state (camera, visibility, shaders, surface type, overlay) to its index-specific factory defaults and reset the single-view state too.
 - **resetAverage** `[signal]` in [AveragingSettingsView](/docs/api/disp/averaging-settings-view)
 - **resetChannelOrder** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
@@ -4748,6 +4758,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **scanCorrelations** `[fn]` in [InvTrapMusic](/docs/api/inv/inv-trap-music) — Compute the MUSIC-type subspace correlation for all source locations.
 - **scannerNo** `[var]` in `AcqFiffChannel` — scanno.
 - **scanNo** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Scanning order number.
+- **scans** `[var]` in `GusbampSetup` — Scans per transfer.
 - **scdc** `[fn]` in [GeometryInfo](/docs/api/disp3-d/geometry-info) — scdc Calculates surface constrained distances on a mesh.
 - **scdcInterpolationMat** `[fn]` in [GeometryInfo](/docs/api/disp3-d/geometry-info) — scdcInterpolationMat Computes geodesic distances (SCDC) and builds the sparse interpolation matrix in a single pass, without allocating a dense nVertices x nSources distance table.
 - **sceneCenter** `[fn]` in [CameraController](/docs/api/disp3-d/camera-controller)
@@ -4781,6 +4792,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **secs** `[var]` in [FiffTime](/docs/api/fiff/fiff-time) — GMT time in seconds since epoch.
 - **section_count** `[fn]` in [Report](/docs/api/report/report-class)
 - **seed** `[var]` in `BrainAmpSimulation`
+- **seed** `[var]` in `GusbampSimulation`
 - **seed** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Random seed for reproducibility.
 - **seed** `[var]` in `TmsiSimulation`
 - **seek** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
@@ -4838,6 +4850,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **separatorGeometries** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Compute the separator widget geometries.
 - **separatorLinePx** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
 - **serial** `[var]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) — Serial number.
+- **serials** `[fn]` in `GusbampTransport`
 - **seriesCount** `[fn]` in [LinePlot](/docs/api/disp/line-plot) — Returns the number of series in the plot.
 - **session** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Session label without "ses-"; empty for none.
 - **session** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Session label (without "ses-").
@@ -5548,6 +5561,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` to `path` from its next sample; the measurement info is on disk on return.
 - **start** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Starts recording `stream` into a BIDS dataset; `stop()` writes the sidecars (channels.tsv, events.tsv, meg.json, dataset_description.json) as mne-bids does.
 - **start** `[fn]` in `BrainAmpTransport`
+- **start** `[fn]` in `GusbampTransport` — Sets up the units and starts the slaves, then the master.
 - **start** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Starts the worker thread.
 - **start** `[fn]` in `TmsiTransport`
 - **start_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_START tag.
@@ -5604,6 +5618,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **stop** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Stops acquisition and output and joins the backend threads.
 - **stop** `[fn]` in [AcqRecorder](/docs/api/acq/acq-recorder) — Records every sample committed until now, writes the annotations and closes the files (and writes the BIDS sidecars).
 - **stop** `[fn]` in `BrainAmpTransport`
+- **stop** `[fn]` in `GusbampTransport`
 - **stop** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtClient](/docs/api/com/rt-client) — Stops the [`RtClient`](/docs/api/com/rt-client) by stopping the producer's thread.
 - **stop** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Stops the thread by interrupting its computation queue, quitting and waiting.
@@ -5903,6 +5918,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **trans** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Coordinate transformation FIFF_COORD_HEAD &lt;-&gt; FIFF_COORD_DEVICE.
 - **trans** `[var]` in [MriSlice](/docs/api/mri/mri-slice) — Coordinate transform: slice -&gt; MRI (surface RAS).
 - **transducerType** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
+- **transfer_bytes** `[fn]` in `GusbampSetup`
 - **transferFunction** `[fn]` in [MvarModel](/docs/api/connectivity/mvar-model) — Computes the transfer function H(f) at the given normalized frequencies.
 - **transform** `[fn]` in [AbstractTreeItem](/docs/api/disp3-d/abstract-tree-item)
 - **transform** `[var]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — 4x4 affine transform (identity if not provided).
@@ -5938,6 +5954,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **triangle_coords** `[fn]` in [MNESurface](/docs/api/mne/mne-surface) — Compute barycentric-like coordinates of a point relative to a triangle.
 - **triangleIndices** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Get the triangle index buffer.
 - **TrianglesT** `[type]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Type abbreviation for ntri x 3 triangle indices.
+- **trigger** `[var]` in `GusbampSetup` — The master's trigger line follows its inputs.
 - **trigger** `[var]` in [MnaParamBinding](/docs/api/mna/mna-param-binding) — "on_change", "periodic", "manual"
 - **triggerDetected** `[signal]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Emmited when trigger detection was performed.
 - **triggerDetected** `[signal]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Emmited when trigger detection was performed.
@@ -6255,6 +6272,7 @@ Index of 6335 public class members (functions, variables, typedefs, enums) acros
 - **whitener** `[var]` in [InvBeamformer](/docs/api/inv/inv-beamformer) — Whitening matrix (n_channels, n_channels).
 - **whitener** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Whitening matrix (derived from noise covariance).
 - **width** `[var]` in [AcqBitField](/docs/api/acq/acq-bit-field) — Bits in the field.
+- **width** `[fn]` in `GusbampSetup`
 - **width** `[var]` in [MNEVolGeom](/docs/api/mne/mne-vol-geom)
 - **width** `[var]` in [MriSlice](/docs/api/mri/mri-slice) — Width of the image in pixels.
 - **width** `[var]` in [MriSliceImage](/docs/api/mri/mri-slice-image) — Width of the slice image in pixels.

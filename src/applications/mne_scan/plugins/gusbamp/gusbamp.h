@@ -21,22 +21,24 @@
 //=============================================================================================================
 
 #include "gusbamp_global.h"
-#include <memory>
+
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <base/circular_buffer.h>
-
-#include <Eigen/Core>
-#include <scMeas/realtimemultisamplearray.h>
-#include <fiff/fiff.h>
-
-#include "FormFiles/gusbampsetupwidget.h"
-#include "FormFiles/gusbampsetupprojectwidget.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QtWidgets>
+#include <string>
+
+//=============================================================================================================
+// FORWARD DECLARATIONS
+//=============================================================================================================
+
+namespace SCMEASLIB
+{
+class RealTimeMultiSampleArray;
+}
 
 //=============================================================================================================
 // DEFINE NAMESPACE GUSBAMPPLUGIN
@@ -46,16 +48,11 @@ namespace GUSBAMPPLUGIN
 {
 
 //=============================================================================================================
-// FORWARD DECLARATIONS
-//=============================================================================================================
-
-class GUSBAmpProducer;
-
-//=============================================================================================================
 /**
  * GUSBAmp...
  *
- * @brief The GUSBAmp class provides an EEG connector for the gTec USBAmp device.
+ * @brief EEG connector for up to four synchronised g.tec g.USBamps through the gusbamp:// source of
+ *        mne_acq_devices, which can also simulate them.
  */
 class GUSBAMPSHARED_EXPORT GUSBAmp : public SCSHAREDLIB::AbstractSensor
 {
@@ -64,129 +61,55 @@ class GUSBAMPSHARED_EXPORT GUSBAmp : public SCSHAREDLIB::AbstractSensor
     // Use the Q_INTERFACES() macro to tell Qt's meta-object system about the interfaces
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
-    friend class GUSBAmpProducer;
     friend class GUSBAmpSetupWidget;
-    friend class GUSBAmpSetupProjectWidget;
 
 public:
-    //=========================================================================================================
-    /**
-     * Constructs a GUSBAmp.
-     */
     GUSBAmp();
+    ~GUSBAmp() override;
+
+    QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const override;
+    void init() override;
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Destroys the GUSBAmp.
+     * Opens the amplifiers (or their simulator) and starts streaming.
      */
-    virtual ~GUSBAmp();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * building all setting for the FIFF-data-stream
+     * Stops streaming and releases the amplifiers.
      */
-    void setUpFiffInfo();
+    bool stop() override;
 
-    //=========================================================================================================
-    /**
-     * Clone the plugin
-     */
-    virtual QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const;
-
-    //=========================================================================================================
-    /**
-     * Initialise input and output connectors.
-     */
-    virtual void init();
-
-    //=========================================================================================================
-    /**
-     * Is called when plugin is detached of the stage. Can be used to safe settings.
-     */
-    virtual void unload();
-
-    //=========================================================================================================
-    /**
-     * Starts the GUSBAmp by starting the GUSBAmp's thread.
-     */
-    virtual bool start();
-
-    //=========================================================================================================
-    /**
-     * Stops the GUSBAmp by stopping the GUSBAmp's thread.
-     */
-    virtual bool stop();
-
-    //=========================================================================================================
-    /**
-     * Opens a dialog to setup the project to check the impedance values
-     */
-    void showSetupProjectDialog();
-
-    //=========================================================================================================
-    /**
-     * Starts data recording
-     */
-    void showStartRecording();
-
-    //=========================================================================================================
-    /**
-     * Implements blinking recording button
-     */
-    void changeRecordingButton();
-
-    //=========================================================================================================
-    /**
-     * returns the type of the plug in
-     */
-    virtual SCSHAREDLIB::AbstractPlugin::PluginType getType() const;
-
-    //=========================================================================================================
-    /**
-     * returns the name of the plugin
-     */
-    virtual QString getName() const;
-
-    //=========================================================================================================
-    /**
-     * setups the widget
-     */
-    virtual QWidget* setupWidget();
-
-    //=========================================================================================================
-    /**
-     * splits the recorded FIFF file
-     */
-    void splitRecordingFile();
-
-    virtual QString getBuildInfo();
+    SCSHAREDLIB::AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+    QWidget* setupWidget() override;
+    QString getBuildInfo() override;
 
 protected:
     //=========================================================================================================
     /**
-     * The starting point for the thread. After calling start(), the newly created thread calls this function.
-     * Returning from this method will end the execution of the thread.
-     * Pure virtual method inherited by QThread.
+     * Hands the amplifiers' blocks to the connected plugins until stop().
      */
-    virtual void run();
+    void run() override;
 
 private:
-    SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSA_GUSBAmp; /**< The RealTimeSampleArray to provide the EEG data.*/
-    QSharedPointer<GUSBAmpSetupProjectWidget> m_pGUSBampSetupProjectWidget;                    /**< Widget for setup the project file*/
+    /** @return The gusbamp:// URI of the current settings. */
+    std::string uri() const;
 
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXf>> m_pCircularBuffer; /**< Holds incoming raw data.*/
+    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_GUSBAmp; /**< The EEG data. */
 
-    QString m_qStringResourcePath;                      /**< The path to the EEG resource directory.*/
-    QSharedPointer<GUSBAmpProducer> m_pGUSBAmpProducer; /**< the GUSBAmpProducer.*/
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;     /**< Fiff measurement info.*/
+    ACQLIB::AcqDevice m_device; /**< The amplifiers while streaming. */
+    ACQLIB::AcqReader m_reader; /**< Reads the amplifiers' stream in run(). */
 
-    std::vector<QString> m_vSerials;         /**< vector of all Serials (the first one is the master). */
-    int m_iSampleRate;                       /**< the sample rate in Hz (see documentation of the g.USBamp API for details on this value and the NUMBER_OF_SCANS!)*/
-    int m_iSamplesPerBlock;                  /**< The samples per block defined by the user via the GUI. */
-    int m_iNumberOfChannels;                 /**< the channels that should be acquired from each device. */
-    std::vector<int> m_viSizeOfSampleMatrix; /**< vector including the size of the two dimensional sample Matrix. */
-    std::vector<int> m_viChannelsToAcquire;  /**< vector of the calling numbers of the channels to be acquired. */
-    Eigen::RowVectorXd m_cals;
+    std::string m_serials;         /**< Serial numbers separated by commas, master first; empty for the first connected unit. */
+    std::string m_inputs = "1-16"; /**< Inputs of every unit, e.g. 1-8,11. */
+    int m_iSampleRate = 1200;      /**< Sampling rate in Hz. */
+    int m_iSamplesPerBlock = 64;   /**< Samples per block handed to the connected plugins. */
+    bool m_bTrigger = false;       /**< Deliver the master's trigger line. */
+    bool m_bSimulate = false;      /**< Simulate the amplifiers. */
 };
 } // NAMESPACE
 

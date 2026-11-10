@@ -11,7 +11,7 @@ Plugins are loaded as shared libraries at runtime. Each plugin inherits from one
 
 ## Guides
 
-- **[Acquisition Plugins](scan-acq.mdx)** — The three-tier architecture (Plugin → Producer → Driver) used by all sensor plugins, with the gUSBamp EEG driver as a worked example.
+- **[Acquisition Plugins](scan-acq.mdx)** — Amplifier plugins as thin layers over `mne_acq` sources, with their simulators, and how to add one.
 - **[Creating a Plugin](scan-plugin.mdx)** — Step-by-step guide to building a new MNE Scan plugin using the DummyToolbox template, including CMake setup, virtual functions, connectors, and static build integration.
 
 ## Key Concepts

@@ -24,7 +24,6 @@
 
 # External device SDKs (if installed)
 /src/applications/mne_scan/plugins/eegosports/eemagine/
-/src/applications/mne_scan/plugins/gusbamp/gtec_gUSBamp.h
 /src/applications/mne_scan/plugins/brainamp/BrainAmpIoCtl.h
 
 # Installer framework

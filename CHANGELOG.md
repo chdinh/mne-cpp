@@ -76,8 +76,7 @@ aliases; replace the old spelling as below.
   instead of reading them as zero. `SelectionIO::write_mon` refuses group names
   that would leave the target directory.
 - `ex_make_layout` honours `--mirrorY`; it used to mirror x twice.
-- The EEGoSports and g.USBamp MNE Scan plugins (Windows, off by default)
-  compile again. Configuring one without its vendor header now
+- The EEGoSports MNE Scan plugin (Windows, off by default) compiles again. Configuring it without its vendor header now
   stops with a message naming the missing file. Closing the EEGoSports
   impedance widget no longer switches the plugin into impedance mode.
 - New `mne_acq_devices` library with the `brainamp://` source for Brain
@@ -102,6 +101,18 @@ aliases; replace the old spelling as below.
   gone, and the beep interval starts at 5 s instead of an uninitialised
   value. The samples always apply the channels' gain, offset and exponent;
   the options to skip them and the driver debug file are removed.
+- `gusbamp://` streams up to four synchronised g.tec g.USBamp amplifiers,
+  the master's inputs first, as floats in microvolts, with the master's
+  trigger line and the electrode impedances. `gusbamp://?simulate=1`
+  simulates them on every platform. On Windows it loads `gUSBamp.dll` from
+  the system directory, so the g.tec header and import libraries are no
+  longer needed to build.
+- The GUSBAmp MNE Scan plugin reads through `gusbamp://` and is built by
+  default (`WITH_GUSBAMP` is gone). It used to dereference a measurement
+  info it never created on start, ignore the chosen sampling rate (its slot
+  matched no Qt 6 signal) and print every sample. Its setup takes the serial
+  numbers and inputs as text, the block size, the trigger line and a
+  simulate switch; the empty project dialog is removed.
 - The TMSI impedance view finds its cap layouts wherever MNE Scan was
   started; it stayed empty unless the working directory was `bin/`. With a
   cap of more electrodes than the amplifier measures it colours the measured

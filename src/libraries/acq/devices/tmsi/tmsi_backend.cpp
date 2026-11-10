@@ -22,6 +22,7 @@
 #include "tmsi_transport.h"
 
 #include "../acq_devices.h"
+#include "../trigger_word.h"
 #include "../../acq_backend.h"
 #include "../../acq_device_registry.h"
 #include "../../acq_thread.h"
@@ -218,8 +219,7 @@ public:
         if (AcqError e = m_transport->start(); !e.ok()) {
             return e;
         }
-        m_idle.reset();
-        m_word = 0;
+        m_trigger.reset();
         const auto now = std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now().time_since_epoch()).count();
         AcqClockModel clock;
         clock.sfreq = m_rate;
@@ -328,17 +328,12 @@ private:
         const std::uint64_t first = m_writer->writePosition();
         for (std::size_t s = 0; s < samples; ++s) {
             const std::int32_t word = m_scratch[s * width + *m_digital];
-            if (!m_idle) {
-                m_idle = word; // inputs may idle high or low
-                m_word = word;
-            }
-            if (word != m_word && word != *m_idle) {
+            if (m_trigger.changed(word)) {
                 if (AcqError e = m_writer->pushEvent({first + s, 0, word}); !e.ok()) {
                     reportError(e);
                     return false;
                 }
             }
-            m_word = word;
         }
         return true;
     }
@@ -351,8 +346,7 @@ private:
     AcqWriter* m_writer = nullptr;
     double m_rate = 0.0;
     std::optional<std::size_t> m_digital; // stream index of the digital inputs
-    std::optional<std::int32_t> m_idle;   // digital word at the start; owned by the acquisition thread
-    std::int32_t m_word = 0;              // digital word of the previous sample
+    TriggerWord m_trigger;                // owned by the acquisition thread while it runs
     std::thread m_thread;
     std::atomic<bool> m_stop{false};
 };

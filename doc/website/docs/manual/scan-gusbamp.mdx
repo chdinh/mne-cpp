@@ -4,24 +4,37 @@ sidebar_label: GUSBAmp
 ---
 # GUSBAmp
 
-This article describes the installation and usage of the gUSBamp EEG driver plugin for MNE Scan.
+The GUSBAmp plugin streams up to four synchronised g.tec g.USBamp amplifiers into MNE Scan through the `gusbamp://`
+source of the `mne_acq_devices` library. Without amplifiers it simulates them.
 
-## Building the gUSBamp EEG Plugin
+## Building and running
 
-In order to build the gUSBamp driver, at first, the header file `gtec_gUSBamp.h` and the two library files `gUSBamp_x64.lib` and `gUSBamp_x86.lib` from the gUSBamp SDK have to be included into the mne-cpp project. These files can be found in the device's attached software library. They have to be copied to the gUSBamp driver repository which is to be found under:
+The plugin is built by default. On Windows it loads the g.USBamp API (`gUSBamp.dll`) from the system directory at run
+time; the amplifier's USB driver installs it there. Connect the units with the synchronisation cable and switch them on
+before starting the acquisition. The setup widget sets
 
-`\mne-cpp\applications\mne_scan\plugins\gusbamp`
+- **Serial numbers**: the units, separated by commas, master first (e.g. `UB-2015.05.16,UB-2015.05.17`); empty for the
+  first connected unit.
+- **Inputs**: the inputs 1 to 16 acquired on every unit, e.g. `1-8,11`.
+- **Sample rate**: 32, 64, 128, 256, 512, 600, 1200, 2400, 4800, 9600, 19200 or 38400 Hz.
+- **Samples per block**: the block size handed to the connected plugins.
+- **Trigger line**: the master's trigger input as `STI 014`; its changes become events.
+- **Simulate the amplifiers**: synthetic EEG and trigger codes in the API's format, for the given serial numbers.
 
-In a second step, the plugin's source code has to be reintegrated into the mne-cpp project. Therefore, in the file :
+The channels are `EEG 001` onwards, the inputs of the master first, then those of each slave. The amplifiers run
+without their hardware filters, unipolar, with no common reference or ground.
 
-`\mne-cpp\applications\mne_scan\plugins\plugins.pro`
+## Simulation and scripting
 
-the plugin's project `gusbamp` has to be restored by deleting the `#` in front of the name in the Sensor section. After this is done, the MNE Scan project can be rebuilt.
+The same source is available to every program that links `mne_acq_devices`:
 
-## Running the gUSBamp EEG Plugin
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
 
-For running the gUSBamp EEG plugin, the according driver has to be installed to the operating system. The files can also be found on the device attached software, as well as a documentation which will guide the whole process. After that, the gUSBamp EEG plugin can be used in the MNE Scan environment, like shown in the following figure.
+ACQLIB::register_gusbamp_scheme();
+auto device = ACQLIB::AcqDevice::open("gusbamp://UB-1,UB-2?simulate=1&inputs=1-8&rate=512&trigger=1");
+auto impedances = device->measureImpedances();
+```
 
-![](/img/GUSBampGUI.jpg "The GUI of the gUSBamp EEG plugin.")
-
-The connected devices and the sample frequency can be set via `set serials` and `sample rate`. Up to 3 more gUSBamp slaves can be connected to one gUSBamp master. Usually, all channels are selected by default. Under `Single Channel Select`, this can be changed by clicking on the desired selection. After the settings are done, the acquisition can be started with the green `Run` button.
+`simulate=1` also accepts `seed`, `realtime=0` (as fast as possible), `duration` in seconds and `gain`.

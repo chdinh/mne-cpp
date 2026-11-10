@@ -16,8 +16,8 @@
       "reason": "Built only with -DWITH_EEGO=ON; needs the proprietary eemagine SDK and an eego amplifier."
     },
     {
-      "pattern": "src/applications/mne_scan/plugins/gusbamp/*",
-      "reason": "Built only with -DWITH_GUSBAMP=ON; needs the g.tec gUSBamp SDK and device."
+      "pattern": "src/libraries/acq/devices/gusbamp/gusbamp_driver_win32.cpp",
+      "reason": "Built only on Windows; needs the g.USBamp API DLL and amplifiers. gusbamp://?simulate=1 covers the rest of the source."
     },
     {
       "pattern": "src/libraries/acq/devices/tmsi/tmsi_driver_win32.cpp",

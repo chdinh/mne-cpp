@@ -17,6 +17,7 @@
 #include <averaging/averaging.h>
 #include <brainamp/brainamp.h>
 #include <covariance/covariance.h>
+#include <gusbamp/gusbamp.h>
 #include <hpi/hpi.h>
 #include <neuronalconnectivity/neuronalconnectivity.h>
 #include <noisereduction/noisereduction.h>
@@ -41,6 +42,7 @@
 //=============================================================================================================
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QFileDialog>
 #include <QGraphicsView>
 #include <QLineEdit>
@@ -77,6 +79,7 @@ private slots:
     void passesTheStreamThrough();
     void brainAmpStreamsTheSimulatedAmplifier();
     void tmsiStreamsTheSimulatedAmplifier();
+    void gusbampStreamsTheSimulatedAmplifiers();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
 
@@ -391,6 +394,54 @@ void TestMneScanPlugins::brainAmpStreamsTheSimulatedAmplifier()
         QVERIFY(block.topRows(8).cwiseAbs().maxCoeff() > 0.0);
         for (const double marker : block.row(8))
             QVERIFY(marker == 0.0 || marker == 1.0 || marker == 2.0);
+    }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::gusbampStreamsTheSimulatedAmplifiers()
+{
+    GUSBAMPPLUGIN::GUSBAmp plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* serials = setup->findChild<QLineEdit*>("m_lineEdit_Serials");
+        auto* inputs = setup->findChild<QLineEdit*>("m_lineEdit_Inputs");
+        auto* rate = setup->findChild<QComboBox*>("m_comboBox_SampleRate");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        auto* trigger = setup->findChild<QCheckBox*>("m_checkBox_Trigger");
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        QVERIFY(serials && inputs && rate && block && trigger && simulate);
+        serials->setText("UB-1, UB-2");
+        inputs->setText("1-4");
+        rate->setCurrentText("512");
+        block->setValue(32);
+        trigger->click();
+        simulate->click();
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // Four inputs of the master, four of the slave, the master's trigger line; in volts at 512 Hz
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(9));
+    QCOMPARE(info->sfreq, 512.0);
+    QCOMPARE(info->chs[7].ch_name, std::string("EEG 008"));
+    QCOMPARE(info->chs[8].kind, FIFFV_STIM_CH);
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 9);
+        QCOMPARE(data.cols(), 32);
+        QVERIFY(data.topRows(8).cwiseAbs().maxCoeff() < 1e-3);
+        QVERIFY(data.topRows(8).cwiseAbs().maxCoeff() > 0.0);
     }
 }
 

@@ -7,96 +7,47 @@ sidebar_label: Acquisition Plugins
 
 Acquisition plugins (also called sensor plugins) are the entry point for all data in MNE Scan. They interface with hardware devices or data sources — EEG amplifiers, MEG systems, file readers, or simulated signals — and stream data into the real-time processing pipeline.
 
-## Three-Tier Architecture
+## Plugin and Source
 
-All acquisition plugins follow a consistent three-tier architecture that separates concerns between the MNE Scan framework, the data acquisition logic, and the hardware driver:
+An amplifier plugin is a thin layer over an acquisition source of the `mne_acq` library:
 
-| Tier | Class Role | Responsibilities |
-|------|-----------|------------------|
-| **Plugin** (top) | Main plugin class, inherits from `AbstractSensor` | Communicates with MNE Scan; manages the GUI (setup widget, toolbar buttons); creates and owns the Producer |
-| **Producer** (middle) | Data acquisition controller | Manages the acquisition thread; pulls data from the Driver and pushes it into ring buffers; bridges Plugin ↔ Driver |
-| **Driver** (bottom) | Hardware/device interface | Directly communicates with the device SDK or API; handles device initialization, parameter configuration, and raw sample retrieval |
+| Part | Where | Responsibilities |
+|------|-------|------------------|
+| **Plugin** | `src/applications/mne_scan/plugins/<device>/`, inherits `AbstractSensor` | Setup widget and toolbar actions; builds the source URI from its settings; hands blocks to its output connector |
+| **Source** | `src/libraries/acq/devices/<device>/`, a scheme of `AcqDeviceRegistry` such as `gusbamp://` | Talks to the vendor SDK in its own thread, writes the device's native samples, events and clock into a lock-free ring; measures impedances |
+| **Transport** | `<device>_transport.h` with `<device>_driver_win32.cpp` and `<device>_simulator.cpp` | The vendor SDK as the source sees it; the simulator digitises a `synthetic://` session in the SDK's format, so the source and plugin are tested on every platform without hardware |
 
-This separation means that the Plugin and Producer classes are structurally similar across all acquisition plugins — only the Driver class changes significantly depending on the hardware.
+The source has no Qt dependency and works the same from any program, e.g. `mne_acq` or a test:
 
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
+
+ACQLIB::register_gusbamp_scheme();
+auto device = ACQLIB::AcqDevice::open("gusbamp://UB-1,UB-2?simulate=1&inputs=1-8&rate=512");
+auto reader = device->stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+device->start();
 ```
-┌─────────────────────────────────┐
-│         MNE Scan                │
-│  (plugin pipeline framework)   │
-└──────────┬──────────────────────┘
-           │  ← AbstractSensor interface
-┌──────────▼──────────────────────┐
-│       Plugin Class              │
-│  (e.g. GUSBamp, BabyMEG,       │
-│   FiffSimulator, LSLAdapter)    │
-│  • GUI setup widget             │
-│  • Start/stop acquisition       │
-│  • Output connectors            │
-└──────────┬──────────────────────┘
-           │
-┌──────────▼──────────────────────┐
-│      Producer Class             │
-│  (e.g. GUSBampProducer)         │
-│  • Runs acquisition thread      │
-│  • Ring buffer management       │
-│  • Calls driver for samples     │
-└──────────┬──────────────────────┘
-           │
-┌──────────▼──────────────────────┐
-│       Driver Class              │
-│  (e.g. GUSBampDriver)           │
-│  • Device SDK calls             │
-│  • Parameter configuration      │
-│  • Raw sample retrieval         │
-└──────────┬──────────────────────┘
-           │
-     ┌─────▼─────┐
-     │  Hardware  │
-     │  Device    │
-     └───────────┘
-```
-
-## Example: gUSBamp EEG Driver
-
-The gUSBamp plugin illustrates this pattern:
-
-![](/img/eeg_amp_scan4.png "Flow sheet of the gUSBamp acquisition plugin")
-
-The left side shows the MNE Scan boundary; the right side shows the hardware device. The three classes mediate between them:
-
-* **gUSBamp** — main plugin class; communicates with MNE Scan and manages the GUI.
-* **gUSBampproducer** — controls the acquisition thread and bridges the plugin with the driver.
-* **gUSBampdriver** — communicates directly with the gUSBamp amplifier hardware.
 
 ## Data Flow
 
-All three classes are constructed sequentially during plugin initialization, setting up default parameters. Once initialized, the plugin waits for a start command or parameter changes from the GUI.
+`start()` of the plugin opens the source, converts its stream description to a `FiffInfo` with `ACQLIB::toFiffInfo()`, creates a Lossless reader and starts the source and the plugin thread. The plugin thread reads blocks of the configured size in physical units with `AcqReader::read()` and passes them to its `RealTimeMultiSampleArray`. `stop()` interrupts the plugin thread and closes the source, which stops its acquisition thread and releases the device.
 
-### Starting Acquisition
-
-Starting acquisition triggers a chain: the Plugin starts the Producer, and the Producer starts the Driver. The Driver initializes the hardware and begins sampling. Both the Plugin and Producer run internal threads that pull data from the class below and push it upward via **ring buffers** (`CircularBuffer`), creating a continuous data stream into MNE Scan.
-
-### Stopping Acquisition
-
-When stopping the acquisition, both threads are interrupted by setting the `m_bIsRunning` flag to `false`, and the Driver class puts the device into standby mode. The ring buffers are flushed and reset.
-
-## Key Base Classes
+## Key Classes
 
 | Class | Location | Purpose |
 |-------|----------|---------|
 | `AbstractSensor` | `src/applications/mne_scan/libs/scShared/` | Base class for all acquisition plugins |
-| `CircularBuffer` | `src/libraries/base/` | Bounded blocking ring buffer for inter-thread data transfer |
+| `AcqDevice`, `AcqReader` | `src/libraries/acq/` | Opens a source by URI; reads its stream |
+| `AcqBackend` | `src/libraries/acq/` | Base class of a source; owns its streams and writers |
 | `PluginOutputData` | `src/applications/mne_scan/libs/scShared/` | Typed output connector that passes data to downstream plugins |
 
-## Implementing a New Acquisition Plugin
+## Implementing a New Amplifier
 
-To create a new acquisition plugin:
-
-1. **Copy** an existing plugin folder (e.g., `dummytoolbox` or `fiffsimulator`) as a template.
-2. **Create three classes**: `MyPlugin` (inherits `AbstractSensor`), `MyPluginProducer`, and `MyPluginDriver`.
-3. **Implement the Driver** to interface with your device's SDK — initialize the device, configure parameters, and read raw samples.
-4. **Implement the Producer** to run the acquisition loop in a separate thread, pulling samples from the Driver and pushing them into a `CircularBuffer`.
-5. **Implement the Plugin** to set up the GUI, create output connectors, and manage the start/stop lifecycle.
-6. **Register** the plugin in the parent `CMakeLists.txt` and, for static builds, in `main.cpp` via `Q_IMPORT_PLUGIN`.
+1. **Write the tests** in `src/testframes/test_acq_devices/` against `<device>://?simulate=1`: stream layout, agreement with `synthetic://`, invalid parameters, a gating reader, and the error without hardware.
+2. **Declare the transport** in `src/libraries/acq/devices/<device>/<device>_transport.h`, write the simulator and the backend, and register the scheme in `acq_devices.h`.
+3. **Implement the Windows driver**: load the vendor DLL at run time from an absolute path with `detail::AcqSharedLibrary`, so the source builds without the SDK.
+4. **Write the plugin**: copy `gusbamp` or `tmsi`, build the URI from the settings, and add a test to `test_mne_scan_plugins`.
+5. **Register** the plugin in the parent `CMakeLists.txt` and, for static builds, in `main.cpp` via `Q_IMPORT_PLUGIN`.
 
 See [Creating a Plugin](scan-plugin.mdx) for the general plugin scaffolding guide.

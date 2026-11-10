@@ -37,6 +37,7 @@ add_subdirectory(babymeg)
 add_subdirectory(natus)
 add_subdirectory(brainamp)
 add_subdirectory(tmsi)
+add_subdirectory(gusbamp)
 
 # Algorithm Plugin
 add_subdirectory(rtclustmne)
@@ -49,14 +50,9 @@ add_subdirectory(hpi)
 add_subdirectory(rtfwd)
 
 option(WITH_EEGO        "Build Eego Sport plugin"   OFF)
-option(WITH_GUSBAMP     "Build GUSBAmp plugin"      OFF)
 
 if(WITH_EEGO)
     add_subdirectory(eegosports)
-endif()
-
-if(WITH_GUSBAMP)
-    add_subdirectory(gusbamp)
 endif()
 
 add_subdirectory(lsladapter)

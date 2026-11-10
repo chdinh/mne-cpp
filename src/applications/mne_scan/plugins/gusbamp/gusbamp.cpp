@@ -18,122 +18,56 @@
 //=============================================================================================================
 
 #include "gusbamp.h"
-#include <memory>
-#include "gusbampproducer.h"
-#include <fiff/fiff_ch_info.h>
+
+#include "FormFiles/gusbampsetupwidget.h"
+
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <fiff/fiff_info.h>
+#include <scMeas/realtimemultisamplearray.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QtCore/QtPlugin>
 #include <QDebug>
 
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
 #include <format>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
+using namespace GUSBAMPPLUGIN;
 using namespace SCSHAREDLIB;
 using namespace SCMEASLIB;
-using namespace GUSBAMPPLUGIN;
 using namespace Eigen;
-using namespace FIFFLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-GUSBAmp::GUSBAmp()
-: m_pCircularBuffer(std::make_shared<BASELIB::CircularBuffer<Eigen::MatrixXf>>(8))
-, m_qStringResourcePath(qApp->applicationDirPath() + "/../resources/mne_scan/plugins/gusbamp/")
-, m_pGUSBAmpProducer(new GUSBAmpProducer(this))
-, m_iSampleRate(128)
-, m_iSamplesPerBlock(0)
-, m_iNumberOfChannels(0)
-{
-    m_viChannelsToAcquire = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-
-    m_viSizeOfSampleMatrix.resize(2, 0);
-
-    m_vSerials.resize(1);
-    m_vSerials[0] = "UB-2015.05.16";
-}
+GUSBAmp::GUSBAmp() = default;
 
 //=============================================================================================================
 
 GUSBAmp::~GUSBAmp()
 {
-    //If the program is closed while the sampling is in process
-    if (this->isRunning()) {
-        this->stop();
+    if (isRunning()) {
+        stop();
     }
-}
-
-//=============================================================================================================
-
-void GUSBAmp::setUpFiffInfo()
-{
-    // Only works for ANT Neuro Waveguard Duke caps
-    //Clear old fiff info data
-    m_pFiffInfo->clear();
-
-    //Set number of channels, sampling frequency and high/-lowpass
-    m_pFiffInfo->nchan = m_iNumberOfChannels;
-    m_pFiffInfo->sfreq = m_iSampleRate;
-    m_pFiffInfo->highpass = 0.001f;
-    m_pFiffInfo->lowpass = m_iSampleRate / 2;
-
-    int numberEEGCh = m_iNumberOfChannels;
-
-    //Set up the channel info
-    m_pFiffInfo->chs.clear();
-    m_pFiffInfo->ch_names.clear();
-
-    for (int i = 0; i < m_iNumberOfChannels; i++) {
-        //Create information for each channel
-        FiffChInfo fChInfo;
-
-        //EEG Channels
-        if (i <= numberEEGCh - 1) {
-            //Set channel name
-            //fChInfo.ch_name = elcChannelNames.at(i);
-            fChInfo.ch_name = std::format("EEG {:03}", i);
-
-            //Set channel type
-            fChInfo.kind = FIFFV_EEG_CH;
-
-            //Set logno
-            fChInfo.logNo = i;
-
-            //Set coord frame
-            fChInfo.coord_frame = FIFFV_COORD_HEAD;
-
-            //Set unit
-            fChInfo.unit = FIFF_UNIT_V;
-            fChInfo.unit_mul = 0;
-
-            //cout<<i<<endl<<fChInfo.eeg_loc<<endl;
-        }
-
-        m_pFiffInfo->ch_names.push_back(fChInfo.ch_name);
-        m_pFiffInfo->chs.push_back(fChInfo);
-    }
-
-    //Set head projection
-    m_pFiffInfo->dev_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->dev_head_t.to = FIFFV_COORD_HEAD;
-    m_pFiffInfo->ctf_head_t.from = FIFFV_COORD_DEVICE;
-    m_pFiffInfo->ctf_head_t.to = FIFFV_COORD_HEAD;
 }
 
 //=============================================================================================================
 
 QSharedPointer<AbstractPlugin> GUSBAmp::clone() const
 {
-    QSharedPointer<GUSBAmp> pGUSBAmpClone(new GUSBAmp());
-    return pGUSBAmpClone;
+    return QSharedPointer<GUSBAmp>(new GUSBAmp());
 }
 
 //=============================================================================================================
@@ -141,8 +75,7 @@ QSharedPointer<AbstractPlugin> GUSBAmp::clone() const
 void GUSBAmp::init()
 {
     m_pRTMSA_GUSBAmp = PluginOutputData<RealTimeMultiSampleArray>::create(this, "GUSBAmp", "EEG output data");
-    m_pRTMSA_GUSBAmp->measurementData()->setName(this->getName()); //Provide name to auto store widget settings
-
+    m_pRTMSA_GUSBAmp->measurementData()->setName(getName()); //Provide name to auto store widget settings
     m_outputConnectors.append(m_pRTMSA_GUSBAmp);
 }
 
@@ -154,51 +87,56 @@ void GUSBAmp::unload()
 
 //=============================================================================================================
 
+std::string GUSBAmp::uri() const
+{
+    return std::format("gusbamp://{}?rate={}&inputs={}&trigger={}&simulate={}", m_serials, m_iSampleRate, m_inputs, m_bTrigger ? 1 : 0,
+                       m_bSimulate ? 1 : 0);
+}
+
+//=============================================================================================================
+
 bool GUSBAmp::start()
 {
-    //get the values from the GUI and start GUSBAmpProducer
-    m_pGUSBAmpProducer->start(m_vSerials, m_viChannelsToAcquire, m_iSampleRate);
-
-    //after device was started: ask for size of SampleMatrix to set the buffer matrix (bevor setUpFiffInfo() is started)
-    m_viSizeOfSampleMatrix = m_pGUSBAmpProducer->getSizeOfSampleMatrix();
-
-    //set the parameters for number of channels (rows of matrix) and samples (columns of matrix)
-    m_iNumberOfChannels = m_viSizeOfSampleMatrix[0];
-    m_iSamplesPerBlock = m_viSizeOfSampleMatrix[1];
-
-    //Setup fiff info
-    setUpFiffInfo();
-
-    //Set the channel size of the RTMSA - this needs to be done here and NOT in the init() function because the user can change the number of channels during runtime
-    m_pRTMSA_GUSBAmp->measurementData()->initFromFiffInfo(m_pFiffInfo);
-    m_pRTMSA_GUSBAmp->measurementData()->setMultiArraySize(1);
-    m_pRTMSA_GUSBAmp->measurementData()->setSamplingRate(m_iSampleRate);
-
-    //start the thread for ring buffer
-    if (m_pGUSBAmpProducer->isRunning()) {
-        QThread::start();
-        return true;
-    } else {
-        qWarning() << "Plugin GUSBAmp - ERROR - GUSBAmpProducer thread could not be started - Either the device is turned off (check your OS device manager) or the driver DLL (GUSBAmpSDK.dll / GUSBAmpSDK32bit.dll) is not installed in the system32 / SysWOW64 directory";
+    ACQLIB::register_gusbamp_scheme();
+    auto device = ACQLIB::AcqDevice::open(uri());
+    if (!device) {
+        qWarning() << "[GUSBAmp::start]" << QString::fromStdString(device.error().text());
         return false;
     }
+    m_device = std::move(*device);
+    auto fiffInfo = ACQLIB::toFiffInfo(*m_device.stream().info());
+    auto reader = m_device.stream().reader(ACQLIB::AcqReader::ReadMode::Lossless);
+    if (!fiffInfo || !reader) {
+        qWarning() << "[GUSBAmp::start]" << QString::fromStdString((fiffInfo ? reader.error() : fiffInfo.error()).text());
+        m_device.close();
+        return false;
+    }
+
+    //The user can change the channels between runs, so the measurement is set up here and not in init()
+    m_pRTMSA_GUSBAmp->measurementData()->initFromFiffInfo(std::make_shared<FIFFLIB::FiffInfo>(std::move(*fiffInfo)));
+    m_pRTMSA_GUSBAmp->measurementData()->setMultiArraySize(1);
+
+    if (ACQLIB::AcqError e = m_device.start(); !e.ok()) {
+        qWarning() << "[GUSBAmp::start]" << QString::fromStdString(e.text());
+        m_device.close();
+        return false;
+    }
+    m_reader = std::move(*reader);
+    QThread::start();
+    return true;
 }
 
 //=============================================================================================================
 
 bool GUSBAmp::stop()
 {
-    // Stop this (consumer) thread first
     requestInterruption();
-    wait(500);
-
-    //Stop the producer thread first
-    m_pGUSBAmpProducer->stop();
+    wait();
+    m_reader = ACQLIB::AcqReader();
+    m_device.close();
 
     // Clear all data in the buffer connected to displays and other plugins
     m_pRTMSA_GUSBAmp->measurementData()->clear();
-    m_pCircularBuffer->clear();
-
     return true;
 }
 
@@ -220,49 +158,26 @@ QString GUSBAmp::getName() const
 
 QWidget* GUSBAmp::setupWidget()
 {
-    GUSBAmpSetupWidget* pWidget = new GUSBAmpSetupWidget(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
-
-    //init properties dialog
-    pWidget->initGui();
-
-    return pWidget;
+    return new GUSBAmpSetupWidget(this); //widget is later destroyed by CentralWidget - so it has to be created everytime new
 }
 
 //=============================================================================================================
 
 void GUSBAmp::run()
 {
-    MatrixXf matValue;
-
+    const std::size_t channels = m_device.stream().info()->channelCount();
+    MatrixXd block(static_cast<Index>(channels), m_iSamplesPerBlock);
     while (!isInterruptionRequested()) {
-        //pop matrix only if the producer thread is running
-        if (m_pGUSBAmpProducer->isRunning()) {
-            //pop matrix
-            if (m_pCircularBuffer->pop(matValue)) {
-                for (int i = 0; i < matValue.cols(); i++) {
-                    qDebug() << matValue(0, i);
-                }
-
-                //emit values to real time multi sample array
-                m_pRTMSA_GUSBAmp->measurementData()->setValue(matValue.cast<double>() / 1000000);
+        const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
+                                        std::chrono::milliseconds(100));
+        if (!read) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+                continue;
             }
+            qWarning() << "[GUSBAmp::run]" << QString::fromStdString(read.error().text());
+            return;
         }
-    }
-}
-
-//=============================================================================================================
-
-void GUSBAmp::showSetupProjectDialog()
-{
-    // Open setup project widget
-    if (m_pGUSBampSetupProjectWidget == nullptr) {
-        m_pGUSBampSetupProjectWidget = QSharedPointer<GUSBAmpSetupProjectWidget>(new GUSBAmpSetupProjectWidget(this));
-    }
-    if (!m_pGUSBampSetupProjectWidget->isVisible()) {
-        m_pGUSBampSetupProjectWidget->setWindowTitle("GUSBAmp EEG Connector - Setup project");
-        m_pGUSBampSetupProjectWidget->initGui();
-        m_pGUSBampSetupProjectWidget->show();
-        m_pGUSBampSetupProjectWidget->raise();
+        m_pRTMSA_GUSBAmp->measurementData()->setValue(block);
     }
 }
 

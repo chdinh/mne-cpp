@@ -13,11 +13,15 @@ set(SOURCES
   brainamp/brainamp_simulator.cpp
   tmsi/tmsi_backend.cpp
   tmsi/tmsi_simulator.cpp
+  gusbamp/gusbamp_backend.cpp
+  gusbamp/gusbamp_simulator.cpp
 )
 
 set(PRIVATE_HEADERS
+  trigger_word.h
   brainamp/brainamp_transport.h
   tmsi/tmsi_transport.h
+  gusbamp/gusbamp_transport.h
 )
 
 set(HEADERS
@@ -34,9 +38,9 @@ if(WIN32 AND EXISTS "${MNE_BRAINAMP_SDK_DIR}/BrainAmpIoCtl.h")
   list(APPEND SOURCES brainamp/brainamp_driver_win32.cpp)
 endif()
 
-# The TMSi SDK is a system DLL, loaded at run time
+# The TMSi SDK and the g.USBamp API are system DLLs, loaded at run time
 if(WIN32)
-  list(APPEND SOURCES tmsi/tmsi_driver_win32.cpp)
+  list(APPEND SOURCES tmsi/tmsi_driver_win32.cpp gusbamp/gusbamp_driver_win32.cpp)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})

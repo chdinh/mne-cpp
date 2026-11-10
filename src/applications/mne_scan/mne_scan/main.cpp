@@ -74,9 +74,7 @@ Q_IMPORT_PLUGIN(FtBuffer)
 Q_IMPORT_PLUGIN(WriteToFile)
 Q_IMPORT_PLUGIN(Hpi)
 //Q_IMPORT_PLUGIN(DummyToolbox)
-#ifdef WITHGUSBAMP
 Q_IMPORT_PLUGIN(GUSBAmp)
-#endif
 Q_IMPORT_PLUGIN(BrainAMP)
 #ifdef WITHEEGOSPORTS
 Q_IMPORT_PLUGIN(EEGoSports)
@@ -114,9 +112,6 @@ int main(int argc, char* argv[])
     Q_INIT_RESOURCE(brainamp);
 #ifdef WITHEEGOSPORTS
     Q_INIT_RESOURCE(eegosports);
-#endif
-#ifdef WITHGUSBAMP
-    Q_INIT_RESOURCE(gusbamp);
 #endif
     Q_INIT_RESOURCE(tmsi);
 #endif
