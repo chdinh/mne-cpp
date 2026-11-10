@@ -20,7 +20,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_info.h>
-#include <com/rt_command/command_manager.h>
+#include <rtserver_connector/command_manager.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -101,7 +101,7 @@ private:
      *
      * @param[in] p_command  The connector list command.
      */
-    void comClist(COMLIB::Command p_command);
+    void comClist(RTSERVER::Command p_command);
 
     //=========================================================================================================
     /**
@@ -109,7 +109,7 @@ private:
      *
      * @param[in] p_command  The select connector command.
      */
-    void comMeasinfo(COMLIB::Command p_command);
+    void comMeasinfo(RTSERVER::Command p_command);
 
     //=========================================================================================================
     /**
@@ -117,7 +117,7 @@ private:
      *
      * @param[in] p_command  The start command.
      */
-    void comStart(COMLIB::Command p_command); //comMeas
+    void comStart(RTSERVER::Command p_command); //comMeas
 
     //=========================================================================================================
     /**
@@ -125,7 +125,7 @@ private:
      *
      * @param[in] p_command  The stop command.
      */
-    void comStop(COMLIB::Command p_command);
+    void comStop(RTSERVER::Command p_command);
 
     //=========================================================================================================
     /**
@@ -133,7 +133,7 @@ private:
      *
      * @param[in] p_command  The stop all command.
      */
-    void comStopAll(COMLIB::Command p_command);
+    void comStopAll(RTSERVER::Command p_command);
 
     QByteArray parseToId(QString& p_sRawId, qint32& p_iParsedId);
 

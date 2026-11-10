@@ -7,22 +7,22 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Untyped intermediate produced by @ref COMLIB::CommandParser before type information is bound to parameters.
+ * @brief    Untyped intermediate produced by @ref RTSERVER::CommandParser before type information is bound to parameters.
  *
- * @ref COMLIB::RawCommand is the first object the parser builds when a
+ * @ref RTSERVER::RawCommand is the first object the parser builds when a
  * command arrives on the command port of mne_rt_server. At that point the wire payload
  * has been tokenised into a command keyword and a list of string
- * arguments, but the parser does not yet know which @ref COMLIB::Command
+ * arguments, but the parser does not yet know which @ref RTSERVER::Command
  * descriptor (if any) those arguments belong to — the parameter types,
- * names and descriptions live in whichever @ref COMLIB::CommandManager ends up
+ * names and descriptions live in whichever @ref RTSERVER::CommandManager ends up
  * accepting the request. Keeping that pre-resolution state in its own
  * class avoids forcing every observer to deal with half-populated
  * @c Command objects.
  *
- * The class also implements @ref COMLIB::ICommand so it can be
+ * The class also implements @ref RTSERVER::ICommand so it can be
  * notified through the same dispatch path as a fully-typed @c Command;
  * the @c executed(QList<QString>) signal hands the raw parameter list
- * to whichever @ref COMLIB::CommandManager recognises the keyword, which is
+ * to whichever @ref RTSERVER::CommandManager recognises the keyword, which is
  * responsible for converting the strings into the appropriate
  * @c QVariant values and re-emitting them as a typed @c Command.
  *
@@ -38,7 +38,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "../com_global.h"
+#include "rtserver_connector_global.h"
 
 #include "command_pattern.h"
 
@@ -51,10 +51,10 @@
 #include <QVariant>
 
 //=============================================================================================================
-// DEFINE NAMESPACE COMLIB
+// DEFINE NAMESPACE RTSERVER
 //=============================================================================================================
 
-namespace COMLIB
+namespace RTSERVER
 {
 
 //=============================================================================================================
@@ -67,7 +67,7 @@ namespace COMLIB
  * located. Retains the JSON-vs-CLI dialect flag so replies travel back
  * in the same encoding the caller used.
  */
-class COMSHARED_EXPORT RawCommand : public QObject, public ICommand
+class RTSERVER_CONNECTOR_EXPORT RawCommand : public QObject, public ICommand
 {
     Q_OBJECT
 
@@ -78,7 +78,7 @@ public:
      *
      * @param[in] parent             Parent QObject (optional).
      */
-    explicit RawCommand(QObject* parent = 0);
+    explicit RawCommand(QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -88,7 +88,7 @@ public:
      * @param[in] p_bIsJson          If is received/should be send as JSON (optional, default true).
      * @param[in] parent             Parent QObject (optional).
      */
-    explicit RawCommand(const QString& p_sCommand, bool p_bIsJson = true, QObject* parent = 0);
+    explicit RawCommand(const QString& p_sCommand, bool p_bIsJson = true, QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -114,7 +114,7 @@ public:
      */
     inline quint32 count() const;
 
-    virtual void execute();
+    void execute() override;
 
     //=========================================================================================================
     /**

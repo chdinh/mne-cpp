@@ -35,7 +35,6 @@
 //=============================================================================================================
 
 using namespace RTSERVER;
-using namespace COMLIB;
 
 const char* connectorDir = "/mne_rt_server_plugins"; /**< holds directory to connectors.*/
 
@@ -148,7 +147,7 @@ void MNERTServer::comHelp(Command p_command)
 
     QMap<QString, Command>::ConstIterator itCommands;
 
-    for (COMLIB::IObserver* observer : m_commandServer.getCommandParser().observers()) {
+    for (RTSERVER::IObserver* observer : m_commandServer.getCommandParser().observers()) {
         CommandManager* t_pCommandManager = static_cast<CommandManager*>(observer);
 
         for (itCommands = t_pCommandManager->commandMap().begin(); itCommands != t_pCommandManager->commandMap().end(); ++itCommands) {

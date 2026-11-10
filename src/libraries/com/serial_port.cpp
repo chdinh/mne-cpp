@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <array>
 #include <cstring>
-#include <format>
 #include <utility>
 
 #ifdef _WIN32
@@ -40,8 +39,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace ACQLIB;
-using namespace ACQLIB::detail;
+using namespace COMLIB;
 
 //=============================================================================================================
 // STATIC HELPERS
@@ -62,13 +60,9 @@ int rank(std::string_view name)
     return 1;
 }
 
-AcqError system_error(const std::string& what)
+std::error_code last_error() noexcept
 {
-    const int error = errno;
-    const AcqErrorCode code = error == ENOENT || error == ENXIO ? AcqErrorCode::DeviceNotFound
-        : error == EACCES || error == EPERM                     ? AcqErrorCode::PermissionDenied
-                                                                : AcqErrorCode::DeviceIo;
-    return {code, std::format("{}: {}", what, std::strerror(error))};
+    return {errno, std::generic_category()};
 }
 
 /** @return The termios speed of @p baud, or B0 if termios has none. */
@@ -132,19 +126,19 @@ bool SerialPort::is_open() const noexcept
 
 //=============================================================================================================
 
-AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
+std::expected<SerialPort, std::error_code> SerialPort::open(const std::string& name, int baud)
 {
     if (baud <= 0) {
-        return AcqError(AcqErrorCode::InvalidParameter, std::format("baud rate {} of {}", baud, name));
+        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
     }
     const std::string path = name.starts_with("\\\\.\\") ? name : "\\\\.\\" + name; // COM10 and above need the prefix
     HANDLE handle = CreateFileA(path.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
     if (handle == INVALID_HANDLE_VALUE) {
         const DWORD error = GetLastError();
-        if (error == ERROR_FILE_NOT_FOUND) {
-            return AcqError(AcqErrorCode::DeviceNotFound, std::format("no serial port {}", name));
+        if (error == ERROR_ACCESS_DENIED) {
+            return std::unexpected(std::make_error_code(std::errc::device_or_resource_busy)); // ports are not shared
         }
-        return AcqError(AcqErrorCode::DeviceIo, std::format("cannot open serial port {}{} (error {})", name, error == ERROR_ACCESS_DENIED ? ", another program has it" : "", error));
+        return std::unexpected(std::error_code(static_cast<int>(error), std::system_category()));
     }
     SerialPort port;
     port.m_handle = handle;
@@ -153,7 +147,7 @@ AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
     COMMTIMEOUTS timeouts{};
     timeouts.ReadIntervalTimeout = MAXDWORD; // read() returns what is there
     if (!GetCommState(handle, &dcb)) {
-        return AcqError(AcqErrorCode::DeviceIo, std::format("{} is not a serial port", name));
+        return std::unexpected(std::make_error_code(std::errc::inappropriate_io_control_operation));
     }
     dcb.BaudRate = static_cast<DWORD>(baud);
     dcb.ByteSize = 8;
@@ -168,7 +162,7 @@ AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
     dcb.fOutX = FALSE;
     dcb.fInX = FALSE;
     if (!SetCommState(handle, &dcb) || !SetCommTimeouts(handle, &timeouts)) {
-        return AcqError(AcqErrorCode::InvalidParameter, std::format("{} refuses {} baud 8N1", name, baud));
+        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
     }
     PurgeComm(handle, PURGE_RXCLEAR | PURGE_TXCLEAR);
     return port;
@@ -176,12 +170,12 @@ AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
 
 //=============================================================================================================
 
-AcqError SerialPort::write(std::string_view data)
+std::error_code SerialPort::write(std::string_view data)
 {
     while (!data.empty()) {
         DWORD written = 0;
         if (!WriteFile(m_handle, data.data(), static_cast<DWORD>(data.size()), &written, nullptr)) {
-            return {AcqErrorCode::DeviceIo, std::format("serial write failed (error {})", GetLastError())};
+            return {static_cast<int>(GetLastError()), std::system_category()};
         }
         data.remove_prefix(written);
     }
@@ -190,25 +184,25 @@ AcqError SerialPort::write(std::string_view data)
 
 //=============================================================================================================
 
-AcqExpected<std::size_t> SerialPort::read(std::span<char> buffer, std::chrono::milliseconds timeout)
+std::expected<std::size_t, std::error_code> SerialPort::read(std::span<char> buffer, std::chrono::milliseconds timeout)
 {
     const auto deadline = std::chrono::steady_clock::now() + timeout;
     while (true) {
         DWORD errors = 0;
         COMSTAT status{};
         if (!ClearCommError(m_handle, &errors, &status)) {
-            return AcqError(AcqErrorCode::DeviceIo, std::format("serial port went away (error {})", GetLastError()));
+            return std::unexpected(std::make_error_code(std::errc::no_such_device));
         }
         if (status.cbInQue > 0) {
             DWORD got = 0;
             const DWORD wanted = static_cast<DWORD>(std::min<std::size_t>(buffer.size(), status.cbInQue));
             if (!ReadFile(m_handle, buffer.data(), wanted, &got, nullptr)) {
-                return AcqError(AcqErrorCode::DeviceIo, std::format("serial read failed (error {})", GetLastError()));
+                return std::unexpected(std::error_code(static_cast<int>(GetLastError()), std::system_category()));
             }
             return std::size_t{got};
         }
         if (std::chrono::steady_clock::now() >= deadline) {
-            return AcqError(AcqErrorCode::Timeout);
+            return std::unexpected(std::make_error_code(std::errc::timed_out));
         }
         Sleep(1);
     }
@@ -216,7 +210,7 @@ AcqExpected<std::size_t> SerialPort::read(std::span<char> buffer, std::chrono::m
 
 //=============================================================================================================
 
-std::vector<std::string> ACQLIB::detail::list_serial_ports()
+std::vector<std::string> COMLIB::list_serial_ports()
 {
     std::vector<std::string> ports;
     std::array<char, 65536> devices{};
@@ -249,20 +243,20 @@ bool SerialPort::is_open() const noexcept
 
 //=============================================================================================================
 
-AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
+std::expected<SerialPort, std::error_code> SerialPort::open(const std::string& name, int baud)
 {
     const speed_t speed = speed_of(baud);
     if (speed == B0) {
-        return AcqError(AcqErrorCode::InvalidParameter, std::format("baud rate {} of {}: 1200 to 230400", baud, name));
+        return std::unexpected(std::make_error_code(std::errc::invalid_argument));
     }
     SerialPort port;
     port.m_fd = ::open(name.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK | O_CLOEXEC);
     if (port.m_fd < 0) {
-        return system_error("cannot open serial port " + name);
+        return std::unexpected(last_error());
     }
     termios tty{};
     if (::tcgetattr(port.m_fd, &tty) != 0) {
-        return AcqError(AcqErrorCode::DeviceIo, std::format("{} is not a serial port", name));
+        return std::unexpected(std::make_error_code(std::errc::inappropriate_io_control_operation));
     }
     ::cfmakeraw(&tty);
     tty.c_cflag |= CLOCAL | CREAD;
@@ -270,7 +264,7 @@ AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
     tty.c_cc[VMIN] = 0;
     tty.c_cc[VTIME] = 0;
     if (::cfsetispeed(&tty, speed) != 0 || ::cfsetospeed(&tty, speed) != 0 || ::tcsetattr(port.m_fd, TCSANOW, &tty) != 0) {
-        return system_error(std::format("{} refuses {} baud 8N1", name, baud));
+        return std::unexpected(last_error());
     }
     ::tcflush(port.m_fd, TCIOFLUSH);
     return port;
@@ -278,7 +272,7 @@ AcqExpected<SerialPort> SerialPort::open(const std::string& name, int baud)
 
 //=============================================================================================================
 
-AcqError SerialPort::write(std::string_view data)
+std::error_code SerialPort::write(std::string_view data)
 {
     while (!data.empty()) {
         const ssize_t written = ::write(m_fd, data.data(), data.size());
@@ -291,7 +285,7 @@ AcqError SerialPort::write(std::string_view data)
                 ::poll(&p, 1, 100);
                 continue;
             }
-            return system_error("serial write failed");
+            return last_error();
         }
         data.remove_prefix(static_cast<std::size_t>(written));
     }
@@ -300,32 +294,34 @@ AcqError SerialPort::write(std::string_view data)
 
 //=============================================================================================================
 
-AcqExpected<std::size_t> SerialPort::read(std::span<char> buffer, std::chrono::milliseconds timeout)
+std::expected<std::size_t, std::error_code> SerialPort::read(std::span<char> buffer, std::chrono::milliseconds timeout)
 {
+    const auto timed_out = std::unexpected(std::make_error_code(std::errc::timed_out));
+    const auto gone = std::unexpected(std::make_error_code(std::errc::no_such_device));
     pollfd p{m_fd, POLLIN, 0};
     const int ready = ::poll(&p, 1, static_cast<int>(timeout.count()));
     if (ready < 0) {
-        return errno == EINTR ? AcqExpected<std::size_t>(AcqError(AcqErrorCode::Timeout)) : system_error("serial poll failed");
+        return errno == EINTR ? timed_out : std::unexpected(last_error());
     }
     if (ready == 0) {
-        return AcqError(AcqErrorCode::Timeout);
+        return timed_out;
     }
     if ((p.revents & (POLLERR | POLLNVAL)) != 0) {
-        return AcqError(AcqErrorCode::DeviceIo, "the serial port went away");
+        return gone;
     }
     const ssize_t got = ::read(m_fd, buffer.data(), buffer.size());
     if (got < 0) {
-        return errno == EAGAIN || errno == EINTR ? AcqExpected<std::size_t>(AcqError(AcqErrorCode::Timeout)) : system_error("serial read failed");
+        return errno == EAGAIN || errno == EINTR ? timed_out : std::unexpected(last_error());
     }
     if (got == 0) {
-        return AcqError(AcqErrorCode::DeviceIo, "the serial port went away");
+        return gone;
     }
     return static_cast<std::size_t>(got);
 }
 
 //=============================================================================================================
 
-std::vector<std::string> ACQLIB::detail::list_serial_ports()
+std::vector<std::string> COMLIB::list_serial_ports()
 {
     std::vector<std::string> usb;
     std::vector<std::string> other;

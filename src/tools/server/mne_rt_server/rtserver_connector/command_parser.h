@@ -7,10 +7,10 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Front-end tokeniser that turns incoming JSON or CLI payloads into @ref COMLIB::RawCommand objects and notifies attached managers.
+ * @brief    Front-end tokeniser that turns incoming JSON or CLI payloads into @ref RTSERVER::RawCommand objects and notifies attached managers.
  *
- * @ref COMLIB::CommandParser is the @ref COMLIB::Subject side of the observer
- * pattern; every @ref COMLIB::CommandManager that
+ * @ref RTSERVER::CommandParser is the @ref RTSERVER::Subject side of the observer
+ * pattern; every @ref RTSERVER::CommandManager that
  * wants to react to a slice of the command vocabulary attaches itself,
  * and the parser then fans every accepted request out to all of them.
  * That decoupling lets multiple subsystems (data acquisition, source
@@ -22,8 +22,8 @@
  * JSON input is decoded with @c QJsonDocument and may contain either a
  * single command object or an array of commands, allowing batched
  * requests in one round-trip. In either case the result is the same
- * untyped @ref COMLIB::RawCommand handed to the observers — the type-aware
- * @ref COMLIB::Command is constructed downstream once a manager has identified
+ * untyped @ref RTSERVER::RawCommand handed to the observers — the type-aware
+ * @ref RTSERVER::Command is constructed downstream once a manager has identified
  * which schema applies.
  *
  * @c parse() returns @c true when at least one observer claimed the
@@ -40,7 +40,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "../com_global.h"
+#include "rtserver_connector_global.h"
 #include "raw_command.h"
 #include "command.h"
 
@@ -55,10 +55,10 @@
 #include <QMultiMap>
 
 //=============================================================================================================
-// DEFINE NAMESPACE COMLIB
+// DEFINE NAMESPACE RTSERVER
 //=============================================================================================================
 
-namespace COMLIB
+namespace RTSERVER
 {
 
 //=============================================================================================================
@@ -71,7 +71,7 @@ namespace COMLIB
  * whichever manager handled the request so the caller (the server's
  * command thread) can forward them to the originating socket.
  */
-class COMSHARED_EXPORT CommandParser : public QObject, public Subject
+class RTSERVER_CONNECTOR_EXPORT CommandParser : public QObject, public Subject
 {
     Q_OBJECT
 
@@ -82,7 +82,7 @@ public:
      *
      * @param[in] parent     Parent QObject (optional).
      */
-    explicit CommandParser(QObject* parent = 0);
+    explicit CommandParser(QObject* parent = nullptr);
 
     //=========================================================================================================
     /**

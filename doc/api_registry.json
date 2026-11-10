@@ -8077,23 +8077,67 @@
       "python_url": null
     },
     {
-      "name": "ICommand",
+      "name": "SerialPort",
       "module": "com",
-      "header": "com/rt_command/command_pattern.h",
-      "origin": "mne-c + custom",
+      "header": "com/serial_port.h",
+      "origin": "custom",
       "mne_c_tool": null,
       "mne_python": null,
       "sklearn": null,
-      "test": "test_com_observer_pattern",
+      "test": "test_com",
       "example": "ex_com",
       "example_snippet": [
-        "ex_com/main.cpp#command_pattern_usage"
+        "ex_com/main.cpp#serial_usage"
       ],
       "example_mode": "run",
       "status": "documented",
       "skigen_candidate": false,
       "documented": true,
-      "sidebar_position": 22,
+      "sidebar_position": 1,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
+      "name": "TcpSocket",
+      "module": "com",
+      "header": "com/tcp_socket.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_com",
+      "example": "ex_com",
+      "example_snippet": [
+        "ex_com/main.cpp#tcp_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 2,
+      "guide": null,
+      "python_equiv": null,
+      "python_url": null
+    },
+    {
+      "name": "UdpSocket",
+      "module": "com",
+      "header": "com/udp_socket.h",
+      "origin": "custom",
+      "mne_c_tool": null,
+      "mne_python": null,
+      "sklearn": null,
+      "test": "test_com",
+      "example": "ex_com",
+      "example_snippet": [
+        "ex_com/main.cpp#udp_usage"
+      ],
+      "example_mode": "run",
+      "status": "documented",
+      "skigen_candidate": false,
+      "documented": true,
+      "sidebar_position": 3,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -8120,28 +8164,6 @@
       "python_equiv": "numpy.savetxt / numpy.loadtxt",
       "python_url": null,
       "kind": "module"
-    },
-    {
-      "name": "IObserver",
-      "module": "com",
-      "header": "com/rt_command/observer_pattern.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": "test_com_observer_pattern",
-      "example": "ex_com",
-      "example_snippet": [
-        "ex_com/main.cpp#observer_pattern_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 24,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
     },
     {
       "name": "LayoutLoader",
@@ -8602,28 +8624,6 @@
       "skigen_candidate": false,
       "documented": true,
       "sidebar_position": 77,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
-      "name": "Subject",
-      "module": "com",
-      "header": "com/rt_command/observer_pattern.h",
-      "origin": "mne-c + custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": "test_com_observer_pattern",
-      "example": "ex_com",
-      "example_snippet": [
-        "ex_com/main.cpp#observer_pattern_usage"
-      ],
-      "example_mode": "run",
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 49,
       "guide": null,
       "python_equiv": null,
       "python_url": null
@@ -12533,78 +12533,6 @@
       "python_url": null
     },
     {
-      "name": "Command",
-      "module": "com",
-      "header": "com/rt_command/command.h",
-      "origin": "custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": "test_com",
-      "example": null,
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 1,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
-      "name": "CommandManager",
-      "module": "com",
-      "header": "com/rt_command/command_manager.h",
-      "origin": "custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": "test_com",
-      "example": null,
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 2,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
-      "name": "CommandParser",
-      "module": "com",
-      "header": "com/rt_command/command_parser.h",
-      "origin": "custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": "test_com",
-      "example": null,
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 3,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
-      "name": "RawCommand",
-      "module": "com",
-      "header": "com/rt_command/raw_command.h",
-      "origin": "custom",
-      "mne_c_tool": null,
-      "mne_python": null,
-      "sklearn": null,
-      "test": "test_com",
-      "example": null,
-      "status": "documented",
-      "skigen_candidate": false,
-      "documented": true,
-      "sidebar_position": 5,
-      "guide": null,
-      "python_equiv": null,
-      "python_url": null
-    },
-    {
       "name": "AcqMatrixRef",
       "module": "acq",
       "header": "acq/acq_convert.h",
@@ -16384,7 +16312,7 @@
         "library": "base"
       },
       "ex_com": {
-        "title": "Observer and command patterns behind real-time commands",
+        "title": "Receive datagrams and talk to a TCP server with timeouts",
         "tasks": [
           "infrastructure"
         ],

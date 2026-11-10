@@ -7,10 +7,10 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Per-component registry of @ref COMLIB::Command schemas; receives @ref COMLIB::RawCommand from the parser and dispatches matching @c Command instances.
+ * @brief    Per-component registry of @ref RTSERVER::Command schemas; receives @ref RTSERVER::RawCommand from the parser and dispatches matching @c Command instances.
  *
- * @ref COMLIB::CommandManager is the receiver half of the observer
- * pattern anchored at @ref COMLIB::CommandParser. Each subsystem that
+ * @ref RTSERVER::CommandManager is the receiver half of the observer
+ * pattern anchored at @ref RTSERVER::CommandParser. Each subsystem that
  * understands a slice of the @c mne_rt_server vocabulary (acquisition
  * control, source-estimation control, GUI plumbing, etc.) owns a
  * @c CommandManager seeded with the @c Command schemas it accepts and
@@ -46,7 +46,7 @@
 // Includes
 //=============================================================================================================
 
-#include "../com_global.h"
+#include "rtserver_connector_global.h"
 #include "command.h"
 #include "command_parser.h"
 
@@ -60,10 +60,10 @@
 #include <QJsonDocument>
 
 //=============================================================================================================
-// DEFINE NAMESPACE COMLIB
+// DEFINE NAMESPACE RTSERVER
 //=============================================================================================================
 
-namespace COMLIB
+namespace RTSERVER
 {
 
 //=============================================================================================================
@@ -82,18 +82,18 @@ namespace COMLIB
  * one at a time or bulk-loaded from a @c QJsonDocument matching the
  * server’s self-described command list.
  */
-class COMSHARED_EXPORT CommandManager : public QObject, public IObserver
+class RTSERVER_CONNECTOR_EXPORT CommandManager : public QObject, public IObserver
 {
     Q_OBJECT
 
 public:
-    explicit CommandManager(bool p_bIsActive = true, QObject* parent = 0);
+    explicit CommandManager(bool p_bIsActive = true, QObject* parent = nullptr);
 
-    explicit CommandManager(const QByteArray& p_qByteArrayJsonDoc, bool p_bIsActive = true, QObject* parent = 0);
+    explicit CommandManager(const QByteArray& p_qByteArrayJsonDoc, bool p_bIsActive = true, QObject* parent = nullptr);
 
-    explicit CommandManager(const QJsonDocument& p_jsonDoc, bool p_bIsActive = true, QObject* parent = 0);
+    explicit CommandManager(const QJsonDocument& p_jsonDoc, bool p_bIsActive = true, QObject* parent = nullptr);
 
-    virtual ~CommandManager();
+    ~CommandManager() override;
 
     //=========================================================================================================
     /**
@@ -170,7 +170,7 @@ public:
      *
      * @param[in] p_pSubject  pointer to the subject (CommandParser) to which observer (CommandManager) is attached to.
      */
-    virtual void update(Subject* p_pSubject);
+    void update(Subject* p_pSubject) override;
 
     //=========================================================================================================
     /**

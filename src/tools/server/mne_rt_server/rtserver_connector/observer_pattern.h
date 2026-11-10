@@ -12,13 +12,13 @@
  * @date     September 2017
  * @brief    Classical observer pattern (@c Subject and @c IObserver) behind the real-time command dispatch.
  *
- * @ref COMLIB::CommandParser is the @ref COMLIB::Subject that announces every parsed command, and each
- * @ref COMLIB::CommandManager is an @ref COMLIB::IObserver that executes the commands it knows. The pattern
+ * @ref RTSERVER::CommandParser is the @ref RTSERVER::Subject that announces every parsed command, and each
+ * @ref RTSERVER::CommandManager is an @ref RTSERVER::IObserver that executes the commands it knows. The pattern
  * needs no QObject, so the subject and observers can live on any thread; notifications are synchronous.
  */
 
-#ifndef COMLIB_OBSERVER_PATTERN_H
-#define COMLIB_OBSERVER_PATTERN_H
+#ifndef RTSERVER_OBSERVER_PATTERN_H
+#define RTSERVER_OBSERVER_PATTERN_H
 
 //=============================================================================================================
 // STL INCLUDES
@@ -29,10 +29,10 @@
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE COMLIB
+// DEFINE NAMESPACE RTSERVER
 //=============================================================================================================
 
-namespace COMLIB
+namespace RTSERVER
 {
 
 class Subject;
@@ -147,6 +147,6 @@ private:
     bool m_notifyEnabled = true;         /**< False while notifications are suspended. */
 };
 
-} // namespace COMLIB
+} // namespace RTSERVER
 
-#endif // COMLIB_OBSERVER_PATTERN_H
+#endif // RTSERVER_OBSERVER_PATTERN_H

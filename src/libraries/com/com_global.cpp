@@ -1,25 +1,16 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2012-2026 MNE-CPP Authors
  *
  * @file     com_global.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.0.0
- * @date     March 2026
+ * @since    0.1.0
+ * @date     December, 2012
  * @brief    Translation unit for the @c COMLIB build-info entry points declared in @ref com_global.h.
  *
- * Provides the three out-of-line definitions of @ref COMLIB::buildDateTime,
- * @ref COMLIB::buildHash and @ref COMLIB::buildHashLong. Each delegates
- * to the equivalent function in @c BASELIB so the actual @c __DATE__ /
- * @c __TIME__ / @c MNE_GIT_HASH_* compile-time strings are owned by a
- * single utility translation unit and the values reported across all
- * mne-cpp libraries stay consistent.
- *
- * The CMake build re-runs this file whenever any other source under
- * @c src/libraries/com/ changes (@c OBJECT_DEPENDS in the parent
- * @c CMakeLists.txt) so the embedded build timestamp tracks the most
- * recent edit to the library rather than the last full reconfigure.
+ * The CMake build re-runs this file whenever any other source under @c src/libraries/com/ changes
+ * (@c OBJECT_DEPENDS in the CMakeLists.txt) so the embedded build timestamp tracks the most recent edit.
  */
 
 //=============================================================================================================
@@ -28,25 +19,32 @@
 
 #include "com_global.h"
 
+#ifndef MNE_GIT_HASH_SHORT
+#define MNE_GIT_HASH_SHORT "unknown"
+#endif
+#ifndef MNE_GIT_HASH_LONG
+#define MNE_GIT_HASH_LONG "unknown"
+#endif
+
 //=============================================================================================================
 // DEFINE METHODS
 //=============================================================================================================
 
 const char* COMLIB::buildDateTime()
 {
-    return BASELIB::dateTimeNow();
+    return __DATE__ " " __TIME__;
 }
 
 //=============================================================================================================
 
 const char* COMLIB::buildHash()
 {
-    return BASELIB::gitHash();
+    return MNE_GIT_HASH_SHORT;
 }
 
 //=============================================================================================================
 
 const char* COMLIB::buildHashLong()
 {
-    return BASELIB::gitHashLong();
+    return MNE_GIT_HASH_LONG;
 }

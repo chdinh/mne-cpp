@@ -15,9 +15,10 @@ else()
     add_executable(${PROJECT_NAME} main.cpp)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-  mne_com
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE mne_com)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
+endif()
 
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)

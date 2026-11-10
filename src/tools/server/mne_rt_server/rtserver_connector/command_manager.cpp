@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Translation unit for @ref COMLIB::CommandManager: schema storage, observer-side dispatch and JSON bulk-load.
+ * @brief    Translation unit for @ref RTSERVER::CommandManager: schema storage, observer-side dispatch and JSON bulk-load.
  *
  * Implements the @c init() helper that wires the inbound
  * @c triggered/@c response signals to the manager’s own slots, the
@@ -39,7 +39,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace COMLIB;
+using namespace RTSERVER;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

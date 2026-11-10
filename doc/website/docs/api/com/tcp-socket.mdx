@@ -1,0 +1,132 @@
+---
+id: tcp-socket
+title: "COMLIB::TcpSocket"
+sidebar_label: TcpSocket
+sidebar_position: 2
+---
+
+# TcpSocket
+
+**Namespace:** `COMLIB` &nbsp;·&nbsp; **Library:** Communication Library &nbsp;·&nbsp; **Source:** [`com/tcp_socket.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/com/tcp_socket.h)
+
+`#include <com/tcp_socket.h>`
+
+```cpp
+class COMLIB::TcpSocket
+```
+
+A connected TCP socket; move-only, closed on destruction.
+
+```cpp title="src/examples/ex_com/main.cpp"
+auto server = TcpSocket::connect("127.0.0.1", 1, 500ms);
+if (!server) {
+    std::println("no server: {}", server.error().message());
+}
+```
+
+---
+
+## Public Methods
+
+### TcpSocket()
+
+---
+
+### ~TcpSocket()
+
+---
+
+### TcpSocket(other)
+
+---
+
+### operator=(other)
+
+---
+
+### TcpSocket()
+
+---
+
+### operator=()
+
+---
+
+### write(data)
+
+**Parameters:**
+
+- **data** : *std::span&lt; const std::byte &gt;*
+  Bytes to send, all of them.
+
+**Returns:**
+
+- *std::error_code* — The system's error if the connection fails.
+
+---
+
+### read(buffer, timeout)
+
+Reads exactly `buffer.size()` bytes.
+
+**Parameters:**
+
+- **buffer** : *std::span&lt; std::byte &gt;*
+  Destination.
+
+- **timeout** : *std::chrono::milliseconds*
+  Maximum wait for the first byte; the rest must follow within it too.
+
+**Returns:**
+
+- *std::error_code* — timed_out if nothing arrived (nothing is consumed then), io_error if the rest did not follow, connection_reset if the peer closed the connection, or the system's error.
+
+---
+
+## Static Methods
+
+### connect(host, port, timeout)
+
+**Parameters:**
+
+- **host** : *const std::string &*
+  Host name or address.
+
+- **port** : *std::uint16_t*
+  Port.
+
+- **timeout** : *std::chrono::milliseconds*
+  Maximum wait for the connection.
+
+**Returns:**
+
+- *std::expected&lt; TcpSocket, std::error_code &gt;* — The connection, or why there is none: host_unreachable for an unknown host, timed_out if nothing answers, the system's error otherwise (e.g. connection_refused).
+
+---
+
+## Example
+
+- Start here: [ex_com](../../examples/com/ex_com.mdx) — Communication library: receive datagrams and talk to a TCP server with timeouts.
+- Full source: [`src/examples/ex_com/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_com/main.cpp)
+- Build target: `ex_com` (runs under CTest)
+
+## Used in examples
+
+### [ex_com](../../examples/com/ex_com.mdx)
+
+Communication library: receive datagrams and talk to a TCP server with timeouts.
+
+````cpp title="src/examples/ex_com/main.cpp, line 107"
+std::println("TCP: nothing serves port 1 of this machine");
+auto server = TcpSocket::connect("127.0.0.1", 1, 500ms);
+if (!server) {
+    std::println("no server: {}", server.error().message());
+}
+ok &= expect(!server, "connecting fails with the system's reason");
+ok &= expect(TcpSocket::connect("no-such-host.invalid", 4217, 500ms).error() == std::errc::host_unreachable,
+             "an unknown host is host_unreachable");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

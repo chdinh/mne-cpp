@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Translation unit for @ref COMLIB::RawCommand: storage of the untyped keyword/argument pair before schema binding.
+ * @brief    Translation unit for @ref RTSERVER::RawCommand: storage of the untyped keyword/argument pair before schema binding.
  *
  * Implements the trivial constructors, copy-assignment and the
  * @c ICommand::execute() override that emits @c executed(QList<QString>)
@@ -27,7 +27,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace COMLIB;
+using namespace RTSERVER;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Translation unit for @ref COMLIB::Command: constructors, JSON/CLI serialisation, parameter access and dispatch glue.
+ * @brief    Translation unit for @ref RTSERVER::Command: constructors, JSON/CLI serialisation, parameter access and dispatch glue.
  *
  * Defines the five constructor overloads (default, JSON-object,
  * keyword+description, fully-specified parameter list, copy), the
@@ -39,7 +39,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace COMLIB;
+using namespace RTSERVER;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

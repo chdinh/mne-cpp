@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Translation unit for @ref COMLIB::CommandParser: JSON/CLI tokenisation and fan-out to attached managers.
+ * @brief    Translation unit for @ref RTSERVER::CommandParser: JSON/CLI tokenisation and fan-out to attached managers.
  *
  * Implements the dual-dialect @c parse() entry point. CLI input is
  * split on whitespace into a keyword and string arguments; JSON input
@@ -15,7 +15,7 @@
  * command object or an array of them, supporting batched requests in a
  * single payload. In either case the result is a populated
  * @ref RawCommand handed to every attached @ref CommandManager via the
- * @c Subject::notify mechanism inherited from @ref COMLIB::Subject; the
+ * @c Subject::notify mechanism inherited from @ref RTSERVER::Subject; the
  * @c response signal carries replies produced by handlers back to the
  * originating client of the command port.
  */
@@ -42,7 +42,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace COMLIB;
+using namespace RTSERVER;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

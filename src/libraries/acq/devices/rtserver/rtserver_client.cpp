@@ -19,7 +19,9 @@
 
 #include "rtserver_transport.h"
 
-#include "../tcp_socket.h"
+#include "../transport_error.h"
+
+#include <com/tcp_socket.h>
 
 #include <array>
 #include <format>
@@ -30,6 +32,7 @@
 
 using namespace ACQLIB;
 using namespace ACQLIB::detail;
+using COMLIB::TcpSocket;
 
 //=============================================================================================================
 // STATIC HELPERS
@@ -142,8 +145,8 @@ public:
         put_big(frame, static_cast<std::uint32_t>(4 + text.size()), 2);
         put_big(frame, static_cast<std::uint32_t>(text.size()), 4);
         frame.insert(frame.end(), text.begin(), text.end());
-        if (AcqError e = m_commands.write(frame); !e.ok()) {
-            return e;
+        if (const std::error_code e = m_commands.write(frame)) {
+            return transport_error(e, AcqErrorCode::DeviceIo, std::format("cannot send to {}", m_name));
         }
         return reply(timeout);
     }
@@ -158,14 +161,14 @@ public:
         put_big(tag, static_cast<std::uint32_t>(command), 4);
         const auto* chars = reinterpret_cast<const std::byte*>(text.data());
         tag.insert(tag.end(), chars, chars + text.size());
-        return m_data.write(tag);
+        return transport_error(m_data.write(tag), AcqErrorCode::DeviceIo, std::format("cannot send to {}", m_name));
     }
 
     AcqExpected<const NeuromagTag*> next(std::chrono::milliseconds timeout) override
     {
         std::array<std::byte, kTagHeader> header{};
-        if (AcqError e = m_data.read(header, timeout); !e.ok()) {
-            return e;
+        if (const std::error_code e = m_data.read(header, timeout)) {
+            return transport_error(e, AcqErrorCode::DeviceIo, std::format("{} failed", m_name));
         }
         const std::uint32_t size = get_big(header, 8, 4);
         if (size > kMaxTag) {
@@ -174,7 +177,7 @@ public:
         m_tag.kind = static_cast<int>(get_big(header, 0, 4));
         m_tag.type = static_cast<int>(get_big(header, 4, 4));
         m_tag.data.resize(size);
-        if (AcqError e = m_data.read(m_tag.data, std::chrono::milliseconds(5000)); !e.ok()) {
+        if (m_data.read(m_tag.data, std::chrono::milliseconds(5000))) {
             return AcqError(AcqErrorCode::DeviceIo, std::format("{} sent an incomplete tag", m_name));
         }
         big_to_native(m_tag.type, m_tag.data);
@@ -186,11 +189,11 @@ private:
     AcqExpected<std::string> reply(std::chrono::milliseconds timeout)
     {
         std::array<std::byte, 2> size{};
-        if (AcqError e = m_commands.read(size, timeout); !e.ok()) {
-            return e;
+        if (const std::error_code e = m_commands.read(size, timeout)) {
+            return transport_error(e, AcqErrorCode::DeviceIo, std::format("{} failed", m_name));
         }
         std::vector<std::byte> frame(get_big(size, 0, 2));
-        if (AcqError e = m_commands.read(frame, std::chrono::milliseconds(5000)); !e.ok()) {
+        if (m_commands.read(frame, std::chrono::milliseconds(5000))) {
             return AcqError(AcqErrorCode::DeviceIo, std::format("{} sent an incomplete reply", m_name));
         }
         if (frame.size() < 4) {
@@ -220,11 +223,12 @@ AcqExpected<std::unique_ptr<RtServerTransport>> ACQLIB::detail::connect_rtserver
     }
     auto commands = TcpSocket::connect(host, port, timeout);
     if (!commands) {
-        return AcqError(commands.error().code(), "no mne_rt_server: " + commands.error().text());
+        return AcqError(AcqErrorCode::DeviceNotFound, std::format("no mne_rt_server: cannot connect to {}:{} ({})", host, port, commands.error().message()));
     }
     auto data = TcpSocket::connect(host, static_cast<std::uint16_t>(port + 1), timeout);
     if (!data) {
-        return AcqError(data.error().code(), "no mne_rt_server data port: " + data.error().text());
+        return AcqError(AcqErrorCode::DeviceNotFound,
+                        std::format("no mne_rt_server data port: cannot connect to {}:{} ({})", host, port + 1, data.error().message()));
     }
     return std::unique_ptr<RtServerTransport>(std::make_unique<RtServerClient>(std::move(*commands), std::move(*data), std::format("{}:{}", host, port)));
 }

@@ -538,13 +538,9 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
       collapsed: true,
       link: {type: 'doc', id: 'api/com/index'},
       items: [
-        'api/com/command',
-        'api/com/command-manager',
-        'api/com/command-parser',
-        'api/com/raw-command',
-        'api/com/i-command',
-        'api/com/i-observer',
-        'api/com/subject'
+        'api/com/serial-port',
+        'api/com/tcp-socket',
+        'api/com/udp-socket'
       ],
     },
     {

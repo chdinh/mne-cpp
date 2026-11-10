@@ -11,19 +11,19 @@
  * @date     September 2017
  * @brief    Minimal @c ICommand interface of the command pattern behind the real-time command classes.
  *
- * @ref COMLIB::Command and @ref COMLIB::RawCommand implement it to model the control requests exchanged with
+ * @ref RTSERVER::Command and @ref RTSERVER::RawCommand implement it to model the control requests exchanged with
  * mne_rt_server (start or stop a measurement, set parameters, request status). Invokers and receivers are
  * expressed through Qt signals and slots rather than dedicated classes.
  */
 
-#ifndef COMLIB_COMMAND_PATTERN_H
-#define COMLIB_COMMAND_PATTERN_H
+#ifndef RTSERVER_COMMAND_PATTERN_H
+#define RTSERVER_COMMAND_PATTERN_H
 
 //=============================================================================================================
-// DEFINE NAMESPACE COMLIB
+// DEFINE NAMESPACE RTSERVER
 //=============================================================================================================
 
-namespace COMLIB
+namespace RTSERVER
 {
 
 //=============================================================================================================
@@ -44,6 +44,6 @@ public:
     virtual void execute() = 0;
 };
 
-} // namespace COMLIB
+} // namespace RTSERVER
 
-#endif // COMLIB_COMMAND_PATTERN_H
+#endif // RTSERVER_COMMAND_PATTERN_H

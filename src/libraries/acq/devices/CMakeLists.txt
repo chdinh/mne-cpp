@@ -30,8 +30,6 @@ set(SOURCES
   rtserver/rtserver_backend.cpp
   rtserver/rtserver_client.cpp
   rtserver/rtserver_simulator.cpp
-  serial_port.cpp
-  tcp_socket.cpp
 )
 
 set(PRIVATE_HEADERS
@@ -46,8 +44,7 @@ set(PRIVATE_HEADERS
   polhemus/polhemus_transport.h
   ftbuffer/ftbuffer_transport.h
   rtserver/rtserver_transport.h
-  serial_port.h
-  tcp_socket.h
+  transport_error.h
 )
 
 set(HEADERS
@@ -78,9 +75,7 @@ add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})
 
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..> $<INSTALL_INTERFACE:include>)
 target_link_libraries(${PROJECT_NAME} PUBLIC mne_acq)
-if(WIN32)
-  target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE mne_com)
 
 if(_brainamp_hardware)
   target_include_directories(${PROJECT_NAME} PRIVATE "${MNE_BRAINAMP_SDK_DIR}")

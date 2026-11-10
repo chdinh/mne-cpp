@@ -24,7 +24,7 @@
 
 #include <rtserver_connector/iconnector.h>
 
-#include <com/rt_command/command_manager.h>
+#include <rtserver_connector/command_manager.h>
 
 #ifdef STATICBUILD
 #include "../plugins/fiffsimulator/fiffsimulator.h"
@@ -48,7 +48,6 @@
 //=============================================================================================================
 
 using namespace RTSERVER;
-using namespace COMLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

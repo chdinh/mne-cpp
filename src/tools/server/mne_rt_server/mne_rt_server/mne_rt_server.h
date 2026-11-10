@@ -19,7 +19,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <com/rt_command/command_manager.h>
+#include <rtserver_connector/command_manager.h>
 #include "connectormanager.h"
 #include "commandserver.h"
 #include "fiffstreamserver.h"
@@ -70,7 +70,7 @@ public:
     /**
      * Returns the command manager
      */
-    inline COMLIB::CommandManager& getCommandManager();
+    inline RTSERVER::CommandManager& getCommandManager();
 
     //=========================================================================================================
     /**
@@ -93,21 +93,21 @@ private:
     /**
      * Is called when signal help is executed.
      */
-    void comHelp(COMLIB::Command p_command);
+    void comHelp(RTSERVER::Command p_command);
 
     FiffStreamServer m_fiffStreamServer; /**< Fiff stream server. */
     CommandServer m_commandServer;       /**< Command server. */
 
     ConnectorManager m_connectorManager; /**< Connector manager. */
 
-    COMLIB::CommandManager m_commandManager; /**< The command manager of the mne_rt_server. */
+    RTSERVER::CommandManager m_commandManager; /**< The command manager of the mne_rt_server. */
 };
 
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline COMLIB::CommandManager& MNERTServer::getCommandManager()
+inline RTSERVER::CommandManager& MNERTServer::getCommandManager()
 {
     return m_commandManager;
 }

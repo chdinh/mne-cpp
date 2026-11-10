@@ -10,9 +10,6 @@
     "bids": {
       "JSON": "Sidecars are JSON; QJsonDocument instead of a new dependency."
     },
-    "com": {
-      "Sockets": "The FIFF real-time protocol runs over QTcpSocket."
-    },
     "fiff": {
       "Sockets": "FiffStream also streams over a QTcpSocket for the real-time protocol."
     },
@@ -29,12 +26,13 @@
       "acq",
       "acq/devices",
       "channels",
+      "com",
       "decoding",
       "math",
       "ml",
       "report"
     ],
-    "tokens": 14256,
+    "tokens": 14028,
     "gui_outside_design": []
   },
   "libraries": {
@@ -51,7 +49,7 @@
       "by_category": {},
       "public_header_includes": 0,
       "q_object": 0,
-      "files": 37,
+      "files": 34,
       "modules": []
     },
     "acq/devices/polhemus": {
@@ -135,20 +133,12 @@
       "modules": []
     },
     "com": {
-      "tokens": 228,
-      "by_category": {
-        "containers": 18,
-        "global": 12,
-        "json": 30,
-        "objects_signals": 73,
-        "strings": 95
-      },
-      "public_header_includes": 17,
-      "q_object": 4,
-      "files": 12,
-      "modules": [
-        "Core"
-      ]
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
+      "q_object": 0,
+      "files": 9,
+      "modules": []
     },
     "connectivity": {
       "tokens": 59,

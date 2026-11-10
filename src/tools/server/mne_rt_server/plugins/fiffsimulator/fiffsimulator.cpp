@@ -25,7 +25,7 @@
 #include <fiff/fiff_types.h>
 #include <base/string_utils.h>
 
-#include <com/rt_command/command.h>
+#include <rtserver_connector/command.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -53,7 +53,6 @@ using namespace FIFFSIMULATORRTSERVERPLUGIN;
 using namespace ACQLIB;
 using namespace FIFFLIB;
 using namespace RTSERVER;
-using namespace COMLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER CONSTANTS

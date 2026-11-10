@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * Copyright (c) 2026 MNE-CPP Authors
  *
- * @file     test_com_observer_pattern.cpp
+ * @file     test_rtserver_observer_pattern.cpp
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March, 2026
@@ -14,8 +14,8 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <com/rt_command/command_pattern.h>
-#include <com/rt_command/observer_pattern.h>
+#include <rtserver_connector/command_pattern.h>
+#include <rtserver_connector/observer_pattern.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -36,7 +36,7 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace COMLIB;
+using namespace RTSERVER;
 
 //=============================================================================================================
 // TEST HELPERS
@@ -93,7 +93,7 @@ private:
 /**
  * @brief Tests for the Subject/IObserver pattern and the ICommand interface.
  */
-class TestComObserverPattern : public QObject
+class TestRtServerObserverPattern : public QObject
 {
     Q_OBJECT
 
@@ -108,7 +108,7 @@ private slots:
 
 //=============================================================================================================
 
-void TestComObserverPattern::testAttachDetach()
+void TestRtServerObserverPattern::testAttachDetach()
 {
     TestSubject subject;
     TestObserver observer;
@@ -132,7 +132,7 @@ void TestComObserverPattern::testAttachDetach()
 
 //=============================================================================================================
 
-void TestComObserverPattern::testNotify()
+void TestRtServerObserverPattern::testNotify()
 {
     TestSubject subject;
     TestObserver observer;
@@ -148,7 +148,7 @@ void TestComObserverPattern::testNotify()
 
 //=============================================================================================================
 
-void TestComObserverPattern::testNotifyDisabled()
+void TestRtServerObserverPattern::testNotifyDisabled()
 {
     TestSubject subject;
     TestSubject other;
@@ -171,7 +171,7 @@ void TestComObserverPattern::testNotifyDisabled()
 
 //=============================================================================================================
 
-void TestComObserverPattern::testMultipleObserversInOrder()
+void TestRtServerObserverPattern::testMultipleObserversInOrder()
 {
     TestSubject subject;
     std::vector<int> order;
@@ -203,7 +203,7 @@ void TestComObserverPattern::testMultipleObserversInOrder()
 
 //=============================================================================================================
 
-void TestComObserverPattern::testDetachDuringNotify()
+void TestRtServerObserverPattern::testDetachDuringNotify()
 {
     TestSubject subject;
     TestObserver first;
@@ -231,7 +231,7 @@ void TestComObserverPattern::testDetachDuringNotify()
 
 //=============================================================================================================
 
-void TestComObserverPattern::testCommand()
+void TestRtServerObserverPattern::testCommand()
 {
     std::vector<int> log;
     std::vector<std::unique_ptr<ICommand>> queue;
@@ -248,5 +248,5 @@ void TestComObserverPattern::testCommand()
 // MAIN
 //=============================================================================================================
 
-QTEST_GUILESS_MAIN(TestComObserverPattern)
-#include "test_com_observer_pattern.moc"
+QTEST_GUILESS_MAIN(TestRtServerObserverPattern)
+#include "test_rtserver_observer_pattern.moc"

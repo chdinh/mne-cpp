@@ -15,7 +15,7 @@ All public namespaces in the MNE-CPP library tree.
 | [`BASELIB`](/docs/api/base/) | 9 | Shared utilities (I/O helpers, spectral analysis, layout management, warp algorithms). |
 | [`BIDSLIB`](/docs/api/bids/) | 14 | BIDS dataset reading, writing, path construction, and sidecar metadata handling for iEEG/EEG/MEG. |
 | [`CHANNELSLIB`](/docs/api/channels/) | 8 | Sensor layouts, channel selections and standard EEG montages. |
-| [`COMLIB`](/docs/api/com/) | 7 | Real-time client/server communication primitives for talking to `mne_rt_server`. |
+| [`COMLIB`](/docs/api/com/) | 3 | Byte transports to devices and servers in standard C++: TCP connections, UDP sockets and serial ports, each with timeouts and std::error_code results. |
 | [`CONNECTIVITYLIB`](/docs/api/connectivity/) | 20 | Functional connectivity metrics (coherence, PLV, cross-correlation, etc.). |
 | [`DECODINGLIB`](/docs/api/decoding/) | 5 | Supervised and unsupervised spatial-filter decompositions for M/EEG decoding. |
 | [`DISP3DLIB`](/docs/api/disp3-d/) | 49 | 3-D brain visualisation using the Qt RHI rendering backend. |
@@ -140,13 +140,9 @@ All public namespaces in the MNE-CPP library tree.
 
 ### COMLIB
 
-- [Command](/docs/api/com/command)
-- [CommandManager](/docs/api/com/command-manager)
-- [CommandParser](/docs/api/com/command-parser)
-- [ICommand](/docs/api/com/i-command)
-- [IObserver](/docs/api/com/i-observer)
-- [RawCommand](/docs/api/com/raw-command)
-- [Subject](/docs/api/com/subject)
+- [SerialPort](/docs/api/com/serial-port)
+- [TcpSocket](/docs/api/com/tcp-socket)
+- [UdpSocket](/docs/api/com/udp-socket)
 
 ### CONNECTIVITYLIB
 

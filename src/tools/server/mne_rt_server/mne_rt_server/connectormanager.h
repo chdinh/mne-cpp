@@ -140,7 +140,7 @@ private:
      *
      * @param[in] p_command  The connector list command.
      */
-    void comConlist(COMLIB::Command p_command);
+    void comConlist(RTSERVER::Command p_command);
 
     //=========================================================================================================
     /**
@@ -148,7 +148,7 @@ private:
      *
      * @param[in] p_command  The select connector command.
      */
-    void comSelcon(COMLIB::Command p_command);
+    void comSelcon(RTSERVER::Command p_command);
 
     //=========================================================================================================
     /**
@@ -156,7 +156,7 @@ private:
      *
      * @param[in] p_command  The start command.
      */
-    void comStart(COMLIB::Command p_command); //comMeas
+    void comStart(RTSERVER::Command p_command); //comMeas
 
     //=========================================================================================================
     /**
@@ -164,7 +164,7 @@ private:
      *
      * @param[in] p_command  The stop all command.
      */
-    void comStopAll(COMLIB::Command p_command);
+    void comStopAll(RTSERVER::Command p_command);
 
     static QVector<IConnector*> s_vecConnectors; /**< Holds vector of all plugins. */
 

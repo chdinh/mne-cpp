@@ -6,9 +6,7 @@
     "disp3D/workers/": "Background worker owned by a real-time view; its behaviour is exercised through the owning view.",
     "disp3D/core/": "Renderer internals behind the BrainView/MultimodalScene facade.",
     "disp3D/geometry/": "Renderer internals behind the BrainView/MultimodalScene facade.",
-    "disp3D/input/": "Interaction handler of an interactive view; evidenced by GUI tests.",
-    "com/rt_client/": "Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example.",
-    "com/rt_command/": "Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
+    "disp3D/input/": "Interaction handler of an interactive view; evidenced by GUI tests."
   },
   "exempt_name_suffixes": {
     "Private": "Implementation detail behind a public facade.",

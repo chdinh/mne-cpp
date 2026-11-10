@@ -829,34 +829,6 @@
     "src/libraries/bids/readers/bids_brain_vision_reader.cpp": {
       "performance-unnecessary-copy-initialization": 1
     },
-    "src/libraries/com/rt_client/rt_client.cpp": {
-      "performance-unnecessary-value-param": 2
-    },
-    "src/libraries/com/rt_client/rt_client.h": {
-      "modernize-use-nullptr": 1,
-      "modernize-use-override": 2
-    },
-    "src/libraries/com/rt_client/rt_data_client.cpp": {
-      "bugprone-switch-missing-default-case": 6
-    },
-    "src/libraries/com/rt_client/rt_data_client.h": {
-      "modernize-use-override": 1
-    },
-    "src/libraries/com/rt_command/command.h": {
-      "modernize-use-nullptr": 5,
-      "modernize-use-override": 2
-    },
-    "src/libraries/com/rt_command/command_manager.h": {
-      "modernize-use-nullptr": 3,
-      "modernize-use-override": 2
-    },
-    "src/libraries/com/rt_command/command_parser.h": {
-      "modernize-use-nullptr": 1
-    },
-    "src/libraries/com/rt_command/raw_command.h": {
-      "modernize-use-nullptr": 2,
-      "modernize-use-override": 1
-    },
     "src/libraries/disp/plots/graph.cpp": {
       "bugprone-integer-division": 6
     },

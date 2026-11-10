@@ -8,8 +8,8 @@
   "summary": {
     "directories": 281,
     "registration": {
-      "unconditional": 271,
-      "conditional": 7,
+      "unconditional": 269,
+      "conditional": 9,
       "unregistered": 3
     },
     "missing_directories": [],
@@ -23,7 +23,7 @@
       "test-data": 122
     },
     "gui": 46,
-    "with_qskip": 97,
+    "with_qskip": 98,
     "ci_excluded": {},
     "retry_paths": [],
     "ci": {
@@ -50,7 +50,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -61,7 +60,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -97,6 +98,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_com_rt_client",
           "test_python_runner",
           "test_rtprocessing_averaging",
           "test_rtprocessing_extended",
@@ -136,7 +138,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -147,7 +148,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -183,6 +186,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_com_rt_client",
           "test_python_runner",
           "test_rtprocessing_averaging",
           "test_rtprocessing_extended",
@@ -222,7 +226,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -233,7 +236,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -269,6 +274,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_com_rt_client",
           "test_python_runner",
           "test_rtprocessing_averaging",
           "test_rtprocessing_extended",
@@ -308,7 +314,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -319,7 +324,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -355,6 +362,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_com_rt_client",
           "test_python_runner",
           "test_rtprocessing_averaging",
           "test_rtprocessing_extended",
@@ -394,7 +402,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -405,7 +412,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -441,6 +450,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_com_rt_client",
           "test_python_runner",
           "test_rtprocessing_averaging",
           "test_rtprocessing_extended",
@@ -480,7 +490,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -491,7 +500,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "executed_not_in_inventory": [
           "ex_bids",
@@ -527,6 +538,7 @@
           "ex_read_raw",
           "ex_sts_statistics",
           "ex_utils",
+          "test_com_rt_client",
           "test_python_runner",
           "test_rtprocessing_averaging",
           "test_rtprocessing_extended",
@@ -1763,7 +1775,7 @@
       "timeout": 60,
       "requirements": [],
       "gui": false,
-      "qskip_sites": 0,
+      "qskip_sites": 6,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {
@@ -1775,79 +1787,10 @@
         "windows-2025-vs2026-qt-min": "run"
       },
       "registry_classes": [
-        "Command",
-        "CommandManager",
-        "CommandParser",
-        "RawCommand"
+        "SerialPort",
+        "TcpSocket",
+        "UdpSocket"
       ]
-    },
-    {
-      "name": "test_com_observer_pattern",
-      "cmake": "src/testframes/test_com_observer_pattern/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_com_observer_pattern"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "absent",
-        "macos-26-qt-min": "absent",
-        "ubuntu-24.04": "absent",
-        "ubuntu-24.04-qt-min": "absent",
-        "windows-2025-vs2026": "absent",
-        "windows-2025-vs2026-qt-min": "absent"
-      },
-      "registry_classes": [
-        "ICommand",
-        "IObserver",
-        "Subject"
-      ]
-    },
-    {
-      "name": "test_com_rt_client",
-      "cmake": "src/testframes/test_com_rt_client/CMakeLists.txt",
-      "registration": {
-        "state": "unconditional",
-        "via": "src/testframes/CMakeLists.txt",
-        "conditions": [],
-        "early_return_guard": null,
-        "unregistered_reason": null
-      },
-      "add_test_names": [
-        "test_com_rt_client"
-      ],
-      "labels": [
-        "unit"
-      ],
-      "timeout": 60,
-      "requirements": [],
-      "gui": false,
-      "qskip_sites": 0,
-      "spawns_processes": false,
-      "ci_excluded_on": [],
-      "ci": {
-        "macos-26": "run",
-        "macos-26-qt-min": "run",
-        "ubuntu-24.04": "run",
-        "ubuntu-24.04-qt-min": "run",
-        "windows-2025-vs2026": "run",
-        "windows-2025-vs2026-qt-min": "run"
-      },
-      "registry_classes": []
     },
     {
       "name": "test_compute_raw_inverse",
@@ -8946,6 +8889,74 @@
       "registry_classes": [
         "RtSourceDataController"
       ]
+    },
+    {
+      "name": "test_rtserver_commands",
+      "cmake": "src/testframes/test_rtserver_commands/CMakeLists.txt",
+      "registration": {
+        "state": "conditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [
+          "TARGET mne_rt_server"
+        ],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_rtserver_commands"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": []
+    },
+    {
+      "name": "test_rtserver_observer_pattern",
+      "cmake": "src/testframes/test_rtserver_observer_pattern/CMakeLists.txt",
+      "registration": {
+        "state": "conditional",
+        "via": "src/testframes/CMakeLists.txt",
+        "conditions": [
+          "TARGET mne_rt_server"
+        ],
+        "early_return_guard": null,
+        "unregistered_reason": null
+      },
+      "add_test_names": [
+        "test_rtserver_observer_pattern"
+      ],
+      "labels": [
+        "unit"
+      ],
+      "timeout": 60,
+      "requirements": [],
+      "gui": false,
+      "qskip_sites": 0,
+      "spawns_processes": false,
+      "ci_excluded_on": [],
+      "ci": {
+        "macos-26": "absent",
+        "macos-26-qt-min": "absent",
+        "ubuntu-24.04": "absent",
+        "ubuntu-24.04-qt-min": "absent",
+        "windows-2025-vs2026": "absent",
+        "windows-2025-vs2026-qt-min": "absent"
+      },
+      "registry_classes": []
     },
     {
       "name": "test_scdisp_widgets",

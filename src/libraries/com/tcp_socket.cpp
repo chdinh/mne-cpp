@@ -16,33 +16,17 @@
 
 #include "tcp_socket.h"
 
-#include <cstring>
-#include <format>
-#include <utility>
+#include "detail/socket_platform.h"
 
-#ifdef _WIN32
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <cerrno>
-#include <fcntl.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <poll.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#endif
+#include <string>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace ACQLIB;
-using namespace ACQLIB::detail;
+using namespace COMLIB;
+using namespace COMLIB::detail;
 
 //=============================================================================================================
 // STATIC HELPERS
@@ -50,65 +34,6 @@ using namespace ACQLIB::detail;
 
 namespace
 {
-
-#ifdef _WIN32
-using Native = SOCKET;
-constexpr Native kInvalid = INVALID_SOCKET;
-
-int last_error() noexcept
-{
-    return WSAGetLastError();
-}
-
-void close_native(Native s) noexcept
-{
-    closesocket(s);
-}
-
-/** @return 1 when @p s is ready for @p events within @p timeout, 0 on timeout, -1 on failure. */
-int wait_for(Native s, short events, std::chrono::milliseconds timeout) noexcept
-{
-    WSAPOLLFD p{s, events, 0};
-    return WSAPoll(&p, 1, static_cast<INT>(timeout.count()));
-}
-
-bool started() noexcept
-{
-    static const bool ok = [] {
-        WSADATA data{};
-        return WSAStartup(MAKEWORD(2, 2), &data) == 0;
-    }();
-    return ok;
-}
-#else
-using Native = int;
-constexpr Native kInvalid = -1;
-
-int last_error() noexcept
-{
-    return errno;
-}
-
-void close_native(Native s) noexcept
-{
-    ::close(s);
-}
-
-int wait_for(Native s, short events, std::chrono::milliseconds timeout) noexcept
-{
-    pollfd p{s, events, 0};
-    int ready = 0;
-    do {
-        ready = ::poll(&p, 1, static_cast<int>(timeout.count()));
-    } while (ready < 0 && errno == EINTR);
-    return ready;
-}
-
-bool started() noexcept
-{
-    return true;
-}
-#endif
 
 /** Puts @p s into non-blocking mode; reads and writes then wait in wait_for(). */
 bool set_non_blocking(Native s) noexcept
@@ -122,15 +47,6 @@ bool set_non_blocking(Native s) noexcept
 #endif
 }
 
-bool would_block(int error) noexcept
-{
-#ifdef _WIN32
-    return error == WSAEWOULDBLOCK || error == WSAEINPROGRESS;
-#else
-    return error == EINPROGRESS || error == EAGAIN || error == EWOULDBLOCK || error == EINTR;
-#endif
-}
-
 } // namespace
 
 //=============================================================================================================
@@ -139,7 +55,7 @@ bool would_block(int error) noexcept
 
 TcpSocket::~TcpSocket()
 {
-    if (m_socket != static_cast<decltype(m_socket)>(kInvalid)) {
+    if (m_socket != kInvalidHandle) {
         close_native(static_cast<Native>(m_socket));
     }
 }
@@ -147,7 +63,7 @@ TcpSocket::~TcpSocket()
 //=============================================================================================================
 
 TcpSocket::TcpSocket(TcpSocket&& other) noexcept
-: m_socket(std::exchange(other.m_socket, static_cast<decltype(m_socket)>(kInvalid)))
+: m_socket(std::exchange(other.m_socket, kInvalidHandle))
 {
 }
 
@@ -157,17 +73,17 @@ TcpSocket& TcpSocket::operator=(TcpSocket&& other) noexcept
 {
     if (this != &other) {
         TcpSocket closing(std::move(*this));
-        m_socket = std::exchange(other.m_socket, static_cast<decltype(m_socket)>(kInvalid));
+        m_socket = std::exchange(other.m_socket, kInvalidHandle);
     }
     return *this;
 }
 
 //=============================================================================================================
 
-AcqExpected<TcpSocket> TcpSocket::connect(const std::string& host, std::uint16_t port, std::chrono::milliseconds timeout)
+std::expected<TcpSocket, std::error_code> TcpSocket::connect(const std::string& host, std::uint16_t port, std::chrono::milliseconds timeout)
 {
     if (!started()) {
-        return AcqError(AcqErrorCode::PlatformUnsupported, "the sockets library is not available");
+        return std::unexpected(std::make_error_code(std::errc::not_supported));
     }
     addrinfo hints{};
     hints.ai_family = AF_UNSPEC;
@@ -175,18 +91,20 @@ AcqExpected<TcpSocket> TcpSocket::connect(const std::string& host, std::uint16_t
     addrinfo* found = nullptr;
     const std::string service = std::to_string(port);
     if (::getaddrinfo(host.c_str(), service.c_str(), &hints, &found) != 0 || found == nullptr) {
-        return AcqError(AcqErrorCode::DeviceNotFound, std::format("unknown host {}", host));
+        return std::unexpected(std::make_error_code(std::errc::host_unreachable));
     }
-    std::string why = "no address";
+    std::error_code why = std::make_error_code(std::errc::address_not_available);
     TcpSocket socket;
     for (const addrinfo* a = found; a != nullptr; a = a->ai_next) {
         const Native s = ::socket(a->ai_family, a->ai_socktype, a->ai_protocol);
         if (s == kInvalid) {
+            why = last_error();
             continue;
         }
         socket = TcpSocket();
-        socket.m_socket = static_cast<decltype(socket.m_socket)>(s);
+        socket.m_socket = static_cast<Handle>(s);
         if (!set_non_blocking(s)) {
+            why = last_error();
             continue;
         }
 #ifdef SO_NOSIGPIPE
@@ -194,18 +112,22 @@ AcqExpected<TcpSocket> TcpSocket::connect(const std::string& host, std::uint16_t
         ::setsockopt(s, SOL_SOCKET, SO_NOSIGPIPE, &no_signal, sizeof(no_signal));
 #endif
         if (::connect(s, a->ai_addr, static_cast<socklen_t>(a->ai_addrlen)) != 0 && !would_block(last_error())) {
-            why = std::format("error {}", last_error());
+            why = last_error();
             continue;
         }
         if (wait_for(s, POLLOUT, timeout) <= 0) {
-            why = "no answer";
+            why = std::make_error_code(std::errc::timed_out);
             continue;
         }
         int error = 0;
         socklen_t length = sizeof(error);
         ::getsockopt(s, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&error), &length);
         if (error != 0) {
-            why = std::format("error {}", error);
+#ifdef _WIN32
+            why = {error, std::system_category()};
+#else
+            why = {error, std::generic_category()};
+#endif
             continue;
         }
         int on = 1; // requests are small and answered one by one
@@ -214,12 +136,12 @@ AcqExpected<TcpSocket> TcpSocket::connect(const std::string& host, std::uint16_t
         return socket;
     }
     ::freeaddrinfo(found);
-    return AcqError(AcqErrorCode::DeviceNotFound, std::format("cannot connect to {}:{} ({})", host, port, why));
+    return std::unexpected(why);
 }
 
 //=============================================================================================================
 
-AcqError TcpSocket::write(std::span<const std::byte> data)
+std::error_code TcpSocket::write(std::span<const std::byte> data)
 {
     const auto s = static_cast<Native>(m_socket);
     while (!data.empty()) {
@@ -231,10 +153,11 @@ AcqError TcpSocket::write(std::span<const std::byte> data)
         const auto sent = ::send(s, data.data(), data.size(), 0); // SO_NOSIGPIPE is set
 #endif
         if (sent < 0) {
-            if (would_block(last_error()) && wait_for(s, POLLOUT, std::chrono::milliseconds(1000)) > 0) {
+            const std::error_code error = last_error();
+            if (would_block(error) && wait_for(s, POLLOUT, std::chrono::milliseconds(1000)) > 0) {
                 continue;
             }
-            return {AcqErrorCode::DeviceIo, std::format("cannot send (error {})", last_error())};
+            return error;
         }
         data = data.subspan(static_cast<std::size_t>(sent));
     }
@@ -243,20 +166,17 @@ AcqError TcpSocket::write(std::span<const std::byte> data)
 
 //=============================================================================================================
 
-AcqError TcpSocket::read(std::span<std::byte> buffer, std::chrono::milliseconds timeout)
+std::error_code TcpSocket::read(std::span<std::byte> buffer, std::chrono::milliseconds timeout)
 {
     const auto s = static_cast<Native>(m_socket);
     bool started_reading = false;
     while (!buffer.empty()) {
         const int ready = wait_for(s, POLLIN, timeout);
         if (ready == 0) {
-            if (!started_reading) {
-                return AcqError(AcqErrorCode::Timeout);
-            }
-            return {AcqErrorCode::DeviceIo, "the answer stopped halfway"};
+            return std::make_error_code(started_reading ? std::errc::io_error : std::errc::timed_out);
         }
         if (ready < 0) {
-            return {AcqErrorCode::DeviceIo, std::format("cannot wait for data (error {})", last_error())};
+            return last_error();
         }
 #ifdef _WIN32
         const int got = ::recv(s, reinterpret_cast<char*>(buffer.data()), static_cast<int>(buffer.size()), 0);
@@ -264,13 +184,14 @@ AcqError TcpSocket::read(std::span<std::byte> buffer, std::chrono::milliseconds 
         const auto got = ::recv(s, buffer.data(), buffer.size(), 0);
 #endif
         if (got == 0) {
-            return {AcqErrorCode::DeviceIo, "the server closed the connection"};
+            return std::make_error_code(std::errc::connection_reset);
         }
         if (got < 0) {
-            if (would_block(last_error())) {
+            const std::error_code error = last_error();
+            if (would_block(error)) {
                 continue;
             }
-            return {AcqErrorCode::DeviceIo, std::format("cannot receive (error {})", last_error())};
+            return error;
         }
         started_reading = true;
         buffer = buffer.subspan(static_cast<std::size_t>(got));

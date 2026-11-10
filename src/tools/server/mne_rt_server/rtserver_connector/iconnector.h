@@ -25,7 +25,7 @@
 #include "rtserver_connector_global.h"
 
 #include <fiff/fiff_info.h>
-#include <com/rt_command/command_manager.h>
+#include <rtserver_connector/command_manager.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -99,7 +99,7 @@ public:
      *
      * @return the CommandManager.
      */
-    inline COMLIB::CommandManager& getCommandManager();
+    inline RTSERVER::CommandManager& getCommandManager();
 
     //=========================================================================================================
     /**
@@ -191,7 +191,7 @@ protected:
 
     QJsonObject m_qJsonObjectMetaData; /**< The meta data of the plugin defined in Q_PLUGIN_METADATA and the corresponding json file. */
 
-    COMLIB::CommandManager m_commandManager; /**< The CommandManager of the connector. */
+    RTSERVER::CommandManager m_commandManager; /**< The CommandManager of the connector. */
 
 private:
     bool m_bIsActive = false; /**< Holds the activation status. */
@@ -201,7 +201,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline COMLIB::CommandManager& IConnector::getCommandManager()
+inline RTSERVER::CommandManager& IConnector::getCommandManager()
 {
     return m_commandManager;
 }

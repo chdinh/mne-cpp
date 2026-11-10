@@ -30,7 +30,6 @@
 
 using namespace RTSERVER;
 using namespace FIFFLIB;
-using namespace COMLIB;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS

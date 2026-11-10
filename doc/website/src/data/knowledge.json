@@ -371,8 +371,8 @@
     },
     {
       "name": "ex_com",
-      "title": "Observer and command patterns behind real-time commands",
-      "brief": "Communication library: the observer and command patterns behind the real-time command dispatch",
+      "title": "Receive datagrams and talk to a TCP server with timeouts",
+      "brief": "Communication library: receive datagrams and talk to a TCP server with timeouts",
       "thumbnail": "",
       "url": "/docs/examples/com/ex_com/",
       "library": "com",

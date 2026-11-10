@@ -7,42 +7,48 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November 2026
- * @brief    Communication library: the observer and command patterns behind the real-time command dispatch.
+ * @brief    Communication library: receive datagrams and talk to a TCP server with timeouts.
  *
- * Runs without an mne_rt_server. Every step checks its result and the example exits non-zero on a mismatch.
+ * Runs on this machine only: it sends itself a datagram and connects to a port nothing listens on. Every step
+ * checks its result and the example exits non-zero on a mismatch.
  */
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include <com/rt_command/command_pattern.h>
-#include <com/rt_command/observer_pattern.h>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QCoreApplication>
+#include <com/serial_port.h>
+#include <com/tcp_socket.h>
+#include <com/udp_socket.h>
 
 //=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <array>
+#include <chrono>
+#include <cstdint>
 #include <cstdlib>
-#include <format>
-#include <memory>
 #include <print>
 #include <string>
 #include <string_view>
-#include <utility>
-#include <vector>
+
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace COMLIB;
+using namespace std::chrono_literals;
 
 //=============================================================================================================
 // DEFINE GLOBAL METHODS
@@ -57,64 +63,22 @@ bool expect(bool condition, std::string_view what)
     return condition;
 }
 
-//=============================================================================================================
-
-//! [observer_pattern_usage]
-// A subject notifies every attached observer; observers pull the state they need
-class Counter : public Subject
+/** Sends @p text as one datagram to @p port on this machine, as a device on the network would. */
+void send_datagram(std::uint16_t port, std::string_view text)
 {
-public:
-    void increment()
-    {
-        ++m_value;
-        notify();
-    }
-    int value() const
-    {
-        return m_value;
-    }
-
-private:
-    int m_value = 0;
-};
-
-class LastSeen : public IObserver
-{
-public:
-    void update(Subject* subject) override
-    {
-        m_seen = static_cast<Counter*>(subject)->value();
-    }
-    int seen() const
-    {
-        return m_seen;
-    }
-
-private:
-    int m_seen = -1;
-};
-//! [observer_pattern_usage]
-
-//! [command_pattern_usage]
-// A command wraps an action so it can be queued or replayed later
-class AppendCommand : public ICommand
-{
-public:
-    AppendCommand(std::vector<std::string>& target, std::string text)
-    : m_target(target)
-    , m_text(std::move(text))
-    {
-    }
-    void execute() override
-    {
-        m_target.push_back(m_text);
-    }
-
-private:
-    std::vector<std::string>& m_target;
-    std::string m_text;
-};
-//! [command_pattern_usage]
+    const auto s = ::socket(AF_INET, SOCK_DGRAM, 0);
+    sockaddr_in to{};
+    to.sin_family = AF_INET;
+    to.sin_port = htons(port);
+    ::inet_pton(AF_INET, "127.0.0.1", &to.sin_addr);
+#ifdef _WIN32
+    ::sendto(s, text.data(), static_cast<int>(text.size()), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+    ::closesocket(s);
+#else
+    ::sendto(s, text.data(), text.size(), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+    ::close(s);
+#endif
+}
 
 } // namespace
 
@@ -122,29 +86,43 @@ private:
 // MAIN
 //=============================================================================================================
 
-int main(int argc, char* argv[])
+int main()
 {
-    QCoreApplication app(argc, argv);
     bool ok = true;
 
-    Counter counter;
-    LastSeen observer;
-    counter.attach(&observer);
-    counter.increment();
-    counter.increment();
-    counter.detach(&observer);
-    counter.increment();
-    ok &= expect(observer.seen() == 2, std::format("observer saw {} before detaching (2)", observer.seen()));
-
-    std::vector<std::string> journal;
-    std::vector<std::unique_ptr<ICommand>> queue;
-    queue.push_back(std::make_unique<AppendCommand>(journal, "a"));
-    queue.push_back(std::make_unique<AppendCommand>(journal, "b"));
-    for (const auto& command : queue) {
-        command->execute();
+    std::println("UDP: a device sends datagrams to a port");
+    //! [udp_usage]
+    auto udp = UdpSocket::bind("127.0.0.1", 0); // 0: the system chooses the port
+    if (!udp) {
+        std::println("cannot receive: {}", udp.error().message());
+        return EXIT_FAILURE;
     }
-    ok &= expect(journal == std::vector<std::string>{"a", "b"}, "commands executed in order");
+    send_datagram(udp->port(), "sample block");
+    std::array<std::byte, 1500> datagram{};
+    const auto size = udp->receive(datagram, 1s);
+    //! [udp_usage]
+    ok &= expect(size && *size == 12, "one datagram of 12 bytes arrives");
+    ok &= expect(udp->receive(datagram, 50ms).error() == std::errc::timed_out, "no second one: timed_out");
 
-    std::println("{}", ok ? "All com checks passed." : "com checks FAILED.");
+    std::println("TCP: nothing serves port 1 of this machine");
+    //! [tcp_usage]
+    auto server = TcpSocket::connect("127.0.0.1", 1, 500ms);
+    if (!server) {
+        std::println("no server: {}", server.error().message());
+    }
+    //! [tcp_usage]
+    ok &= expect(!server, "connecting fails with the system's reason");
+    ok &= expect(TcpSocket::connect("no-such-host.invalid", 4217, 500ms).error() == std::errc::host_unreachable,
+                 "an unknown host is host_unreachable");
+
+    std::println("Serial ports of this machine, USB-serial adapters first:");
+    //! [serial_usage]
+    for (const std::string& name : list_serial_ports()) {
+        std::println("  {}", name);
+    }
+    ok &= expect(SerialPort::open("/no/such/port", 9600).error() == std::errc::no_such_file_or_directory,
+                 "a missing port is no_such_file_or_directory");
+    //! [serial_usage]
+
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }

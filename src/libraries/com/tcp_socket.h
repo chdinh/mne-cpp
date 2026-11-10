@@ -7,33 +7,39 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November, 2026
- * @brief    A blocking TCP client connection with timeouts, for devices that serve their data over TCP.
+ * @brief    A blocking TCP client connection with timeouts, for devices and servers that send their data over TCP.
  */
 
-#ifndef ACQ_DEVICES_TCP_SOCKET_H
-#define ACQ_DEVICES_TCP_SOCKET_H
+#ifndef COM_TCP_SOCKET_H
+#define COM_TCP_SOCKET_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../acq_error.h"
+#include "com_global.h"
 
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <span>
 #include <string>
+#include <system_error>
 
 //=============================================================================================================
-// DEFINE NAMESPACE ACQLIB::detail
+// DEFINE NAMESPACE COMLIB
 //=============================================================================================================
 
-namespace ACQLIB::detail
+namespace COMLIB
 {
 
-/** A connected TCP socket; move-only, closed on destruction. */
-class TcpSocket
+/**
+ * A connected TCP socket; move-only, closed on destruction.
+ *
+ * @snippet ex_com/main.cpp tcp_usage
+ */
+class COMSHARED_EXPORT TcpSocket
 {
 public:
     TcpSocket() = default;
@@ -49,16 +55,18 @@ public:
      * @param[in] port      Port.
      * @param[in] timeout   Maximum wait for the connection.
      *
-     * @return The connection, or DeviceNotFound if nothing answers.
+     * @return The connection, or why there is none: host_unreachable for an unknown host, timed_out if nothing
+     *         answers, the system's error otherwise (e.g. connection_refused).
      */
-    [[nodiscard]] static AcqExpected<TcpSocket> connect(const std::string& host, std::uint16_t port, std::chrono::milliseconds timeout);
+    [[nodiscard]] static std::expected<TcpSocket, std::error_code> connect(const std::string& host, std::uint16_t port,
+                                                                           std::chrono::milliseconds timeout);
 
     /**
      * @param[in] data   Bytes to send, all of them.
      *
-     * @return DeviceIo if the connection fails.
+     * @return The system's error if the connection fails.
      */
-    AcqError write(std::span<const std::byte> data);
+    std::error_code write(std::span<const std::byte> data);
 
     /**
      * Reads exactly @p buffer.size() bytes.
@@ -66,9 +74,10 @@ public:
      * @param[out] buffer    Destination.
      * @param[in]  timeout   Maximum wait for the first byte; the rest must follow within it too.
      *
-     * @return Timeout if nothing arrived (nothing is consumed then), DeviceIo if the connection closed or failed.
+     * @return timed_out if nothing arrived (nothing is consumed then), io_error if the rest did not follow,
+     *         connection_reset if the peer closed the connection, or the system's error.
      */
-    AcqError read(std::span<std::byte> buffer, std::chrono::milliseconds timeout);
+    std::error_code read(std::span<std::byte> buffer, std::chrono::milliseconds timeout);
 
 private:
 #ifdef _WIN32
@@ -78,6 +87,6 @@ private:
 #endif
 };
 
-} // namespace ACQLIB::detail
+} // namespace COMLIB
 
-#endif // ACQ_DEVICES_TCP_SOCKET_H
+#endif // COM_TCP_SOCKET_H

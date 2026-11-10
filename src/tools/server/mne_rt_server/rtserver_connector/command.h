@@ -9,9 +9,9 @@
  * @date     March 2026
  * @brief    Typed, parameter-bearing command object that round-trips between mne-cpp clients and @c mne_rt_server.
  *
- * @ref COMLIB::Command is the unit of conversation on the
+ * @ref RTSERVER::Command is the unit of conversation on the
  * @c mne_rt_server control channel after parsing has assigned types
- * (compare @ref COMLIB::RawCommand, which carries only string tokens).
+ * (compare @ref RTSERVER::RawCommand, which carries only string tokens).
  * Each instance holds a short command keyword (e.g. @c bufsize,
  * @c selch, @c start), a human-readable description, a list of named
  * parameters with both their @c QVariant values and their per-parameter
@@ -29,8 +29,8 @@
  * @c toJsonObject() / @c toStringList() format the same object for the
  * different transports.
  *
- * @c Command implements @ref COMLIB::ICommand from the generic command
- * pattern so it can be dispatched through @ref COMLIB::CommandManager without
+ * @c Command implements @ref RTSERVER::ICommand from the generic command
+ * pattern so it can be dispatched through @ref RTSERVER::CommandManager without
  * the manager needing to know whether the receiver is local or remote;
  * the @c triggered / @c received signals are how the manager routes
  * execution back to subscribers.
@@ -43,7 +43,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "../com_global.h"
+#include "rtserver_connector_global.h"
 
 #include "command_pattern.h"
 
@@ -62,10 +62,10 @@
 #include <QStringList>
 
 //=============================================================================================================
-// DEFINE NAMESPACE COMLIB
+// DEFINE NAMESPACE RTSERVER
 //=============================================================================================================
 
-namespace COMLIB
+namespace RTSERVER
 {
 
 static QVariant defaultVariant;
@@ -78,12 +78,12 @@ static QVariant defaultVariant;
  * names / values / descriptions, and a JSON-vs-CLI flag. Constructible
  * either from a parsed @c QJsonObject (when echoing the server’s
  * advertised command list) or from explicit string/value lists (when
- * authoring a request). Implements @ref COMLIB::ICommand so it can be
+ * authoring a request). Implements @ref RTSERVER::ICommand so it can be
  * dispatched through @ref CommandManager and surfaces parameter access
  * by both name (@c operator[](QString)) and index
  * (@c operator[](qint32)).
  */
-class COMSHARED_EXPORT Command : public QObject, public ICommand
+class RTSERVER_CONNECTOR_EXPORT Command : public QObject, public ICommand
 {
     Q_OBJECT
 
@@ -95,7 +95,7 @@ public:
      * @param[in] p_bIsJson      If is received/should be send as JSON (optional, default true).
      * @param[in] parent         Parent QObject (optional).
      */
-    explicit Command(bool p_bIsJson = true, QObject* parent = 0);
+    explicit Command(bool p_bIsJson = true, QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -106,7 +106,7 @@ public:
      * @param[in] p_bIsJson          If is received/should be send as JSON (optional, default true).
      * @param[in] parent             Parent QObject (optional).
      */
-    explicit Command(const QString& p_sCommand, const QJsonObject& p_qCommandContent, bool p_bIsJson = true, QObject* parent = 0);
+    explicit Command(const QString& p_sCommand, const QJsonObject& p_qCommandContent, bool p_bIsJson = true, QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -117,7 +117,7 @@ public:
      * @param[in] p_bIsJson          If is received/should be send as JSON (optional, default true).
      * @param[in] parent             Parent QObject (optional).
      */
-    explicit Command(const QString& p_sCommand, const QString& p_sDescription, bool p_bIsJson = true, QObject* parent = 0);
+    explicit Command(const QString& p_sCommand, const QString& p_sDescription, bool p_bIsJson = true, QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -131,7 +131,7 @@ public:
      * @param[in] parent             Parent QObject (optional).
      */
     explicit Command(const QString& p_sCommand, const QString& p_sDescription,
-                     const QStringList& p_qListParamNames, const QList<QVariant>& p_qListParamValues, bool p_bIsJson = true, QObject* parent = 0);
+                     const QStringList& p_qListParamNames, const QList<QVariant>& p_qListParamValues, bool p_bIsJson = true, QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -146,7 +146,7 @@ public:
      * @param[in] parent Parent QObject.
      */
     explicit Command(const QString& p_sCommand, const QString& p_sDescription,
-                     const QStringList& p_qListParamNames, const QList<QVariant>& p_qListParamValues, const QStringList& p_vecParameterDescriptions, bool p_bIsJson = true, QObject* parent = 0);
+                     const QStringList& p_qListParamNames, const QList<QVariant>& p_qListParamValues, const QStringList& p_vecParameterDescriptions, bool p_bIsJson = true, QObject* parent = nullptr);
 
     //=========================================================================================================
     /**
@@ -160,7 +160,7 @@ public:
     /**
      * Destroys the command
      */
-    virtual ~Command();
+    ~Command() override;
 
     //=========================================================================================================
     /**
@@ -190,7 +190,7 @@ public:
     /**
      * Inherited by ICommand. Emits received().
      */
-    virtual void execute();
+    void execute() override;
 
     //=========================================================================================================
     /**

@@ -1,0 +1,134 @@
+---
+id: serial-port
+title: "COMLIB::SerialPort"
+sidebar_label: SerialPort
+sidebar_position: 1
+---
+
+# SerialPort
+
+**Namespace:** `COMLIB` &nbsp;·&nbsp; **Library:** Communication Library &nbsp;·&nbsp; **Source:** [`com/serial_port.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/com/serial_port.h)
+
+`#include <com/serial_port.h>`
+
+```cpp
+class COMLIB::SerialPort
+```
+
+An open serial port; move-only, closed on destruction after its output has gone out.
+
+```cpp title="src/examples/ex_com/main.cpp"
+for (const std::string& name : list_serial_ports()) {
+    std::println("  {}", name);
+}
+ok &= expect(SerialPort::open("/no/such/port", 9600).error() == std::errc::no_such_file_or_directory,
+             "a missing port is no_such_file_or_directory");
+```
+
+---
+
+## Public Methods
+
+### SerialPort()
+
+---
+
+### ~SerialPort()
+
+---
+
+### SerialPort(other)
+
+---
+
+### operator=(other)
+
+---
+
+### SerialPort()
+
+---
+
+### operator=()
+
+---
+
+### is_open()
+
+**Returns:**
+
+- *bool* — Whether the port is open.
+
+---
+
+### write(data)
+
+Writes all of `data`.
+
+**Parameters:**
+
+- **data** : *std::string_view*
+  Bytes to send.
+
+**Returns:**
+
+- *std::error_code* — The system's error if the port fails.
+
+---
+
+### read(buffer, timeout)
+
+Waits for bytes and reads what is there, at most `buffer.size()`.
+
+**Parameters:**
+
+- **buffer** : *std::span&lt; char &gt;*
+  Destination.
+
+- **timeout** : *std::chrono::milliseconds*
+  Maximum wait.
+
+**Returns:**
+
+- *std::expected&lt; std::size_t, std::error_code &gt;* — The bytes read, timed_out if none arrived, no_such_device if the port went away, or the system's error.
+
+---
+
+## Static Methods
+
+### open(name, baud)
+
+**Parameters:**
+
+- **name** : *const std::string &*
+  Device path ("/dev/cu.usbserial-1", "/dev/ttyUSB0") or port name ("COM3").
+
+- **baud** : *int*
+  Bits per second.
+
+**Returns:**
+
+- *std::expected&lt; SerialPort, std::error_code &gt;* — The port in raw mode, invalid_argument for an unsupported baud rate, inappropriate_io_control_operation for a file that is no serial port, or the system's error: no_such_file_or_directory if it does not exist, permission_denied, device_or_resource_busy (another program has it).
+
+---
+
+## Example
+
+- Start here: [ex_com](../../examples/com/ex_com.mdx) — Communication library: receive datagrams and talk to a TCP server with timeouts.
+- Full source: [`src/examples/ex_com/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_com/main.cpp)
+- Build target: `ex_com` (runs under CTest)
+
+## Used in examples
+
+### [ex_com](../../examples/com/ex_com.mdx)
+
+Communication library: receive datagrams and talk to a TCP server with timeouts.
+
+````cpp title="src/examples/ex_com/main.cpp, line 123"
+ok &= expect(SerialPort::open("/no/such/port", 9600).error() == std::errc::no_such_file_or_directory,
+             "a missing port is no_such_file_or_directory");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

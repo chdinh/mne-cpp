@@ -10,31 +10,37 @@
  * @brief    A raw 8N1 serial port without flow control, for devices that talk over RS-232 or USB-serial.
  */
 
-#ifndef ACQ_DEVICES_SERIAL_PORT_H
-#define ACQ_DEVICES_SERIAL_PORT_H
+#ifndef COM_SERIAL_PORT_H
+#define COM_SERIAL_PORT_H
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include "../acq_error.h"
+#include "com_global.h"
 
 #include <chrono>
 #include <cstddef>
+#include <expected>
 #include <span>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <vector>
 
 //=============================================================================================================
-// DEFINE NAMESPACE ACQLIB::detail
+// DEFINE NAMESPACE COMLIB
 //=============================================================================================================
 
-namespace ACQLIB::detail
+namespace COMLIB
 {
 
-/** An open serial port; move-only, closed on destruction. */
-class SerialPort
+/**
+ * An open serial port; move-only, closed on destruction after its output has gone out.
+ *
+ * @snippet ex_com/main.cpp serial_usage
+ */
+class COMSHARED_EXPORT SerialPort
 {
 public:
     SerialPort() = default;
@@ -49,10 +55,11 @@ public:
      * @param[in] name   Device path ("/dev/cu.usbserial-1", "/dev/ttyUSB0") or port name ("COM3").
      * @param[in] baud   Bits per second.
      *
-     * @return The port in raw mode, DeviceNotFound if it does not exist, PermissionDenied, InvalidParameter for
-     *         an unsupported baud rate, or DeviceIo (e.g. another program has it).
+     * @return The port in raw mode, invalid_argument for an unsupported baud rate, inappropriate_io_control_operation for a file that is
+     *         no serial port, or the system's error: no_such_file_or_directory if it does not exist,
+     *         permission_denied, device_or_resource_busy (another program has it).
      */
-    [[nodiscard]] static AcqExpected<SerialPort> open(const std::string& name, int baud);
+    [[nodiscard]] static std::expected<SerialPort, std::error_code> open(const std::string& name, int baud);
 
     /** @return Whether the port is open. */
     [[nodiscard]] bool is_open() const noexcept;
@@ -62,9 +69,9 @@ public:
      *
      * @param[in] data   Bytes to send.
      *
-     * @return DeviceIo if the port fails.
+     * @return The system's error if the port fails.
      */
-    AcqError write(std::string_view data);
+    std::error_code write(std::string_view data);
 
     /**
      * Waits for bytes and reads what is there, at most @p buffer.size().
@@ -72,9 +79,10 @@ public:
      * @param[out] buffer    Destination.
      * @param[in]  timeout   Maximum wait.
      *
-     * @return The bytes read, Timeout if none arrived, DeviceIo if the port fails or went away.
+     * @return The bytes read, timed_out if none arrived, no_such_device if the port went away, or the system's
+     *         error.
      */
-    [[nodiscard]] AcqExpected<std::size_t> read(std::span<char> buffer, std::chrono::milliseconds timeout);
+    [[nodiscard]] std::expected<std::size_t, std::error_code> read(std::span<char> buffer, std::chrono::milliseconds timeout);
 
 private:
 #ifdef _WIN32
@@ -85,8 +93,8 @@ private:
 };
 
 /** @return The serial ports of this machine, USB-serial adapters first. */
-std::vector<std::string> list_serial_ports();
+COMSHARED_EXPORT std::vector<std::string> list_serial_ports();
 
-} // namespace ACQLIB::detail
+} // namespace COMLIB
 
-#endif // ACQ_DEVICES_SERIAL_PORT_H
+#endif // COM_SERIAL_PORT_H

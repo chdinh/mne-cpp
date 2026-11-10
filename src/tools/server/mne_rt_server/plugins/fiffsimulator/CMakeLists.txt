@@ -51,7 +51,6 @@ set(MNE_LIBS_REQUIRED
     mne_base
     mne_math
     mne_fiff
-    mne_com
     mne_acq_fiff
 )
 

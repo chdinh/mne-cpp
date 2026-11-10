@@ -1,0 +1,129 @@
+---
+id: udp-socket
+title: "COMLIB::UdpSocket"
+sidebar_label: UdpSocket
+sidebar_position: 3
+---
+
+# UdpSocket
+
+**Namespace:** `COMLIB` &nbsp;·&nbsp; **Library:** Communication Library &nbsp;·&nbsp; **Source:** [`com/udp_socket.h`](https://github.com/mne-tools/mne-cpp/blob/staging/src/libraries/com/udp_socket.h)
+
+`#include <com/udp_socket.h>`
+
+```cpp
+class COMLIB::UdpSocket
+```
+
+A bound UDP socket; move-only, closed on destruction.
+
+```cpp title="src/examples/ex_com/main.cpp"
+auto udp = UdpSocket::bind("127.0.0.1", 0); // 0: the system chooses the port
+if (!udp) {
+    std::println("cannot receive: {}", udp.error().message());
+    return EXIT_FAILURE;
+}
+send_datagram(udp->port(), "sample block");
+std::array<std::byte, 1500> datagram{};
+const auto size = udp->receive(datagram, 1s);
+```
+
+---
+
+## Public Methods
+
+### UdpSocket()
+
+---
+
+### ~UdpSocket()
+
+---
+
+### UdpSocket(other)
+
+---
+
+### operator=(other)
+
+---
+
+### UdpSocket()
+
+---
+
+### operator=()
+
+---
+
+### port()
+
+**Returns:**
+
+- *std::uint16_t* — The local port the socket is bound to.
+
+---
+
+### receive(buffer, timeout)
+
+**Parameters:**
+
+- **buffer** : *std::span&lt; std::byte &gt;*
+  Destination; a longer datagram is cut.
+
+- **timeout** : *std::chrono::milliseconds*
+  Maximum wait.
+
+**Returns:**
+
+- *std::expected&lt; std::size_t, std::error_code &gt;* — The size of the next datagram, timed_out if none arrived, or the system's error.
+
+---
+
+## Static Methods
+
+### bind(address, port)
+
+**Parameters:**
+
+- **address** : *const std::string &*
+  Local IPv4 address to receive on, e.g. 0.0.0.0 for all.
+
+- **port** : *std::uint16_t*
+  Local port; 0 lets the system choose one.
+
+**Returns:**
+
+- *std::expected&lt; UdpSocket, std::error_code &gt;* — The bound socket, invalid_argument for an address that is no IPv4 address, or the system's error (e.g. address_in_use).
+
+---
+
+## Example
+
+- Start here: [ex_com](../../examples/com/ex_com.mdx) — Communication library: receive datagrams and talk to a TCP server with timeouts.
+- Full source: [`src/examples/ex_com/main.cpp`](https://github.com/mne-tools/mne-cpp/tree/staging/src/examples/ex_com/main.cpp)
+- Build target: `ex_com` (runs under CTest)
+
+## Used in examples
+
+### [ex_com](../../examples/com/ex_com.mdx)
+
+Communication library: receive datagrams and talk to a TCP server with timeouts.
+
+````cpp title="src/examples/ex_com/main.cpp, line 93"
+std::println("UDP: a device sends datagrams to a port");
+auto udp = UdpSocket::bind("127.0.0.1", 0); // 0: the system chooses the port
+if (!udp) {
+    std::println("cannot receive: {}", udp.error().message());
+    return EXIT_FAILURE;
+}
+send_datagram(udp->port(), "sample block");
+std::array<std::byte, 1500> datagram{};
+const auto size = udp->receive(datagram, 1s);
+ok &= expect(size && *size == 12, "one datagram of 12 bytes arrives");
+ok &= expect(udp->receive(datagram, 50ms).error() == std::errc::timed_out, "no second one: timed_out");
+````
+
+## Authors of this file
+
+- Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

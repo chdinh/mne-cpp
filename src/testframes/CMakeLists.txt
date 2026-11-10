@@ -200,11 +200,9 @@ add_subdirectory(test_inv_rt_library)
 
 # Communication library tests
 add_subdirectory(test_com)
-add_subdirectory(test_com_rt_client)
 
 # Utils, disp, and disp3D coverage tests
 add_subdirectory(test_channels_layout_selection)
-add_subdirectory(test_com_observer_pattern)
 add_subdirectory(test_disp_plots)
 add_subdirectory(test_disp3d_viewstate)
 add_subdirectory(test_disp3d_brainsurface)
@@ -296,6 +294,8 @@ add_subdirectory(test_acq_fiff_replay)
 add_subdirectory(test_acq_lsl)
 if(TARGET mne_rt_server)
     add_subdirectory(test_rt_server_fiff_replay)
+    add_subdirectory(test_rtserver_commands)
+    add_subdirectory(test_rtserver_observer_pattern)
 endif()
 add_subdirectory(test_mne_acq_tool)
 add_subdirectory(test_mna_inverse_pipeline)

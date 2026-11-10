@@ -17,7 +17,9 @@
 
 #include "ftbuffer_transport.h"
 
-#include "../tcp_socket.h"
+#include "../transport_error.h"
+
+#include <com/tcp_socket.h>
 
 #include <array>
 #include <cstring>
@@ -29,6 +31,7 @@
 
 using namespace ACQLIB;
 using namespace ACQLIB::detail;
+using COMLIB::TcpSocket;
 
 //=============================================================================================================
 // STATIC HELPERS
@@ -61,14 +64,14 @@ public:
         std::memcpy(def.data(), &ft::kVersion, 2);
         std::memcpy(def.data() + 2, &command, 2);
         std::memcpy(def.data() + 4, &size, 4);
-        if (AcqError e = m_socket.write(def); !e.ok()) {
-            return e;
+        for (const std::span<const std::byte> part : {std::span<const std::byte>(def), payload}) {
+            if (const std::error_code e = m_socket.write(part)) {
+                return transport_error(e, AcqErrorCode::DeviceIo, "cannot send to the FieldTrip buffer");
+            }
         }
-        if (AcqError e = m_socket.write(payload); !e.ok()) {
-            return e;
-        }
-        if (AcqError e = m_socket.read(def, timeout); !e.ok()) {
-            return e.code() == AcqErrorCode::Timeout ? AcqError(AcqErrorCode::DeviceIo, "the FieldTrip buffer does not answer") : e;
+        if (const std::error_code e = m_socket.read(def, timeout)) {
+            return e == std::errc::timed_out ? AcqError(AcqErrorCode::DeviceIo, "the FieldTrip buffer does not answer")
+                                             : transport_error(e, AcqErrorCode::DeviceIo, "the FieldTrip buffer failed");
         }
         std::uint16_t version = 0;
         FtMessage answer;
@@ -80,7 +83,7 @@ public:
             return AcqError(AcqErrorCode::DeviceIo, std::format("{} does not speak the FieldTrip buffer protocol", m_name));
         }
         answer.payload.resize(length);
-        if (AcqError e = m_socket.read(answer.payload, timeout); !e.ok()) {
+        if (m_socket.read(answer.payload, timeout)) {
             return AcqError(AcqErrorCode::DeviceIo, "the FieldTrip buffer's answer is incomplete");
         }
         return answer;
@@ -102,7 +105,7 @@ AcqExpected<std::unique_ptr<FtBufferTransport>> ACQLIB::detail::connect_ftbuffer
 {
     auto socket = TcpSocket::connect(host, port, timeout);
     if (!socket) {
-        return AcqError(socket.error().code(), "no FieldTrip buffer: " + socket.error().text());
+        return AcqError(AcqErrorCode::DeviceNotFound, std::format("no FieldTrip buffer: cannot connect to {}:{} ({})", host, port, socket.error().message()));
     }
     return std::unique_ptr<FtBufferTransport>(std::make_unique<FtBufferClient>(std::move(*socket), std::format("{}:{}", host, port)));
 }

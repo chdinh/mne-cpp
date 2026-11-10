@@ -12,7 +12,7 @@
   "gates": {
     "G1_test_integrity": {
       "registered": 278,
-      "conditional": 7,
+      "conditional": 9,
       "unregistered": 3,
       "without_labels": 0,
       "without_timeout": 0,
@@ -52,7 +52,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -63,7 +62,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "macos-26-qt-min": [
           "test_acq_convert",
@@ -84,7 +85,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -95,7 +95,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "ubuntu-24.04": [
           "test_acq_convert",
@@ -116,7 +118,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -127,7 +128,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "ubuntu-24.04-qt-min": [
           "test_acq_convert",
@@ -148,7 +151,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -159,7 +161,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "windows-2025-vs2026": [
           "test_acq_convert",
@@ -180,7 +184,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -191,7 +194,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ],
         "windows-2025-vs2026-qt-min": [
           "test_acq_convert",
@@ -212,7 +217,6 @@
           "test_base_thread_pool",
           "test_channels_layout_selection",
           "test_channels_standard_montage",
-          "test_com_observer_pattern",
           "test_dsp_rt_averaging",
           "test_dsp_rt_extended",
           "test_math_kmeans",
@@ -223,7 +227,9 @@
           "test_math_warp",
           "test_mne_acq_tool",
           "test_pybridge_python_runner",
-          "test_rt_server_fiff_replay"
+          "test_rt_server_fiff_replay",
+          "test_rtserver_commands",
+          "test_rtserver_observer_pattern"
         ]
       },
       "ci_failures": 0,
@@ -247,12 +253,12 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 570,
+      "public_api_units": 566,
       "exported_not_registered": 1,
-      "example_eligible": 410,
+      "example_eligible": 413,
       "eligible_backed_percent": 99.76,
       "snippets": 448,
-      "registered_test_percent": 41.3
+      "registered_test_percent": 40.88
     },
     "G4_screenshots": {
       "referenced_images": 19,

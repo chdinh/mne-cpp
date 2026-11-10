@@ -22,11 +22,13 @@
 #include "polhemus_transport.h"
 
 #include "../acq_devices.h"
-#include "../serial_port.h"
+#include "../transport_error.h"
 #include "../../acq_backend.h"
 #include "../../acq_device_registry.h"
 #include "../../acq_thread.h"
 #include "../../detail/acq_uri_params.h"
+
+#include <com/serial_port.h>
 
 #include <algorithm>
 #include <array>
@@ -48,6 +50,8 @@
 
 using namespace ACQLIB;
 using namespace ACQLIB::detail;
+using COMLIB::list_serial_ports;
+using COMLIB::SerialPort;
 
 //=============================================================================================================
 // STATIC HELPERS
@@ -179,12 +183,16 @@ public:
 
     AcqError write(std::string_view command) override
     {
-        return m_port.write(command);
+        return transport_error(m_port.write(command), AcqErrorCode::DeviceIo, "cannot write to " + m_name);
     }
 
     AcqExpected<std::size_t> read(std::span<char> buffer, std::chrono::milliseconds timeout) override
     {
-        return m_port.read(buffer, timeout);
+        auto got = m_port.read(buffer, timeout);
+        if (!got) {
+            return transport_error(got.error(), AcqErrorCode::DeviceIo, "cannot read " + m_name);
+        }
+        return *got;
     }
 
 private:
@@ -204,7 +212,7 @@ AcqExpected<std::unique_ptr<PolhemusTransport>> openSerial(const Config& config)
     }
     auto port = SerialPort::open(name, config.baud);
     if (!port) {
-        return port.error();
+        return transport_error(port.error(), AcqErrorCode::DeviceIo, std::format("cannot open serial port {} at {} baud", name, config.baud));
     }
     return std::unique_ptr<PolhemusTransport>(std::make_unique<PolhemusSerial>(std::move(*port), std::move(name)));
 }

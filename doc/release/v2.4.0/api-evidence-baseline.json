@@ -3,25 +3,25 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 474,
-    "exported_free_functions": 182,
-    "registered_classes": 569,
+    "exported_classes": 473,
+    "exported_free_functions": 183,
+    "registered_classes": 565,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
-    "registered_header_only": 82,
+    "registered_header_only": 79,
     "registered_stale": 0,
-    "registered_with_test": 235,
+    "registered_with_test": 231,
     "registered_test_unresolved": 0,
     "registered_with_example": 414,
     "registered_example_not_built": 0,
     "registered_with_python_equiv": 97,
     "registered_without_api_page": 0,
     "with_snippet": 448,
-    "public_api_units": 570,
-    "example_eligible": 410,
-    "example_exempt": 160,
-    "eligible_backed_by_registry_example": 409,
-    "eligible_used_by_some_example": 353,
+    "public_api_units": 566,
+    "example_eligible": 413,
+    "example_exempt": 153,
+    "eligible_backed_by_registry_example": 412,
+    "eligible_used_by_some_example": 356,
     "examples_on_disk": 79,
     "examples_built": 79
   },
@@ -63,12 +63,12 @@
       "with_snippet": 8
     },
     "com": {
-      "public": 7,
-      "registered": 7,
-      "with_test": 7,
-      "eligible": 0,
-      "eligible_with_registry_example": 0,
-      "eligible_used_by_example": 0,
+      "public": 3,
+      "registered": 3,
+      "with_test": 3,
+      "eligible": 3,
+      "eligible_with_registry_example": 3,
+      "eligible_used_by_example": 3,
       "with_snippet": 3
     },
     "connectivity": {
@@ -532,6 +532,11 @@
     {
       "name": "buildHashLong",
       "header": "com/com_global.h",
+      "library": "com"
+    },
+    {
+      "name": "list_serial_ports",
+      "header": "com/serial_port.h",
       "library": "com"
     },
     {
@@ -3239,71 +3244,14 @@
       "exempt_reason": null
     },
     {
-      "name": "Command",
-      "header": "com/rt_command/command.h",
+      "name": "SerialPort",
+      "header": "com/serial_port.h",
       "library": "com",
       "kind": "exported-class",
       "exported": true,
       "registered": true,
       "registry_status": "documented",
       "test": "test_com",
-      "test_resolves": true,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/com/command.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
-    },
-    {
-      "name": "CommandManager",
-      "header": "com/rt_command/command_manager.h",
-      "library": "com",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": "test_com",
-      "test_resolves": true,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/com/command-manager.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
-    },
-    {
-      "name": "CommandParser",
-      "header": "com/rt_command/command_parser.h",
-      "library": "com",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": "test_com",
-      "test_resolves": true,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/com/command-parser.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
-    },
-    {
-      "name": "ICommand",
-      "header": "com/rt_command/command_pattern.h",
-      "library": "com",
-      "kind": "header-only",
-      "exported": false,
-      "registered": true,
-      "registry_status": "documented",
-      "test": "test_com_observer_pattern",
       "test_resolves": true,
       "example": "ex_com",
       "example_state": "built",
@@ -3311,64 +3259,16 @@
         "ex_com"
       ],
       "snippets": [
-        "ex_com/main.cpp#command_pattern_usage"
+        "ex_com/main.cpp#serial_usage"
       ],
-      "api_page": "doc/website/docs/api/com/i-command.mdx",
+      "api_page": "doc/website/docs/api/com/serial-port.mdx",
       "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
+      "example_eligible": true,
+      "exempt_reason": null
     },
     {
-      "name": "IObserver",
-      "header": "com/rt_command/observer_pattern.h",
-      "library": "com",
-      "kind": "header-only",
-      "exported": false,
-      "registered": true,
-      "registry_status": "documented",
-      "test": "test_com_observer_pattern",
-      "test_resolves": true,
-      "example": "ex_com",
-      "example_state": "built",
-      "including_examples": [
-        "ex_com"
-      ],
-      "snippets": [
-        "ex_com/main.cpp#observer_pattern_usage",
-        "ex_com/main.cpp#observer_pattern_usage"
-      ],
-      "api_page": "doc/website/docs/api/com/i-observer.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
-    },
-    {
-      "name": "Subject",
-      "header": "com/rt_command/observer_pattern.h",
-      "library": "com",
-      "kind": "header-only",
-      "exported": false,
-      "registered": true,
-      "registry_status": "documented",
-      "test": "test_com_observer_pattern",
-      "test_resolves": true,
-      "example": "ex_com",
-      "example_state": "built",
-      "including_examples": [
-        "ex_com"
-      ],
-      "snippets": [
-        "ex_com/main.cpp#observer_pattern_usage",
-        "ex_com/main.cpp#observer_pattern_usage"
-      ],
-      "api_page": "doc/website/docs/api/com/subject.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
-    },
-    {
-      "name": "RawCommand",
-      "header": "com/rt_command/raw_command.h",
+      "name": "TcpSocket",
+      "header": "com/tcp_socket.h",
       "library": "com",
       "kind": "exported-class",
       "exported": true,
@@ -3376,14 +3276,41 @@
       "registry_status": "documented",
       "test": "test_com",
       "test_resolves": true,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/com/raw-command.mdx",
+      "example": "ex_com",
+      "example_state": "built",
+      "including_examples": [
+        "ex_com"
+      ],
+      "snippets": [
+        "ex_com/main.cpp#tcp_usage"
+      ],
+      "api_page": "doc/website/docs/api/com/tcp-socket.mdx",
       "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'com/rt_command/': Requires a running mne_rt_server; evidenced by integration tests rather than a runnable example."
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "UdpSocket",
+      "header": "com/udp_socket.h",
+      "library": "com",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_com",
+      "test_resolves": true,
+      "example": "ex_com",
+      "example_state": "built",
+      "including_examples": [
+        "ex_com"
+      ],
+      "snippets": [
+        "ex_com/main.cpp#udp_usage"
+      ],
+      "api_page": "doc/website/docs/api/com/udp-socket.mdx",
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
     },
     {
       "name": "ConnectivitySettings",

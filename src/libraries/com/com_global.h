@@ -1,41 +1,21 @@
 //=============================================================================================================
 /**
  * SPDX-License-Identifier: BSD-3-Clause
- * Copyright (c) 2026 MNE-CPP Authors
+ * Copyright (c) 2012-2026 MNE-CPP Authors
  *
  * @file     com_global.h
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
- * @since    2.0.0
- * @date     March 2026
+ * @since    0.1.0
+ * @date     December, 2012
  * @brief    Export macros, build-info entry points and namespace anchor for the @c COMLIB communication library.
  *
- * @c mne_rt_server bridges MEG/EEG hardware drivers (or a pre-recorded
- * FIFF file) to networked clients over two TCP endpoints: the @e command
- * port (default 4217), used to negotiate session state through line- or
- * JSON-encoded messages, and the @e data port (default 4218), used to
- * stream raw sample buffers tagged with FIFF block kinds.
- *
- * The library holds the command vocabulary of the command port
- * (@ref COMLIB::Command, @ref COMLIB::RawCommand,
- * @ref COMLIB::CommandParser, @ref COMLIB::CommandManager). Clients read
- * the server through the rtserver:// source of mne_acq_devices.
- *
- * This header defines @ref COMSHARED_EXPORT, expanding to
- * the export decoration when building the shared library, the import one
- * when consuming it, and to nothing for the static build configuration
- * (@c STATICBUILD). It also declares the three @c buildDateTime /
- * @c buildHash / @c buildHashLong entry points used by tooling and the
- * About dialogs to report the exact commit the binary was built from.
+ * This header defines @ref COMSHARED_EXPORT, expanding to the export decoration when building the shared library,
+ * the import one when consuming it, and to nothing for the static build configuration (@c STATICBUILD). It also
+ * declares the @c buildDateTime / @c buildHash / @c buildHashLong entry points.
  */
 
 #ifndef COMMUNICATION_GLOBAL_H
 #define COMMUNICATION_GLOBAL_H
-
-//=============================================================================================================
-// INCLUDES
-//=============================================================================================================
-
-#include <base/buildinfo.h>
 
 //=============================================================================================================
 // DEFINES
@@ -53,23 +33,11 @@
 #define COMSHARED_EXPORT __attribute__((visibility("default"))) /**< Default visibility on ELF/Mach-O. */
 #endif
 
-// Exported classes hold Eigen and standard-library members and share their ABI with clients built by the same
-// compiler, so MSVC's warnings about members and bases without dll-interface do not apply (Qt disables them alike).
-#if defined(_MSC_VER)
-#pragma warning(disable : 4251 4275)
-#endif
-
 //=============================================================================================================
 /**
  * @namespace COMLIB
- * @brief Real-time client/server communication primitives for talking to @c mne_rt_server.
- *
- * @c rt_command/ holds the command vocabulary used on the wire: @ref RawCommand carries the
- * tokenised request before types are known, @ref Command carries a
- * named, typed, parameter-bearing message that round-trips through JSON,
- * @ref CommandParser dispatches incoming text to all interested
- * managers, and @ref CommandManager is a per-component registry of the
- * commands that component understands.
+ * @brief Byte transports to devices and servers in standard C++: TCP connections, UDP sockets and serial ports,
+ *        each with timeouts and std::error_code results.
  */
 namespace COMLIB
 {
@@ -78,8 +46,7 @@ namespace COMLIB
 /**
  * @brief Compile-time date/time stamp baked into the @c COMLIB binary.
  *
- * Resolved from the @c __DATE__ / @c __TIME__ macros at build time and
- * surfaced through @c base/buildinfo.h. Used by About dialogs and bug
+ * Resolved from the @c __DATE__ / @c __TIME__ macros at build time. Used by About dialogs and bug
  * reports to disambiguate identically-versioned builds.
  *
  * @return Null-terminated build date/time string with static storage duration.

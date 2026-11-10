@@ -40,7 +40,7 @@ aliases; replace the old spelling as below.
 | `PythonRunner` signals `lineReceived`, `progressUpdated`, `finished` | the line and progress callbacks; `PythonRunner` is no longer a `QObject` |
 | `MLTrainer::checkPrerequisites(QStringList)`, `InvCMNE::trainLstm(QString...)` | `check_prerequisites(StringList)`, `train_lstm(std::filesystem::path...)` |
 | `utils/report.h`, `UTILSLIB::Report` (`QString`, `QList<QPair>`); `addText`, `addTable`, `addKeyValue`, `addCode`, `sectionCount`, `toHtml`; `ReportSection` | `report/report.h`, `REPORTLIB::Report` (`std::string`, `std::vector<std::pair>`), in the new Qt-free `mne_report` library; `add_text`, ..., `to_html`; the section type is private |
-| `utils/generics/observerpattern.h`, `commandpattern.h`, `UTILSLIB::Subject`, `IObserver`, `ICommand` | `com/rt_command/observer_pattern.h`, `command_pattern.h`, `COMLIB::...` |
+| `utils/generics/observerpattern.h`, `commandpattern.h`, `UTILSLIB::Subject`, `IObserver`, `ICommand` | removed from the libraries; `mne_rt_server` keeps them for its commands |
 | `Subject::t_Observers` (`QSet`), `observerNumDebug()`, the global `Subject::notifyEnabled` | `observers()` (`std::vector`, attach order), `observers().size()`, per-subject `set_notify_enabled()` |
 | `ex_utils` | `ex_channels`; the other sections moved to `ex_base`, `ex_math`, `ex_pybridge`, `ex_report` and `ex_com` |
 | `UTILSLIB::KMeans`, `Linalg`, `Numerics`, `SimplexAlgorithm`, `Spectral`, `Sphere`, `Warp` (in `math/`) | `MATHLIB::...` |
@@ -51,7 +51,8 @@ aliases; replace the old spelling as below.
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
 | `ACQLIB::PolhemusConnection`, `PolhemusSerialConfig`, `FastrakParser`, `FastrakSample` (Qt SerialPort) | `AcqDevice::open("polhemus://<port>?stations=1,2")`: a stream of positions and quaternions per station, stylus button presses as event code 1 |
 | `PolhemusCoregistration::setConnection(conn)`, `connection()` | feed the stream: `on_pose(station, position, orientation)`, `on_button(station, position, orientation)` |
-| `com/rt_client/`: `COMLIB::RtClient`, `RtCmdClient`, `RtDataClient`, `MetaData` (Qt Network) | `AcqDevice::open("rtserver://host:4217?simfile=...&buffer=...")`: the measurement info as `fiff.MeasInfo/1` extension (`toFiffInfo()`), calibrated samples, `STI 014` changes as events; `mne_com` no longer links Qt Network, `mne_fiff` or `mne_math` |
+| `com/rt_client/`: `COMLIB::RtClient`, `RtCmdClient`, `RtDataClient`, `MetaData` (Qt Network) | `AcqDevice::open("rtserver://host:4217?simfile=...&buffer=...")`: the measurement info as `fiff.MeasInfo/1` extension (`toFiffInfo()`), calibrated samples, `STI 014` changes as events |
+| `com/rt_command/`: `COMLIB::Command`, `CommandManager`, `CommandParser`, `RawCommand`, `Subject`, `IObserver`, `ICommand` | removed from the libraries: the command vocabulary of `mne_rt_server` lives in its `rtserver_connector` (`RTSERVER::...`); clients send commands through `rtserver://` |
 
 - `mne_utils` is gone. Its contents moved to `mne_base`, `mne_math`,
   `mne_channels`, `mne_pybridge`, `mne_report` and `mne_com`, so each library
@@ -153,6 +154,11 @@ aliases; replace the old spelling as below.
   treat every sample as float32 whatever the buffer held, call every
   channel MEG without the Neuromag header, and hand on half a second of
   samples at a time.
+- `mne_com` is a standard-C++ transports library without Qt: `TcpSocket`
+  (connect, read and write with timeouts), `UdpSocket` (receive datagrams)
+  and `SerialPort` (raw 8N1, `list_serial_ports()`), each reporting
+  `std::error_code`s through `std::expected`. The acquisition devices use it
+  for their network and serial connections; `ex_com` shows it.
 - `rtserver://` reads the active connector of an `mne_rt_server` without Qt:
   it selects the connector, the replayed file and the buffer size, takes the
   measurement info with projectors, compensators and digitizer points, and
