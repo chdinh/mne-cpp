@@ -20,6 +20,7 @@ set(SOURCES
     fiff_tag.cpp
     fiff_coord_trans.cpp
     fiff_ch_info.cpp
+    fiff_ch_name.cpp
     fiff_proj.cpp
     fiff_named_matrix.cpp
     fiff_raw_data.cpp
@@ -63,6 +64,7 @@ set(HEADERS
     fiff_tag.h
     fiff_coord_trans.h
     fiff_ch_info.h
+    fiff_ch_name.h
     fiff_proj.h
     fiff_named_matrix.h
     fiff_ctf_comp.h

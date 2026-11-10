@@ -283,7 +283,7 @@ void TestFiffEvokedPython::oldStyleEvoked_matchesPython()
     // definitions and calibrations replace the measurement info's.
     QCOMPARE(e.info.nchan, 6);
     QCOMPARE(e.info.sfreq, 200.0);
-    QCOMPARE(e.info.chs[5].ch_name, QString("EEG3")); // MNE-CPP reads names without spaces
+    QCOMPARE(e.info.chs[5].ch_name, QString("EEG 3"));
     QCOMPARE(e.nave, 1);
     QCOMPARE(e.aspect_kind, FIFFV_ASPECT_STD_ERR);
     QCOMPARE(e.comment, QString("aspect comment"));

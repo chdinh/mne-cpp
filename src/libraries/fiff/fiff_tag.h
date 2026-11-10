@@ -788,9 +788,7 @@ inline FiffChInfo FiffTag::toChInfo() const
         //   Handle the channel name
         //
         const char* orig = static_cast<const char*>(this->data());
-        std::string name(orig + 80, qstrnlen(orig + 80, 16));
-        std::erase(name, ' ');
-        p_FiffChInfo.ch_name = std::move(name);
+        p_FiffChInfo.ch_name.assign(orig + 80, qstrnlen(orig + 80, 16));
 
         return p_FiffChInfo;
     }

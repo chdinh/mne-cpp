@@ -550,10 +550,10 @@ void TestFiffCorePython::computeFromRaw_matchesPython()
         double peak;
     };
     const Expected expected[] = {
-        {"PCA-grad-v1", 10.091097564301108, "MEG1823", 0.2501957576044427},
-        {"PCA-grad-v2", 10.190314393972283, "MEG1032", 0.48101060726726025},
-        {"PCA-mag-v1", 8.580154535344956, "MEG2011", 0.19903630986928558},
-        {"PCA-eeg-v1", 6.735075674238848, "EEG008", 0.30820096830837057},
+        {"PCA-grad-v1", 10.091097564301108, "MEG 1823", 0.2501957576044427},
+        {"PCA-grad-v2", 10.190314393972283, "MEG 1032", 0.48101060726726025},
+        {"PCA-mag-v1", 8.580154535344956, "MEG 2011", 0.19903630986928558},
+        {"PCA-eeg-v1", 6.735075674238848, "EEG 008", 0.30820096830837057},
     };
 
     // The smallest singular-value gap mne-python reports for these vectors is
@@ -597,7 +597,7 @@ void TestFiffCorePython::computeFromRaw_withRejection()
     const RowVectorXd v = projs.front().data->data.row(0);
     Index peakIdx = 0;
     const double peak = v.cwiseAbs().maxCoeff(&peakIdx);
-    QCOMPARE(m_raw->info.ch_names.at(static_cast<int>(peakIdx)), QString("EEG008"));
+    QCOMPARE(m_raw->info.ch_names.at(static_cast<int>(peakIdx)), QString("EEG 008"));
     QVERIFY2(relClose(v.cwiseAbs().sum(), 6.897932646721715, 1e-6), qPrintable(mismatch("abs sum", v.cwiseAbs().sum(), 6.897932646721715)));
     QVERIFY2(relClose(peak, 0.30228902469573343, 1e-6), qPrintable(mismatch("peak", peak, 0.30228902469573343)));
 }
@@ -636,11 +636,11 @@ void TestFiffCorePython::computeFromEvoked_matchesPython()
         double first;
     };
     const Expected expected[] = {
-        {"planar--0.200-0.499-PCA-01", "MEG1823", 0.247146315570, "MEG0113", 0.115274939637},
-        {"planar--0.200-0.499-PCA-02", "MEG1332", 0.288624288516, "MEG0113", 0.052683115472},
-        {"axial--0.200-0.499-PCA-01", "MEG0321", 0.238183090399, "MEG0111", 0.143120360319},
-        {"eeg--0.200-0.499-PCA-01", "EEG008", 0.405921365810, "EEG001", 0.152191442197},
-        {"eeg--0.200-0.499-PCA-02", "EEG060", 0.255398662153, "EEG001", 0.061448154221},
+        {"planar--0.200-0.499-PCA-01", "MEG 1823", 0.247146315570, "MEG 0113", 0.115274939637},
+        {"planar--0.200-0.499-PCA-02", "MEG 1332", 0.288624288516, "MEG 0113", 0.052683115472},
+        {"axial--0.200-0.499-PCA-01", "MEG 0321", 0.238183090399, "MEG 0111", 0.143120360319},
+        {"eeg--0.200-0.499-PCA-01", "EEG 008", 0.405921365810, "EEG 001", 0.152191442197},
+        {"eeg--0.200-0.499-PCA-02", "EEG 060", 0.255398662153, "EEG 001", 0.061448154221},
     };
     for (int i = 0; i < 5; ++i) {
         const FiffProj& p = projs.at(i);
@@ -1053,7 +1053,7 @@ void TestFiffCorePython::events_matchPython()
     }
 
     // find_events(mask=3, mask_type='and'): codes 4 and 32 vanish, 5 becomes 1.
-    const FiffEvents masked = FiffEvents::find_events(*m_raw, "STI014", 3).value();
+    const FiffEvents masked = FiffEvents::find_events(*m_raw, "STI 014", 3).value();
     const QList<int> maskedCodes{2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 1, 2, 3, 1, 2, 3, 1};
     QCOMPARE(static_cast<int>(masked.events.rows()), static_cast<int>(maskedCodes.size()));
     for (int k = 0; k < maskedCodes.size(); ++k)

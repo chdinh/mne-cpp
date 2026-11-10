@@ -22,17 +22,17 @@ Collection of channel derivations.
 const QString montage = tmp.filePath("montage.txt");
 QFile montageFile(montage);
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
-montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
+montageFile.write("\"EEG 001-EEG 002\" = \"EEG 001\" - \"EEG 002\"\n\"FRONT\" = 0.5 * \"EEG 001\" + 0.5 * \"EEG 002\" - \"EEG 999\"\n");
 montageFile.close();
 const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
 derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
 const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
-bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
+bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
 bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
-bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG001"), BASELIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
+bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
 mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, ns, rows.data());
@@ -212,17 +212,17 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 492"
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
-montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
+montageFile.write("\"EEG 001-EEG 002\" = \"EEG 001\" - \"EEG 002\"\n\"FRONT\" = 0.5 * \"EEG 001\" + 0.5 * \"EEG 002\" - \"EEG 999\"\n");
 montageFile.close();
 const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
 derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
 const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
-bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
+bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
 bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
-bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG001"), BASELIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
+bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
 ````

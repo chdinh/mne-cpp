@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "mne_forward_solution.h"
+#include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
 
@@ -68,50 +69,10 @@ using namespace FIFFLIB;
 namespace
 {
 
-bool check_matching_chnames_conventions(const StringList& chNamesA, const StringList& chNamesB, bool bCheckForNewNamingConvention = false)
+/** @return Whether any name of @p chNamesA names a channel in @p chNamesB. */
+bool check_matching_chnames(const StringList& chNamesA, const StringList& chNamesB)
 {
-    bool bMatching = false;
-
-    if (chNamesA.empty()) {
-        Log::warning("Warning in check_matching_chnames_conventions - chNamesA list is empty. Nothing to compare");
-    }
-    if (chNamesB.empty()) {
-        Log::warning("Warning in check_matching_chnames_conventions - chNamesB list is empty. Nothing to compare");
-    }
-
-    for (const std::string& name : chNamesA) {
-        if (BASELIB::contains(chNamesB, name)) {
-            bMatching = true;
-        } else if (bCheckForNewNamingConvention) {
-            // New convention drops the space ("MEG0113"), the old one has it before the number ("MEG 0113")
-            std::string newConv = name;
-            std::erase(newConv, ' ');
-
-            if (BASELIB::contains(chNamesB, newConv)) {
-                bMatching = true;
-            } else {
-                const auto digit = [](char c) {
-                    return c >= '0' && c <= '9';
-                };
-                const auto first = std::find_if(name.begin(), name.end(), digit);
-                if (first != name.end()) {
-                    const std::string number(first, std::find_if_not(first, name.end(), digit));
-                    std::string oldConv;
-                    for (std::size_t pos = 0;;) {
-                        const std::size_t hit = name.find(number, pos);
-                        oldConv.append(name, pos, hit == std::string::npos ? std::string::npos : hit - pos);
-                        if (hit == std::string::npos)
-                            break;
-                        oldConv += " " + number;
-                        pos = hit + number.size();
-                    }
-                    bMatching = BASELIB::contains(chNamesB, newConv) || BASELIB::contains(chNamesB, oldConv);
-                }
-            }
-        }
-    }
-
-    return bMatching;
+    return std::ranges::any_of(chNamesA, [&](const std::string& name) { return FIFFLIB::has_channel(chNamesB, name); });
 }
 
 } // anonymous namespace
@@ -372,14 +333,8 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     MNEForwardSolution p_fwdOut = MNEForwardSolution(*this);
 
     //Check if cov naming conventions are matching
-    if (!check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names) && !p_pNoise_cov.names.empty() && !p_pInfo.ch_names.empty()) {
-        if (check_matching_chnames_conventions(p_pNoise_cov.names, p_pInfo.ch_names, true)) {
-            Log::warning("MNEForwardSolution::cluster_forward_solution - Cov names do match with info channel names but have a different naming convention.");
-            //return p_fwdOut;
-        } else {
-            Log::warning("MNEForwardSolution::cluster_forward_solution - Cov channel names do not match with info channel names.");
-            //return p_fwdOut;
-        }
+    if (!p_pNoise_cov.names.empty() && !p_pInfo.ch_names.empty() && !check_matching_chnames(p_pNoise_cov.names, p_pInfo.ch_names)) {
+        Log::warning("MNEForwardSolution::cluster_forward_solution - Cov channel names do not match with info channel names.");
     }
 
     //
@@ -919,7 +874,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
 
     StringList bads;
     for (const std::string& bad : fwd.info.bads)
-        if (BASELIB::contains(ch_names, bad))
+        if (FIFFLIB::has_channel(ch_names, bad))
             bads.push_back(bad);
     fwd.info.bads = std::move(bads);
     fwd.sol->row_names = std::move(ch_names);
@@ -1015,7 +970,7 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
 
     ch_names.clear();
     for (qint32 i = 0; i < std::ssize(p_info.chs); ++i)
-        if (!BASELIB::contains(p_info.bads, p_info.chs[i].ch_name) && !BASELIB::contains(p_noise_cov.bads, p_info.chs[i].ch_name) && BASELIB::contains(p_noise_cov.names, p_info.chs[i].ch_name) && BASELIB::contains(fwd_ch_names, p_info.chs[i].ch_name))
+        if (!FIFFLIB::has_channel(p_info.bads, p_info.chs[i].ch_name) && !FIFFLIB::has_channel(p_noise_cov.bads, p_info.chs[i].ch_name) && FIFFLIB::has_channel(p_noise_cov.names, p_info.chs[i].ch_name) && FIFFLIB::has_channel(fwd_ch_names, p_info.chs[i].ch_name))
             ch_names.push_back(p_info.chs[i].ch_name);
 
     qint32 n_chan = static_cast<int>(ch_names.size());
@@ -1061,12 +1016,12 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
     qint32 count_fwd_idx = 0;
     qint32 count_info_idx = 0;
     for (qint32 i = 0; i < static_cast<int>(ch_names.size()); ++i) {
-        idx = BASELIB::indexOf(fwd_ch_names, ch_names[i]);
+        idx = FIFFLIB::channel_index(fwd_ch_names, ch_names[i]);
         if (idx > -1) {
             fwd_idx[count_fwd_idx] = idx;
             ++count_fwd_idx;
         }
-        idx = BASELIB::indexOf(p_info.ch_names, ch_names[i]);
+        idx = FIFFLIB::channel_index(p_info.ch_names, ch_names[i]);
         if (idx > -1) {
             info_idx[count_info_idx] = idx;
             ++count_info_idx;

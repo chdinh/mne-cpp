@@ -20,6 +20,7 @@
 #include "covariancewindow.h"
 #include <memory>
 #include <base/string_utils.h>
+#include <fiff/fiff_ch_name.h>
 
 #include <QAction>
 #include <QCheckBox>
@@ -346,7 +347,7 @@ void CovarianceWindow::updateHeatmap()
         }
 
         if (m_pFiffInfo) {
-            const int chIdx = BASELIB::indexOf(m_pFiffInfo->ch_names, m_covariance.names[i]);
+            const int chIdx = FIFFLIB::channel_index(m_pFiffInfo->ch_names, m_covariance.names[i]);
             if (chIdx < 0 || chIdx >= std::ssize(m_pFiffInfo->chs))
                 continue;
 

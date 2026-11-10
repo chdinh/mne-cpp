@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include <fiff/fiff_constants.h>
+#include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
 #include <base/string_utils.h>
@@ -450,7 +451,7 @@ void MNEProjOp::report_data(QTextStream& out, const std::string& tag, bool list_
             }
             for (p = 0; p < vecs->nrow; p++)
                 for (q = 0; q < vecs->ncol; q++) {
-                    found = BASELIB::contains(exclude, vecs->collist[q]);
+                    found = FIFFLIB::has_channel(exclude, vecs->collist[q]);
                     out << qSetFieldWidth(10) << qSetRealNumberPrecision(5) << Qt::forcepoint
                         << (found ? 0.0 : vecs->data(p, q)) << qSetFieldWidth(0) << " ";
                     out << (q < vecs->ncol - 1 ? " " : "\n");

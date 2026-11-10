@@ -38,6 +38,7 @@
 #include <mne/mne_source_spaces.h>
 #include <mne/mne_cortical_map.h>
 #include <fiff/fiff_cov.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_evoked.h>
 #include <fs/fs_label.h>
 #include <fs/fs_annotationset.h>
@@ -430,7 +431,7 @@ void TestMneLabelPython::assembleKernel_label()
         surfFwd.convert_to_surf_ori();
         MatrixXd G(364, fwd.sol->data.cols());
         for (int c = 0; c < 364; ++c)
-            G.row(c) = surfFwd.sol->data.row(static_cast<int>(BASELIB::indexOf(surfFwd.sol->row_names, prepared.eigen_fields->col_names[c])));
+            G.row(c) = surfFwd.sol->data.row(FIFFLIB::channel_index(surfFwd.sol->row_names, prepared.eigen_fields->col_names[c]));
         QVERIFY((R - kFull * G).norm() <= 1e-12 * R.norm());
         QVERIFY2(std::abs(R.trace() - 43.488585536748346) <= 1e-5 * 43.488585536748346, qPrintable(QString::number(R.trace(), 'g', 17)));
         QVERIFY2(std::abs(R.norm() - 7.8792209245077) <= 1e-5 * 7.8792209245077, qPrintable(QString::number(R.norm(), 'g', 17)));
@@ -440,7 +441,7 @@ void TestMneLabelPython::assembleKernel_label()
         QTest::ignoreMessage(QtWarningMsg, "MNECorticalMap::makeCorticalMap - Forward solution is empty.");
         QVERIFY(MNECorticalMap::makeCorticalMap(MNEForwardSolution(), prepared, evoked.info).size() == 0);
         const MNEForwardSolution noMeg = fwd.pick_channels({}, StringList(fwd.sol->row_names.begin() + 0, fwd.sol->row_names.begin() + 0 + 306));
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Channel MEG\\w+ is not in the forward solution"));
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Channel MEG \\d+ is not in the forward solution"));
         QVERIFY(MNECorticalMap::makeCorticalMap(noMeg, prepared, evoked.info).size() == 0);
     } else {
         QCOMPARE(static_cast<int>(nnLabel.rows()), static_cast<int>(sel.size()));

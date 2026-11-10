@@ -18,6 +18,7 @@
 #include <inv/inv_source_estimate.h>
 #include <memory>
 #include <inv/dipole_fit/inv_ecd_set.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_evoked_set.h>
 #include <fiff/fiff_raw_data.h>
@@ -507,7 +508,7 @@ private slots:
     // mne_fix_stim14
     //=========================================================================================================
 
-    void testFixStim14MissingChannels()
+    void testFixStim14FindsStimChannels()
     {
         if (!toolExists("mne_fix_stim14"))
             QSKIP("mne_fix_stim14 not found");
@@ -515,16 +516,19 @@ private slots:
         if (!QFile::exists(rawFile))
             QSKIP("Raw data not available");
 
-        FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
-        QVERIFY(!inputRaw.info.empty());
-
         const QString outFile = m_tempDir.filePath("raw-fixed-stim14.fif");
         const QString output = runTool("mne_fix_stim14", {"--raw", rawFile, "--out", outFile}, 120000);
         QVERIFY2(m_lastProcessFinished, qPrintable(output));
         QCOMPARE(m_lastExitStatus, QProcess::NormalExit);
-        QCOMPARE(m_lastExitCode, 1);
-        QVERIFY(output.contains("Cannot find channel: STI 001"));
-        QVERIFY(!QFileInfo::exists(outFile));
+        QCOMPARE(m_lastExitCode, 0);
+
+        // The sample file names its stim lines "STI 001" ... "STI 014"; all are found.
+        QVERIFY(output.contains("Found STI 001"));
+        QVERIFY(output.contains("Found STI 014"));
+        FIFFLIB::FiffRawData inputRaw(rawFile.toStdString());
+        FIFFLIB::FiffRawData outputRaw(outFile.toStdString());
+        QCOMPARE(outputRaw.info.ch_names, inputRaw.info.ch_names);
+        QCOMPARE(outputRaw.last_samp - outputRaw.first_samp, inputRaw.last_samp - inputRaw.first_samp);
     }
 
     //=========================================================================================================
@@ -1210,7 +1214,7 @@ private slots:
             QSKIP("Raw data not available");
 
         QString eventsOut = m_tempDir.path() + "/detected_events.fif";
-        QString output = runTool("mne_process_raw", {"--raw", rawFile, "--digtrig", "STI014", "--eventsout", eventsOut}, 120000);
+        QString output = runTool("mne_process_raw", {"--raw", rawFile, "--digtrig", "STI 014", "--eventsout", eventsOut}, 120000);
         // Trigger detection ran (0 events may be found in truncated data)
         QVERIFY(output.contains("event", Qt::CaseInsensitive) ||
                 output.contains("detect", Qt::CaseInsensitive) ||
@@ -1287,7 +1291,7 @@ private slots:
             QSKIP("Raw data not available");
 
         QString eventsOut = m_tempDir.path() + "/all_events.fif";
-        QString output = runTool("mne_process_raw", {"--raw", rawFile, "--digtrig", "STI014", "--allevents", "--eventsout", eventsOut}, 120000);
+        QString output = runTool("mne_process_raw", {"--raw", rawFile, "--digtrig", "STI 014", "--allevents", "--eventsout", eventsOut}, 120000);
         QVERIFY(output.contains("event", Qt::CaseInsensitive) ||
                 output.contains("detect", Qt::CaseInsensitive) ||
                 output.contains("Complete", Qt::CaseInsensitive));
@@ -2469,7 +2473,7 @@ private slots:
         QFile af(aliasFile);
         if (af.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QTextStream ts(&af);
-            ts << "MEG0111:RENAMED_CH\n";
+            ts << "MEG 0111:RENAMED_CH\n";
             af.close();
         }
 

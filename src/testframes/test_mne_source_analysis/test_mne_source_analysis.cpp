@@ -85,9 +85,9 @@ private slots:
         FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {}, {{-0.2f, 0.0f}});
 
         StringList include;
-        include.push_back("MEG0111");
-        include.push_back("MEG0121");
-        include.push_back("MEG0131");
+        include.push_back("MEG 0111");
+        include.push_back("MEG 0121");
+        include.push_back("MEG 0131");
         FiffEvokedSet picked = evokedSet.pick_channels(include, {});
 
         QCOMPARE(picked.info.nchan, 3);
@@ -117,8 +117,8 @@ private slots:
         FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String(), {}, {{-0.2f, 0.0f}});
 
         StringList include;
-        include.push_back("MEG0111");
-        include.push_back("MEG0121");
+        include.push_back("MEG 0111");
+        include.push_back("MEG 0121");
         FiffEvoked picked = evokedSet.evoked[0].pick_channels(include, {});
         QCOMPARE(picked.ch_names().size(), 2);
     }
@@ -213,8 +213,8 @@ private slots:
         FiffInfo& info = raw.info;
 
         StringList include;
-        include.push_back("MEG0111");
-        include.push_back("MEG0121");
+        include.push_back("MEG 0111");
+        include.push_back("MEG 0121");
         Eigen::RowVectorXi sel = FiffInfoBase::pick_channels(info.ch_names, include, {});
         QCOMPARE(sel.size(), 2);
     }
@@ -269,9 +269,9 @@ private slots:
         FiffCov cov(m_sCovFile.toStdString());
 
         StringList include;
-        include.push_back("MEG0111");
-        include.push_back("MEG0121");
-        include.push_back("MEG0131");
+        include.push_back("MEG 0111");
+        include.push_back("MEG 0121");
+        include.push_back("MEG 0131");
         FiffCov picked = cov.pick_channels(include, {});
         QCOMPARE(picked.names.size(), 3);
         QCOMPARE(picked.dim, 3);

@@ -27,6 +27,7 @@
 #include <fs/fs_annotationset.h>
 #include <fs/fs_surfaceset.h>
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_info.h>
 
 #include <mne/mne_forward_solution.h>
@@ -271,7 +272,7 @@ bool RtClustMne::calcFiffInfo()
         //Pick only channels which are present in all data structures (covariance, evoked and forward)
         m_qListPickChannels.clear();
         for (const std::string& ch : m_pFiffInfoForward->ch_names) {
-            if (BASELIB::contains(m_pFiffInfoInput->ch_names, ch) && BASELIB::contains(m_qListCovChNames, ch))
+            if (FIFFLIB::has_channel(m_pFiffInfoInput->ch_names, ch) && FIFFLIB::has_channel(m_qListCovChNames, ch))
                 m_qListPickChannels.push_back(ch);
         }
         RowVectorXi sel = m_pFiffInfoInput->pick_channels(m_qListPickChannels);
@@ -632,7 +633,7 @@ void RtClustMne::run()
                     matDataResized.resize(iNumberChannels, matData.cols());
 
                     for (j = 0; j < iNumberChannels; ++j) {
-                        matDataResized.row(j) = matData.row(BASELIB::indexOf(lChNamesFiffInfo, lChNamesInvOp.at(j)));
+                        matDataResized.row(j) = matData.row(FIFFLIB::channel_index(lChNamesFiffInfo, lChNamesInvOp.at(j)));
                     }
 
                     //TODO: Add picking here. See evoked part as input.

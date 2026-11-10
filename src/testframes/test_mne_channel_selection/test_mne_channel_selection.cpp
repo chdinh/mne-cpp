@@ -64,10 +64,10 @@ private slots:
         sel.chspick.push_back("MEG 0112");
         sel.chspick.push_back("MEG 0211");
         sel.chspick.push_back("MEG 0212");
-        sel.chspick_nospace.push_back("MEG0111");
-        sel.chspick_nospace.push_back("MEG0112");
-        sel.chspick_nospace.push_back("MEG0211");
-        sel.chspick_nospace.push_back("MEG0212");
+        sel.chspick_nospace.push_back("MEG 0111");
+        sel.chspick_nospace.push_back("MEG 0112");
+        sel.chspick_nospace.push_back("MEG 0211");
+        sel.chspick_nospace.push_back("MEG 0212");
         sel.nchan = 4;
 
         sel.pick.resize(4);

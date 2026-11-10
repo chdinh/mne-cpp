@@ -226,6 +226,17 @@ Opens a source through [`AcqDeviceRegistry`](/docs/api/acq/acq-device-registry),
 
 ## Used in examples
 
+### [ex_acq_devices](../../examples/acq/ex_acq_devices.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_devices/main.cpp, line 167"
+m_settings->setFrameShape(QFrame::NoFrame);
+m_uri = new QLineEdit;
+m_uri->setReadOnly(true);
+m_uri->setToolTip("The source URI built from the settings; mne_acq and AcqDevice::open() take the same");
+````
+
 ### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
 
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
@@ -245,17 +256,6 @@ if (!recorder || !device->start().ok()) {
     return 1;
 }
 while (recorder->isRecording()) { // a session of fixed duration ends the stream, which ends the recording
-````
-
-### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
-
-Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
-
-````cpp title="src/examples/ex_acq_studio/main.cpp, line 167"
-m_settings->setFrameShape(QFrame::NoFrame);
-m_uri = new QLineEdit;
-m_uri->setReadOnly(true);
-m_uri->setToolTip("The source URI built from the settings; mne_acq and AcqDevice::open() take the same");
 ````
 
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)

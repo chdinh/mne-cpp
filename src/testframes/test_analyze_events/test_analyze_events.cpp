@@ -93,8 +93,8 @@ void TestAnalyzeEvents::detectsTriggersLikePython()
     }
     QVERIFY(view);
     auto* channel = view->findChild<QComboBox*>(QStringLiteral("m_comboBox_triggerChannels"));
-    QVERIFY(channel && channel->findText(QStringLiteral("STI014")) >= 0);
-    channel->setCurrentText(QStringLiteral("STI014"));
+    QVERIFY(channel && channel->findText(QStringLiteral("STI 014")) >= 0);
+    channel->setCurrentText(QStringLiteral("STI 014"));
     view->findChild<QDoubleSpinBox*>(QStringLiteral("m_doubleSpinBox_detectionThresholdFirst"))->setValue(1.0);
     view->findChild<QSpinBox*>(QStringLiteral("m_spinBox_detectionThresholdSecond"))->setValue(0);
 
@@ -125,15 +125,15 @@ void TestAnalyzeEvents::detectsTriggersLikePython()
     std::map<int, std::vector<int>> found;
     for (const auto& group : *groups) {
         const QString name = QString::fromStdString(group.name);
-        if (!name.startsWith(QStringLiteral("STI014_")))
+        if (!name.startsWith(QStringLiteral("STI 014_")))
             continue;
         events->clearGroupSelection();
         events->addToSelectedGroups(group.id);
         const Eigen::MatrixXi matrix = events->getEventMatrix();
-        std::vector<int>& samples = found[name.mid(7).toInt()];
+        std::vector<int>& samples = found[name.mid(8).toInt()];
         for (int k = 0; k < matrix.rows(); ++k) {
             samples.push_back(matrix(k, 0));
-            QCOMPARE(matrix(k, 2), name.mid(7).toInt());
+            QCOMPARE(matrix(k, 2), name.mid(8).toInt());
         }
         std::sort(samples.begin(), samples.end());
     }

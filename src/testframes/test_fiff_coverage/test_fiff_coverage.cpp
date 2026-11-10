@@ -318,9 +318,9 @@ void TestFiffCoverage::testWriteBadChannels()
         QVERIFY(stream != nullptr);
 
         StringList bads;
-        bads.push_back("MEG0111");
-        bads.push_back("MEG0113");
-        bads.push_back("MEG0121");
+        bads.push_back("MEG 0111");
+        bads.push_back("MEG 0113");
+        bads.push_back("MEG 0121");
         stream->write_bad_channels(bads);
         stream->end_file();
         stream->close(); // flush to disk
@@ -419,8 +419,8 @@ void TestFiffCoverage::testCtfCompRoundTrip()
         data->nrow = 2;
         data->ncol = 3;
         data->data = MatrixXd::Ones(2, 3);
-        data->row_names.push_back("MEG0111");
-        data->row_names.push_back("MEG0121");
+        data->row_names.push_back("MEG 0111");
+        data->row_names.push_back("MEG 0121");
         data->col_names.push_back("REF01");
         data->col_names.push_back("REF02");
         data->col_names.push_back("REF03");
@@ -447,7 +447,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     // Read compensators are calibrated in memory and written back uncalibrated (mne _write_ctf_comp),
     // so a read-write-read round trip returns the same matrix
     std::vector<FiffChInfo> chs;
-    for (const auto& [name, cal] : {std::pair{"MEG0111", 2.0f}, std::pair{"MEG0121", 4.0f}, std::pair{"REF01", 0.5f}, std::pair{"REF02", 8.0f}, std::pair{"REF03", 1.0f}}) {
+    for (const auto& [name, cal] : {std::pair{"MEG 0111", 2.0f}, std::pair{"MEG 0121", 4.0f}, std::pair{"REF01", 0.5f}, std::pair{"REF02", 8.0f}, std::pair{"REF03", 1.0f}}) {
         FiffChInfo ch;
         ch.ch_name = name;
         ch.range = 1.0f;
@@ -457,7 +457,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     FiffCtfComp raw;
     raw.ctfkind = 1194410578;
     raw.save_calibrated = false;
-    raw.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(2, 3, {"MEG0111", "MEG0121"}, {"REF01", "REF02", "REF03"}, MatrixXd::Constant(2, 3, 1.0)));
+    raw.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(2, 3, {"MEG 0111", "MEG 0121"}, {"REF01", "REF02", "REF03"}, MatrixXd::Constant(2, 3, 1.0)));
     const auto writeComps = [](const QString& path, const std::vector<FiffCtfComp>& list) {
         QFile out(path);
         auto w = FiffStream::start_file(out);
@@ -490,7 +490,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     // A compensator naming a channel the data lack makes the set unusable (mne raises), not half-read
     FiffCtfComp unknown = raw;
     unknown.ctfkind = 1194476114;
-    unknown.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(1, 1, {"MEG0111"}, {"REF99"}, MatrixXd::Ones(1, 1)));
+    unknown.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(1, 1, {"MEG 0111"}, {"REF99"}, MatrixXd::Ones(1, 1)));
     const QString brokenPath = m_tmpDir.path() + "/ctf_comp_unknown.fif";
     writeComps(brokenPath, {raw, unknown});
     QVERIFY(readComps(brokenPath).empty());

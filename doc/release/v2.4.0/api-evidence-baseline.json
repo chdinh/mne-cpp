@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 473,
-    "exported_free_functions": 187,
+    "exported_free_functions": 189,
     "registered_classes": 565,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
@@ -862,6 +862,16 @@
     {
       "name": "count_annotations",
       "header": "fiff/fiff_annotation_event_utils.h",
+      "library": "fiff"
+    },
+    {
+      "name": "same_channel",
+      "header": "fiff/fiff_ch_name.h",
+      "library": "fiff"
+    },
+    {
+      "name": "channel_index",
+      "header": "fiff/fiff_ch_name.h",
       "library": "fiff"
     },
     {
@@ -2356,8 +2366,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record",
-        "ex_acq_studio"
+        "ex_acq_devices",
+        "ex_acq_record"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -2384,8 +2394,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record",
-        "ex_acq_studio"
+        "ex_acq_devices",
+        "ex_acq_record"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -2412,8 +2422,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record",
-        "ex_acq_studio"
+        "ex_acq_devices",
+        "ex_acq_record"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -2440,8 +2450,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record",
-        "ex_acq_studio"
+        "ex_acq_devices",
+        "ex_acq_record"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -4340,7 +4350,7 @@
       "example": null,
       "example_state": "none",
       "including_examples": [
-        "ex_acq_studio"
+        "ex_acq_devices"
       ],
       "snippets": [],
       "api_page": "doc/website/docs/api/disp/channel-data-view.mdx",

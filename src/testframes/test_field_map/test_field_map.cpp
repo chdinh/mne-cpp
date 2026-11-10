@@ -723,18 +723,9 @@ void TestFieldMap::testMultiEvokedMegMapping()
                  << "times:" << evoked.data.cols();
 
         // Build channel pick indices matching Python's channel order
-        // C++ uses "MEG0113", Python uses "MEG 0113" — normalize by removing spaces
         QVector<int> megPick;
         for (const QString& chName : m_megChNames) {
-            int idx = -1;
-            QString pyNorm = chName.trimmed().remove(' ');
-            for (int k = 0; k < std::ssize(evoked.info.chs); ++k) {
-                QString cppNorm = QString::fromStdString(evoked.info.chs[k].ch_name).trimmed().remove(' ');
-                if (cppNorm == pyNorm) {
-                    idx = k;
-                    break;
-                }
-            }
+            const int idx = BASELIB::indexOf(evoked.info.ch_names, chName.trimmed().toStdString());
             QVERIFY2(idx >= 0,
                      qPrintable(QString("MEG channel '%1' not found in evoked %2")
                                     .arg(chName)
@@ -879,18 +870,9 @@ void TestFieldMap::testMultiEvokedEegMapping()
         const FiffEvoked& evoked = m_evokedSet.evoked[ci];
 
         // Build EEG channel pick indices
-        // Same normalization: C++ "EEG001" vs Python "EEG 001"
         QVector<int> eegPick;
         for (const QString& chName : m_eegChNames) {
-            int idx = -1;
-            QString pyNorm = chName.trimmed().remove(' ');
-            for (int k = 0; k < std::ssize(evoked.info.chs); ++k) {
-                QString cppNorm = QString::fromStdString(evoked.info.chs[k].ch_name).trimmed().remove(' ');
-                if (cppNorm == pyNorm) {
-                    idx = k;
-                    break;
-                }
-            }
+            const int idx = BASELIB::indexOf(evoked.info.ch_names, chName.trimmed().toStdString());
             QVERIFY2(idx >= 0,
                      qPrintable(QString("EEG channel '%1' not found in evoked %2")
                                     .arg(chName)
@@ -1147,15 +1129,7 @@ void TestFieldMap::testHelmetFieldMap()
         // Build channel pick indices: Python ch_names → C++ evoked rows
         QVector<int> pick;
         for (const QString& pyName : helmetChNames) {
-            int idx = -1;
-            QString pyNorm = pyName.trimmed().remove(' ');
-            for (int k = 0; k < std::ssize(baselinedEvoked.info.chs); ++k) {
-                QString cppNorm = QString::fromStdString(baselinedEvoked.info.chs[k].ch_name).trimmed().remove(' ');
-                if (cppNorm == pyNorm) {
-                    idx = k;
-                    break;
-                }
-            }
+            const int idx = BASELIB::indexOf(baselinedEvoked.info.ch_names, pyName.trimmed().toStdString());
             QVERIFY2(idx >= 0,
                      qPrintable(QString("Channel '%1' not found").arg(pyName)));
             pick.append(idx);

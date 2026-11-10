@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "inv_convenience.h"
+#include <fiff/fiff_ch_name.h>
 #include <base/log.h>
 #include <base/string_utils.h>
 #include "minimum_norm/inv_minimum_norm.h"
@@ -237,7 +238,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
         std::iota(sel.begin(), sel.end(), 0);
     }
     for (int c = 0; c < static_cast<int>(fixed.sol->row_names.size()); ++c) {
-        sel(c) = static_cast<int>(BASELIB::indexOf(info.ch_names, fixed.sol->row_names[c]));
+        sel(c) = static_cast<int>(FIFFLIB::channel_index(info.ch_names, fixed.sol->row_names[c]));
         if (sel(c) < 0) {
             BASELIB::Log::warning("[applyForward] Channel {} of the forward is not in the info.", fixed.sol->row_names[c]);
             return FiffEvoked();

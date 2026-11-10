@@ -169,7 +169,7 @@ void TestMneCovPython::readsHeader()
     QCOMPARE(cov->ncov, 366);
     QCOMPARE(cov->nfree, 15972);
     // Name lists are read without spaces (see test_fiff_cov_python).
-    QCOMPARE(cov->bads, StringList({"MEG2443", "EEG053"}));
+    QCOMPARE(cov->bads, StringList({"MEG 2443", "EEG 053"}));
     QVERIFY(!cov->is_diag());
     QVERIFY(cov->proj);
     QCOMPARE(cov->proj->nitems, 4);

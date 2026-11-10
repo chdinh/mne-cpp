@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
     FiffRawData raw(sRaw.toStdString());
 
     // Select bad channels
-    //raw.info.bads << "MEG2412" << "MEG2413";
+    //raw.info.bads << "MEG 2412" << "MEG 2413";
 
     // Setup compensators and projectors so they get applied while reading
     raw.activate_projections();

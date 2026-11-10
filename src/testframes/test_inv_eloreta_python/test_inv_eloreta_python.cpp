@@ -50,6 +50,7 @@
 #include <mne/mne_inverse_operator.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_evoked.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_raw_data.h>
 #include <fs/fs_label.h>
 
@@ -302,7 +303,7 @@ void TestInvEloretaPython::estimateSnr_matchesPython()
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(BASELIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
     } else {
         QTest::ignoreMessage(QtWarningMsg, "[estimateSnr] SNR estimation did not converge.");
     }
@@ -362,7 +363,7 @@ void TestInvEloretaPython::mneData_matchesPython()
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(BASELIB::indexOf(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
     }
 
     InvMinimumNorm mn(m_loose, 1.0f / 9.0f, "MNE");
@@ -395,8 +396,8 @@ void TestInvEloretaPython::mneData_predictedMatchesPython()
     QCOMPARE(mne.lambda2.size(), mne.lambda2_est.size());
     QCOMPARE(static_cast<int>(mne.predicted.rows()), 364);
     const StringList& names = mn.getPreparedInverseOperator().noise_cov->names;
-    QCOMPARE(names[5], std::string("MEG0121"));
-    QCOMPARE(names[300], std::string("MEG2632"));
+    QCOMPARE(names[5], std::string("MEG 0121"));
+    QCOMPARE(names[300], std::string("MEG 2632"));
     const double absSum = mne.predicted.cwiseAbs().sum();
     QVERIFY2(std::fabs(absSum - 0.047335931752795365) <= 1e-6 * 0.047335931752795365, qPrintable(QString("predicted sum %1").arg(absSum, 0, 'g', 17)));
     QVERIFY(std::fabs(mne.predicted(5, 100) - 1.2397408293656668e-13) <= 1e-6 * 1.2397408293656668e-13);

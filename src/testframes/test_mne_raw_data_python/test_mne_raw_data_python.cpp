@@ -144,10 +144,9 @@ MNEChSelection TestMneRawDataPython::makeSelection() const
     sel.ndef = sel.nchan;
     sel.pick = VectorXi::Constant(sel.nchan, -1);
     sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
-    // Channel names are stored without spaces ("MEG0113").
     for (int c = 0; c < sel.nchan; ++c) {
         std::erase(sel.chspick_nospace[c], ' ');
-        sel.pick[c] = static_cast<int>(BASELIB::indexOf(m_raw->ch_names, sel.chspick_nospace[c]));
+        sel.pick[c] = static_cast<int>(BASELIB::indexOf(m_raw->ch_names, sel.chspick[c]));
     }
     return sel;
 }
@@ -344,14 +343,14 @@ void TestMneRawDataPython::projectsSegment()
         const Eigen::MatrixXd u = op->proj_data.cast<double>();
         return Eigen::MatrixXd(Eigen::MatrixXd::Identity(u.cols(), u.cols()) - u.transpose() * u);
     };
-    const int eeg1 = BASELIB::indexOf(m_raw->ch_names, "EEG001");
-    const int meg2443 = BASELIB::indexOf(m_raw->ch_names, "MEG2443");
+    const int eeg1 = BASELIB::indexOf(m_raw->ch_names, "EEG 001");
+    const int meg2443 = BASELIB::indexOf(m_raw->ch_names, "MEG 2443");
     QVERIFY(eeg1 >= 0 && meg2443 >= 0);
     int nvec = 0;
     Eigen::MatrixXd p = projector({}, nvec);
     QCOMPARE(nvec, 4);
     QVERIFY(std::fabs(p(eeg1, eeg1) - 0.9833333333333333) < 1e-6);
-    p = projector({"MEG2443", "EEG053"}, nvec);
+    p = projector({"MEG 2443", "EEG 053"}, nvec);
     QCOMPARE(nvec, 4);
     QVERIFY(std::fabs(p.trace() - 372.0) < 1e-4);
     QVERIFY2(std::fabs(p(eeg1, eeg1) - 0.9830508474576272) < 1e-6, qPrintable(QString::number(p(eeg1, eeg1), 'g', 10)));
@@ -484,10 +483,10 @@ void TestMneRawDataPython::picksDerivedChannel()
     filter.lowpass_width = filter.eog_lowpass_width = 5.0f;
     std::unique_ptr<MNERawData> raw(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     QVERIFY(raw);
-    const int a = static_cast<int>(BASELIB::indexOf(raw->ch_names, "MEG0111"));
-    const int b = static_cast<int>(BASELIB::indexOf(raw->ch_names, "MEG0121"));
+    const int a = static_cast<int>(BASELIB::indexOf(raw->ch_names, "MEG 0111"));
+    const int b = static_cast<int>(BASELIB::indexOf(raw->ch_names, "MEG 0121"));
     // A derivation set with one usable row and one whose input is not recorded.
-    const MNEDerivSet set = MNEDerivSet::fromDefinitions({{"BIP", {{"MEG0111", 1.0}, {"MEG0121", -1.0}}}, {"MISSING", {{"MEG0111", 1.0}, {"EEG999", -1.0}}}});
+    const MNEDerivSet set = MNEDerivSet::fromDefinitions({{"BIP", {{"MEG 0111", 1.0}, {"MEG 0121", -1.0}}}, {"MISSING", {{"MEG 0111", 1.0}, {"EEG 999", -1.0}}}});
     std::unique_ptr<MNEDeriv> deriv = set.match(raw->ch_names);
     QVERIFY(deriv);
     // Matching keeps the usable row, takes the data's channel order and counts per channel how many rows use it.
@@ -496,11 +495,11 @@ void TestMneRawDataPython::picksDerivedChannel()
     VectorXi inUse = VectorXi::Zero(raw->info->nchan);
     inUse(a) = inUse(b) = 1;
     QCOMPARE(deriv->in_use, inUse);
-    QVERIFY(!MNEDerivSet::fromDefinitions({{"MISSING", {{"EEG999", 1.0}}}}).match(raw->ch_names));
+    QVERIFY(!MNEDerivSet::fromDefinitions({{"MISSING", {{"EEG 999", 1.0}}}}).match(raw->ch_names));
     // Attaching matches and validates in one step; both inputs are magnetometers, which the projectors act on, so BIP is valid.
     QCOMPARE(raw->attachDerivations(set), 1);
     QCOMPARE(raw->deriv_matched->in_use, inUse);
-    QCOMPARE(raw->deriv_matched->chs[0].ch_name, QString("MEG0111"));
+    QCOMPARE(raw->deriv_matched->chs[0].ch_name, QString("MEG 0111"));
 
     // Channel 0 is derived, 1 and 2 are its inputs.
     MNEChSelection sel;
@@ -510,7 +509,7 @@ void TestMneRawDataPython::picksDerivedChannel()
     sel.pick_deriv = VectorXi(3);
     sel.pick_deriv << 0, -1, -1;
     sel.nderiv = 1;
-    sel.chspick = sel.chspick_nospace = {"BIP", "MEG0111", "MEG0121"};
+    sel.chspick = sel.chspick_nospace = {"BIP", "MEG 0111", "MEG 0121"};
 
     // The projected path derives from projected inputs; the read starts before the data to cover the zero padding
     std::unique_ptr<MNEProjOp> proj;

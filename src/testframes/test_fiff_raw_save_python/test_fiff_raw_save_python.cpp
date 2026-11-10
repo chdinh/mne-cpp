@@ -90,7 +90,7 @@ void TestFiffRawSavePython::initTestCase()
 RowVectorXi TestFiffRawSavePython::picks() const
 {
     // FIFF readers store channel names without spaces.
-    const QStringList names{"MEG0113", "MEG0112", "MEG0111", "EEG001", "STI014", "EOG061"};
+    const QStringList names{"MEG 0113", "MEG 0112", "MEG 0111", "EEG 001", "STI 014", "EOG 061"};
     RowVectorXi sel(names.size());
     for (int k = 0; k < names.size(); ++k)
         sel[k] = static_cast<int>(BASELIB::indexOf(m_raw.info.ch_names, names[k].toStdString()));
@@ -126,7 +126,7 @@ void TestFiffRawSavePython::savesSubRange()
 
     FiffRawData back(path.toStdString());
     QCOMPARE(back.info.nchan, 6);
-    QCOMPARE(back.info.ch_names[4], QString("STI014"));
+    QCOMPARE(back.info.ch_names[4], QString("STI 014"));
     QCOMPARE(back.first_samp, decim == 1 ? 13900 : 13900 / decim);
     QCOMPARE(back.last_samp - back.first_samp + 1, nsamp);
     QVERIFY(std::abs(back.info.sfreq - 300.3074951171875 / decim) < 1e-3);

@@ -98,7 +98,7 @@ void TestAnalyzeChannelSelection::publishesTheSelectedChannels()
     QVERIFY(selection);
 
     // Selecting two sensors, twice: each time the same names and the indices of those channels in the recording
-    const QStringList wanted{QStringLiteral("MEG0113"), QStringLiteral("MEG0112")};
+    const QStringList wanted{QStringLiteral("MEG 0113"), QStringLiteral("MEG 0112")};
     for (int pass = 0; pass < 2; ++pass) {
         selection->selectChannels(wanted);
         QTRY_VERIFY_WITH_TIMEOUT(names.size() > pass, 5000);
@@ -109,8 +109,8 @@ void TestAnalyzeChannelSelection::publishesTheSelectedChannels()
         QCOMPARE(got, expected);
         QList<int> idx = indices.last();
         std::sort(idx.begin(), idx.end());
-        QList<int> expectedIdx{static_cast<int>(BASELIB::indexOf(raw->getFiffInfo()->ch_names, "MEG0112")),
-                               static_cast<int>(BASELIB::indexOf(raw->getFiffInfo()->ch_names, "MEG0113"))};
+        QList<int> expectedIdx{static_cast<int>(BASELIB::indexOf(raw->getFiffInfo()->ch_names, "MEG 0112")),
+                               static_cast<int>(BASELIB::indexOf(raw->getFiffInfo()->ch_names, "MEG 0113"))};
         std::sort(expectedIdx.begin(), expectedIdx.end());
         QCOMPARE(idx, expectedIdx);
     }

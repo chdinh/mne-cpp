@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "fiff_events.h"
+#include "fiff_ch_name.h"
 #include <memory>
 
 #include "fiff_evoked_set.h"
@@ -213,18 +214,10 @@ Expected<void> FiffEvents::write_ascii(const std::filesystem::path& path, float 
 
 Expected<FiffEvents> FiffEvents::find_events(const FiffRawData& raw, std::string_view stim_channel, unsigned int mask, bool leading_edge)
 {
-    // Channel names are read without spaces ("STI014"), so compare without them.
-    const auto withoutSpaces = [](std::string_view name) {
-        std::string out;
-        std::ranges::copy_if(name, std::back_inserter(out), [](char c) { return c != ' '; });
-        return out;
-    };
-    const std::string wanted = withoutSpaces(stim_channel);
-    const auto channel = std::ranges::find_if(raw.info.ch_names, [&](const std::string& name) { return withoutSpaces(name) == wanted; });
-    if (channel == raw.info.ch_names.end()) {
+    const int index = channel_index(raw.info.ch_names, stim_channel);
+    if (index < 0) {
         return fail(ErrorCode::NotFound, "no stimulus channel {}", stim_channel);
     }
-    const int index = static_cast<int>(channel - raw.info.ch_names.begin());
 
     MatrixXd data;
     MatrixXd times;

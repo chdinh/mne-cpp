@@ -20,6 +20,7 @@
 #include "mainwindow.h"
 #include <memory>
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_stream.h>
 
 #include <QBuffer>
@@ -296,13 +297,6 @@ QMap<int, int> countEventsByType(const MatrixXi& events)
     return counts;
 }
 
-QString normalizeStimChannelName(const QString& channelName)
-{
-    QString normalizedName = channelName.trimmed().toUpper();
-    normalizedName.remove(QLatin1Char(' '));
-    return normalizedName;
-}
-
 bool detectFallbackStimEvents(const FIFFLIB::FiffRawData& raw,
                               MatrixXi& events,
                               QString& sourceDescription)
@@ -315,11 +309,10 @@ bool detectFallbackStimEvents(const FIFFLIB::FiffRawData& raw,
             continue;
         }
 
-        const QString stimChannel = QString::fromStdString(raw.info.ch_names[channelIndex]);
-        const QString normalizedName = normalizeStimChannelName(stimChannel);
+        const std::string& name = raw.info.ch_names[channelIndex];
+        const QString stimChannel = QString::fromStdString(name);
 
-        if (normalizedName == QLatin1String("STI014") ||
-            normalizedName == QLatin1String("STI101")) {
+        if (FIFFLIB::same_channel(name, "STI 014") || FIFFLIB::same_channel(name, "STI 101")) {
             preferredStimChannels.append(stimChannel);
         } else {
             fallbackStimChannels.append(stimChannel);

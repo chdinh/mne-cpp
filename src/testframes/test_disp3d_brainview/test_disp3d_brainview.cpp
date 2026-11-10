@@ -820,7 +820,7 @@ void TestDisp3dBrainView::rtSensorInterpolationMatWorker_basics()
     // Safe setters
     worker.setMegFieldMapOnHead(true);
     worker.setMegFieldMapOnHead(false);
-    worker.setBadChannels(QStringList() << "MEG0111" << "MEG0112");
+    worker.setBadChannels(QStringList() << "MEG 0111" << "MEG 0112");
     worker.setBadChannels(QStringList());
 
     int eegCount = 0;
@@ -2102,7 +2102,7 @@ void TestDisp3dBrainView::rtWorkers_extended()
         RtSensorInterpolationMatWorker worker;
         worker.setMegFieldMapOnHead(true);
         worker.setMegFieldMapOnHead(false);
-        worker.setBadChannels(QStringList() << "MEG0111");
+        worker.setBadChannels(QStringList() << "MEG 0111");
         worker.setBadChannels(QStringList());
 
         FIFFLIB::FiffCoordTrans emptyTrans;

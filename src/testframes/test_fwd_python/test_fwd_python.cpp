@@ -34,6 +34,7 @@
 #include <fwd/fwd_eeg_sphere_model_set.h>
 #include <fwd/compute_fwd/compute_fwd.h>
 #include <fwd/compute_fwd/compute_fwd_settings.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_raw_data.h>
 #include <fiff/fiff_coord_trans.h>
 #include <base/string_utils.h>
@@ -151,6 +152,12 @@ void TestFwdPython::initTestCase()
 
     m_ref = MNEForwardSolution(refPath.toStdU16String());
     QVERIFY(!m_ref.empty());
+    // The reference stores "MEG0113", the measurement "MEG 0113": compare against the measurement's spelling.
+    for (std::string& name : m_ref.sol->row_names) {
+        const int k = FIFFLIB::channel_index(m_raw.info.ch_names, name);
+        QVERIFY(k >= 0);
+        name = m_raw.info.ch_names[static_cast<std::size_t>(k)];
+    }
 
     // MNE-C assigns labels to a hemisphere by the "-lh.label" suffix.
     m_labelPath = m_dir.filePath("V1-lh.label");

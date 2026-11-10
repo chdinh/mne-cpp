@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "inv_lcmv.h"
+#include <fiff/fiff_ch_name.h>
 #include <base/log.h>
 #include <base/string_utils.h>
 #include "inv_beamformer_compute.h"
@@ -230,7 +231,7 @@ InvSourceEstimate InvLCMV::applyLCMV(const FiffEvoked& evoked, const InvBeamform
         const int nTimes = static_cast<int>(evoked.data.cols());
         data.resize(nFilterCh, nTimes);
         for (int i = 0; i < nFilterCh; ++i) {
-            int idx = BASELIB::indexOf(evoked.info.ch_names, filters.chNames[i]);
+            int idx = FIFFLIB::channel_index(evoked.info.ch_names, filters.chNames[i]);
             if (idx < 0) {
                 Log::warning("InvLCMV::applyLCMV - Channel {} not found in evoked!", filters.chNames[i]);
                 return InvSourceEstimate();

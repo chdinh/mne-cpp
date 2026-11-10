@@ -38,13 +38,13 @@ private slots:
 
     void testCreateRequest()
     {
-        QJsonObject params{{"channel", "MEG0111"}};
+        QJsonObject params{{"channel", "MEG 0111"}};
         QJsonObject msg = JsonRpcMessage::createRequest("req-1", "getChannelData", params);
 
         QCOMPARE(msg.value("jsonrpc").toString(), QString("2.0"));
         QCOMPARE(msg.value("id").toString(), QString("req-1"));
         QCOMPARE(msg.value("method").toString(), QString("getChannelData"));
-        QCOMPARE(msg.value("params").toObject().value("channel").toString(), QString("MEG0111"));
+        QCOMPARE(msg.value("params").toObject().value("channel").toString(), QString("MEG 0111"));
     }
 
     void testCreateRequestNoParams()

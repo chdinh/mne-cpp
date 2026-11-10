@@ -95,7 +95,7 @@ static int mne_ch_selection_assign_chs(MNEChSelection* sel,
     sel->chspick = sel->chdef;
     sel->chspick_nospace = sel->chdef;
     for (auto& name : sel->chspick_nospace)
-        name = std::string(BASELIB::trimmed(name));
+        std::erase(name, ' ');
     sel->nchan = sel->ndef;
 
     sel->pick.setConstant(sel->nchan, -1);

@@ -288,7 +288,7 @@ std::shared_ptr<FiffInfo> makeInfo(double sfreq)
 {
     std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>();
     info->sfreq = sfreq;
-    for (const QString& name : {QStringLiteral("MEG0111"), QStringLiteral("MEG0121"), QStringLiteral("STI014")}) {
+    for (const QString& name : {QStringLiteral("MEG 0111"), QStringLiteral("MEG 0121"), QStringLiteral("STI 014")}) {
         FiffChInfo ch;
         ch.ch_name = name.toStdString();
         ch.kind = name.startsWith("STI") ? FIFFV_STIM_CH : FIFFV_MEG_CH;
@@ -330,10 +330,10 @@ const FiffInfo& info = raw.info;                                       // channe
 const FiffChInfo& first = info.chs[0];
 const RowVectorXi megPicks = info.pick_types(true, false, false, {}, info.bads); // good MEG channels
 // mne.io.read_raw_fif: 376 channels at 300.307 Hz, bads MEG 2443 + EEG 053, 4 projectors
-ok &= expect(info.nchan == 376 && near(info.sfreq, 300.3074951171875) && info.bads == StringList{"MEG2443", "EEG053"} && info.projs.size() == 4 && megPicks.size() == 305 && raw.first_samp == 12900 && raw.last_samp == 18906,
+ok &= expect(info.nchan == 376 && near(info.sfreq, 300.3074951171875) && info.bads == StringList{"MEG 2443", "EEG 053"} && info.projs.size() == 4 && megPicks.size() == 305 && raw.first_samp == 12900 && raw.last_samp == 18906,
              "FiffInfo: 376 channels at 300.307 Hz, 2 bads, 4 projectors, 305 good MEG channels");
 // ch 0: MEG 0113, planar gradiometer 3012 at (-0.1066, 0.0464, -0.0604) m, cal 3.16e-9
-ok &= expect(first.ch_name == "MEG0113" && first.kind == FIFFV_MEG_CH && first.chpos.coil_type == FIFFV_COIL_VV_PLANAR_T1 && (first.chpos.r0 - Vector3f(-0.1066f, 0.0464f, -0.0604f)).norm() < 1e-6f && near(first.cal, 3.1600000394149674e-09),
+ok &= expect(first.ch_name == "MEG 0113" && first.kind == FIFFV_MEG_CH && first.chpos.coil_type == FIFFV_COIL_VV_PLANAR_T1 && (first.chpos.r0 - Vector3f(-0.1066f, 0.0464f, -0.0604f)).norm() < 1e-6f && near(first.cal, 3.1600000394149674e-09),
              "FiffChInfo/FiffChPos: MEG0113 is a 3012 planar gradiometer at (-0.1066, 0.0464, -0.0604) m");
 ````
 

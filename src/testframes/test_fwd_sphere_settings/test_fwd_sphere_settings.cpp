@@ -250,7 +250,7 @@ private slots:
     void fwdCoil_createEegEl()
     {
         FiffChInfo ch;
-        ch.ch_name = "EEG001";
+        ch.ch_name = "EEG 001";
         ch.kind = FIFFV_EEG_CH;
         ch.chpos.r0[0] = 0.05f;
         ch.chpos.r0[1] = 0.05f;
@@ -259,7 +259,7 @@ private slots:
 
         std::unique_ptr<FwdCoil> el = FwdCoil::create_eeg_el(ch);
         QVERIFY(el != nullptr);
-        QCOMPARE(el->chname, QString("EEG001"));
+        QCOMPARE(el->chname, QString("EEG 001"));
         QCOMPARE(el->coil_class, FWD_COILC_EEG);
     }
 

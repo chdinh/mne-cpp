@@ -54,6 +54,14 @@ aliases; replace the old spelling as below.
 | `com/rt_client/`: `COMLIB::RtClient`, `RtCmdClient`, `RtDataClient`, `MetaData` (Qt Network) | `AcqDevice::open("rtserver://host:4217?simfile=...&buffer=...")`: the measurement info as `fiff.MeasInfo/1` extension (`toFiffInfo()`), calibrated samples, `STI 014` changes as events |
 | `com/rt_command/`: `COMLIB::Command`, `CommandManager`, `CommandParser`, `RawCommand`, `Subject`, `IObserver`, `ICommand` | removed from the libraries: the command vocabulary of `mne_rt_server` lives in its `rtserver_connector` (`RTSERVER::...`); clients send commands through `rtserver://` |
 
+- FIFF channel names are read as stored: `"MEG 0113"`, `"STI 014"`, as in
+  MNE-Python and MNE-C. They used to lose their spaces (`"MEG0113"`). Look-ups
+  match the way MNE-C does, ignoring spaces and case, so files that spell a
+  channel differently still combine (for example a forward solution written
+  with `"MEG0113"` and a raw file with `"MEG 0113"`). Compare names with
+  `FIFFLIB::same_channel(a, b)` and find them with
+  `FIFFLIB::channel_index(names, name)` or `has_channel` (`fiff_ch_name.h`)
+  instead of `==`, `BASELIB::indexOf` or stripping spaces.
 - `mne_utils` is gone. Its contents moved to `mne_base`, `mne_math`,
   `mne_channels`, `mne_pybridge`, `mne_report` and `mne_com`, so each library
   has one purpose and one namespace.

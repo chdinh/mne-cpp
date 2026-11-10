@@ -75,7 +75,7 @@ int main()
 
     //! [selection_io_usage]
     // MNE .sel: one "name:ch1|ch2|..." group per line, read back in file order
-    const std::vector<ChannelSelection> selections{{"Left-temporal", {"MEG0111", "MEG0112", "MEG0113"}}, {"Vertex", {"MEG0711"}}};
+    const std::vector<ChannelSelection> selections{{"Left-temporal", {"MEG 0111", "MEG 0112", "MEG 0113"}}, {"Vertex", {"MEG 0711"}}};
     SelectionIO::write_sel(dir / "groups.sel", selections);
     const auto reread = SelectionIO::read_sel(dir / "groups.sel");
     //! [selection_io_usage]

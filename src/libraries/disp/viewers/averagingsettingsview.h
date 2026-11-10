@@ -175,7 +175,7 @@ protected:
 
     std::unique_ptr<Ui::AverageSettingsViewWidget> m_pUi; /**< Holds the user interface for the AverageSettingsViewWidget.*/
 
-    QString m_sCurrentStimChan = QStringLiteral("STI014");
+    QString m_sCurrentStimChan = QStringLiteral("STI 014");
 
     QMap<QString, int> m_mapStimChsIndexNames;
 

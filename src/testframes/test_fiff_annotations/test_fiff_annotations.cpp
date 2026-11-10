@@ -132,14 +132,14 @@ void TestFiffAnnotations::testAppendAndSize()
 void TestFiffAnnotations::testAppendConvenience()
 {
     FiffAnnotations annot;
-    annot.append(2.5, 1.0, "response/1", {"MEG0111"});
+    annot.append(2.5, 1.0, "response/1", {"MEG 0111"});
     annot[0].comment = "good response";
 
     QCOMPARE(annot.size(), std::size_t{1});
     QCOMPARE(annot[0].onset, 2.5);
     QCOMPARE(annot[0].duration, 1.0);
     QCOMPARE(annot[0].description, std::string("response/1"));
-    QCOMPARE(annot[0].ch_names, std::vector<std::string>{"MEG0111"});
+    QCOMPARE(annot[0].ch_names, std::vector<std::string>{"MEG 0111"});
     QCOMPARE(annot[0].comment, std::string("good response"));
 }
 
@@ -244,11 +244,11 @@ void TestFiffAnnotations::testSelectByDescription()
 void TestFiffAnnotations::testSelectByChannel()
 {
     FiffAnnotations annot;
-    annot.append(0.0, 0.1, "bad", {"MEG0111", "MEG0112"});
-    annot.append(1.0, 0.1, "bad", {"MEG0211"});
-    annot.append(2.0, 0.1, "bad", {"MEG0111"});
+    annot.append(0.0, 0.1, "bad", {"MEG 0111", "MEG 0112"});
+    annot.append(1.0, 0.1, "bad", {"MEG 0211"});
+    annot.append(2.0, 0.1, "bad", {"MEG 0111"});
 
-    FiffAnnotations ch0111 = annot.select_by_channel("MEG0111");
+    FiffAnnotations ch0111 = annot.select_by_channel("MEG 0111");
     QCOMPARE(ch0111.size(), std::size_t{2});
 }
 
@@ -273,7 +273,7 @@ void TestFiffAnnotations::testCrop()
 void TestFiffAnnotations::testWriteReadJson()
 {
     FiffAnnotations original;
-    original.append(0.0, 0.5, "event/1", {"MEG0111"});
+    original.append(0.0, 0.5, "event/1", {"MEG 0111"});
     original[0].comment = "comment1";
     original[0].extras = {{"hed", std::string("Sensory-event")}, {"trial", std::int64_t{3}}, {"score", 0.25}, {"valid", true}, {"note", std::monostate{}}};
     original.append(1.0, 0.3, "event/2");

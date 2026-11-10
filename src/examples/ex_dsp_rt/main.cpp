@@ -109,7 +109,7 @@ std::shared_ptr<FiffInfo> makeInfo(double sfreq)
 {
     std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>();
     info->sfreq = sfreq;
-    for (const QString& name : {QStringLiteral("MEG0111"), QStringLiteral("MEG0121"), QStringLiteral("STI014")}) {
+    for (const QString& name : {QStringLiteral("MEG 0111"), QStringLiteral("MEG 0121"), QStringLiteral("STI 014")}) {
         FiffChInfo ch;
         ch.ch_name = name.toStdString();
         ch.kind = name.startsWith("STI") ? FIFFV_STIM_CH : FIFFV_MEG_CH;
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
     }
     //! [rt_cov_usage]
     // regularize() adds 0.1 x mean MEG variance to the diagonal; the off-diagonal term is untouched
-    ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG0111", "MEG0121"} && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
+    ok &= expect(cov.dim == 2 && cov.names == StringList{"MEG 0111", "MEG 0121"} && cov.nfree == 4000 && std::fabs(cov.data(0, 1) - numpyCov(0, 1)) < 1e-6 * std::fabs(numpyCov(0, 1)),
                  std::format("RtCov: covariance of 4000 samples matches numpy.cov off the diagonal ({:.6g})", cov.data(0, 1)));
 
     // ---------------------------------------------------------------------------------------------------------
@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
     //! [rt_inv_op_usage]
     const bool inverseArrived = waitFor(inverseDone, 60000);
     // 306 MEG channels in the forward solution, minus the bad MEG2443
-    ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && BASELIB::contains(rawInfo->bads, "MEG2443"),
+    ok &= expect(inverseArrived && inverse.nsource == fwd->nsource && inverse.nchan == 305 && BASELIB::contains(rawInfo->bads, "MEG 2443"),
                  std::format("RtInvOp builds a {}-channel operator for {} sources", inverse.nchan, inverse.nsource));
     rtInvOp.stop();
 

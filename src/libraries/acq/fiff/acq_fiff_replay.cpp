@@ -160,7 +160,7 @@ void toHostOrder(std::byte* data, std::size_t elements, std::size_t size) noexce
     }
 }
 
-/** @return The channel called @p name, ignoring spaces as FIFFLIB drops them when reading names; -1 if none. */
+/** @return The channel called @p name, ignoring spaces ("STI014" finds "STI 014"); -1 if none. */
 int channelIndex(const FiffInfo& info, std::string name)
 {
     std::erase(name, ' ');

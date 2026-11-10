@@ -37,6 +37,7 @@
 #include "fiff_tag.h"
 #include "fiff_coord_trans.h"
 #include "fiff_ch_info.h"
+#include "fiff_ch_name.h"
 #include "fiff_proj.h"
 #include "fiff_named_matrix.h"
 #include "fiff_ctf_comp.h"

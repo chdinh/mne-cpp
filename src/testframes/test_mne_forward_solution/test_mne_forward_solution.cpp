@@ -23,10 +23,12 @@
 #include <fwd/compute_fwd/compute_fwd.h>
 #include <mne/mne_forward_solution.h>
 
+#include <algorithm>
 #include <memory>
 #include <mne/mne.h>
 
 #include <fiff/fiff.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_named_matrix.h>
 
@@ -136,7 +138,19 @@ void TestMneForwardSolution::computeForward()
 
     printf("<<<<<<<<<<<<<<<<<<<<<<<<< Compute/Write/Read MEG/EEG Forward Solution Finished <<<<<<<<<<<<<<<<<<<<<<<<<\n");
 
-    QVERIFY(m_pFwdMEGEEGRead->info == m_pFwdMEGEEGRef->info);
+    // The reference was written while MNE-CPP dropped the spaces of channel names ("MEG0113"); the new
+    // forward keeps the measurement's names ("MEG 0113"). Compare them as the same channels.
+    const auto sameChannels = [](const BASELIB::StringList& a, const BASELIB::StringList& b) {
+        return std::ranges::equal(a, b, [](const std::string& x, const std::string& y) { return FIFFLIB::same_channel(x, y); });
+    };
+    QVERIFY(sameChannels(m_pFwdMEGEEGRead->info.ch_names, m_pFwdMEGEEGRef->info.ch_names));
+    QVERIFY(sameChannels(m_pFwdMEGEEGRead->info.bads, m_pFwdMEGEEGRef->info.bads));
+    FIFFLIB::FiffInfoBase refInfo = m_pFwdMEGEEGRef->info;
+    refInfo.ch_names = m_pFwdMEGEEGRead->info.ch_names;
+    refInfo.bads = m_pFwdMEGEEGRead->info.bads;
+    for (std::size_t k = 0; k < refInfo.chs.size(); ++k)
+        refInfo.chs[k].ch_name = m_pFwdMEGEEGRead->info.chs[k].ch_name;
+    QVERIFY(m_pFwdMEGEEGRead->info == refInfo);
     QVERIFY(m_pFwdMEGEEGRead->source_ori == m_pFwdMEGEEGRef->source_ori);
     QVERIFY(m_pFwdMEGEEGRead->surf_ori == m_pFwdMEGEEGRef->surf_ori);
     QVERIFY(m_pFwdMEGEEGRead->coord_frame == m_pFwdMEGEEGRef->coord_frame);
@@ -146,7 +160,7 @@ void TestMneForwardSolution::computeForward()
     // Compare sol data row-by-row (Eigen 5 isApprox on full large matrices can crash)
     QVERIFY(m_pFwdMEGEEGRead->sol->nrow == m_pFwdMEGEEGRef->sol->nrow);
     QVERIFY(m_pFwdMEGEEGRead->sol->ncol == m_pFwdMEGEEGRef->sol->ncol);
-    QVERIFY(m_pFwdMEGEEGRead->sol->row_names == m_pFwdMEGEEGRef->sol->row_names);
+    QVERIFY(sameChannels(m_pFwdMEGEEGRead->sol->row_names, m_pFwdMEGEEGRef->sol->row_names));
     QVERIFY(m_pFwdMEGEEGRead->sol->col_names == m_pFwdMEGEEGRef->sol->col_names);
     for (Eigen::Index r = 0; r < m_pFwdMEGEEGRead->sol->data.rows(); ++r) {
         QVERIFY(m_pFwdMEGEEGRead->sol->data.row(r).isApprox(m_pFwdMEGEEGRef->sol->data.row(r), 0.0001));

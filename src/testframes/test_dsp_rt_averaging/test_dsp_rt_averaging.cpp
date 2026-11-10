@@ -57,7 +57,7 @@ static std::shared_ptr<FiffInfo> createSyntheticFiffInfo(int nChannels, float sf
     }
     // Add one STI channel as trigger
     FiffChInfo sti;
-    sti.ch_name = "STI014";
+    sti.ch_name = "STI 014";
     sti.kind = FIFFV_STIM_CH;
     sti.unit = FIFF_UNIT_NONE;
     sti.cal = 1.0;
@@ -75,7 +75,7 @@ static MatrixXi deriveStimEvents(const FiffRawData& raw)
     for (int channelIndex = 0; channelIndex < raw.info.nchan; ++channelIndex) {
         if (raw.info.chs[channelIndex].kind == FIFFV_STIM_CH) {
             stimIdx = channelIndex;
-            if (QString::fromStdString(raw.info.ch_names[channelIndex]).remove(QLatin1Char(' ')) == QLatin1String("STI014")) {
+            if (raw.info.ch_names[channelIndex] == "STI 014") {
                 break;
             }
         }
@@ -260,7 +260,7 @@ private slots:
             QSKIP("No test data");
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         std::shared_ptr<FiffInfo> info = std::make_shared<FiffInfo>(raw.info);
-        const int stiIdx = BASELIB::indexOf(info->ch_names, "STI014");
+        const int stiIdx = BASELIB::indexOf(info->ch_names, "STI 014");
         QVERIFY(stiIdx >= 0);
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
@@ -790,7 +790,7 @@ private slots:
         FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         MatrixXd data, times;
         QVERIFY(raw.read_raw_segment(data, times));
-        const int stiIdx = BASELIB::indexOf(raw.info.ch_names, "STI014");
+        const int stiIdx = BASELIB::indexOf(raw.info.ch_names, "STI 014");
         QVERIFY(stiIdx >= 0);
 
         // Rising stim onsets with their codes, as read from the stim channel directly

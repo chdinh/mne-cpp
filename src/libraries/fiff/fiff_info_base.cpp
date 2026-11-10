@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "fiff_info_base.h"
+#include "fiff_ch_name.h"
 
 #include <vector>
 
@@ -125,15 +126,14 @@ std::string FiffInfoBase::channel_type(qint32 idx) const
 
 int FiffInfoBase::channelIndex(std::string_view name) const
 {
-    const auto it = std::find(ch_names.begin(), ch_names.end(), name);
-    return it == ch_names.end() ? -1 : static_cast<int>(it - ch_names.begin());
+    return channel_index(ch_names, name);
 }
 
 //=============================================================================================================
 
 bool FiffInfoBase::isBad(std::string_view name) const
 {
-    return std::find(bads.begin(), bads.end(), name) != bads.end();
+    return has_channel(bads, name);
 }
 
 //=============================================================================================================
@@ -257,15 +257,12 @@ RowVectorXi FiffInfoBase::pick_types(bool meg, bool eeg, bool stim, const String
 
 RowVectorXi FiffInfoBase::pick_channels(const StringList& ch_names, const StringList& include, const StringList& exclude)
 {
-    const auto contains = [](const StringList& list, const std::string& name) {
-        return std::find(list.begin(), list.end(), name) != list.end();
-    };
     RowVectorXi sel = RowVectorXi::Zero(static_cast<Index>(ch_names.size()));
     std::unordered_set<std::string> selected;
     qint32 count = 0;
     for (std::size_t k = 0; k < ch_names.size(); ++k) {
         const std::string& name = ch_names[k];
-        if ((include.empty() || contains(include, name)) && !contains(exclude, name) && selected.insert(name).second) {
+        if ((include.empty() || has_channel(include, name)) && !has_channel(exclude, name) && selected.insert(name).second) {
             sel[count] = static_cast<int>(k);
             ++count;
         }

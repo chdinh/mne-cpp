@@ -9,6 +9,8 @@
  */
 //=============================================================================================================
 
+#include <fiff/fiff_ch_name.h>
+
 #include <QtTest/QtTest>
 #include <base/string_utils.h>
 #include <QCoreApplication>
@@ -229,13 +231,13 @@ private slots:
 
         const FiffEvoked evoked = INVLIB::applyForward(m_fwd, stc, ave.info);
         QCOMPARE(evoked.info.ch_names.size(), 366);
-        QCOMPARE(evoked.info.ch_names.front(), QString("MEG0113"));
+        QCOMPARE(evoked.info.ch_names.front(), QString("MEG 0113"));
         QVERIFY(std::abs(evoked.times(0) - 0.1f) < 1e-7f);
         const QList<QPair<QString, QList<double>>> expected = {
-            {"MEG0113", {2.29908704899e-13, 5.78211973512e-14, -2.13557499523e-13}},
-            {"MEG2443", {-1.04706535856e-12, -1.61720466574e-13, 1.11124408652e-12}},
-            {"EEG001", {-3.50052778352e-07, 1.34513634827e-08, 4.92685045566e-07}},
-            {"EEG060", {5.92750625114e-09, -2.18851835027e-07, -4.00659174832e-07}}};
+            {"MEG 0113", {2.29908704899e-13, 5.78211973512e-14, -2.13557499523e-13}},
+            {"MEG 2443", {-1.04706535856e-12, -1.61720466574e-13, 1.11124408652e-12}},
+            {"EEG 001", {-3.50052778352e-07, 1.34513634827e-08, 4.92685045566e-07}},
+            {"EEG 060", {5.92750625114e-09, -2.18851835027e-07, -4.00659174832e-07}}};
         for (const auto& [name, values] : expected) {
             const int row = static_cast<int>(BASELIB::indexOf(evoked.info.ch_names, name.toStdString()));
             QVERIFY2(row >= 0, qPrintable(name));
@@ -340,7 +342,7 @@ private slots:
         const FiffRawData raw(m_sRawFile.toStdString());
         Eigen::RowVectorXi sel(fwd.info.ch_names.size());
         for (int i = 0; i < sel.size(); ++i) {
-            sel(i) = static_cast<int>(BASELIB::indexOf(raw.info.ch_names, fwd.info.ch_names[i]));
+            sel(i) = static_cast<int>(FIFFLIB::channel_index(raw.info.ch_names, fwd.info.ch_names[i]));
             QVERIFY(sel(i) >= 0);
         }
         const FiffInfo info = raw.info.pick_info(sel);

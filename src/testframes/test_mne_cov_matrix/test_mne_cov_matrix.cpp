@@ -85,7 +85,7 @@ private slots:
     void testCreateDense()
     {
         const int n = 3;
-        StringList names = {"MEG0111", "MEG0121", "MEG0131"};
+        StringList names = {"MEG 0111", "MEG 0121", "MEG 0131"};
         VectorXd cov(n * (n + 1) / 2); // 6 elements for 3x3
         cov << 1.0, 0.1, 0.2, 2.0, 0.3, 3.0;
 

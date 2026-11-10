@@ -49,6 +49,7 @@
 
 #include <fs/fs_label.h>
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_evoked.h>
 #include <fiff/fiff_info.h>
@@ -133,12 +134,11 @@ void TestInvLcmvPython::initTestCase()
     }
     QCOMPARE(good.size(), 305);
 
-    // The forward names channels without the space ("MEG0113"); the evoked and
-    // covariance files use "MEG 0113". Both list them in the same order.
+    // The forward stores "MEG0113", the evoked and covariance files "MEG 0113"; both list them in the same order.
     MNEForwardSolution fullFwd((base + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
     StringList fwdGood;
     for (const std::string& name : fullFwd.sol->row_names) {
-        if (name.starts_with("MEG") && name != "MEG2443")
+        if (name.starts_with("MEG") && !FIFFLIB::same_channel(name, "MEG 2443"))
             fwdGood.push_back(name);
     }
     m_fwd = fullFwd.pick_channels(fwdGood);

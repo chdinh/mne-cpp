@@ -105,7 +105,7 @@ void TestBrowseVirtualChannels::addChannel_returnsUsableRow()
     // The returned row is used by the caller to select the new entry, so it has
     // to be a real index into the model rather than a count or a status code.
     const int row = model.addVirtualChannel("derived-1", VirtualChannelKind::Bipolar,
-                                            "MEG0111", QStringList{"MEG0112"},
+                                            "MEG 0111", QStringList{"MEG 0112"},
                                             QVector<double>(), QString());
 
     QCOMPARE(row, 0);
@@ -113,7 +113,7 @@ void TestBrowseVirtualChannels::addChannel_returnsUsableRow()
     QVERIFY(model.index(row, 0).isValid());
 
     const int second = model.addVirtualChannel("derived-2", VirtualChannelKind::Bipolar,
-                                               "MEG0113", QStringList{"MEG0114"},
+                                               "MEG 0113", QStringList{"MEG 0114"},
                                                QVector<double>(), QString());
     QCOMPARE(second, 1);
     QCOMPARE(model.rowCount(), 2);
@@ -151,15 +151,15 @@ void TestBrowseVirtualChannels::references_cannotIncludeThePrimaryChannel()
     // trace. That looks like a dead sensor rather than like a bad montage, so
     // it has to be refused at definition time.
     model.addVirtualChannel("self", VirtualChannelKind::Bipolar,
-                            "MEG0111", QStringList{"MEG0111", "MEG0112"},
+                            "MEG 0111", QStringList{"MEG 0111", "MEG 0112"},
                             QVector<double>(), QString());
 
     const QVector<VirtualChannelDefinition> definitions = model.virtualChannels();
     QCOMPARE(definitions.size(), 1);
 
-    QVERIFY2(!definitions.at(0).referenceChannels.contains("MEG0111"),
+    QVERIFY2(!definitions.at(0).referenceChannels.contains("MEG 0111"),
              "a channel was allowed to reference itself, which flattens its own trace");
-    QCOMPARE(definitions.at(0).referenceChannels, QStringList{"MEG0112"});
+    QCOMPARE(definitions.at(0).referenceChannels, QStringList{"MEG 0112"});
 }
 
 //=============================================================================================================
@@ -171,13 +171,13 @@ void TestBrowseVirtualChannels::references_areDeduplicated()
     // A duplicated reference would be subtracted twice, scaling the result by
     // an amount nobody asked for.
     model.addVirtualChannel("dupes", VirtualChannelKind::Bipolar,
-                            "MEG0111", QStringList{"MEG0112", "MEG0112", "MEG0113", "MEG0112"},
+                            "MEG 0111", QStringList{"MEG 0112", "MEG 0112", "MEG 0113", "MEG 0112"},
                             QVector<double>(), QString());
 
     const QVector<VirtualChannelDefinition> definitions = model.virtualChannels();
     QCOMPARE(definitions.at(0).referenceChannels.size(), 2);
-    QCOMPARE(definitions.at(0).referenceChannels.at(0), QString("MEG0112"));
-    QCOMPARE(definitions.at(0).referenceChannels.at(1), QString("MEG0113"));
+    QCOMPARE(definitions.at(0).referenceChannels.at(0), QString("MEG 0112"));
+    QCOMPARE(definitions.at(0).referenceChannels.at(1), QString("MEG 0113"));
 }
 
 //=============================================================================================================
@@ -293,7 +293,7 @@ void TestBrowseVirtualChannels::referenceSet_roundTripsAndResolves()
     // set. If that resolution failed the derivation would have no reference at
     // all and would show the raw channel instead.
     model.addVirtualChannel("via-set", VirtualChannelKind::AverageReference,
-                            "MEG0111", QStringList(), QVector<double>(), "mastoids");
+                            "MEG 0111", QStringList(), QVector<double>(), "mastoids");
 
     const QVector<VirtualChannelDefinition> definitions = model.virtualChannels();
     QCOMPARE(definitions.size(), 1);
@@ -343,10 +343,10 @@ void TestBrowseVirtualChannels::saveAndLoad_roundTripsDefinitions()
         VirtualChannelModel model;
         model.addReferenceSet("mastoids", QStringList{"A1", "A2"});
         model.addVirtualChannel("bipolar", VirtualChannelKind::Bipolar,
-                                "MEG0111", QStringList{"MEG0112"},
+                                "MEG 0111", QStringList{"MEG 0112"},
                                 QVector<double>(), QString());
         model.addVirtualChannel("weighted", VirtualChannelKind::WeightedReference,
-                                "MEG0113", QStringList{"MEG0114", "MEG0115"},
+                                "MEG 0113", QStringList{"MEG 0114", "MEG 0115"},
                                 QVector<double>{0.25, 0.75}, QString());
 
         QFile file(path);
@@ -362,11 +362,11 @@ void TestBrowseVirtualChannels::saveAndLoad_roundTripsDefinitions()
     const QVector<VirtualChannelDefinition> definitions = reloaded.virtualChannels();
     QCOMPARE(definitions.size(), 2);
 
-    QCOMPARE(definitions.at(0).primaryChannel, QString("MEG0111"));
+    QCOMPARE(definitions.at(0).primaryChannel, QString("MEG 0111"));
     QCOMPARE(definitions.at(0).kind, VirtualChannelKind::Bipolar);
-    QCOMPARE(definitions.at(0).referenceChannels, QStringList{"MEG0112"});
+    QCOMPARE(definitions.at(0).referenceChannels, QStringList{"MEG 0112"});
 
-    QCOMPARE(definitions.at(1).primaryChannel, QString("MEG0113"));
+    QCOMPARE(definitions.at(1).primaryChannel, QString("MEG 0113"));
     QCOMPARE(definitions.at(1).kind, VirtualChannelKind::WeightedReference);
     QCOMPARE(definitions.at(1).referenceChannels.size(), 2);
 

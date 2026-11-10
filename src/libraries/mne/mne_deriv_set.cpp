@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "mne_deriv_set.h"
+#include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
 
@@ -111,10 +112,10 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
             if (std::fabs(it->second) <= kZero) {
                 continue;
             }
-            if (!BASELIB::contains(inputs, it->first)) {
+            if (!FIFFLIB::has_channel(inputs, it->first)) {
                 inputs.push_back(it->first);
             }
-            row.push_back({static_cast<int>(BASELIB::indexOf(inputs, it->first)), it->second});
+            row.push_back({static_cast<int>(FIFFLIB::channel_index(inputs, it->first)), it->second});
         }
         if (row.empty()) {
             BASELIB::Log::info("MNEDerivSet - Empty derivation \"{}\" omitted", definition.first);
@@ -310,14 +311,14 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
         ++ntot;
         bool available = true;
         for (auto it = definition.second.cbegin(); it != definition.second.cend() && available; ++it) {
-            available = std::fabs(it->second) <= kZero || BASELIB::contains(chNames, it->first);
+            available = std::fabs(it->second) <= kZero || FIFFLIB::has_channel(chNames, it->first);
         }
         if (!available) {
             continue;
         }
         for (auto it = definition.second.cbegin(); it != definition.second.cend(); ++it) {
             if (std::fabs(it->second) > kZero) {
-                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(BASELIB::indexOf(chNames, it->first)), static_cast<float>(it->second));
+                triplets.emplace_back(static_cast<int>(outputs.size()), static_cast<int>(FIFFLIB::channel_index(chNames, it->first)), static_cast<float>(it->second));
             }
         }
         outputs.push_back(definition.first);

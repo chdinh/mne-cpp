@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
     const MNERawBufDef& firstBuffer = mneRaw->bufs.front();
 
     MNEChSelection sel; // channel names are stored without spaces
-    sel.chspick = sel.chspick_nospace = {"MEG0113", "EEG001", "EOG061"};
+    sel.chspick = sel.chspick_nospace = {"MEG 0113", "EEG 001", "EOG 061"};
     sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
     sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
     sel.pick.resize(sel.nchan);
@@ -413,7 +413,7 @@ int main(int argc, char* argv[])
     //! [mne_cov_description_usage]
     // mne.compute_covariance(mne.Epochs(event_id=[1, 2], tmin=-0.2, tmax=0, baseline=None, reject=dict(eeg=14.23e-9)),
     // keep_sample_mean=False, rank="full"): 6 of 12 epochs kept, nfree 365, C[EEG001, EEG001] = 8.784207369943824e-18
-    const int eeg001 = BASELIB::indexOf(noiseCov.names, "EEG001");
+    const int eeg001 = BASELIB::indexOf(noiseCov.names, "EEG 001");
     ok &= expect(preStim.events == std::vector<unsigned int>({1, 2}) && noiseCov.nfree == 365 && near(noiseCov.data(eeg001, eeg001), 8.784207369943824e-18, 1e-6),
                  std::format("MNEDescriptionParser: a .cov description with EEG rejection gives nfree {} like mne.compute_covariance", noiseCov.nfree));
 
@@ -490,17 +490,17 @@ int main(int argc, char* argv[])
     const QString montage = tmp.filePath("montage.txt");
     QFile montageFile(montage);
     ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    montageFile.write("\"EEG001-EEG002\" = \"EEG001\" - \"EEG002\"\n\"FRONT\" = 0.5 * \"EEG001\" + 0.5 * \"EEG002\" - \"EEG999\"\n");
+    montageFile.write("\"EEG 001-EEG 002\" = \"EEG 001\" - \"EEG 002\"\n\"FRONT\" = 0.5 * \"EEG 001\" + 0.5 * \"EEG 002\" - \"EEG 999\"\n");
     montageFile.close();
     const auto derivations = MNEDerivSet::readText(montage.toStdU16String());
     derivations->write(tmp.filePath("montage-deriv.fif").toStdU16String());
     const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU16String());
     const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
     MNEChSelection bipolar;
-    bipolar.chspick = bipolar.chspick_nospace = {"EEG001-EEG002", "EEG001", "EEG002"};
+    bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
     bipolar.nchan = bipolar.ndef = 3;
     bipolar.nderiv = 1;
-    bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG001"), BASELIB::indexOf(mneRaw->ch_names, "EEG002")).finished();
+    bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
     bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
     mneRaw->proj.reset();
     mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, ns, rows.data());
@@ -514,7 +514,7 @@ int main(int argc, char* argv[])
     auto layout = MNELayout::read((layoutDir + "/Vectorview-all.lout").toStdU16String());
     const std::map<std::string, QPointF> positions = layout->channelPositions();             // lower-left corners, keyed "MEG 0113"
     const int leftHalf = layout->confine(QRectF(QPointF(-85.0, -83.0), QPointF(0.0, 75.0))); // zoom to the left half
-    const int shownTriplet = layout->matchPorts({"MEG0113", "MEG0112", "MEG0111"});
+    const int shownTriplet = layout->matchPorts({"MEG 0113", "MEG 0112", "MEG 0111"});
     //! [mne_layout_usage]
     // mne.channels.read_layout("Vectorview-all.lout", scale=False): 306 viewports in -85 ... 90 x -83 ... 75, MEG 0113 at (-73.4162, 33.4167); 138 boxes left of x = 0
     ok &= expect(layout && layout->ports.size() == 306 && (positions.at("MEG 0113") - QPointF(-73.416206, 33.416687)).manhattanLength() < 1e-4 && leftHalf == 138 && shownTriplet == 3,

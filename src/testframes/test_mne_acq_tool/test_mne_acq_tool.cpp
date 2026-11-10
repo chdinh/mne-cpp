@@ -287,8 +287,7 @@ void TestMneAcqTool::recordWritesTheSource()
         if (names[c].rfind("EEG", 0) != 0) {
             continue;
         }
-        // FIFFLIB drops the spaces of channel names on read.
-        const auto row = static_cast<Eigen::Index>(BASELIB::indexOf(raw.info.ch_names, ((QString::fromStdString(names[c]).remove(QLatin1Char(' '))).toStdString())));
+        const auto row = static_cast<Eigen::Index>(BASELIB::indexOf(raw.info.ch_names, names[c]));
         QVERIFY2(row >= 0, names[c].c_str());
         for (std::size_t s = 0; s < 2000; ++s) {
             const double want = expected[s * names.size() + c];

@@ -1905,14 +1905,7 @@ std::optional<FiffTag> FiffStream::read_tag(fiff_long_t pos)
 
 StringList FiffStream::split_name_list(std::string_view p_sNameList)
 {
-    // Spaces are dropped from the whole list before splitting, as MNE-C does
-    std::string compact;
-    compact.reserve(p_sNameList.size());
-    for (const char c : p_sNameList) {
-        if (c != ' ')
-            compact.push_back(c);
-    }
-    return BASELIB::split(compact, ':');
+    return BASELIB::split(p_sNameList, ':', true);
 }
 
 //=============================================================================================================

@@ -56,6 +56,27 @@
   },
   "examples": [
     {
+      "name": "ex_acq_devices",
+      "title": "Try every acquisition device or its simulator: watch, record, play back",
+      "brief": "Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_devices/",
+      "library": "acq",
+      "libraries": [
+        "acq",
+        "disp"
+      ],
+      "tasks": [
+        "real-time"
+      ],
+      "modalities": [
+        "eeg",
+        "meg"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_acq_oddball",
       "title": "Recover the P300 from a streaming oddball session",
       "brief": "Recover the P300 from a streaming oddball session by trigger-locked averaging",
@@ -153,27 +174,6 @@
       ],
       "modalities": [
         "eeg"
-      ],
-      "level": "start",
-      "topics": []
-    },
-    {
-      "name": "ex_acq_studio",
-      "title": "Pick a source or its simulator, record it and play it back",
-      "brief": "Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back",
-      "thumbnail": "",
-      "url": "/docs/examples/acq/ex_acq_studio/",
-      "library": "acq",
-      "libraries": [
-        "acq",
-        "disp"
-      ],
-      "tasks": [
-        "real-time"
-      ],
-      "modalities": [
-        "eeg",
-        "meg"
       ],
       "level": "start",
       "topics": []

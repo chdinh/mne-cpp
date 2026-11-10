@@ -541,11 +541,11 @@ public:
     /**
      * fiff_split_name_list
      *
-     * Splits a string by looking for seperator ":"
+     * Splits a FIFF name list at its separator ":".
      *
-     * @param[in] p_sNameList    string to split.
+     * @param[in] p_sNameList    The list, e.g. "MEG 0113:MEG 0112".
      *
-     * @return the splitted string list.
+     * @return The names as stored, spaces included; empty names are skipped.
      */
     static StringList split_name_list(std::string_view p_sNameList);
 

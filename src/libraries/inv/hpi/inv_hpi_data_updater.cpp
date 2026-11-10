@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "inv_hpi_data_updater.h"
+#include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
 
@@ -86,7 +87,7 @@ void InvHpiDataUpdater::updateChannels(const std::shared_ptr<FiffInfo>& pFiffInf
             pFiffInfo->chs[i].chpos.coil_type == FIFFV_COIL_VV_PLANAR_T3) {
             // Check if the sensor is bad, if not append to innerind
 
-            if (!(BASELIB::contains(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
+            if (!(FIFFLIB::has_channel(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
                 m_vecInnerind.append(i);
                 m_lChannels.push_back(pFiffInfo->chs[i]);
             }

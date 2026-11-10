@@ -239,7 +239,7 @@ Finds the trigger events of a stimulus channel, like mne.find_events.
   The recording.
 
 - **stim_channel** : *std::string_view*
-  Name of the stimulus channel; spaces are ignored ("STI 014" matches "STI014").
+  Name of the stimulus channel; matched as `same_channel()` does ("STI014" finds "STI 014").
 
 - **mask** : *unsigned int*
   Bits of the channel value that count.

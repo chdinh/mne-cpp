@@ -292,11 +292,11 @@ void drainInto(AcqReader& reader, std::size_t index, std::vector<float>& block, 
         const bool decoded = n > 0 && decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), channels, n)).ok();
 ````
 
-### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+### [ex_acq_devices](../../examples/acq/ex_acq_devices.mdx)
 
 Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
 
-````cpp title="src/examples/ex_acq_studio/main.cpp, line 469"
+````cpp title="src/examples/ex_acq_devices/main.cpp, line 469"
 auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
 if (!reader) {
     return fail(reader.error().text());

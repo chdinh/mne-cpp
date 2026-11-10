@@ -25,6 +25,7 @@
 #include <base/string_utils.h>
 #include "mneoperator.h"
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_info.h>
 
 //=============================================================================================================
@@ -576,7 +577,7 @@ const QStringList& ChannelInfoModel::getMappedChannelsList()
 
 int ChannelInfoModel::getIndexFromOrigChName(QString chName)
 {
-    return BASELIB::indexOf(m_pFiffInfo->ch_names, chName.toStdString());
+    return FIFFLIB::channel_index(m_pFiffInfo->ch_names, chName.toStdString());
 }
 
 //=============================================================================================================
@@ -608,7 +609,7 @@ void ChannelInfoModel::mapLayoutToChannels()
         switch (chInfo.kind) {
             case FIFFV_MEG_CH:
                 //Scan for MEG string and other characters
-                regExpRemove = QRegularExpression("(MEG|-|_|/|\\| )");
+                regExpRemove = QRegularExpression("MEG|[-_/|\\s]");
                 chName.remove(regExpRemove);
 
                 //After cleaning the string try to convert the residual to an int number
@@ -618,7 +619,7 @@ void ChannelInfoModel::mapLayoutToChannels()
 
             case FIFFV_EEG_CH: {
                 //Scan for EEG string and other characters
-                regExpRemove = QRegularExpression("(EEG|-|_|/|\\| )");
+                regExpRemove = QRegularExpression("EEG|[-_/|\\s]");
                 chName.remove(regExpRemove);
 
                 //After cleaning the string try to convert the residual to an int number

@@ -101,19 +101,6 @@ QByteArray serialize(const FiffInfo& info)
     return QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()));
 }
 
-// FiffStream drops the spaces of names read from name lists ("MEG 0113" -> "MEG0113"); restore them from the channels.
-std::string channelName(const std::vector<std::string>& channels, const std::string& name)
-{
-    for (const std::string& channel : channels) {
-        std::string compact = channel;
-        std::erase(compact, ' ');
-        if (compact == name) {
-            return channel;
-        }
-    }
-    return name;
-}
-
 bool deserialize(const std::vector<std::byte>& data, FiffInfo& info)
 {
     QByteArray bytes(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
@@ -124,20 +111,6 @@ bool deserialize(const std::vector<std::byte>& data, FiffInfo& info)
     }
     std::shared_ptr<FiffDirNode> node;
     return stream.read_meas_info(stream.dirtree(), info, node);
-}
-
-void restoreNames(FiffInfo& info)
-{
-    for (std::string& bad : info.bads) {
-        bad = channelName(info.ch_names, bad);
-    }
-    for (FiffProj& proj : info.projs) {
-        if (proj.data != nullptr) {
-            for (std::string& name : proj.data->col_names) {
-                name = channelName(info.ch_names, name);
-            }
-        }
-    }
 }
 
 } // namespace
@@ -257,6 +230,5 @@ AcqExpected<FiffInfo> ACQLIB::toFiffInfo(const AcqStreamInfo& info)
         fiff.ch_names.push_back(ch.ch_name);
     }
     fiff.nchan = static_cast<fiff_int_t>(fiff.chs.size());
-    restoreNames(fiff);
     return fiff;
 }

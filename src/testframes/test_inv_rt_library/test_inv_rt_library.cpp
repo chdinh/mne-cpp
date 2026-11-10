@@ -404,7 +404,7 @@ void TestInvRtLibrary::rtAveraging_moreWorkerOps()
         ch.ch_name = (QString("Ch%1").arg(i)).toStdString();
         if (i == 9) {
             ch.kind = FIFFV_STIM_CH;
-            ch.ch_name = "STI014";
+            ch.ch_name = "STI 014";
         } else {
             ch.kind = FIFFV_MEG_CH;
         }
@@ -765,21 +765,21 @@ void TestInvRtLibrary::rtAveragingWorker_doWork()
     std::shared_ptr<FiffInfo> pInfo(new FiffInfo());
     pInfo->sfreq = 1000.0;
     FiffChInfo chData;
-    chData.ch_name = "MEG0111";
+    chData.ch_name = "MEG 0111";
     chData.kind = FIFFV_MEG_CH;
     chData.unit = FIFF_UNIT_T;
     chData.range = 1.0;
     chData.cal = 1.0;
     FiffChInfo chTrig;
-    chTrig.ch_name = "STI014";
+    chTrig.ch_name = "STI 014";
     chTrig.kind = FIFFV_STIM_CH;
     chTrig.range = 1.0;
     chTrig.cal = 1.0;
     pInfo->chs.push_back(chData);
     pInfo->chs.push_back(chTrig);
     pInfo->nchan = 2;
-    pInfo->ch_names.push_back("MEG0111");
-    pInfo->ch_names.push_back("STI014");
+    pInfo->ch_names.push_back("MEG 0111");
+    pInfo->ch_names.push_back("STI 014");
     quint32 preStim = 50, postStim = 100;
     DSPLIB::RtAveragingWorker worker(2, preStim, postStim, 0, 0, 1, pInfo);
     QList<FiffEvokedSet> results;

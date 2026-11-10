@@ -18,6 +18,7 @@
 //=============================================================================================================
 
 #include "mne_cortical_map.h"
+#include <fiff/fiff_ch_name.h>
 #include <base/log.h>
 #include <base/string_utils.h>
 #include "mne_forward_solution.h"
@@ -70,7 +71,7 @@ MatrixXd MNECorticalMap::makeCorticalMap(
     if (static_cast<int>(invChannels.size()) == kernel.cols() && static_cast<int>(matched.sol->row_names.size()) == gain.rows()) {
         MatrixXd picked(kernel.cols(), gain.cols());
         for (int c = 0; c < static_cast<int>(invChannels.size()); ++c) {
-            const int row = static_cast<int>(BASELIB::indexOf(matched.sol->row_names, invChannels[c]));
+            const int row = static_cast<int>(FIFFLIB::channel_index(matched.sol->row_names, invChannels[c]));
             if (row < 0) {
                 BASELIB::Log::warning("MNECorticalMap::makeCorticalMap - Channel {} is not in the forward solution.", invChannels[c]);
                 return MatrixXd();

@@ -722,7 +722,7 @@ void TestStsCluster::testTrisAdjacencyMatchesMne()
     // An even number of picks takes the mean of the middle two: median(1, 1, 1, 8) = 1
     QCOMPARE(upperEdges(StatsAdjacency::fromChannelPositions(info, {"EEG0", "EEG1", "EEG2", "EEG10"})).join(' '), QStringLiteral("0-1 0-2 1-2"));
     QCOMPARE(upperEdges(StatsAdjacency::fromChannelPositions(info, {"EEG0", "EEG10"})).join(' '), QStringLiteral("0-1"));
-    QCOMPARE(StatsAdjacency::fromChannelPositions(info, {"MEG0111"}).rows(), 0);
+    QCOMPARE(StatsAdjacency::fromChannelPositions(info, {"MEG 0111"}).rows(), 0);
 }
 
 //=============================================================================================================

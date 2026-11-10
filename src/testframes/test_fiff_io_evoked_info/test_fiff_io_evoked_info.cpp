@@ -328,7 +328,7 @@ void TestFiffIoEvokedInfo::evokedSet_grandAverage()
     QCOMPARE(g.info.nchan, 374);
     QCOMPARE(grandAvg.info.nchan, 374);
     QVERIFY(g.info.bads.empty());
-    QVERIFY(!BASELIB::contains(g.info.ch_names, "MEG2443"));
+    QVERIFY(!BASELIB::contains(g.info.ch_names, "MEG 2443"));
     QVERIFY(qAbs(g.data(0, 100) / -9.523296577431598e-12 - 1.0) < 1e-6);
     QVERIFY(qAbs(g.data.norm() / 11.161421411316139 - 1.0) < 1e-6);
 }
@@ -365,8 +365,8 @@ void TestFiffIoEvokedInfo::evoked_combineMatchesMnePython()
         QCOMPARE(c.combined.nave, c.nave);
         QCOMPARE(c.combined.comment, c.comment);
         QCOMPARE(c.combined.info.bads.size(), 2);
-        QVERIFY(BASELIB::contains(c.combined.info.bads, "MEG2443"));
-        QVERIFY(BASELIB::contains(c.combined.info.bads, "EEG053"));
+        QVERIFY(BASELIB::contains(c.combined.info.bads, "MEG 2443"));
+        QVERIFY(BASELIB::contains(c.combined.info.bads, "EEG 053"));
         QVERIFY(qAbs(c.combined.data(0, 100) / c.d0 - 1.0) < 1e-6);
         QVERIFY(qAbs(c.combined.data(315, 200) / c.d1 - 1.0) < 1e-6);
         QVERIFY(qAbs(c.combined.data.norm() / c.norm - 1.0) < 1e-6);

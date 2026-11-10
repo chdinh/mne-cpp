@@ -376,16 +376,16 @@ void TestToolPreprocHelpers::testReadAliasesBasic()
     QFile f(fname);
     QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
     QTextStream out(&f);
-    out << "MEG0111:MEG0111_new\n";
-    out << "MEG0121:MEG0121_new\n";
+    out << "MEG 0111:MEG0111_new\n";
+    out << "MEG 0121:MEG0121_new\n";
     f.close();
 
     QList<ChannelAlias> aliases = readAliases(fname, false);
     QCOMPARE(aliases.size(), 2);
-    QCOMPARE(aliases[0].from, QString("MEG0111"));
+    QCOMPARE(aliases[0].from, QString("MEG 0111"));
     QCOMPARE(aliases[0].to, QString("MEG0111_new"));
     QCOMPARE(aliases[0].toKind, -1);
-    QCOMPARE(aliases[1].from, QString("MEG0121"));
+    QCOMPARE(aliases[1].from, QString("MEG 0121"));
     QCOMPARE(aliases[1].to, QString("MEG0121_new"));
 }
 
@@ -411,12 +411,12 @@ void TestToolPreprocHelpers::testReadAliasesWithKind()
     QFile f(fname);
     QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
     QTextStream out(&f);
-    out << "STI014:TRIGGER:3" << "\n"; // kind = 3 (STIM)
+    out << "STI 014:TRIGGER:3" << "\n"; // kind = 3 (STIM)
     f.close();
 
     QList<ChannelAlias> aliases = readAliases(fname, false);
     QCOMPARE(aliases.size(), 1);
-    QCOMPARE(aliases[0].from, QString("STI014"));
+    QCOMPARE(aliases[0].from, QString("STI 014"));
     QCOMPARE(aliases[0].to, QString("TRIGGER"));
     QCOMPARE(aliases[0].toKind, 3);
 }
@@ -463,16 +463,16 @@ void TestToolPreprocHelpers::testReadBadChannelListBasic()
     QFile f(fname);
     QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
     QTextStream out(&f);
-    out << "MEG0111\n";
-    out << "MEG0121\n";
-    out << "MEG0131\n";
+    out << "MEG 0111\n";
+    out << "MEG 0121\n";
+    out << "MEG 0131\n";
     f.close();
 
     std::vector<std::string> bads = readBadChannelList(fname);
     QCOMPARE(static_cast<int>(bads.size()), 3);
-    QCOMPARE(bads[0], std::string("MEG0111"));
-    QCOMPARE(bads[1], std::string("MEG0121"));
-    QCOMPARE(bads[2], std::string("MEG0131"));
+    QCOMPARE(bads[0], std::string("MEG 0111"));
+    QCOMPARE(bads[1], std::string("MEG 0121"));
+    QCOMPARE(bads[2], std::string("MEG 0131"));
 }
 
 void TestToolPreprocHelpers::testReadBadChannelListComments()
@@ -482,10 +482,10 @@ void TestToolPreprocHelpers::testReadBadChannelListComments()
     QVERIFY(f.open(QIODevice::WriteOnly | QIODevice::Text));
     QTextStream out(&f);
     out << "# Bad channels\n";
-    out << "MEG0111\n";
+    out << "MEG 0111\n";
     out << "\n";
     out << "# More bads\n";
-    out << "MEG0121\n";
+    out << "MEG 0121\n";
     f.close();
 
     std::vector<std::string> bads = readBadChannelList(fname);

@@ -233,7 +233,7 @@ void ChannelSelection::onSelectionChanged(const QList<QGraphicsItem*>& selectedC
         DISPLIB::SelectionSceneItem* selectionSceneItemTemp = static_cast<DISPLIB::SelectionSceneItem*>(i.next());
 
         m_pSelectionItem->m_sChannelName.append(selectionSceneItemTemp->m_sChannelName);
-        m_pSelectionItem->m_iChannelNumber.append(m_pChannelInfoModel->getIndexFromOrigChName(selectionSceneItemTemp->m_sChannelName.remove(' ')));
+        m_pSelectionItem->m_iChannelNumber.append(m_pChannelInfoModel->getIndexFromOrigChName(selectionSceneItemTemp->m_sChannelName));
         m_pSelectionItem->m_iChannelKind.append(selectionSceneItemTemp->m_iChannelKind);
         m_pSelectionItem->m_iChannelUnit.append(selectionSceneItemTemp->m_iChannelUnit);
         m_pSelectionItem->m_qpChannelPosition.append(selectionSceneItemTemp->m_qpChannelPosition);

@@ -11,6 +11,7 @@
 
 #include <base/log.h>
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_info_base.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_proj.h>
@@ -72,6 +73,47 @@ private slots:
         if (QFile::exists(base + "/MEG/sample/sample_audvis_trunc_raw.fif"))
             m_sDataPath = base;
     }
+    //=========================================================================
+    // Channel names
+    //=========================================================================
+    void channelNames_readAsStored()
+    {
+        if (m_sDataPath.isEmpty())
+            QSKIP("No test data");
+        // As mne-python reads them: names, bads and projector columns keep their spaces
+        const FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
+        QCOMPARE(raw.info.ch_names.front(), std::string("MEG 0113"));
+        QCOMPARE(raw.info.chs.front().ch_name, std::string("MEG 0113"));
+        QCOMPARE(raw.info.bads, (BASELIB::StringList{"MEG 2443", "EEG 053"}));
+        QVERIFY(!raw.info.projs.empty());
+        QCOMPARE(raw.info.projs.front().data->col_names.front(), std::string("MEG 0111"));
+    }
+
+    void channelNames_matchAcrossConventions()
+    {
+        QVERIFY(same_channel("MEG 0113", "MEG0113"));
+        QVERIFY(same_channel("meg0113", "MEG 0113"));
+        QVERIFY(same_channel("STI 014", "STI 014"));
+        QVERIFY(same_channel("", "  "));
+        QVERIFY(!same_channel("MEG 0113", "MEG 0112"));
+        QVERIFY(!same_channel("MEG 011", "MEG 0113"));
+
+        // An exact name wins over one that only matches across conventions
+        const BASELIB::StringList names{"EEG001", "EEG 001", "STI 014"};
+        QCOMPARE(channel_index(names, "EEG 001"), 1);
+        QCOMPARE(channel_index(names, "STI014"), 2);
+        QCOMPARE(channel_index(names, "EEG 002"), -1);
+
+        // Selections and look-ups accept either convention
+        FiffInfoBase info = makeSyntheticInfoBase(3); // MEG 0000 .. MEG 0002
+        info.bads = {"MEG0002"};
+        QCOMPARE(info.channelIndex("MEG0001"), 1);
+        QVERIFY(info.isBad("MEG 0002"));
+        QVERIFY(!info.isBad("MEG 0001"));
+        QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {"meg0002"}).size(), 1);
+        QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {}, {"MEG0001"}).size(), 2);
+    }
+
     //=========================================================================
     // FiffInfoBase
     //=========================================================================
@@ -200,7 +242,7 @@ private slots:
         const FiffRawData raw((m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
         const FiffInfo& info = raw.info;
         QCOMPARE(info.nchan, 376);
-        QCOMPARE(info.bads, StringList({"MEG2443", "EEG053"}));
+        QCOMPARE(info.bads, StringList({"MEG 2443", "EEG 053"}));
 
         const RowVectorXi meg = info.pick_types(true, false, false, {}, info.bads);
         QCOMPARE(meg.size(), Index(305));
@@ -215,12 +257,12 @@ private slots:
         QCOMPARE(stim(8), 314);
         QCOMPARE(info.pick_types(true, true, false).size(), Index(366));
 
-        QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {"EEG001", "MEG0113", "STI014"}), RowVectorXi((RowVectorXi(3) << 0, 312, 315).finished()));
+        QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {"EEG 001", "MEG 0113", "STI 014"}), RowVectorXi((RowVectorXi(3) << 0, 312, 315).finished()));
         QCOMPARE(FiffInfoBase::pick_channels(info.ch_names, {}, info.bads).size(), Index(374));
 
         const RowVectorXi sel = (RowVectorXi(3) << 3, 10, 316).finished();
         const FiffInfo sub = info.pick_info(sel);
-        QCOMPARE(sub.ch_names, StringList({"MEG0122", "MEG0142", "EEG002"}));
+        QCOMPARE(sub.ch_names, StringList({"MEG 0122", "MEG 0142", "EEG 002"}));
         QCOMPARE(sub.nchan, 3);
         QVERIFY(sub.bads.empty());
     }

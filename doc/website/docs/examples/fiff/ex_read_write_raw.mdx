@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 
     RowVectorXi picks = raw.info.pick_types(want_meg, want_eeg, want_stim, include, raw.info.bads);
     if (picks.cols() == 0) {
-        include = {"STI101", "STI201", "STI301"};
+        include = {"STI 101", "STI 201", "STI 301"};
         picks = raw.info.pick_types(want_meg, want_eeg, want_stim, include, raw.info.bads);
         if (picks.cols() == 0) {
             printf("channel list may need modification\n");

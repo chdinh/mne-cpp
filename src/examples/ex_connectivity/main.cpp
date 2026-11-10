@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     QSharedPointer<ConnectivitySettingsManager> pConnectivitySettingsManager = QSharedPointer<ConnectivitySettingsManager>::create();
 
     // Select bad channels
-    //raw.info.bads << "MEG2412" << "MEG2413";
+    //raw.info.bads << "MEG 2412" << "MEG 2413";
 
     // Setup compensators and projectors so they get applied while reading
     raw.activate_projections();
@@ -213,7 +213,7 @@ int main(int argc, char* argv[])
 
     // Read the epochs and reject bad epochs. Note, that SSPs are automatically applied to the data if activate_projections() was called beforehand.
     BASELIB::StringList exludeChs;
-    //exludeChs << "EOG061" << "EOG063";
+    //exludeChs << "EOG 061" << "EOG 063";
 
     std::map<std::string, double> mapReject;
     mapReject.emplace("eog", 100e-06);

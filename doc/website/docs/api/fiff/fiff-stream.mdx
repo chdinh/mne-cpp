@@ -1154,16 +1154,16 @@ Byte stream over a Qt device, for callers that hold a QIODevice such as a socket
 
 fiff_split_name_list
 
-Splits a string by looking for seperator ":"
+Splits a FIFF name list at its separator ":".
 
 **Parameters:**
 
 - **p_sNameList** : *std::string_view*
-  string to split.
+  The list, e.g. "MEG 0113:MEG 0112".
 
 **Returns:**
 
-- *StringList* — the splitted string list.
+- *StringList* — The names as stored, spaces included; empty names are skipped.
 
 ---
 

@@ -166,11 +166,11 @@ void TestAnSharedModels::rawModel_saveToFileRoundTrips()
     Eigen::MatrixXd a, b, t;
     QVERIFY(original.read_raw_segment(a, t, 14000, 14999));
     QVERIFY(lowpassed.read_raw_segment(b, t, 14000, 14999));
-    for (const char* name : {"STI014", "MEG0113", "EOG061"}) {
+    for (const char* name : {"STI 014", "MEG 0113", "EOG 061"}) {
         const int k = static_cast<int>(BASELIB::indexOf(original.info.ch_names, name));
         QVERIFY2(k >= 0 && (a.row(k) - b.row(k)).cwiseAbs().maxCoeff() <= 1e-6 * a.row(k).cwiseAbs().maxCoeff(), name);
     }
-    const int eeg = static_cast<int>(BASELIB::indexOf(original.info.ch_names, "EEG001"));
+    const int eeg = static_cast<int>(BASELIB::indexOf(original.info.ch_names, "EEG 001"));
     QVERIFY((a.row(eeg) - b.row(eeg)).cwiseAbs().maxCoeff() > 1e-3 * a.row(eeg).cwiseAbs().maxCoeff());
 }
 

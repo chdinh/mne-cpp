@@ -290,7 +290,7 @@ void AveragingSettingsView::loadSettings()
     }
 
     m_iNumAverages = settings.value(m_sSettingsPath + QString("/AveragingSettingsView/numAverages"), 10).toInt();
-    m_sCurrentStimChan = settings.value(m_sSettingsPath + QString("/AveragingSettingsView/currentStimChannel"), "STI014").toString();
+    m_sCurrentStimChan = settings.value(m_sSettingsPath + QString("/AveragingSettingsView/currentStimChannel"), "STI 014").toString();
     m_bDoBaselineCorrection = settings.value(m_sSettingsPath + QString("/AveragingSettingsView/doBaselineCorrection"), false).toBool();
 }
 

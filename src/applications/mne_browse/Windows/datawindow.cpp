@@ -21,6 +21,7 @@
 #include <base/string_utils.h>
 #include "../Models/virtualchannelmodel.h"
 #include <disp/viewers/helpers/channeldatamodel.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_constants.h>
 
 #include <algorithm>
@@ -51,10 +52,7 @@ int resolveStimChannelIndex(const FIFFLIB::FiffInfo& info)
         if (fallbackStim < 0)
             fallbackStim = ch;
 
-        QString normalizedName = QString::fromStdString(info.ch_names[ch]).trimmed().toUpper();
-        normalizedName.remove(QLatin1Char(' '));
-        if (normalizedName == QLatin1String("STI014") ||
-            normalizedName == QLatin1String("STI101")) {
+        if (FIFFLIB::same_channel(info.ch_names[ch], "STI 014") || FIFFLIB::same_channel(info.ch_names[ch], "STI 101")) {
             return ch;
         }
     }

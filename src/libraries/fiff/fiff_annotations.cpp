@@ -19,6 +19,7 @@
 //=============================================================================================================
 
 #include "fiff_annotations.h"
+#include "fiff_ch_name.h"
 #include "fiff_annotations_json.h"
 
 #include <base/string_utils.h>
@@ -191,7 +192,7 @@ FiffAnnotations FiffAnnotations::select_by_channel(std::string_view ch_name) con
 {
     FiffAnnotations result;
     std::ranges::copy_if(m_annotations, std::back_inserter(result.m_annotations), [ch_name](const FiffAnnotation& a) {
-        return a.ch_names.empty() || std::ranges::find(a.ch_names, ch_name) != a.ch_names.end();
+        return a.ch_names.empty() || has_channel(a.ch_names, ch_name);
     });
     return result;
 }

@@ -308,7 +308,7 @@ std::shared_ptr<FiffInfo> createBrowserTestInfo()
     std::shared_ptr<FiffInfo> info(new FiffInfo);
     info->sfreq = 1000.0f;
     info->nchan = 4;
-    info->ch_names = {"MEG0111", "MEG0112", "MEG0113", "STI014"};
+    info->ch_names = {"MEG 0111", "MEG 0112", "MEG 0113", "STI 014"};
 
     info->chs.clear();
     info->chs.resize(info->nchan);
@@ -328,7 +328,7 @@ std::shared_ptr<FiffInfo> createBrowserTestInfo()
         info->chs[i] = channelInfo;
     }
 
-    info->bads = {"MEG0112"};
+    info->bads = {"MEG 0112"};
     return info;
 }
 
@@ -1179,7 +1179,7 @@ void TestDispViewers2::averagingSettingsView_controlsAndSettings()
         QCOMPARE(view.getBaselineFromSeconds(), 0);
         QCOMPARE(view.getBaselineToSeconds(), 0);
         QVERIFY(!view.getDoBaselineCorrection());
-        QCOMPARE(view.getCurrentStimCh(), QStringLiteral("STI014"));
+        QCOMPARE(view.getCurrentStimCh(), QStringLiteral("STI 014"));
     }
 
     // Stored settings, including a baseline that ends before the stimulus
@@ -1191,12 +1191,12 @@ void TestDispViewers2::averagingSettingsView_controlsAndSettings()
         settings.setValue(sPath + QStringLiteral("/AveragingSettingsView/baselineFromSeconds"), -150);
         settings.setValue(sPath + QStringLiteral("/AveragingSettingsView/baselineToSeconds"), -50);
         settings.setValue(sPath + QStringLiteral("/AveragingSettingsView/numAverages"), 25);
-        settings.setValue(sPath + QStringLiteral("/AveragingSettingsView/currentStimChannel"), QStringLiteral("STI101"));
+        settings.setValue(sPath + QStringLiteral("/AveragingSettingsView/currentStimChannel"), QStringLiteral("STI 101"));
         settings.setValue(sPath + QStringLiteral("/AveragingSettingsView/doBaselineCorrection"), true);
     }
     const auto removeSettings = qScopeGuard([&sPath]() { QSettings("MNECPP").remove(sPath); });
 
-    const QMap<QString, int> stimChannels = {{QStringLiteral("STI014"), 306}, {QStringLiteral("STI101"), 312}};
+    const QMap<QString, int> stimChannels = {{QStringLiteral("STI 014"), 306}, {QStringLiteral("STI 101"), 312}};
     AveragingSettingsView view(sPath, stimChannels);
     view.show();
     auto* pChannels = view.findChild<QComboBox*>(QStringLiteral("m_pComboBoxChSelection"));
@@ -1222,23 +1222,23 @@ void TestDispViewers2::averagingSettingsView_controlsAndSettings()
     QVERIFY(view.getDoBaselineCorrection());
 
     // Stim channel: the stored one is selected and its channel index is reported
-    QCOMPARE(pChannels->currentText(), QStringLiteral("STI101"));
+    QCOMPARE(pChannels->currentText(), QStringLiteral("STI 101"));
     QCOMPARE(view.getStimChannelIdx(), 312);
     QSignalSpy stimSpy(&view, &AveragingSettingsView::changeStimChannel);
-    pChannels->setCurrentText(QStringLiteral("STI014"));
+    pChannels->setCurrentText(QStringLiteral("STI 014"));
     QCOMPARE(stimSpy.count(), 1);
-    QCOMPARE(stimSpy.last().at(0).toString(), QStringLiteral("STI014"));
-    QCOMPARE(view.getCurrentStimCh(), QStringLiteral("STI014"));
+    QCOMPARE(stimSpy.last().at(0).toString(), QStringLiteral("STI 014"));
+    QCOMPARE(view.getCurrentStimCh(), QStringLiteral("STI 014"));
     QCOMPARE(view.getStimChannelIdx(), 306);
 
     // New stim channels keep the selection and do not duplicate the reaction
-    view.setStimChannels({{QStringLiteral("STI014"), 6}, {QStringLiteral("STI201"), 7}});
+    view.setStimChannels({{QStringLiteral("STI 014"), 6}, {QStringLiteral("STI 201"), 7}});
     QCOMPARE(pChannels->count(), 2);
     QCOMPARE(view.getStimChannelIdx(), 6);
     stimSpy.clear();
-    pChannels->setCurrentText(QStringLiteral("STI201"));
+    pChannels->setCurrentText(QStringLiteral("STI 201"));
     QCOMPARE(stimSpy.count(), 1);
-    QCOMPARE(view.getCurrentStimCh(), QStringLiteral("STI201"));
+    QCOMPARE(view.getCurrentStimCh(), QStringLiteral("STI 201"));
     QCOMPARE(view.getStimChannelIdx(), 7);
 
     // Epoch window and baseline: finished edits emit and constrain the baseline range
@@ -1323,7 +1323,7 @@ void TestDispViewers2::triggerDetectionView_settingsAndSignals()
 {
     auto info = createBrowserTestInfo();
     info->chs[2].kind = FIFFV_STIM_CH;
-    info->chs[2].ch_name = "STI101";
+    info->chs[2].ch_name = "STI 101";
 
     TriggerDetectionView view(QString{});
     view.show();
@@ -1346,8 +1346,8 @@ void TestDispViewers2::triggerDetectionView_settingsAndSignals()
     view.init(info);
     view.init(info);
     QCOMPARE(pChannels->count(), 2);
-    QCOMPARE(pChannels->itemText(0), QStringLiteral("STI101"));
-    QCOMPARE(view.getSelectedStimChannel(), QStringLiteral("STI101"));
+    QCOMPARE(pChannels->itemText(0), QStringLiteral("STI 101"));
+    QCOMPARE(view.getSelectedStimChannel(), QStringLiteral("STI 101"));
 
     QSignalSpy infoSpy(&view, &TriggerDetectionView::triggerInfoChanged);
     pFirst->setValue(2.5);
@@ -1358,7 +1358,7 @@ void TestDispViewers2::triggerDetectionView_settingsAndSignals()
     pActive->setChecked(true);
     QCOMPARE(infoSpy.last().at(1).toBool(), true);
     pChannels->setCurrentIndex(1);
-    QCOMPARE(infoSpy.last().at(2).toString(), QStringLiteral("STI014"));
+    QCOMPARE(infoSpy.last().at(2).toString(), QStringLiteral("STI 014"));
     QCOMPARE(infoSpy.count(), 4);
 
     // Detected triggers fill the count and the type list once per value
@@ -1408,7 +1408,7 @@ void TestDispViewers2::triggerDetectionView_settingsAndSignals()
     QSignalSpy detectSpy(&view, &TriggerDetectionView::detectTriggers);
     QTest::mouseClick(pDetect, Qt::LeftButton);
     QCOMPARE(detectSpy.count(), 1);
-    QCOMPARE(detectSpy.last().at(0).toString(), QStringLiteral("STI014"));
+    QCOMPARE(detectSpy.last().at(0).toString(), QStringLiteral("STI 014"));
     QVERIFY(qAbs(detectSpy.last().at(1).toDouble() - 2.5e-3) < 1e-15);
     view.setProcessingMode(AbstractView::ProcessingMode::RealTime);
     QVERIFY(pDetect->isHidden());
@@ -2005,18 +2005,18 @@ void TestDispViewers2::rtFiffRawViewModel_dataFlow()
     QCOMPARE(model.getIdxSelMap().size(), 4);
 
     model.markChBad(model.index(0, 0), true);
-    QVERIFY(BASELIB::contains(info->bads, "MEG0111"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG 0111"));
     model.markChBad(model.index(0, 0), false);
-    QVERIFY(!BASELIB::contains(info->bads, "MEG0111"));
+    QVERIFY(!BASELIB::contains(info->bads, "MEG 0111"));
     model.markChBad({model.index(0, 0), model.index(2, 0)}, true);
-    QVERIFY(BASELIB::contains(info->bads, "MEG0111"));
-    QVERIFY(BASELIB::contains(info->bads, "MEG0113"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG 0111"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG 0113"));
 
     QMap<double, QColor> triggerColors;
     triggerColors.insert(3.0, Qt::red);
-    model.triggerInfoChanged(triggerColors, true, QStringLiteral("STI014"), 1.0);
+    model.triggerInfoChanged(triggerColors, true, QStringLiteral("STI 014"), 1.0);
     QVERIFY(model.triggerDetectionActive());
-    QCOMPARE(model.getTriggerName(), QStringLiteral("STI014"));
+    QCOMPARE(model.getTriggerName(), QStringLiteral("STI 014"));
     QCOMPARE(model.getTriggerThreshold(), 1.0);
     QCOMPARE(model.getCurrentTriggerIndex(), 3);
 
@@ -2131,7 +2131,7 @@ void TestDispViewers2::rtFiffRawViewModel_ringBufferWrap()
         auto info = createBrowserTestInfo();
         model.setFiffInfo(info);
         model.setSamplingInfo(100.0f, 1, true);
-        model.triggerInfoChanged({{2.0, Qt::red}}, true, QStringLiteral("STI014"), 1.0);
+        model.triggerInfoChanged({{2.0, Qt::red}}, true, QStringLiteral("STI 014"), 1.0);
         QSignalSpy triggerSpy(&model, &RtFiffRawViewModel::triggerDetected);
 
         // Pulses at stream samples 90 (before the wrap inside block 60..119) and 215 (after the wrap inside 180..239)
@@ -2192,7 +2192,7 @@ void TestDispViewers2::rtFiffRawViewModel_projectionWrapFilterAndRoles()
 
     // data(): name, row pointer into the buffer, bad flag, background
     model.setBackgroundColor(Qt::darkGray);
-    QCOMPARE(model.data(model.index(3, 0)).toString(), QStringLiteral("STI014"));
+    QCOMPARE(model.data(model.index(3, 0)).toString(), QStringLiteral("STI 014"));
     const auto row = model.data(model.index(0, 1)).value<RowVectorPair>();
     QCOMPARE(row.second, 100);
     QVERIFY(std::fabs(row.first[10] - std::sin(0.1 * 110)) < 1e-12);
@@ -2201,7 +2201,7 @@ void TestDispViewers2::rtFiffRawViewModel_projectionWrapFilterAndRoles()
     QVERIFY(!model.data(model.index(0, 0), Qt::ToolTipRole).isValid());
     QCOMPARE(model.headerData(1, Qt::Horizontal).toString(), QStringLiteral("data plot"));
     QCOMPARE(model.headerData(1, Qt::Horizontal, Qt::TextAlignmentRole).toInt(), static_cast<int>(Qt::AlignLeft));
-    QCOMPARE(model.headerData(2, Qt::Vertical).toString(), QStringLiteral("MEG0113"));
+    QCOMPARE(model.headerData(2, Qt::Vertical).toString(), QStringLiteral("MEG 0113"));
     QVERIFY(!model.headerData(0, Qt::Horizontal, Qt::ToolTipRole).isValid());
 
     // Freezing keeps serving the snapshot while new data arrives
@@ -2283,7 +2283,7 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
 
     // Two channels, one bad, laid out left and right
     SelectionItem selection;
-    selection.m_sChannelName = {QStringLiteral("MEG0111"), QStringLiteral("MEG0113")};
+    selection.m_sChannelName = {QStringLiteral("MEG 0111"), QStringLiteral("MEG 0113")};
     selection.m_iChannelNumber = {0, 2};
     selection.m_iChannelKind = {FIFFV_MEG_CH, FIFFV_MEG_CH};
     selection.m_iChannelUnit = {FIFF_UNIT_T, FIFF_UNIT_T};
@@ -2314,7 +2314,7 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
         QCOMPARE(std::abs(averageItem->pos().x()), 160.0);
     }
     names.sort();
-    QCOMPARE(names, (QStringList{QStringLiteral("MEG0111"), QStringLiteral("MEG0113")}));
+    QCOMPARE(names, (QStringList{QStringLiteral("MEG 0111"), QStringLiteral("MEG 0113")}));
 
     // Item at x = -160 (MEG0111) and x = +160 (MEG0113), 120 x 60 each: 0.8 of full scale is 24 px off centre
     QImage image(480, 120, QImage::Format_RGB32);
@@ -2431,7 +2431,7 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     QCOMPARE(model.getKind(5), 0);
     QCOMPARE(model.getUnit(5), FIFF_UNIT_NONE);
     QCOMPARE(model.getCoil(5), FIFFV_COIL_NONE);
-    set->info.bads = {"MEG0111"};
+    set->info.bads = {"MEG 0111"};
     QVERIFY(model.getIsChannelBad(1));
     QVERIFY(!model.getIsChannelBad(0));
     QVERIFY(!model.getIsChannelBad(7));
@@ -2502,11 +2502,12 @@ void TestDispViewers2::channelInfoModel_columnsRolesAndLayoutMapping()
     QCOMPARE(model.columnCount(), 13);
 
     // Layout names drop the kind prefix and separators and re-prefix MEG / EEG; other kinds keep their name
-    const QStringList mapped = {"MEG 0111", "MEG 0112", "MEG 0113", "STI014", "EEG 007"};
+    const QStringList mapped = {"MEG 0111", "MEG 0112", "MEG 0113", "STI 014", "EEG 007"};
     QCOMPARE(model.getMappedChannelsList(), mapped);
     QCOMPARE(model.getIndexFromMappedChName(QStringLiteral("EEG 007")), 4);
+    QCOMPARE(model.getIndexFromOrigChName(QStringLiteral("MEG 0113")), 2);
     QCOMPARE(model.getIndexFromOrigChName(QStringLiteral("MEG0113")), 2);
-    QCOMPARE(model.getBadChannelList(), StringList{"MEG0112"});
+    QCOMPARE(model.getBadChannelList(), StringList{"MEG 0112"});
 
     model.layoutChanged({{QStringLiteral("MEG 0111"), QPointF(1.5, -2.0)}, {QStringLiteral("EEG 007"), QPointF(3, 4)}});
     QCOMPARE(mappedSpy.size(), 1);
@@ -2628,7 +2629,7 @@ void TestDispViewers2::channelDataView_hideBadChannelsAndMapping()
     view.hideBadChannels(true);
     QCOMPARE(rhiView->totalLogicalChannels(), 3);
 
-    view.setChannelFilter(QStringList() << QStringLiteral("MEG0111") << QStringLiteral("MEG0113"));
+    view.setChannelFilter(QStringList() << QStringLiteral("MEG 0111") << QStringLiteral("MEG 0113"));
     QCOMPARE(rhiView->totalLogicalChannels(), 2);
 
     view.setChannelFilter(QStringList());
@@ -3266,11 +3267,11 @@ void TestDispViewers2::channelRhiView_overlayValues()
     rhiView->setCrosshairEnabled(true);
     sendMouse(QEvent::MouseMove, Qt::NoButton, QPoint(40, 50));
     rec = paintOverlay();
-    QCOMPARE(textStartingWith(rec.texts, QStringLiteral("MEG0111")),
-             QStringLiteral("MEG0111  0.020 s  %1 mT").arg(QString::number(std::sin(1.0) * 1e3, 'f', 1)));
+    QCOMPARE(textStartingWith(rec.texts, QStringLiteral("MEG 0111")),
+             QStringLiteral("MEG 0111  0.020 s  %1 mT").arg(QString::number(std::sin(1.0) * 1e3, 'f', 1)));
     rhiView->setClockTimeFormat(true);
-    QCOMPARE(textStartingWith(paintOverlay().texts, QStringLiteral("MEG0111")),
-             QStringLiteral("MEG0111  00:00.020  %1 mT").arg(QString::number(std::sin(1.0) * 1e3, 'f', 1)));
+    QCOMPARE(textStartingWith(paintOverlay().texts, QStringLiteral("MEG 0111")),
+             QStringLiteral("MEG 0111  00:00.020  %1 mT").arg(QString::number(std::sin(1.0) * 1e3, 'f', 1)));
     rhiView->setCrosshairEnabled(false);
 
     // Ruler held from (100, 30) to (180, 75) in row 0: 80 px = 40 samples = 40 ms, -45 px = -amplitudeMax
@@ -3404,7 +3405,7 @@ void TestDispViewers2::channelRhiView_rendersAndDrawsOverlays()
             QCOMPARE(args.at(1).toFloat(), 0.0f);
             QCOMPARE(args.at(3).toString(), QStringLiteral("T"));
         } else {
-            QCOMPARE(args.at(2).toString(), QStringLiteral("MEG0111"));
+            QCOMPARE(args.at(2).toString(), QStringLiteral("MEG 0111"));
             QVERIFY(std::fabs(args.at(1).toFloat() - static_cast<float>(std::sin(20 * 0.05))) < 1e-5f);
         }
         QVERIFY(!view.grab().isNull());
@@ -3652,7 +3653,7 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QCOMPARE(view.getScalingMap().value(FIFF_UNIT_T), 2.0f);
     view.setDistanceTimeSpacer(200);
     QCOMPARE(view.getDistanceTimeSpacer(), 200);
-    view.triggerInfoChanged({{3.0, Qt::red}}, true, QStringLiteral("STI014"), 1.0);
+    view.triggerInfoChanged({{3.0, Qt::red}}, true, QStringLiteral("STI 014"), 1.0);
 
     // Four blocks of 300 samples: the trigger channel steps to 3 every 250 samples
     QSignalSpy triggerSpy(&view, &RtFiffRawView::triggerDetected);
@@ -3689,11 +3690,11 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QCOMPARE(view.getZoom(), 2.0);
     QCOMPARE(table->verticalHeader()->defaultSectionSize(), static_cast<int>(h / 2.0f));
 
-    view.showSelectedChannelsOnly({QStringLiteral("MEG0111"), QStringLiteral("STI014")});
+    view.showSelectedChannelsOnly({QStringLiteral("MEG 0111"), QStringLiteral("STI 014")});
     QVERIFY(!table->isRowHidden(0));
     QVERIFY(table->isRowHidden(2));
     QVERIFY(!table->isRowHidden(3));
-    view.showSelectedChannelsOnly({"MEG0111", "MEG0112", "MEG0113", "STI014"});
+    view.showSelectedChannelsOnly({"MEG 0111", "MEG 0112", "MEG 0113", "STI 014"});
 
     // The context menu offers the event and bad-marking actions; trigger them as the user would
     auto contextAction = [&view, table](const QPoint& pos, const QString& text) {
@@ -3709,9 +3710,9 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     QSignalSpy markSpy(&view, &RtFiffRawView::channelMarkingChanged);
     table->selectRow(2);
     contextAction(table->visualRect(model->index(2, 1)).center(), QStringLiteral("Mark as bad"));
-    QVERIFY(BASELIB::contains(info->bads, "MEG0113"));
+    QVERIFY(BASELIB::contains(info->bads, "MEG 0113"));
     contextAction(table->visualRect(model->index(2, 1)).center(), QStringLiteral("Mark as good"));
-    QVERIFY(!BASELIB::contains(info->bads, "MEG0113"));
+    QVERIFY(!BASELIB::contains(info->bads, "MEG 0113"));
     QCOMPARE(markSpy.size(), 2);
 
     // Only show / hide / reset the selected rows
@@ -3765,7 +3766,7 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
         hover(QPoint(x, yRow0));
         const int iSample = (x == xNew ? 1000 : 0) + static_cast<int>(x / dx);
         QVERIFY(!crosshairSpy.isEmpty());
-        QCOMPARE(crosshairSpy.last().at(2).toString(), QStringLiteral("MEG0111"));
+        QCOMPARE(crosshairSpy.last().at(2).toString(), QStringLiteral("MEG 0111"));
         QCOMPARE(crosshairSpy.last().at(0).toFloat(), static_cast<float>(iSample / 1000.0));
         QCOMPARE(crosshairSpy.last().at(1).toFloat(), static_cast<float>(std::sin(0.02 * iSample)));
         QCOMPARE(crosshairSpy.last().at(3).toString(), QStringLiteral("T"));
@@ -3773,7 +3774,7 @@ void TestDispViewers2::rtFiffRawView_paintsHidesRowsAndAddsEvents()
     const int iBefore = crosshairSpy.size();
     hover(QPoint(xNew, table->visualRect(model->index(2, 1)).center().y()));
     QCOMPARE(crosshairSpy.size(), iBefore + 1);
-    QCOMPARE(crosshairSpy.last().at(2).toString(), QStringLiteral("MEG0113"));
+    QCOMPARE(crosshairSpy.last().at(2).toString(), QStringLiteral("MEG 0113"));
     QCOMPARE(crosshairSpy.last().at(1).toFloat(), 0.5f);
 
     // The crosshair is drawn: a vertical line in its own color at the mouse position
@@ -3942,7 +3943,7 @@ void TestDispViewers2::averageSceneItem_paintsScaledClampedCurves()
         aud(1, s) = (s < 60) ? 0.5e-12 : 2e-12;
         vis(1, s) = -0.5e-12;
     }
-    AverageSceneItem item(QStringLiteral("MEG0112"), 1, QPointF(0, 0), FIFFV_MEG_CH, FIFF_UNIT_T, Qt::darkGray);
+    AverageSceneItem item(QStringLiteral("MEG 0112"), 1, QPointF(0, 0), FIFFV_MEG_CH, FIFF_UNIT_T, Qt::darkGray);
     item.m_iTotalNumberChannels = 2;
     item.m_firstLastSample = qMakePair(-30, 90);
     item.m_scaleMap = {{FIFF_UNIT_T, 1e-12f}};
@@ -4325,7 +4326,7 @@ void TestDispViewers2::rtFiffRawViewDelegate_paintsSignalCursorAndThreshold()
     model.setFiffInfo(info);
     model.setSamplingInfo(100.0f, 1, true);
     model.setScaling({{FIFF_UNIT_T, 1e-12f}, {FIFFV_STIM_CH, 5.0f}});
-    model.triggerInfoChanged({{4.0, Qt::red}}, true, QStringLiteral("STI014"), 2.5);
+    model.triggerInfoChanged({{4.0, Qt::red}}, true, QStringLiteral("STI 014"), 2.5);
     Eigen::MatrixXd block = Eigen::MatrixXd::Zero(4, 60);
     block.row(0).setConstant(0.5e-12);
     block.row(3).tail(30).setConstant(4.0);
@@ -4390,7 +4391,7 @@ void TestDispViewers2::rtFiffRawViewDelegate_paintsSignalCursorAndThreshold()
     QVERIFY2(iThreshold > 30, qPrintable(QString::number(iThreshold)));
 
     // A bad channel gets a reddish tint over the whole cell
-    info->bads = {"MEG0111"};
+    info->bads = {"MEG 0111"};
     image = render(0);
     const QRgb background = image.pixel(5, 90);
     QVERIFY2(qRed(background) > qBlue(background) + 10, qPrintable(QColor(background).name()));
@@ -4596,10 +4597,10 @@ void TestDispViewers2::spectrumView_scalesBoundsAndPaints()
         QCOMPARE(bound[model->getLowerFrqBound()], 0.0);
         QCOMPARE(bound[model->getUpperFrqBound()], 1.0);
 
-        QCOMPARE(model->data(model->index(2, 0)).toString(), QStringLiteral("MEG0113"));
+        QCOMPARE(model->data(model->index(2, 0)).toString(), QStringLiteral("MEG 0113"));
         QCOMPARE(model->data(model->index(1, 1)).value<Eigen::RowVectorXd>(), psd.row(1));
         QCOMPARE(model->headerData(1, Qt::Horizontal).toString(), QStringLiteral("data plot"));
-        QCOMPARE(model->headerData(3, Qt::Vertical).toString(), QStringLiteral("STI014"));
+        QCOMPARE(model->headerData(3, Qt::Vertical).toString(), QStringLiteral("STI 014"));
 
         // Freeze keeps the old spectrum while new data arrives
         model->toggleFreeze(QModelIndex());
@@ -4610,7 +4611,7 @@ void TestDispViewers2::spectrumView_scalesBoundsAndPaints()
 
         model->selectRows({1, 3, 7});
         QCOMPARE(model->rowCount(), 2);
-        QCOMPARE(model->data(model->index(1, 0)).toString(), QStringLiteral("STI014"));
+        QCOMPARE(model->data(model->index(1, 0)).toString(), QStringLiteral("STI 014"));
         model->resetSelection();
 
         // Paint the plot rows and move the mouse over the first one to draw the read-out

@@ -169,7 +169,7 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
     plugin.m_pFiffInfo = std::make_shared<FIFFLIB::FiffInfo>();
     plugin.m_pFiffInfo->sfreq = 1000.0;
     FIFFLIB::FiffChInfo ch;
-    ch.ch_name = "EEG001";
+    ch.ch_name = "EEG 001";
     ch.kind = FIFFV_EEG_CH;
     plugin.m_pFiffInfo->chs.push_back(ch);
     plugin.m_pFiffInfo->ch_names.push_back(ch.ch_name);

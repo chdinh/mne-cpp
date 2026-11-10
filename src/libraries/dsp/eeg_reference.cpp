@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "eeg_reference.h"
+#include <fiff/fiff_ch_name.h>
 #include <base/log.h>
 
 #include <vector>
@@ -138,7 +139,7 @@ void DSPLIB::setEegReference(MatrixXd& data,
         // Specific channel(s): mean of named channels
         std::vector<int> refIdx;
         for (const std::string& name : refChannels) {
-            int idx = BASELIB::indexOf(info.ch_names, name);
+            int idx = FIFFLIB::channel_index(info.ch_names, name);
             if (idx < 0) {
                 Log::warning("setEegReference: reference channel '{}' not found.", name);
                 return;
@@ -234,12 +235,12 @@ void DSPLIB::setBipolarReference(MatrixXd& data,
     // Resolve anode and cathode indices
     std::vector<int> anodeIdx(nPairs), cathodeIdx(nPairs);
     for (int i = 0; i < nPairs; ++i) {
-        anodeIdx[i] = BASELIB::indexOf(info.ch_names, anodes[i]);
+        anodeIdx[i] = FIFFLIB::channel_index(info.ch_names, anodes[i]);
         if (anodeIdx[i] < 0) {
             Log::warning("setBipolarReference: anode channel '{}' not found.", anodes[i]);
             return;
         }
-        cathodeIdx[i] = BASELIB::indexOf(info.ch_names, cathodes[i]);
+        cathodeIdx[i] = FIFFLIB::channel_index(info.ch_names, cathodes[i]);
         if (cathodeIdx[i] < 0) {
             Log::warning("setBipolarReference: cathode channel '{}' not found.", cathodes[i]);
             return;

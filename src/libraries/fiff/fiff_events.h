@@ -154,7 +154,7 @@ public:
      * Finds the trigger events of a stimulus channel, like mne.find_events.
      *
      * @param[in] raw            The recording.
-     * @param[in] stim_channel   Name of the stimulus channel; spaces are ignored ("STI 014" matches "STI014").
+     * @param[in] stim_channel   Name of the stimulus channel; matched as same_channel() does ("STI014" finds "STI 014").
      * @param[in] mask           Bits of the channel value that count.
      * @param[in] leading_edge   Only changes from 0 to a non-zero value, rather than every change.
      *

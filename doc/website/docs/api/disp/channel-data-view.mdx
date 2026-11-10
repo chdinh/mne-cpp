@@ -550,15 +550,15 @@ Use for advanced configuration such as setMaxStoredSamples().
 
 ## Used in examples
 
-### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+### [ex_acq_devices](../../examples/acq/ex_acq_devices.mdx)
 
 Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
 
-````cpp title="src/examples/ex_acq_studio/main.cpp, line 223"
+````cpp title="src/examples/ex_acq_devices/main.cpp, line 223"
 m_badge->setObjectName("badge");
 m_info = new QLabel;
 m_info->setObjectName("info");
-m_view = new ChannelDataView("MNEACQ/studio");
+m_view = new ChannelDataView("MNEACQ/devices");
 m_view->setOverviewBarVisible(false);
 auto* display = new QWidget;
 auto* displayLayout = new QVBoxLayout(display);

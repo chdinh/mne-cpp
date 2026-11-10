@@ -56,6 +56,20 @@ std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, 
 
 ## Used in examples
 
+### [ex_acq_devices](../../examples/acq/ex_acq_devices.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_devices/main.cpp, line 333"
+        static_cast<void>(m_recorder->stop());
+        const AcqRecorderStats stats = m_recorder->stats();
+        m_recorder.reset();
+        addRecording(m_path, std::format("{} samples · {} events", stats.samples, stats.events));
+    }
+    setMode(Mode::Idle);
+}
+````
+
 ### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
 
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.
@@ -66,20 +80,6 @@ std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, 
             static_cast<unsigned long long>(stats.samples), static_cast<unsigned long long>(stats.lost),
             static_cast<unsigned long long>(stats.events), static_cast<unsigned long long>(stats.buffers),
             static_cast<double>(stats.bytes) / 1e6, stats.directIo ? "on" : "off");
-````
-
-### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
-
-Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
-
-````cpp title="src/examples/ex_acq_studio/main.cpp, line 333"
-        static_cast<void>(m_recorder->stop());
-        const AcqRecorderStats stats = m_recorder->stats();
-        m_recorder.reset();
-        addRecording(m_path, std::format("{} samples · {} events", stats.samples, stats.events));
-    }
-    setMode(Mode::Idle);
-}
 ````
 
 ## Authors of this file

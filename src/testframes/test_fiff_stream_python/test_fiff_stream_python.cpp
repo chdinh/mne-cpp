@@ -245,7 +245,7 @@ void TestFiffStreamPython::projectors()
     QCOMPARE(back[1].active, false);
     QCOMPARE(back[0].kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_FIELD));
     // Channel names are read without spaces (FIFF convention in MNE-CPP).
-    QCOMPARE(back[0].data->col_names, StringList({"MEG0113", "MEG0112", "MEG0111"}));
+    QCOMPARE(back[0].data->col_names, StringList({"MEG 0113", "MEG 0112", "MEG 0111"}));
     QVERIFY((back[0].data->data - RowVector3d(0.6, 0.8, 0.0)).cwiseAbs().maxCoeff() < 1e-7);
     QVERIFY((back[1].data->data - RowVector3d(0.0, 0.8, 0.6)).cwiseAbs().maxCoeff() < 1e-7);
 }
@@ -633,7 +633,7 @@ void TestFiffStreamPython::refusesUnwritablePath()
     const QString path = dir.filePath(QStringLiteral("no/such/dir/out.fif"));
     FiffInfo info;
     FiffChInfo ch;
-    ch.ch_name = "EEG001";
+    ch.ch_name = "EEG 001";
     ch.kind = FIFFV_EEG_CH;
     info.chs.push_back(ch);
     info.ch_names.push_back(ch.ch_name);

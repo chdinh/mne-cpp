@@ -225,8 +225,8 @@ void TestMneBrowseApp::recomputesEvokedLikePython()
         QCOMPARE(evoked->nave, 6);
         QCOMPARE(evoked->data.cols(), Eigen::Index(121));
         QVERIFY(std::abs(evoked->times(0) + 0.09989760657919393) < 1e-6);
-        const int meg = static_cast<int>(BASELIB::indexOf(evoked->info.ch_names, "MEG1332"));
-        const int eeg = static_cast<int>(BASELIB::indexOf(evoked->info.ch_names, "EEG021"));
+        const int meg = static_cast<int>(BASELIB::indexOf(evoked->info.ch_names, "MEG 1332"));
+        const int eeg = static_cast<int>(BASELIB::indexOf(evoked->info.ch_names, "EEG 021"));
         QVERIFY(meg >= 0 && eeg >= 0);
         QVERIFY2(std::abs(evoked->data.row(meg).sum() - expected[row].megSum) < 1e-5 * std::abs(expected[row].megSum),
                  qPrintable(QString::number(evoked->data.row(meg).sum(), 'g', 17)));
@@ -340,8 +340,8 @@ void TestMneBrowseApp::computesAndSavesCovarianceLikePython()
     const FIFFLIB::FiffCov cov(covPath.toStdString());
     QVERIFY(!cov.empty());
     QCOMPARE(cov.nfree, 1524);
-    const int meg = static_cast<int>(BASELIB::indexOf(cov.names, "MEG1332"));
-    const int eeg = static_cast<int>(BASELIB::indexOf(cov.names, "EEG021"));
+    const int meg = static_cast<int>(BASELIB::indexOf(cov.names, "MEG 1332"));
+    const int eeg = static_cast<int>(BASELIB::indexOf(cov.names, "EEG 021"));
     QVERIFY(meg >= 0 && eeg >= 0);
     const double expected[3] = {4.770659745331084e-30, 3.182089184120055e-17, 1.7621560460231146e-24};
     const double got[3] = {cov.data(meg, meg), cov.data(eeg, eeg), cov.data(meg, eeg)};
@@ -468,9 +468,9 @@ void TestMneBrowseApp::writesRawCopyButNotOverItsSource()
     FIFFLIB::FiffRawData source(sourcePath.toStdString());
     Eigen::MatrixXd sourceData, times;
     QVERIFY(source.read_raw_segment(sourceData, times));
-    const int meg = static_cast<int>(BASELIB::indexOf(source.info.ch_names, "MEG1332"));
-    const int eeg = static_cast<int>(BASELIB::indexOf(source.info.ch_names, "EEG021"));
-    const int eog = static_cast<int>(BASELIB::indexOf(source.info.ch_names, "EOG061"));
+    const int meg = static_cast<int>(BASELIB::indexOf(source.info.ch_names, "MEG 1332"));
+    const int eeg = static_cast<int>(BASELIB::indexOf(source.info.ch_names, "EEG 021"));
+    const int eog = static_cast<int>(BASELIB::indexOf(source.info.ch_names, "EOG 061"));
     QVERIFY(meg >= 0 && eeg >= 0 && eog >= 0);
     for (const QString& path : {copyPath, filteredPath}) {
         FIFFLIB::FiffRawData written(path.toStdString());
@@ -678,7 +678,7 @@ void TestMneBrowseApp::managesVirtualChannelsThroughTheirDialogs()
         answerNextModal([](QWidget* pSet) {
             auto* channels = pSet->findChild<QListWidget*>();
             pSet->findChild<QLineEdit*>()->setText("frontal");
-            for (const char* name : {"EEG001", "EEG002", "EEG003"})
+            for (const char* name : {"EEG 001", "EEG 002", "EEG 003"})
                 channels->findItems(name, Qt::MatchExactly).first()->setSelected(true);
             qobject_cast<QDialog*>(pSet)->accept();
             answerNextModal([](QWidget* pManageAgain) { qobject_cast<QDialog*>(pManageAgain)->reject(); });
@@ -691,22 +691,22 @@ void TestMneBrowseApp::managesVirtualChannelsThroughTheirDialogs()
     // A bipolar pair: the dialog picks the first other channel as reference and names it after both
     answerNextModal([](QWidget* pAdd) {
         const auto combos = pAdd->findChildren<QComboBox*>();
-        combos.at(1)->setCurrentText("EEG004");
+        combos.at(1)->setCurrentText("EEG 004");
         qobject_cast<QDialog*>(pAdd)->accept();
     });
     findAction(manager, "Add virtual channel")->trigger();
     QCOMPARE(model->rowCount(), 1);
     const VirtualChannelDefinition bipolar = model->virtualChannels().first();
     QCOMPARE(bipolar.kind, VirtualChannelKind::Bipolar);
-    QCOMPARE(bipolar.primaryChannel, QStringLiteral("EEG004"));
+    QCOMPARE(bipolar.primaryChannel, QStringLiteral("EEG 004"));
     QCOMPARE(bipolar.referenceChannels.size(), 1);
-    QCOMPARE(bipolar.name, QStringLiteral("EEG004-%1").arg(bipolar.referenceChannels.first()));
+    QCOMPARE(bipolar.name, QStringLiteral("EEG 004-%1").arg(bipolar.referenceChannels.first()));
 
     // A weighted reference against the saved set, with one weight edited
     answerNextModal([](QWidget* pAdd) {
         const auto combos = pAdd->findChildren<QComboBox*>();
         combos.at(0)->setCurrentIndex(2);
-        combos.at(1)->setCurrentText("EEG010");
+        combos.at(1)->setCurrentText("EEG 010");
         combos.at(2)->setCurrentIndex(1);
         auto* weights = pAdd->findChild<QTableWidget*>();
         QCOMPARE(weights->rowCount(), 3);
@@ -718,9 +718,9 @@ void TestMneBrowseApp::managesVirtualChannelsThroughTheirDialogs()
     findAction(manager, "Add virtual channel")->trigger();
     QCOMPARE(model->rowCount(), 2);
     const VirtualChannelDefinition weighted = model->virtualChannels().at(1);
-    QCOMPARE(weighted.name, QStringLiteral("EEG010-wref-frontal"));
+    QCOMPARE(weighted.name, QStringLiteral("EEG 010-wref-frontal"));
     QCOMPARE(weighted.referenceSetName, QStringLiteral("frontal"));
-    QCOMPARE(weighted.referenceChannels, (QStringList{"EEG001", "EEG002", "EEG003"}));
+    QCOMPARE(weighted.referenceChannels, (QStringList{"EEG 001", "EEG 002", "EEG 003"}));
     QCOMPARE(weighted.referenceWeights, (QVector<double>{1.0, 0.5, 1.0}));
 
     // Cancelling adds nothing

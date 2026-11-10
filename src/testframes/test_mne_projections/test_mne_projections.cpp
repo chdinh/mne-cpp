@@ -95,17 +95,17 @@ private slots:
         item.active = 1;
         item.nvec = 1;
 
-        StringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList colNames = {"MEG 0111", "MEG 0112", "MEG 0113"};
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 1.0f, 1.0f;
         item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
-        StringList testList = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList testList = {"MEG 0111", "MEG 0112", "MEG 0113"};
         int affected = item.affect(testList, static_cast<int>(testList.size()));
         QVERIFY(affected > 0);
 
-        StringList noMatch = {"EEG001", "EEG002"};
+        StringList noMatch = {"EEG 001", "EEG 002"};
         int notAffected = item.affect(noMatch, static_cast<int>(noMatch.size()));
         QCOMPARE(notAffected, 0);
     }
@@ -124,7 +124,7 @@ private slots:
     {
         MNEProjOp op;
 
-        StringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList colNames = {"MEG 0111", "MEG 0112", "MEG 0113"};
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
@@ -224,7 +224,7 @@ private slots:
     void testProjOpAssignChannels()
     {
         MNEProjOp op;
-        StringList colNames = {"MEG0111", "MEG0112", "MEG0113"};
+        StringList colNames = {"MEG 0111", "MEG 0112", "MEG 0113"};
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
@@ -233,7 +233,7 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        StringList chList = {"MEG0111", "MEG0112", "MEG0113", "MEG0121"};
+        StringList chList = {"MEG 0111", "MEG 0112", "MEG 0113", "MEG 0121"};
         int rc = op.assign_channels(chList, static_cast<int>(chList.size()));
         QVERIFY(rc >= 0);
     }
@@ -315,7 +315,7 @@ private slots:
     void testProjOpAffect()
     {
         MNEProjOp op;
-        StringList colNames = {"MEG0111", "MEG0112"};
+        StringList colNames = {"MEG 0111", "MEG 0112"};
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
@@ -324,11 +324,11 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(&nm, 1, "SSP");
 
-        StringList testChs = {"MEG0111", "MEG0112"};
+        StringList testChs = {"MEG 0111", "MEG 0112"};
         int n = op.affect(testChs, static_cast<int>(testChs.size()));
         QVERIFY(n >= 0);
 
-        StringList noMatch = {"EEG001"};
+        StringList noMatch = {"EEG 001"};
         int n2 = op.affect(noMatch, static_cast<int>(noMatch.size()));
         QCOMPARE(n2, 0);
     }

@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     const QString data = parser.value(dataOption);
     bool ok = true;
 
-    // The 305 good MEG channels; the forward names them without the space ("MEG0113").
+    // The 305 good MEG channels; the forward names them without the space ("MEG 0113").
     const FiffEvoked sample((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0);
     StringList good;
     for (const std::string& name : sample.info.ch_names) {

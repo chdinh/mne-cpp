@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "fiff_proj.h"
+#include "fiff_ch_name.h"
 #include <base/log.h>
 
 #include <format>
@@ -73,7 +74,7 @@ std::array<std::vector<int>, 3> pcaChannelGroups(const FiffInfo& info)
 {
     std::array<std::vector<int>, 3> groups;
     for (int k = 0; k < std::ssize(info.chs); ++k) {
-        if (BASELIB::contains(info.bads, info.ch_names[k])) {
+        if (has_channel(info.bads, info.ch_names[k])) {
             continue;
         }
         if (info.chs[k].kind == FIFFV_MEG_CH) {
@@ -244,10 +245,10 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
             p = 0;
             for (c = 0; c < nchan; ++c) {
                 for (i = 0; i < static_cast<int>(one.data->col_names.size()); ++i) {
-                    if (ch_names[c] == one.data->col_names[i]) {
+                    if (same_channel(ch_names[c], one.data->col_names[i])) {
                         isBad = false;
                         for (j = 0; j < static_cast<int>(bads.size()); ++j) {
-                            if (ch_names[c] == bads[j]) {
+                            if (same_channel(ch_names[c], bads[j])) {
                                 isBad = true;
                             }
                         }
@@ -368,7 +369,7 @@ std::vector<FiffProj> FiffProj::compute_from_raw(const FiffRawData& raw,
         // Simple peak-to-peak rejection
         bool ok = true;
         for (int c = 0; c < nchan && ok; ++c) {
-            if (BASELIB::contains(raw.info.bads, raw.info.ch_names[c]))
+            if (has_channel(raw.info.bads, raw.info.ch_names[c]))
                 continue;
             double pp = epochData.row(c).maxCoeff() - epochData.row(c).minCoeff();
             if (raw.info.chs[c].kind == FIFFV_MEG_CH) {

@@ -175,7 +175,7 @@ void TestFiffRWR::initTestCase()
 
     MatrixXi vPicks = rawFirstInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawFirstInRaw.info.bads); // prefer member function
     if (vPicks.cols() == 0) {
-        include = {"STI101", "STI201", "STI301"};
+        include = {"STI 101", "STI 201", "STI 301"};
         vPicks = rawFirstInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawFirstInRaw.info.bads); // prefer member function
         if (vPicks.cols() == 0) {
             printf("channel list may need modification\n");
@@ -250,7 +250,7 @@ void TestFiffRWR::initTestCase()
 
     vPicks = rawSecondInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawSecondInRaw.info.bads); // prefer member function
     if (vPicks.cols() == 0) {
-        include = {"STI101", "STI201", "STI301"};
+        include = {"STI 101", "STI 201", "STI 301"};
         vPicks = rawSecondInRaw.info.pick_types(bWantMeg, bWantEeg, bWantStim, include, rawSecondInRaw.info.bads); // prefer member function
         if (vPicks.cols() == 0) {
             printf("channel list may need modification\n");
@@ -551,9 +551,9 @@ void TestFiffRWR::writersStable_data()
     QTest::addColumn<qulonglong>("hash");
     QTest::addColumn<qlonglong>("size");
     QTest::addColumn<bool>("layoutOnly");
-    QTest::newRow("raw") << "raw" << qulonglong(0x7315ac1531102ed1ULL) << qlonglong(12036488) << false;
-    QTest::newRow("evoked") << "evoked" << qulonglong(0xf88ccee03ee4b16eULL) << qlonglong(2581535) << true;
-    QTest::newRow("covariance") << "cov" << qulonglong(0xc41f39abd7c6cd27ULL) << qlonglong(545712) << false;
+    QTest::newRow("raw") << "raw" << qulonglong(0x8916c3f09038d573ULL) << qlonglong(12036856) << false;
+    QTest::newRow("evoked") << "evoked" << qulonglong(0xf6bbb2083ff32b99ULL) << qlonglong(2581903) << true;
+    QTest::newRow("covariance") << "cov" << qulonglong(0x698353a3817538d8ULL) << qlonglong(546446) << false;
     QTest::newRow("transform") << "trans" << qulonglong(0x9199331869f76d3eULL) << qlonglong(212) << false;
     QTest::newRow("digitizer") << "dig" << qulonglong(0xc59bdb7c1024cdc8ULL) << qlonglong(5468) << false;
     QTest::newRow("forward") << "fwd" << qulonglong(0x176c6bb765acd4afULL) << qlonglong(55425088) << true;

@@ -309,12 +309,12 @@ private slots:
         // Create a synthetic FiffInfo with one MEG channel
         FiffInfo info;
         FiffChInfo ch;
-        ch.ch_name = "MEG0001";
+        ch.ch_name = "MEG 0001";
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         ch.unit = FIFF_UNIT_T;
         info.chs.push_back(ch);
-        info.ch_names.push_back("MEG0001");
+        info.ch_names.push_back("MEG 0001");
         info.nchan = 1;
 
         // Data well within threshold (peak-to-peak = 0 since all values the same)
@@ -342,12 +342,12 @@ private slots:
         // Create synthetic epochs and average
         FiffInfo info;
         FiffChInfo ch;
-        ch.ch_name = "MEG0001";
+        ch.ch_name = "MEG 0001";
         ch.kind = FIFFV_MEG_CH;
         ch.chpos.coil_type = FIFFV_COIL_VV_MAG_T3;
         ch.unit = FIFF_UNIT_T;
         info.chs.push_back(ch);
-        info.ch_names.push_back("MEG0001");
+        info.ch_names.push_back("MEG 0001");
         info.nchan = 1;
         info.sfreq = 100.0;
 

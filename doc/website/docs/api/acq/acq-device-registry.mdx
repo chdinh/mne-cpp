@@ -121,6 +121,20 @@ Thread-safe.
 
 ## Used in examples
 
+### [ex_acq_devices](../../examples/acq/ex_acq_devices.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_devices/main.cpp, line 145"
+public:
+    explicit DeviceWindow(std::filesystem::path folder)
+    : m_folder(std::move(folder))
+    , m_schemes(AcqDeviceRegistry::instance().schemes())
+    {
+        setWindowTitle("MNE-CPP acquisition devices");
+        resize(1500, 900);
+````
+
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
@@ -139,20 +153,6 @@ Recover the P300 from a streaming oddball session by trigger-locked averaging.
     }
     return 0;
 }
-````
-
-### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
-
-Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
-
-````cpp title="src/examples/ex_acq_studio/main.cpp, line 145"
-public:
-    explicit Studio(std::filesystem::path folder)
-    : m_folder(std::move(folder))
-    , m_schemes(AcqDeviceRegistry::instance().schemes())
-    {
-        setWindowTitle("MNE-CPP acquisition studio");
-        resize(1500, 900);
 ````
 
 ## Authors of this file

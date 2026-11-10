@@ -25,6 +25,7 @@
 //=============================================================================================================
 
 #include "mne_inverse_operator.h"
+#include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
 
@@ -233,7 +234,7 @@ bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
 
     StringList missing_ch_names;
     for (qint32 i = 0; i < static_cast<int>(inv_ch_names.size()); ++i)
-        if (!BASELIB::contains(data_ch_names, inv_ch_names[i]))
+        if (!FIFFLIB::has_channel(data_ch_names, inv_ch_names[i]))
             missing_ch_names.push_back(inv_ch_names[i]);
 
     qint32 n_missing = static_cast<int>(missing_ch_names.size());
@@ -660,7 +661,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     RowVectorXd ch_idx(info.chs.size());
     qint32 count = 0;
     for (qint32 i = 0; i < std::ssize(info.chs); ++i) {
-        if (BASELIB::contains(gain_info.ch_names, info.chs[i].ch_name)) {
+        if (FIFFLIB::has_channel(gain_info.ch_names, info.chs[i].ch_name)) {
             ch_idx[count] = i;
             ++count;
         }

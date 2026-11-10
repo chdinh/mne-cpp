@@ -24,6 +24,7 @@
 //=============================================================================================================
 
 #include "fiff_info.h"
+#include "fiff_ch_name.h"
 #include "fiff_file.h"
 #include "fiff_stream.h"
 
@@ -310,7 +311,7 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
         res.ch_names.push_back(this->ch_names[idx]);
     }
     res.nchan = static_cast<int>(sel.size());
-    std::erase_if(res.bads, [&res](const std::string& bad) { return !BASELIB::contains(res.ch_names, bad); });
+    std::erase_if(res.bads, [&res](const std::string& bad) { return !FIFFLIB::has_channel(res.ch_names, bad); });
 
     return res;
 }
@@ -365,7 +366,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
     std::vector<FiffChInfo> eeg;
 
     for (int k = 0; k < std::ssize(info.chs); k++) {
-        if (BASELIB::contains(bads, info.chs[k].ch_name))
+        if (FIFFLIB::has_channel(bads, info.chs[k].ch_name))
             continue;
         if (do_meg && info.chs[k].kind == FIFFV_MEG_CH)
             meg.push_back(info.chs[k]);

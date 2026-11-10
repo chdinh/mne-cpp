@@ -14,6 +14,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_raw_data.h>
 #include <base/string_utils.h>
 #include <fiff/fiff_stream.h>
@@ -55,11 +56,7 @@ using namespace Eigen;
 
 static int findChannelByName(const FiffInfo& info, const QString& name)
 {
-    for (int i = 0; i < std::ssize(info.chs); ++i) {
-        if (std::string(BASELIB::trimmed(info.chs[i].ch_name)) == name)
-            return i;
-    }
-    return -1;
+    return FIFFLIB::channel_index(info.ch_names, std::string(BASELIB::trimmed(name.toStdString())));
 }
 
 //=============================================================================================================
@@ -118,11 +115,7 @@ int main(int argc, char* argv[])
         qInfo("Found %s at index %d", qPrintable(stiNames[i]), stiIndices[i]);
     }
 
-    int sti14Idx = findChannelByName(raw.info, "STI 014");
-    if (sti14Idx < 0) {
-        // Try alternate name
-        sti14Idx = findChannelByName(raw.info, "STI014");
-    }
+    const int sti14Idx = findChannelByName(raw.info, "STI 014");
     if (sti14Idx < 0) {
         qCritical("Cannot find STI 014 channel.");
         return 1;

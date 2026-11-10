@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "eog_regression.h"
+#include <fiff/fiff_ch_name.h>
 #include <base/log.h>
 
 #include <vector>
@@ -70,12 +71,12 @@ void EogRegression::fit(const MatrixXd& data,
 
     if (eogChannels.empty()) {
         for (int i = 0; i < std::ssize(info.chs); ++i) {
-            if (info.chs[i].kind == FIFFV_EOG_CH && !BASELIB::contains(info.bads, info.ch_names[i]))
+            if (info.chs[i].kind == FIFFV_EOG_CH && !FIFFLIB::has_channel(info.bads, info.ch_names[i]))
                 m_vecEogIndices.push_back(i);
         }
     } else {
         for (const std::string& name : eogChannels) {
-            const int idx = static_cast<int>(BASELIB::indexOf(info.ch_names, name));
+            const int idx = static_cast<int>(FIFFLIB::channel_index(info.ch_names, name));
             if (idx >= 0)
                 m_vecEogIndices.push_back(idx);
             else

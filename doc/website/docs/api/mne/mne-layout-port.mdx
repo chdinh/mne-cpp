@@ -24,7 +24,7 @@ Channel names are stored in matching form: lower case, without spaces and withou
 auto layout = MNELayout::read((layoutDir + "/Vectorview-all.lout").toStdU16String());
 const std::map<std::string, QPointF> positions = layout->channelPositions();             // lower-left corners, keyed "MEG 0113"
 const int leftHalf = layout->confine(QRectF(QPointF(-85.0, -83.0), QPointF(0.0, 75.0))); // zoom to the left half
-const int shownTriplet = layout->matchPorts({"MEG0113", "MEG0112", "MEG0111"});
+const int shownTriplet = layout->matchPorts({"MEG 0113", "MEG 0112", "MEG 0111"});
 ```
 
 ---

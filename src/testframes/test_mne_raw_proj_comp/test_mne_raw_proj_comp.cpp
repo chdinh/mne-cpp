@@ -228,16 +228,16 @@ void TestMneRawProjComp::namedVector_pickByName()
 {
     MNENamedVector nv;
     nv.nvec = 4;
-    nv.names.push_back("MEG001");
-    nv.names.push_back("MEG002");
-    nv.names.push_back("EEG001");
-    nv.names.push_back("EEG002");
+    nv.names.push_back("MEG 001");
+    nv.names.push_back("MEG 002");
+    nv.names.push_back("EEG 001");
+    nv.names.push_back("EEG 002");
     nv.data.resize(4);
     nv.data << 1.0f, 2.0f, 3.0f, 4.0f;
 
     StringList pickNames;
-    pickNames.push_back("MEG001");
-    pickNames.push_back("EEG002");
+    pickNames.push_back("MEG 001");
+    pickNames.push_back("EEG 002");
     VectorXf result(2);
     int status = nv.pick(pickNames, 2, false, result);
     QCOMPARE(status, 0);
@@ -457,19 +457,19 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
 
     // FIFF round trip of the FIFFB_MNE_DERIVATIONS block; FIFF name lists carry no spaces.
     MNEDerivSet both = *set;
-    both.append(MNEDerivSet::fromDefinitions({{"EOG", {{"EOG061", 1.0}}}}, "eog"));
+    both.append(MNEDerivSet::fromDefinitions({{"EOG", {{"EOG 061", 1.0}}}}, "eog"));
     QVERIFY(both.write(dir.filePath("deriv.fif").toStdU16String()));
     const auto back = MNEDerivSet::read(dir.filePath("deriv.fif").toStdU16String());
     QVERIFY(back);
     QCOMPARE(static_cast<int>(back->derivs.size()), 2);
     QCOMPARE(back->count(), 4);
-    QCOMPARE(back->definitions()[0].first, std::string("EEG001-EEG002"));
-    QCOMPARE(back->definitions()[1].second.at("EEG003"), -0.5);
-    QCOMPARE(back->definitions()[3].second, (std::map<std::string, double>{{"EOG061", 1.0}}));
+    QCOMPARE(back->definitions()[0].first, std::string("EEG 001-EEG 002"));
+    QCOMPARE(back->definitions()[1].second.at("EEG 003"), -0.5);
+    QCOMPARE(back->definitions()[3].second, (std::map<std::string, double>{{"EOG 061", 1.0}}));
 
     // Validation: inputs must exist and share kind and unit.
     std::vector<FiffChInfo> chs;
-    for (const auto& [name, kind] : QList<QPair<QString, int>>{{"EEG001", FIFFV_EEG_CH}, {"EEG002", FIFFV_EEG_CH}, {"EOG061", FIFFV_EOG_CH}}) {
+    for (const auto& [name, kind] : QList<QPair<QString, int>>{{"EEG 001", FIFFV_EEG_CH}, {"EEG 002", FIFFV_EEG_CH}, {"EOG 061", FIFFV_EOG_CH}}) {
         FiffChInfo ch;
         ch.ch_name = name.toStdString();
         ch.kind = kind;
@@ -479,7 +479,7 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
     MNEDeriv first = *back->derivs[0];
     QCOMPARE(first.validate(chs), 1);
     QCOMPARE(first.valid, (Eigen::VectorXi(3) << 1, 0, 0).finished());
-    QCOMPARE(first.chs[0].ch_name, QString("EEG001"));
+    QCOMPARE(first.chs[0].ch_name, QString("EEG 001"));
     chs[1].kind = FIFFV_MEG_CH;
     QCOMPARE(first.validate(chs), 0);
 

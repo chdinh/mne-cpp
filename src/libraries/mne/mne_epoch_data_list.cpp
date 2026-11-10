@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include "mne_epoch_data_list.h"
+#include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
 
@@ -295,7 +296,7 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
         }
         // Like mne.Epochs(reject=...): only channel types with a limit are checked
         const auto limit = key ? mapReject.find(key) : mapReject.end();
-        if (limit == mapReject.end() || BASELIB::contains(lExcludeChs, ch.ch_name) || BASELIB::contains(pFiffInfo.bads, ch.ch_name) || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG2) {
+        if (limit == mapReject.end() || FIFFLIB::has_channel(lExcludeChs, ch.ch_name) || FIFFLIB::has_channel(pFiffInfo.bads, ch.ch_name) || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG || ch.chpos.coil_type == FIFFV_COIL_BABY_REF_MAG2) {
             continue;
         }
         ArtifactRejectionData tempData;
