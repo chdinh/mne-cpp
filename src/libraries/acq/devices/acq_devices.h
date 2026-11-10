@@ -75,6 +75,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_gusbamp_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_eego_scheme();
 
+/**
+ * Registers the neuromag:// scheme (the data acquisition of Neuromag/MEGIN MEG systems) with
+ * AcqDeviceRegistry::instance(), as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_neuromag_scheme();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H

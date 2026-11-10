@@ -18,6 +18,9 @@ set(SOURCES
   eego/eego_backend.cpp
   eego/eego_simulator.cpp
   eego/eego_driver.cpp
+  neuromag/neuromag_backend.cpp
+  neuromag/neuromag_fiff.cpp
+  neuromag/neuromag_simulator.cpp
 )
 
 set(PRIVATE_HEADERS
@@ -26,6 +29,8 @@ set(PRIVATE_HEADERS
   tmsi/tmsi_transport.h
   gusbamp/gusbamp_transport.h
   eego/eego_transport.h
+  neuromag/neuromag_fiff.h
+  neuromag/neuromag_transport.h
 )
 
 set(HEADERS
@@ -45,6 +50,11 @@ endif()
 # The TMSi SDK and the g.USBamp API are system DLLs, loaded at run time
 if(WIN32)
   list(APPEND SOURCES tmsi/tmsi_driver_win32.cpp gusbamp/gusbamp_driver_win32.cpp)
+endif()
+
+# The Neuromag acquisition runs on Linux; its client uses POSIX sockets and shared memory
+if(UNIX AND NOT EMSCRIPTEN)
+  list(APPEND SOURCES neuromag/neuromag_dacq_posix.cpp)
 endif()
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${PRIVATE_HEADERS})

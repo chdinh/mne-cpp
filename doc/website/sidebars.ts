@@ -63,6 +63,7 @@ const sidebars: SidebarsConfig = {
                                 'manual/scan-gusbamp',
                                 'manual/scan-eegosports',
                                 'manual/scan-natus',
+                                'manual/scan-neuromag',
                                 'manual/scan-ftbuffer',
                                 'manual/scan-lsl',
                                 'manual/scan-tmsi',

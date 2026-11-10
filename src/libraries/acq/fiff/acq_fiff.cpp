@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "acq_fiff.h"
+#include "../detail/acq_fiff_codes.h"
 #include <memory>
 
 #include <fiff/fiff_constants.h>
@@ -54,92 +55,20 @@ namespace
 
 constexpr const char* kMeasInfoSchema = "fiff.MeasInfo/1";
 
-struct KindMap
-{
-    AcqChannelKind kind;
-    int fiff;
-};
-
-// First match wins in both directions, so the canonical FIFF kind of an AcqChannelKind comes first.
-constexpr KindMap kKinds[] = {
-    {AcqChannelKind::Eeg, FIFFV_EEG_CH},
-    {AcqChannelKind::Meg, FIFFV_MEG_CH},
-    {AcqChannelKind::Meg, FIFFV_REF_MEG_CH},
-    {AcqChannelKind::Opm, FIFFV_MEG_CH},
-    {AcqChannelKind::Ecg, FIFFV_ECG_CH},
-    {AcqChannelKind::Eog, FIFFV_EOG_CH},
-    {AcqChannelKind::Emg, FIFFV_EMG_CH},
-    {AcqChannelKind::Seeg, FIFFV_SEEG_CH},
-    {AcqChannelKind::Ecog, FIFFV_ECOG_CH},
-    {AcqChannelKind::Dbs, FIFFV_DBS_CH},
-    {AcqChannelKind::Fnirs, FIFFV_FNIRS_CH},
-    {AcqChannelKind::Respiration, FIFFV_RESP_CH},
-    {AcqChannelKind::Gsr, FIFFV_GALVANIC_CH},
-    {AcqChannelKind::Stim, FIFFV_STIM_CH},
-    {AcqChannelKind::Temperature, FIFFV_TEMPERATURE_CH},
-    {AcqChannelKind::Misc, FIFFV_MISC_CH},
-};
-
-struct UnitMap
-{
-    AcqUnit unit;
-    int fiff;
-};
-
-constexpr UnitMap kUnits[] = {
-    {AcqUnit::None, FIFF_UNIT_NONE},
-    {AcqUnit::Volt, FIFF_UNIT_V},
-    {AcqUnit::Ampere, FIFF_UNIT_A},
-    {AcqUnit::Tesla, FIFF_UNIT_T},
-    {AcqUnit::TeslaPerMeter, FIFF_UNIT_T_M},
-    {AcqUnit::AmpereMeter, FIFF_UNIT_AM},
-    {AcqUnit::DegreeCelsius, FIFF_UNIT_CEL},
-    {AcqUnit::Second, FIFF_UNIT_SEC},
-    {AcqUnit::Ohm, FIFF_UNIT_OHM},
-    {AcqUnit::Watt, FIFF_UNIT_W},
-    {AcqUnit::Pascal, FIFF_UNIT_PA},
-    {AcqUnit::Molar, FIFF_UNIT_MOL},
-};
-
-int fiffKind(AcqChannelKind kind)
-{
-    for (const KindMap& m : kKinds) {
-        if (m.kind == kind) {
-            return m.fiff;
-        }
-    }
-    return FIFFV_MISC_CH;
-}
-
-AcqChannelKind acqKind(int fiff)
-{
-    for (const KindMap& m : kKinds) {
-        if (m.fiff == fiff) {
-            return m.kind;
-        }
-    }
-    return AcqChannelKind::Unknown;
-}
-
-int fiffUnit(AcqUnit unit)
-{
-    for (const UnitMap& m : kUnits) {
-        if (m.unit == unit) {
-            return m.fiff;
-        }
-    }
-    return FIFF_UNIT_NONE;
-}
-
-AcqUnit acqUnit(int fiff)
-{
-    for (const UnitMap& m : kUnits) {
-        if (m.fiff == fiff) {
-            return m.unit;
-        }
-    }
-    return AcqUnit::Unknown;
-}
+// The FIFF codes of the standard-library table are those of the FIFF library
+static_assert(detail::fiff_kind::kMeg == FIFFV_MEG_CH && detail::fiff_kind::kEeg == FIFFV_EEG_CH && detail::fiff_kind::kStim == FIFFV_STIM_CH &&
+              detail::fiff_kind::kEog == FIFFV_EOG_CH && detail::fiff_kind::kRefMeg == FIFFV_REF_MEG_CH && detail::fiff_kind::kEmg == FIFFV_EMG_CH &&
+              detail::fiff_kind::kEcg == FIFFV_ECG_CH && detail::fiff_kind::kMisc == FIFFV_MISC_CH && detail::fiff_kind::kResp == FIFFV_RESP_CH &&
+              detail::fiff_kind::kSeeg == FIFFV_SEEG_CH && detail::fiff_kind::kDbs == FIFFV_DBS_CH && detail::fiff_kind::kEcog == FIFFV_ECOG_CH &&
+              detail::fiff_kind::kFnirs == FIFFV_FNIRS_CH && detail::fiff_kind::kTemperature == FIFFV_TEMPERATURE_CH &&
+              detail::fiff_kind::kGalvanic == FIFFV_GALVANIC_CH);
+static_assert(detail::fiff_unit::kNone == FIFF_UNIT_NONE && detail::fiff_unit::kSecond == FIFF_UNIT_SEC && detail::fiff_unit::kAmpere == FIFF_UNIT_A &&
+              detail::fiff_unit::kMol == FIFF_UNIT_MOL && detail::fiff_unit::kPascal == FIFF_UNIT_PA && detail::fiff_unit::kWatt == FIFF_UNIT_W &&
+              detail::fiff_unit::kVolt == FIFF_UNIT_V && detail::fiff_unit::kOhm == FIFF_UNIT_OHM && detail::fiff_unit::kTesla == FIFF_UNIT_T &&
+              detail::fiff_unit::kCelsius == FIFF_UNIT_CEL && detail::fiff_unit::kTeslaPerMeter == FIFF_UNIT_T_M &&
+              detail::fiff_unit::kAmpereMeter == FIFF_UNIT_AM);
+static_assert(detail::fiff_coord::kUnknown == FIFFV_COORD_UNKNOWN && detail::fiff_coord::kDevice == FIFFV_COORD_DEVICE &&
+              detail::fiff_coord::kHead == FIFFV_COORD_HEAD);
 
 // MNE-Python tells oxy- from deoxyhaemoglobin by the coil type and names the channels "S1_D1 hbo".
 int coilType(const AcqChannelInfo& channel, int kind)
@@ -229,8 +158,8 @@ AcqStreamInfo ACQLIB::fromFiffInfo(const FiffInfo& info, AcqSampleFormat format)
     for (const FiffChInfo& ch : info.chs) {
         AcqChannelInfo channel;
         channel.name = ch.ch_name;
-        channel.kind = acqKind(ch.kind);
-        channel.unit = acqUnit(ch.unit);
+        channel.kind = detail::acq_kind_of(ch.kind);
+        channel.unit = detail::acq_unit_of(ch.unit);
         channel.unitExponent = ch.unit_mul;
         channel.scale = static_cast<double>(ch.cal) * static_cast<double>(ch.range);
         AcqFiffChannel fiff;
@@ -315,8 +244,8 @@ AcqExpected<FiffInfo> ACQLIB::toFiffInfo(const AcqStreamInfo& info)
             ch.unit_mul = unchanged ? f.unitMul : FIFF_UNITM_NONE;
         } else {
             // MNE-Python applies cal * range but not unit_mul, so the power of ten goes into cal.
-            ch.kind = channel.unit == AcqUnit::Unknown ? FIFFV_MISC_CH : fiffKind(channel.kind);
-            ch.unit = fiffUnit(channel.unit);
+            ch.kind = channel.unit == AcqUnit::Unknown ? FIFFV_MISC_CH : detail::fiff_kind_of(channel.kind);
+            ch.unit = detail::fiff_unit_of(channel.unit);
             ch.unit_mul = FIFF_UNITM_NONE;
             ch.logNo = index;
             ch.chpos.coil_type = coilType(channel, ch.kind);

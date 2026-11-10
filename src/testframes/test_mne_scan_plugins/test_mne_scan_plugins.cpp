@@ -21,6 +21,7 @@
 #include <eegosports/eegosportselectrodeitem.h>
 #include <gusbamp/gusbamp.h>
 #include <hpi/hpi.h>
+#include <neuromag/neuromag.h>
 #include <neuronalconnectivity/neuronalconnectivity.h>
 #include <noisereduction/noisereduction.h>
 #include <rtclustmne/rtclustmne.h>
@@ -83,6 +84,7 @@ private slots:
     void tmsiStreamsTheSimulatedAmplifier();
     void gusbampStreamsTheSimulatedAmplifiers();
     void eegoStreamsTheSimulatedAmplifier();
+    void neuromagStreamsTheSimulatedAcquisition();
     void eegoImpedanceViewShowsTheMeasuredElectrodes();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
@@ -446,6 +448,54 @@ void TestMneScanPlugins::gusbampStreamsTheSimulatedAmplifiers()
         QCOMPARE(data.cols(), 32);
         QVERIFY(data.topRows(8).cwiseAbs().maxCoeff() < 1e-3);
         QVERIFY(data.topRows(8).cwiseAbs().maxCoeff() > 0.0);
+    }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::neuromagStreamsTheSimulatedAcquisition()
+{
+    NEUROMAGPLUGIN::Neuromag plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* root = setup->findChild<QLineEdit*>("m_lineEdit_Root");
+        auto* buffer = setup->findChild<QSpinBox*>("m_spinBox_BufferSize");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        auto* autostart = setup->findChild<QCheckBox*>("m_checkBox_Autostart");
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        QVERIFY(root && buffer && block && autostart && simulate);
+        root->setText("/no such dir & more"); // must reach the source encoded, and is unused when simulating
+        buffer->setValue(50);
+        block->setValue(25);
+        simulate->click();
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // 306 MEG channels in the device frame and the trigger channel, in tesla at 1 kHz
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(307));
+    QCOMPARE(info->sfreq, 1000.0);
+    QCOMPARE(info->chs[0].kind, FIFFV_MEG_CH);
+    QCOMPARE(info->chs[0].chpos.coil_type, FIFFV_COIL_VV_MAG_T3);
+    QCOMPARE(info->chs[0].coord_frame, FIFFV_COORD_DEVICE);
+    QCOMPARE(info->chs[306].ch_name, std::string("STI 014"));
+    QCOMPARE(info->chs[306].kind, FIFFV_STIM_CH);
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 307);
+        QCOMPARE(data.cols(), 25);
+        QVERIFY(data.topRows(306).cwiseAbs().maxCoeff() < 1e-9);
+        QVERIFY(data.topRows(306).cwiseAbs().maxCoeff() > 0.0);
     }
 }
 

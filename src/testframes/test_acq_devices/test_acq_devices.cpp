@@ -19,6 +19,11 @@
 #include <acq/devices/acq_devices.h>
 
 #include <algorithm>
+#include <array>
+#include <atomic>
+#include <filesystem>
+#include <fstream>
+#include <mutex>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -27,6 +32,16 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+#if !defined(_WIN32)
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <poll.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <unistd.h>
+#endif
 
 //=============================================================================================================
 // QT INCLUDES
@@ -67,15 +82,11 @@ struct Recording
     }
 };
 
-Recording record(const std::string& uri)
+/** Everything a Lossless reader of @p device delivers from start() until EndOfStream. */
+Recording record_device(AcqDevice& device)
 {
     Recording out;
-    auto device = AcqDevice::open(uri);
-    if (!device) {
-        qWarning("open(%s): %s", uri.c_str(), device.error().text().c_str());
-        return out;
-    }
-    const auto info = device->stream().info();
+    const auto info = device.stream().info();
     out.channels = info->channelCount();
     for (const AcqChannelInfo& channel : info->channels) {
         out.scale.push_back(channel.scale);
@@ -83,15 +94,15 @@ Recording record(const std::string& uri)
     // Replays as fast as they are read wait for the reader instead of overrunning it
     AcqReaderOptions gating;
     gating.gating = true;
-    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
-    if (!reader || !device->start().ok()) {
+    auto reader = device.stream().reader(AcqReader::ReadMode::Lossless, gating);
+    if (!reader || !device.start().ok()) {
         return out;
     }
     while (true) {
         auto view = reader->acquire(1, 10s);
         if (!view) {
             if (view.error() != AcqErrorCode::EndOfStream) {
-                qWarning("acquire(%s): %s", uri.c_str(), view.error().text().c_str());
+                qWarning("acquire: %s", view.error().text().c_str());
             }
             break;
         }
@@ -127,11 +138,253 @@ Recording record(const std::string& uri)
     return out;
 }
 
+Recording record(const std::string& uri)
+{
+    auto device = AcqDevice::open(uri);
+    if (!device) {
+        qWarning("open(%s): %s", uri.c_str(), device.error().text().c_str());
+        return {};
+    }
+    return record_device(*device);
+}
+
 AcqErrorCode openError(const std::string& uri)
 {
     auto device = AcqDevice::open(uri);
     return device ? AcqErrorCode::None : device.error().code();
 }
+
+#if !defined(_WIN32)
+/**
+ * A Neuromag data server and collector on this machine, enough for the client: the measurement info of three
+ * channels (two MEG, STI 014) at 600 Hz on every connection, and on the second one a data buffer from the
+ * measurement file (big-endian), one in a datagram, and the end of the file.
+ */
+class FakeDacq
+{
+public:
+    FakeDacq()
+    {
+        char dir[] = "/tmp/nmXXXXXX"; // short: socket paths are limited to about 100 characters
+        if (::mkdtemp(dir) == nullptr) {
+            return;
+        }
+        m_root = dir;
+        ::mkdir((m_root + "/sockets").c_str(), 0700);
+        ::mkdir((m_root + "/raw").c_str(), 0700);
+        write_file();
+
+        m_server = ::socket(AF_UNIX, SOCK_DGRAM, 0);
+        const sockaddr_un address = unix_address(m_root + "/sockets/dacq_server");
+        if (m_server < 0 || ::bind(m_server, reinterpret_cast<const sockaddr*>(&address), sizeof(address)) != 0) {
+            return;
+        }
+        m_listener = ::socket(AF_INET, SOCK_STREAM, 0);
+        sockaddr_in tcp{};
+        tcp.sin_family = AF_INET;
+        tcp.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        socklen_t length = sizeof(tcp);
+        if (m_listener < 0 || ::bind(m_listener, reinterpret_cast<sockaddr*>(&tcp), sizeof(tcp)) != 0 || ::listen(m_listener, 4) != 0 ||
+            ::getsockname(m_listener, reinterpret_cast<sockaddr*>(&tcp), &length) != 0) {
+            return;
+        }
+        m_port = ntohs(tcp.sin_port);
+        m_threads.emplace_back([this] { serve_data(); });
+        m_threads.emplace_back([this] { serve_collector(); });
+    }
+
+    ~FakeDacq()
+    {
+        m_stop = true;
+        ::shutdown(m_listener, SHUT_RDWR);
+        ::close(m_listener);
+        ::close(m_server);
+        for (std::thread& thread : m_threads) {
+            thread.join();
+        }
+        std::filesystem::remove_all(m_root);
+    }
+
+    FakeDacq(const FakeDacq&) = delete;
+    FakeDacq& operator=(const FakeDacq&) = delete;
+
+    [[nodiscard]] bool ok() const
+    {
+        return m_port > 0;
+    }
+
+    [[nodiscard]] const std::string& root() const
+    {
+        return m_root;
+    }
+
+    [[nodiscard]] int port() const
+    {
+        return m_port;
+    }
+
+    [[nodiscard]] std::vector<std::string> commands()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_commands;
+    }
+
+private:
+    static sockaddr_un unix_address(const std::string& path)
+    {
+        sockaddr_un address{};
+        address.sun_family = AF_UNIX;
+        std::strncpy(address.sun_path, path.c_str(), sizeof(address.sun_path) - 1);
+        return address;
+    }
+
+    static bool readable(int fd)
+    {
+        pollfd p{fd, POLLIN, 0};
+        return ::poll(&p, 1, 50) > 0 && (p.revents & POLLIN) != 0;
+    }
+
+    static std::vector<std::byte> ints(std::initializer_list<std::int32_t> values)
+    {
+        std::vector<std::byte> data(values.size() * 4);
+        std::memcpy(data.data(), std::data(values), data.size());
+        return data;
+    }
+
+    static std::vector<std::byte> channel(int scan, const char* name, int kind, int coil, int unit, float cal, float range)
+    {
+        std::vector<std::byte> data(96);
+        const std::int32_t head[3] = {scan, scan, kind};
+        std::memcpy(data.data(), head, sizeof(head));
+        std::memcpy(data.data() + 12, &range, 4);
+        std::memcpy(data.data() + 16, &cal, 4);
+        std::memcpy(data.data() + 20, &coil, 4);
+        std::memcpy(data.data() + 72, &unit, 4);
+        std::memcpy(data.data() + 80, name, std::strlen(name));
+        return data;
+    }
+
+    /** Samples @p first..first+3 of the three channels. */
+    static std::vector<std::int32_t> samples(int first)
+    {
+        std::vector<std::int32_t> values;
+        for (int s = first; s < first + 4; ++s) {
+            values.insert(values.end(), {100 + s, -s, s >= 5 ? 3 : 0});
+        }
+        return values;
+    }
+
+    void write_file() const
+    {
+        std::ofstream file(m_root + "/raw/meas.fif", std::ios::binary);
+        for (std::int32_t value : samples(0)) {
+            const auto bits = static_cast<std::uint32_t>(value);
+            const std::array<char, 4> big = {static_cast<char>(bits >> 24), static_cast<char>(bits >> 16), static_cast<char>(bits >> 8),
+                                             static_cast<char>(bits)};
+            file.write(big.data(), 4);
+        }
+    }
+
+    void send(const sockaddr_un& to, int kind, int type, const std::vector<std::byte>& data, int loc = -1)
+    {
+        const std::int32_t message[6] = {kind, type, static_cast<std::int32_t>(data.size()), loc, -1, -1};
+        ::sendto(m_server, message, sizeof(message), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+        if (loc < 0 && !data.empty()) {
+            ::sendto(m_server, data.data(), data.size(), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+        }
+    }
+
+    void serve_data()
+    {
+        int session = 0;
+        while (!m_stop) {
+            if (!readable(m_server)) {
+                continue;
+            }
+            sockaddr_un from{};
+            socklen_t length = sizeof(from);
+            std::int32_t id = 0;
+            if (::recvfrom(m_server, &id, sizeof(id), 0, reinterpret_cast<sockaddr*>(&from), &length) != sizeof(id)) {
+                continue;
+            }
+            const std::int32_t ok = 0;
+            ::sendto(m_server, &ok, sizeof(ok), 0, reinterpret_cast<const sockaddr*>(&from), length);
+            if (id <= 0) {
+                continue;
+            }
+            const float sfreq = 600.0F;
+            std::vector<std::byte> rate(4);
+            std::memcpy(rate.data(), &sfreq, 4);
+            send(from, 104, 3, ints({101}));
+            send(from, 200, 3, ints({3}));
+            send(from, 201, 4, rate);
+            send(from, 203, 30, channel(1, "MEG 0111", 1, 3024, 112, 1.0F, 1.0F));
+            send(from, 203, 30, channel(2, "MEG 0112", 1, 3012, 201, 2.0F, 0.5F));
+            send(from, 203, 30, channel(3, "STI 014", 3, 0, -1, 1.0F, 1.0F));
+            send(from, 105, 3, ints({101}));
+            if (++session == 2) {
+                const std::string path = m_root + "/raw/meas.fif";
+                std::vector<std::byte> name(path.size() + 1);
+                std::memcpy(name.data(), path.c_str(), path.size());
+                send(from, 1, 10, name);
+                send(from, 300, 3, std::vector<std::byte>(48), 0);
+                const std::vector<std::int32_t> second = samples(4);
+                std::vector<std::byte> data(48);
+                std::memcpy(data.data(), second.data(), data.size());
+                send(from, 300, 3, data);
+                send(from, 2, 0, {});
+            }
+        }
+    }
+
+    void serve_collector()
+    {
+        while (!m_stop) {
+            const int fd = ::accept(m_listener, nullptr, nullptr);
+            if (fd < 0) {
+                return;
+            }
+            std::string pending;
+            std::array<char, 256> buffer{};
+            while (!m_stop) {
+                if (!readable(fd)) {
+                    continue;
+                }
+                const ssize_t got = ::recv(fd, buffer.data(), buffer.size(), 0);
+                if (got <= 0) {
+                    break;
+                }
+                pending.append(buffer.data(), static_cast<std::size_t>(got));
+                for (std::size_t end = pending.find('\n'); end != std::string::npos; end = pending.find('\n')) {
+                    std::string line = pending.substr(0, end);
+                    pending.erase(0, end + 1);
+                    while (!line.empty() && (line.back() == '\r' || line.back() == ' ')) {
+                        line.pop_back();
+                    }
+                    if (line.starts_with("pass ") || line.starts_with("name ")) {
+                        line.resize(4);
+                    }
+                    {
+                        std::lock_guard<std::mutex> lock(m_mutex);
+                        m_commands.push_back(line);
+                    }
+                    ::send(fd, "OK\n", 3, 0);
+                }
+            }
+            ::close(fd);
+        }
+    }
+
+    std::string m_root;
+    int m_server = -1;
+    int m_listener = -1;
+    int m_port = 0;
+    std::atomic<bool> m_stop{false};
+    std::mutex m_mutex;
+    std::vector<std::string> m_commands;
+    std::vector<std::thread> m_threads;
+};
+#endif
 
 } // namespace
 
@@ -184,6 +437,13 @@ private slots:
     void testEegoInvalidParameters();
     void testEegoHardwareUnavailable();
     void testEegoDriverReadsTheSdk();
+    void testNeuromagStreamLayout();
+    void testNeuromagMatchesSynthetic();
+    void testNeuromagWaitsForGatingReader();
+    void testNeuromagInvalidParameters_data();
+    void testNeuromagInvalidParameters();
+    void testNeuromagHardwareUnavailable();
+    void testNeuromagReadsTheDataServer();
 };
 
 //=============================================================================================================
@@ -194,6 +454,7 @@ void TestAcqDevices::initTestCase()
     QVERIFY(registerTmsiScheme().ok());
     QVERIFY(register_gusbamp_scheme().ok());
     QVERIFY(register_eego_scheme().ok());
+    QVERIFY(register_neuromag_scheme().ok());
 }
 
 //=============================================================================================================
@@ -923,6 +1184,168 @@ void TestAcqDevices::testEegoDriverReadsTheSdk()
     // The SDK's own refusals
     QCOMPARE(openError(sdk + "&rate=512"), AcqErrorCode::InvalidParameter);
     QCOMPARE(openError("eego://OTHER-2?sdk=" EEGO_SDK_STUB), AcqErrorCode::DeviceNotFound);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNeuromagStreamLayout()
+{
+    auto device = AcqDevice::open("neuromag://?simulate=1&meg=4&eeg=2");
+    QVERIFY(device);
+    QCOMPARE(device->description().backend, std::string("neuromag"));
+    QVERIFY(device->description().device.find("simulated Vectorview") != std::string::npos);
+
+    // The acquisition's format: an int32 per channel, MEG, EEG, then STI 014, as the measurement info describes them
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Int32);
+    QCOMPARE(info->sfreq, 1000.0);
+    QCOMPARE(info->channelCount(), std::size_t(7));
+    QCOMPARE(info->channels[0].name, std::string("MEG 0001"));
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Meg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Tesla);
+    QCOMPARE(info->channels[0].scale, static_cast<double>(1e-15F));
+    QVERIFY(info->channels[0].fiff);
+    QCOMPARE(info->channels[0].fiff->coilType, 3024);
+    QCOMPARE(info->channels[0].fiff->coordFrame, 1); // device
+    QCOMPARE(info->channels[0].fiff->scannerNo, 1);
+    QCOMPARE(info->channels[4].name, std::string("EEG 001"));
+    QCOMPARE(info->channels[4].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[4].fiff->coordFrame, 4); // head
+    QCOMPARE(info->channels[6].name, std::string("STI 014"));
+    QCOMPARE(info->channels[6].kind, AcqChannelKind::Stim);
+    // The whole measurement info travels with the stream, for the FIFF bridge
+    QCOMPARE(info->extensions.size(), std::size_t(1));
+    QCOMPARE(info->extensions[0].schema, std::string("fiff.MeasInfo/1"));
+    QVERIFY(!info->extensions[0].data.empty());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNeuromagMatchesSynthetic()
+{
+    // The simulated acquisition digitises the synthetic session of the same seed, MEG first
+    const Recording amp = record("neuromag://?simulate=1&meg=4&eeg=2&rate=500&seed=3&realtime=0&duration=2");
+    const Recording ref = record("synthetic://?meg=4&eeg=2&sfreq=500&seed=3&realtime=0&duration=2&block=100");
+    QCOMPARE(amp.channels, std::size_t(7));
+    QCOMPARE(ref.channels, std::size_t(7));
+    QCOMPARE(amp.frames(), std::size_t(1000));
+    QCOMPARE(ref.frames(), amp.frames());
+
+    const std::array<std::size_t, 7> source = {2, 3, 4, 5, 0, 1, 6};
+    for (std::size_t s = 0; s < amp.frames(); ++s) {
+        for (std::size_t c = 0; c < 7; ++c) {
+            QVERIFY2(std::abs(amp.at(s, c) - ref.at(s, source[c])) <= 0.5 * amp.scale[c] + 1e-30, qPrintable(QString::number(c)));
+        }
+    }
+    QVERIFY(ref.events.size() >= 1);
+    QCOMPARE(amp.events.size(), ref.events.size());
+    for (std::size_t e = 0; e < ref.events.size(); ++e) {
+        QCOMPARE(amp.events[e].sample, ref.events[e].sample);
+        QCOMPARE(amp.events[e].code, ref.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNeuromagWaitsForGatingReader()
+{
+    // Six seconds are more than the ring holds; the replay waits while the reader is busy
+    auto device = AcqDevice::open("neuromag://?simulate=1&meg=4&realtime=0&duration=6");
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    std::this_thread::sleep_for(300ms);
+
+    std::size_t frames = 0;
+    while (true) {
+        auto view = reader->acquire(1, 10s);
+        if (!view) {
+            QCOMPARE(view.error().code(), AcqErrorCode::EndOfStream);
+            break;
+        }
+        frames += view->sampleCount();
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(frames, std::size_t(6000));
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNeuromagInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("target") << "neuromag://megpc?simulate=1";
+    QTest::newRow("rate") << "neuromag://?simulate=1&rate=0";
+    QTest::newRow("buffer") << "neuromag://?simulate=1&buffer=-1";
+    QTest::newRow("autostart") << "neuromag://?simulate=1&autostart=maybe";
+    QTest::newRow("timeout") << "neuromag://?simulate=1&timeout=-1";
+    QTest::newRow("port") << "neuromag://?port=0";
+}
+
+void TestAcqDevices::testNeuromagInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNeuromagHardwareUnavailable()
+{
+#if defined(_WIN32)
+    QCOMPARE(openError("neuromag://"), AcqErrorCode::PlatformUnsupported);
+#else
+    auto device = AcqDevice::open("neuromag://?root=/no/such/dacq&autostart=0&timeout=0.5");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::DeviceNotFound);
+    QVERIFY(device.error().text().find("/no/such/dacq") != std::string::npos);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testNeuromagReadsTheDataServer()
+{
+#if defined(_WIN32)
+    QSKIP("the Neuromag acquisition runs on Linux");
+#else
+    FakeDacq dacq;
+    QVERIFY(dacq.ok());
+    const std::string uri = std::format("neuromag://?root={}&port={}&buffer=4", dacq.root(), dacq.port());
+    auto device = AcqDevice::open(uri);
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
+    QCOMPARE(info->sfreq, 600.0);
+    QCOMPARE(info->channelCount(), std::size_t(3));
+    QCOMPARE(info->channels[0].name, std::string("MEG 0111"));
+    QCOMPARE(info->channels[0].unit, AcqUnit::Tesla);
+    QCOMPARE(info->channels[1].name, std::string("MEG 0112"));
+    QCOMPARE(info->channels[1].unit, AcqUnit::TeslaPerMeter);
+    QCOMPARE(info->channels[1].scale, static_cast<double>(2.0F) * static_cast<double>(0.5F));
+    QCOMPARE(info->channels[2].kind, AcqChannelKind::Stim);
+
+    const Recording recorded = record_device(*device);
+    // A buffer in the measurement file (big-endian), then one in the datagram; the closed file ends the stream
+    QCOMPARE(recorded.frames(), std::size_t(8));
+    for (std::size_t s = 0; s < 8; ++s) {
+        QCOMPARE(recorded.at(s, 0), static_cast<double>(100 + s));
+        QCOMPARE(recorded.at(s, 1), static_cast<double>(-static_cast<int>(s)));
+        QCOMPARE(recorded.at(s, 2), s >= 5 ? 3.0 : 0.0);
+    }
+    QCOMPARE(recorded.events.size(), std::size_t(1));
+    QCOMPARE(recorded.events[0].sample, std::uint64_t(5));
+    QCOMPARE(recorded.events[0].code, 3);
+    device->close();
+
+    // The collector set the buffer and started and stopped both measurements: the info, then the data
+    const std::vector<std::string> expected = {"pass", "name", "vara maxBuflen 4", "setu", "meas", "stop",
+                                               "pass", "name", "vara maxBuflen 4", "setu", "meas", "stop"};
+    QCOMPARE(dacq.commands(), expected);
+#endif
 }
 
 //=============================================================================================================

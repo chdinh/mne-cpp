@@ -39,6 +39,7 @@ add_subdirectory(brainamp)
 add_subdirectory(tmsi)
 add_subdirectory(gusbamp)
 add_subdirectory(eegosports)
+add_subdirectory(neuromag)
 
 # Algorithm Plugin
 add_subdirectory(rtclustmne)

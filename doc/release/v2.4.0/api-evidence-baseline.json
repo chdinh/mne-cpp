@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 481,
-    "exported_free_functions": 178,
+    "exported_free_functions": 179,
     "registered_classes": 577,
     "exported_not_registered": 1,
     "registered_function_modules": 14,
@@ -366,6 +366,11 @@
     },
     {
       "name": "register_eego_scheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "register_neuromag_scheme",
       "header": "acq/devices/acq_devices.h",
       "library": "acq"
     },

@@ -1,0 +1,48 @@
+---
+title: Neuromag
+sidebar_label: Neuromag
+---
+# Neuromag
+
+The Neuromag plugin streams a Neuromag / MEGIN (Elekta) Vectorview or TRIUX MEG system into MNE Scan through the
+`neuromag://` source of the `mne_acq_devices` library. It reads the acquisition software (DACQ) directly, the way the
+Neuromag plugin of `mne_rt_server` did until 2020. Without a system it simulates one.
+
+## Building and running
+
+The plugin is built by default; reading a real system needs Linux or macOS, the simulator runs everywhere. MNE Scan runs
+on the acquisition workstation itself: the source registers as a client of the DACQ data server through its UNIX socket
+in `<root>/sockets`, receives the data buffers through the server's shared memory or files, and starts and stops
+measurements through the collector (TCP port 11122). The setup widget sets
+
+- **Acquisition directory**: the DACQ root, `/neuro/dacq` by default.
+- **Samples per data buffer**: the buffer length set on the collector before a measurement; *as set up* keeps it.
+- **Samples per block**: the block size handed to the connected plugins.
+- **Start and stop the measurement**: let the plugin start a measurement on the collector; clear it to follow
+  measurements started from the acquisition user interface.
+- **Simulate the acquisition**: 306 MEG channels and `STI 014` at 1 kHz in the data server's format.
+
+The channels, their calibration, coil types and positions come from the measurement info the acquisition sends at the
+start of each measurement. The trigger channel is `STI 014`, otherwise `STI101`; its changes become events.
+
+## Neuromag or FtBuffer
+
+The [FtBuffer](./scan-ftbuffer.mdx) plugin reads a FieldTrip buffer, which FieldTrip's `neuromag2ft` fills on the
+acquisition workstation; it runs on any computer on the network. The Neuromag plugin needs no further software but
+runs on the acquisition workstation.
+
+## Simulation and scripting
+
+The same source is available to every program that links `mne_acq_devices`:
+
+```cpp
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
+
+ACQLIB::register_neuromag_scheme();
+auto device = ACQLIB::AcqDevice::open("neuromag://?simulate=1&meg=306&eeg=64&rate=1000");
+```
+
+`host`, `port` and `client` select the collector and the data server's client id; `timeout` is how long to wait for the
+measurement info. `simulate=1` also accepts `meg`, `eeg`, `rate`, `buffer`, `seed`, `realtime=0` (as fast as possible),
+`duration` in seconds and `gain`.

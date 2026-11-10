@@ -125,6 +125,17 @@ aliases; replace the old spelling as below.
   started from `bin/` and the cap had no more electrodes than the amplifier
   inputs; it now finds its layouts next to the application and colours the
   measured electrodes.
+- `neuromag://` reads Neuromag / MEGIN Vectorview and TRIUX systems from
+  their acquisition software, as the Neuromag plugins of `mne_rt_server` and
+  MNE Scan did until they were removed in 2020: it registers with the data
+  server, takes the buffers from its shared memory or files, and starts and
+  stops measurements through the collector. The channels and their
+  calibration come from the measurement info, `STI 014` (or `STI101`)
+  changes become events. `neuromag://?simulate=1` simulates a system on
+  every platform.
+- The Neuromag MNE Scan plugin is back and reads through `neuromag://`.
+- `acq_fiff` maps channel kinds, units and coordinate frames through one
+  table shared with the devices that speak FIFF.
 - The TMSI impedance view finds its cap layouts wherever MNE Scan was
   started; it stayed empty unless the working directory was `bin/`. With a
   cap of more electrodes than the amplifier measures it colours the measured

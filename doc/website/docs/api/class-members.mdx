@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6374 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6410 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -245,6 +245,8 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **area** `[var]` in [MNEPatchInfo](/docs/api/mne/mne-patch-info) — Total surface area of the patch (m^2).
 - **area** `[var]` in [MNETriangle](/docs/api/mne/mne-triangle) — Triangle area.
 - **ArtifactSettingsView** `[fn]` in [ArtifactSettingsView](/docs/api/disp/artifact-settings-view)
+- **as_float** `[fn]` in `NeuromagTag`
+- **as_int** `[fn]` in `NeuromagTag`
 - **aspect_kind** `[var]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Aspect identifier, either FIFFV_ASPECT_AVERAGE or FIFFV_ASPECT_STD_ERR.
 - **aspectKindToString** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Provides the python Evoked string formatted aspect_kind, which is stored in kind: "average" &lt;-&gt; FIFFV_ASPECT_AVERAGE, "standard_error" &lt;-&gt; FIFFV_ASPECT_STD_ERR or "unknown".
 - **assemble_kernel** `[fn]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Assemble the inverse kernel matrix.
@@ -265,6 +267,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **autoDetectPortName** `[fn]` in [PolhemusConnection](/docs/api/acq/polhemus-connection) — Best-effort auto-detection of an attached Fastrak/FastSCAN.
 - **automatedRotation** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Whether automated rotation is currently active.
 - **autoSelect** `[fn]` in [StsCovEstimators](/docs/api/sts/sts-cov-estimators) — Auto-select the best covariance estimator via cross-validation.
+- **autostart** `[var]` in `NeuromagDacq` — Start and stop measurements through the collector.
 - **available** `[var]` in [AcqDiscoveredDevice](/docs/api/acq/acq-discovered-device) — false for backends whose runtime library was not found (still listed).
 - **available** `[fn]` in [AcqReader](/docs/api/acq/acq-reader)
 - **availablePorts** `[fn]` in [PolhemusConnection](/docs/api/acq/polhemus-connection) — Enumerate every serial port currently visible to the OS.
@@ -408,6 +411,8 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **bReject** `[var]` in [MNEEpochData](/docs/api/mne/mne-epoch-data) — Whether this epoch is to be rejected.
 - **bRejected** `[var]` in [ArtifactRejectionData](/docs/api/mne/artifact-rejection-data) — Set when the channel's peak-to-peak range exceeds dThreshold.
 - **buf_size** `[var]` in [MNERawInfo](/docs/api/mne/mne-raw-info) — Buffer size in samples.
+- **buffer** `[var]` in `NeuromagDacq` — Samples per data buffer to set; 0 keeps the server's setting.
+- **buffer** `[var]` in `NeuromagSimulation` — Samples per data buffer.
 - **buffers** `[var]` in [AcqRecorderStats](/docs/api/acq/acq-recorder-stats) — FIFF data buffers flushed to disk.
 - **bufferSamples** `[var]` in [AcqRecorderOptions](/docs/api/acq/acq-recorder-options) — Samples per FIFF data buffer, the unit flushed to disk; 0 = 1 s.
 - **bufs** `[var]` in [MNERawData](/docs/api/mne/mne-raw-data) — Raw data buffer definitions.
@@ -442,6 +447,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **cachedResultPath** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Relative path to cached result.
 - **cal** `[var]` in `AcqFiffChannel` — FIFF cal.
 - **cal** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Calibration from volts to units used.
+- **cal** `[var]` in `NeuromagChannel`
 - **calc_beta** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Compute the beta angle used in the linear collocation integration.
 - **calc_f** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Compute the f0, fx, fy integration helper values from corner coordinates.
 - **calc_gamma** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Compute the gamma angle for the linear field integration (Ferguson).
@@ -712,6 +718,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **clearView** `[fn]` in [TriggerDetectionView](/docs/api/disp/trigger-detection-view) — Clears the view.
 - **client** `[var]` in [FwdCompData](/docs/api/fwd/fwd-comp-data) — Client data to pass to the above functions.
 - **client** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Client data for the field computation function.
+- **client** `[var]` in `NeuromagDacq` — Client id at the data server, above 10000 for shared memory.
 - **client_free** `[var]` in [FwdThreadArg](/docs/api/fwd/fwd-thread-arg) — Releases owned client sub-objects.
 - **clipped** `[var]` in [AcqEncodeResult](/docs/api/acq/acq-encode-result) — Elements saturated to the channel range or native type, or NaN.
 - **clippingToggled** `[signal]` in [ChannelDataView](/docs/api/disp/channel-data-view)
@@ -766,6 +773,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **coil_class** `[var]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Coil class.
 - **coil_trans** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Coil coordinate system transformation.
 - **coil_type** `[var]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — What kind of coil.
+- **coil_type** `[var]` in `NeuromagChannel`
 - **coilFrequenciesChanged** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever the coil frequencies changed.
 - **CoilParam** `[fn]` in [CoilParam](/docs/api/inv/coil-param)
 - **coils** `[var]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — The coil or electrode positions.
@@ -1118,6 +1126,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **data** `[var]` in [MNENamedMatrix](/docs/api/mne/mne-named-matrix) — Dense data matrix of dimension `nrow` x `ncol`.
 - **data** `[var]` in [MNENamedVector](/docs/api/mne/mne-named-vector) — The data itself.
 - **data** `[var]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — The data itself (sparse).
+- **data** `[var]` in `NeuromagTag`
 - **data** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the data stored under the given role for the item referred to by the index.
 - **data_filt** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Optionally filtered copy of the data.
 - **data_proj** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Data after SSP projection (kept separately for some programs).
@@ -1203,6 +1212,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **description** `[var]` in [MnaOpSchemaPort](/docs/api/mna/mna-op-schema-port) — Human-readable description.
 - **description** `[var]` in [MnaProject](/docs/api/mna/mna-project) — Project description.
 - **description** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — Human-readable: "Covariance matrix must be positive-definite".
+- **description** `[fn]` in `NeuromagTransport`
 - **description** `[fn]` in `TmsiTransport`
 - **design** `[fn]` in [FirFilter](/docs/api/dsp/fir-filter) — Design a linear-phase FIR filter using [`FilterKernel`](/docs/api/dsp/filter-kernel) as the backend.
 - **designButterworth** `[fn]` in [IirFilter](/docs/api/dsp/iir-filter) — Design a Butterworth filter as a cascade of second-order sections.
@@ -1387,6 +1397,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **duration** `[var]` in `EegoSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [FiffAnnotation](/docs/api/fiff/fiff-annotation) — Duration in seconds (0 for point events).
 - **duration** `[var]` in `GusbampSimulation` — Seconds; 0 runs until stopped.
+- **duration** `[var]` in `NeuromagSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Duration (seconds).
 - **duration** `[var]` in `TmsiSimulation` — Seconds; 0 runs until stopped.
 - **dVarZThresh** `[var]` in [BadChannelDetectParams](/docs/api/dsp/bad-channel-detect-params) — Z-score of std-dev above this -&gt; noisy.
@@ -1408,6 +1419,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **edges** `[fn]` in [Network](/docs/api/connectivity/network)
 - **edges** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node)
 - **edgeStreams** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
+- **eeg** `[var]` in `NeuromagSimulation`
 - **eeg_client** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Client data for EEG field computations (not owned).
 - **eeg_els** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — EEG electrode definitions.
 - **eeg_loc** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Channel location.
@@ -2079,6 +2091,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **gain** `[var]` in `BrainAmpSimulation` — Amplitude factor of the simulated signal.
 - **gain** `[var]` in `EegoSimulation` — Amplitude factor of the simulated signal.
 - **gain** `[var]` in `GusbampSimulation` — Amplitude factor of the simulated signal.
+- **gain** `[var]` in `NeuromagSimulation` — Amplitude factor of the simulated signal.
 - **gain** `[var]` in `TmsiChannel` — Physical = (raw * gain + offset) * 10^exponent.
 - **gain** `[var]` in `TmsiSimulation` — Amplitude factor of the simulated signal.
 - **gainVector** `[fn]` in [FineCalibration](/docs/api/dsp/fine-calibration) — Magnetometer calibration factors.
@@ -2462,6 +2475,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **hitTestSplitter** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Hit-test the splitter bars.
 - **hitTolerancePx** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
 - **holmBonferroni** `[fn]` in [StatsMcCorrection](/docs/api/sts/stats-mc-correction) — Holm-Bonferroni step-down correction.
+- **host** `[var]` in `NeuromagDacq` — Host of the collector, which controls the measurement.
 - **hostAccessible** `[fn]` in [AcqMemoryLocation](/docs/api/acq/acq-memory-location)
 - **hostName** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Machine name (for cluster provenance).
 - **hoveredContact** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
@@ -2838,6 +2852,8 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **kind** `[var]` in [MNECTFCompData](/docs/api/mne/mnectf-comp-data) — The CTF compensation kind constant.
 - **kind** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — FIFF aspect kind (e.g.
 - **kind** `[var]` in [MNEProjItem](/docs/api/mne/mne-proj-item) — FIFF projection item kind (FIFFV_PROJ_ITEM_*).
+- **kind** `[var]` in `NeuromagChannel`
+- **kind** `[var]` in `NeuromagTag`
 - **kind** `[var]` in [PickResult](/docs/api/disp3-d/pick-result) — What was hit.
 - **kind** `[var]` in [SceneLayer](/docs/api/disp3-d/scene-layer)
 - **kMaxDepthSpacing** `[var]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Leads whose closest neighbouring contacts are nearer than this are depth leads.
@@ -2848,6 +2864,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **knownTrackerToObjectiveDistance** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **kShaftOvershoot** `[var]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Shaft extension past the outer contacts.
 - **kShaftRadius** `[var]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
+- **kSize** `[var]` in `NeuromagChannel` — Size of the record in a tag.
 - **kStimZoneH** `[var]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget) — Height of the stimulus lane (px).
 - **kSubduralContactRadius** `[var]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **kTieRadius** `[var]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object) — Ties between neighbouring strip / grid contacts.
@@ -3001,10 +3018,12 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **loadTrans** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the transformation should be loaded.
 - **loadTransformation** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Load a coordinate transformation from a FIF file.
 - **loc** `[var]` in `AcqFiffChannel` — Position r0 and orientation ex, ey, ez.
+- **loc** `[var]` in `NeuromagChannel` — r0, ex, ey, ez.
 - **lock** `[var]` in [AcqTimebase](/docs/api/acq/acq-timebase) — See `AcqLockState`.
 - **lockMemory** `[var]` in [AcqStreamOptions](/docs/api/acq/acq-stream-options) — mlock / VirtualLock; best effort, reported in stats.
 - **Log** `[fn]` in [Log](/docs/api/base/log)
 - **log2** `[fn]` in [Numerics](/docs/api/math/numerics) — Compute log base 2 of a given number.
+- **log_no** `[var]` in `NeuromagChannel`
 - **LogCapture** `[fn]` in [LogCapture](/docs/api/base/log-capture)
 - **LogCapture** `[fn]` in [LogCapture](/docs/api/base/log-capture)
 - **logFile** `[var]` in [AverageDescription](/docs/api/fiff/average-description) — Save log here.
@@ -3221,6 +3240,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **measure** `[var]` in [InvConnectivity](/docs/api/inv/inv-connectivity) — Metric name, e.g.
 - **measureImpedances** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend) — Measures electrode impedances.
 - **measureImpedances** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Measures the electrode impedances (control path, allocates).
+- **meg** `[var]` in `NeuromagSimulation` — Magnetometer channels.
 - **meg_client** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Client data for MEG field computations.
 - **meg_coils** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — MEG coil definitions.
 - **meg_comp** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Owns `meg_client` when it is a compensation wrapper.
@@ -3478,6 +3498,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **name** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Name of this selection.
 - **name** `[var]` in [MNEMshEyes](/docs/api/mne/mne-msh-eyes) — Name of this viewpoint definition.
 - **name** `[var]` in [MNEMshLightSet](/docs/api/mne/mne-msh-light-set) — Name of this light set.
+- **name** `[var]` in `NeuromagChannel`
 - **name** `[var]` in `TmsiChannel` — The SDK's channel name.
 - **names** `[var]` in [ElectrodeLayout](/docs/api/channels/electrode-layout) — Electrode names, from the Labels block if present.
 - **names** `[var]` in [FiffCov](/docs/api/fiff/fiff-cov) — Channel names.
@@ -3578,6 +3599,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **newSmoothedDataAvailable** `[signal]` in [RtSourceDataController](/docs/api/disp3-d/rt-source-data-controller) — Emitted when new interpolated per-vertex color data is available for rendering.
 - **newSubject** `[signal]` in [ProjectSettingsView](/docs/api/disp/project-settings-view)
 - **next** `[var]` in [FiffTag](/docs/api/fiff/fiff-tag) — Pointer to the next object.
+- **next** `[fn]` in `NeuromagTransport`
 - **next_legen** `[fn]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — Compute the next Legendre polynomials of the first and second kind using a recursion formula.
 - **nextEvent** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Require this event next.
 - **nextIgnore** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Ignore mask for next event.
@@ -3957,6 +3979,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **ParksMcClellan** `[fn]` in [ParksMcClellan](/docs/api/dsp/parks-mc-clellan) — NumTaps must be odd for high pass and notch filters.
 - **parse** `[fn]` in [AcqUri](/docs/api/acq/acq-uri)
 - **parse** `[fn]` in [CommandParser](/docs/api/com/command-parser) — Parses a CLI command or JSON command (list) and notifies all attached observers (command managers).
+- **parse** `[fn]` in `NeuromagChannel`
 - **parse_elc** `[fn]` in [LayoutLoader](/docs/api/channels/layout-loader) — Parses the text of an .elc file.
 - **parseAverageFile** `[fn]` in [MNEDescriptionParser](/docs/api/mne/mne-description-parser) — Parse an averaging description file.
 - **parseCovarianceFile** `[fn]` in [MNEDescriptionParser](/docs/api/mne/mne-description-parser) — Parse a covariance description file.
@@ -4084,6 +4107,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **PolhemusCoregistration** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **PolylineObject** `[fn]` in [PolylineObject](/docs/api/disp3-d/polyline-object) — Constructs a [`PolylineObject`](/docs/api/disp3-d/polyline-object) without any points.
 - **pop** `[fn]` in [CircularBuffer](/docs/api/base/circular-buffer) — Removes the oldest element.
+- **port** `[var]` in `NeuromagDacq` — Port of the collector.
 - **portAt** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Returns the port whose interior contains a point.
 - **portno** `[var]` in [MNELayoutPort](/docs/api/mne/mne-layout-port) — Running number of this viewport.
 - **ports** `[var]` in [MNELayout](/docs/api/mne/mne-layout) — Viewports in file order.
@@ -4267,6 +4291,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **randomSeed** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — -1 if not applicable
 - **range** `[var]` in `AcqFiffChannel` — FIFF range.
 - **range** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Voltmeter range (-1 = auto ranging).
+- **range** `[var]` in `NeuromagChannel`
 - **rangeMax** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Physical range, NaN if unknown.
 - **rangeMax** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **rangeMin** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Physical range, NaN if unknown.
@@ -4279,6 +4304,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **rasToVoxel** `[fn]` in [MriSlicer](/docs/api/mri/mri-slicer) — Convert RAS coordinate to voxel index using a volume's transform.
 - **rate** `[var]` in `EegoSetup` — Sampling rate in Hz, one of the amplifier's.
 - **rate** `[var]` in `GusbampSetup` — Sampling rate in Hz, one the amplifier supports.
+- **rate** `[var]` in `NeuromagSimulation` — Sampling rate in Hz.
 - **rate** `[var]` in `TmsiSetup` — Requested sampling rate in Hz.
 - **rateCorrection** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Estimated actual / nominal rate.
 - **rates** `[fn]` in `EegoTransport`
@@ -4434,6 +4460,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **realtime** `[var]` in `BrainAmpSimulation`
 - **realtime** `[var]` in `EegoSimulation`
 - **realtime** `[var]` in `GusbampSimulation`
+- **realtime** `[var]` in `NeuromagSimulation`
 - **realtime** `[var]` in `TmsiSimulation`
 - **realtimeColorsAvailable** `[signal]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Emitted when the real-time pipeline produces a new set of per-vertex colours.
 - **rearrange_source_space** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Rearrange source space after filtering: recount nuse, rebuild vertno, and recompute patch statistics if nearest info is available.
@@ -4589,6 +4616,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **role** `[var]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Role of the file.
 - **root** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Dataset root; created if missing.
 - **root** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — BIDS dataset root path.
+- **root** `[var]` in `NeuromagDacq` — Directory with the server's sockets/, shmem/ and raw/.
 - **rot** `[var]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Rotation angles of the MRI (in radians).
 - **rot** `[var]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Rotation angles of the MRI (in radians).
 - **rotation** `[fn]` in [CameraController](/docs/api/disp3-d/camera-controller)
@@ -4772,6 +4800,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **scalingChanged** `[signal]` in [ScalingView](/docs/api/disp/scaling-view) — Emit this signal whenever the scaling sliders or spin boxes changed.
 - **scalingMap** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **ScalingView** `[fn]` in [ScalingView](/docs/api/disp/scaling-view) — Constructs a [`ScalingView`](/docs/api/disp/scaling-view) which is a child of parent.
+- **scan_no** `[var]` in `NeuromagChannel`
 - **scanCorrelations** `[fn]` in [InvTrapMusic](/docs/api/inv/inv-trap-music) — Compute the MUSIC-type subspace correlation for all source locations.
 - **scannerNo** `[var]` in `AcqFiffChannel` — scanno.
 - **scanNo** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Scanning order number.
@@ -4811,6 +4840,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **seed** `[var]` in `BrainAmpSimulation`
 - **seed** `[var]` in `EegoSimulation`
 - **seed** `[var]` in `GusbampSimulation`
+- **seed** `[var]` in `NeuromagSimulation`
 - **seed** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Random seed for reproducibility.
 - **seed** `[var]` in `TmsiSimulation`
 - **seek** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
@@ -4868,6 +4898,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **separatorGeometries** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout) — Compute the separator widget geometries.
 - **separatorLinePx** `[fn]` in [MultiViewLayout](/docs/api/disp3-d/multi-view-layout)
 - **serial** `[var]` in [FiffDeviceInfo](/docs/api/fiff/fiff-device-info) — Serial number.
+- **serialize** `[fn]` in `NeuromagChannel`
 - **serials** `[fn]` in `GusbampTransport`
 - **seriesCount** `[fn]` in [LinePlot](/docs/api/disp/line-plot) — Returns the number of series in the plot.
 - **session** `[var]` in [AcqBidsPath](/docs/api/acq/acq-bids-path) — Session label without "ses-"; empty for none.
@@ -5581,6 +5612,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **start** `[fn]` in `BrainAmpTransport`
 - **start** `[fn]` in `EegoTransport` — Opens the EEG stream.
 - **start** `[fn]` in `GusbampTransport` — Sets up the units and starts the slaves, then the master.
+- **start** `[fn]` in `NeuromagTransport` — Connects as a data client and, if so set up, starts a measurement.
 - **start** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Starts the worker thread.
 - **start** `[fn]` in `TmsiTransport`
 - **start_block** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFF_BLOCK_START tag.
@@ -5639,6 +5671,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **stop** `[fn]` in `BrainAmpTransport`
 - **stop** `[fn]` in `EegoTransport`
 - **stop** `[fn]` in `GusbampTransport`
+- **stop** `[fn]` in `NeuromagTransport` — Stops the measurement it started, if any, and disconnects.
 - **stop** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtClient](/docs/api/com/rt-client) — Stops the [`RtClient`](/docs/api/com/rt-client) by stopping the producer's thread.
 - **stop** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Stops the thread by interrupting its computation queue, quitting and waiting.
@@ -6015,6 +6048,7 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **type** `[var]` in [MNEMshColorScaleDef](/docs/api/mne/mne-msh-color-scale-def)
 - **type** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Is this a volume or a surface.
 - **type** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Voxel data type (MRI_UCHAR, MRI_INT, MRI_FLOAT, MRI_SHORT).
+- **type** `[var]` in `NeuromagTag`
 - **type** `[var]` in `TmsiChannel`
 - **typeLabel** `[var]` in `ButterflyTypeGroup`
 - **typeLabel** `[var]` in [ChannelDisplayInfo](/docs/api/disp/channel-display-info) — Short type string: "MEG grad", "MEG mag", "EEG", "EOG", "ECG", "EMG", "STIM", "MISC".
@@ -6036,8 +6070,10 @@ Index of 6374 public class members (functions, variables, typedefs, enums) acros
 - **unit** `[var]` in [ElectrodeLayout](/docs/api/channels/electrode-layout) — Unit of the positions, e.g.
 - **unit** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unit of measurement.
 - **unit** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — SI symbol of a unit (FIFF_UNIT_*), e.g.
+- **unit** `[var]` in `NeuromagChannel`
 - **unit** `[var]` in `TmsiChannel`
 - **unit_mul** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Unit multiplier exponent.
+- **unit_mul** `[var]` in `NeuromagChannel`
 - **unitExponent** `[var]` in [AcqChannelInfo](/docs/api/acq/acq-channel-info) — Power of ten of the unit (e.g.
 - **unitMul** `[var]` in `AcqFiffChannel` — FIFF_UNITM_*.
 - **unitMultiplier** `[fn]` in [FiffExplain](/docs/api/fiff/fiff-explain) — SI prefix of a unit multiplier (FIFF_UNITM_*), e.g.

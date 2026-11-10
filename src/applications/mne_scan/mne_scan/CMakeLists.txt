@@ -101,6 +101,7 @@ if(NOT BUILD_SHARED_LIBS)
         scan_ftbuffer
         scan_hpi
         scan_natus
+        scan_neuromag
         scan_neuronalconnectivity
         scan_noisereduction
         scan_rtclustmne
