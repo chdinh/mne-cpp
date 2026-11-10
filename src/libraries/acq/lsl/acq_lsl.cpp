@@ -16,6 +16,7 @@
 
 #include "acq_lsl.h"
 #include "../acq_backend.h"
+#include "../acq_device.h"
 #include "../acq_clock_model.h"
 #include "../acq_device_registry.h"
 #include "../acq_thread.h"
@@ -25,6 +26,7 @@
 #include <lsl/lsl_stream_discovery.h>
 #include <lsl/lsl_stream_inlet.h>
 #include <lsl/lsl_stream_info.h>
+#include <lsl/lsl_stream_outlet.h>
 
 #include <algorithm>
 #include <atomic>
@@ -33,6 +35,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
+#include <format>
 #include <limits>
 #include <memory>
 #include <string>
@@ -269,6 +272,10 @@ struct Config
     double timeout = 5.0;
     std::string library = "auto";
     AcqThreadPolicy thread;
+    bool simulate = false;
+    std::size_t channels = 8;
+    double sfreq = 250.0;
+    std::int64_t seed = 0;
 };
 
 AcqExpected<Config> parseConfig(const AcqUri& uri)
@@ -280,13 +287,28 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
     c.library = std::string(uri.param("library").value_or("auto"));
     const auto timeout = paramDouble(uri, "timeout", 5.0, 0.0, 3600.0);
     auto thread = paramThreadPolicy(uri);
-    for (const AcqError& error : {timeout.error(), thread.error()}) {
+    const auto simulate = paramBool(uri, "simulate", false);
+    const auto channels = paramInt(uri, "channels", 8, 1, 1024);
+    const auto sfreq = paramDouble(uri, "sfreq", 250.0, 1.0, 100000.0);
+    const auto seed = paramInt(uri, "seed", 0, 0, std::numeric_limits<std::int32_t>::max());
+    for (const AcqError& error : {timeout.error(), thread.error(), simulate.error(), channels.error(), sfreq.error(), seed.error()}) {
         if (!error.ok()) {
             return error;
         }
     }
     if (c.library != "auto" && c.library != "liblsl" && c.library != "intree") {
         return AcqError(AcqErrorCode::InvalidParameter, "library=" + c.library + ": use auto, liblsl or intree");
+    }
+    c.simulate = *simulate;
+    c.channels = static_cast<std::size_t>(*channels);
+    c.sfreq = *sfreq;
+    c.seed = *seed;
+    if (c.simulate) {
+        // Resolved by a source id of its own, so a real stream of the same name is never read instead
+        static std::atomic<unsigned> count{0};
+        c.name = c.name.empty() ? "MNE-CPP simulator" : c.name;
+        c.type = "EEG";
+        c.sourceId = std::format("mne-acq-simulator-{}-{}", Clock::now().time_since_epoch().count(), count++);
     }
     if (c.name.empty() && c.type.empty() && c.sourceId.empty()) {
         return AcqError(AcqErrorCode::InvalidParameter, "lsl:// needs a stream name, type= or source_id=, e.g. lsl://BioSemi");
@@ -299,6 +321,9 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
 /** The property to resolve by: the name, else source_id, else type. */
 std::pair<std::string, std::string> selector(const Config& c)
 {
+    if (c.simulate) {
+        return {"source_id", c.sourceId};
+    }
     if (!c.name.empty()) {
         return {"name", c.name};
     }
@@ -477,6 +502,91 @@ private:
 
 //=============================================================================================================
 
+/** A synthetic:// EEG session published as an in-tree LSL outlet: the stream that simulate=1 reads. */
+class LslSimulator
+{
+public:
+    static AcqExpected<std::unique_ptr<LslSimulator>> start(const Config& c)
+    {
+        const auto block = static_cast<std::size_t>(std::max(1.0, std::round(c.sfreq / 100.0)));
+        auto session = AcqDevice::open(
+            std::format("synthetic://?sfreq={}&eeg={}&stim=0&block={}&seed={}&realtime=1", c.sfreq, c.channels, block, c.seed));
+        if (!session) {
+            return session.error();
+        }
+        AcqReaderOptions gating;
+        gating.gating = true;
+        auto reader = session->stream().reader(AcqReader::ReadMode::Lossless, gating);
+        if (!reader) {
+            return reader.error();
+        }
+        std::unique_ptr<LslSimulator> simulator(new LslSimulator(
+            c, block, std::move(*session), std::move(*reader)));
+        if (AcqError e = simulator->m_session.start(); !e.ok()) {
+            return e;
+        }
+        simulator->m_thread = std::thread([s = simulator.get()] { s->run(); });
+        return simulator;
+    }
+
+    ~LslSimulator()
+    {
+        m_stop.store(true, std::memory_order_release);
+        if (m_thread.joinable()) {
+            m_thread.join();
+        }
+        m_session.close();
+    }
+
+    LslSimulator(const LslSimulator&) = delete;
+    LslSimulator& operator=(const LslSimulator&) = delete;
+
+private:
+    LslSimulator(const Config& c, std::size_t block, AcqDevice session, AcqReader reader)
+    : m_outlet(LSLLIB::stream_info(c.name, c.type, static_cast<int>(c.channels), c.sfreq, LSLLIB::ChannelFormat::Float32, c.sourceId))
+    , m_session(std::move(session))
+    , m_reader(std::move(reader))
+    , m_chunk(block, std::vector<float>(c.channels))
+    {
+    }
+
+    void run()
+    {
+        while (!m_stop.load(std::memory_order_acquire)) {
+            auto view = m_reader.acquire(m_chunk.size(), std::chrono::milliseconds(200), m_chunk.size());
+            if (!view) {
+                if (view.error().code() == AcqErrorCode::Timeout) {
+                    continue;
+                }
+                return;
+            }
+            std::size_t s = 0;
+            for (std::size_t p = 0; p < view->partCount(); ++p) {
+                const AcqBlockPart& part = view->part(p);
+                for (std::size_t i = 0; i < part.samples; ++i, ++s) {
+                    for (std::size_t c = 0; c < m_chunk[s].size(); ++c) {
+                        std::memcpy(&m_chunk[s][c], part.at(c, i), sizeof(float));
+                    }
+                }
+            }
+            const bool whole = s == m_chunk.size();
+            if (!m_reader.release(*view).ok() || !whole) {
+                return;
+            }
+            m_outlet.push_chunk(m_chunk);
+        }
+    }
+
+    LSLLIB::stream_outlet m_outlet;
+    AcqDevice m_session;
+    AcqReader m_reader;
+    std::vector<std::vector<float>> m_chunk;
+    std::thread m_thread;
+    std::atomic<bool> m_stop{false};
+};
+
+//=============================================================================================================
+
 class LslBackend final : public AcqBackend
 {
 public:
@@ -487,6 +597,13 @@ public:
             return config.error();
         }
         std::unique_ptr<LslBackend> backend(new LslBackend(*config, uri.toString()));
+        if (config->simulate) {
+            auto simulator = LslSimulator::start(*config);
+            if (!simulator) {
+                return simulator.error();
+            }
+            backend->m_simulator = std::move(*simulator);
+        }
         std::string why;
         const Liblsl* lsl = config->library == "intree" ? nullptr : Liblsl::instance(&why);
         if (lsl == nullptr && config->library == "liblsl") {
@@ -662,6 +779,11 @@ private:
 
     AcqError addStream(AcqStreamInfo stream)
     {
+        if (m_simulator) {
+            for (AcqChannelInfo& channel : stream.channels) {
+                channel.unit = AcqUnit::Volt; // the outlet carries no channel description
+            }
+        }
         m_frameBytes = stream.channels.size() * bytesPerSample(stream.format);
         m_sfreq = stream.sfreq;
         m_block = static_cast<std::size_t>(std::max(1.0, std::round(m_sfreq / 100.0)));
@@ -749,6 +871,7 @@ private:
     std::string m_uri;
     std::string m_runtime;
     std::string m_device;
+    std::unique_ptr<LslSimulator> m_simulator; // outlives the link that reads it
     std::unique_ptr<Link> m_link;
     AcqWriter* m_writer = nullptr;
     std::vector<std::byte> m_scratch;
@@ -764,7 +887,8 @@ AcqSchemeInfo schemeInfo()
 {
     AcqSchemeInfo info;
     info.scheme = "lsl";
-    info.description = "Reads a Lab Streaming Layer stream through liblsl (loaded at runtime) or the in-tree LSL.";
+    info.description = "Reads a Lab Streaming Layer stream through liblsl (loaded at runtime) or the in-tree LSL. "
+                       "simulate=1 publishes a synthetic:// EEG session as an LSL stream and reads that instead.";
     info.exampleUri = "lsl://BioSemi";
     info.parameters = {
         {"type", "string", "", "Resolve by stream type (e.g. EEG) instead of the name."},
@@ -773,6 +897,10 @@ AcqSchemeInfo schemeInfo()
         {"library", "enum:auto|liblsl|intree", "auto", "LSL implementation; auto prefers liblsl."},
         {"cpus", "string", "", "Comma-separated CPUs for the reader thread."},
         {"priority", "string", "normal", "Reader thread priority: normal, high or realtime."},
+        {"simulate", "bool", "0", "Publish a synthetic EEG stream and read it instead of an existing one."},
+        {"channels", "int", "8", "Simulation: EEG channels."},
+        {"sfreq", "double", "250", "Simulation: sampling rate in Hz."},
+        {"seed", "int", "0", "Simulation: seed of the synthetic session."},
     };
     return info;
 }

@@ -190,6 +190,8 @@ private slots:
     void readsInTreeOutlet();
     void readsInTreeOutlet_data();
     void pylslReadsInTreeOutlet();
+    void simulatesAStream_data();
+    void simulatesAStream();
     void rejectsBadUris();
 
 private:
@@ -468,6 +470,45 @@ void TestAcqLsl::pylslReadsInTreeOutlet()
 
 //=============================================================================================================
 
+void TestAcqLsl::simulatesAStream_data()
+{
+    QTest::addColumn<QString>("library");
+    QTest::newRow("intree") << QStringLiteral("intree");
+    QTest::newRow("liblsl") << QStringLiteral("liblsl");
+}
+
+void TestAcqLsl::simulatesAStream()
+{
+    QFETCH(QString, library);
+    if (library == QStringLiteral("liblsl") && !m_lsl) {
+        QSKIP("liblsl not found");
+    }
+    // simulate=1 publishes a synthetic EEG session as an LSL outlet and reads it back, without a target.
+    auto device = AcqDevice::open("lsl://?simulate=1&channels=4&sfreq=250&library=" + library.toStdString());
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    const auto info = reader->stream().info();
+    QCOMPARE(info->channels.size(), std::size_t{4});
+    QCOMPARE(info->sfreq, 250.0);
+    QCOMPARE(info->channels[0].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[0].unit, AcqUnit::Volt);
+    QVERIFY(device->start().ok());
+    const std::vector<double> got = drain(*reader, 125);
+    QVERIFY(got.size() >= std::size_t{125 * 4});
+    double peak = 0.0;
+    for (const double v : got) {
+        peak = std::max(peak, std::abs(v));
+    }
+    // Scalp EEG in volts: tens of microvolts
+    QVERIFY2(peak > 1e-6 && peak < 1e-3, qPrintable(QString::number(peak)));
+    device->close();
+}
+
+//=============================================================================================================
+
 void TestAcqLsl::rejectsBadUris()
 {
     const auto code = [](const std::string& uri) {
@@ -478,6 +519,8 @@ void TestAcqLsl::rejectsBadUris()
     QCOMPARE(code("lsl://x?library=other"), AcqErrorCode::InvalidParameter);
     QCOMPARE(code("lsl://x?timeout=-1"), AcqErrorCode::InvalidParameter);
     QCOMPARE(code("lsl://x?colour=red"), AcqErrorCode::InvalidParameter);
+    QCOMPARE(code("lsl://?simulate=1&channels=0"), AcqErrorCode::InvalidParameter);
+    QCOMPARE(code("lsl://?simulate=1&sfreq=0"), AcqErrorCode::InvalidParameter);
     QCOMPARE(code("lsl://" + uniqueName("absent") + "?timeout=0.2&library=intree"), AcqErrorCode::DeviceNotFound);
     if (m_lsl) {
         QCOMPARE(code("lsl://" + uniqueName("absent") + "?timeout=0.2"), AcqErrorCode::DeviceNotFound);
