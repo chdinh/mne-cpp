@@ -541,11 +541,7 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/com/command',
         'api/com/command-manager',
         'api/com/command-parser',
-        'api/com/meta-data',
         'api/com/raw-command',
-        'api/com/rt-client',
-        'api/com/rt-cmd-client',
-        'api/com/rt-data-client',
         'api/com/i-command',
         'api/com/i-observer',
         'api/com/subject'

@@ -99,6 +99,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_polhemus_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_ftbuffer_scheme();
 
+/**
+ * Registers the rtserver:// scheme (the active connector of an mne_rt_server) with AcqDeviceRegistry::instance(),
+ * as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_rtserver_scheme();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H

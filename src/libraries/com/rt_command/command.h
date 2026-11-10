@@ -16,7 +16,7 @@
  * @c selch, @c start), a human-readable description, a list of named
  * parameters with both their @c QVariant values and their per-parameter
  * descriptions, and a flag selecting JSON or CLI serialisation when the
- * object is pushed out through @ref COMLIB::RtCmdClient.
+ * object goes out on the command port of mne_rt_server.
  *
  * Two construction paths matter. The data path: an incoming JSON object
  * is parsed into a fully-populated @c Command by the @c QJsonObject
@@ -25,7 +25,7 @@
  * schema. The authoring path: client code constructs an empty
  * @c Command with name, description and parameter declarations, fills
  * @c pValues() per call site, then forwards it to
- * @ref COMLIB::RtCmdClient::sendCommandJSON "RtCmdClient::sendCommandJSON". @c toStringReadySend() and
+ * the command port. @c toStringReadySend() and
  * @c toJsonObject() / @c toStringList() format the same object for the
  * different transports.
  *

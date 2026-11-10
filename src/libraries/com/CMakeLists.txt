@@ -5,20 +5,14 @@
 cmake_minimum_required(VERSION 3.14)
 project(mne_com LANGUAGES CXX)
 
-#Handle qt uic, moc, rrc automatically
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Network)
+set(QT_REQUIRED_COMPONENTS Core)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
 set(SOURCES
     com_global.cpp
-    rt_client/rt_client.cpp
-    rt_client/rt_data_client.cpp
-    rt_client/rt_cmd_client.cpp
     rt_command/command.cpp
     rt_command/command_manager.cpp
     rt_command/command_parser.cpp
@@ -27,9 +21,6 @@ set(SOURCES
 
 set(HEADERS
     com_global.h
-    rt_client/rt_client.h
-    rt_client/rt_cmd_client.h
-    rt_client/rt_data_client.h
     rt_command/command.h
     rt_command/command_pattern.h
     rt_command/command_manager.h
@@ -46,39 +37,14 @@ set_source_files_properties(${FILE_TO_UPDATE} PROPERTIES OBJECT_DEPENDS "${SOURC
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
-set(FFTW_LIBS "")
-
-if(USE_FFTW)
-  if(WIN32)
-    set(FFTW_LIBS
-      ${FFTW_DIR_LIBS}/libfftw3-3.dll
-      ${FFTW_DIR_LIBS}/libfftw3f-3.dll
-      ${FFTW_DIR_LIBS}/libfftwf3l-3.dll
-    )
-    target_include_directories(${PROJECT_NAME} PRIVATE ${FFTW_DIR_INCLUDE})
-  elseif(UNIX AND NOT APPLE)
-    set(FFTW_LIBS ${FFTW_DIR_LIBS}/lib/libfftw3.so)
-    target_include_directories(${PROJECT_NAME} PRIVATE ${FFTW_DIR_INCLUDE}/api)
-  endif()
-endif()
-
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..> $<INSTALL_INTERFACE:include>)
 
 set(QT_REQUIRED_COMPONENT_LIBS ${QT_REQUIRED_COMPONENTS})
 list(TRANSFORM QT_REQUIRED_COMPONENT_LIBS PREPEND "Qt${QT_VERSION_MAJOR}::")
 
-set(MNE_LIBS_REQUIRED 
-    mne_base
-    mne_math
-    mne_fiff
-)
-
-# The client and server headers expose QTcpSocket and QObject
+# The command headers expose QObject, QString and QJsonObject
 target_link_libraries(${PROJECT_NAME} PUBLIC ${QT_REQUIRED_COMPONENT_LIBS})
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    ${MNE_LIBS_REQUIRED}
-    Eigen3::Eigen
-    ${FFTW_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE mne_base)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE MNE_COM_LIBRARY MNE_GIT_HASH_SHORT="${MNE_GIT_HASH_SHORT}" MNE_GIT_HASH_LONG="${MNE_GIT_HASH_LONG}")
 

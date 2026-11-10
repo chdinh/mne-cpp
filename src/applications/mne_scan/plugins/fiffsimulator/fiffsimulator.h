@@ -20,25 +20,16 @@
 //=============================================================================================================
 
 #include "fiffsimulator_global.h"
-#include <memory>
 
+#include <acq/acq_device.h>
 #include <scShared/Plugins/abstractsensor.h>
-#include <com/rt_client/rt_cmd_client.h>
-#include <base/circular_buffer.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QtWidgets>
-#include <QVector>
-#include <QTimer>
-
-//=============================================================================================================
-// EIGEN INCLUDES
-//=============================================================================================================
-
-#include <Eigen/Core>
+#include <cstdint>
+#include <string>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -49,12 +40,6 @@ namespace SCMEASLIB
 class RealTimeMultiSampleArray;
 }
 
-namespace FIFFLIB
-{
-class FiffInfo;
-class FiffDigitizerData;
-}
-
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFSIMULATORPLUGIN
 //=============================================================================================================
@@ -63,16 +48,9 @@ namespace FIFFSIMULATORPLUGIN
 {
 
 //=============================================================================================================
-// FIFFSIMULATORPLUGIN FORWARD DECLARATIONS
-//=============================================================================================================
-
-class FiffSimulatorProducer;
-
-//=============================================================================================================
 /**
- * DECLARE CLASS FiffSimulator
- *
- * @brief The FiffSimulator class provides a RT server connection.
+ * @brief Streams the FIFF file simulator of an mne_rt_server through the rtserver:// source of mne_acq_devices,
+ *        which can also simulate the server.
  */
 class FIFFSIMULATORSHARED_EXPORT FiffSimulator : public SCSHAREDLIB::AbstractSensor
 {
@@ -81,132 +59,54 @@ class FIFFSIMULATORSHARED_EXPORT FiffSimulator : public SCSHAREDLIB::AbstractSen
     // Use the Q_INTERFACES() macro to tell Qt's meta-object system about the interfaces
     Q_INTERFACES(SCSHAREDLIB::AbstractSensor)
 
-    friend class FiffSimulatorProducer;
     friend class FiffSimulatorSetupWidget;
 
 public:
-    //=========================================================================================================
-    /**
-     * Constructs a FiffSimulator.
-     */
     FiffSimulator();
+    ~FiffSimulator() override;
+
+    QSharedPointer<SCSHAREDLIB::AbstractPlugin> clone() const override;
+    void init() override;
+    void unload() override;
 
     //=========================================================================================================
     /**
-     * Destroys the FiffSimulator.
+     * Connects to the server (or its simulator), reads the measurement info and starts streaming.
      */
-    virtual ~FiffSimulator();
+    bool start() override;
 
     //=========================================================================================================
     /**
-     * Clears the rt server
+     * Stops streaming and disconnects.
      */
-    void clear();
+    bool stop() override;
 
-    //=========================================================================================================
-    /**
-     * Clone the plugin
-     */
-    virtual QSharedPointer<AbstractPlugin> clone() const;
-
-    //=========================================================================================================
-    /**
-     * Initialise the FiffSimulator.
-     */
-    virtual void init();
-
-    //=========================================================================================================
-    /**
-     * Is called when plugin is detached of the stage. Can be used to safe settings.
-     */
-    virtual void unload();
-
-    virtual bool start();
-    virtual bool stop();
-
-    virtual AbstractPlugin::PluginType getType() const;
-    virtual QString getName() const;
-    virtual QString getBuildInfo();
-
-    //=========================================================================================================
-    /**
-     * Creates the setup widget.
-     *
-     * @return Returns the setup widget.
-     */
-    virtual QWidget* setupWidget();
+    SCSHAREDLIB::AbstractPlugin::PluginType getType() const override;
+    QString getName() const override;
+    QWidget* setupWidget() override;
+    QString getBuildInfo() override;
 
 protected:
-    virtual void run();
-
     //=========================================================================================================
     /**
-     * Initialises the output connector.
+     * Hands the server's blocks to the connected plugins until stop().
      */
-    void initConnector();
+    void run() override;
 
-    //=========================================================================================================
-    /**
-     * Change connector
-     *
-     * @param[in] p_iNewConnectorId      new connector ID.
-     */
-    void changeConnector(qint32 p_iNewConnectorId);
+private:
+    /** @return The rtserver:// URI of the current settings. */
+    std::string uri() const;
 
-    //=========================================================================================================
-    /**
-     * Connects the cmd client.
-     */
-    void connectCmdClient();
+    QSharedPointer<SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>> m_pRTMSA_FiffSimulator; /**< The data. */
 
-    //=========================================================================================================
-    /**
-     * Disconnects the cmd client.
-     */
-    void disconnectCmdClient();
+    ACQLIB::AcqDevice m_device; /**< The server while streaming. */
+    ACQLIB::AcqReader m_reader; /**< Reads the server's stream in run(). */
 
-    //=========================================================================================================
-    /**
-     * Request FiffInfo using cmd client and producer (data client)
-     */
-    void requestInfo();
-
-    SCSHAREDLIB::PluginOutputData<SCMEASLIB::RealTimeMultiSampleArray>::SPtr m_pRTMSA_FiffSimulator; /**< The RealTimeMultiSampleArray to provide the rt_server Channels.*/
-
-    QSharedPointer<FiffSimulatorProducer> m_pFiffSimulatorProducer;              /**< Holds the FiffSimulatorProducer.*/
-    std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;                              /**< Fiff measurement info.*/
-    std::shared_ptr<FIFFLIB::FiffDigitizerData> m_pFiffDigData;                  /**< Fiff Digitizer Data. */
-    std::shared_ptr<COMLIB::RtCmdClient> m_pRtCmdClient;                         /**< The command client.*/
-    std::shared_ptr<BASELIB::CircularBuffer<Eigen::MatrixXf>> m_pCircularBuffer; /**< Holds incoming raw data. */
-
-    bool m_bCmdClientIsConnected;        /**< If the command client is connected.*/
-    QString m_sFiffSimulatorIP;          /**< The IP Adress of mne_rt_server.*/
-    QString m_sFiffSimulatorClientAlias; /**< The rt server client alias.*/
-
-    qint32 m_iActiveConnectorId;     /**< The active connector.*/
-    qint32 m_iBufferSize;            /**< The raw data buffer size.*/
-    quint16 m_iDefaultPortCmdClient; /**< The default port for the rt command client. */
-
-    QMap<qint32, QString> m_qMapConnectors; /**< Connector map.*/
-
-    QTimer m_cmdConnectionTimer; /**< Timer for convinient command client connection. When timer times out a connection is tried to be established. */
-
-    QMutex m_qMutex; /**< The mutex to ensure thread safety.*/
-
-signals:
-    //=========================================================================================================
-    /**
-     * Emitted when command clients connection status changed
-     *
-     * @param[in] p_bStatus  connection status.
-     */
-    void cmdConnectionChanged(bool p_bStatus);
-
-    //=========================================================================================================
-    /**
-     * Emitted when fiffInfo is available
-     */
-    void fiffInfoAvailable();
+    std::string m_host = "127.0.0.1"; /**< Host of mne_rt_server. */
+    std::uint16_t m_port = 4217;      /**< Its command port; the data port is the next one. */
+    std::string m_simfile;            /**< File the server replays; empty keeps its file. */
+    int m_iSamplesPerBlock = 100;     /**< Samples per buffer of the server and per block handed on. */
+    bool m_bSimulate = false;         /**< Simulate the server. */
 };
 } // NAMESPACE
 

@@ -34,6 +34,10 @@ The server uses a plugin-based connector architecture:
   acquisition library's `fiff://` source, as [mne_acq](tools-acq.mdx) does)
 - Additional connectors can be loaded for different data sources
 
+Clients read the active connector through the `rtserver://` source of the acquisition library
+(host and command port as target, e.g. `rtserver://127.0.0.1:4217?simfile=sample_audvis_raw.fif`),
+as the FiffSimulator plugin of MNE Scan does.
+
 ### Use Cases
 
 - Testing real-time processing pipelines with pre-recorded data

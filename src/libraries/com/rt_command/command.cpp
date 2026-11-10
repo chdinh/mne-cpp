@@ -12,7 +12,7 @@
  * Defines the five constructor overloads (default, JSON-object,
  * keyword+description, fully-specified parameter list, copy), the
  * @c toJsonObject / @c toStringList / @c toStringReadySend formatters
- * used by @ref RtCmdClient, and the @c ICommand @c execute() override
+ * of the command port, and the @c ICommand @c execute() override
  * that lets a @c CommandManager dispatch the command through the
  * generic command-pattern infrastructure in @ref command_pattern.h. The
  * @c operator[] overloads expose parameter values both by name and by

@@ -9,23 +9,16 @@
  * @date     March 2026
  * @brief    Export macros, build-info entry points and namespace anchor for the @c COMLIB communication library.
  *
- * @c COMLIB is the transport layer that connects mne-cpp acquisition and
- * analysis code to a running @c mne_rt_server instance — the long-running
- * daemon shipped by mne-cpp that bridges MEG/EEG hardware drivers (or a
- * pre-recorded FIFF file) to networked clients. Two TCP endpoints are
- * exposed by the server and consumed here: the @e command port (default
- * 4217), used to negotiate session state through line- or JSON-encoded
- * messages, and the @e data port (default 4218), used to stream raw
- * sample buffers tagged with FIFF block kinds.
+ * @c mne_rt_server bridges MEG/EEG hardware drivers (or a pre-recorded
+ * FIFF file) to networked clients over two TCP endpoints: the @e command
+ * port (default 4217), used to negotiate session state through line- or
+ * JSON-encoded messages, and the @e data port (default 4218), used to
+ * stream raw sample buffers tagged with FIFF block kinds.
  *
- * The library is intentionally narrow: it contains the threaded TCP
- * clients (@ref COMLIB::RtClient, @ref COMLIB::RtCmdClient,
- * @ref COMLIB::RtDataClient) and a small command vocabulary
+ * The library holds the command vocabulary of the command port
  * (@ref COMLIB::Command, @ref COMLIB::RawCommand,
- * @ref COMLIB::CommandParser, @ref COMLIB::CommandManager) that both
- * sides agree on. Higher-level orchestration (channel selection, ring
- * buffering, source localisation) lives in the @c rtprocessing /
- * @c disp / acquisition plugins that link against this library.
+ * @ref COMLIB::CommandParser, @ref COMLIB::CommandManager). Clients read
+ * the server through the rtserver:// source of mne_acq_devices.
  *
  * This header defines @ref COMSHARED_EXPORT, expanding to
  * the export decoration when building the shared library, the import one
@@ -71,12 +64,7 @@
  * @namespace COMLIB
  * @brief Real-time client/server communication primitives for talking to @c mne_rt_server.
  *
- * Aggregates two cooperating subsystems. @c rt_client/ holds the
- * @c QThread- and @c QTcpSocket-derived clients that own the actual
- * socket connections and surface received data through Qt signals; they
- * are designed to be moved to (or constructed in) a worker thread so the
- * UI thread is never blocked by network I/O. @c rt_command/ holds the
- * command vocabulary used on the wire: @ref RawCommand carries the
+ * @c rt_command/ holds the command vocabulary used on the wire: @ref RawCommand carries the
  * tokenised request before types are known, @ref Command carries a
  * named, typed, parameter-bearing message that round-trips through JSON,
  * @ref CommandParser dispatches incoming text to all interested

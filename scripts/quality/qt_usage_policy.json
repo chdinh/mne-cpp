@@ -80,11 +80,10 @@
       "modules": []
     },
     "com": {
-      "tokens": 367,
-      "public_header_includes": 29,
+      "tokens": 228,
+      "public_header_includes": 17,
       "modules": [
-        "Core",
-        "Network"
+        "Core"
       ]
     },
     "connectivity": {

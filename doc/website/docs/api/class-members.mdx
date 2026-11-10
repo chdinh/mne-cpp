@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6423 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6405 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -821,16 +821,17 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **combine** `[fn]` in [StatsAdjacency](/docs/api/sts/stats-adjacency) — Combine the adjacency of several dimensions, as mne.stats.combine_adjacency: points are flattened in C order (the last dimension varies fastest), two points are adjacent when they differ in one dimension and are adjacent there, and every point is adjacent to itself.
 - **combine_xyz** `[fn]` in [Linalg](/docs/api/math/linalg) — Compute the three Cartesian components of a vector together.
 - **CombineWeights** `[enum]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Predefined weighting strategies of `combine()`.
+- **command** `[fn]` in [Command](/docs/api/com/command) — Short command for this request.
+- **command** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Saves the recognized command line for future use.
+- **command** `[var]` in `FtMessage`
+- **command** `[fn]` in [RawCommand](/docs/api/com/raw-command) — [`Command`](/docs/api/com/command) name.
+- **command** `[fn]` in `RtServerTransport` — Sends a command on the command port and waits for its reply.
 - **Command** `[fn]` in [Command](/docs/api/com/command) — Constructs a [`Command`](/docs/api/com/command).
 - **Command** `[fn]` in [Command](/docs/api/com/command) — Constructor which parses a command stored in a json object.
 - **Command** `[fn]` in [Command](/docs/api/com/command) — Constructs a command without parameters.
 - **Command** `[fn]` in [Command](/docs/api/com/command) — Constructor which assembles a command from single parts.
 - **Command** `[fn]` in [Command](/docs/api/com/command) — Constructor which assembles a command from single parts.
 - **Command** `[fn]` in [Command](/docs/api/com/command) — Copy constructor.
-- **command** `[fn]` in [Command](/docs/api/com/command) — Short command for this request.
-- **command** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Saves the recognized command line for future use.
-- **command** `[var]` in `FtMessage`
-- **command** `[fn]` in [RawCommand](/docs/api/com/raw-command) — [`Command`](/docs/api/com/command) name.
 - **CommandManager** `[fn]` in [CommandManager](/docs/api/com/command-manager)
 - **CommandManager** `[fn]` in [CommandManager](/docs/api/com/command-manager)
 - **CommandManager** `[fn]` in [CommandManager](/docs/api/com/command-manager)
@@ -959,7 +960,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **confine** `[fn]` in [MNELayout](/docs/api/mne/mne-layout) — Zooms to the ports inside `area` (MNE-C `mne_lout_confine`).
 - **connect** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph) — Connect output port of srcNode to input port of dstNode.
 - **connect** `[fn]` in `TcpSocket`
-- **connectionChanged** `[signal]` in [RtClient](/docs/api/com/rt-client) — Emitted when connection status changed.
 - **connectivity** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Pairwise connectivity between sources (one per metric / frequency band).
 - **connectivity_matrix** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the node-by-node adjacency matrix of edge weights.
 - **connectivityMetricChanged** `[signal]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Emit signal whenever the connectivity metric changed.
@@ -1211,6 +1211,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **description** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — Human-readable: "Covariance matrix must be positive-definite".
 - **description** `[fn]` in `NeuromagTransport`
 - **description** `[fn]` in `PolhemusTransport`
+- **description** `[fn]` in `RtServerTransport`
 - **description** `[fn]` in `TmsiTransport`
 - **design** `[fn]` in [FirFilter](/docs/api/dsp/fir-filter) — Design a linear-phase FIR filter using [`FilterKernel`](/docs/api/dsp/filter-kernel) as the backend.
 - **designButterworth** `[fn]` in [IirFilter](/docs/api/dsp/iir-filter) — Design a Butterworth filter as a cascade of second-order sections.
@@ -1318,7 +1319,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **dirtyNodes** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **discard** `[var]` in [FiffDigitizerData](/docs/api/fiff/fiff-digitizer-data) — Which points should be discarded.
 - **discard_outlier_digitizer_points** `[fn]` in [MNEMshDisplaySurface](/docs/api/mne/mne-msh-display-surface) — Mark digitizer points whose distance to the head surface exceeds maxdist.
-- **disconnectFromHost** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Attempts to close the socket.
 - **discover** `[fn]` in [AcqDeviceRegistry](/docs/api/acq/acq-device-registry)
 - **Discoverer** `[type]` in [AcqDeviceRegistry](/docs/api/acq/acq-device-registry) — Lists reachable sources of one scheme within a timeout.
 - **displayLabel** `[fn]` in [RayHit](/docs/api/disp3-d/ray-hit) — Build a human-readable display label for the hit object.
@@ -1398,6 +1398,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **duration** `[var]` in `GusbampSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in `NeuromagSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in `PolhemusSimulation` — Seconds; 0 runs until stopped.
+- **duration** `[var]` in `RtServerSimulation` — Seconds; 0 runs until stopped.
 - **duration** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Duration (seconds).
 - **duration** `[var]` in `TmsiSimulation` — Seconds; 0 runs until stopped.
 - **dVarZThresh** `[var]` in [BadChannelDetectParams](/docs/api/dsp/bad-channel-detect-params) — Z-score of std-dev above this -&gt; noisy.
@@ -1421,6 +1422,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **edgeStreams** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **eeg** `[var]` in `FtBufferSimulation` — EEG channels of the relayed Neuromag system.
 - **eeg** `[var]` in `NeuromagSimulation`
+- **eeg** `[var]` in `RtServerSimulation` — EEG channels of the replayed recording.
 - **eeg_client** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Client data for EEG field computations (not owned).
 - **eeg_els** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — EEG electrode definitions.
 - **eeg_loc** `[var]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Channel location.
@@ -2151,7 +2153,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **getChannelInfos** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return all channel infos.
 - **getChannels** `[fn]` in [InvHpiDataUpdater](/docs/api/inv/inv-hpi-data-updater) — inline get functions for private member variables.
 - **getChannelType** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Returns the current channel type which is to be filtered.
-- **getClientId** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Requests the ID at mne_rt_server and returns it.
 - **getClusteringStatusChanged** `[fn]` in [FwdSettingsView](/docs/api/disp/fwd-settings-view) — Get status of clustering check box.
 - **getClusterNumber** `[fn]` in [FwdSettingsView](/docs/api/disp/fwd-settings-view) — Get status of cluster size spin box.
 - **getCoefficients** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
@@ -2163,7 +2164,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **getCompStatusChanged** `[fn]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Get the Comp checked status.
 - **getConditionNumber** `[fn]` in [Linalg](/docs/api/math/linalg) — Returns the condition number of a given matrix.
 - **getConditionSlope** `[fn]` in [Linalg](/docs/api/math/linalg) — Returns the condition slope of a given matrix.
-- **getConnectionStatus** `[fn]` in [RtClient](/docs/api/com/rt-client) — Rt Server status, returns true when rt server is started.
 - **getConnectivityMethods** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **getConnectivityMetric** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Get the current connectivity metric.
 - **getControlWidget** `[fn]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — Returns pointer to the portion of the channel view with the controls.
@@ -2198,7 +2198,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **getEvokedSetModel** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — Returns the currently set [`EvokedSetModel`](/docs/api/disp/evoked-set-model).
 - **getFftCoefficients** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **getFFTSize** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
-- **getFiffInfo** `[fn]` in [RtClient](/docs/api/com/rt-client) — Request Fiff Info.
 - **getFilterActive** `[fn]` in [FilterSettingsView](/docs/api/disp/filter-settings-view) — Returns true if the filters a set as active.
 - **getFilterOrder** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **getFilterTaps** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Returns the currently set number of filter taps.
@@ -2396,7 +2395,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **hasAllTwinFiducials** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points)
 - **hasBinding** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
 - **hasCommand** `[fn]` in [CommandManager](/docs/api/com/command-manager) — Checks if a command is managed;.
-- **hasCommand** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Checks if a command is managed;.
 - **hasData** `[fn]` in [NetworkObject](/docs/api/disp3-d/network-object)
 - **hasData** `[fn]` in [PolylineObject](/docs/api/disp3-d/polyline-object)
 - **hasDepthFrame** `[fn]` in [VideoOverlay](/docs/api/disp3-d/video-overlay)
@@ -3091,8 +3089,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **m_lAverageData** `[var]` in [AverageSceneItem](/docs/api/disp/average-scene-item) — The channels average data which is to be plotted.
 - **m_matProjector** `[var]` in [InvHpiFitData](/docs/api/inv/inv-hpi-fit-data)
 - **m_OperatorType** `[var]` in [MNEOperator](/docs/api/disp/mne-operator)
-- **m_pDigitizerData** `[var]` in [MetaData](/docs/api/com/meta-data) — Head-shape digitizer point set.
-- **m_pInfo** `[var]` in [MetaData](/docs/api/com/meta-data) — Measurement information (channel layout, sampling rate, etc.).
 - **m_qlistEvoked** `[var]` in [FiffIO](/docs/api/fiff/fiff-io) — List of evoked data sets.
 - **m_qListParamDescriptions** `[var]` in [Command](/docs/api/com/command) — Per-parameter description strings.
 - **m_qListParamNames** `[var]` in [Command](/docs/api/com/command) — Parameter names (positional order).
@@ -3240,6 +3236,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **measureImpedances** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Measures the electrode impedances (control path, allocates).
 - **meg** `[var]` in `FtBufferSimulation` — Magnetometers of the relayed Neuromag system.
 - **meg** `[var]` in `NeuromagSimulation` — Magnetometer channels.
+- **meg** `[var]` in `RtServerSimulation` — Magnetometers of the replayed recording.
 - **meg_client** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Client data for MEG field computations.
 - **meg_coils** `[var]` in [InvDipoleFitData](/docs/api/inv/inv-dipole-fit-data) — MEG coil definitions.
 - **meg_comp** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — Owns `meg_client` when it is a compensation wrapper.
@@ -3277,7 +3274,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **message** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — Formatted message: "PASS: ..." or "FAIL [error]: ...".
 - **metaChanged** `[signal]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Emitted when channel metadata (scale, colour, bad-flag) changes.
 - **metadata** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model)
-- **MetaData** `[fn]` in [MetaData](/docs/api/com/meta-data)
 - **method** `[var]` in [InvCMNESettings](/docs/api/inv/inv-cmne-settings) — 0=MNE, 1=dSPM (default), 2=sLORETA.
 - **method** `[var]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — The inverse method that produced this estimate.
 - **method** `[fn]` in [Network](/docs/api/connectivity/network)
@@ -3599,6 +3595,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **newSubject** `[signal]` in [ProjectSettingsView](/docs/api/disp/project-settings-view)
 - **next** `[var]` in [FiffTag](/docs/api/fiff/fiff-tag) — Pointer to the next object.
 - **next** `[fn]` in `NeuromagTransport`
+- **next** `[fn]` in `RtServerTransport`
 - **next_legen** `[fn]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — Compute the next Legendre polynomials of the first and second kind using a recursion formula.
 - **nextEvent** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Require this event next.
 - **nextIgnore** `[var]` in [AverageCategory](/docs/api/fiff/average-category) — Ignore mask for next event.
@@ -3899,8 +3896,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **operator[]** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Subscript operator [] to access source spaces by index.
 - **operator[]** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Subscript operator [] to access source spaces by hemisphere identifier.
 - **operator[]** `[fn]` in [MNESourceSpaces](/docs/api/mne/mne-source-spaces) — Subscript operator [] to access source spaces by hemisphere identifier.
-- **operator[]** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Subscript operator [] to access commands by command name.
-- **operator[]** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Subscript operator [] to access commands by command name.
 - **OperatorType** `[enum]` in [MNEOperator](/docs/api/disp/mne-operator)
 - **OpFunc** `[type]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Operation implementation callback type.
 - **opFunc** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Get the implementation function for an operation type.
@@ -4306,12 +4301,12 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **rate** `[var]` in `GusbampSetup` — Sampling rate in Hz, one the amplifier supports.
 - **rate** `[var]` in `NeuromagSimulation` — Sampling rate in Hz.
 - **rate** `[var]` in `PolhemusSimulation` — Records per second, shared by the stations.
+- **rate** `[var]` in `RtServerSimulation` — Hz.
 - **rate** `[var]` in `TmsiSetup` — Requested sampling rate in Hz.
 - **rateCorrection** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Estimated actual / nominal rate.
 - **rates** `[fn]` in `EegoTransport`
 - **raw** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Raw data with fully populated FiffInfo.
 - **raw** `[var]` in [MNEMeasData](/docs/api/mne/mne-meas-data) — Raw-data handle when data originates from a raw file.
-- **rawBufferReceived** `[signal]` in [RtClient](/docs/api/com/rt-client) — Emits a received raw buffer - ToDo change the emits to fiff raw data.
 - **RawCommand** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Default constructor.
 - **RawCommand** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Constructor which parses a command stored in a json object.
 - **RawCommand** `[fn]` in [RawCommand](/docs/api/com/raw-command) — Copy constructor.
@@ -4431,7 +4426,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **read_tag_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the payload of a tag whose header `read_tag_info()` has read.
 - **read_tag_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the header of the tag at the current position.
 - **read_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Reads a .w file (one value per vertex), as mne.read_w does.
-- **readAvailableData** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Returns the available data.
 - **readBadChannelsFromFile** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Read bad channel names from a plain text file (one name per line, '#' comments skipped).
 - **readBids** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Read a BIDS iEEG `*_electrodes.tsv`.
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream) — Reads `count` big-endian values and converts them to host byte order.
@@ -4444,13 +4438,10 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **readFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 - **readFilter** `[fn]` in [FilterIO](/docs/api/dsp/filter-io) — Reads a given txt file and scans it for filter coefficients.
 - **readHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Read head positions from a file.
-- **readInfo** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Read a BIDS *_coordsystem.json file.
 - **readMegEegChannels** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Read MEG and EEG channel information from a FIFF file, excluding bad channels.
-- **readMetadata** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff metaata class from data connection.
 - **readMniTransform** `[fn]` in [FiffCoordTransSet](/docs/api/fiff/fiff-coord-trans-set) — Reads the scanner RAS -&gt; MNI Talairach transform of a FreeSurfer/MNI .xfm file (MNE-C read_mni_coord_transform_file).
 - **ReadMode** `[enum]` in [AcqReader](/docs/api/acq/acq-reader) — Consumption mode.
-- **readRawBuffer** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Reads fiff measurement information of a data the connection.
 - **readRawSegment** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Read a segment of raw data.
 - **readRawSegment** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Read a segment of raw data.
 - **readRawSegment** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Read a segment of raw data.
@@ -4467,6 +4458,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **realtime** `[var]` in `GusbampSimulation`
 - **realtime** `[var]` in `NeuromagSimulation`
 - **realtime** `[var]` in `PolhemusSimulation` — Deliver records at the digitizer's pace.
+- **realtime** `[var]` in `RtServerSimulation`
 - **realtime** `[var]` in `TmsiSimulation`
 - **realtimeColorsAvailable** `[signal]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Emitted when the real-time pipeline produces a new set of per-vertex colours.
 - **rearrange_source_space** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Rearrange source space after filtering: recount nuse, rebuild vertno, and recompute patch statistics if nearest info is available.
@@ -4548,10 +4540,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **report_dim** `[var]` in [FitDipUserRec](/docs/api/inv/fit-dip-user-rec)
 - **reportPick** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Report a pick result from a layer's renderer or hit-tester.
 - **request** `[fn]` in `FtBufferTransport` — Sends a request and waits for its answer.
-- **requestBufsize** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Request buffer size from mne_rt_server.
 - **requestCancel** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Request cancellation of the current loading/interpolation.
-- **requestCommands** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Request available commands from mne_rt_server.
-- **requestConnectors** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Request available connectors from mne_rt_server.
 - **requestParams** `[fn]` in [DipoleFitView](/docs/api/disp/dipole-fit-view) — Sends updated signals for parameters (excluding selected models).
 - **required** `[var]` in [MnaOpSchemaAttr](/docs/api/mna/mna-op-schema-attr) — Must be set?
 - **required** `[var]` in [MnaOpSchemaPort](/docs/api/mna/mna-op-schema-port) — Must be connected?
@@ -4594,7 +4583,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **resolvedAttributes** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance)
 - **response** `[signal]` in [CommandManager](/docs/api/com/command-manager) — Is triggered when a reply is available.
 - **response** `[signal]` in [CommandParser](/docs/api/com/command-parser) — Response channel which is used by attached observers (command managers) to send data back to subject.
-- **response** `[signal]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Emits the received response.
 - **restart** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Restarts the thread by interrupting its computation queue, quitting, waiting and then starting it again.
 - **restart** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Restarts the thread by interrupting its computation queue, quitting, waiting and then starting it again.
 - **restart** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Restarts the thread by interrupting its computation queue, quitting, waiting and then starting it again.
@@ -4653,11 +4641,8 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **RtAveraging** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Creates the real-time averaging object.
 - **RtAveragingWorker** `[fn]` in [RtAveragingWorker](/docs/api/dsp/rt-averaging-worker) — Creates the real-time averaging object.
 - **rtClear** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer)
-- **RtClient** `[fn]` in [RtClient](/docs/api/com/rt-client) — Creates the real-time client.
-- **RtCmdClient** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Creates the real-time command client.
 - **RtConnectivity** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Creates the real-time connectivity estimation object.
 - **RtCov** `[fn]` in [RtCov](/docs/api/dsp/rt-cov)
-- **RtDataClient** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Creates the real-time data client.
 - **RtFiffRawView** `[fn]` in [RtFiffRawView](/docs/api/disp/rt-fiff-raw-view) — Constructs a [`RtFiffRawView`](/docs/api/disp/rt-fiff-raw-view) which is a child of parent.
 - **RtFiffRawViewDelegate** `[fn]` in [RtFiffRawViewDelegate](/docs/api/disp/rt-fiff-raw-view-delegate) — Creates a new abstract item delegate with the given parent.
 - **RtFiffRawViewModel** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Constructs an real-time multi sample array table model for the given parent.
@@ -4849,6 +4834,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **seed** `[var]` in `GusbampSimulation`
 - **seed** `[var]` in `NeuromagSimulation`
 - **seed** `[var]` in `PolhemusSimulation` — Phase of the simulated sweep.
+- **seed** `[var]` in `RtServerSimulation`
 - **seed** `[var]` in [SimulateStcParams](/docs/api/dsp/simulate-stc-params) — Random seed for reproducibility.
 - **seed** `[var]` in `TmsiSimulation`
 - **seek** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
@@ -4890,8 +4876,7 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **selectTris** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — Select tris for this label from a given surface file.
 - **selectTris** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — Select tris for this label from a given tri matrix.
 - **send** `[fn]` in [Command](/docs/api/com/command) — Sender slot which emmits triggered signal.
-- **sendCLICommand** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Sends a command line formatted command to a connected mne_rt_server.
-- **sendCommandJSON** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Sends a command to a connected mne_rt_server.
+- **send** `[fn]` in `RtServerTransport` — Sends a command tag on the data port.
 - **sendMouseLoc** `[signal]` in [SpectrumView](/docs/api/disp/spectrum-view) — Signals for sending the mouse location to the delegate.
 - **sensEeg** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
 - **sensMeg** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
@@ -5008,7 +4993,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **setChannelInfoModel** `[fn]` in [ButterflyView](/docs/api/disp/butterfly-view) — Set the channel info model.
 - **setChannelType** `[fn]` in [FilterDesignView](/docs/api/disp/filter-design-view) — Sets the current channel type which is to be filtered.
 - **setChInfo** `[fn]` in [ArtifactSettingsView](/docs/api/disp/artifact-settings-view)
-- **setClientAlias** `[fn]` in [RtDataClient](/docs/api/com/rt-data-client) — Sets the alias of the data client.
 - **setClippingVisible** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view)
 - **setClippingVisible** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **setClock** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Publishes a new clock model (sequence counter, no lock).
@@ -5683,7 +5667,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **stop** `[fn]` in `GusbampTransport`
 - **stop** `[fn]` in `NeuromagTransport` — Stops the measurement it started, if any, and disconnects.
 - **stop** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Stops the thread by interrupting its computation queue, quitting and waiting.
-- **stop** `[fn]` in [RtClient](/docs/api/com/rt-client) — Stops the [`RtClient`](/docs/api/com/rt-client) by stopping the producer's thread.
 - **stop** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Stops the thread by interrupting its computation queue, quitting and waiting.
 - **stop** `[fn]` in [RtInvOp](/docs/api/dsp/rt-inv-op) — Stops the thread by interrupting its computation queue, quitting and waiting.
@@ -6322,7 +6305,6 @@ Index of 6423 public class members (functions, variables, typedefs, enums) acros
 - **w** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **wait** `[var]` in [AcqReaderOptions](/docs/api/acq/acq-reader-options) — Ignored for LowLatency, which spins.
 - **wait** `[fn]` in [RtNoise](/docs/api/dsp/rt-noise) — Blocks until the worker thread has finished, or until the timeout (ms) expires.
-- **waitForDataAvailable** `[fn]` in [RtCmdClient](/docs/api/com/rt-cmd-client) — Wait for ready read until data are available.
 - **waitForSpace** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer) — Waits until beginWrite(`samples`) would not wait.
 - **wallTimeMs** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — Wall-clock duration in milliseconds.
 - **warning** `[fn]` in [Log](/docs/api/base/log) — As `debug()`, at warning level.

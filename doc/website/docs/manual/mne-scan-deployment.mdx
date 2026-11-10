@@ -80,7 +80,7 @@ The `writetofile` plugin produces one FIFF file per pipeline *Run*. Recommended 
 |-------------------------|--------------|-----|
 | `Failed to load plugin <name>: cannot open shared object file` | Vendor SDK library not on the loader path | Copy the SDK `*.dll` / `*.so` next to `mne_scan` (Windows) or into a directory included in the system loader path (Linux / macOS). Do not rely on `LD_LIBRARY_PATH` for production. |
 | `<sensor> init failed: device not found` | Amplifier off, not enumerated, or claimed by another process | Power-cycle the amplifier, close any vendor utility that may hold the device, restart `mne_scan`. |
-| `FiffSimulator: connection refused` | `mne_rt_server` not running or wrong host/port | Start `mne_rt_server` first; verify host `127.0.0.1` and port 4217 (default) in the Connection tab. |
+| `FiffSimulator: connection refused` | `mne_rt_server` not running or wrong host/port | Start `mne_rt_server` first; verify host `127.0.0.1` and port 4217 (default) in the plug-in's settings. |
 | `FtBuffer: header read timed out` | Producer (e.g. `neuromag2ft`) not yet pushing data | Start the producer before the FieldTrip-side consumer; confirm the buffer port (default 1972) is reachable. |
 | `LSL: no streams discovered` | UDP multicast blocked between hosts | Put MNE Scan and the LSL outlet on the same VLAN, or unblock multicast on the network. |
 | `HPI: insufficient coil amplitude` | HPI coils disabled in the recording, or coil-frequency preset wrong for the system | Confirm coil energising on the acquisition console; verify `hpi.json` matches the site's coil frequencies. |

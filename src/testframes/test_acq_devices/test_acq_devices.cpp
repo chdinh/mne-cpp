@@ -654,6 +654,259 @@ private:
 };
 
 /**
+ * An mne_rt_server on two consecutive ports: it records the commands of the command port and the alias, gives
+ * the data client id 5, answers "measinfo 5" with the measurement info of two MEG channels and STI 014 at 600 Hz,
+ * and "start 5" with a buffer left over from an earlier start, the raw-data block with 8 calibrated samples in
+ * two buffers, and the end of the block, as when the server stops.
+ */
+class FakeRtServer
+{
+public:
+    FakeRtServer()
+    {
+        for (int attempt = 0; attempt < 20 && m_port == 0; ++attempt) {
+            const int commands = listen_on(0);
+            const int port = commands < 0 ? 0 : bound_port(commands);
+            const int data = port > 0 && port < 65535 ? listen_on(port + 1) : -1;
+            if (data < 0) {
+                ::close(commands);
+                continue;
+            }
+            m_listeners = {commands, data};
+            m_port = port;
+        }
+        if (m_port > 0) {
+            m_thread = std::thread([this] { serve(); });
+        }
+    }
+
+    ~FakeRtServer()
+    {
+        m_stop = true;
+        for (const int fd : m_listeners) {
+            ::shutdown(fd, SHUT_RDWR);
+            ::close(fd);
+        }
+        if (m_thread.joinable()) {
+            m_thread.join();
+        }
+    }
+
+    FakeRtServer(const FakeRtServer&) = delete;
+    FakeRtServer& operator=(const FakeRtServer&) = delete;
+
+    [[nodiscard]] int port() const
+    {
+        return m_port;
+    }
+
+    [[nodiscard]] std::vector<std::string> commands()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_commands;
+    }
+
+    [[nodiscard]] std::string alias()
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        return m_alias;
+    }
+
+private:
+    static int listen_on(int port)
+    {
+        const int fd = ::socket(AF_INET, SOCK_STREAM, 0);
+        sockaddr_in tcp{};
+        tcp.sin_family = AF_INET;
+        tcp.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        tcp.sin_port = htons(static_cast<std::uint16_t>(port));
+        if (fd < 0 || ::bind(fd, reinterpret_cast<sockaddr*>(&tcp), sizeof(tcp)) != 0 || ::listen(fd, 4) != 0) {
+            if (fd >= 0) {
+                ::close(fd);
+            }
+            return -1;
+        }
+        return fd;
+    }
+
+    static int bound_port(int fd)
+    {
+        sockaddr_in tcp{};
+        socklen_t length = sizeof(tcp);
+        return ::getsockname(fd, reinterpret_cast<sockaddr*>(&tcp), &length) == 0 ? ntohs(tcp.sin_port) : 0;
+    }
+
+    static bool read_all(int fd, std::byte* data, std::size_t size)
+    {
+        while (size > 0) {
+            const ssize_t got = ::recv(fd, data, size, 0);
+            if (got <= 0) {
+                return false;
+            }
+            data += got;
+            size -= static_cast<std::size_t>(got);
+        }
+        return true;
+    }
+
+    static std::uint32_t big(std::span<const std::byte> data, std::size_t offset)
+    {
+        std::uint32_t value = 0;
+        for (std::size_t i = 0; i < 4; ++i) {
+            value = (value << 8) | std::to_integer<std::uint32_t>(data[offset + i]);
+        }
+        return value;
+    }
+
+    /** A channel record in big-endian byte order. */
+    static std::vector<std::byte> big_channel(std::int32_t kind, std::int32_t coil, std::int32_t unit, float cal, const char* name)
+    {
+        std::vector<std::byte> out = fiff_channel(kind, coil, unit, cal, name);
+        for (std::size_t word = 0; word < 20; ++word) {
+            std::reverse(out.begin() + static_cast<std::ptrdiff_t>(4 * word), out.begin() + static_cast<std::ptrdiff_t>(4 * word + 4));
+        }
+        return out;
+    }
+
+    static std::vector<std::byte> meas_info()
+    {
+        std::vector<std::byte> out;
+        append_fiff_tag(out, 104, 3, fiff_words({100}, true), true);
+        append_fiff_tag(out, 104, 3, fiff_words({101}, true), true);
+        append_fiff_tag(out, 200, 3, fiff_words({3}, true), true);
+        std::vector<std::byte> sfreq;
+        append_value(sfreq, 600.0F, true);
+        append_fiff_tag(out, 201, 4, sfreq, true);
+        append_fiff_tag(out, 203, 30, big_channel(1, 3022, 112, 1e-13F, "MEG 0111"), true);
+        append_fiff_tag(out, 203, 30, big_channel(1, 3012, 201, 2e-13F, "MEG 0112"), true);
+        append_fiff_tag(out, 203, 30, big_channel(3, 0, -1, 1.0F, "STI 014"), true);
+        append_fiff_tag(out, 105, 3, fiff_words({101}, true), true);
+        return out;
+    }
+
+    static std::vector<std::byte> buffer(int first, int count)
+    {
+        std::vector<std::byte> values;
+        for (int s = first; s < first + count; ++s) {
+            for (const float v : {1e-12F * static_cast<float>(100 + s), -1e-11F * static_cast<float>(s), s >= 5 ? 3.0F : 0.0F}) {
+                append_value(values, v, true);
+            }
+        }
+        std::vector<std::byte> out;
+        append_fiff_tag(out, 300, 4, values, true);
+        return out;
+    }
+
+    static void send_all(int fd, const std::vector<std::byte>& data)
+    {
+        static_cast<void>(::send(fd, data.data(), data.size(), 0));
+    }
+
+    void reply(int fd, const std::string& text)
+    {
+        std::vector<std::byte> out;
+        append_value(out, static_cast<std::uint16_t>(4 + 2 * text.size()), true);
+        append_value(out, static_cast<std::uint32_t>(2 * text.size()), true);
+        for (const char c : text) {
+            append_value(out, static_cast<std::uint16_t>(c), true);
+        }
+        send_all(fd, out);
+    }
+
+    /** Handles a command; @return false when the client left. */
+    bool command(int commands, int data)
+    {
+        std::array<std::byte, 6> head{};
+        if (!read_all(commands, head.data(), head.size())) {
+            return false;
+        }
+        std::vector<std::byte> text(big(head, 2));
+        if (!read_all(commands, text.data(), text.size())) {
+            return false;
+        }
+        std::string line;
+        for (std::size_t i = 0; i + 1 < text.size(); i += 2) {
+            line += static_cast<char>(std::to_integer<int>(text[i + 1]));
+        }
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_commands.push_back(line);
+        }
+        if (line == "measinfo 5") {
+            send_all(data, meas_info());
+        } else if (line == "start 5") {
+            std::vector<std::byte> out = buffer(-4, 4); // still on its way from an earlier start
+            append_fiff_tag(out, 104, 3, fiff_words({102}, true), true);
+            const std::vector<std::byte> first = buffer(0, 5);
+            const std::vector<std::byte> second = buffer(5, 3);
+            out.insert(out.end(), first.begin(), first.end());
+            out.insert(out.end(), second.begin(), second.end());
+            append_fiff_tag(out, 105, 3, fiff_words({102}, true), true);
+            send_all(data, out);
+        }
+        if (line.starts_with("simfile ")) {
+            reply(commands, line.ends_with(".fif") ? "New simulation file set succefully.\r\n" : "Simulation file not set.\r\n");
+        } else {
+            reply(commands, "done " + line + "\r\n");
+        }
+        return true;
+    }
+
+    /** Handles a command tag; @return false when the client left. */
+    bool data_command(int data)
+    {
+        std::array<std::byte, 16> head{};
+        if (!read_all(data, head.data(), head.size())) {
+            return false;
+        }
+        std::vector<std::byte> payload(big(head, 8));
+        if (!read_all(data, payload.data(), payload.size())) {
+            return false;
+        }
+        if (big(head, 0) != 3700 || payload.size() < 4) {
+            return true;
+        }
+        if (big(payload, 0) == 1) {
+            std::vector<std::byte> out;
+            append_fiff_tag(out, 3701, 3, fiff_words({5}, true), true);
+            send_all(data, out);
+        } else if (big(payload, 0) == 2) {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_alias.assign(reinterpret_cast<const char*>(payload.data()) + 4, payload.size() - 4);
+        }
+        return true;
+    }
+
+    void serve()
+    {
+        const int commands = ::accept(m_listeners[0], nullptr, nullptr);
+        const int data = commands < 0 ? -1 : ::accept(m_listeners[1], nullptr, nullptr);
+        while (!m_stop && data >= 0) {
+            std::array<pollfd, 2> fds{{{commands, POLLIN, 0}, {data, POLLIN, 0}}};
+            if (::poll(fds.data(), fds.size(), 50) < 0) {
+                break;
+            }
+            if ((fds[0].revents != 0 && !command(commands, data)) || (fds[1].revents != 0 && !data_command(data))) {
+                break;
+            }
+        }
+        for (const int fd : {commands, data}) {
+            if (fd >= 0) {
+                ::close(fd);
+            }
+        }
+    }
+
+    std::array<int, 2> m_listeners{-1, -1};
+    int m_port = 0;
+    std::atomic<bool> m_stop{false};
+    std::mutex m_mutex;
+    std::vector<std::string> m_commands;
+    std::string m_alias;
+    std::thread m_thread;
+};
+
+/**
  * A Fastrak at the far end of a pseudo-terminal: it records the commands it receives, answers the first "C"
  * with two updates of stations 1 and 2 (between them a station that is not used and lines that are no
  * records), then falls silent like a pressed stylus button, and answers the next "C" with one more update.
@@ -826,6 +1079,13 @@ private slots:
     void testFtBufferInvalidParameters();
     void testFtBufferServerUnavailable();
     void testFtBufferReadsTheServer();
+    void testRtServerStreamLayout();
+    void testRtServerMatchesNeuromag();
+    void testRtServerRestarts();
+    void testRtServerInvalidParameters_data();
+    void testRtServerInvalidParameters();
+    void testRtServerServerUnavailable();
+    void testRtServerReadsTheServer();
 };
 
 //=============================================================================================================
@@ -839,6 +1099,7 @@ void TestAcqDevices::initTestCase()
     QVERIFY(register_neuromag_scheme().ok());
     QVERIFY(register_polhemus_scheme().ok());
     QVERIFY(register_ftbuffer_scheme().ok());
+    QVERIFY(register_rtserver_scheme().ok());
 }
 
 //=============================================================================================================
@@ -2044,6 +2305,143 @@ void TestAcqDevices::testFtBufferReadsTheServer()
     // Header, the counts at start, the counts with data, events, samples, and the new header's counts
     const std::vector<std::uint16_t> expected = {0x201, 0x402, 0x402, 0x203, 0x202, 0x402};
     QCOMPARE(buffer.commands(), expected);
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testRtServerStreamLayout()
+{
+    auto device = AcqDevice::open("rtserver://?simulate=1&meg=4&eeg=2&rate=500");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().backend, std::string("rtserver"));
+    // The server sends the recording's channels and measurement info, and calibrated floats
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float32);
+    QCOMPARE(info->sfreq, 500.0);
+    QCOMPARE(info->channelCount(), std::size_t(7));
+    QCOMPARE(info->channels[0].name, std::string("MEG 0001"));
+    QCOMPARE(info->channels[0].unit, AcqUnit::Tesla);
+    QCOMPARE(info->channels[0].scale, 1.0);
+    QCOMPARE(info->channels[6].kind, AcqChannelKind::Stim);
+    QCOMPARE(info->extensions.size(), std::size_t(1));
+    QCOMPARE(info->extensions[0].schema, std::string("fiff.MeasInfo/1"));
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testRtServerMatchesNeuromag()
+{
+    // The connector sends the recording's samples times calibration and range
+    const Recording replayed = record("rtserver://?simulate=1&meg=4&eeg=2&rate=500&buffer=50&seed=3&realtime=0&duration=2");
+    const Recording direct = record("neuromag://?simulate=1&meg=4&eeg=2&rate=500&seed=3&realtime=0&duration=2");
+    QCOMPARE(replayed.channels, std::size_t(7));
+    QCOMPARE(replayed.frames(), std::size_t(1000));
+    QCOMPARE(direct.frames(), replayed.frames());
+    for (std::size_t s = 0; s < replayed.frames(); ++s) {
+        for (std::size_t c = 0; c < 7; ++c) {
+            QVERIFY2(std::abs(replayed.at(s, c) - direct.at(s, c)) <= 1e-6 * std::abs(direct.at(s, c)) + 1e-30, qPrintable(QString::number(c)));
+        }
+    }
+    QVERIFY(!direct.events.empty());
+    QCOMPARE(replayed.events.size(), direct.events.size());
+    for (std::size_t e = 0; e < direct.events.size(); ++e) {
+        QCOMPARE(replayed.events[e].sample, direct.events[e].sample);
+        QCOMPARE(replayed.events[e].code, direct.events[e].code);
+    }
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testRtServerRestarts()
+{
+    // A stopped stream starts again where the server is then
+    auto device = AcqDevice::open("rtserver://?simulate=1&meg=4&rate=1000");
+    QVERIFY(device);
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    for (int run = 0; run < 2; ++run) {
+        QVERIFY(device->start().ok());
+        auto view = reader->acquire(100, 5s);
+        QVERIFY2(view, view ? "" : view.error().text().c_str());
+        QVERIFY(reader->release(*view).ok());
+        device->stop();
+    }
+    QVERIFY(device->lastError().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testRtServerInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("target") << "rtserver://localhost?simulate=1";
+    QTest::newRow("port") << "rtserver://localhost:0";
+    QTest::newRow("no data port") << "rtserver://localhost:65535";
+    QTest::newRow("port text") << "rtserver://localhost:rt";
+    QTest::newRow("host") << "rtserver://:4217";
+    QTest::newRow("timeout") << "rtserver://?simulate=1&timeout=0";
+    QTest::newRow("channels") << "rtserver://?simulate=1&meg=0";
+    QTest::newRow("connector") << "rtserver://?simulate=1&connector=-1";
+    QTest::newRow("buffer") << "rtserver://?simulate=1&buffer=-1";
+    QTest::newRow("simfile") << "rtserver://?simulate=1&simfile=a.fif";
+}
+
+void TestAcqDevices::testRtServerInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testRtServerServerUnavailable()
+{
+    auto device = AcqDevice::open("rtserver://127.0.0.1:1?timeout=0.5");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::DeviceNotFound);
+    QVERIFY(device.error().text().find("127.0.0.1:1") != std::string::npos);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testRtServerReadsTheServer()
+{
+#if defined(_WIN32)
+    QSKIP("the fake server uses POSIX sockets");
+#else
+    FakeRtServer server;
+    QVERIFY(server.port() > 0);
+    auto device = AcqDevice::open(std::format("rtserver://127.0.0.1:{}?connector=2&simfile=/data/run.fif&buffer=50&alias=scan", server.port()));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
+    QCOMPARE(info->sfreq, 600.0);
+    QCOMPARE(info->channelCount(), std::size_t(3));
+    QCOMPARE(info->channels[0].name, std::string("MEG 0111"));
+    QCOMPARE(info->channels[1].unit, AcqUnit::TeslaPerMeter);
+    QCOMPARE(info->channels[1].scale, 1.0);
+    QCOMPARE(info->channels[2].kind, AcqChannelKind::Stim);
+
+    // The buffer of an earlier start is dropped; the end of the raw-data block ends the stream
+    const Recording recorded = record_device(*device);
+    QCOMPARE(recorded.frames(), std::size_t(8));
+    for (std::size_t s = 0; s < 8; ++s) {
+        QCOMPARE(static_cast<float>(recorded.at(s, 0)), 1e-12F * static_cast<float>(100 + s));
+        QCOMPARE(static_cast<float>(recorded.at(s, 1)), -1e-11F * static_cast<float>(s));
+    }
+    QCOMPARE(recorded.events.size(), std::size_t(1));
+    QCOMPARE(recorded.events[0].sample, std::uint64_t(5));
+    QCOMPARE(recorded.events[0].code, 3);
+    device->close();
+
+    const std::vector<std::string> expected = {"selcon 2", "simfile /data/run.fif", "bufsize 50", "measinfo 5", "start 5", "stop 5"};
+    QVERIFY(QTest::qWaitFor([&] { return server.commands().size() >= expected.size(); }, 2000));
+    QCOMPARE(server.commands(), expected);
+    QCOMPARE(server.alias(), std::string("scan"));
+
+    // A file the connector refuses
+    FakeRtServer refusing;
+    QCOMPARE(openError(std::format("rtserver://127.0.0.1:{}?simfile=notes.txt", refusing.port())), AcqErrorCode::InvalidParameter);
 #endif
 }
 

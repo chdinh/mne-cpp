@@ -9,7 +9,7 @@
  *           Lorenz Esch <lorenz.esch@tu-ilmenau.de>
  * @since    0.1.0
  * @date     February, 2013
- * @brief    Definition of the RTServerSetupWidget class.
+ * @brief    Definition of the FiffSimulatorSetupWidget class.
  */
 
 //=============================================================================================================
@@ -17,19 +17,16 @@
 //=============================================================================================================
 
 #include "fiffsimulatorsetupwidget.h"
-
 #include "../fiffsimulator.h"
-
-#include <fiff/fiff_info.h>
-#include <com/rt_client/rt_cmd_client.h>
 
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDir>
-#include <QDebug>
-#include <QComboBox>
+#include <QCheckBox>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QSpinBox>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -41,162 +38,42 @@ using namespace FIFFSIMULATORPLUGIN;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffSimulatorSetupWidget::FiffSimulatorSetupWidget(FiffSimulator* p_pFiffSimulator, QWidget* parent)
+FiffSimulatorSetupWidget::FiffSimulatorSetupWidget(FiffSimulator* pFiffSimulator, QWidget* parent)
 : QWidget(parent)
-, m_pFiffSimulator(p_pFiffSimulator)
-, m_bIsInit(false)
 {
-    ui.setupUi(this);
+    auto* host = new QLineEdit(QString::fromStdString(pFiffSimulator->m_host));
+    host->setObjectName("m_lineEdit_Host");
+    host->setToolTip(tr("The computer that runs mne_rt_server"));
+    connect(host, &QLineEdit::textChanged, this, [pFiffSimulator](const QString& text) { pFiffSimulator->m_host = text.trimmed().toStdString(); });
 
-    //rt server connection
-    this->ui.m_qLineEdit_Ip->setText(m_pFiffSimulator->m_sFiffSimulatorIP);
+    auto* port = new QSpinBox;
+    port->setObjectName("m_spinBox_Port");
+    port->setRange(1, 65534);
+    port->setValue(pFiffSimulator->m_port);
+    port->setToolTip(tr("The command port of mne_rt_server; the data port is the next one"));
+    connect(port, &QSpinBox::valueChanged, this, [pFiffSimulator](int value) { pFiffSimulator->m_port = static_cast<std::uint16_t>(value); });
 
-    connect(ui.m_qPushButton_Connect, &QPushButton::released,
-            this, &FiffSimulatorSetupWidget::pressedConnect);
+    auto* file = new QLineEdit(QString::fromStdString(pFiffSimulator->m_simfile));
+    file->setObjectName("m_lineEdit_SimFile");
+    file->setPlaceholderText(tr("The server's file"));
+    file->setToolTip(tr("FIFF file on the server's computer to replay"));
+    connect(file, &QLineEdit::textChanged, this, [pFiffSimulator](const QString& text) { pFiffSimulator->m_simfile = text.trimmed().toStdString(); });
 
-    connect(m_pFiffSimulator, &FiffSimulator::cmdConnectionChanged,
-            this, &FiffSimulatorSetupWidget::cmdConnectionChanged);
+    auto* block = new QSpinBox;
+    block->setObjectName("m_spinBox_SamplesPerBlock");
+    block->setRange(1, 100000);
+    block->setValue(pFiffSimulator->m_iSamplesPerBlock);
+    connect(block, &QSpinBox::valueChanged, this, [pFiffSimulator](int value) { pFiffSimulator->m_iSamplesPerBlock = value; });
 
-    //rt server fiffInfo received
-    connect(m_pFiffSimulator, &FiffSimulator::fiffInfoAvailable,
-            this, &FiffSimulatorSetupWidget::fiffInfoReceived);
+    auto* simulate = new QCheckBox(tr("Simulate the server"));
+    simulate->setObjectName("m_checkBox_Simulate");
+    simulate->setChecked(pFiffSimulator->m_bSimulate);
+    connect(simulate, &QCheckBox::toggled, this, [pFiffSimulator](bool on) { pFiffSimulator->m_bSimulate = on; });
 
-    //Buffer
-    connect(ui.m_qLineEdit_BufferSize, &QLineEdit::textChanged,
-            this, &FiffSimulatorSetupWidget::bufferSizeEdited);
-
-    //CLI
-    connect(ui.m_qPushButton_SendCLI, &QPushButton::released,
-            this, &FiffSimulatorSetupWidget::pressedSendCLI);
-
-    this->init();
-}
-
-//=============================================================================================================
-
-FiffSimulatorSetupWidget::~FiffSimulatorSetupWidget()
-{
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::init()
-{
-    cmdConnectionChanged(m_pFiffSimulator->m_bCmdClientIsConnected);
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::bufferSizeEdited()
-{
-    bool t_bSuccess = false;
-    qint32 t_iBufferSize = ui.m_qLineEdit_BufferSize->text().toInt(&t_bSuccess);
-
-    if (t_bSuccess && t_iBufferSize > 0)
-        m_pFiffSimulator->m_iBufferSize = t_iBufferSize;
-    else
-        ui.m_qLineEdit_BufferSize->setText(QString("%1").arg(m_pFiffSimulator->m_iBufferSize));
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::pressedConnect()
-{
-    if (m_pFiffSimulator->m_bCmdClientIsConnected)
-        m_pFiffSimulator->disconnectCmdClient();
-    else {
-        m_pFiffSimulator->m_sFiffSimulatorIP = this->ui.m_qLineEdit_Ip->text();
-        m_pFiffSimulator->connectCmdClient();
-    }
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::pressedSendCLI()
-{
-    if (m_pFiffSimulator->m_bCmdClientIsConnected) {
-        this->printToLog(this->ui.m_qLineEdit_SendCLI->text());
-        QString t_sReply = m_pFiffSimulator->m_pRtCmdClient->sendCLICommand(this->ui.m_qLineEdit_SendCLI->text());
-        this->printToLog(t_sReply);
-    }
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::printToLog(QString logMsg)
-{
-    ui.m_qTextBrowser_ServerMessage->insertPlainText(logMsg + "\n");
-    //scroll down to the newest entry
-    QTextCursor c = ui.m_qTextBrowser_ServerMessage->textCursor();
-    c.movePosition(QTextCursor::End);
-    ui.m_qTextBrowser_ServerMessage->setTextCursor(c);
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::cmdConnectionChanged(bool p_bConnectionStatus)
-{
-    m_bIsInit = false;
-
-    if (p_bConnectionStatus) {
-        //
-        // set frequency txt
-        //
-        if (m_pFiffSimulator->m_pFiffInfo)
-            this->ui.m_qLabel_sps->setText(QString("%1").arg(m_pFiffSimulator->m_pFiffInfo->sfreq));
-
-        //
-        // set buffer size txt
-        //
-        this->ui.m_qLineEdit_BufferSize->setText(QString("%1").arg(m_pFiffSimulator->m_iBufferSize));
-
-        //
-        // set connectors
-        //
-        //        QMap<qint32, QString>::ConstIterator it = m_pFiffSimulator->m_qMapConnectors.begin();
-        //        qint32 idx = 0;
-
-        //        for(; it != m_pFiffSimulator->m_qMapConnectors.end(); ++it)
-        //        {
-        //            if(this->ui.m_qComboBox_Connector->findData(it.key()) == -1)
-        //            {
-        //                this->ui.m_qComboBox_Connector->insertItem(idx, it.value(), it.key());
-        //                ++idx;
-        //            }
-        //            else
-        //                idx = this->ui.m_qComboBox_Connector->findData(it.key()) + 1;
-        //        }
-        //        this->ui.m_qComboBox_Connector->setCurrentIndex(this->ui.m_qComboBox_Connector->findData(m_pFiffSimulator->m_iActiveConnectorId));
-
-        //UI enables/disables
-        this->ui.m_qLabel_ConnectionStatus->setText(QString("Connected"));
-        this->ui.m_qLineEdit_Ip->setEnabled(false);
-        this->ui.m_qPushButton_Connect->setText(QString("Disconnect"));
-        this->ui.m_qLineEdit_SendCLI->setEnabled(true);
-        this->ui.m_qPushButton_SendCLI->setEnabled(true);
-
-        m_bIsInit = true;
-    } else {
-        //clear connectors --> ToDO create a clear function
-        m_pFiffSimulator->m_qMapConnectors.clear();
-        //        this->ui.m_qComboBox_Connector->clear();
-        m_pFiffSimulator->m_iBufferSize = -1;
-
-        //UI enables/disables
-        this->ui.m_qLabel_ConnectionStatus->setText(QString("Not connected"));
-        this->ui.m_qLineEdit_Ip->setEnabled(true);
-        this->ui.m_qPushButton_Connect->setText(QString("Connect"));
-        this->ui.m_qLineEdit_SendCLI->setEnabled(false);
-        this->ui.m_qPushButton_SendCLI->setEnabled(false);
-
-        this->ui.m_qLineEdit_BufferSize->setText(QString(""));
-    }
-}
-
-//=============================================================================================================
-
-void FiffSimulatorSetupWidget::fiffInfoReceived()
-{
-    if (m_pFiffSimulator->m_pFiffInfo)
-        this->ui.m_qLabel_sps->setText(QString("%1").arg(m_pFiffSimulator->m_pFiffInfo->sfreq));
+    auto* form = new QFormLayout(this);
+    form->addRow(tr("Host"), host);
+    form->addRow(tr("Port"), port);
+    form->addRow(tr("File"), file);
+    form->addRow(tr("Samples per block"), block);
+    form->addRow(simulate);
 }

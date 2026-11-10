@@ -9,20 +9,19 @@
  * @date     November 2026
  * @brief    Loopback test of mne_rt_server's FIFF simulator: the buffers a client receives equal the file.
  *
- * Starts mne_rt_server, points its FIFF simulator at the test data with the command client, starts streaming
- * to a data client and compares the received buffers with read_raw_segment of the same samples.
+ * Starts mne_rt_server, points its FIFF simulator at the test data over the command port, streams it through
+ * rtserver:// and compares the received buffers with read_raw_segment of the same samples.
  */
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include <com/rt_client/rt_cmd_client.h>
-#include <memory>
-#include <com/rt_client/rt_data_client.h>
-#include <fiff/fiff_constants.h>
-#include <fiff/fiff_file.h>
+#include <acq/acq_device.h>
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
 #include <fiff/fiff_raw_data.h>
+#include <fiff/fiff_stream.h>
 #include <rtserver_connector/iconnector.h>
 
 //=============================================================================================================
@@ -30,11 +29,22 @@
 //=============================================================================================================
 
 #include <QCoreApplication>
+#include <QDataStream>
 #include <QDir>
 #include <QFile>
 #include <QPluginLoader>
 #include <QProcess>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QtTest>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <chrono>
+#include <format>
+#include <thread>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -46,8 +56,115 @@
 // USED NAMESPACES
 //=============================================================================================================
 
-using namespace COMLIB;
 using namespace FIFFLIB;
+
+namespace
+{
+
+/** @return The reply of the server's command port to @p line, framed as mne_rt_server frames its commands. */
+QString send(QTcpSocket& socket, const QString& line)
+{
+    QByteArray block;
+    QDataStream out(&block, QIODevice::WriteOnly);
+    out.setVersion(QDataStream::Qt_6_0);
+    out << quint16(0) << line;
+    out.device()->seek(0);
+    out << quint16(block.size() - sizeof(quint16));
+    socket.write(block);
+    QString reply;
+    QDataStream in(&socket);
+    in.setVersion(QDataStream::Qt_6_0);
+    while (socket.waitForReadyRead(10000)) {
+        in.startTransaction();
+        quint16 size = 0;
+        in >> size >> reply;
+        if (in.commitTransaction()) {
+            break;
+        }
+    }
+    return reply;
+}
+
+/**
+ * Serves @p info as mne_rt_server does on two consecutive local ports: the data client gets id 1, "measinfo 1"
+ * the bytes of FiffInfo::writeToStream, every command the reply "ok".
+ */
+class MeasInfoServer
+{
+public:
+    explicit MeasInfoServer(const FiffInfo& info)
+    {
+        FiffStream out(&m_info, QIODevice::WriteOnly);
+        info.writeToStream(out);
+        for (quint16 port = 40217; port < 40417 && m_port == 0; port += 2) {
+            if (m_commands.listen(QHostAddress::LocalHost, port) && m_data.listen(QHostAddress::LocalHost, port + 1)) {
+                m_port = port;
+            } else {
+                m_commands.close();
+            }
+        }
+    }
+
+    [[nodiscard]] quint16 port() const
+    {
+        return m_port;
+    }
+
+    /** Answers the client in this thread until it has the measurement info. */
+    void serve()
+    {
+        QVERIFY(m_commands.waitForNewConnection(5000) && m_data.waitForNewConnection(5000));
+        // Closing a socket with unread data (the alias) resets the connection, so both stay open until the end
+        m_command_socket.reset(m_commands.nextPendingConnection());
+        m_data_socket.reset(m_data.nextPendingConnection());
+        QTcpSocket* commands = m_command_socket.get();
+        QTcpSocket* data = m_data_socket.get();
+        // The id request: a command tag of 20 bytes; then the alias tag
+        while (data->bytesAvailable() < 20 && data->waitForReadyRead(5000)) {
+        }
+        data->read(20);
+        FiffStream out(data);
+        const fiff_int_t id = 1;
+        out.write_int(FIFF_MNE_RT_CLIENT_ID, &id);
+        data->waitForBytesWritten(5000);
+        QDataStream in(commands);
+        in.setVersion(QDataStream::Qt_6_0);
+        while (commands->waitForReadyRead(5000)) {
+            in.startTransaction();
+            quint16 size = 0;
+            QString line;
+            in >> size >> line;
+            if (!in.commitTransaction()) {
+                continue;
+            }
+            if (line == QStringLiteral("measinfo 1")) {
+                data->write(m_info);
+                data->waitForBytesWritten(5000);
+            }
+            QByteArray block;
+            QDataStream reply(&block, QIODevice::WriteOnly);
+            reply.setVersion(QDataStream::Qt_6_0);
+            reply << quint16(0) << QStringLiteral("ok");
+            reply.device()->seek(0);
+            reply << quint16(block.size() - sizeof(quint16));
+            commands->write(block);
+            commands->waitForBytesWritten(5000);
+            if (line.startsWith(QStringLiteral("measinfo"))) {
+                break;
+            }
+        }
+    }
+
+private:
+    QTcpServer m_commands;
+    QTcpServer m_data;
+    std::unique_ptr<QTcpSocket> m_command_socket;
+    std::unique_ptr<QTcpSocket> m_data_socket;
+    QByteArray m_info;
+    quint16 m_port = 0;
+};
+
+} // namespace
 
 //=============================================================================================================
 /**
@@ -58,6 +175,8 @@ class TestRtServerFiffReplay : public QObject
     Q_OBJECT
 
 private slots:
+    void readsTheMeasurementInfo_data();
+    void readsTheMeasurementInfo();
     void pluginSharesTheConnectorType();
     void streamsTheFile();
     void cleanupTestCase();
@@ -65,6 +184,98 @@ private slots:
 private:
     QProcess m_server;
 };
+
+//=============================================================================================================
+
+void TestRtServerFiffReplay::readsTheMeasurementInfo_data()
+{
+    QTest::addColumn<bool>("withProjector");
+    QTest::newRow("ctf compensators") << false;
+    QTest::newRow("ctf compensators + projector") << true;
+}
+
+void TestRtServerFiffReplay::readsTheMeasurementInfo()
+{
+    // What the server writes of a measurement info reaches the client field by field
+    QFETCH(bool, withProjector);
+    FiffRawData rawData(QStringLiteral(MNE_CTF_COMP_DATA_DIR "/ctf_grade1_raw.fif").toStdString());
+    FiffInfo info = rawData.info;
+    QCOMPARE(info.nchan, 36);
+    QCOMPARE(info.comps.size(), 5);
+    QCOMPARE(info.dig.size(), 3);
+    if (withProjector) {
+        Eigen::MatrixXd vec(2, 3);
+        vec << 0.6, 0.8, 0.0, 0.0, 0.6, -0.8;
+        FiffNamedMatrix vectors(2, 3, {}, StringList(info.ch_names.begin(), info.ch_names.begin() + 3), vec);
+        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "PCA-v1", vectors));
+    }
+    info.experimenter = "rt test";
+    info.description = "wire round trip";
+    info.proj_name = "rt";
+    info.proj_id = 7;
+    info.utc_offset = "+02:00";
+    info.acq_pars = "ACQch001 110113";
+    info.acq_stim = "STI 014";
+    info.bads = {info.ch_names.front()};
+
+    MeasInfoServer server(info);
+    QVERIFY(server.port() > 0);
+    QVERIFY(ACQLIB::register_rtserver_scheme().ok());
+    ACQLIB::AcqExpected<ACQLIB::AcqDevice> device = ACQLIB::AcqError(ACQLIB::AcqErrorCode::Timeout);
+    std::thread client([&] { device = ACQLIB::AcqDevice::open(std::format("rtserver://127.0.0.1:{}?timeout=5", server.port())); });
+    server.serve();
+    client.join();
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto converted = ACQLIB::toFiffInfo(*device->stream().info());
+    QVERIFY2(converted, converted ? "" : converted.error().text().c_str());
+    const FiffInfo& got = *converted;
+
+    QCOMPARE(got.nchan, info.nchan);
+    QCOMPARE(got.ch_names, info.ch_names);
+    for (int k = 0; k < info.nchan; ++k) {
+        QCOMPARE(got.chs[k].kind, info.chs[k].kind);
+        QCOMPARE(got.chs[k].cal, 1.0F); // the server sends calibrated values
+        QCOMPARE(got.chs[k].unit, info.chs[k].unit);
+        QVERIFY(got.chs[k].chpos.r0 == info.chs[k].chpos.r0);
+    }
+    QCOMPARE(got.sfreq, info.sfreq);
+    QCOMPARE(got.highpass, info.highpass);
+    QCOMPARE(got.lowpass, info.lowpass);
+    QCOMPARE(got.linefreq, info.linefreq);
+    QCOMPARE(got.meas_date[0], info.meas_date[0]);
+    QCOMPARE(got.meas_date[1], info.meas_date[1]);
+    QCOMPARE(got.experimenter, info.experimenter);
+    QCOMPARE(got.description, info.description);
+    QCOMPARE(got.proj_name, info.proj_name);
+    QCOMPARE(got.proj_id, info.proj_id);
+    QCOMPARE(got.gantry_angle, info.gantry_angle);
+    QCOMPARE(got.utc_offset, info.utc_offset);
+    QCOMPARE(got.acq_pars, info.acq_pars);
+    QCOMPARE(got.acq_stim, info.acq_stim);
+    QCOMPARE(got.bads, info.bads);
+    QVERIFY(got.dev_head_t.trans == info.dev_head_t.trans);
+    QCOMPARE(got.dig.size(), info.dig.size());
+    for (int k = 0; k < std::ssize(info.dig); ++k) {
+        QCOMPARE(got.dig[k].ident, info.dig[k].ident);
+        QCOMPARE(got.dig[k].r[0], info.dig[k].r[0]);
+    }
+    QCOMPARE(got.projs.size(), info.projs.size());
+    for (int p = 0; p < std::ssize(info.projs); ++p) {
+        QCOMPARE(got.projs[p].desc, info.projs[p].desc);
+        QCOMPARE(got.projs[p].kind, info.projs[p].kind);
+        QCOMPARE(got.projs[p].active, info.projs[p].active);
+        QCOMPARE(got.projs[p].data->col_names, info.projs[p].data->col_names);
+        QVERIFY(got.projs[p].data->data.isApprox(info.projs[p].data->data, 1e-6));
+    }
+    QCOMPARE(got.comps.size(), info.comps.size());
+    for (int c = 0; c < std::ssize(info.comps); ++c) {
+        QCOMPARE(got.comps[c].kind, info.comps[c].kind);
+        QCOMPARE(got.comps[c].save_calibrated, info.comps[c].save_calibrated);
+        QCOMPARE(got.comps[c].data->row_names, info.comps[c].data->row_names);
+        QCOMPARE(got.comps[c].data->col_names, info.comps[c].data->col_names);
+        QVERIFY(got.comps[c].data->data.isApprox(info.comps[c].data->data, 1e-6));
+    }
+}
 
 //=============================================================================================================
 
@@ -111,71 +322,54 @@ void TestRtServerFiffReplay::streamsTheFile()
     QVERIFY2(output.contains("fiff data port"), output.constData());
     QVERIFY2(output.contains("Fiff File Simulator"), output.constData());
 
-    RtCmdClient command;
+    QTcpSocket command;
     command.connectToHost(QStringLiteral("127.0.0.1"), 4217);
     QVERIFY(command.waitForConnected(5000));
-    command.requestCommands();
-    QVERIFY2(command.hasCommand(QStringLiteral("simfile")),
-             qPrintable(QStringLiteral("help reply: ") + command.readAvailableData().left(400) + "\nserver: " +
-                        QString::fromUtf8(output + m_server.readAll())));
+    const QString help = send(command, QStringLiteral("help"));
+    QVERIFY2(help.contains(QStringLiteral("simfile")),
+             qPrintable(QStringLiteral("help reply: ") + help.left(400) + "\nserver: " + QString::fromUtf8(output + m_server.readAll())));
     // A file the simulator cannot read is refused, and the simulator still accepts the next one.
     QTemporaryDir dir;
     QFile notFiff(dir.filePath(QStringLiteral("not_fiff.fif")));
     QVERIFY(notFiff.open(QIODevice::WriteOnly));
     notFiff.write("not a FIFF file");
     notFiff.close();
-    command[QStringLiteral("simfile")].pValues()[0].setValue(notFiff.fileName());
-    command[QStringLiteral("simfile")].send();
-    QVERIFY(command.readAvailableData().contains(QStringLiteral("not set")));
-    command[QStringLiteral("simfile")].pValues()[0].setValue(file);
-    command[QStringLiteral("simfile")].send();
-    QVERIFY(command.waitForDataAvailable(10000));
-    QVERIFY2(command.readAvailableData().contains(QStringLiteral("succe")), "simfile was not accepted");
+    QVERIFY(ACQLIB::register_rtserver_scheme().ok());
+    auto refused = ACQLIB::AcqDevice::open(std::format("rtserver://127.0.0.1:4217?simfile={}", notFiff.fileName().toStdString()));
+    QVERIFY(!refused);
+    QCOMPARE(refused.error().code(), ACQLIB::AcqErrorCode::InvalidParameter);
+    QVERIFY(!send(command, QStringLiteral("accel 100")).isEmpty());
+
     const int bufsize = 100;
-    command[QStringLiteral("bufsize")].pValues()[0].setValue(bufsize);
-    command[QStringLiteral("bufsize")].send();
-    QVERIFY(command.waitForDataAvailable(10000));
-    command.readAvailableData();
-    command[QStringLiteral("accel")].pValues()[0].setValue(100.0);
-    command[QStringLiteral("accel")].send();
-    QVERIFY(command.waitForDataAvailable(10000));
-    command.readAvailableData();
-
-    RtDataClient data;
-    data.connectToHost(QStringLiteral("127.0.0.1"), 4218);
-    QVERIFY(data.waitForConnected(5000));
-    const qint32 id = data.getClientId();
-    QVERIFY(id >= 0);
-    command[QStringLiteral("measinfo")].pValues()[0].setValue(id);
-    command[QStringLiteral("measinfo")].send();
-    const std::shared_ptr<FiffInfo> info = data.readMetadata().m_pInfo;
-    QVERIFY(info);
-
+    auto device = ACQLIB::AcqDevice::open(std::format("rtserver://127.0.0.1:4217?simfile={}&buffer={}", file.toStdString(), bufsize));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
     FiffRawData raw(file.toStdString());
-    QCOMPARE(info->nchan, raw.info.nchan);
-    QCOMPARE(info->sfreq, raw.info.sfreq * 100.0F); // the acceleration factor scales the advertised rate
+    QCOMPARE(info->channelCount(), std::size_t(raw.info.nchan));
+    QCOMPARE(info->sfreq, double(raw.info.sfreq * 100.0F)); // the acceleration factor scales the advertised rate
 
-    command[QStringLiteral("start")].pValues()[0].setValue(id);
-    command[QStringLiteral("start")].send();
+    // The reader gates the stream, so the client stops reading the socket once the reader stops reading
+    ACQLIB::AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(ACQLIB::AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
     // Buffers go out calibrated, as read_raw_segment returns them, and follow each other without gaps. A client
     // joins a running stream, so the first buffer it receives may lie anywhere in the file.
     const auto segment = [&raw](int b) {
         Eigen::MatrixXd expected, times;
         const fiff_int_t first = raw.first_samp + b * bufsize;
-        return raw.read_raw_segment(expected, times, first, first + bufsize - 1) ? Eigen::MatrixXf(expected.cast<float>())
-                                                                                 : Eigen::MatrixXf();
+        return raw.read_raw_segment(expected, times, first, first + bufsize - 1) ? Eigen::MatrixXd(expected.cast<float>().cast<double>())
+                                                                                 : Eigen::MatrixXd();
     };
     const int buffers = (raw.last_samp - raw.first_samp + 1) / bufsize;
     int offset = -1;
+    Eigen::MatrixXd received(raw.info.nchan, bufsize);
     // At 100 times real time a buffer is due every 1.7 ms, faster than the server polls its socket.
     for (int b = 0; b < 30; ++b) {
-        Eigen::MatrixXf received;
-        fiff_int_t kind = 0;
-        for (int tag = 0; tag < 10 && kind != FIFF_DATA_BUFFER; ++tag) {
-            data.readRawBuffer(info->nchan, received, kind); // clients skip other tags, e.g. the end of the info block
-        }
-        QCOMPARE(kind, FIFF_DATA_BUFFER);
-        QCOMPARE(received.cols(), Eigen::Index(bufsize));
+        const auto read = reader->read(ACQLIB::AcqMatrixRef<double>::columnMajor(received.data(), std::size_t(received.rows()), std::size_t(bufsize)),
+                                       std::chrono::seconds(10));
+        QVERIFY2(read, read ? "" : read.error().text().c_str());
         for (int k = 0; offset < 0 && k < buffers; ++k) {
             if (received == segment(k)) {
                 offset = k;
@@ -188,9 +382,9 @@ void TestRtServerFiffReplay::streamsTheFile()
     QThread::msleep(1000);
     QElapsedTimer reply;
     reply.start();
-    command[QStringLiteral("stop-all")].send();
+    QVERIFY(!send(command, QStringLiteral("stop-all")).isEmpty());
     QVERIFY2(reply.elapsed() < 2000, qPrintable(QStringLiteral("stop-all took %1 ms").arg(reply.elapsed())));
-    data.disconnectFromHost();
+    device->close();
     command.disconnectFromHost();
 }
 

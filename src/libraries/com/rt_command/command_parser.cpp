@@ -17,7 +17,7 @@
  * @ref RawCommand handed to every attached @ref CommandManager via the
  * @c Subject::notify mechanism inherited from @ref COMLIB::Subject; the
  * @c response signal carries replies produced by handlers back to the
- * originating @ref RtCmdClient.
+ * originating client of the command port.
  */
 
 //=============================================================================================================

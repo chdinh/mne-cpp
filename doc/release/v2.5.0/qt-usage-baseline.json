@@ -34,7 +34,7 @@
       "ml",
       "report"
     ],
-    "tokens": 14395,
+    "tokens": 14256,
     "gui_outside_design": []
   },
   "libraries": {
@@ -51,7 +51,7 @@
       "by_category": {},
       "public_header_includes": 0,
       "q_object": 0,
-      "files": 33,
+      "files": 37,
       "modules": []
     },
     "acq/devices/polhemus": {
@@ -135,24 +135,19 @@
       "modules": []
     },
     "com": {
-      "tokens": 367,
+      "tokens": 228,
       "by_category": {
-        "containers": 20,
-        "files": 5,
-        "global": 48,
-        "json": 45,
-        "network": 10,
-        "objects_signals": 90,
-        "strings": 142,
-        "threads": 5,
-        "time": 2
+        "containers": 18,
+        "global": 12,
+        "json": 30,
+        "objects_signals": 73,
+        "strings": 95
       },
-      "public_header_includes": 29,
-      "q_object": 7,
-      "files": 18,
+      "public_header_includes": 17,
+      "q_object": 4,
+      "files": 12,
       "modules": [
-        "Core",
-        "Network"
+        "Core"
       ]
     },
     "connectivity": {

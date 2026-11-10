@@ -14,10 +14,8 @@ Follow these steps to playback recorded data through the MNE Rt Server to MNE Sc
 
 ![](/img/mne_scan_fiffsimulator.png)
 
-* Click on the `FiffSimulator` plug-in and select the `Connection` tab. If you have started the `mne_rt_server` on your local machine, use IP `127.0.0.1` and press `Connect`. The status should change to `Connected`.
-* Click on the `FiffSimulator` plug-in and select the `Preferences` tab. We recommend to use the same block size as the sampling frequency. This way the data will be refreshed every second. 
-
-![](/img/mne_scan_fiffsimulator_size.png)
+* Click on the `FiffSimulator` plug-in. Its settings are the host and command port of `mne_rt_server` (`127.0.0.1` and `4217` for a server on your machine; the data port is the next one), the file the server replays (empty keeps the server's file) and the samples per block. We recommend a block size equal to the sampling frequency, so the display refreshes every second. Without a server, `Simulate the server` replays a synthetic Neuromag recording.
+* The plug-in reads the server through the `rtserver://` source of the acquisition library, e.g. `mne_acq view "rtserver://127.0.0.1:4217?simfile=/data/run_raw.fif&buffer=1000"` reads it the same way.
 
 * Press the green play button in the left upper corner.
 

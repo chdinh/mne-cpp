@@ -33,7 +33,6 @@
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <disp/viewers/projectsettingsview.h>
-#include <com/rt_client/rt_cmd_client.h>
 #include <scMeas/realtimemultisamplearray.h>
 
 //=============================================================================================================

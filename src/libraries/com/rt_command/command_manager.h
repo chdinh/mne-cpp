@@ -32,7 +32,7 @@
  * Outbound traffic uses three signals. @c commandMapChanged() notifies
  * the rest of the application when the schema set has been mutated.
  * @c triggered(Command) lets the manager push outbound requests onto
- * the shared @c RtCmdClient. @c response(QString, Command) carries the
+ * the command port. @c response(QString, Command) carries the
  * reply produced by an executed @c Command back to whoever originally
  * sent it. @c m_bIsActive lets a subsystem temporarily mute the manager
  * (during long-running operations, for example) without detaching it

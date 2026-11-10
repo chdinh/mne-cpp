@@ -51,6 +51,7 @@ aliases; replace the old spelling as below.
 | `MNE_LOG_LEVEL=FATAL` | removed; `CRIT` is the highest level |
 | `ACQLIB::PolhemusConnection`, `PolhemusSerialConfig`, `FastrakParser`, `FastrakSample` (Qt SerialPort) | `AcqDevice::open("polhemus://<port>?stations=1,2")`: a stream of positions and quaternions per station, stylus button presses as event code 1 |
 | `PolhemusCoregistration::setConnection(conn)`, `connection()` | feed the stream: `on_pose(station, position, orientation)`, `on_button(station, position, orientation)` |
+| `com/rt_client/`: `COMLIB::RtClient`, `RtCmdClient`, `RtDataClient`, `MetaData` (Qt Network) | `AcqDevice::open("rtserver://host:4217?simfile=...&buffer=...")`: the measurement info as `fiff.MeasInfo/1` extension (`toFiffInfo()`), calibrated samples, `STI 014` changes as events; `mne_com` no longer links Qt Network, `mne_fiff` or `mne_math` |
 
 - `mne_utils` is gone. Its contents moved to `mne_base`, `mne_math`,
   `mne_channels`, `mne_pybridge`, `mne_report` and `mne_com`, so each library
@@ -152,6 +153,14 @@ aliases; replace the old spelling as below.
   treat every sample as float32 whatever the buffer held, call every
   channel MEG without the Neuromag header, and hand on half a second of
   samples at a time.
+- `rtserver://` reads the active connector of an `mne_rt_server` without Qt:
+  it selects the connector, the replayed file and the buffer size, takes the
+  measurement info with projectors, compensators and digitizer points, and
+  streams the calibrated buffers with `STI 014` changes as events; the end of
+  the measurement ends the stream. `rtserver://?simulate=1` replays a
+  simulated Neuromag recording. The FiffSimulator MNE Scan plugin reads
+  through it; it used to wait a fixed second for its data connection, spin
+  on an empty buffer, and need a separate connect step before starting.
 - `acq_fiff` maps channel kinds, units and coordinate frames through one
   table shared with the devices that speak FIFF.
 - The TMSI impedance view finds its cap layouts wherever MNE Scan was

@@ -68,8 +68,8 @@ namespace COMLIB
  * Single entry point @c parse() accepts either dialect, builds a
  * @ref RawCommand, and broadcasts it to every attached
  * @ref CommandManager; the @c response signal carries replies back from
- * whichever manager handled the request so the caller (typically a
- * @ref RtCmdClient) can forward them to the originating socket.
+ * whichever manager handled the request so the caller (the server's
+ * command thread) can forward them to the originating socket.
  */
 class COMSHARED_EXPORT CommandParser : public QObject, public Subject
 {

@@ -7,18 +7,14 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March, 2026
- * @brief    Tests for com rt_client classes — RtCmdClient, RtDataClient,
- *           and RtClient offline construction and state management
- *           (no network server required).
+ * @brief    Edge cases of the mne_rt_server command vocabulary: Command, RawCommand, CommandManager and
+ *           CommandParser.
  */
 
 //=============================================================================================================
 // INCLUDES
 //=============================================================================================================
 
-#include <com/rt_client/rt_cmd_client.h>
-#include <com/rt_client/rt_data_client.h>
-#include <com/rt_client/rt_client.h>
 #include <com/rt_command/command.h>
 #include <com/rt_command/command_manager.h>
 #include <com/rt_command/command_parser.h>
@@ -32,18 +28,6 @@
 #include <QSignalSpy>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QAbstractSocket>
-#include <QDataStream>
-#include <QElapsedTimer>
-#include <QFile>
-#include <QTcpServer>
-#include <QTcpSocket>
-
-#include <fiff/fiff_constants.h>
-#include <fiff/fiff_digitizer_data.h>
-#include <fiff/fiff_file.h>
-#include <fiff/fiff_raw_data.h>
-#include <fiff/fiff_stream.h>
 
 #include <memory>
 
@@ -52,42 +36,16 @@
 //=============================================================================================================
 
 using namespace COMLIB;
-using namespace FIFFLIB;
 
 //=============================================================================================================
 /**
- * @brief Offline tests for RtCmdClient, RtDataClient, RtClient construction
- *        and state management; additional Command/CommandManager edge cases.
+ * @brief Edge cases of Command, RawCommand, CommandManager and CommandParser.
  */
 class TestComRtClient : public QObject
 {
     Q_OBJECT
 
 private slots:
-    // ── RtCmdClient (offline) ─────────────────────────────────────────
-    void testRtCmdClientConstruction();
-    void testRtCmdClientHasCommandEmpty();
-    void testRtCmdClientReadAvailableDataEmpty();
-    void testRtCmdClientResponseSignal();
-    void testRtCmdClientDisconnectedState();
-    void testRtCmdClientServerClosesWithoutReply();
-
-    // ── RtDataClient (offline) ────────────────────────────────────────
-    void testRtDataClientConstruction();
-    void testRtDataClientDisconnectedState();
-    void testRtDataClientReadsWhatTheServerWrites_data();
-    void testRtDataClientReadsWhatTheServerWrites();
-    void testRtDataClientClientIdAliasAndRawBuffer();
-
-    // ── RtClient (offline) ────────────────────────────────────────────
-    void testRtClientConstruction();
-    void testRtClientConnectionStatusOffline();
-    void testRtClientStopBeforeStart();
-    void testRtClientConnectionChangedSignal();
-
-    // ── MetaData struct ───────────────────────────────────────────────
-    void testMetaDataConstruction();
-
     // ── Command edge cases ────────────────────────────────────────────
     void testCommandDirectMemberAccess();
     void testCommandReserializeRoundTrip();
@@ -111,360 +69,6 @@ private slots:
     void testCommandParserCLIWithMultipleParams();
     void testCommandParserJsonWithMultipleCommands();
 };
-
-//=============================================================================================================
-// RtCmdClient (offline)
-//=============================================================================================================
-
-void TestComRtClient::testRtCmdClientConstruction()
-{
-    RtCmdClient client;
-    // Should be disconnected, not connected to any server
-    QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtCmdClientHasCommandEmpty()
-{
-    RtCmdClient client;
-    // No commands loaded
-    QVERIFY(!client.hasCommand("help"));
-    QVERIFY(!client.hasCommand("stop"));
-    QVERIFY(!client.hasCommand(""));
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtCmdClientReadAvailableDataEmpty()
-{
-    RtCmdClient client;
-    // No data available before any connection
-    QString data = client.readAvailableData();
-    QVERIFY(data.isEmpty());
-    QElapsedTimer timer;
-    timer.start();
-    QVERIFY(!client.waitForDataAvailable(200));
-    QVERIFY(timer.elapsed() >= 150); // waits for the timeout before giving up
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtCmdClientResponseSignal()
-{
-    RtCmdClient client;
-    // Verify the response signal is connectable
-    QSignalSpy spy(&client, &RtCmdClient::response);
-    QVERIFY(spy.isValid());
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtCmdClientDisconnectedState()
-{
-    RtCmdClient client;
-    QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
-    QVERIFY(!client.isOpen());
-    QCOMPARE(client.peerPort(), quint16(0));
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtCmdClientServerClosesWithoutReply()
-{
-    // A server that goes away while a command waits for its reply must not keep the client spinning
-    QTcpServer server;
-    QVERIFY(server.listen(QHostAddress::LocalHost));
-    RtCmdClient client;
-    client.connectToHost(QHostAddress::LocalHost, server.serverPort());
-    QVERIFY(client.waitForConnected(5000));
-    QVERIFY(server.waitForNewConnection(5000));
-    std::unique_ptr<QTcpSocket> peer(server.nextPendingConnection());
-    QVERIFY(peer);
-    peer->close();
-
-    QSignalSpy replies(&client, &RtCmdClient::response);
-    QElapsedTimer elapsed;
-    elapsed.start();
-    client.sendCommandJSON(Command(QStringLiteral("help"), QStringLiteral("lists the commands")));
-    QVERIFY2(elapsed.elapsed() < 5000, qPrintable(QStringLiteral("returned after %1 ms").arg(elapsed.elapsed())));
-    QCOMPARE(replies.count(), 1);
-    QVERIFY(replies.first().first().toString().isEmpty());
-    QVERIFY(client.readAvailableData().isEmpty());
-}
-
-//=============================================================================================================
-// RtDataClient (offline)
-//=============================================================================================================
-
-void TestComRtClient::testRtDataClientConstruction()
-{
-    QTest::failOnWarning();
-    RtDataClient client;
-    QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
-    QCOMPARE(client.getClientId(), -1); // nothing to ask before a connection
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtDataClientDisconnectedState()
-{
-    RtDataClient client;
-    QVERIFY(!client.isOpen());
-    QCOMPARE(client.peerPort(), quint16(0));
-    // disconnectFromHost on already disconnected socket should not crash
-    client.disconnectFromHost();
-    QCOMPARE(client.state(), QAbstractSocket::UnconnectedState);
-}
-
-//=============================================================================================================
-
-//=============================================================================================================
-
-namespace
-{
-
-// The bytes mne_rt_server's FiffStreamThread sends for a measurement info.
-QByteArray serverMeasInfo(const FiffInfo& info)
-{
-    QByteArray block;
-    FiffStream out(&block, QIODevice::WriteOnly);
-    info.writeToStream(out);
-    return block;
-}
-
-// A local server that accepts one data client and returns the server-side socket.
-QTcpSocket* acceptClient(QTcpServer& server, RtDataClient& client)
-{
-    client.connectToHost(QHostAddress::LocalHost, server.serverPort());
-    if (!client.waitForConnected(5000) || !server.waitForNewConnection(5000)) {
-        return nullptr;
-    }
-    return server.nextPendingConnection();
-}
-
-} // namespace
-
-//=============================================================================================================
-
-void TestComRtClient::testRtDataClientReadsWhatTheServerWrites_data()
-{
-    QTest::addColumn<bool>("withProjector");
-    QTest::newRow("ctf compensators") << false;
-    QTest::newRow("ctf compensators + projector") << true;
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtDataClientReadsWhatTheServerWrites()
-{
-    QFETCH(bool, withProjector);
-    FiffRawData rawData(QStringLiteral(MNE_CTF_COMP_DATA_DIR "/ctf_grade1_raw.fif").toStdString());
-    FiffInfo info = rawData.info;
-    QCOMPARE(info.nchan, 36);
-    QCOMPARE(info.comps.size(), 5);
-    QCOMPARE(info.dig.size(), 3);
-    if (withProjector) {
-        Eigen::MatrixXd vec(2, 3);
-        vec << 0.6, 0.8, 0.0, 0.0, 0.6, -0.8;
-        FiffNamedMatrix vectors(2, 3, {}, StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 3), vec);
-        info.projs.push_back(FiffProj(FIFFV_PROJ_ITEM_FIELD, true, "PCA-v1", vectors));
-    }
-    info.experimenter = "rt test";
-    info.description = "wire round trip";
-    info.proj_name = "rt";
-    info.proj_id = 7;
-    info.utc_offset = "+02:00";
-    info.acq_pars = "ACQch001 110113";
-    info.acq_stim = "STI 014";
-    info.bads = {info.ch_names.front()};
-
-    QTcpServer server;
-    QVERIFY(server.listen(QHostAddress::LocalHost));
-    for (int pass = 0; pass < 2; ++pass) {
-        RtDataClient client;
-        std::unique_ptr<QTcpSocket> peer(acceptClient(server, client));
-        QVERIFY(peer);
-        peer->write(serverMeasInfo(info));
-        QVERIFY(peer->waitForBytesWritten(5000));
-
-        std::shared_ptr<FiffInfo> got;
-        std::shared_ptr<FiffDigitizerData> dig;
-        if (pass == 0) {
-            got = client.readInfo();
-        } else {
-            const MetaData meta = client.readMetadata();
-            got = meta.m_pInfo;
-            dig = meta.m_pDigitizerData;
-        }
-
-        QCOMPARE(got->nchan, info.nchan);
-        QCOMPARE(got->ch_names, info.ch_names);
-        QCOMPARE(got->chs.size(), info.chs.size());
-        for (int k = 0; k < info.nchan; ++k) {
-            QCOMPARE(got->chs[k].kind, info.chs[k].kind);
-            QCOMPARE(got->chs[k].cal, info.chs[k].cal);
-            QVERIFY(got->chs[k].chpos.r0 == info.chs[k].chpos.r0);
-        }
-        QCOMPARE(got->sfreq, info.sfreq);
-        QCOMPARE(got->highpass, info.highpass);
-        QCOMPARE(got->lowpass, info.lowpass);
-        QCOMPARE(got->linefreq, info.linefreq);
-        QCOMPARE(got->meas_date[0], info.meas_date[0]);
-        QCOMPARE(got->meas_date[1], info.meas_date[1]);
-        QCOMPARE(got->experimenter, info.experimenter);
-        QCOMPARE(got->description, info.description);
-        QCOMPARE(got->proj_name, info.proj_name);
-        QCOMPARE(got->proj_id, info.proj_id);
-        QCOMPARE(got->gantry_angle, info.gantry_angle);
-        QCOMPARE(got->utc_offset, info.utc_offset);
-        QCOMPARE(got->acq_pars, info.acq_pars);
-        QCOMPARE(got->acq_stim, info.acq_stim);
-        QCOMPARE(got->bads, info.bads);
-        QVERIFY(got->dev_head_t.trans == info.dev_head_t.trans);
-        QCOMPARE(got->dig.size(), info.dig.size());
-        QCOMPARE(got->projs.size(), info.projs.size());
-        for (int p = 0; p < std::ssize(info.projs); ++p) {
-            QCOMPARE(got->projs[p].desc, info.projs[p].desc);
-            QCOMPARE(got->projs[p].kind, info.projs[p].kind);
-            QCOMPARE(got->projs[p].active, info.projs[p].active);
-            QCOMPARE(got->projs[p].data->col_names, info.projs[p].data->col_names);
-            QVERIFY(got->projs[p].data->data.isApprox(info.projs[p].data->data, 1e-6));
-        }
-        QCOMPARE(got->comps.size(), info.comps.size());
-        for (int c = 0; c < std::ssize(info.comps); ++c) {
-            QCOMPARE(got->comps[c].kind, info.comps[c].kind);
-            QCOMPARE(got->comps[c].save_calibrated, info.comps[c].save_calibrated);
-            QCOMPARE(got->comps[c].data->row_names, info.comps[c].data->row_names);
-            QCOMPARE(got->comps[c].data->col_names, info.comps[c].data->col_names);
-            QVERIFY(got->comps[c].data->data.isApprox(info.comps[c].data->data, 1e-6));
-        }
-        if (dig) {
-            QCOMPARE(dig->points.size(), info.dig.size());
-            QCOMPARE(dig->active.size(), info.dig.size());
-            for (int k = 0; k < std::ssize(info.dig); ++k) {
-                QCOMPARE(dig->points[k].ident, info.dig[k].ident);
-                QCOMPARE(dig->points[k].r[0], info.dig[k].r[0]);
-            }
-        }
-    }
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtDataClientClientIdAliasAndRawBuffer()
-{
-    QTcpServer server;
-    QVERIFY(server.listen(QHostAddress::LocalHost));
-    RtDataClient client;
-    std::unique_ptr<QTcpSocket> peer(acceptClient(server, client));
-    QVERIFY(peer);
-
-    // The server answers the id request with FIFF_MNE_RT_CLIENT_ID (FiffStreamThread::writeClientId)
-    QByteArray idBlock;
-    {
-        FiffStream out(&idBlock, QIODevice::WriteOnly);
-        const qint32 id = 42;
-        out.write_int(FIFF_MNE_RT_CLIENT_ID, &id);
-    }
-    peer->write(idBlock);
-    QVERIFY(peer->waitForBytesWritten(5000));
-    QCOMPARE(client.getClientId(), 42);
-    QCOMPARE(client.getClientId(), 42);
-
-    // The id request and the alias arrive as MNE_RT commands 1 and 2
-    client.setClientAlias(QStringLiteral("tëst"));
-    QByteArray received;
-    while (received.size() < 20 + 20 + 5 && peer->waitForReadyRead(5000)) {
-        received += peer->readAll();
-    }
-    QDataStream in(received);
-    in.setByteOrder(QDataStream::BigEndian);
-    qint32 kind, type, size, next, command;
-    in >> kind >> type >> size >> next >> command;
-    QCOMPARE(kind, FIFF_MNE_RT_COMMAND);
-    QCOMPARE(command, 1);
-    QCOMPARE(size, 4);
-    in >> kind >> type >> size >> next >> command;
-    QCOMPARE(command, 2);
-    QCOMPARE(QString::fromUtf8(received.mid(40, size - 4)), QStringLiteral("tëst"));
-
-    // One raw buffer of 3 channels x 4 samples (column-major floats), then a non-data tag
-    Eigen::MatrixXf data(3, 4);
-    data << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
-    QByteArray buffers;
-    {
-        FiffStream out(&buffers, QIODevice::WriteOnly);
-        out.write_float(FIFF_DATA_BUFFER, data.data(), static_cast<int>(data.size()));
-        const qint32 marker = 0;
-        out.write_int(FIFF_MNE_RT_CLIENT_ID, &marker);
-    }
-    peer->write(buffers);
-    QVERIFY(peer->waitForBytesWritten(5000));
-    Eigen::MatrixXf got;
-    fiff_int_t kindRead = 0;
-    client.readRawBuffer(3, got, kindRead);
-    QCOMPARE(kindRead, FIFF_DATA_BUFFER);
-    QVERIFY(got == data);
-    client.readRawBuffer(3, got, kindRead);
-    QCOMPARE(kindRead, FIFF_MNE_RT_CLIENT_ID);
-    QVERIFY(got == data);
-}
-
-//=============================================================================================================
-// RtClient (offline)
-//=============================================================================================================
-
-void TestComRtClient::testRtClientConstruction()
-{
-    RtClient client("127.0.0.1", "test_client");
-    // Should not be running
-    QVERIFY(!client.isRunning());
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtClientConnectionStatusOffline()
-{
-    RtClient client("127.0.0.1", "test_client");
-    QVERIFY(!client.getConnectionStatus());
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtClientStopBeforeStart()
-{
-    RtClient client("127.0.0.1", "test_client");
-    // Stopping a thread that was never started should be safe
-    bool stopped = client.stop();
-    QVERIFY(stopped);
-    QVERIFY(!client.isRunning());
-}
-
-//=============================================================================================================
-
-void TestComRtClient::testRtClientConnectionChangedSignal()
-{
-    RtClient client("127.0.0.1", "test_client");
-    QSignalSpy spy(&client, &RtClient::connectionChanged);
-    QVERIFY(spy.isValid());
-}
-
-//=============================================================================================================
-// MetaData struct
-//=============================================================================================================
-
-void TestComRtClient::testMetaDataConstruction()
-{
-    std::shared_ptr<FIFFLIB::FiffInfo> pInfo = std::make_shared<FIFFLIB::FiffInfo>();
-    std::shared_ptr<FIFFLIB::FiffDigitizerData> pDigData = std::make_shared<FIFFLIB::FiffDigitizerData>();
-
-    MetaData meta(pInfo, pDigData);
-    QVERIFY(meta.m_pInfo != nullptr);
-    QVERIFY(meta.m_pDigitizerData != nullptr);
-    QCOMPARE(meta.m_pInfo, pInfo);
-    QCOMPARE(meta.m_pDigitizerData, pDigData);
-}
 
 //=============================================================================================================
 // Command edge cases

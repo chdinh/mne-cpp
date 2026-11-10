@@ -27,6 +27,9 @@ set(SOURCES
   ftbuffer/ftbuffer_backend.cpp
   ftbuffer/ftbuffer_client.cpp
   ftbuffer/ftbuffer_simulator.cpp
+  rtserver/rtserver_backend.cpp
+  rtserver/rtserver_client.cpp
+  rtserver/rtserver_simulator.cpp
   serial_port.cpp
   tcp_socket.cpp
 )
@@ -42,6 +45,7 @@ set(PRIVATE_HEADERS
   polhemus/fastrak_record.h
   polhemus/polhemus_transport.h
   ftbuffer/ftbuffer_transport.h
+  rtserver/rtserver_transport.h
   serial_port.h
   tcp_socket.h
 )

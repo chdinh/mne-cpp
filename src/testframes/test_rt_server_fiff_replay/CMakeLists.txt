@@ -7,7 +7,7 @@ project(test_rt_server_fiff_replay LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Test)
+set(QT_REQUIRED_COMPONENTS Core Network Test)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
@@ -21,10 +21,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Network
     Qt${QT_VERSION_MAJOR}::Test
-    mne_com
+    mne_acq
+    mne_acq_devices
+    mne_acq_fiff
     mne_fiff
     rtserver_connector
     Eigen3::Eigen)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    MNE_CTF_COMP_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/../test_mne_ctf_comp_python/data")
 
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(${PROJECT_NAME} PRIVATE STATICBUILD)

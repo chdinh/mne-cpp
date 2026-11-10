@@ -19,6 +19,7 @@
 #include <covariance/covariance.h>
 #include <eegosports/eegosports.h>
 #include <eegosports/eegosportselectrodeitem.h>
+#include <fiffsimulator/fiffsimulator.h>
 #include <ftbuffer/ftbuffer.h>
 #include <gusbamp/gusbamp.h>
 #include <hpi/hpi.h>
@@ -87,6 +88,7 @@ private slots:
     void eegoStreamsTheSimulatedAmplifier();
     void neuromagStreamsTheSimulatedAcquisition();
     void ftbufferStreamsTheSimulatedRelay();
+    void fiffSimulatorStreamsTheSimulatedServer();
     void eegoImpedanceViewShowsTheMeasuredElectrodes();
     void tmsiImpedanceViewShowsTheMeasuredElectrodes();
     void mainWindowSwitchesStyle();
@@ -488,6 +490,51 @@ void TestMneScanPlugins::ftbufferStreamsTheSimulatedRelay()
     QCOMPARE(info->sfreq, 1000.0);
     QCOMPARE(info->chs[0].kind, FIFFV_MEG_CH);
     QCOMPARE(info->chs[0].chpos.coil_type, FIFFV_COIL_VV_MAG_T3);
+    QCOMPARE(info->chs[306].ch_name, std::string("STI 014"));
+    QMutexLocker locker(&mutex);
+    for (const Eigen::MatrixXd& data : blocks) {
+        QCOMPARE(data.rows(), 307);
+        QCOMPARE(data.cols(), 40);
+        QVERIFY(data.topRows(306).cwiseAbs().maxCoeff() < 1e-9);
+        QVERIFY(data.topRows(306).cwiseAbs().maxCoeff() > 0.0);
+    }
+}
+
+//=============================================================================================================
+
+void TestMneScanPlugins::fiffSimulatorStreamsTheSimulatedServer()
+{
+    FIFFSIMULATORPLUGIN::FiffSimulator plugin;
+    plugin.init();
+    {
+        std::unique_ptr<QWidget> setup(plugin.setupWidget());
+        auto* host = setup->findChild<QLineEdit*>("m_lineEdit_Host");
+        auto* port = setup->findChild<QSpinBox*>("m_spinBox_Port");
+        auto* file = setup->findChild<QLineEdit*>("m_lineEdit_SimFile");
+        auto* block = setup->findChild<QSpinBox*>("m_spinBox_SamplesPerBlock");
+        auto* simulate = setup->findChild<QCheckBox*>("m_checkBox_Simulate");
+        QVERIFY(host && port && file && block && simulate);
+        QCOMPARE(host->text(), QString("127.0.0.1"));
+        QCOMPARE(port->value(), 4217);
+        block->setValue(40);
+        simulate->click();
+    }
+
+    QList<Eigen::MatrixXd> blocks;
+    QMutex mutex;
+    connect(plugin.getOutputConnectors().first().data(), &PluginOutputConnector::notify, this, [&blocks, &mutex](Measurement::SPtr pMeasurement) {
+        QMutexLocker locker(&mutex);
+        blocks.append(pMeasurement.dynamicCast<RealTimeMultiSampleArray>()->getMultiSampleArray()); }, Qt::DirectConnection);
+    QVERIFY(plugin.start());
+    QVERIFY(QTest::qWaitFor([&]() { QMutexLocker locker(&mutex); return blocks.size() >= 4; }, 10000));
+    QVERIFY(plugin.stop());
+    QVERIFY(plugin.wait(5000));
+
+    // The server sends the recording's measurement info: 306 MEG channels and the trigger channel, in tesla
+    const auto info = plugin.getOutputConnectors().first().dynamicCast<PluginOutputData<RealTimeMultiSampleArray>>()->measurementData()->info();
+    QCOMPARE(info->chs.size(), std::size_t(307));
+    QCOMPARE(info->sfreq, 1000.0);
+    QCOMPARE(info->chs[0].kind, FIFFV_MEG_CH);
     QCOMPARE(info->chs[306].ch_name, std::string("STI 014"));
     QMutexLocker locker(&mutex);
     for (const Eigen::MatrixXd& data : blocks) {
