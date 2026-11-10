@@ -36,6 +36,8 @@ set(SOURCES
   rtserver/rtserver_backend.cpp
   rtserver/rtserver_client.cpp
   rtserver/rtserver_simulator.cpp
+  brainflow/brainflow_backend.cpp
+  brainflow/brainflow_library.cpp
 )
 
 set(PRIVATE_HEADERS
@@ -52,6 +54,7 @@ set(PRIVATE_HEADERS
   babymeg/babymeg_transport.h
   natus/natus_transport.h
   rtserver/rtserver_transport.h
+  brainflow/brainflow_library.h
   transport_error.h
 )
 

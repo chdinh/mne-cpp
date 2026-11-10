@@ -94,6 +94,7 @@ inline constexpr AcqFiffKind kAcqFiffKinds[] = {
     {AcqChannelKind::Respiration, fiff_kind::kResp},
     {AcqChannelKind::Gsr, fiff_kind::kGalvanic},
     {AcqChannelKind::Stim, fiff_kind::kStim},
+    {AcqChannelKind::Marker, fiff_kind::kStim},
     {AcqChannelKind::Temperature, fiff_kind::kTemperature},
     {AcqChannelKind::Misc, fiff_kind::kMisc},
 };

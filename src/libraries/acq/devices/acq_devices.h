@@ -123,6 +123,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_natus_scheme();
  */
 ACQDEVICESSHARED_EXPORT AcqError register_babymeg_scheme();
 
+/**
+ * Registers the brainflow:// scheme (any board BrainFlow supports, through BrainFlow's library loaded at run time)
+ * with AcqDeviceRegistry::instance(), as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_brainflow_scheme();
+
 } // namespace ACQLIB
 
 #endif // ACQ_DEVICES_H

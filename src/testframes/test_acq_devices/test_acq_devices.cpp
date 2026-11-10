@@ -1233,6 +1233,14 @@ private slots:
     void testBabyMegInvalidParameters();
     void testBabyMegServerUnavailable();
     void testBabyMegReadsTheServer();
+    void testBrainFlowStreamLayout();
+    void testBrainFlowReadsTheBoard();
+    void testBrainFlowPassesInputParams();
+    void testBrainFlowInvalidParameters_data();
+    void testBrainFlowInvalidParameters();
+    void testBrainFlowLibraryUnavailable();
+    void testBrainFlowRefusesUnsupportedVersion();
+    void testBrainFlowSyntheticBoard();
 };
 
 //=============================================================================================================
@@ -1249,6 +1257,7 @@ void TestAcqDevices::initTestCase()
     QVERIFY(register_rtserver_scheme().ok());
     QVERIFY(register_natus_scheme().ok());
     QVERIFY(register_babymeg_scheme().ok());
+    QVERIFY(register_brainflow_scheme().ok());
 }
 
 //=============================================================================================================
@@ -2843,6 +2852,178 @@ void TestAcqDevices::testBabyMegReadsTheServer()
     QVERIFY(QTest::qWaitFor([&] { return server.commands().size() >= expected.size(); }, 2000));
     QCOMPARE(server.commands(), expected);
 #endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowStreamLayout()
+{
+    // A board by name and by BrainFlow's id
+    for (const std::string board : {"synthetic", "-1"}) {
+        auto device = AcqDevice::open("brainflow://" + board + "?library=" BRAINFLOW_STUB);
+        QVERIFY2(device, device ? "" : device.error().text().c_str());
+        QCOMPARE(device->description().backend, std::string("brainflow"));
+        QCOMPARE(device->description().backendVersion, std::string("5.12.1"));
+        QCOMPARE(device->description().device, std::string("BrainFlow Synthetic (board -1)"));
+    }
+
+    // BrainFlow's rows in its units: microvolts for EEG, seconds for the timestamp
+    auto device = AcqDevice::open("brainflow://synthetic?library=" BRAINFLOW_STUB);
+    QVERIFY(device);
+    const auto info = device->stream().info();
+    QCOMPARE(info->format, AcqSampleFormat::Float64);
+    QCOMPARE(info->layout, AcqLayout::Interleaved);
+    QCOMPARE(info->sfreq, 250.0);
+    QCOMPARE(info->channelCount(), std::size_t(12));
+    const std::vector<std::string> names = {"PACKAGE", "Fz", "Cz", "Pz", "Oz", "ACC 001",
+                                            "ACC 002", "ACC 003", "TEMP 001", "BATTERY", "TIMESTAMP", "MARKER"};
+    for (std::size_t c = 0; c < names.size(); ++c) {
+        QCOMPARE(info->channels[c].name, names[c]);
+    }
+    QCOMPARE(info->channels[1].kind, AcqChannelKind::Eeg); // EEG wins over the same rows as EMG
+    QCOMPARE(info->channels[1].unit, AcqUnit::Volt);
+    QCOMPARE(info->channels[1].scale, 1e-6);
+    QCOMPARE(info->channels[5].kind, AcqChannelKind::Accelerometer);
+    QCOMPARE(info->channels[5].unit, AcqUnit::Unknown);
+    QCOMPARE(info->channels[8].kind, AcqChannelKind::Temperature);
+    QCOMPARE(info->channels[8].unit, AcqUnit::DegreeCelsius);
+    QCOMPARE(info->channels[10].kind, AcqChannelKind::Timestamp);
+    QCOMPARE(info->channels[10].unit, AcqUnit::Second);
+    QCOMPARE(info->channels[11].kind, AcqChannelKind::Marker);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowReadsTheBoard()
+{
+    auto device = AcqDevice::open("brainflow://synthetic?library=" BRAINFLOW_STUB);
+    QVERIFY(device);
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    constexpr std::size_t width = 12;
+    std::vector<double> frames;
+    std::vector<AcqEvent> events;
+    while (frames.size() < width * 100) {
+        auto view = reader->acquire(1, 5s);
+        QVERIFY2(view, view ? "" : view.error().text().c_str());
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            const AcqBlockPart& part = view->part(p);
+            for (std::size_t s = 0; s < part.samples; ++s) {
+                for (std::size_t c = 0; c < width; ++c) {
+                    double v = 0.0;
+                    std::memcpy(&v, part.at(c, s), sizeof(v));
+                    frames.push_back(v);
+                }
+            }
+        }
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            events.push_back(view->events()[e]);
+        }
+        QVERIFY(reader->release(*view).ok());
+    }
+    const AcqClockModel clock = device->stream().clock();
+    QVERIFY(device->stop().ok());
+
+    // Rows become channels, sample after sample
+    for (std::size_t s = 0; s < 100; ++s) {
+        QCOMPARE(frames[s * width + 1], 1.0 + static_cast<double>(s) / 1000.0);
+        QCOMPARE(frames[s * width + 4], 4.0 + static_cast<double>(s) / 1000.0);
+        QCOMPARE(frames[s * width + 10], 1.7e9 + static_cast<double>(s) / 250.0);
+    }
+    // The marker row as events
+    QCOMPARE(events.size(), std::size_t(1));
+    QCOMPARE(events.front().sample, std::uint64_t(30));
+    QCOMPARE(events.front().code, 7);
+    // The timestamp row as the device clock: UTC of a sample is its timestamp
+    QCOMPARE(clock.source, AcqClockSource::Device);
+    const double utc = static_cast<double>(clock.physicalNs(50) + clock.utcOffsetNs) * 1e-9;
+    QVERIFY2(std::abs(utc - (1.7e9 + 50.0 / 250.0)) < 1e-5, std::format("{}", utc).c_str());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowPassesInputParams()
+{
+    // The stand-in's Cyton opens only on its serial port, which reaches BrainFlow in the input parameters
+    QCOMPARE(openError("brainflow://cyton?library=" BRAINFLOW_STUB), AcqErrorCode::DeviceNotFound);
+    auto device = AcqDevice::open("brainflow://cyton?library=" BRAINFLOW_STUB "&serial_port=COM-STUB&timeout=5");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().device, std::string("BrainFlow Cyton (board 0)"));
+    QCOMPARE(device->description().uri.find("serial_port=COM-STUB") != std::string::npos, true);
+
+    // A board BrainFlow describes but was built without here
+    auto ganglion = AcqDevice::open("brainflow://ganglion?library=" BRAINFLOW_STUB);
+    QVERIFY(!ganglion);
+    QCOMPARE(ganglion.error().code(), AcqErrorCode::PlatformUnsupported);
+    QVERIFY2(ganglion.error().text().find("Ganglion") != std::string::npos, ganglion.error().text().c_str());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("no board") << QString("brainflow://?library=" BRAINFLOW_STUB);
+    QTest::newRow("unknown name") << QString("brainflow://nonesuch?library=" BRAINFLOW_STUB);
+    QTest::newRow("unsupported id") << QString("brainflow://5?library=" BRAINFLOW_STUB);
+    QTest::newRow("port not a number") << QString("brainflow://-1?library=" BRAINFLOW_STUB "&ip_port=x");
+    QTest::newRow("unknown parameter") << QString("brainflow://-1?library=" BRAINFLOW_STUB "&serialport=COM1");
+}
+
+void TestAcqDevices::testBrainFlowInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowLibraryUnavailable()
+{
+    auto device = AcqDevice::open("brainflow://synthetic?library=/nonexistent/BoardController");
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::BackendUnavailable);
+    const std::string text = device.error().text();
+    QVERIFY2(text.find("BrainFlow not found") != std::string::npos, text.c_str());
+    QVERIFY2(text.find("/nonexistent/BoardController") != std::string::npos, text.c_str());
+    QVERIFY2(text.find("pip install brainflow") != std::string::npos, text.c_str());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowRefusesUnsupportedVersion()
+{
+    auto device = AcqDevice::open("brainflow://synthetic?library=" BRAINFLOW_STUB_OLD);
+    QVERIFY(!device);
+    QCOMPARE(device.error().code(), AcqErrorCode::UnsupportedVersion);
+    QVERIFY2(device.error().text().find("4.9.2") != std::string::npos, device.error().text().c_str());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowSyntheticBoard()
+{
+    // BrainFlow itself, where it is installed (MNE_CPP_BRAINFLOW_LIB or pip install brainflow)
+    auto device = AcqDevice::open("brainflow://synthetic");
+    if (!device && device.error() == AcqErrorCode::BackendUnavailable) {
+        QSKIP("BrainFlow is not installed");
+    }
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
+    QCOMPARE(info->sfreq, 250.0);
+    QCOMPARE(info->channels[1].name, std::string("Fz"));
+    QCOMPARE(info->channels[1].kind, AcqChannelKind::Eeg);
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+    auto view = reader->acquire(25, 5s);
+    QVERIFY2(view, view ? "" : view.error().text().c_str());
+    QVERIFY(reader->release(*view).ok());
+    QCOMPARE(device->stream().clock().source, AcqClockSource::Device);
+    QVERIFY(device->stop().ok());
 }
 
 //=============================================================================================================

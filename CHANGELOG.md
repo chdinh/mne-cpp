@@ -159,6 +159,14 @@ aliases; replace the old spelling as below.
   and `SerialPort` (raw 8N1, `list_serial_ports()`), each reporting
   `std::error_code`s through `std::expected`. The acquisition devices use it
   for their network and serial connections; `ex_com` shows it.
+- `brainflow://<board>` opens any board BrainFlow supports through an
+  installed BrainFlow 5, whose `BoardController` library is loaded at run
+  time (`library=`, `MNE_CPP_BRAINFLOW_LIB`, `pip install brainflow`, the
+  system loader) and never built or shipped with MNE-CPP. The board is a
+  BrainFlow id or name, the parameters are BrainFlow's input parameters.
+  Every row is a channel in BrainFlow's units, the timestamp row is the
+  clock and the marker row gives events. Other BrainFlow versions and
+  boards this platform's BrainFlow lacks are refused with the reason.
 - `babymeg://` reads the acquisition server of a BabyMEG system without Qt:
   its channels, sensor positions, coil types and current gains from the
   command port, the data from the data port, and the trigger lines

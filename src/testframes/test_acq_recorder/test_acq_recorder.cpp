@@ -588,6 +588,11 @@ void TestAcqRecorder::refusesInfoWithoutFiff()
     unknown.name = "AUX";
     unknown.kind = AcqChannelKind::Ecg;
     info.channels.push_back(unknown);
+    AcqChannelInfo marker;
+    marker.name = "MARKER";
+    marker.kind = AcqChannelKind::Marker;
+    marker.unit = AcqUnit::None;
+    info.channels.push_back(marker);
     auto fiff = toFiffInfo(info);
     QVERIFY(fiff);
     QCOMPARE(fiff->chs[0].kind, FIFFV_EEG_CH);
@@ -601,6 +606,7 @@ void TestAcqRecorder::refusesInfoWithoutFiff()
     QCOMPARE(fiff->chs[4].unit, FIFF_UNIT_MOL);
     QCOMPARE(fiff->chs[5].kind, FIFFV_MISC_CH);
     QCOMPARE(fiff->chs[5].unit, FIFF_UNIT_NONE);
+    QCOMPARE(fiff->chs[6].kind, FIFFV_STIM_CH); // a device marker row is a trigger channel
     QCOMPARE(fiff->lowpass, 500.0f);
 
     // FIFF has no complex or segmented raw data.

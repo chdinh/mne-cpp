@@ -25,6 +25,14 @@ set_target_properties(eego_sdk_stub PROPERTIES PREFIX "" OUTPUT_NAME "eego-SDK-s
 add_dependencies(${PROJECT_NAME} eego_sdk_stub)
 target_compile_definitions(${PROJECT_NAME} PRIVATE EEGO_SDK_STUB="$<TARGET_FILE:eego_sdk_stub>")
 
+# Stand-ins for BrainFlow's BoardController library, a supported and an unsupported version
+add_library(brainflow_stub SHARED brainflow_stub.cpp)
+add_library(brainflow_stub_old SHARED brainflow_stub.cpp)
+target_compile_definitions(brainflow_stub_old PRIVATE STUB_VERSION="4.9.2")
+add_dependencies(${PROJECT_NAME} brainflow_stub brainflow_stub_old)
+target_compile_definitions(${PROJECT_NAME} PRIVATE BRAINFLOW_STUB="$<TARGET_FILE:brainflow_stub>"
+                                                   BRAINFLOW_STUB_OLD="$<TARGET_FILE:brainflow_stub_old>")
+
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE FALSE MACOSX_BUNDLE FALSE)
 
 if(QT_VERSION_MAJOR EQUAL 6)
