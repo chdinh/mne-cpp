@@ -141,6 +141,20 @@ Recover the P300 from a streaming oddball session by trigger-locked averaging.
 }
 ````
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 145"
+public:
+    explicit Studio(std::filesystem::path folder)
+    : m_folder(std::move(folder))
+    , m_schemes(AcqDeviceRegistry::instance().schemes())
+    {
+        setWindowTitle("MNE-CPP acquisition studio");
+        resize(1500, 900);
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -22,8 +22,8 @@
     "example_exempt": 153,
     "eligible_backed_by_registry_example": 412,
     "eligible_used_by_some_example": 356,
-    "examples_on_disk": 79,
-    "examples_built": 79
+    "examples_on_disk": 80,
+    "examples_built": 80
   },
   "by_library": {
     "acq": {
@@ -2356,7 +2356,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record"
+        "ex_acq_record",
+        "ex_acq_studio"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -2383,7 +2384,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record"
+        "ex_acq_record",
+        "ex_acq_studio"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -2410,7 +2412,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record"
+        "ex_acq_record",
+        "ex_acq_studio"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -2437,7 +2440,8 @@
       "example": "ex_acq_record",
       "example_state": "built",
       "including_examples": [
-        "ex_acq_record"
+        "ex_acq_record",
+        "ex_acq_studio"
       ],
       "snippets": [
         "ex_acq_record/main.cpp#acq_record_bids",
@@ -4335,7 +4339,9 @@
       "test_resolves": true,
       "example": null,
       "example_state": "none",
-      "including_examples": [],
+      "including_examples": [
+        "ex_acq_studio"
+      ],
       "snippets": [],
       "api_page": "doc/website/docs/api/disp/channel-data-view.mdx",
       "python_equiv": null,

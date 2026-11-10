@@ -95,6 +95,25 @@ From [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx).
 
 ## Used in examples
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 295"
+    auto parsed = AcqUri::parse(uri);
+    if (!parsed) {
+        return fail(parsed.error().text());
+    }
+    const auto it = std::find_if(m_schemes.begin(), m_schemes.end(), [&](const AcqSchemeInfo& s) { return s.scheme == parsed->scheme; });
+    if (it == m_schemes.end()) {
+        return fail("no device for " + parsed->scheme + "://");
+    }
+    m_devices->setCurrentRow(static_cast<int>(it - m_schemes.begin()));
+    fill(*parsed);
+    return true;
+}
+````
+
 ### [ex_acq_record](../../examples/acq/ex_acq_record.mdx)
 
 Record an acquisition source to FIFF and to a BIDS dataset while it runs, and read the file back.

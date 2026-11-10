@@ -44,6 +44,27 @@ if (uri == "--list") {
 
 ## Used in examples
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 153"
+// Device
+m_devices = new QListWidget;
+for (const AcqSchemeInfo& scheme : m_schemes) {
+    auto* item = new QListWidgetItem(QString::fromStdString(scheme.scheme), m_devices);
+    item->setToolTip(QString::fromStdString(scheme.description));
+}
+m_about = new QLabel;
+m_about->setWordWrap(true);
+m_about->setObjectName("about");
+m_simulate = new QCheckBox("Use the simulator (no hardware needed)");
+m_target = new QLineEdit;
+m_target->setPlaceholderText("address, board or file, as the device describes");
+m_settings = new QScrollArea;
+m_settings->setWidgetResizable(true);
+````
+
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.

@@ -1,0 +1,696 @@
+//=============================================================================================================
+/**
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright (c) 2026 MNE-CPP Authors
+ *
+ * @file     main.cpp
+ * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    2.5.0
+ * @date     November 2026
+ * @brief    Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+ *
+ * The device list holds every registered URI scheme. A device that needs hardware offers its simulator, which
+ * serves the device's own wire format, so the whole acquisition path runs without an amplifier. The settings
+ * form is generated from the parameters the scheme declares (AcqSchemeInfo) and builds the source URI.
+ *
+ * Start shows the source in a sweep display; Record also writes it to a FIFF file with AcqRecorder. Stopping a
+ * recording adds it to the recordings, and Play replays the selected one through fiff:// in real time.
+ *
+ * Run it without arguments; --source <uri> --record <s> [--screenshot <prefix>] records a source for s seconds,
+ * plays the recording back as long and saves both views, for unattended runs.
+ */
+
+//=============================================================================================================
+// INCLUDES
+//=============================================================================================================
+
+#include <acq/acq.h>
+#include <acq/acq_eigen.h>
+#include <acq/devices/acq_devices.h>
+#include <acq/fiff/acq_fiff.h>
+#include <acq/fiff/acq_fiff_replay.h>
+#include <acq/fiff/acq_recorder.h>
+#include <acq/lsl/acq_lsl.h>
+
+#include <disp/viewers/channeldataview.h>
+
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <optional>
+#include <vector>
+
+//=============================================================================================================
+// QT INCLUDES
+//=============================================================================================================
+
+#include <QApplication>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QCommandLineParser>
+#include <QDateTime>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMainWindow>
+#include <QPushButton>
+#include <QScrollArea>
+#include <QSplitter>
+#include <QTimer>
+#include <QUrl>
+#include <QVBoxLayout>
+
+//=============================================================================================================
+// USED NAMESPACES
+//=============================================================================================================
+
+using namespace ACQLIB;
+using namespace DISPLIB;
+using namespace std::chrono_literals;
+
+//=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+constexpr double kWindowSeconds = 10.0;
+constexpr const char* kSimulationPrefix = "Simulation:"; // parameters that only the simulator reads
+
+enum class Mode
+{
+    Idle,
+    Live,
+    Recording,
+    Playback
+};
+
+/** A generated settings field for one parameter of a scheme. */
+struct Field
+{
+    AcqParameterInfo info;
+    QLineEdit* edit = nullptr;
+    QCheckBox* check = nullptr;
+    QComboBox* combo = nullptr;
+
+    [[nodiscard]] bool simulationOnly() const
+    {
+        return info.description.starts_with(kSimulationPrefix);
+    }
+
+    /** @return The value to put into the URI, empty when the default stands. */
+    [[nodiscard]] std::string value() const
+    {
+        if (check != nullptr) {
+            const bool fallback = info.defaultValue == "1" || info.defaultValue == "true";
+            return check->isChecked() == fallback ? std::string() : (check->isChecked() ? "1" : "0");
+        }
+        const std::string v = (combo != nullptr ? combo->currentText() : edit->text()).trimmed().toStdString();
+        return v == info.defaultValue ? std::string() : v;
+    }
+
+    void set(const std::string& v)
+    {
+        if (check != nullptr) {
+            check->setChecked(v == "1" || v == "true");
+        } else if (combo != nullptr) {
+            combo->setCurrentText(QString::fromStdString(v));
+        } else {
+            edit->setText(QString::fromStdString(v));
+        }
+    }
+
+    void setEnabled(bool on)
+    {
+        for (QWidget* widget : std::initializer_list<QWidget*>{edit, check, combo}) {
+            if (widget != nullptr) {
+                widget->setEnabled(on);
+            }
+        }
+    }
+};
+
+/** The studio window: device and settings, transport, recordings and the sweep display. */
+class Studio : public QMainWindow
+{
+public:
+    explicit Studio(std::filesystem::path folder)
+    : m_folder(std::move(folder))
+    , m_schemes(AcqDeviceRegistry::instance().schemes())
+    {
+        setWindowTitle("MNE-CPP acquisition studio");
+        resize(1500, 900);
+
+        // Device
+        m_devices = new QListWidget;
+        for (const AcqSchemeInfo& scheme : m_schemes) {
+            auto* item = new QListWidgetItem(QString::fromStdString(scheme.scheme), m_devices);
+            item->setToolTip(QString::fromStdString(scheme.description));
+        }
+        m_about = new QLabel;
+        m_about->setWordWrap(true);
+        m_about->setObjectName("about");
+        m_simulate = new QCheckBox("Use the simulator (no hardware needed)");
+        m_target = new QLineEdit;
+        m_target->setPlaceholderText("address, board or file, as the device describes");
+        m_settings = new QScrollArea;
+        m_settings->setWidgetResizable(true);
+        m_settings->setFrameShape(QFrame::NoFrame);
+        m_uri = new QLineEdit;
+        m_uri->setReadOnly(true);
+        m_uri->setToolTip("The source URI built from the settings; mne_acq and AcqDevice::open() take the same");
+
+        auto* deviceBox = new QGroupBox("1  Device");
+        auto* deviceLayout = new QVBoxLayout(deviceBox);
+        deviceLayout->addWidget(m_devices, 1);
+        deviceLayout->addWidget(m_about);
+        deviceLayout->addWidget(m_simulate);
+        auto* targetRow = new QFormLayout;
+        targetRow->addRow("Target", m_target);
+        deviceLayout->addLayout(targetRow);
+        deviceLayout->addWidget(new QLabel("Settings"));
+        deviceLayout->addWidget(m_settings, 2);
+        deviceLayout->addWidget(new QLabel("Source URI"));
+        deviceLayout->addWidget(m_uri);
+
+        // Transport
+        m_start = new QPushButton("▶  Start");
+        m_start->setToolTip("Show the source live, without recording");
+        m_record = new QPushButton("●  Record");
+        m_record->setObjectName("record");
+        m_record->setToolTip("Show the source and record it to a FIFF file");
+        m_stop = new QPushButton("■  Stop");
+        auto* transportBox = new QGroupBox("2  Acquire");
+        auto* transport = new QHBoxLayout(transportBox);
+        for (QPushButton* button : {m_start, m_record, m_stop}) {
+            button->setMinimumHeight(34);
+            transport->addWidget(button);
+        }
+
+        // Recordings
+        m_recordings = new QListWidget;
+        m_play = new QPushButton("▶  Play selected recording");
+        m_play->setMinimumHeight(34);
+        auto* open = new QPushButton("Open FIFF file…");
+        auto* reveal = new QPushButton("Show folder");
+        auto* recordingsBox = new QGroupBox("3  Recordings");
+        auto* recordingsLayout = new QVBoxLayout(recordingsBox);
+        recordingsLayout->addWidget(m_recordings, 1);
+        recordingsLayout->addWidget(m_play);
+        auto* fileButtons = new QHBoxLayout;
+        fileButtons->addWidget(open);
+        fileButtons->addWidget(reveal);
+        recordingsLayout->addLayout(fileButtons);
+
+        auto* side = new QWidget;
+        side->setMinimumWidth(380);
+        auto* column = new QVBoxLayout(side);
+        column->addWidget(deviceBox, 3);
+        column->addWidget(transportBox);
+        column->addWidget(recordingsBox, 1);
+
+        // Display
+        m_badge = new QLabel;
+        m_badge->setObjectName("badge");
+        m_info = new QLabel;
+        m_info->setObjectName("info");
+        m_view = new ChannelDataView("MNEACQ/studio");
+        m_view->setOverviewBarVisible(false);
+        auto* display = new QWidget;
+        auto* displayLayout = new QVBoxLayout(display);
+        auto* header = new QHBoxLayout;
+        header->addWidget(m_badge);
+        header->addWidget(m_info, 1);
+        displayLayout->addLayout(header);
+        displayLayout->addWidget(m_view, 1);
+
+        auto* splitter = new QSplitter;
+        splitter->addWidget(side);
+        splitter->addWidget(display);
+        splitter->setStretchFactor(1, 1);
+        splitter->setSizes({400, 1100});
+        setCentralWidget(splitter);
+        setStyleSheet("QGroupBox { font-weight: 600; }"
+                      "QLabel#about { color: palette(mid); }"
+                      "QLabel#badge { color: white; font-weight: 700; border-radius: 4px; padding: 4px 10px; }"
+                      "QPushButton#record { color: #c62828; font-weight: 600; }");
+
+        connect(m_devices, &QListWidget::currentRowChanged, this, [this](int row) { selectDevice(row); });
+        connect(m_simulate, &QCheckBox::toggled, this, [this] { refreshUri(); });
+        connect(m_target, &QLineEdit::textChanged, this, [this] { refreshUri(); });
+        connect(m_start, &QPushButton::clicked, this, [this] { start(false); });
+        connect(m_record, &QPushButton::clicked, this, [this] { start(true); });
+        connect(m_stop, &QPushButton::clicked, this, [this] { stop_source(); });
+        connect(m_play, &QPushButton::clicked, this, [this] {
+            if (auto* item = m_recordings->currentItem()) {
+                play(item->data(Qt::UserRole).toString());
+            }
+        });
+        connect(m_recordings, &QListWidget::currentItemChanged, this, [this] { setMode(m_mode); });
+        connect(m_recordings, &QListWidget::itemDoubleClicked, m_play, &QPushButton::click);
+        connect(open, &QPushButton::clicked, this, [this] {
+            const QString path = QFileDialog::getOpenFileName(this, "Open a raw FIFF file", QString::fromStdString(m_folder.string()), "FIFF (*.fif)");
+            if (!path.isEmpty()) {
+                addRecording(path.toStdString(), {});
+            }
+        });
+        connect(reveal, &QPushButton::clicked, this, [this] { QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(m_folder.string()))); });
+        connect(&m_timer, &QTimer::timeout, this, [this] { poll(); });
+
+        std::vector<std::filesystem::path> existing;
+        for (const auto& entry : std::filesystem::directory_iterator(m_folder)) {
+            if (entry.path().string().ends_with("_raw.fif")) {
+                existing.push_back(entry.path());
+            }
+        }
+        std::sort(existing.begin(), existing.end());
+        for (const auto& path : existing) {
+            addRecording(path, {});
+        }
+        m_devices->setCurrentRow(0);
+        setMode(Mode::Idle);
+        m_timer.start(33);
+    }
+
+    ~Studio() override
+    {
+        stop_source();
+    }
+
+    Studio(const Studio&) = delete;
+    Studio& operator=(const Studio&) = delete;
+
+    /** Shows @p uri in the settings: its device, simulation, target and parameters. @return false if no device has its scheme. */
+    bool apply_uri(const std::string& uri)
+    {
+        auto parsed = AcqUri::parse(uri);
+        if (!parsed) {
+            return fail(parsed.error().text());
+        }
+        const auto it = std::find_if(m_schemes.begin(), m_schemes.end(), [&](const AcqSchemeInfo& s) { return s.scheme == parsed->scheme; });
+        if (it == m_schemes.end()) {
+            return fail("no device for " + parsed->scheme + "://");
+        }
+        m_devices->setCurrentRow(static_cast<int>(it - m_schemes.begin()));
+        fill(*parsed);
+        return true;
+    }
+
+    /** Starts the device of the settings, recording it to a new FIFF file when @p recording. */
+    bool start(bool recording)
+    {
+        std::string label = m_schemes[static_cast<std::size_t>(m_devices->currentRow())].scheme;
+        if (m_hasSimulator && m_simulate->isChecked()) {
+            label += " (simulated)";
+        }
+        return run(m_uri->text().toStdString(), recording ? Mode::Recording : Mode::Live, label);
+    }
+
+    /** Replays the recording at @p path in real time. */
+    bool play(const QString& path)
+    {
+        return run(AcqUri{"fiff", path.toStdString(), {}}.toString(), Mode::Playback, std::filesystem::path(path.toStdString()).filename().string());
+    }
+
+    /** Stops the source; a recording is finished and becomes the selected recording. */
+    void stop_source()
+    {
+        m_reader.reset();
+        if (m_device) {
+            m_device->close();
+            m_device.reset();
+        }
+        if (m_recorder) {
+            static_cast<void>(m_recorder->stop());
+            const AcqRecorderStats stats = m_recorder->stats();
+            m_recorder.reset();
+            addRecording(m_path, std::format("{} samples · {} events", stats.samples, stats.events));
+        }
+        setMode(Mode::Idle);
+    }
+
+    /** @return Samples shown since the last source was opened. */
+    [[nodiscard]] std::uint64_t shown() const noexcept
+    {
+        return m_next;
+    }
+
+    /** @return The selected recording, empty if there is none. */
+    [[nodiscard]] QString selectedRecording() const
+    {
+        return m_recordings->currentItem() == nullptr ? QString() : m_recordings->currentItem()->data(Qt::UserRole).toString();
+    }
+
+private:
+    bool fail(const std::string& text)
+    {
+        m_recorder.reset();
+        m_info->setText(QString::fromStdString("Error: " + text));
+        return false;
+    }
+
+    /** Rebuilds the settings form for device @p row from its example URI. */
+    void selectDevice(int row)
+    {
+        if (row < 0) {
+            return;
+        }
+        const AcqSchemeInfo& scheme = m_schemes[static_cast<std::size_t>(row)];
+        m_about->setText(QString::fromStdString(scheme.description));
+        m_fields.clear();
+        auto* host = new QWidget;
+        auto* form = new QFormLayout(host);
+        form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+        bool simulator = false;
+        for (const AcqParameterInfo& parameter : scheme.parameters) {
+            if (parameter.name == "simulate") {
+                simulator = true;
+                continue;
+            }
+            Field field{parameter};
+            QWidget* widget = nullptr;
+            if (parameter.type == "bool") {
+                field.check = new QCheckBox;
+                field.check->setChecked(parameter.defaultValue == "1" || parameter.defaultValue == "true");
+                connect(field.check, &QCheckBox::toggled, this, [this] { refreshUri(); });
+                widget = field.check;
+            } else if (parameter.type.starts_with("enum:")) {
+                field.combo = new QComboBox;
+                field.combo->addItems(QString::fromStdString(parameter.type.substr(5)).split('|'));
+                field.combo->setCurrentText(QString::fromStdString(parameter.defaultValue));
+                connect(field.combo, &QComboBox::currentTextChanged, this, [this] { refreshUri(); });
+                widget = field.combo;
+            } else {
+                field.edit = new QLineEdit;
+                field.edit->setPlaceholderText(QString::fromStdString(parameter.defaultValue));
+                connect(field.edit, &QLineEdit::textChanged, this, [this] { refreshUri(); });
+                widget = field.edit;
+            }
+            widget->setToolTip(QString::fromStdString(parameter.description));
+            auto* label = new QLabel(QString::fromStdString(parameter.name));
+            label->setToolTip(QString::fromStdString(parameter.description));
+            form->addRow(label, widget);
+            m_fields.push_back(field);
+        }
+        m_settings->setWidget(host);
+        m_hasSimulator = simulator;
+        m_simulate->setVisible(simulator);
+        m_target->clear();
+        auto example = AcqUri::parse(scheme.exampleUri);
+        if (example) {
+            fill(*example);
+        }
+        refreshUri();
+    }
+
+    /** Sets the simulation, target and parameters from @p uri. */
+    void fill(const AcqUri& uri)
+    {
+        m_updating = true;
+        m_simulate->setChecked(uri.param("simulate").value_or("0") == "1");
+        m_target->setText(QString::fromStdString(uri.target));
+        for (const auto& [key, value] : uri.params) {
+            const auto it = std::find_if(m_fields.begin(), m_fields.end(), [&](const Field& f) { return f.info.name == key; });
+            if (it != m_fields.end()) {
+                it->set(value);
+            }
+        }
+        m_updating = false;
+        refreshUri();
+    }
+
+    /** Builds the source URI from the settings; simulation parameters only count while simulating. */
+    void refreshUri()
+    {
+        if (m_updating || m_devices->currentRow() < 0) {
+            return;
+        }
+        const bool simulating = m_hasSimulator && m_simulate->isChecked();
+        AcqUri uri{m_schemes[static_cast<std::size_t>(m_devices->currentRow())].scheme, m_target->text().trimmed().toStdString(), {}};
+        if (simulating) {
+            uri.params.emplace_back("simulate", "1");
+        }
+        for (Field& field : m_fields) {
+            const bool relevant = !field.simulationOnly() || simulating;
+            field.setEnabled(relevant);
+            if (const std::string value = field.value(); relevant && !value.empty()) {
+                uri.params.emplace_back(field.info.name, value);
+            }
+        }
+        m_uri->setText(QString::fromStdString(uri.toString()));
+    }
+
+    void addRecording(const std::filesystem::path& path, const std::string& detail)
+    {
+        const QString file = QString::fromStdString(path.filename().string());
+        auto* item = new QListWidgetItem(detail.empty() ? file : file + "\n    " + QString::fromStdString(detail), m_recordings);
+        item->setData(Qt::UserRole, QString::fromStdString(path.string()));
+        item->setToolTip(QString::fromStdString(path.string()));
+        m_recordings->setCurrentItem(item);
+    }
+
+    /** Opens @p uri and shows it in @p mode, recording it when Mode::Recording. */
+    bool run(const std::string& uri, Mode mode, const std::string& label)
+    {
+        stop_source();
+        auto device = AcqDevice::open(uri);
+        if (!device) {
+            return fail(device.error().text());
+        }
+        auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+        if (!reader) {
+            return fail(reader.error().text());
+        }
+        auto fiffInfo = toFiffInfo(*device->stream().info());
+        if (!fiffInfo) {
+            return fail(fiffInfo.error().text());
+        }
+        if (mode == Mode::Recording) {
+            const std::string name = std::format("{}{}_{}_raw.fif", m_schemes[static_cast<std::size_t>(m_devices->currentRow())].scheme,
+                                                 m_hasSimulator && m_simulate->isChecked() ? "_sim" : "",
+                                                 QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss").toStdString());
+            m_path = m_folder / name;
+            AcqRecorderOptions options;
+            options.device = device->description();
+            auto recorder = AcqRecorder::start(device->stream(), m_path.string(), options);
+            if (!recorder) {
+                return fail(recorder.error().text());
+            }
+            m_recorder.emplace(std::move(*recorder));
+        }
+        const auto info = device->stream().info();
+        m_channels = static_cast<Eigen::Index>(info->channelCount());
+        m_sfreq = info->sfreq;
+        m_width = std::max<Eigen::Index>(2, static_cast<Eigen::Index>(kWindowSeconds * m_sfreq));
+        m_sweep = Eigen::MatrixXd::Zero(m_channels, m_width);
+        m_view->init(std::make_shared<FIFFLIB::FiffInfo>(std::move(*fiffInfo)));
+        m_view->setWindowSize(static_cast<float>(kWindowSeconds));
+        m_view->setFileBounds(0, static_cast<int>(m_width) - 1);
+        m_view->setData(m_sweep, 0);
+        m_view->scrollToSample(0, false);
+        if (const AcqError e = device->start(); !e.ok()) {
+            m_recorder.reset();
+            return fail(e.text());
+        }
+        m_device.emplace(std::move(*device));
+        m_reader.emplace(std::move(*reader));
+        m_next = 0;
+        m_eventCount = 0;
+        m_events.clear();
+        m_label = label;
+        setMode(mode);
+        return true;
+    }
+
+    /** Shows @p mode in the badge and enables what can be done in it. */
+    void setMode(Mode mode)
+    {
+        m_mode = mode;
+        const bool idle = mode == Mode::Idle;
+        m_start->setEnabled(idle);
+        m_record->setEnabled(idle);
+        m_stop->setEnabled(!idle);
+        m_play->setEnabled(idle && m_recordings->currentItem() != nullptr);
+        m_devices->setEnabled(idle);
+        m_settings->setEnabled(idle);
+        m_simulate->setEnabled(idle && m_hasSimulator);
+        m_target->setEnabled(idle);
+        updateHeader();
+    }
+
+    void updateHeader()
+    {
+        static constexpr std::array<std::pair<const char*, const char*>, 4> kBadges = {
+            {{"IDLE", "#757575"}, {"▶ LIVE", "#2e7d32"}, {"● REC", "#c62828"}, {"▶ PLAYBACK", "#1565c0"}}};
+        const auto& [text, color] = kBadges[static_cast<std::size_t>(m_mode)];
+        m_badge->setText(text);
+        m_badge->setStyleSheet(QString("background: %1;").arg(color));
+        if (m_mode == Mode::Idle) {
+            return;
+        }
+        const double seconds = m_sfreq > 0.0 ? static_cast<double>(m_next) / m_sfreq : 0.0;
+        std::string line = std::format("{}  ·  {} channels at {} Hz  ·  {:.1f} s  ·  {} events", m_label, m_channels, m_sfreq, seconds, m_eventCount);
+        if (m_recorder) {
+            line += std::format("  →  {} ({} samples written)", m_path.filename().string(), m_recorder->stats().samples);
+        }
+        m_info->setText(QString::fromStdString(line));
+    }
+
+    /** Moves the samples that arrived into the sweep, which the newest overwrite from left to right. */
+    void poll()
+    {
+        if (!m_reader) {
+            return;
+        }
+        bool added = false;
+        bool ended = false;
+        for (;;) {
+            auto view = m_reader->acquire(0, 0ms);
+            if (!view) {
+                ended = view.error() == AcqErrorCode::EndOfStream || view.error() == AcqErrorCode::DeviceStopped;
+                break;
+            }
+            if (view->sampleCount() == 0) {
+                static_cast<void>(m_reader->release(*view));
+                break;
+            }
+            m_block.resize(m_channels, static_cast<Eigen::Index>(view->sampleCount()));
+            const AcqError decoded = decode(*view, ref(m_block));
+            for (const auto* part : {&view->events().first, &view->events().second}) {
+                m_events.insert(m_events.end(), part->begin(), part->end());
+                m_eventCount += part->size();
+            }
+            const std::uint64_t first = view->firstSample();
+            if (m_reader->release(*view).ok() && decoded.ok()) {
+                for (Eigen::Index i = 0; i < m_block.cols(); ++i) {
+                    m_sweep.col(static_cast<Eigen::Index>((first + static_cast<std::uint64_t>(i)) % static_cast<std::uint64_t>(m_width))) = m_block.col(i);
+                }
+                m_next = first + static_cast<std::uint64_t>(m_block.cols());
+                added = true;
+            }
+        }
+        if (added) {
+            const auto width = static_cast<std::uint64_t>(m_width);
+            std::erase_if(m_events, [&](const AcqEvent& e) { return e.sample + width < m_next; }); // overwritten
+            QVector<ChannelRhiView::EventMarker> markers;
+            for (const AcqEvent& e : m_events) {
+                markers.append({static_cast<int>(e.sample % width), e.code, QColor(), QString::number(e.code)});
+            }
+            markers.append({static_cast<int>(m_next % width), 0, QColor(0, 110, 230), "now"});
+            std::sort(markers.begin(), markers.end(), [](const auto& a, const auto& b) { return a.sample < b.sample; });
+            m_view->setData(m_sweep, 0);
+            m_view->setEvents(markers);
+            updateHeader();
+        }
+        if (ended) {
+            stop_source();
+            m_info->setText(QString::fromStdString(m_label + " ended"));
+        }
+    }
+
+    std::filesystem::path m_folder;
+    std::filesystem::path m_path; // of the running recording
+    std::vector<AcqSchemeInfo> m_schemes;
+    std::vector<Field> m_fields;
+    bool m_updating = false;
+    bool m_hasSimulator = false; // the selected device has a simulator
+    QListWidget* m_devices = nullptr;
+    QLabel* m_about = nullptr;
+    QCheckBox* m_simulate = nullptr;
+    QLineEdit* m_target = nullptr;
+    QScrollArea* m_settings = nullptr;
+    QLineEdit* m_uri = nullptr;
+    QPushButton* m_start = nullptr;
+    QPushButton* m_record = nullptr;
+    QPushButton* m_stop = nullptr;
+    QListWidget* m_recordings = nullptr;
+    QPushButton* m_play = nullptr;
+    QLabel* m_badge = nullptr;
+    QLabel* m_info = nullptr;
+    ChannelDataView* m_view = nullptr;
+    QTimer m_timer;
+    Mode m_mode = Mode::Idle;
+    std::optional<AcqDevice> m_device;
+    std::optional<AcqReader> m_reader;
+    std::optional<AcqRecorder> m_recorder;
+    std::string m_label;
+    Eigen::Index m_channels = 0;
+    Eigen::Index m_width = 0;
+    double m_sfreq = 0.0;
+    Eigen::MatrixXd m_sweep;
+    Eigen::MatrixXd m_block;
+    std::uint64_t m_next = 0;
+    std::size_t m_eventCount = 0;
+    std::vector<AcqEvent> m_events;
+};
+
+/** Runs @p seconds of the event loop. */
+void runFor(double seconds)
+{
+    QTimer::singleShot(static_cast<int>(seconds * 1000.0), qApp, &QCoreApplication::quit);
+    QApplication::exec();
+}
+
+} // namespace
+
+//=============================================================================================================
+// MAIN
+//=============================================================================================================
+
+int main(int argc, char* argv[])
+{
+    QApplication app(argc, argv);
+    QCommandLineParser parser;
+    parser.setApplicationDescription("Pick an acquisition device or its simulator, watch it, record it and play it back.");
+    parser.addHelpOption();
+    const QCommandLineOption sourceOpt("source", "URI to record unattended.", "uri");
+    const QCommandLineOption recordOpt("record", "Seconds to record, then as long to play back.", "s", "5");
+    const QCommandLineOption shotOpt("screenshot", "Prefix of the PNGs of the recording and the playback.", "prefix");
+    const QCommandLineOption folderOpt("folder", "Folder of the recordings (default: a temporary folder).", "dir");
+    parser.addOptions({sourceOpt, recordOpt, shotOpt, folderOpt});
+    parser.process(app);
+
+    registerFiffScheme();
+    registerLslScheme();
+    static_cast<void>(register_device_schemes());
+
+    const std::filesystem::path folder = parser.isSet(folderOpt) ? std::filesystem::path(parser.value(folderOpt).toStdString())
+                                                                 : std::filesystem::temp_directory_path() / "mne_acq_studio";
+    std::filesystem::create_directories(folder);
+    Studio studio(folder);
+    studio.show();
+    if (!parser.isSet(sourceOpt)) {
+        return QApplication::exec();
+    }
+
+    // Unattended: record, then play the recording back
+    const double seconds = parser.value(recordOpt).toDouble();
+    const QString shot = parser.value(shotOpt);
+    if (!studio.apply_uri(parser.value(sourceOpt).toStdString()) || !studio.start(true)) {
+        return 1;
+    }
+    runFor(seconds);
+    if (!shot.isEmpty()) {
+        studio.grab().save(shot + "_record.png");
+    }
+    studio.stop_source();
+    if (studio.selectedRecording().isEmpty() || !studio.play(studio.selectedRecording())) {
+        return 1;
+    }
+    runFor(seconds);
+    if (!shot.isEmpty()) {
+        studio.grab().save(shot + "_playback.png");
+    }
+    const bool replayed = studio.shown() > 0;
+    studio.stop_source();
+    return replayed ? 0 : 1;
+}

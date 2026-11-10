@@ -211,6 +211,27 @@ if (const AcqError error = recorder->stop(); !error.ok()) {
     std::fprintf(stderr, "%s\n", error.text().c_str());
 ````
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 481"
+    m_path = m_folder / name;
+    AcqRecorderOptions options;
+    options.device = device->description();
+    auto recorder = AcqRecorder::start(device->stream(), m_path.string(), options);
+    if (!recorder) {
+        return fail(recorder.error().text());
+    }
+    m_recorder.emplace(std::move(*recorder));
+}
+const auto info = device->stream().info();
+m_channels = static_cast<Eigen::Index>(info->channelCount());
+m_sfreq = info->sfreq;
+m_width = std::max<Eigen::Index>(2, static_cast<Eigen::Index>(kWindowSeconds * m_sfreq));
+m_sweep = Eigen::MatrixXd::Zero(m_channels, m_width);
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

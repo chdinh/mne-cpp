@@ -16287,6 +16287,18 @@
         "level": "start",
         "library": "acq"
       },
+      "ex_acq_studio": {
+        "title": "Pick a source or its simulator, record it and play it back",
+        "tasks": [
+          "real-time"
+        ],
+        "modalities": [
+          "eeg",
+          "meg"
+        ],
+        "level": "start",
+        "library": "acq"
+      },
       "ex_averaging": {
         "title": "Average epochs into an evoked response",
         "tasks": [

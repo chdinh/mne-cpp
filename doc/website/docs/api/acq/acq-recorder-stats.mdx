@@ -68,6 +68,20 @@ std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, 
             static_cast<double>(stats.bytes) / 1e6, stats.directIo ? "on" : "off");
 ````
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 333"
+        static_cast<void>(m_recorder->stop());
+        const AcqRecorderStats stats = m_recorder->stats();
+        m_recorder.reset();
+        addRecording(m_path, std::format("{} samples · {} events", stats.samples, stats.events));
+    }
+    setMode(Mode::Idle);
+}
+````
+
 ## Authors of this file
 
 - Christoph Dinh &lt;christoph.dinh@mne-cpp.org&gt;

@@ -44,6 +44,17 @@ if (uri == "--list") {
 
 ## Used in examples
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 100"
+AcqParameterInfo info;
+QLineEdit* edit = nullptr;
+QCheckBox* check = nullptr;
+QComboBox* combo = nullptr;
+````
+
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.

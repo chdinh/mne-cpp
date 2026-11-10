@@ -108,6 +108,27 @@ Creates an error with context (control path, allocates).
 
 ## Used in examples
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 497"
+m_view->setFileBounds(0, static_cast<int>(m_width) - 1);
+m_view->setData(m_sweep, 0);
+m_view->scrollToSample(0, false);
+if (const AcqError e = device->start(); !e.ok()) {
+    m_recorder.reset();
+    return fail(e.text());
+}
+m_device.emplace(std::move(*device));
+m_reader.emplace(std::move(*reader));
+m_next = 0;
+m_eventCount = 0;
+m_events.clear();
+m_label = label;
+setMode(mode);
+````
+
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
@@ -146,18 +167,7 @@ std::printf("recorded %llu samples (%llu lost) and %llu events in %llu buffers, 
             static_cast<double>(stats.bytes) / 1e6, stats.directIo ? "on" : "off");
 ````
 
-### [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx)
-
-Live multi-channel, multi-rate scope of a streaming source with a closed-loop stimulator on the same clock.
-
-````cpp title="src/examples/ex_acq_scope/main.cpp, line 307"
-if (const AcqError error = decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), channels, n));
-    !error.ok()) {
-    std::fprintf(stderr, "Cannot decode: %s\n", error.text().c_str());
-    (void)input.release(*view);
-    break;
-}
-````
+Also used in [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx).
 
 ## Authors of this file
 

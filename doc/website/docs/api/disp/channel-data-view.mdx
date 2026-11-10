@@ -548,6 +548,27 @@ Use for advanced configuration such as setMaxStoredSamples().
 
 ---
 
+## Used in examples
+
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 223"
+m_badge->setObjectName("badge");
+m_info = new QLabel;
+m_info->setObjectName("info");
+m_view = new ChannelDataView("MNEACQ/studio");
+m_view->setOverviewBarVisible(false);
+auto* display = new QWidget;
+auto* displayLayout = new QVBoxLayout(display);
+auto* header = new QHBoxLayout;
+header->addWidget(m_badge);
+header->addWidget(m_info, 1);
+displayLayout->addLayout(header);
+displayLayout->addWidget(m_view, 1);
+````
+
 ## Authors of this file
 
 - Lorenz Esch &lt;lorenz.esch@tu-ilmenau.de&gt;

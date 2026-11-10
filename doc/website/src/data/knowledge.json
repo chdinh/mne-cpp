@@ -158,6 +158,27 @@
       "topics": []
     },
     {
+      "name": "ex_acq_studio",
+      "title": "Pick a source or its simulator, record it and play it back",
+      "brief": "Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back",
+      "thumbnail": "",
+      "url": "/docs/examples/acq/ex_acq_studio/",
+      "library": "acq",
+      "libraries": [
+        "acq",
+        "disp"
+      ],
+      "tasks": [
+        "real-time"
+      ],
+      "modalities": [
+        "eeg",
+        "meg"
+      ],
+      "level": "start",
+      "topics": []
+    },
+    {
       "name": "ex_averaging",
       "title": "Average epochs into an evoked response",
       "brief": "Average stimulus-locked epochs of a raw FIFF recording into an evoked response, with event selection and EOG rejection",

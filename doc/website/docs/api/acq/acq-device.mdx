@@ -247,6 +247,17 @@ if (!recorder || !device->start().ok()) {
 while (recorder->isRecording()) { // a session of fixed duration ends the stream, which ends the recording
 ````
 
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
+
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
+
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 167"
+m_settings->setFrameShape(QFrame::NoFrame);
+m_uri = new QLineEdit;
+m_uri->setReadOnly(true);
+m_uri->setToolTip("The source URI built from the settings; mne_acq and AcqDevice::open() take the same");
+````
+
 ### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
 
 Recover the P300 from a streaming oddball session by trigger-locked averaging.
@@ -268,26 +279,7 @@ if (auto impedances = device->measureImpedances()) {
         }
 ````
 
-### [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx)
-
-Polhemus digitiser: stream stylus poses, register fiducials captured with the button, collect points.
-
-````cpp title="src/examples/ex_acq_polhemus/main.cpp, line 62"
-register_polhemus_scheme();
-// Stylus on station 1, head tracker on station 2; the simulated stylus button is pressed every 0.4 s.
-// A Fastrak on a serial port: "polhemus:///dev/cu.usbserial-1?stations=1,2"
-auto device = AcqDevice::open("polhemus://?simulate=1&stations=1,2&button=0.4");
-if (!device) {
-    std::fprintf(stderr, "Cannot open the digitizer: %s\n", device.error().text().c_str());
-    return EXIT_FAILURE;
-}
-auto reader = device->stream().reader(AcqReader::ReadMode::Lossless); // 14 channels: per station X Y Z (m), QW QX QY QZ
-if (!reader || !device->start().ok()) {
-    return EXIT_FAILURE;
-}
-````
-
-Also used in [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx).
+Also used in [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx), [ex_acq_scope](../../examples/acq/ex_acq_scope.mdx).
 
 ## Authors of this file
 

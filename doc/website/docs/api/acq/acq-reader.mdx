@@ -292,19 +292,28 @@ void drainInto(AcqReader& reader, std::size_t index, std::vector<float>& block, 
         const bool decoded = n > 0 && decode(*view, AcqMatrixRef<float>::columnMajor(block.data(), channels, n)).ok();
 ````
 
-### [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx)
+### [ex_acq_studio](../../examples/acq/ex_acq_studio.mdx)
 
-Recover the P300 from a streaming oddball session by trigger-locked averaging.
+Pick an acquisition device or its simulator, watch it, record it to FIFF and play the recording back.
 
-````cpp title="src/examples/ex_acq_oddball/main.cpp, line 216"
-auto reader = stream.reader(AcqReader::ReadMode::Lossless);
-if (!reader || !device->start().ok()) {
-    std::fprintf(stderr, "Cannot start %s: %s\n", uri.c_str(), device->lastError().text().c_str());
-    return 1;
+````cpp title="src/examples/ex_acq_studio/main.cpp, line 469"
+auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+if (!reader) {
+    return fail(reader.error().text());
 }
+auto fiffInfo = toFiffInfo(*device->stream().info());
+if (!fiffInfo) {
+    return fail(fiffInfo.error().text());
+}
+if (mode == Mode::Recording) {
+    const std::string name = std::format("{}{}_{}_raw.fif", m_schemes[static_cast<std::size_t>(m_devices->currentRow())].scheme,
+                                         m_hasSimulator && m_simulate->isChecked() ? "_sim" : "",
+                                         QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss").toStdString());
+    m_path = m_folder / name;
+    AcqRecorderOptions options;
 ````
 
-Also used in [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx), [ex_acq_record](../../examples/acq/ex_acq_record.mdx).
+Also used in [ex_acq_oddball](../../examples/acq/ex_acq_oddball.mdx), [ex_acq_polhemus](../../examples/acq/ex_acq_polhemus.mdx), [ex_acq_record](../../examples/acq/ex_acq_record.mdx).
 
 ## Authors of this file
 
