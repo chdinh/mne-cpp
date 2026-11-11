@@ -104,9 +104,9 @@ private:
         return QFile::exists(path);
     }
 
-    /** Writes @p data (channels x samples) as two raw buffers of @p type; stim channels get range @p stimRange. */
+    /** Writes @p data (channels x samples) as two raw buffers of @p type, @p skip buffers apart; stim channels get range @p stimRange. */
     static bool writeTriggerRaw(const QString& path, FIFFLIB::fiff_int_t type, const BASELIB::StringList& names, const Eigen::MatrixXd& data,
-                                float stimRange)
+                                float stimRange, FIFFLIB::fiff_int_t skip = 0)
     {
         FIFFLIB::FiffInfo info;
         for (const std::string& name : names) {
@@ -129,7 +129,11 @@ private:
         }
         const int size = type == FIFFT_DAU_PACK16 || type == FIFFT_SHORT ? 2 : 4;
         const Eigen::Index half = data.cols() / 2;
+        bool first = true;
         for (const Eigen::MatrixXd& buffer : {Eigen::MatrixXd(data.leftCols(half)), Eigen::MatrixXd(data.rightCols(data.cols() - half))}) {
+            if (!std::exchange(first, false) && skip > 0) {
+                out->write_int(FIFF_DATA_SKIP, &skip);
+            }
             FIFFLIB::FiffTag tag;
             tag.kind = FIFF_DATA_BUFFER;
             tag.type = type;
@@ -631,6 +635,47 @@ private slots:
         const QString output = runTool("mne_fix_stim14", {"--32", noStim});
         QVERIFY2(m_lastProcessFinished && m_lastExitCode == 1, qPrintable(output));
         QVERIFY(output.contains("Neither STI101 nor STI201"));
+    }
+
+    //=========================================================================================================
+    // mne_toggle_skips
+    //=========================================================================================================
+
+    void testToggleSkipsTurnsSkipsOffAndOn()
+    {
+        if (!toolExists("mne_toggle_skips"))
+            QSKIP("mne_toggle_skips not found");
+
+        // As MNE-C: a skip becomes FIFF_MNE_DATA_SKIP_NOP, which readers ignore, and back on the next run.
+        Eigen::MatrixXd data(1, 4);
+        data << 1, 2, 3, 4;
+        const QString path = m_tempDir.filePath("skips-raw.fif");
+        QVERIFY(writeTriggerRaw(path, FIFFT_INT, {"EEG 001"}, data, 1.0f, 1));
+        const auto samples = [&path] {
+            FIFFLIB::FiffRawData raw(path.toStdString());
+            return raw.last_samp - raw.first_samp + 1;
+        };
+        const auto kinds = [&path] {
+            std::vector<FIFFLIB::fiff_int_t> found;
+            auto stream = FIFFLIB::FiffStream::open(path.toStdString());
+            for (const FIFFLIB::FiffDirEntry& entry : stream ? stream->dir() : std::vector<FIFFLIB::FiffDirEntry>{}) {
+                if (entry.kind == FIFF_DATA_SKIP || entry.kind == FIFF_MNE_DATA_SKIP_NOP) {
+                    found.push_back(entry.kind);
+                }
+            }
+            return found;
+        };
+        QCOMPARE(samples(), 6);
+
+        QString output = runTool("mne_toggle_skips", {"--raw", path});
+        QVERIFY2(m_lastProcessFinished && m_lastExitCode == 0, qPrintable(output));
+        QCOMPARE(kinds(), std::vector<FIFFLIB::fiff_int_t>{FIFF_MNE_DATA_SKIP_NOP});
+        QCOMPARE(samples(), 4);
+
+        output = runTool("mne_toggle_skips", {"--raw", path});
+        QVERIFY2(m_lastProcessFinished && m_lastExitCode == 0, qPrintable(output));
+        QCOMPARE(kinds(), std::vector<FIFFLIB::fiff_int_t>{FIFF_DATA_SKIP});
+        QCOMPARE(samples(), 6);
     }
 
     //=========================================================================================================

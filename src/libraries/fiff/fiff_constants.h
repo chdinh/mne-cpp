@@ -437,6 +437,7 @@ inline constexpr auto FIFF_MNE_EVENT_LIST = 3561;         /**< An event list (fo
 inline constexpr auto FIFF_MNE_EVENT_TRIGGER_MASK = 3565; /**< Mask applied to the trigger channel values*/
 inline constexpr auto FIFF_MNE_EVENT_COMMENTS = 3566;     /**< Event comments, one NUL-terminated string per event*/
 inline constexpr auto FIFF_MNE_HEMI = 3562;               /**< Hemisphere association for general purposes*/
+inline constexpr auto FIFF_MNE_DATA_SKIP_NOP = 3563;      /**< A data skip turned off in the raw data*/
 inline constexpr auto FIFF_MNE_BASELINE_MIN = 3568;       /**< Baseline start; annotation onsets in FIFFB_MNE_ANNOTATIONS*/
 inline constexpr auto FIFF_MNE_BASELINE_MAX = 3569;       /**< Baseline end; annotation onset + duration in FIFFB_MNE_ANNOTATIONS*/
 

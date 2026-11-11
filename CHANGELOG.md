@@ -289,6 +289,10 @@ aliases; replace the old spelling as below.
   never reached, and so cleared `STI 014`. A refused file stays unchanged and
   the tool exits with 1. Migration: `mne_fix_stim14 --raw in.fif --out
   out.fif` becomes `cp in.fif out.fif && mne_fix_stim14 out.fif`.
+- `mne_toggle_skips` turns skips off and on as MNE-C does, by renaming
+  `FIFF_DATA_SKIP` to `FIFF_MNE_DATA_SKIP_NOP` and back. It used to write the
+  negated skip count in host byte order, which a skip of one buffer read back
+  as -1 and others as garbage.
 
 ## [2.4.0] - 2026-10-27
 

@@ -7,7 +7,7 @@ sidebar_label: mne_toggle_skips
 
 ## Overview
 
-`mne_toggle_skips` toggles skip tags in raw FIFF data. This modifies the file in-place, toggling `FIFF_DATA_SKIP` tags between active (skip) and inactive (unskip) states. Skip tags mark segments of raw data that should be excluded from processing.
+`mne_toggle_skips` turns the skips of a raw FIFF file off and on, in place. A skip (`FIFF_DATA_SKIP`) leaves a gap of whole buffers in the data, for instance where the acquisition paused. The tool renames each skip to `FIFF_MNE_DATA_SKIP_NOP`, which readers ignore, so the buffers around it join up; running it again turns the skips back on.
 
 This is a C++ port of the original MNE-C tool by Matti Hämäläinen.
 
@@ -38,5 +38,5 @@ mne_toggle_skips --raw sam-raw.fif
 
 ## See Also
 
-- [mne_fix_stim14](tools-fix-stim14.mdx) — Fix STI 014 by combining STI 001-006
+- [mne_fix_stim14](tools-fix-stim14.mdx) — Fix the trigger channel of old Neuromag files
 - [mne_add_triggers](tools-add-triggers.mdx) — Add trigger events to raw data

@@ -77,46 +77,25 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Scan directory for FIFF_DATA_SKIP tags
-    int nToggled = 0;
-    const std::vector<FiffDirEntry>& dirEntries = stream->dir();
-
-    for (std::size_t i = 0; i < dirEntries.size(); ++i) {
-        if (dirEntries[i].kind == FIFF_DATA_SKIP) {
-            // Read the tag
-            std::optional<FiffTag> tag;
-            if (tag = stream->read_tag(dirEntries[i].pos); !tag) {
-                qWarning("Cannot read tag at position %lld, skipping.",
-                         static_cast<long long>(dirEntries[i].pos));
-                continue;
-            }
-
-            // Toggle: if the skip count is positive, negate it (disable skip);
-            // if negative, make it positive (enable skip)
-            fiff_int_t skipCount = *tag->toInt();
-            fiff_int_t newSkipCount = -skipCount;
-
-            // Write back the modified skip count at the data position
-            // The data starts after the tag header (12 bytes)
-            fiff_long_t dataPos = dirEntries[i].pos + 16; // kind(4) + type(4) + size(4) + next(4)
-            stream->device()->seek(dataPos);
-            fiff_int_t beVal = newSkipCount;
-            // Write as big-endian int32
-            stream->device()->write(reinterpret_cast<const char*>(&beVal), sizeof(fiff_int_t));
-
-            qInfo("  Tag at pos %lld: skip count %d -> %d",
-                  static_cast<long long>(dirEntries[i].pos), skipCount, newSkipCount);
-            ++nToggled;
+    // As MNE-C: a skip is turned off by renaming it FIFF_MNE_DATA_SKIP_NOP, which readers ignore, and on again
+    int turnedOff = 0;
+    int turnedOn = 0;
+    for (const FiffDirEntry& entry : stream->dir()) {
+        if (entry.kind != FIFF_DATA_SKIP && entry.kind != FIFF_MNE_DATA_SKIP_NOP) {
+            continue;
         }
+        std::optional<FiffTag> tag = stream->read_tag(entry.pos);
+        if (!tag) {
+            qCritical("Cannot read the tag at position %lld.", static_cast<long long>(entry.pos));
+            return 1;
+        }
+        const bool on = tag->kind == FIFF_DATA_SKIP;
+        tag->kind = on ? FIFF_MNE_DATA_SKIP_NOP : FIFF_DATA_SKIP;
+        stream->write_tag(*tag, entry.pos);
+        ++(on ? turnedOff : turnedOn);
     }
-
     stream->close();
 
-    if (nToggled == 0) {
-        qInfo("No FIFF_DATA_SKIP tags found in %s", qPrintable(rawFile));
-    } else {
-        qInfo("Toggled %d skip tag(s) in %s", nToggled, qPrintable(rawFile));
-    }
-
+    qInfo("%d skips turned off, %d skips turned on in %s", turnedOff, turnedOn, qPrintable(rawFile));
     return 0;
 }
