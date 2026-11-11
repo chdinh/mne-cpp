@@ -116,6 +116,7 @@ private slots:
     void testDefaultOutput();
     void testDeleteInputFile();
     void testInPlace();
+    void testNonAsciiHisId();
 
     //test anonymization
     void testDefaultAnonymizationOfTags();
@@ -218,6 +219,40 @@ void TestMneAnonymize::testAnonymizerConfiguration()
     QVERIFY(anonymizer.isFileOutSet());
     QVERIFY(QFileInfo(anonymizer.getFileNameIn()).isAbsolute());
     QVERIFY(QFileInfo(anonymizer.getFileNameOut()).isAbsolute());
+}
+
+//=============================================================================================================
+
+void TestMneAnonymize::testNonAsciiHisId()
+{
+    // A HIS ID with characters outside ASCII is written whole, as UTF-8
+    QTemporaryDir tempDir;
+    const QString fileIn = tempDir.filePath("his_id.fif");
+    const QString fileOut = tempDir.filePath("his_id_anonymized.fif");
+    {
+        const std::unique_ptr<FiffStream> stream = FiffStream::start_file(fileIn.toStdU16String());
+        QVERIFY(stream);
+        stream->start_block(FIFFB_MEAS);
+        stream->start_block(FIFFB_SUBJECT);
+        stream->write_string(FIFF_SUBJ_HIS_ID, "patient-1");
+        stream->end_block(FIFFB_SUBJECT);
+        stream->end_block(FIFFB_MEAS);
+        stream->end_file();
+    }
+    const QString hisId = QStringLiteral("Jörg-Müller-ß");
+    FiffAnonymizer anonymizer;
+    anonymizer.setSubjectHisId(hisId);
+    QCOMPARE(anonymizer.setInFile(fileIn), 0);
+    QCOMPARE(anonymizer.setOutFile(fileOut), 0);
+    QCOMPARE(anonymizer.anonymizeFile(), 0);
+
+    FiffStream stream(fileOut.toStdU16String());
+    QVERIFY(stream.open());
+    std::optional<FiffTag> tag;
+    while ((tag = stream.read_tag()) && tag->kind != FIFF_SUBJ_HIS_ID) {
+    }
+    QVERIFY(tag);
+    QCOMPARE(QString::fromStdString(tag->toString()), hisId);
 }
 
 //=============================================================================================================

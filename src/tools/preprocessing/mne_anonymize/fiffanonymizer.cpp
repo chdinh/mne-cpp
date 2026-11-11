@@ -30,6 +30,9 @@
 #include <QFileInfo>
 #include <QTimeZone>
 
+#include <algorithm>
+#include <cstring>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -285,24 +288,22 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_COMMENT: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingFileComment(inStr);
 
             if (m_pBlockTypeList->top() == FIFFB_MEAS_INFO) {
                 QString outStr(m_sDefaultString);
-                m_pTag->resize(outStr.size());
-                memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+                setTagText(outStr);
                 printIfVerbose("Description of the measurement block changed: " + inStr + " -> " + outStr);
             }
             break;
         }
         case FIFF_EXPERIMENTER: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingFileExperimenter(inStr);
 
             QString outStr(m_sDefaultString);
-            m_pTag->resize(outStr.size());
-            memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+            setTagText(outStr);
             printIfVerbose("Experimenter changed: " + inStr + " -> " + outStr);
             break;
         }
@@ -315,29 +316,26 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_FIRST_NAME: {
-            QString inFirstName(m_pTag->data());
+            QString inFirstName(tagText());
             emit readingSubjectFirstName(inFirstName);
             QString outFirstName(m_sSubjectFirstName);
-            m_pTag->resize(outFirstName.size());
-            memcpy(m_pTag->data(), outFirstName.toUtf8(), static_cast<size_t>(outFirstName.size()));
+            setTagText(outFirstName);
             printIfVerbose("Subject first name changed: " + inFirstName + " -> " + outFirstName);
             break;
         }
         case FIFF_SUBJ_MIDDLE_NAME: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingSubjectMiddleName(inStr);
             QString outStr(m_sSubjectMidName);
-            m_pTag->resize(outStr.size());
-            memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+            setTagText(outStr);
             printIfVerbose("Subject middle name changed: " + inStr + " -> " + outStr);
             break;
         }
         case FIFF_SUBJ_LAST_NAME: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingSubjectLastName(inStr);
             QString outStr(m_sSubjectLastName);
-            m_pTag->resize(outStr.size());
-            memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+            setTagText(outStr);
             printIfVerbose("Subject last name changed: " + inStr + " -> " + outStr);
             break;
         }
@@ -399,20 +397,18 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_COMMENT: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingSubjectComment(inStr);
             QString outStr(m_sSubjectComment);
-            m_pTag->resize(outStr.size());
-            memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+            setTagText(outStr);
             printIfVerbose("Subject comment changed: " + inStr + " -> " + outStr);
             break;
         }
         case FIFF_SUBJ_HIS_ID: {
-            QString inSubjectHisId(m_pTag->data());
+            QString inSubjectHisId(tagText());
             emit readingSubjectHisId(inSubjectHisId);
             QString outSubjectHisId(m_sSubjectHisId);
-            m_pTag->resize(outSubjectHisId.size());
-            memcpy(m_pTag->data(), outSubjectHisId.toUtf8(), static_cast<size_t>(outSubjectHisId.size()));
+            setTagText(outSubjectHisId);
             printIfVerbose("Subject Hospital-ID(His Id) changed: " + inSubjectHisId + " -> " + outSubjectHisId);
             break;
         }
@@ -427,43 +423,39 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_PROJ_NAME: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingProjectName(inStr);
             if (m_bBruteMode) {
                 QString outStr(m_sProjectName);
-                m_pTag->resize(outStr.size());
-                memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+                setTagText(outStr);
                 printIfVerbose("Project name changed: " + inStr + " -> " + outStr);
             }
             break;
         }
         case FIFF_PROJ_AIM: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingProjectAim(inStr);
             if (m_bBruteMode) {
                 QString outStr(m_sProjectAim);
-                m_pTag->resize(outStr.size());
-                memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+                setTagText(outStr);
                 printIfVerbose("Project aim changed: " + inStr + " -> " + outStr);
             }
             break;
         }
         case FIFF_PROJ_PERSONS: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingProjectPersons(inStr);
             QString outStr(m_sProjectPersons);
-            m_pTag->resize(outStr.size());
-            memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+            setTagText(outStr);
             printIfVerbose("Project persons changed: " + inStr + " -> " + outStr);
             break;
         }
         case FIFF_PROJ_COMMENT: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingProjectComment(inStr);
             if (m_bBruteMode) {
                 QString outStr(m_sProjectComment);
-                m_pTag->resize(outStr.size());
-                memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+                setTagText(outStr);
                 printIfVerbose("Project comment changed: " + inStr + " -> " + outStr);
             }
             break;
@@ -478,23 +470,21 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_MNE_ENV_WORKING_DIR: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingMNEWorkingDir(inStr);
             if (m_bMNEEnvironmentMode || m_bBruteMode) {
                 QString outStr(m_sMNEWorkingDir);
-                m_pTag->resize(outStr.size());
-                memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+                setTagText(outStr);
                 printIfVerbose("MNE working directory info changed: " + inStr + " -> " + outStr);
             }
             break;
         }
         case FIFF_MNE_ENV_COMMAND_LINE: {
-            QString inStr(m_pTag->data());
+            QString inStr(tagText());
             emit readingMNECommandLine(inStr);
             if (m_bMNEEnvironmentMode || m_bBruteMode) {
                 QString outStr(m_sMNECommand);
-                m_pTag->resize(outStr.size());
-                memcpy(m_pTag->data(), outStr.toUtf8(), static_cast<size_t>(outStr.size()));
+                setTagText(outStr);
                 printIfVerbose("MNE command line info changed: " + inStr + " -> " + outStr);
             }
             break;
@@ -847,4 +837,21 @@ bool FiffAnonymizer::isFileInSet() const
 bool FiffAnonymizer::isFileOutSet() const
 {
     return m_bFileOutSet;
+}
+
+//=============================================================================================================
+
+QString FiffAnonymizer::tagText() const
+{
+    const auto* text = reinterpret_cast<const char*>(m_pTag->data());
+    return QString::fromUtf8(text, std::find(text, text + m_pTag->size(), '\0') - text);
+}
+
+//=============================================================================================================
+
+void FiffAnonymizer::setTagText(const QString& text)
+{
+    const QByteArray utf8 = text.toUtf8();
+    m_pTag->resize(utf8.size());
+    std::memcpy(m_pTag->data(), utf8.constData(), static_cast<std::size_t>(utf8.size()));
 }

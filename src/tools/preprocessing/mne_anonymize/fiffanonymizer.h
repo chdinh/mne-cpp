@@ -717,6 +717,20 @@ private:
 
     //=========================================================================================================
     /**
+     * @return The current tag's text, decoded from UTF-8 up to its first NUL.
+     */
+    QString tagText() const;
+
+    //=========================================================================================================
+    /**
+     * Replaces the current tag's payload with @p text encoded as UTF-8.
+     *
+     * @param[in] text   The new text.
+     */
+    void setTagText(const QString& text);
+
+    //=========================================================================================================
+    /**
      * Configure and setup the in and out stream (Fiffstreams) to read from and write to.
      */
     int openInOutStreams();

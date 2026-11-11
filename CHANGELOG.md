@@ -323,6 +323,9 @@ aliases; replace the old spelling as below.
 - The raw data browser of MNE Analyze Studio saves samples at their true
   scale; it divided them by the channel range (3276.8 for most channels of
   the sample data).
+- `mne_anonymize` writes replacement texts with characters outside ASCII
+  whole; it cut each of them short by one byte per such character, leaving
+  invalid UTF-8 (a HIS ID `Jörg-Müller-ß` became `Jörg-Müller`).
 
 ## [2.4.0] - 2026-10-27
 
