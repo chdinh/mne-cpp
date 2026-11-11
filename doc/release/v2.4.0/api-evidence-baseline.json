@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 474,
-    "exported_free_functions": 192,
+    "exported_free_functions": 193,
     "registered_classes": 565,
     "exported_not_registered": 2,
     "registered_function_modules": 14,
@@ -406,6 +406,11 @@
     },
     {
       "name": "register_streaming_board_scheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "register_brainflow_file_scheme",
       "header": "acq/devices/acq_devices.h",
       "library": "acq"
     },
