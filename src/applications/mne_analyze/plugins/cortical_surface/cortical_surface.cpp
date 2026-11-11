@@ -1458,12 +1458,12 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         stc = mnEst.calculateInverse(evoked);
         ok = !stc.empty();
     } else if (m == QStringLiteral("MxNE")) {
-        const Eigen::MatrixXd& gain = fwd.sol->data;
+        const Eigen::MatrixXd& gain = fwd.sol.data;
         InvMxneResult res = InvMxne::compute(gain, evoked.data, opts.alpha);
         stc = res.stc;
         ok = !stc.empty();
     } else if (m == QStringLiteral("Gamma-MAP")) {
-        const Eigen::MatrixXd& gain = fwd.sol->data;
+        const Eigen::MatrixXd& gain = fwd.sol.data;
         InvGammaMapResult res = InvGammaMap::compute(gain, evoked.data, noiseCov.data);
         stc = res.stc;
         ok = !stc.empty();
@@ -1471,7 +1471,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         InvCMNESettings settings;
         settings.onnxModelPath = opts.onnxPath;
         settings.lambda2 = 1.0 / (opts.snr * opts.snr);
-        const Eigen::MatrixXd& gain = fwd.sol->data;
+        const Eigen::MatrixXd& gain = fwd.sol.data;
         const Eigen::MatrixXd srcCov = Eigen::MatrixXd::Identity(gain.cols(), gain.cols());
         InvCMNEResult res = InvCMNE::compute(evoked.data, gain, noiseCov.data, srcCov, settings);
         stc = res.stcCmne;

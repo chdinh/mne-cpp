@@ -370,14 +370,14 @@ private slots:
         proj.active = false;
         proj.desc = "Average EEG reference";
         // Build a simple 2-channel projector
-        FiffNamedMatrix::SDPtr projData(new FiffNamedMatrix());
-        projData->nrow = 1;
-        projData->ncol = 3;
-        projData->row_names.push_back("EEG avg");
-        projData->col_names.push_back("EEG 001");
-        projData->col_names.push_back("EEG 002");
-        projData->col_names.push_back("EEG 003");
-        projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
+        FiffNamedMatrix projData;
+        projData.nrow = 1;
+        projData.ncol = 3;
+        projData.row_names.push_back("EEG avg");
+        projData.col_names.push_back("EEG 001");
+        projData.col_names.push_back("EEG 002");
+        projData.col_names.push_back("EEG 003");
+        projData.data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
         proj.data = projData;
 
         std::vector<FiffProj> projList;
@@ -395,14 +395,14 @@ private slots:
         proj.active = true;
         proj.desc = "Average EEG reference";
 
-        FiffNamedMatrix::SDPtr projData(new FiffNamedMatrix());
-        projData->nrow = 1;
-        projData->ncol = 3;
-        projData->row_names.push_back("EEG avg");
-        projData->col_names.push_back("EEG 001");
-        projData->col_names.push_back("EEG 002");
-        projData->col_names.push_back("EEG 003");
-        projData->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
+        FiffNamedMatrix projData;
+        projData.nrow = 1;
+        projData.ncol = 3;
+        projData.row_names.push_back("EEG avg");
+        projData.col_names.push_back("EEG 001");
+        projData.col_names.push_back("EEG 002");
+        projData.col_names.push_back("EEG 003");
+        projData.data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
         proj.data = projData;
 
         std::vector<FiffProj> projList;

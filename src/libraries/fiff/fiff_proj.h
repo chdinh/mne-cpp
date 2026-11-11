@@ -220,7 +220,7 @@ public:
     bool active;      /**< If fiff projector active. */
     std::string desc; /**< Projector description. */
 
-    FiffNamedMatrix::SDPtr data; /**< Projector data, rows are equal to the length of channels. */
+    FiffNamedMatrix data; /**< Projector data, rows are equal to the length of channels. */
 };
 
 //=============================================================================================================
@@ -233,7 +233,7 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffProj& p_Fi
     out << "\tKind: " << p_FiffProj.kind << std::endl;
     out << "\tactive: " << p_FiffProj.active << std::endl;
     out << "\tdesc: " << p_FiffProj.desc.c_str() << std::endl;
-    out << "\tdata:\n\t" << *p_FiffProj.data.data() << std::endl;
+    out << "\tdata:\n\t" << p_FiffProj.data << std::endl;
     return out;
 }
 } // NAMESPACE

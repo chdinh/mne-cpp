@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     qInfo("Read %d channels x %d samples", static_cast<int>(data.rows()), static_cast<int>(data.cols()));
 
     // Apply compensation
-    data = comp.data->data.cast<double>() * data;
+    data = comp.data.data.cast<double>() * data;
     qInfo("Compensation applied.");
 
     // Update compensation info

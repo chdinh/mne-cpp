@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
     std::vector<FiffProj> projs = info.projs;
     FiffProj::activate_projs(projs);
     //! [fiff_proj_usage]
-    ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.data->ncol == 102 && projs[0].active,
+    ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data.nrow == 1 && pca.data.ncol == 102 && projs[0].active,
                  "FiffProj/FiffNamedMatrix: PCA-v1 is 1 x 102 and inactive until activated");
 
     //! [fiff_cov_usage]

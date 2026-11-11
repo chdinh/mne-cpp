@@ -108,31 +108,6 @@ BASELIB::Expected<FiffCov> FiffCov::read(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-FiffCov::FiffCov(const FiffCov& p_FiffCov)
-: QSharedData(p_FiffCov)
-, kind(p_FiffCov.kind)
-, diag(p_FiffCov.diag)
-, dim(p_FiffCov.dim)
-, names(p_FiffCov.names)
-, data(p_FiffCov.data)
-, projs(p_FiffCov.projs)
-, bads(p_FiffCov.bads)
-, nfree(p_FiffCov.nfree)
-, eig(p_FiffCov.eig)
-, eigvec(p_FiffCov.eigvec)
-{
-    qRegisterMetaType<std::shared_ptr<FIFFLIB::FiffCov>>();
-    qRegisterMetaType<FIFFLIB::FiffCov>("FIFFLIB::FiffCov");
-}
-
-//=============================================================================================================
-
-FiffCov::~FiffCov()
-{
-}
-
-//=============================================================================================================
-
 void FiffCov::clear()
 {
     kind = -1;
@@ -434,27 +409,6 @@ FiffCov FiffCov::regularize(const FiffInfo& p_info, double p_fRegMag, double p_f
             cov.data(idx[i], idx[j]) = C(i, j);
 
     return cov;
-}
-
-//=============================================================================================================
-
-FiffCov& FiffCov::operator=(const FiffCov& rhs)
-{
-    if (this != &rhs) // protect against invalid self-assignment
-    {
-        kind = rhs.kind;
-        diag = rhs.diag;
-        dim = rhs.dim;
-        names = rhs.names;
-        data = rhs.data;
-        projs = rhs.projs;
-        bads = rhs.bads;
-        nfree = rhs.nfree;
-        eig = rhs.eig;
-        eigvec = rhs.eigvec;
-    }
-    // to support chained assignment operators (a=b=c), always return *this
-    return *this;
 }
 
 //=============================================================================================================

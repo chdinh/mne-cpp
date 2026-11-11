@@ -138,14 +138,14 @@ void TestFiffSimulatorSsp::sspAndBadsRoundTripThroughFiffWrite()
         QCOMPARE(b.kind, a.kind);
         QCOMPARE(b.active, a.active);
         QCOMPARE(b.desc, a.desc);
-        QVERIFY(a.data);
-        QVERIFY(b.data);
-        QCOMPARE(b.data->nrow, a.data->nrow);
-        QCOMPARE(b.data->ncol, a.data->ncol);
-        QCOMPARE(b.data->col_names, a.data->col_names);
-        QCOMPARE(b.data->row_names, a.data->row_names);
+        QVERIFY(!a.data.empty());
+        QVERIFY(!b.data.empty());
+        QCOMPARE(b.data.nrow, a.data.nrow);
+        QCOMPARE(b.data.ncol, a.data.ncol);
+        QCOMPARE(b.data.col_names, a.data.col_names);
+        QCOMPARE(b.data.row_names, a.data.row_names);
         // Byte-equivalent numeric coefficients (FIFF preserves float32 exactly).
-        QVERIFY2(b.data->data.isApprox(a.data->data, 0.0),
+        QVERIFY2(b.data.data.isApprox(a.data.data, 0.0),
                  qPrintable(QStringLiteral("Projector %1 (%2) coefficients differ").arg(i).arg(a.desc)));
     }
 }

@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     }
     MNEForwardSolution& fwd = *fwdRead;
 
-    MatrixXd G = fwd.sol->data;
+    MatrixXd G = fwd.sol.data;
     int nChan = G.rows();
     int nSrc = G.cols();
     bool isFixed = fwd.isFixedOrient();

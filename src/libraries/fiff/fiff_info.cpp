@@ -169,10 +169,10 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
 
     //    if(ctf_comp.data)
     //        delete ctf_comp.data;
-    ctf_comp.data->clear();
+    ctf_comp.data.clear();
 
     if (from == to) {
-        ctf_comp.data->data = MatrixXd::Identity(this->nchan, this->nchan);
+        ctf_comp.data.data = MatrixXd::Identity(this->nchan, this->nchan);
         return false;
     }
 
@@ -219,11 +219,11 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
             return false;
         }
 
-        ctf_comp.data->data.resize(npick, this->nchan);
+        ctf_comp.data.data.resize(npick, this->nchan);
         for (k = 0; k < npick; ++k)
-            ctf_comp.data->data.row(k) = comp_tmp.block(pick(k), 0, 1, this->nchan);
+            ctf_comp.data.data.row(k) = comp_tmp.block(pick(k), 0, 1, this->nchan);
     } else {
-        ctf_comp.data->data = comp_tmp;
+        ctf_comp.data.data = comp_tmp;
     }
     // FiffRawData applies the compensator only when kind is set.
     ctf_comp.kind = to;
@@ -235,13 +235,13 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
 
 bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //private method
 {
-    FiffNamedMatrix::SDPtr this_data;
+    const FiffNamedMatrix* this_data = nullptr;
     MatrixXd presel, postsel;
     std::int32_t k, col, c, ch = 0, row, row_ch = 0, channelAvailable;
 
     for (k = 0; k < std::ssize(this->comps); ++k) {
         if (this->comps[k].kind == kind) {
-            this_data = this->comps[k].data;
+            this_data = &this->comps[k].data;
 
             //
             //   Create the preselector

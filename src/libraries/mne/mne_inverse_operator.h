@@ -328,31 +328,31 @@ public:
     friend std::ostream& operator<<(std::ostream& out, const MNEInverseOperator& inv);
 
 public:
-    FIFFLIB::FiffInfoBase info;                                                 /**< Lightweight measurement info (channel names, types, etc.). */
-    FIFFLIB::fiff_int_t methods = -1;                                           /**< Modality flag: FIFFV_MNE_MEG, _EEG, or _MEG_EEG. */
-    FIFFLIB::fiff_int_t source_ori = -1;                                        /**< Source orientation constraint (FIFFV_MNE_FREE_ORI / FIXED_ORI). */
-    FIFFLIB::fiff_int_t nsource = -1;                                           /**< Number of source-space points. */
-    FIFFLIB::fiff_int_t nchan = -1;                                             /**< Number of channels (= number of singular values). */
-    FIFFLIB::fiff_int_t coord_frame = -1;                                       /**< Coordinate frame of the inverse (MRI or head). */
-    FIFFLIB::fiff_int_t units = -1;                                             /**< Unit of the source estimates, FIFF_UNIT_AM, FIFF_UNIT_AM_M2 or FIFF_UNIT_AM_M3. -1 when the file did not state one. */
-    Eigen::MatrixXf source_nn;                                                  /**< Source-normal vectors (nsource x 3, or nsource*3 x 3 for free). */
-    Eigen::VectorXd sing;                                                       /**< Singular values of the whitened lead field. */
-    bool eigen_leads_weighted = false;                                          /**< True if eigenleads already include R^{0.5} weighting. */
-    FIFFLIB::FiffNamedMatrix::SDPtr eigen_leads{new FIFFLIB::FiffNamedMatrix};  /**< Right singular vectors (eigenleads), sources x components. */
-    FIFFLIB::FiffNamedMatrix::SDPtr eigen_fields{new FIFFLIB::FiffNamedMatrix}; /**< Left singular vectors (eigenfields), channels x components. */
-    FIFFLIB::FiffCov::SDPtr noise_cov{new FIFFLIB::FiffCov};                    /**< Noise covariance matrix. */
-    FIFFLIB::FiffCov::SDPtr source_cov{new FIFFLIB::FiffCov};                   /**< Source covariance matrix (depth + orientation weighting). */
-    FIFFLIB::FiffCov::SDPtr orient_prior{new FIFFLIB::FiffCov};                 /**< Orientation prior (loose-constraint weighting). */
-    FIFFLIB::FiffCov::SDPtr depth_prior{new FIFFLIB::FiffCov};                  /**< Depth prior (depth-weighting coefficients). */
-    FIFFLIB::FiffCov::SDPtr fmri_prior{new FIFFLIB::FiffCov};                   /**< fMRI prior (if available). */
-    MNESourceSpaces src;                                                        /**< Source space (surfaces and/or volume). */
-    FIFFLIB::FiffCoordTrans mri_head_t;                                         /**< MRI-to-head coordinate transformation. */
-    FIFFLIB::fiff_int_t nave = -1;                                              /**< Number of averages (default 1). */
-    std::vector<FIFFLIB::FiffProj> projs;                                       /**< SSP projectors read from the file. */
-    Eigen::MatrixXd proj;                                                       /**< SSP projector matrix applied to data. */
-    Eigen::MatrixXd whitener;                                                   /**< Whitening matrix (derived from noise covariance). */
-    Eigen::VectorXd reginv;                                                     /**< Diagonal regularised inverse of the singular values. */
-    Eigen::SparseMatrix<double> noisenorm;                                      /**< Diagonal noise-normalisation matrix (dSPM / sLORETA). */
+    FIFFLIB::FiffInfoBase info;            /**< Lightweight measurement info (channel names, types, etc.). */
+    FIFFLIB::fiff_int_t methods = -1;      /**< Modality flag: FIFFV_MNE_MEG, _EEG, or _MEG_EEG. */
+    FIFFLIB::fiff_int_t source_ori = -1;   /**< Source orientation constraint (FIFFV_MNE_FREE_ORI / FIXED_ORI). */
+    FIFFLIB::fiff_int_t nsource = -1;      /**< Number of source-space points. */
+    FIFFLIB::fiff_int_t nchan = -1;        /**< Number of channels (= number of singular values). */
+    FIFFLIB::fiff_int_t coord_frame = -1;  /**< Coordinate frame of the inverse (MRI or head). */
+    FIFFLIB::fiff_int_t units = -1;        /**< Unit of the source estimates, FIFF_UNIT_AM, FIFF_UNIT_AM_M2 or FIFF_UNIT_AM_M3. -1 when the file did not state one. */
+    Eigen::MatrixXf source_nn;             /**< Source-normal vectors (nsource x 3, or nsource*3 x 3 for free). */
+    Eigen::VectorXd sing;                  /**< Singular values of the whitened lead field. */
+    bool eigen_leads_weighted = false;     /**< True if eigenleads already include R^{0.5} weighting. */
+    FIFFLIB::FiffNamedMatrix eigen_leads;  /**< Right singular vectors (eigenleads), sources x components. */
+    FIFFLIB::FiffNamedMatrix eigen_fields; /**< Left singular vectors (eigenfields), channels x components. */
+    FIFFLIB::FiffCov noise_cov;            /**< Noise covariance matrix. */
+    FIFFLIB::FiffCov source_cov;           /**< Source covariance matrix (depth + orientation weighting). */
+    FIFFLIB::FiffCov orient_prior;         /**< Orientation prior (loose-constraint weighting). */
+    FIFFLIB::FiffCov depth_prior;          /**< Depth prior (depth-weighting coefficients). */
+    FIFFLIB::FiffCov fmri_prior;           /**< fMRI prior (if available). */
+    MNESourceSpaces src;                   /**< Source space (surfaces and/or volume). */
+    FIFFLIB::FiffCoordTrans mri_head_t;    /**< MRI-to-head coordinate transformation. */
+    FIFFLIB::fiff_int_t nave = -1;         /**< Number of averages (default 1). */
+    std::vector<FIFFLIB::FiffProj> projs;  /**< SSP projectors read from the file. */
+    Eigen::MatrixXd proj;                  /**< SSP projector matrix applied to data. */
+    Eigen::MatrixXd whitener;              /**< Whitening matrix (derived from noise covariance). */
+    Eigen::VectorXd reginv;                /**< Diagonal regularised inverse of the singular values. */
+    Eigen::SparseMatrix<double> noisenorm; /**< Diagonal noise-normalisation matrix (dSPM / sLORETA). */
 
 private:
     Eigen::MatrixXd m_K; /**< Most recently assembled kernel matrix. */
@@ -391,8 +391,8 @@ inline std::ostream& operator<<(std::ostream& out, const MNEInverseOperator& inv
         << "  nsource:     " << inv.nsource << '\n'
         << "  nchan:       " << inv.nchan << '\n'
         << "  coord_frame: " << inv.coord_frame << '\n'
-        << "  eigen_leads: " << *inv.eigen_leads << '\n'
-        << "  eigen_fields:" << *inv.eigen_fields << '\n';
+        << "  eigen_leads: " << inv.eigen_leads << '\n'
+        << "  eigen_fields:" << inv.eigen_fields << '\n';
     return out;
 }
 } // NAMESPACE

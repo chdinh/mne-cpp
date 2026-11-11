@@ -153,7 +153,7 @@ void TestFwdPython::initTestCase()
     m_ref = MNEForwardSolution(refPath.toStdU16String());
     QVERIFY(!m_ref.empty());
     // The reference stores "MEG0113", the measurement "MEG 0113": compare against the measurement's spelling.
-    for (std::string& name : m_ref.sol->row_names) {
+    for (std::string& name : m_ref.sol.row_names) {
         const int k = FIFFLIB::channel_index(m_raw.info.ch_names, name);
         QVERIFY(k >= 0);
         name = m_raw.info.ch_names[static_cast<std::size_t>(k)];
@@ -343,8 +343,8 @@ void TestFwdPython::labelForward_free()
     QCOMPARE(fwd->src[0].nuse, 70);
     QCOMPARE(fwd->src[1].nuse, 0);
     QCOMPARE(fwd->nchan, m_ref.nchan);
-    QCOMPARE(fwd->sol->row_names, m_ref.sol->row_names);
-    QCOMPARE(static_cast<int>(fwd->sol->data.cols()), 3 * 70);
+    QCOMPARE(fwd->sol.row_names, m_ref.sol.row_names);
+    QCOMPARE(static_cast<int>(fwd->sol.data.cols()), 3 * 70);
     QCOMPARE(static_cast<int>(fwd->source_rr.rows()), 70);
     QCOMPARE(static_cast<int>(fwd->source_nn.rows()), 3 * 70);
 
@@ -354,18 +354,18 @@ void TestFwdPython::labelForward_free()
     // solution, and a column from a neighbouring source differs by >10%.
     for (int i = 0; i < 70; ++i) {
         for (int c = 0; c < 3; ++c) {
-            const VectorXd ref = m_ref.sol->data.col(3 * m_v1Sel(i) + c);
-            const VectorXd got = fwd->sol->data.col(3 * i + c);
+            const VectorXd ref = m_ref.sol.data.col(3 * m_v1Sel(i) + c);
+            const VectorXd got = fwd->sol.data.col(3 * i + c);
             QVERIFY2((got - ref).norm() <= 1e-4 * ref.norm(), qPrintable(QString("source %1 component %2 differs by %3").arg(i).arg(c).arg((got - ref).norm() / ref.norm())));
         }
         QVERIFY((fwd->source_rr.row(i) - m_ref.source_rr.row(m_v1Sel(i))).norm() < 1e-6f);
     }
 
     // Position derivatives: three per dipole component, nine per source.
-    QCOMPARE(static_cast<int>(fwd->sol_grad->data.rows()), fwd->nchan);
-    QCOMPARE(static_cast<int>(fwd->sol_grad->data.cols()), 9 * 70);
-    for (int k = 0; k < fwd->sol_grad->data.cols(); ++k) {
-        QVERIFY2(fwd->sol_grad->data.col(k).norm() > 0.0, qPrintable(QString("gradient column %1 is empty").arg(k)));
+    QCOMPARE(static_cast<int>(fwd->sol_grad.data.rows()), fwd->nchan);
+    QCOMPARE(static_cast<int>(fwd->sol_grad.data.cols()), 9 * 70);
+    for (int k = 0; k < fwd->sol_grad.data.cols(); ++k) {
+        QVERIFY2(fwd->sol_grad.data.col(k).norm() > 0.0, qPrintable(QString("gradient column %1 is empty").arg(k)));
     }
 
     // Threads split the work by source space and dipole component; without threads it is done in one pass
@@ -375,8 +375,8 @@ void TestFwdPython::labelForward_free()
         single->solname = m_dir.filePath("free-single-fwd.fif").toStdString();
         auto unthreaded = std::make_shared<ComputeFwd>(single)->calculateFwd();
         QVERIFY(unthreaded != nullptr);
-        QCOMPARE(unthreaded->sol->data, fwd->sol->data);
-        QCOMPARE(unthreaded->sol_grad->data, fwd->sol_grad->data);
+        QCOMPARE(unthreaded->sol.data, fwd->sol.data);
+        QCOMPARE(unthreaded->sol_grad.data, fwd->sol_grad.data);
     }
 
     // The file stores MEG and EEG as separate blocks; reading merges them again.
@@ -384,27 +384,27 @@ void TestFwdPython::labelForward_free()
     {
         QVERIFY(fwd->write(path.toStdU16String()));
     }
-    const MatrixXd G = fwd->sol->data;
-    const MatrixXd dG = fwd->sol_grad->data;
+    const MatrixXd G = fwd->sol.data;
+    const MatrixXd dG = fwd->sol_grad.data;
     {
         const MNEForwardSolution back(path.toStdU16String());
-        QCOMPARE(back.sol->row_names, fwd->sol->row_names);
-        QCOMPARE(back.sol_grad->row_names, fwd->sol_grad->row_names);
-        QVERIFY((back.sol->data - G).norm() <= 1e-6 * G.norm());
-        QCOMPARE(static_cast<int>(back.sol_grad->data.rows()), static_cast<int>(dG.rows()));
-        QVERIFY((back.sol_grad->data - dG).norm() <= 1e-6 * dG.norm());
+        QCOMPARE(back.sol.row_names, fwd->sol.row_names);
+        QCOMPARE(back.sol_grad.row_names, fwd->sol_grad.row_names);
+        QVERIFY((back.sol.data - G).norm() <= 1e-6 * G.norm());
+        QCOMPARE(static_cast<int>(back.sol_grad.data.rows()), static_cast<int>(dG.rows()));
+        QVERIFY((back.sol_grad.data - dG).norm() <= 1e-6 * dG.norm());
     }
 
     // Fixed orientation: G n and, per position derivative d, dG_d n (mne-python's kron(fix_rot, eye(3))).
     {
         const MNEForwardSolution fixed(path.toStdU16String(), {.force_fixed = true});
-        QCOMPARE(static_cast<int>(fixed.sol_grad->data.cols()), 3 * 70);
+        QCOMPARE(static_cast<int>(fixed.sol_grad.data.cols()), 3 * 70);
         for (int i = 0; i < 70; ++i) {
             const Vector3d n = fixed.source_nn.row(i).cast<double>().transpose();
-            QVERIFY((fixed.sol->data.col(i) - G.middleCols(3 * i, 3) * n).norm() <= 1e-6 * G.middleCols(3 * i, 3).norm());
+            QVERIFY((fixed.sol.data.col(i) - G.middleCols(3 * i, 3) * n).norm() <= 1e-6 * G.middleCols(3 * i, 3).norm());
             for (int d = 0; d < 3; ++d) {
                 const VectorXd want = dG.col(9 * i + d) * n(0) + dG.col(9 * i + 3 + d) * n(1) + dG.col(9 * i + 6 + d) * n(2);
-                QVERIFY((fixed.sol_grad->data.col(3 * i + d) - want).norm() <= 1e-6 * want.norm());
+                QVERIFY((fixed.sol_grad.data.col(3 * i + d) - want).norm() <= 1e-6 * want.norm());
             }
         }
     }
@@ -418,7 +418,7 @@ void TestFwdPython::labelForward_fixed()
     QVERIFY(fwd != nullptr);
     QVERIFY(fwd->isFixedOrient());
     QCOMPARE(fwd->nsource, 70);
-    QCOMPARE(static_cast<int>(fwd->sol->data.cols()), 70);
+    QCOMPARE(static_cast<int>(fwd->sol.data.cols()), 70);
     QCOMPARE(static_cast<int>(fwd->source_nn.rows()), 70);
     // Fixed orientation: each normal must be the source-space normal of that vertex.
     for (int i = 0; i < 70; ++i) {
@@ -438,13 +438,13 @@ void TestFwdPython::labelForward_fixed()
     }
 
     // mne-python's fixed conversion of the MNE-C reference: G_free * normal.
-    const double absSum = fwd->sol->data.cwiseAbs().sum();
+    const double absSum = fwd->sol.data.cwiseAbs().sum();
     QVERIFY2(std::fabs(absSum - 165133.28497793473) < 1e-4 * 165133.28497793473, qPrintable(QString("fixed gain abs sum %1, mne-python 165133.28497793473").arg(absSum, 0, 'g', 17)));
 
     for (int i = 0; i < 70; ++i) {
         const Vector3d nn = m_ref.src[0].nn.row(m_ref.src[0].vertno(m_v1Sel(i))).cast<double>().transpose();
-        const VectorXd ref = m_ref.sol->data.middleCols(3 * m_v1Sel(i), 3) * nn;
-        QVERIFY((fwd->sol->data.col(i) - ref).norm() <= 1e-4 * ref.norm());
+        const VectorXd ref = m_ref.sol.data.middleCols(3 * m_v1Sel(i), 3) * nn;
+        QVERIFY((fwd->sol.data.col(i) - ref).norm() <= 1e-4 * ref.norm());
     }
 }
 
@@ -511,22 +511,22 @@ void TestFwdPython::labelForward_variants()
     const int first = meg ? 0 : 306;
     const int nChan = (meg ? 306 : 0) + (eeg ? 60 : 0);
     const Matrix3d R = mriFrame ? Matrix3d(m_ref.mri_head_t.trans.topLeftCorner<3, 3>().cast<double>()) : Matrix3d::Identity();
-    QCOMPARE(static_cast<int>(fwd->sol->data.rows()), nChan);
-    QCOMPARE(fwd->sol->row_names, StringList(m_ref.sol->row_names.begin() + first, m_ref.sol->row_names.begin() + first + nChan));
+    QCOMPARE(static_cast<int>(fwd->sol.data.rows()), nChan);
+    QCOMPARE(fwd->sol.row_names, StringList(m_ref.sol.row_names.begin() + first, m_ref.sol.row_names.begin() + first + nChan));
     auto check = [&]() {
         for (int i = 0; i < 70; ++i) {
-            MatrixXd ref = m_ref.sol->data.block(first, 3 * m_v1Sel(i), nChan, 3) * R;
+            MatrixXd ref = m_ref.sol.data.block(first, 3 * m_v1Sel(i), nChan, 3) * R;
             if (fixedOri) {
                 ref = ref * m_ref.src[0].nn.row(m_ref.src[0].vertno(m_v1Sel(i))).cast<double>().transpose();
             }
-            const MatrixXd got = fwd->sol->data.middleCols(ref.cols() * i, ref.cols());
+            const MatrixXd got = fwd->sol.data.middleCols(ref.cols() * i, ref.cols());
             QVERIFY2((got - ref).norm() <= 1e-4 * ref.norm(), qPrintable(QString("source %1 differs by %2").arg(i).arg((got - ref).norm() / ref.norm())));
         }
     };
     check();
     if (grad) {
-        QCOMPARE(static_cast<int>(fwd->sol_grad->data.rows()), nChan);
-        QCOMPARE(static_cast<int>(fwd->sol_grad->data.cols()), (fixedOri ? 3 : 9) * 70);
+        QCOMPARE(static_cast<int>(fwd->sol_grad.data.rows()), nChan);
+        QCOMPARE(static_cast<int>(fwd->sol_grad.data.cols()), (fixedOri ? 3 : 9) * 70);
     }
     if (fixedOri) {
         // Position derivatives of the normal dipole: dG_d n from the free solution (mne-python kron(fix_rot, eye(3)))
@@ -534,12 +534,12 @@ void TestFwdPython::labelForward_variants()
         free->solname = m_dir.filePath("free-for-fixed-fwd.fif").toStdString();
         auto freeFwd = std::make_shared<ComputeFwd>(free)->calculateFwd();
         QVERIFY(freeFwd != nullptr);
-        const MatrixXd& dG = freeFwd->sol_grad->data;
+        const MatrixXd& dG = freeFwd->sol_grad.data;
         for (int i = 0; i < 70; ++i) {
             const Vector3d n = fwd->source_nn.row(i).cast<double>().transpose();
             for (int d = 0; d < 3; ++d) {
                 const VectorXd want = dG.col(9 * i + d) * n(0) + dG.col(9 * i + 3 + d) * n(1) + dG.col(9 * i + 6 + d) * n(2);
-                QVERIFY2((fwd->sol_grad->data.col(3 * i + d) - want).norm() <= 1e-5 * want.norm(),
+                QVERIFY2((fwd->sol_grad.data.col(3 * i + d) - want).norm() <= 1e-5 * want.norm(),
                          qPrintable(QString("source %1 derivative %2").arg(i).arg(d)));
             }
         }
@@ -592,7 +592,7 @@ void TestFwdPython::sphereForward()
     Vector3d meg;
     Vector3d eeg;
     for (int c = 0; c < 3; ++c) {
-        const VectorXd col = fwd->sol->data.col(3 * source + c);
+        const VectorXd col = fwd->sol.data.col(3 * source + c);
         meg[c] = col.head(306).norm();
         eeg[c] = col.tail(60).norm();
     }
@@ -650,7 +650,7 @@ void TestFwdPython::sphereForward_modelFile()
     s->eeg_model_name = "Three";
     auto fwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(fwd != nullptr);
-    QCOMPARE(static_cast<int>(fwd->sol->data.rows()), 60);
+    QCOMPARE(static_cast<int>(fwd->sol.data.rows()), 60);
 
     const QList<QPair<int, Vector3d>> refs{
         {28, Vector3d(370.27074684018515, 345.1938826601203, 349.37989001470487)},
@@ -660,7 +660,7 @@ void TestFwdPython::sphereForward_modelFile()
     for (const auto& [source, norms] : refs) {
         Vector3d got;
         for (int c = 0; c < 3; ++c)
-            got[c] = fwd->sol->data.col(3 * source + c).norm();
+            got[c] = fwd->sol.data.col(3 * source + c).norm();
         QVERIFY2((got - norms).cwiseAbs().maxCoeff() < 1e-3 * norms.maxCoeff(),
                  qPrintable(QStringLiteral("source %1: %2 %3 %4").arg(source).arg(got[0], 0, 'g', 10).arg(got[1], 0, 'g', 10).arg(got[2], 0, 'g', 10)));
     }
@@ -708,9 +708,9 @@ void TestFwdPython::ctfCompensatedForward()
     s->checkIntegrity();
     auto fwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(fwd != nullptr);
-    QCOMPARE(static_cast<int>(fwd->sol->data.rows()), 7);
-    QCOMPARE(static_cast<int>(fwd->sol->data.cols()), 6);
-    const double err = (fwd->sol->data - ref).norm() / ref.norm();
+    QCOMPARE(static_cast<int>(fwd->sol.data.rows()), 7);
+    QCOMPARE(static_cast<int>(fwd->sol.data.cols()), 6);
+    const double err = (fwd->sol.data - ref).norm() / ref.norm();
     QVERIFY2(err < 1e-4, qPrintable(QStringLiteral("gain differs from mne-python by %1").arg(err)));
 
     // Compensated position derivatives (fwd_comp_field_grad): column 9 s + 3 c + d is dG_c / dr_d of
@@ -724,7 +724,7 @@ void TestFwdPython::ctfCompensatedForward()
             for (int c = 0; c < 18; ++c)
                 in >> refGrad(r, c);
     }
-    const MatrixXd& dG = fwd->sol_grad->data;
+    const MatrixXd& dG = fwd->sol_grad.data;
     QCOMPARE(static_cast<int>(dG.cols()), 18);
     const double gradErr = (dG - refGrad).norm() / refGrad.norm();
     QVERIFY2(gradErr < 1e-3, qPrintable(QStringLiteral("gradient differs by %1").arg(gradErr)));
@@ -733,7 +733,7 @@ void TestFwdPython::ctfCompensatedForward()
     s->compute_grad = false;
     auto vecFwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(vecFwd != nullptr);
-    const double vecErr = (vecFwd->sol->data - ref).norm() / ref.norm();
+    const double vecErr = (vecFwd->sol.data - ref).norm() / ref.norm();
     QVERIFY2(vecErr < 1e-4, qPrintable(QStringLiteral("vector-field gain differs by %1").arg(vecErr)));
 
     // The BEM takes the single-orientation path (fwd_comp_field); mne-python on the one-layer BEM of the fixture.
@@ -756,7 +756,7 @@ void TestFwdPython::ctfCompensatedForward()
     QVERIFY(QFile::copy(QStringLiteral(MNE_FWD_DATA_DIR "/one-layer-bem.fif"), bemDir.filePath("one-layer-bem-sol.fif")));
     auto bemFwd = std::make_shared<ComputeFwd>(s)->calculateFwd();
     QVERIFY(bemFwd != nullptr);
-    const double bemErr = (bemFwd->sol->data - bemRef).norm() / bemRef.norm();
+    const double bemErr = (bemFwd->sol.data - bemRef).norm() / bemRef.norm();
     QVERIFY2(bemErr < 1e-3, qPrintable(QStringLiteral("BEM gain differs from mne-python by %1").arg(bemErr)));
 }
 

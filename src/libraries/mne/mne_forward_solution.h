@@ -479,20 +479,20 @@ private:
                          MNEForwardSolution& one);
 
 public:
-    FIFFLIB::FiffInfoBase info;                                             /**< light weighted measurement info. */
-    FIFFLIB::fiff_int_t source_ori = -1;                                    /**< Source orientation: fixed or free. */
-    bool surf_ori = false;                                                  /**< If surface oriented. */
-    FIFFLIB::fiff_int_t coord_frame = -1;                                   /**< Coil coordinate system definition. */
-    FIFFLIB::fiff_int_t nsource = -1;                                       /**< Number of source dipoles. */
-    FIFFLIB::fiff_int_t nchan = -1;                                         /**< Number of channels. */
-    FIFFLIB::FiffNamedMatrix::SDPtr sol{new FIFFLIB::FiffNamedMatrix};      /**< Forward solution. */
-    FIFFLIB::FiffNamedMatrix::SDPtr sol_grad{new FIFFLIB::FiffNamedMatrix}; /**< ToDo... */
-    FIFFLIB::FiffCoordTrans mri_head_t;                                     /**< MRI head coordinate transformation. */
-    std::string mri_filename;                                               /**< MRI file name (parent provenance). */
-    FIFFLIB::FiffId mri_id;                                                 /**< MRI file ID (parent provenance). */
-    MNELIB::MNESourceSpaces src;                                            /**< Geometric description of the source spaces (hemispheres). */
-    Eigen::MatrixX3f source_rr;                                             /**< Source locations. */
-    Eigen::MatrixX3f source_nn;                                             /**< Source normals (number depends on fixed or free orientation). */
+    FIFFLIB::FiffInfoBase info;           /**< light weighted measurement info. */
+    FIFFLIB::fiff_int_t source_ori = -1;  /**< Source orientation: fixed or free. */
+    bool surf_ori = false;                /**< If surface oriented. */
+    FIFFLIB::fiff_int_t coord_frame = -1; /**< Coil coordinate system definition. */
+    FIFFLIB::fiff_int_t nsource = -1;     /**< Number of source dipoles. */
+    FIFFLIB::fiff_int_t nchan = -1;       /**< Number of channels. */
+    FIFFLIB::FiffNamedMatrix sol;         /**< Forward solution. */
+    FIFFLIB::FiffNamedMatrix sol_grad;    /**< ToDo... */
+    FIFFLIB::FiffCoordTrans mri_head_t;   /**< MRI head coordinate transformation. */
+    std::string mri_filename;             /**< MRI file name (parent provenance). */
+    FIFFLIB::FiffId mri_id;               /**< MRI file ID (parent provenance). */
+    MNELIB::MNESourceSpaces src;          /**< Geometric description of the source spaces (hemispheres). */
+    Eigen::MatrixX3f source_rr;           /**< Source locations. */
+    Eigen::MatrixX3f source_nn;           /**< Source normals (number depends on fixed or free orientation). */
 };
 
 //=============================================================================================================
@@ -521,8 +521,8 @@ inline std::ostream& operator<<(std::ostream& out, const MNELIB::MNEForwardSolut
     out << "\n coord_frame: " << p_MNEForwardSolution.coord_frame << std::endl;
     out << "\n nsource: " << p_MNEForwardSolution.nsource << std::endl;
     out << "\n nchan: " << p_MNEForwardSolution.nchan << std::endl;
-    out << "\n sol:\n\t" << *p_MNEForwardSolution.sol.data() << std::endl;
-    out << "\n sol_grad:\n\t" << *p_MNEForwardSolution.sol_grad.data() << std::endl;
+    out << "\n sol:\n\t" << p_MNEForwardSolution.sol << std::endl;
+    out << "\n sol_grad:\n\t" << p_MNEForwardSolution.sol_grad << std::endl;
 
     return out;
 }
@@ -537,8 +537,8 @@ inline bool operator==(const MNEForwardSolution& a, const MNEForwardSolution& b)
             a.coord_frame == b.coord_frame &&
             a.nsource == b.nsource &&
             a.nchan == b.nchan &&
-            *a.sol == *b.sol &&
-            *a.sol_grad == *b.sol_grad &&
+            a.sol == b.sol &&
+            a.sol_grad == b.sol_grad &&
             a.mri_head_t == b.mri_head_t &&
             a.src == b.src &&
             a.source_rr.isApprox(b.source_rr, 0.0001f) &&

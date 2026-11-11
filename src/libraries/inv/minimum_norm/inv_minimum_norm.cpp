@@ -101,7 +101,7 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const FiffEvoked& p_fiffEvoke
     //
     //   Pick the correct channels from the data
     //
-    FiffEvoked t_fiffEvoked = p_fiffEvoked.pick_channels(inv.noise_cov->names);
+    FiffEvoked t_fiffEvoked = p_fiffEvoked.pick_channels(inv.noise_cov.names);
 
     Log::info("Picked {} channels from the data", t_fiffEvoked.info.nchan);
 
@@ -178,7 +178,7 @@ MNEMneData InvMinimumNorm::mneData(const FiffEvoked& p_fiffEvoked, double snr)
         return MNEMneData();
     }
     doInverseSetup(p_fiffEvoked.nave, false);
-    return MNEMneData::compute(inv, p_fiffEvoked.pick_channels(inv.noise_cov->names).data, snr);
+    return MNEMneData::compute(inv, p_fiffEvoked.pick_channels(inv.noise_cov.names).data, snr);
 }
 
 //=============================================================================================================
@@ -297,13 +297,13 @@ void InvMinimumNorm::computeELoreta()
 
     // Reassemble the whitened gain matrix G = eigen_fields^T * diag(sing) * eigen_leads^T,
     // with eigen_fields (n_comp, n_channels) and eigen_leads (n_sources*n_orient, n_comp).
-    if (!inv.eigen_fields || !inv.eigen_leads) {
+    if (inv.eigen_fields.empty() || inv.eigen_leads.empty()) {
         Log::warning("InvMinimumNorm::computeELoreta - Inverse operator missing eigen structures!");
         return;
     }
 
-    const MatrixXd& eigenFields = inv.eigen_fields->data;
-    const MatrixXd& eigenLeads = inv.eigen_leads->data;
+    const MatrixXd& eigenFields = inv.eigen_fields.data;
+    const MatrixXd& eigenLeads = inv.eigen_leads.data;
     const VectorXd& sing = inv.sing;
 
     MatrixXd G = eigenFields.transpose() * sing.asDiagonal() * eigenLeads.transpose();
@@ -318,9 +318,9 @@ void InvMinimumNorm::computeELoreta()
     }
 
     // Divide by sqrt(source_cov) to undo source covariance weighting
-    if (inv.source_cov && inv.source_cov->data.size() > 0) {
+    if (inv.source_cov.data.size() > 0) {
         for (int i = 0; i < G.cols(); ++i) {
-            double sc = inv.source_cov->data(i, 0);
+            double sc = inv.source_cov.data(i, 0);
             if (sc > 0)
                 G.col(i) /= std::sqrt(sc);
         }
@@ -328,9 +328,9 @@ void InvMinimumNorm::computeELoreta()
 
     // Restore orientation prior
     VectorXd sourceStd = VectorXd::Ones(G.cols());
-    if (inv.orient_prior && inv.orient_prior->data.size() > 0) {
-        for (int i = 0; i < G.cols() && i < inv.orient_prior->data.rows(); ++i) {
-            double op = inv.orient_prior->data(i, 0);
+    if (inv.orient_prior.data.size() > 0) {
+        for (int i = 0; i < G.cols() && i < inv.orient_prior.data.rows(); ++i) {
+            double op = inv.orient_prior.data(i, 0);
             if (op > 0)
                 sourceStd(i) *= std::sqrt(op);
         }
@@ -341,14 +341,14 @@ void InvMinimumNorm::computeELoreta()
 
     // Rank of the inverse as mne-python compute_rank_inverse: from the noise covariance, not from sing.
     int nNonZero = 0;
-    if (inv.noise_cov && !inv.noise_cov->diag) {
-        for (int i = 0; i < inv.noise_cov->eig.size(); ++i) {
-            if (inv.noise_cov->eig(i) > 0)
+    if (!inv.noise_cov.empty() && !inv.noise_cov.diag) {
+        for (int i = 0; i < inv.noise_cov.eig.size(); ++i) {
+            if (inv.noise_cov.eig(i) > 0)
                 ++nNonZero;
         }
-    } else if (inv.noise_cov) {
+    } else if (!inv.noise_cov.empty()) {
         MatrixXd proj;
-        nNonZero = inv.noise_cov->dim - FiffProj::make_projector(inv.projs, inv.noise_cov->names, proj);
+        nNonZero = inv.noise_cov.dim - FiffProj::make_projector(inv.projs, inv.noise_cov.names, proj);
     }
     nNonZero = std::min(nNonZero, nChan);
 
@@ -606,11 +606,11 @@ void InvMinimumNorm::computeELoreta()
 
     // eigen_fields is stored (ncomp, nChan); weighted eigen leads make assemble_kernel use them directly.
     inv.sing = newSing;
-    inv.eigen_fields->data = newU.transpose();
-    inv.eigen_fields->nrow = static_cast<int>(newU.cols());
-    inv.eigen_fields->ncol = static_cast<int>(newU.rows());
-    inv.eigen_leads->ncol = static_cast<int>(weightedLeads.cols());
-    inv.eigen_leads->data = weightedLeads;
+    inv.eigen_fields.data = newU.transpose();
+    inv.eigen_fields.nrow = static_cast<int>(newU.cols());
+    inv.eigen_fields.ncol = static_cast<int>(newU.rows());
+    inv.eigen_leads.ncol = static_cast<int>(weightedLeads.cols());
+    inv.eigen_leads.data = weightedLeads;
     inv.eigen_leads_weighted = true;
 
     // reginv = sing / (sing^2 + lambda2) for the first nNonZero components, zero beyond (mne-python _compute_reginv).

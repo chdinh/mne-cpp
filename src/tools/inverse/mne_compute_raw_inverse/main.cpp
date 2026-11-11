@@ -754,8 +754,8 @@ int main(int argc, char* argv[])
 
         // Pick channels that match the inverse operator
         StringList invChNames;
-        for (int i = 0; i < static_cast<int>(inverseOperator.noise_cov->names.size()); ++i) {
-            invChNames.push_back(inverseOperator.noise_cov->names[i]);
+        for (int i = 0; i < static_cast<int>(inverseOperator.noise_cov.names.size()); ++i) {
+            invChNames.push_back(inverseOperator.noise_cov.names[i]);
         }
 
         RowVectorXi picks = raw.info.pick_channels(invChNames);
@@ -840,7 +840,7 @@ int main(int argc, char* argv[])
             qInfo("  nave = %d", curNave);
 
             // Pick channels matching inverse operator
-            FiffEvoked pickedEvoked = evoked.pick_channels(inverseOperator.noise_cov->names);
+            FiffEvoked pickedEvoked = evoked.pick_channels(inverseOperator.noise_cov.names);
             qInfo("  Picked %d channels from evoked data", pickedEvoked.info.nchan);
 
             if (doBaseline) {

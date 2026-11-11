@@ -128,8 +128,8 @@ int main(int argc, char* argv[])
     }
     MNEForwardSolution& fwd = *fwdRead;
 
-    int nChan = fwd.sol->data.rows();
-    int nSrc = fwd.sol->data.cols();
+    int nChan = fwd.sol.data.rows();
+    int nSrc = fwd.sol.data.cols();
     qInfo("Forward: %d channels x %d sources", nChan, nSrc);
 
     if (sourceIdx < 0 || sourceIdx >= nSrc) {
@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
     qInfo("Sampling rate: %.1f Hz, duration: %.1f s, samples: %d", sfreq, duration, nSamples);
 
     // Get gain vector for selected source
-    VectorXd gainCol = fwd.sol->data.col(sourceIdx);
+    VectorXd gainCol = fwd.sol.data.col(sourceIdx);
 
     // Create source signal: sinusoid
     VectorXd sourceSignal(nSamples);

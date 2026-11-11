@@ -78,12 +78,12 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
     // -----------------------------------------------------------------------
     // Extract leadfield
     // -----------------------------------------------------------------------
-    if (!forward.sol || forward.sol->data.size() == 0) {
+    if (forward.sol.data.size() == 0) {
         BASELIB::Log::warning("InvDICS::makeDICS - Forward solution has no gain matrix!");
         return result;
     }
 
-    MatrixXd G = forward.sol->data;
+    MatrixXd G = forward.sol.data;
     const int nChannels = static_cast<int>(G.rows());
     const int nOrient = (forward.source_ori == FIFFV_MNE_FREE_ORI) ? 3 : 1;
     const int nSources = static_cast<int>(G.cols()) / nOrient;
@@ -171,7 +171,7 @@ InvBeamformer InvDICS::makeDICS([[maybe_unused]] const FiffInfo& info,
     // -----------------------------------------------------------------------
     result.whitener = whitener;
     result.proj = projMat;
-    result.chNames = forward.sol->row_names;
+    result.chNames = forward.sol.row_names;
     result.isFreOri = (nOrient == 3 && pickOri != BeamformerPickOri::Normal && pickOri != BeamformerPickOri::MaxPower);
     result.nSourcesTotal = nSources;
     result.srcType = "surface";

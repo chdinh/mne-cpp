@@ -150,7 +150,7 @@ bool FiffEvokedSet::compensate_to(fiff_int_t to)
     }
 
     for (FiffEvoked& response : evoked) {
-        response.data = ctf_comp.data->data * response.data;
+        response.data = ctf_comp.data.data * response.data;
         response.info.set_current_comp(to);
     }
     info.set_current_comp(to);

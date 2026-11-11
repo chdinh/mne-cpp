@@ -261,6 +261,17 @@ aliases; replace the old spelling as below.
   `Q_DECLARE_METATYPE` declarations are gone: Qt 6 puts the types into a
   `QVariant` without them. Code that took `QString`, `QSharedPointer` or
   `QDebug` from a `fiff` header includes them itself.
+- `FiffCov` and `FiffNamedMatrix` are plain value types; their `SDPtr`
+  aliases and `QSharedData` base are gone. `FiffProj::data`,
+  `FiffCtfComp::data`, `MNEForwardSolution::sol`/`sol_grad` and the
+  `MNEInverseOperator` matrices and covariances (`eigen_leads`,
+  `eigen_fields`, `noise_cov`, `source_cov`, `orient_prior`, `depth_prior`,
+  `fmri_prior`) are members, not shared pointers, and compare by value.
+  Migration: `x.sol->data` becomes `x.sol.data`, `*x.noise_cov.data()`
+  becomes `x.noise_cov`, a null check `if (x.sol)` becomes
+  `if (!x.sol.empty())`, and `FiffCov::SDPtr(new FiffCov(c))` becomes `c`.
+  `SCMEASLIB::RealTimeFwdSolution` loses `setSol`, `getSol`, `setSolGrad`
+  and `getSolGrad` (`setSolGrad` overwrote `sol`); use `getValue()->sol`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella
   headers for their library.
 - `lsl://?simulate=1` publishes a synthetic EEG session as an LSL stream

@@ -51,10 +51,10 @@ MNEMneData MNEMneData::compute(const MNEInverseOperator& inv, const MatrixXd& da
 void MNEMneData::computeRegularization(const MNEInverseOperator& inv, const MatrixXd& data)
 {
     const MatrixXd white = inv.whitener * inv.proj * data;
-    datap = inv.eigen_fields->data * white;
+    datap = inv.eigen_fields.data * white;
 
     // Projected-out channels give zero noise eigenvalues; only the others count.
-    const int rank = inv.noise_cov->diag ? inv.noise_cov->dim : static_cast<int>((inv.noise_cov->eig.array() > 0).count());
+    const int rank = inv.noise_cov.diag ? inv.noise_cov.dim : static_cast<int>((inv.noise_cov.eig.array() > 0).count());
     const int ncomp = std::min(rank, static_cast<int>(inv.sing.size()));
     SNR = white.colwise().squaredNorm().transpose() / rank;
 
@@ -99,11 +99,11 @@ void MNEMneData::computePredicted(const MNEInverseOperator& inv)
     for (Index t = 0; t < datap.cols(); ++t) {
         weighted.col(t) = datap.col(t).array() * sing2 / (sing2 + lambda2(t));
     }
-    const MatrixXd white = inv.eigen_fields->data.transpose() * weighted;
-    if (inv.noise_cov->diag) {
-        predicted = inv.noise_cov->data.col(0).cwiseSqrt().asDiagonal() * white;
+    const MatrixXd white = inv.eigen_fields.data.transpose() * weighted;
+    if (inv.noise_cov.diag) {
+        predicted = inv.noise_cov.data.col(0).cwiseSqrt().asDiagonal() * white;
     } else {
         // Colorer C^(1/2) = eigvec^T sqrt(eig), the rows of eigvec being the eigenvectors.
-        predicted = inv.noise_cov->eigvec.transpose() * (inv.noise_cov->eig.cwiseMax(0.0).cwiseSqrt().asDiagonal() * white);
+        predicted = inv.noise_cov.eigvec.transpose() * (inv.noise_cov.eig.cwiseMax(0.0).cwiseSqrt().asDiagonal() * white);
     }
 }

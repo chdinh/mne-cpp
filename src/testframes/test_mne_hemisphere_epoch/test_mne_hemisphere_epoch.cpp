@@ -578,10 +578,10 @@ private slots:
         fwd.source_ori = FIFFV_MNE_FREE_ORI;
 
         // sol with proper dimensions
-        fwd.sol = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
-        fwd.sol->data = MatrixXd::Random(10, 12); // 4 sources * 3 orientations
-        fwd.sol->ncol = 12;
-        fwd.sol->nrow = 10;
+        fwd.sol = FiffNamedMatrix();
+        fwd.sol.data = MatrixXd::Random(10, 12); // 4 sources * 3 orientations
+        fwd.sol.ncol = 12;
+        fwd.sol.nrow = 10;
 
         FiffCov orient_prior = fwd.compute_orient_prior(0.2f);
         QVERIFY(orient_prior.data.cols() > 0 || orient_prior.data.rows() > 0);

@@ -184,7 +184,7 @@ FiffCtfComp makeComp(int kind, const MatrixXd& data)
     FiffCtfComp comp;
     comp.kind = kind;
     comp.ctfkind = kind;
-    comp.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(2, 2, {"MEG1", "MEG2"}, {"REF2", "REF1"}, data));
+    comp.data = FiffNamedMatrix(2, 2, {"MEG1", "MEG2"}, {"REF2", "REF1"}, data);
     return comp;
 }
 
@@ -566,7 +566,7 @@ void TestFiffCorePython::computeFromRaw_matchesPython()
         QCOMPARE(p.kind, FIFFV_PROJ_ITEM_FIELD);
         QVERIFY(!p.active);
 
-        const RowVectorXd v = p.data->data.row(0);
+        const RowVectorXd v = p.data.data.row(0);
         QCOMPARE(static_cast<int>(v.size()), 376);
         QVERIFY2(std::fabs(v.norm() - 1.0) < 1e-12, "projection vector is not unit length");
 
@@ -583,7 +583,7 @@ void TestFiffCorePython::computeFromRaw_matchesPython()
     }
 
     // The two gradiometer vectors span a two dimensional subspace.
-    QVERIFY(std::fabs(projs[0].data->data.row(0).dot(projs[1].data->data.row(0))) < 1e-12);
+    QVERIFY(std::fabs(projs[0].data.data.row(0).dot(projs[1].data.data.row(0))) < 1e-12);
 }
 
 //=============================================================================================================
@@ -594,7 +594,7 @@ void TestFiffCorePython::computeFromRaw_withRejection()
     const std::vector<FiffProj> projs = FiffProj::compute_from_raw(*m_raw, events(false), 1, -0.1f, 0.2f, 0, 0, 1, {{"eeg", 1.6e-8}});
     QCOMPARE(projs.size(), 1);
 
-    const RowVectorXd v = projs.front().data->data.row(0);
+    const RowVectorXd v = projs.front().data.data.row(0);
     Index peakIdx = 0;
     const double peak = v.cwiseAbs().maxCoeff(&peakIdx);
     QCOMPARE(m_raw->info.ch_names.at(static_cast<int>(peakIdx)), QString("EEG 008"));
@@ -646,7 +646,7 @@ void TestFiffCorePython::computeFromEvoked_matchesPython()
         const FiffProj& p = projs.at(i);
         QCOMPARE(p.desc, QString(expected[i].desc));
         QVERIFY(!p.active);
-        const RowVectorXd v = p.data->data.row(0);
+        const RowVectorXd v = p.data.data.row(0);
         Index peakIdx = 0;
         const double peak = v.cwiseAbs().maxCoeff(&peakIdx);
         QCOMPARE(evoked.info.ch_names.at(static_cast<int>(peakIdx)), QString(expected[i].peakName));
@@ -697,7 +697,7 @@ void TestFiffCorePython::makeCompensator_matchesPython()
     FiffCtfComp comp;
     QVERIFY(info.make_compensator(from, to, comp, exclude));
 
-    const MatrixXd& m = comp.data->data;
+    const MatrixXd& m = comp.data.data;
     QCOMPARE(static_cast<int>(m.rows()), static_cast<int>(expected.size() / 4));
     QCOMPARE(static_cast<int>(m.cols()), 4);
     for (int r = 0; r < m.rows(); ++r) {
@@ -736,7 +736,7 @@ void TestFiffCorePython::makeCompensator_errors()
     FiffInfo refsOnly = makeInfo({makeChannel("REF1", FIFFV_REF_MEG_CH, FIFF_UNIT_T), makeChannel("REF2", FIFFV_REF_MEG_CH, FIFF_UNIT_T)});
     FiffCtfComp refComp;
     refComp.kind = 1;
-    refComp.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(1, 2, {"REF1"}, {"REF2", "REF1"}, MatrixXd::Ones(1, 2)));
+    refComp.data = FiffNamedMatrix(1, 2, {"REF1"}, {"REF2", "REF1"}, MatrixXd::Ones(1, 2));
     refsOnly.comps.push_back(refComp);
     QVERIFY(refsOnly.make_compensator(0, 1, comp, false));
     QVERIFY(!refsOnly.make_compensator(0, 1, comp, true));

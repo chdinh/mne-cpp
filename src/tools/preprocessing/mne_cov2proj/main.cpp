@@ -149,13 +149,11 @@ int main(int argc, char* argv[])
         proj.desc = std::format("Cov eigenvector #{} (eigenvalue={:.6g})", p + 1, eigenvalues(idx));
 
         // Build the named matrix for this projector
-        FiffNamedMatrix::SDPtr data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
-        data->nrow = 1;
-        data->ncol = nEig;
-        data->col_names = chNames;
-        data->data = eigenvectors.col(idx).transpose();
+        proj.data.nrow = 1;
+        proj.data.ncol = nEig;
+        proj.data.col_names = chNames;
+        proj.data.data = eigenvectors.col(idx).transpose();
 
-        proj.data = data;
         projs.push_back(proj);
 
         qInfo("  Projector %d: eigenvalue = %g", p + 1, eigenvalues(idx));

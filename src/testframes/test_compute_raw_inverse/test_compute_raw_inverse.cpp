@@ -181,7 +181,7 @@ void TestComputeRawInverse::initTestCase()
     // Read the inverse operator once for reuse
     const std::filesystem::path invFile = m_sInvFile.toStdU16String();
     m_invOp = MNEInverseOperator(invFile);
-    QVERIFY2(m_invOp.eigen_leads->data.size() > 0, "Failed to read inverse operator");
+    QVERIFY2(m_invOp.eigen_leads.data.size() > 0, "Failed to read inverse operator");
     printf("  Inverse operator: %d channels, %d sources\n", m_invOp.nchan, m_invOp.nsource);
 }
 
@@ -199,7 +199,7 @@ void TestComputeRawInverse::testInverseDSPM()
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data");
 
     // Pick channels matching inverse operator
-    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
+    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov.names);
     QVERIFY2(pickedEvoked.info.nchan > 0, "No channels matched inverse operator");
 
     float tmin = pickedEvoked.times(0);
@@ -277,7 +277,7 @@ void TestComputeRawInverse::testInverseSLORETA()
     FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data");
 
-    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
+    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov.names);
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
@@ -311,7 +311,7 @@ void TestComputeRawInverse::testInverseMNE()
     FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
     QVERIFY2(evoked.data.size() > 0, "Failed to read evoked data");
 
-    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
+    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov.names);
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
@@ -445,7 +445,7 @@ void TestComputeRawInverse::testBaselineAppliedWhenRequested()
     printf("  Baseline correctly applied: per-channel baseline means ~ 0\n");
 
     // Now compute inverse and verify it still produces valid results
-    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
+    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov.names);
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
@@ -589,7 +589,7 @@ void TestComputeRawInverse::testLabelRestrictedInverse()
 
     // Read evoked
     FiffEvoked evoked(m_sEvokedFile.toStdU16String(), s_iSetNo);
-    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov->names);
+    FiffEvoked pickedEvoked = evoked.pick_channels(m_invOp.noise_cov.names);
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 

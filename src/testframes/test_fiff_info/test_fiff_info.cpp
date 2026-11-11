@@ -86,7 +86,7 @@ private slots:
         QCOMPARE(raw.info.chs.front().ch_name, std::string("MEG 0113"));
         QCOMPARE(raw.info.bads, (BASELIB::StringList{"MEG 2443", "EEG 053"}));
         QVERIFY(!raw.info.projs.empty());
-        QCOMPARE(raw.info.projs.front().data->col_names.front(), std::string("MEG 0111"));
+        QCOMPARE(raw.info.projs.front().data.col_names.front(), std::string("MEG 0111"));
     }
 
     void channelNames_matchAcrossConventions()
@@ -279,18 +279,18 @@ private slots:
 
     void proj_parameterizedCtor()
     {
-        FiffNamedMatrix::SDPtr data(new FiffNamedMatrix());
-        data->nrow = 1;
-        data->ncol = 3;
-        data->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
-        data->col_names.push_back("CH1");
-        data->col_names.push_back("CH2");
-        data->col_names.push_back("CH3");
-        data->row_names.push_back("Proj1");
+        FiffNamedMatrix data;
+        data.nrow = 1;
+        data.ncol = 3;
+        data.data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
+        data.col_names.push_back("CH1");
+        data.col_names.push_back("CH2");
+        data.col_names.push_back("CH3");
+        data.row_names.push_back("Proj1");
 
-        FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "TestProj", *data);
+        FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "TestProj", data);
         QCOMPARE(proj.active, true);
-        QVERIFY(proj.data->nrow == 1);
+        QVERIFY(proj.data.nrow == 1);
     }
 
     void proj_copyCtor()
@@ -315,16 +315,16 @@ private slots:
 
     void proj_makeProjector()
     {
-        FiffNamedMatrix::SDPtr data(new FiffNamedMatrix());
-        data->nrow = 1;
-        data->ncol = 3;
-        data->data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
-        data->col_names.push_back("CH1");
-        data->col_names.push_back("CH2");
-        data->col_names.push_back("CH3");
-        data->row_names.push_back("PCA1");
+        FiffNamedMatrix data;
+        data.nrow = 1;
+        data.ncol = 3;
+        data.data = MatrixXd::Ones(1, 3) / std::sqrt(3.0);
+        data.col_names.push_back("CH1");
+        data.col_names.push_back("CH2");
+        data.col_names.push_back("CH3");
+        data.row_names.push_back("PCA1");
 
-        FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "PCA", *data);
+        FiffProj proj(FIFFV_MNE_PROJ_ITEM_EEG_AVREF, true, "PCA", data);
         std::vector<FiffProj> projs;
         projs.push_back(proj);
 

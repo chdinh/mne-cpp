@@ -709,8 +709,8 @@ private slots:
         QVERIFY(pFwd != nullptr);
         QVERIFY(pFwd->nsource > 0);
         QVERIFY(pFwd->nchan > 0);
-        QVERIFY(pFwd->sol->data.rows() > 0);
-        QVERIFY(pFwd->sol->data.cols() > 0);
+        QVERIFY(pFwd->sol.data.rows() > 0);
+        QVERIFY(pFwd->sol.data.cols() > 0);
 
         // Test updateHeadPos
         bool updated = pFwdComputer->updateHeadPos(raw.info.dev_head_t, *pFwd);

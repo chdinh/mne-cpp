@@ -122,10 +122,7 @@ int main(int argc, char* argv[])
     for (int k = 0; k < std::ssize(projs); ++k) {
         const FiffProj& proj = projs[k];
 
-        int nVec = 0;
-        if (proj.data) {
-            nVec = proj.data->nrow;
-        }
+        const int nVec = proj.data.empty() ? 0 : proj.data.nrow;
 
         qInfo("%-6d %-20s %-8d %-8s %s",
               k + 1,

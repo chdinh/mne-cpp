@@ -391,7 +391,7 @@ void Hpi::updateProjections()
             FiffCtfComp newComp;
             //Do this always from 0 since we always read new raw data, we never actually perform a multiplication on already existing data
             if (m_pFiffInfo->make_compensator(0, 101, newComp)) {
-                matComp = newComp.data->data;
+                matComp = newComp.data.data;
             }
         }
 

@@ -598,10 +598,10 @@ void RtClustMne::run()
         bEvokedInput = m_bEvokedInput;
         bRawInput = m_bRawInput;
         iDownSample = m_iDownSample;
-        iNumberChannels = static_cast<int>(m_invOp.noise_cov->names.size());
+        iNumberChannels = static_cast<int>(m_invOp.noise_cov.names.size());
         tstep = 1.0f / m_pFiffInfoInput->sfreq;
         lChNamesFiffInfo = m_pFiffInfoInput->ch_names;
-        lChNamesInvOp = m_invOp.noise_cov->names;
+        lChNamesInvOp = m_invOp.noise_cov.names;
         bUpdateMinimumNorm = m_bUpdateMinimumNorm;
         bCmne = (m_sMethod == QLatin1String("CMNE"));
         sModelCheckpoint = m_sModelCheckpoint;
@@ -710,17 +710,17 @@ InvSourceEstimate RtClustMne::computeCmneInverse(const FiffEvoked& evoked,
     }
 
     std::shared_ptr<MNEForwardSolution> pFwd;
-    FIFFLIB::FiffCov::SDPtr pNoiseCov;
-    FIFFLIB::FiffCov::SDPtr pSrcCov;
+    Eigen::MatrixXd noiseCov;
+    Eigen::MatrixXd srcCov;
 
     {
         QMutexLocker locker(&m_qMutex);
         pFwd = m_pFwd;
-        pNoiseCov = m_invOp.noise_cov;
-        pSrcCov = m_invOp.source_cov;
+        noiseCov = m_invOp.noise_cov.data;
+        srcCov = m_invOp.source_cov.data;
     }
 
-    if (!pFwd || !pFwd->sol || !pNoiseCov || !pSrcCov) {
+    if (!pFwd || pFwd->sol.empty() || noiseCov.size() == 0 || srcCov.size() == 0) {
         qWarning() << "[RtClustMne::computeCmneInverse] Missing forward solution, noise cov or source cov.";
         return stcEmpty;
     }
@@ -728,12 +728,12 @@ InvSourceEstimate RtClustMne::computeCmneInverse(const FiffEvoked& evoked,
     InvCMNESettings cmneSettings;
     cmneSettings.onnxModelPath = sModelCheckpoint;
     cmneSettings.lambda2 = static_cast<double>(fLambda2);
-    cmneSettings.numSources = static_cast<int>(pFwd->sol->data.cols());
+    cmneSettings.numSources = static_cast<int>(pFwd->sol.data.cols());
 
     InvCMNEResult res = InvCMNE::compute(evoked.data,
-                                         pFwd->sol->data,
-                                         pNoiseCov->data,
-                                         pSrcCov->data,
+                                         pFwd->sol.data,
+                                         noiseCov,
+                                         srcCov,
                                          cmneSettings);
     return res.stcCmne;
 }

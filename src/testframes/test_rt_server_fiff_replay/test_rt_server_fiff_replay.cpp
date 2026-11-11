@@ -264,16 +264,16 @@ void TestRtServerFiffReplay::readsTheMeasurementInfo()
         QCOMPARE(got.projs[p].desc, info.projs[p].desc);
         QCOMPARE(got.projs[p].kind, info.projs[p].kind);
         QCOMPARE(got.projs[p].active, info.projs[p].active);
-        QCOMPARE(got.projs[p].data->col_names, info.projs[p].data->col_names);
-        QVERIFY(got.projs[p].data->data.isApprox(info.projs[p].data->data, 1e-6));
+        QCOMPARE(got.projs[p].data.col_names, info.projs[p].data.col_names);
+        QVERIFY(got.projs[p].data.data.isApprox(info.projs[p].data.data, 1e-6));
     }
     QCOMPARE(got.comps.size(), info.comps.size());
     for (int c = 0; c < std::ssize(info.comps); ++c) {
         QCOMPARE(got.comps[c].kind, info.comps[c].kind);
         QCOMPARE(got.comps[c].save_calibrated, info.comps[c].save_calibrated);
-        QCOMPARE(got.comps[c].data->row_names, info.comps[c].data->row_names);
-        QCOMPARE(got.comps[c].data->col_names, info.comps[c].data->col_names);
-        QVERIFY(got.comps[c].data->data.isApprox(info.comps[c].data->data, 1e-6));
+        QCOMPARE(got.comps[c].data.row_names, info.comps[c].data.row_names);
+        QCOMPARE(got.comps[c].data.col_names, info.comps[c].data.col_names);
+        QVERIFY(got.comps[c].data.data.isApprox(info.comps[c].data.data, 1e-6));
     }
 }
 

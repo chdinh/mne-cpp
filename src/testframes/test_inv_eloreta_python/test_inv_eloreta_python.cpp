@@ -156,8 +156,8 @@ void TestInvEloretaPython::initTestCase()
     QCOMPARE(m_loose.nsource, 70);
     QCOMPARE(m_fixed.nsource, 70);
     // One depth weight per fixed-orientation source, three per free one.
-    QCOMPARE(static_cast<int>(m_fixed.source_cov->data.rows()), 70);
-    QCOMPARE(static_cast<int>(m_loose.source_cov->data.rows()), 210);
+    QCOMPARE(static_cast<int>(m_fixed.source_cov.data.rows()), 70);
+    QCOMPARE(static_cast<int>(m_loose.source_cov.data.rows()), 210);
 }
 
 //=============================================================================================================
@@ -299,11 +299,11 @@ void TestInvEloretaPython::estimateSnr_matchesPython()
 
     FiffEvoked evoked = m_evoked;
     if (amplitude > 0.0) {
-        const VectorXd g = m_freeFwd.sol->data.col(32);
+        const VectorXd g = m_freeFwd.sol.data.col(32);
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol.row_names[i])) = g(i) * ramp;
     } else {
         QTest::ignoreMessage(QtWarningMsg, "[estimateSnr] SNR estimation did not converge.");
     }
@@ -359,11 +359,11 @@ void TestInvEloretaPython::mneData_matchesPython()
 
     FiffEvoked evoked = m_evoked;
     if (amplitude > 0.0) {
-        const VectorXd g = m_freeFwd.sol->data.col(32);
+        const VectorXd g = m_freeFwd.sol.data.col(32);
         const RowVectorXd ramp = RowVectorXd::LinSpaced(evoked.data.cols(), 1.0, static_cast<double>(evoked.data.cols())) * amplitude;
         evoked.data.setZero();
         for (int i = 0; i < g.size(); ++i)
-            evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol->row_names[i])) = g(i) * ramp;
+            evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol.row_names[i])) = g(i) * ramp;
     }
 
     InvMinimumNorm mn(m_loose, 1.0f / 9.0f, "MNE");
@@ -395,7 +395,7 @@ void TestInvEloretaPython::mneData_predictedMatchesPython()
     QVERIFY(std::fabs(mne.lambda2(0) - 0.19047619047619055) <= 1e-12);
     QCOMPARE(mne.lambda2.size(), mne.lambda2_est.size());
     QCOMPARE(static_cast<int>(mne.predicted.rows()), 364);
-    const StringList& names = mn.getPreparedInverseOperator().noise_cov->names;
+    const StringList& names = mn.getPreparedInverseOperator().noise_cov.names;
     QCOMPARE(names[5], std::string("MEG 0121"));
     QCOMPARE(names[300], std::string("MEG 2632"));
     const double absSum = mne.predicted.cwiseAbs().sum();
@@ -442,7 +442,7 @@ void TestInvEloretaPython::applyInverseRaw_matchesPython()
     // mne.minimum_norm.apply_inverse_epochs uses nave=1 like apply_inverse_raw, so an epoch holding these samples
     // gets the same values; the second epoch is the same data with the opposite sign
     MatrixXd segment, times;
-    raw.read_raw_segment(segment, times, from, from + 99, FiffInfo::pick_channels(raw.info.ch_names, m_loose.noise_cov->names));
+    raw.read_raw_segment(segment, times, from, from + 99, FiffInfo::pick_channels(raw.info.ch_names, m_loose.noise_cov.names));
     const QList<InvSourceEstimate> epochs = applyInverseEpochs({segment, -segment}, m_loose, 1.0f / 9.0f, method, -0.1f, 0.002f);
     QCOMPARE(epochs.size(), 2);
     for (const InvSourceEstimate& epoch : epochs) {
@@ -580,10 +580,10 @@ void TestInvEloretaPython::writtenOperator_readsBack()
     QCOMPARE(read.isFixedOrient(), fixed);
     QCOMPARE(read.nsource, inv.nsource);
     QVERIFY(read.sing.isApprox(inv.sing, 1e-6));
-    QVERIFY(read.eigen_fields->data.isApprox(inv.eigen_fields->data, 1e-6));
-    QVERIFY(read.eigen_leads->data.isApprox(inv.eigen_leads->data, 1e-6));
-    QVERIFY(read.source_cov->data.isApprox(inv.source_cov->data, 1e-6));
-    QVERIFY(read.noise_cov->data.isApprox(inv.noise_cov->data, 1e-6));
+    QVERIFY(read.eigen_fields.data.isApprox(inv.eigen_fields.data, 1e-6));
+    QVERIFY(read.eigen_leads.data.isApprox(inv.eigen_leads.data, 1e-6));
+    QVERIFY(read.source_cov.data.isApprox(inv.source_cov.data, 1e-6));
+    QVERIFY(read.noise_cov.data.isApprox(inv.noise_cov.data, 1e-6));
     QCOMPARE(read.source_nn.rows(), inv.source_nn.rows());
 }
 

@@ -178,9 +178,9 @@ private slots:
         QVERIFY(!fwd.empty());
         QVERIFY(fwd.nchan > 0);
         QVERIFY(fwd.nsource > 0);
-        QVERIFY(fwd.sol != nullptr);
-        QVERIFY(fwd.sol->data.rows() > 0);
-        QVERIFY(fwd.sol->data.cols() > 0);
+        QVERIFY(!fwd.sol.empty());
+        QVERIFY(fwd.sol.data.rows() > 0);
+        QVERIFY(fwd.sol.data.cols() > 0);
 
         // Check source space
         QVERIFY(fwd.src.size() > 0);
@@ -295,7 +295,7 @@ private slots:
 
         // Compute depth prior using raw info
         FiffCov depth_prior = fwd.compute_depth_prior(
-            fwd.sol->data, raw.info, fwd.isFixedOrient(), 0.8, 10.0);
+            fwd.sol.data, raw.info, fwd.isFixedOrient(), 0.8, 10.0);
 
         QVERIFY(depth_prior.data.rows() > 0 || depth_prior.data.cols() > 0);
     }

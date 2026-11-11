@@ -153,7 +153,7 @@ static FiffInfo buildInfoFromForward(const MNEForwardSolution& forward,
             eegAvRef.kind = FIFFV_MNE_PROJ_ITEM_EEG_AVREF;
             eegAvRef.active = true;
             eegAvRef.desc = QString("Average EEG reference").toStdString();
-            eegAvRef.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(projData));
+            eegAvRef.data = FiffNamedMatrix(projData);
             info.projs.push_back(eegAvRef);
         }
     }

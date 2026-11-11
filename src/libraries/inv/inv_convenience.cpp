@@ -162,7 +162,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
         to = raw.last_samp;
 
     // Pick channels matching the inverse operator
-    RowVectorXi picks = FiffInfo::pick_channels(raw.info.ch_names, inverse.noise_cov->names);
+    RowVectorXi picks = FiffInfo::pick_channels(raw.info.ch_names, inverse.noise_cov.names);
     if (picks.size() == 0) {
         BASELIB::Log::warning("[applyInverseRaw] No channels match the inverse operator.");
         return InvSourceEstimate();
@@ -192,7 +192,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
 FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEstimate& stc, const FiffInfo& info)
 {
     // Adapted from mne.forward.forward.apply_forward / _apply_forward (MNE-Python, BSD-3-Clause).
-    if (!fwd.sol || fwd.sol->data.size() == 0 || stc.empty()) {
+    if (fwd.sol.data.size() == 0 || stc.empty()) {
         BASELIB::Log::warning("[applyForward] Empty forward solution or source estimate.");
         return FiffEvoked();
     }
@@ -202,7 +202,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
         fixed.convert_to_surf_ori();
         fixed.to_fixed_ori();
     }
-    const MatrixXd& gain = fixed.sol->data;
+    const MatrixXd& gain = fixed.sol.data;
 
     QVector<int> columns(static_cast<int>(stc.data.rows()));
     if (nHemi == 0) {
@@ -229,18 +229,18 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     }
 
     // A gain matrix without channel names is taken to have the info's channels in order
-    RowVectorXi sel(fixed.sol->row_names.empty() ? gain.rows() : fixed.sol->row_names.size());
-    if (fixed.sol->row_names.empty()) {
+    RowVectorXi sel(fixed.sol.row_names.empty() ? gain.rows() : fixed.sol.row_names.size());
+    if (fixed.sol.row_names.empty()) {
         if (info.nchan != gain.rows()) {
             BASELIB::Log::warning("[applyForward] Unnamed forward rows {} != info channels {}", gain.rows(), info.nchan);
             return FiffEvoked();
         }
         std::iota(sel.begin(), sel.end(), 0);
     }
-    for (int c = 0; c < static_cast<int>(fixed.sol->row_names.size()); ++c) {
-        sel(c) = static_cast<int>(FIFFLIB::channel_index(info.ch_names, fixed.sol->row_names[c]));
+    for (int c = 0; c < static_cast<int>(fixed.sol.row_names.size()); ++c) {
+        sel(c) = static_cast<int>(FIFFLIB::channel_index(info.ch_names, fixed.sol.row_names[c]));
         if (sel(c) < 0) {
-            BASELIB::Log::warning("[applyForward] Channel {} of the forward is not in the info.", fixed.sol->row_names[c]);
+            BASELIB::Log::warning("[applyForward] Channel {} of the forward is not in the info.", fixed.sol.row_names[c]);
             return FiffEvoked();
         }
     }
@@ -268,19 +268,19 @@ QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
     // Adapted from MNE-Python mne.minimum_norm.estimate_snr (BSD-3-Clause), itself after
     // compute_regularization in MNE-C's mne_analyze/regularization.c.
     const MNEInverseOperator inv = inverse.prepare_inverse_operator(evoked.nave, 1.0f / 9.0f, false);
-    if (!inv.eigen_fields) {
+    if (inv.eigen_fields.empty()) {
         BASELIB::Log::warning("[estimateSnr] Could not prepare the inverse operator.");
         return QPair<VectorXd, VectorXd>();
     }
-    const MatrixXd white = inv.whitener * inv.proj * evoked.pick_channels(inv.noise_cov->names).data;
-    const MatrixXd whiteEf = inv.eigen_fields->data * white;
+    const MatrixXd white = inv.whitener * inv.proj * evoked.pick_channels(inv.noise_cov.names).data;
+    const MatrixXd whiteEf = inv.eigen_fields.data * white;
 
     int rank = 0;
-    if (!inv.noise_cov->diag) {
-        rank = static_cast<int>((inv.noise_cov->eig.array() > 0).count());
+    if (!inv.noise_cov.diag) {
+        rank = static_cast<int>((inv.noise_cov.eig.array() > 0).count());
     } else {
         MatrixXd proj;
-        rank = inv.noise_cov->dim - FiffProj::make_projector(inv.projs, inv.noise_cov->names, proj);
+        rank = inv.noise_cov.dim - FiffProj::make_projector(inv.projs, inv.noise_cov.names, proj);
     }
 
     const int nTimes = static_cast<int>(white.cols());

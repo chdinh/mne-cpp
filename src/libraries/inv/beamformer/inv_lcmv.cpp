@@ -70,12 +70,12 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
     // -----------------------------------------------------------------------
     // Extract leadfield G from forward solution
     // -----------------------------------------------------------------------
-    if (!forward.sol || forward.sol->data.size() == 0) {
+    if (forward.sol.data.size() == 0) {
         Log::warning("InvLCMV::makeLCMV - Forward solution has no gain matrix!");
         return result;
     }
 
-    MatrixXd G = forward.sol->data; // (n_channels, n_sources * n_orient)
+    MatrixXd G = forward.sol.data; // (n_channels, n_sources * n_orient)
     const int nChannels = static_cast<int>(G.rows());
     const int nOrient = (forward.source_ori == FIFFV_MNE_FREE_ORI) ? 3 : 1;
     const int nSources = static_cast<int>(G.cols()) / nOrient;
@@ -163,7 +163,7 @@ InvBeamformer InvLCMV::makeLCMV([[maybe_unused]] const FiffInfo& info,
     result.weights.push_back(W);
     result.whitener = whitener;
     result.proj = projMat;
-    result.chNames = forward.sol->row_names;
+    result.chNames = forward.sol.row_names;
     result.isFreOri = (nOrient == 3 && pickOri != BeamformerPickOri::Normal && pickOri != BeamformerPickOri::MaxPower);
     result.nSourcesTotal = nSources;
     result.srcType = "surface";
@@ -381,7 +381,7 @@ MatrixXd InvLCMV::makeLCMVResolutionMatrix(
     }
 
     // Extract leadfield: G (n_channels x n_dipoles)
-    MatrixXd G = forward.sol->data;
+    MatrixXd G = forward.sol.data;
 
     // Apply whitening to leadfield
     MatrixXd Gw = G;

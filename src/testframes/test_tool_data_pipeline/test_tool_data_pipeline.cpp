@@ -1731,12 +1731,12 @@ private slots:
         stream.close();
         QCOMPARE(projectors.size(), 2);
         for (const FIFFLIB::FiffProj& projector : projectors) {
-            QVERIFY(projector.data);
-            QCOMPARE(projector.data->nrow, 1);
-            QCOMPARE(projector.data->ncol, 366);
-            QCOMPARE(projector.data->col_names.size(), 366);
-            QVERIFY(projector.data->data.allFinite());
-            QVERIFY(projector.data->data.norm() > 0.0);
+            QVERIFY(!projector.data.empty());
+            QCOMPARE(projector.data.nrow, 1);
+            QCOMPARE(projector.data.ncol, 366);
+            QCOMPARE(projector.data.col_names.size(), 366);
+            QVERIFY(projector.data.data.allFinite());
+            QVERIFY(projector.data.data.norm() > 0.0);
         }
     }
 

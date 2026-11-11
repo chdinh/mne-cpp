@@ -53,25 +53,25 @@ MatrixXd MNECorticalMap::makeCorticalMap(
         return MatrixXd();
     }
 
-    if (!fwd.sol || fwd.sol->data.rows() == 0) {
+    if (fwd.sol.data.rows() == 0) {
         BASELIB::Log::warning("MNECorticalMap::makeCorticalMap - Forward solution is empty.");
         return MatrixXd();
     }
     // A loose inverse kernel is in surface coordinates; rotate a Cartesian free forward to match
     // (mne-python _convert_forward_match_inv).
     MNEForwardSolution matched = fwd;
-    const bool looseInverse = inv.orient_prior && inv.orient_prior->data.size() > 0 && (inv.orient_prior->data.array() < 1.0).any();
+    const bool looseInverse = inv.orient_prior.data.size() > 0 && (inv.orient_prior.data.array() < 1.0).any();
     if (looseInverse && !matched.isFixedOrient())
         matched.convert_to_surf_ori();
 
     // The kernel's columns are the inverse operator's channels; pick those rows of the gain by name, as
     // mne-python's make_inverse_resolution_matrix does.
-    MatrixXd gain = matched.sol->data;
-    const StringList& invChannels = inv.eigen_fields ? inv.eigen_fields->col_names : StringList();
-    if (static_cast<int>(invChannels.size()) == kernel.cols() && static_cast<int>(matched.sol->row_names.size()) == gain.rows()) {
+    MatrixXd gain = matched.sol.data;
+    const StringList& invChannels = inv.eigen_fields.col_names;
+    if (static_cast<int>(invChannels.size()) == kernel.cols() && static_cast<int>(matched.sol.row_names.size()) == gain.rows()) {
         MatrixXd picked(kernel.cols(), gain.cols());
         for (int c = 0; c < static_cast<int>(invChannels.size()); ++c) {
-            const int row = static_cast<int>(FIFFLIB::channel_index(matched.sol->row_names, invChannels[c]));
+            const int row = static_cast<int>(FIFFLIB::channel_index(matched.sol.row_names, invChannels[c]));
             if (row < 0) {
                 BASELIB::Log::warning("MNECorticalMap::makeCorticalMap - Channel {} is not in the forward solution.", invChannels[c]);
                 return MatrixXd();

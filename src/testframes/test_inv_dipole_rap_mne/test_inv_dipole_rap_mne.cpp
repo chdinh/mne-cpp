@@ -730,11 +730,11 @@ void TestInvDipoleRapMne::rapMusic_initAndCalculate()
 
     // Truncate to a small subset of sources so RAP MUSIC completes in
     // reasonable time under code-coverage instrumentation.
-    int maxSrc = qMin(200, (int)fwdMeg.sol->data.cols() / 3);
-    if (maxSrc * 3 < fwdMeg.sol->data.cols()) {
-        fwdMeg.sol->data.conservativeResize(Eigen::NoChange, maxSrc * 3);
+    int maxSrc = qMin(200, (int)fwdMeg.sol.data.cols() / 3);
+    if (maxSrc * 3 < fwdMeg.sol.data.cols()) {
+        fwdMeg.sol.data.conservativeResize(Eigen::NoChange, maxSrc * 3);
         fwdMeg.nsource = maxSrc;
-        fwdMeg.sol->ncol = maxSrc * 3;
+        fwdMeg.sol.ncol = maxSrc * 3;
     }
 
     InvRapMusic rap(fwdMeg, false, 2, 0.5);

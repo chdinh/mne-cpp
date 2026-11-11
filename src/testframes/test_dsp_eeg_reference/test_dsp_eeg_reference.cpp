@@ -431,8 +431,8 @@ private slots:
         QCOMPARE(proj.desc, QString("Average EEG reference"));
         QCOMPARE(proj.kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_EEG_AVREF));
         QVERIFY(!proj.active);
-        QCOMPARE(proj.data->col_names, StringList({"EEG1", "EEG2"}));
-        QVERIFY(proj.data->data.isApprox(MatrixXd::Constant(1, 2, 1.0 / std::sqrt(2.0))));
+        QCOMPARE(proj.data.col_names, StringList({"EEG1", "EEG2"}));
+        QVERIFY(proj.data.data.isApprox(MatrixXd::Constant(1, 2, 1.0 / std::sqrt(2.0))));
     }
 
     //=========================================================================================================

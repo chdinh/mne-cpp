@@ -162,13 +162,13 @@ private slots:
         QVERIFY(!read.empty());
         QCOMPARE(read.nchan, nchan);
         QCOMPARE(read.nsource, 7928);
-        QCOMPARE(read.sol->data.cols(), 3 * 7928);
-        QVERIFY(qAbs(read.sol->data.cwiseAbs().sum() - absSum) < 1e-5 * absSum);
+        QCOMPARE(read.sol.data.cols(), 3 * 7928);
+        QVERIFY(qAbs(read.sol.data.cwiseAbs().sum() - absSum) < 1e-5 * absSum);
 
         // Read with fixed orientation it keeps one column per source
         MNEForwardSolution fixed(path, {.force_fixed = true});
         QCOMPARE(fixed.nchan, nchan);
-        QCOMPARE(fixed.sol->data.cols(), 7928);
+        QCOMPARE(fixed.sol.data.cols(), 7928);
     }
 
     // ── to_fixed_ori ────────────────────────────────────────────────────────
@@ -183,8 +183,8 @@ private slots:
         fwdCopy.to_fixed_ori();
 
         // After fixed orientation: sols should still be valid
-        QVERIFY(fwdCopy.sol->data.cols() > 0);
-        QVERIFY(fwdCopy.sol->data.rows() > 0);
+        QVERIFY(fwdCopy.sol.data.cols() > 0);
+        QVERIFY(fwdCopy.sol.data.rows() > 0);
     }
 
     // ── read_forward_solution ───────────────────────────────────────────────
@@ -196,7 +196,7 @@ private slots:
 
         // Reference values produced by mne.read_forward_solution(fwd file) (mne 1.11): gain shape (366, 23784),
         // G[0, 0], G[200, 1000], G[365, 23783], sum |G|; nuse 3956 / 3972; mne.forward.is_fixed_orient(fwd) False
-        const MatrixXd& g = m_fwd.sol->data;
+        const MatrixXd& g = m_fwd.sol.data;
         QCOMPARE(g.rows(), Eigen::Index(366));
         QCOMPARE(g.cols(), Eigen::Index(23784));
         QVERIFY(std::abs(g(0, 0) + 1.788588e-06) < 1e-12);
@@ -330,7 +330,7 @@ private slots:
         QFETCH(double, at300);
 
         const MNEForwardSolution fwd = fixed ? MNEForwardSolution(m_sFwdFile.toStdU16String(), {.force_fixed = true}) : m_fwd;
-        MatrixXd gain = fwd.sol->data;
+        MatrixXd gain = fwd.sol.data;
         if (zeroSource) {
             gain.leftCols(fixed ? 1 : 3).setZero();
         }
@@ -459,9 +459,9 @@ private slots:
         if (!m_bFwdLoaded)
             QSKIP("Forward solution not loaded");
 
-        QVERIFY(m_fwd.sol != nullptr);
-        QVERIFY(m_fwd.sol->data.rows() == m_fwd.nchan);
-        QVERIFY(m_fwd.sol->data.cols() > 0);
+        QVERIFY(!m_fwd.sol.empty());
+        QVERIFY(m_fwd.sol.data.rows() == m_fwd.nchan);
+        QVERIFY(m_fwd.sol.data.cols() > 0);
     }
 
     void cleanupTestCase()

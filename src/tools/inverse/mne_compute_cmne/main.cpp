@@ -152,7 +152,7 @@ static int doCompute(const QCommandLineParser& parser)
     }
     const MNEForwardSolution& fwd = *fwdRead;
 
-    const MatrixXd matGain = fwd.sol->data;
+    const MatrixXd matGain = fwd.sol.data;
     const int nChannels = matGain.rows();
     const int nSources = matGain.cols();
     out << "  " << nChannels << " channels x " << nSources << " sources\n";
@@ -187,7 +187,7 @@ static int doCompute(const QCommandLineParser& parser)
     // ── Pick channels to match forward solution ────────────────────────
     // The evoked file may contain extra channels (STIM, EOG, ECG, …)
     // that are not in the forward solution.  Subset to forward channels.
-    const StringList fwdChNames = fwd.sol->row_names;
+    const StringList fwdChNames = fwd.sol.row_names;
     FiffEvoked evokedPicked = evoked.pick_channels(fwdChNames);
     FiffCov noiseCovPicked = noiseCov.pick_channels(fwdChNames);
 

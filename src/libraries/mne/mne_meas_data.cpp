@@ -185,7 +185,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
         nchan = target.nchan;
     } else {
         if (op) {
-            names = op->eigen_fields->col_names;
+            names = op->eigen_fields.col_names;
             nchan = op->nchan;
         } else if (fwd) {
             names = fwd->collist;

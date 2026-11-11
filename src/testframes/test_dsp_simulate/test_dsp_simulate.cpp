@@ -194,8 +194,7 @@ private slots:
         const int nTimes = 50;
 
         MNEForwardSolution fwd;
-        fwd.sol = new FiffNamedMatrix();
-        fwd.sol->data = MatrixXd::Random(nChan, nSrc);
+        fwd.sol.data = MatrixXd::Random(nChan, nSrc);
 
         // Create source estimate
         VectorXi verts(nSrc);
@@ -230,8 +229,7 @@ private slots:
         const int nTimes = 4;
 
         MNEForwardSolution fwd;
-        fwd.sol = new FiffNamedMatrix();
-        fwd.sol->data = MatrixXd::Identity(nChan, nSrc).block(0, 0, nChan, nSrc);
+        fwd.sol.data = MatrixXd::Identity(nChan, nSrc).block(0, 0, nChan, nSrc);
         // G = [[1,0],[0,1],[0,0]]
 
         VectorXi verts(nSrc);
@@ -269,8 +267,7 @@ private slots:
         const int nTimes = 100;
 
         MNEForwardSolution fwd;
-        fwd.sol = new FiffNamedMatrix();
-        fwd.sol->data = MatrixXd::Random(nChan, nSrc) * 0.1;
+        fwd.sol.data = MatrixXd::Random(nChan, nSrc) * 0.1;
 
         VectorXi verts(nSrc);
         for (int i = 0; i < nSrc; ++i)
@@ -340,8 +337,7 @@ private slots:
         cov.data = (a.transpose() * a).cwiseProduct(scale * scale.transpose());
 
         MNEForwardSolution fwd;
-        fwd.sol = new FiffNamedMatrix();
-        fwd.sol->data = MatrixXd::Zero(nChan, 1);
+        fwd.sol.data = MatrixXd::Zero(nChan, 1);
         const InvSourceEstimate stc(MatrixXd::Zero(1, nTimes), VectorXi::Zero(1), 0.0f, 0.001f);
 
         const FiffEvoked evoked = simulateEvoked(fwd, stc, info, cov, nave, 7);

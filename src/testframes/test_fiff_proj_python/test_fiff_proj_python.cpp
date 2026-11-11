@@ -141,14 +141,14 @@ void TestFiffProjPython::projections_matchPython()
 
     QCOMPARE(p.desc, desc);
     QCOMPARE(static_cast<int>(p.kind), kind);
-    QVERIFY2(p.data, "projection carries no data");
-    QCOMPARE(static_cast<int>(p.data->ncol), ncol);
-    QCOMPARE(static_cast<int>(p.data->nrow), 1);
+    QVERIFY2(!p.data.empty(), "projection carries no data");
+    QCOMPARE(static_cast<int>(p.data.ncol), ncol);
+    QCOMPARE(static_cast<int>(p.data.nrow), 1);
 
-    QCOMPARE(static_cast<int>(p.data->data.cols()), ncol);
-    QCOMPARE(static_cast<int>(p.data->data.rows()), 1);
+    QCOMPARE(static_cast<int>(p.data.data.cols()), ncol);
+    QCOMPARE(static_cast<int>(p.data.data.rows()), 1);
 
-    const double sum = p.data->data.sum();
+    const double sum = p.data.data.sum();
     QVERIFY2(std::fabs(sum - dataSum) < 1.0e-6,
              qPrintable(QString("%1 weights sum to %2, mne-python says %3")
                             .arg(desc)
@@ -157,7 +157,7 @@ void TestFiffProjPython::projections_matchPython()
 
     // The vector names have to line up with the weights, otherwise the
     // projector is applied to the wrong channels.
-    QCOMPARE(p.data->col_names.size(), ncol);
+    QCOMPARE(p.data.col_names.size(), ncol);
 
     // Projections come out of the file inactive; activation is a later step.
     QCOMPARE(p.active, false);

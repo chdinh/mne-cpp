@@ -129,8 +129,8 @@ int main(int argc, char* argv[])
     //
     // Get the gain matrix and channel names
     //
-    const MatrixXd& G = fwd.sol->data; // nchan x nsource (or nsource*3 for free ori)
-    const StringList& chNames = fwd.sol->row_names;
+    const MatrixXd& G = fwd.sol.data; // nchan x nsource (or nsource*3 for free ori)
+    const StringList& chNames = fwd.sol.row_names;
 
     //
     // Determine source columns per vertex depending on orientation type

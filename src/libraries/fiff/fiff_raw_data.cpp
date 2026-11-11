@@ -282,11 +282,11 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         //            data->setZero();
         if (projAvailable || this->comp.kind != -1) {
             if (!projAvailable)
-                mult_full = this->comp.data->data * cal;
+                mult_full = this->comp.data.data * cal;
             else if (this->comp.kind == -1)
                 mult_full = this->proj * cal;
             else
-                mult_full = this->proj * this->comp.data->data * cal;
+                mult_full = this->proj * this->comp.data.data * cal;
         }
     } else {
         data = MatrixXd(sel.size(), to - from + 1);
@@ -306,7 +306,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         } else {
             if (!projAvailable) {
                 for (i = 0; i < sel.size(); ++i)
-                    selVect.row(i) = this->comp.data->data.block(sel[i], 0, 1, nchan);
+                    selVect.row(i) = this->comp.data.data.block(sel[i], 0, 1, nchan);
                 mult_full = selVect * cal;
             } else if (this->comp.kind == -1) {
                 for (i = 0; i < sel.size(); ++i)
@@ -317,7 +317,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 for (i = 0; i < sel.size(); ++i)
                     selVect.row(i) = this->proj.block(sel[i], 0, 1, nchan);
 
-                mult_full = selVect * this->comp.data->data * cal;
+                mult_full = selVect * this->comp.data.data * cal;
             }
         }
     }
@@ -578,11 +578,11 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         //            data->setZero();
         if (projAvailable || this->comp.kind != -1) {
             if (!projAvailable)
-                mult_full = this->comp.data->data * cal;
+                mult_full = this->comp.data.data * cal;
             else if (this->comp.kind == -1)
                 mult_full = this->proj * cal;
             else
-                mult_full = this->proj * this->comp.data->data * cal;
+                mult_full = this->proj * this->comp.data.data * cal;
         }
     } else {
         data = MatrixXd(sel.size(), to - from + 1);
@@ -602,7 +602,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
         } else {
             if (!projAvailable) {
                 for (i = 0; i < sel.size(); ++i)
-                    selVect.row(i) = this->comp.data->data.block(sel[i], 0, 1, nchan);
+                    selVect.row(i) = this->comp.data.data.block(sel[i], 0, 1, nchan);
                 mult_full = selVect * cal;
             } else if (this->comp.kind == -1) {
                 for (i = 0; i < sel.size(); ++i)
@@ -613,7 +613,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 for (i = 0; i < sel.size(); ++i)
                     selVect.row(i) = this->proj.block(sel[i], 0, 1, nchan);
 
-                mult_full = selVect * this->comp.data->data * cal;
+                mult_full = selVect * this->comp.data.data * cal;
             }
         }
     }

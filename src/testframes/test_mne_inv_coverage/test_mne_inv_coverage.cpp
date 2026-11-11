@@ -163,13 +163,13 @@ void TestMneInvCoverage::testCheckChNamesMatch()
 
     // Create inverse operator with same channels
     MNEInverseOperator invOp;
-    invOp.noise_cov = FiffCov::SDPtr(new FiffCov());
-    invOp.noise_cov->names.push_back("MEG 0111");
-    invOp.noise_cov->names.push_back("MEG 0121");
+    invOp.noise_cov = FiffCov();
+    invOp.noise_cov.names.push_back("MEG 0111");
+    invOp.noise_cov.names.push_back("MEG 0121");
     // eigen_fields must have matching col_names for check_ch_names to pass
-    invOp.eigen_fields = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
-    invOp.eigen_fields->col_names.push_back("MEG 0111");
-    invOp.eigen_fields->col_names.push_back("MEG 0121");
+    invOp.eigen_fields = FiffNamedMatrix();
+    invOp.eigen_fields.col_names.push_back("MEG 0111");
+    invOp.eigen_fields.col_names.push_back("MEG 0121");
 
     // check_ch_names should succeed (names match)
     bool ok = invOp.check_ch_names(info);
@@ -186,8 +186,8 @@ void TestMneInvCoverage::testCheckChNamesMismatch()
     info.ch_names.push_back("MEG 0111");
 
     MNEInverseOperator invOp;
-    invOp.noise_cov = FiffCov::SDPtr(new FiffCov());
-    invOp.noise_cov->names.push_back("DIFFERENT_CHANNEL");
+    invOp.noise_cov = FiffCov();
+    invOp.noise_cov.names.push_back("DIFFERENT_CHANNEL");
 
     bool ok = invOp.check_ch_names(info);
     // Mismatch should fail or return false
@@ -199,7 +199,7 @@ void TestMneInvCoverage::testCheckChNamesEmpty()
 {
     FiffInfo info;
     MNEInverseOperator invOp;
-    invOp.noise_cov = FiffCov::SDPtr(new FiffCov());
+    invOp.noise_cov = FiffCov();
 
     bool ok = invOp.check_ch_names(info);
     Q_UNUSED(ok); // Just verify it doesn't crash
@@ -418,7 +418,7 @@ void TestMneInvCoverage::testForwardSolutionFromFile()
              qPrintable(QString("Forward solution not found: %1").arg(fwdPath())));
 
     MNEForwardSolution fwd(fwdPath().toStdU16String());
-    QVERIFY(fwd.sol != nullptr);
+    QVERIFY(!fwd.sol.empty());
     QVERIFY(fwd.nsource > 0);
     QVERIFY(fwd.nchan > 0);
 }
@@ -431,9 +431,9 @@ void TestMneInvCoverage::testForwardSolutionDimensions()
     MNEForwardSolution fwd(fwdPath().toStdU16String());
 
     // sol should be nchan x (nsource * source_ori)
-    QVERIFY(fwd.sol->data.rows() > 0);
-    QVERIFY(fwd.sol->data.cols() > 0);
-    QCOMPARE(fwd.sol->data.rows(), (Eigen::Index)fwd.nchan);
+    QVERIFY(fwd.sol.data.rows() > 0);
+    QVERIFY(fwd.sol.data.cols() > 0);
+    QCOMPARE(fwd.sol.data.rows(), (Eigen::Index)fwd.nchan);
 }
 
 void TestMneInvCoverage::testForwardSolutionPickChannelTypes()
@@ -501,7 +501,7 @@ void TestMneInvCoverage::testMinNormSetup()
 
     // Load forward solution
     MNEForwardSolution fwd(fwdPath().toStdU16String());
-    QVERIFY2(fwd.sol != nullptr, "Could not load forward solution");
+    QVERIFY2(!fwd.sol.empty(), "Could not load forward solution");
 
     // Load raw info
     FiffRawData raw(rawPath().toStdString());
@@ -513,8 +513,8 @@ void TestMneInvCoverage::testMinNormSetup()
     MNEInverseOperator invOp = MNEInverseOperator::make_inverse_operator(
         raw.info, fwd, noiseCov);
 
-    QVERIFY(invOp.noise_cov != nullptr);
-    QVERIFY(invOp.eigen_leads != nullptr);
+    QVERIFY(!invOp.noise_cov.empty());
+    QVERIFY(!invOp.eigen_leads.empty());
 }
 
 void TestMneInvCoverage::testMinNormCalculateInverse()
@@ -524,7 +524,7 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
 
     // Load data
     MNEForwardSolution fwd(fwdPath().toStdU16String());
-    QVERIFY2(fwd.sol != nullptr, "Could not load forward solution");
+    QVERIFY2(!fwd.sol.empty(), "Could not load forward solution");
 
     FiffRawData raw(rawPath().toStdString());
 

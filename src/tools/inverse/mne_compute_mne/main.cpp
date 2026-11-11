@@ -414,13 +414,13 @@ static bool writePredictedData(const QString& fileName,
                                const MatrixXd& stcData,
                                const VectorXd& timesVec)
 {
-    if (!forward.sol || forward.sol->data.rows() == 0) {
+    if (forward.sol.data.rows() == 0) {
         qWarning() << "  WARNING: Forward solution has no gain matrix.";
         return false;
     }
 
     // Predicted data = G * J  (nChannels x nSources) * (nSources x nTimes)
-    MatrixXd predicted = forward.sol->data * stcData;
+    MatrixXd predicted = forward.sol.data * stcData;
 
     qInfo("  Predicted data: %d channels, %d time points",
           static_cast<int>(predicted.rows()), static_cast<int>(predicted.cols()));
@@ -846,15 +846,15 @@ int main(int argc, char* argv[])
         }
         MNEForwardSolution& fwd = *fwdRead;
 
-        MatrixXd pickedData(invOp.nchan, fwd.sol->data.cols());
-        for (int channel = 0; channel < static_cast<int>(invOp.noise_cov->names.size()); ++channel) {
-            const int fwdChannel = FIFFLIB::channel_index(fwd.sol->row_names, invOp.noise_cov->names[channel]);
+        MatrixXd pickedData(invOp.nchan, fwd.sol.data.cols());
+        for (int channel = 0; channel < static_cast<int>(invOp.noise_cov.names.size()); ++channel) {
+            const int fwdChannel = FIFFLIB::channel_index(fwd.sol.row_names, invOp.noise_cov.names[channel]);
             if (fwdChannel < 0) {
                 qCritical("Error: Forward solution is missing inverse-operator channel %s.",
-                          invOp.noise_cov->names[channel].c_str());
+                          invOp.noise_cov.names[channel].c_str());
                 return 1;
             }
-            pickedData.row(channel) = fwd.sol->data.row(fwdChannel) * fwdAmp;
+            pickedData.row(channel) = fwd.sol.data.row(fwdChannel) * fwdAmp;
         }
 
         tstep = 0.001f; // 1 ms per source
@@ -971,7 +971,7 @@ int main(int argc, char* argv[])
                   evoked.times(tmaxIdx) * 1000.0f, tmaxIdx);
         }
 
-        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
+        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov.names);
         if (pickedEvoked.info.nchan != invOp.nchan) {
             qCritical("Error: Found %d of %d inverse-operator channels in the evoked data.",
                       pickedEvoked.info.nchan, invOp.nchan);
@@ -1281,7 +1281,7 @@ int main(int argc, char* argv[])
             goto done;
         }
 
-        if (predFwd.sol && predFwd.sol->data.rows() > 0) {
+        if (predFwd.sol.data.rows() > 0) {
             writePredictedData(predFile, predFwd, stc.data, timesVec);
         } else {
             qInfo("  WARNING: Forward solution has no gain matrix.");

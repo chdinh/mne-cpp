@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     const MNEMneData perTime = dspm.mneData(evoked);       // lambda2 estimated per time point (MNE-C mne_analyze)
     const MNEMneData atSnr3 = dspm.mneData(evoked, 9.0);   // power SNR 9: lambda2 = mean(sing^2) / 9
     const VectorXd amplitudeSnr = perTime.SNR.cwiseSqrt(); // == mne.minimum_norm.estimate_snr's snr
-    const MatrixXd residual = evoked.pick_channels(inverse.noise_cov->names).data - atSnr3.predicted;
+    const MatrixXd residual = evoked.pick_channels(inverse.noise_cov.names).data - atSnr3.predicted;
     //! [mne_mne_data_usage]
     // SNR = sum(whitened^2) / rank, the lambda2 search = MNE-C noise_regularization (both in numpy);
     // predicted = data - apply_inverse(evoked, inv, mean(sing**2) / 9, "MNE", return_residual=True)[1]
@@ -141,8 +141,8 @@ int main(int argc, char* argv[])
     InvMinimumNorm mne(inverse, lambda2, "MNE");
     mne.doInverseSetup(evoked.nave);
     const MatrixXd& kernel = mne.getKernel(); // 210 source components x 364 good channels
-    const MNEForwardSolution goodFwd = fwd.pick_channels(inverse.noise_cov->names);
-    const MatrixXd resolution = InvResolutionMatrix::compute(kernel, goodFwd.sol->data);
+    const MNEForwardSolution goodFwd = fwd.pick_channels(inverse.noise_cov.names);
+    const MatrixXd resolution = InvResolutionMatrix::compute(kernel, goodFwd.sol.data);
     //! [inv_resolution_matrix_usage]
     // mne.minimum_norm.make_inverse_resolution_matrix(fwd, inv, "MNE", 1/9): 210 x 210, Frobenius norm 6.13353
     ok &= expect(resolution.rows() == 210 && resolution.cols() == 210 && near(resolution.norm(), 6.13352636100184, 1e-4),
@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     }
     clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
     //! [mne_cluster_info_usage]
-    ok &= expect(clustered.isClustered() && clusters.numClust() == clustered.nsource && assigned == 70 && clusters.numClust() >= 4 && (clustered.sol->data - fwd.sol->data * clusterMean).norm() <= 1e-9 * fwd.sol->data.norm() && QFile::exists(tmp.filePath("centroids_v1-clusters.txt")),
+    ok &= expect(clustered.isClustered() && clusters.numClust() == clustered.nsource && assigned == 70 && clusters.numClust() >= 4 && (clustered.sol.data - fwd.sol.data * clusterMean).norm() <= 1e-9 * fwd.sol.data.norm() && QFile::exists(tmp.filePath("centroids_v1-clusters.txt")),
                  "MNEClusterInfo: every V1 source in one cluster, clustered gain is the cluster mean");
 
     //! [mne_inverse_cluster_kernel]
@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
 
     //! [inv_vector_source_estimate_usage]
     // The MNE kernel keeps x, y and z per source: an apply_inverse(..., pick_ori="vector") estimate.
-    const MatrixXd goodData = evoked.pick_channels(inverse.noise_cov->names).data;
+    const MatrixXd goodData = evoked.pick_channels(inverse.noise_cov.names).data;
     const InvVectorSourceEstimate vectorStc(kernel * goodData, stc.vertices, stc.tmin, stc.tstep);
     const InvSourceEstimate magnitude = vectorStc.magnitude(); // 70 x 421 vector lengths
     //! [inv_vector_source_estimate_usage]
@@ -233,10 +233,10 @@ int main(int argc, char* argv[])
 
     //! [inv_sparse_usage]
     // Whitened data and a gain per nAm make the noise level 1, as mne.inverse_sparse.mixed_norm does.
-    const auto [whitener, rank] = computeWhitener(*inverse.noise_cov); // rank 360: 364 channels minus 4 projectors
-    const MNEForwardSolution fixedFwd = MNEForwardSolution(fwdPath, {.force_fixed = true, .surf_ori = true}).pick_regions({v1}).pick_channels(inverse.noise_cov->names);
-    const MatrixXd gain = whitener * fixedFwd.sol->data * 1e-9;
-    const MatrixXd measured = whitener * evoked.pick_channels(inverse.noise_cov->names).data.middleCols(170, 40); // 83-148 ms
+    const auto [whitener, rank] = computeWhitener(inverse.noise_cov); // rank 360: 364 channels minus 4 projectors
+    const MNEForwardSolution fixedFwd = MNEForwardSolution(fwdPath, {.force_fixed = true, .surf_ori = true}).pick_regions({v1}).pick_channels(inverse.noise_cov.names);
+    const MatrixXd gain = whitener * fixedFwd.sol.data * 1e-9;
+    const MatrixXd measured = whitener * evoked.pick_channels(inverse.noise_cov.names).data.middleCols(170, 40); // 83-148 ms
     const double alphaMax = (gain.transpose() * measured).rowwise().norm().maxCoeff();
     const InvMxneResult mxne = InvMxne::compute(gain, measured, 0.5 * alphaMax, 1000, 1e-10);
     //! [inv_sparse_usage]

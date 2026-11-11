@@ -114,8 +114,8 @@ void MNEForwardSolution::clear()
     coord_frame = -1;
     nsource = -1;
     nchan = -1;
-    sol = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
-    sol_grad = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
+    sol = FiffNamedMatrix();
+    sol_grad = FiffNamedMatrix();
     mri_head_t.clear();
     mri_filename.clear();
     mri_id.clear();
@@ -254,12 +254,12 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
         t_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &nvert);
         t_pStream->write_int(FIFF_NCHAN, &nmeg);
 
-        FiffNamedMatrix megSol = extractRows(*sol, megIdx);
+        FiffNamedMatrix megSol = extractRows(sol, megIdx);
         megSol.transpose_named_matrix();
         t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, megSol);
 
-        if (!sol_grad->empty()) {
-            FiffNamedMatrix megGrad = extractRows(*sol_grad, megIdx);
+        if (!sol_grad.empty()) {
+            FiffNamedMatrix megGrad = extractRows(sol_grad, megIdx);
             megGrad.transpose_named_matrix();
             t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION_GRAD, megGrad);
         }
@@ -279,12 +279,12 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
         t_pStream->write_int(FIFF_NCHAN, &neeg);
         t_pStream->write_int(FIFF_MNE_SOURCE_SPACE_NPOINTS, &nvert);
 
-        FiffNamedMatrix eegSol = extractRows(*sol, eegIdx);
+        FiffNamedMatrix eegSol = extractRows(sol, eegIdx);
         eegSol.transpose_named_matrix();
         t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION, eegSol);
 
-        if (!sol_grad->empty()) {
-            FiffNamedMatrix eegGrad = extractRows(*sol_grad, eegIdx);
+        if (!sol_grad.empty()) {
+            FiffNamedMatrix eegGrad = extractRows(sol_grad, eegIdx);
             eegGrad.transpose_named_matrix();
             t_pStream->write_named_matrix(FIFF_MNE_FORWARD_SOLUTION_GRAD, eegGrad);
         }
@@ -422,11 +422,11 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
                 idcs.conservativeResize(c);
 
                 //get selected G
-                MatrixXd t_G(this->sol->data.rows(), idcs.rows() * 3);
+                MatrixXd t_G(this->sol.data.rows(), idcs.rows() * 3);
                 MatrixXd t_G_Whitened_Roi(t_G_Whitened.rows(), idcs.rows() * 3);
 
                 for (qint32 j = 0; j < idcs.rows(); ++j) {
-                    t_G.block(0, j * 3, t_G.rows(), 3) = this->sol->data.block(0, (idcs[j] + offset) * 3, t_G.rows(), 3);
+                    t_G.block(0, j * 3, t_G.rows(), 3) = this->sol.data.block(0, (idcs[j] + offset) * 3, t_G.rows(), 3);
                     if (t_bUseWhitened)
                         t_G_Whitened_Roi.block(0, j * 3, t_G_Whitened_Roi.rows(), 3) = t_G_Whitened.block(0, (idcs[j] + offset) * 3, t_G_Whitened_Roi.rows(), 3);
                 }
@@ -592,9 +592,9 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         totalNumOfClust += p_fwdOut.src.hemisphereAt(h)->cluster_info.clusterVertnos.size();
 
     if (this->isFixedOrient())
-        p_D = MatrixXd::Zero(this->sol->data.cols(), totalNumOfClust);
+        p_D = MatrixXd::Zero(this->sol.data.cols(), totalNumOfClust);
     else
-        p_D = MatrixXd::Zero(this->sol->data.cols(), totalNumOfClust * 3);
+        p_D = MatrixXd::Zero(this->sol.data.cols(), totalNumOfClust * 3);
 
     std::vector<VectorXi> t_vertnos = this->src.get_vertno();
 
@@ -630,10 +630,10 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
     //
     // Put it all together
     //
-    p_fwdOut.sol->data = t_G_new;
-    p_fwdOut.sol->ncol = t_G_new.cols();
+    p_fwdOut.sol.data = t_G_new;
+    p_fwdOut.sol.ncol = t_G_new.cols();
 
-    p_fwdOut.nsource = p_fwdOut.sol->ncol / 3;
+    p_fwdOut.nsource = p_fwdOut.sol.ncol / 3;
 
     return p_fwdOut;
 }
@@ -645,7 +645,7 @@ MNEForwardSolution MNEForwardSolution::reduce_forward_solution(qint32 p_iNumDipo
     MNEForwardSolution p_fwdOut = MNEForwardSolution(*this);
 
     bool isFixed = p_fwdOut.isFixedOrient();
-    qint32 np = isFixed ? p_fwdOut.sol->data.cols() : p_fwdOut.sol->data.cols() / 3;
+    qint32 np = isFixed ? p_fwdOut.sol.data.cols() : p_fwdOut.sol.data.cols() / 3;
 
     if (p_iNumDipoles > np)
         return p_fwdOut;
@@ -660,18 +660,18 @@ MNEForwardSolution MNEForwardSolution::reduce_forward_solution(qint32 p_iNumDipo
     }
 
     if (isFixed) {
-        p_D = MatrixXd::Zero(p_fwdOut.sol->data.cols(), p_iNumDipoles);
+        p_D = MatrixXd::Zero(p_fwdOut.sol.data.cols(), p_iNumDipoles);
         for (qint32 i = 0; i < p_iNumDipoles; ++i)
             p_D(sel[i], i) = 1;
     } else {
-        p_D = MatrixXd::Zero(p_fwdOut.sol->data.cols(), p_iNumDipoles * 3);
+        p_D = MatrixXd::Zero(p_fwdOut.sol.data.cols(), p_iNumDipoles * 3);
         for (qint32 i = 0; i < p_iNumDipoles; ++i)
             for (qint32 j = 0; j < 3; ++j)
                 p_D((sel[i] * 3) + j, (i * 3) + j) = 1;
     }
 
     // New gain matrix
-    p_fwdOut.sol->data = this->sol->data * p_D;
+    p_fwdOut.sol.data = this->sol.data * p_D;
 
     MatrixX3f rr(p_iNumDipoles, 3);
 
@@ -685,7 +685,7 @@ MNEForwardSolution MNEForwardSolution::reduce_forward_solution(qint32 p_iNumDipo
     p_fwdOut.source_rr = rr;
     p_fwdOut.source_nn = nn;
 
-    p_fwdOut.sol->ncol = p_fwdOut.sol->data.cols();
+    p_fwdOut.sol.ncol = p_fwdOut.sol.data.cols();
 
     p_fwdOut.nsource = p_iNumDipoles;
 
@@ -794,7 +794,7 @@ FiffCov MNEForwardSolution::compute_depth_prior(const MatrixXd& Gain, const Fiff
 FiffCov MNEForwardSolution::compute_orient_prior(float loose)
 {
     bool is_fixed_ori = this->isFixedOrient();
-    qint32 n_sources = this->sol->data.cols();
+    qint32 n_sources = this->sol.data.cols();
 
     if (0 <= loose && loose <= 1) {
         if (loose < 1 && !this->surf_ori) {
@@ -840,7 +840,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
     if (include.size() == 0 && exclude.size() == 0)
         return fwd;
 
-    RowVectorXi sel = FiffInfo::pick_channels(fwd.sol->row_names, include, exclude);
+    RowVectorXi sel = FiffInfo::pick_channels(fwd.sol.row_names, include, exclude);
 
     // Do we have something?
     quint32 nuse = sel.size();
@@ -852,17 +852,17 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
     Log::info("\t{} out of {} channels remain after picking", nuse, fwd.nchan);
 
     //   Pick the correct rows of the forward operator
-    MatrixXd newData(nuse, fwd.sol->data.cols());
+    MatrixXd newData(nuse, fwd.sol.data.cols());
     for (quint32 i = 0; i < nuse; ++i)
-        newData.row(i) = fwd.sol->data.row(sel[i]);
+        newData.row(i) = fwd.sol.data.row(sel[i]);
 
-    fwd.sol->data = newData;
-    fwd.sol->nrow = nuse;
+    fwd.sol.data = newData;
+    fwd.sol.nrow = nuse;
 
     StringList ch_names;
     ch_names.reserve(nuse);
     for (qint32 i = 0; i < sel.cols(); ++i)
-        ch_names.push_back(fwd.sol->row_names[sel(i)]);
+        ch_names.push_back(fwd.sol.row_names[sel(i)]);
     fwd.nchan = nuse;
 
     std::vector<FiffChInfo> chs;
@@ -877,18 +877,18 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
         if (FIFFLIB::has_channel(ch_names, bad))
             bads.push_back(bad);
     fwd.info.bads = std::move(bads);
-    fwd.sol->row_names = std::move(ch_names);
+    fwd.sol.row_names = std::move(ch_names);
 
-    if (!fwd.sol_grad->empty()) {
-        newData.resize(nuse, fwd.sol_grad->data.cols());
+    if (!fwd.sol_grad.empty()) {
+        newData.resize(nuse, fwd.sol_grad.data.cols());
         for (quint32 i = 0; i < nuse; ++i)
-            newData.row(i) = fwd.sol_grad->data.row(sel[i]);
-        fwd.sol_grad->data = newData;
-        fwd.sol_grad->nrow = nuse;
+            newData.row(i) = fwd.sol_grad.data.row(sel[i]);
+        fwd.sol_grad.data = newData;
+        fwd.sol_grad.nrow = nuse;
         StringList row_names;
         for (qint32 i = 0; i < sel.cols(); ++i)
-            row_names.push_back(fwd.sol_grad->row_names[sel(i)]);
-        fwd.sol_grad->row_names = row_names;
+            row_names.push_back(fwd.sol_grad.row_names[sel(i)]);
+        fwd.sol_grad.row_names = row_names;
     }
 
     return fwd;
@@ -922,17 +922,17 @@ MNEForwardSolution MNEForwardSolution::pick_regions(const std::vector<FsLabel>& 
     const VectorXi selSolIdcs = isFixedOrient() ? selVertices : tripletSelection(selVertices);
 
     MatrixX3f nn(selSolIdcs.size(), 3);
-    MatrixXd G(selectedFwd.sol->data.rows(), selSolIdcs.size());
+    MatrixXd G(selectedFwd.sol.data.rows(), selSolIdcs.size());
     for (qint32 i = 0; i < selSolIdcs.size(); ++i) {
         nn.row(i) = selectedFwd.source_nn.row(selSolIdcs[i]);
-        G.col(i) = selectedFwd.sol->data.col(selSolIdcs[i]);
+        G.col(i) = selectedFwd.sol.data.col(selSolIdcs[i]);
     }
 
     selectedFwd.source_rr = rr;
     selectedFwd.source_nn = nn;
-    selectedFwd.sol->data = G;
-    selectedFwd.sol->nrow = selectedFwd.sol->data.rows();
-    selectedFwd.sol->ncol = selectedFwd.sol->data.cols();
+    selectedFwd.sol.data = G;
+    selectedFwd.sol.nrow = selectedFwd.sol.data.rows();
+    selectedFwd.sol.ncol = selectedFwd.sol.data.cols();
     selectedFwd.nsource = static_cast<int>(selVertices.size());
 
     selectedFwd.src = selectedFwd.src.pick_regions(p_qListLabels);
@@ -1030,9 +1030,9 @@ void MNEForwardSolution::prepare_forward(const FiffInfo& p_info,
     fwd_idx.conservativeResize(count_fwd_idx);
     info_idx.conservativeResize(count_info_idx);
 
-    gain.resize(count_fwd_idx, this->sol->data.cols());
+    gain.resize(count_fwd_idx, this->sol.data.cols());
     for (qint32 i = 0; i < count_fwd_idx; ++i)
-        gain.row(i) = this->sol->data.row(fwd_idx[i]);
+        gain.row(i) = this->sol.data.row(fwd_idx[i]);
 
     p_outFwdInfo = p_info.pick_info(info_idx);
 
@@ -1139,7 +1139,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     MNEForwardSolution fwd;
 
     if (!megfwd.empty() && !eegfwd.empty()) {
-        if (megfwd.sol->data.cols() != eegfwd.sol->data.cols() ||
+        if (megfwd.sol.data.cols() != eegfwd.sol.data.cols() ||
             megfwd.source_ori != eegfwd.source_ori ||
             megfwd.nsource != eegfwd.nsource ||
             megfwd.coord_frame != eegfwd.coord_frame) {
@@ -1147,21 +1147,21 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         }
 
         fwd = MNEForwardSolution(megfwd);
-        fwd.sol->data = MatrixXd(megfwd.sol->nrow + eegfwd.sol->nrow, megfwd.sol->ncol);
+        fwd.sol.data = MatrixXd(megfwd.sol.nrow + eegfwd.sol.nrow, megfwd.sol.ncol);
 
-        fwd.sol->data.block(0, 0, megfwd.sol->nrow, megfwd.sol->ncol) = megfwd.sol->data;
-        fwd.sol->data.block(megfwd.sol->nrow, 0, eegfwd.sol->nrow, eegfwd.sol->ncol) = eegfwd.sol->data;
-        fwd.sol->nrow = megfwd.sol->nrow + eegfwd.sol->nrow;
-        fwd.sol->row_names.insert(fwd.sol->row_names.end(), eegfwd.sol->row_names.begin(), eegfwd.sol->row_names.end());
+        fwd.sol.data.block(0, 0, megfwd.sol.nrow, megfwd.sol.ncol) = megfwd.sol.data;
+        fwd.sol.data.block(megfwd.sol.nrow, 0, eegfwd.sol.nrow, eegfwd.sol.ncol) = eegfwd.sol.data;
+        fwd.sol.nrow = megfwd.sol.nrow + eegfwd.sol.nrow;
+        fwd.sol.row_names.insert(fwd.sol.row_names.end(), eegfwd.sol.row_names.begin(), eegfwd.sol.row_names.end());
 
-        if (!fwd.sol_grad->empty()) {
-            fwd.sol_grad->data.resize(megfwd.sol_grad->data.rows() + eegfwd.sol_grad->data.rows(), megfwd.sol_grad->data.cols());
+        if (!fwd.sol_grad.empty()) {
+            fwd.sol_grad.data.resize(megfwd.sol_grad.data.rows() + eegfwd.sol_grad.data.rows(), megfwd.sol_grad.data.cols());
 
-            fwd.sol_grad->data.block(0, 0, megfwd.sol_grad->data.rows(), megfwd.sol_grad->data.cols()) = megfwd.sol_grad->data;
-            fwd.sol_grad->data.block(megfwd.sol_grad->data.rows(), 0, eegfwd.sol_grad->data.rows(), eegfwd.sol_grad->data.cols()) = eegfwd.sol_grad->data;
+            fwd.sol_grad.data.block(0, 0, megfwd.sol_grad.data.rows(), megfwd.sol_grad.data.cols()) = megfwd.sol_grad.data;
+            fwd.sol_grad.data.block(megfwd.sol_grad.data.rows(), 0, eegfwd.sol_grad.data.rows(), eegfwd.sol_grad.data.cols()) = eegfwd.sol_grad.data;
 
-            fwd.sol_grad->nrow = megfwd.sol_grad->nrow + eegfwd.sol_grad->nrow;
-            fwd.sol_grad->row_names.insert(fwd.sol_grad->row_names.end(), eegfwd.sol_grad->row_names.begin(), eegfwd.sol_grad->row_names.end());
+            fwd.sol_grad.nrow = megfwd.sol_grad.nrow + eegfwd.sol_grad.nrow;
+            fwd.sol_grad.row_names.insert(fwd.sol_grad.row_names.end(), eegfwd.sol_grad.row_names.begin(), eegfwd.sol_grad.row_names.end());
         }
         fwd.nchan = megfwd.nchan + eegfwd.nchan;
         Log::info("\tMEG and EEG forward solutions combined");
@@ -1245,18 +1245,18 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
 
             MatrixXd tmp = fwd.source_nn.transpose().cast<double>();
             SparseMatrix<double> fix_rot = Linalg::make_block_diag(tmp, 1);
-            fwd.sol->data *= fix_rot;
-            fwd.sol->ncol = fwd.nsource;
+            fwd.sol.data *= fix_rot;
+            fwd.sol.ncol = fwd.nsource;
             fwd.source_ori = FIFFV_MNE_FIXED_ORI;
 
-            if (!fwd.sol_grad->empty()) {
+            if (!fwd.sol_grad.empty()) {
                 SparseMatrix<double> t_matKron;
                 SparseMatrix<double> t_eye(3, 3);
                 for (qint32 i = 0; i < 3; ++i)
                     t_eye.insert(i, i) = 1.0f;
                 t_matKron = kroneckerProduct(fix_rot, t_eye); //kron(fix_rot,eye(3));
-                fwd.sol_grad->data *= t_matKron;
-                fwd.sol_grad->ncol = 3 * fwd.nsource;
+                fwd.sol_grad.data *= t_matKron;
+                fwd.sol_grad.ncol = 3 * fwd.nsource;
             }
             Log::info("[done]");
         }
@@ -1342,8 +1342,8 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
 
     one.nchan = *t_pTag->toInt();
 
-    if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION, *one.sol.data()))
-        one.sol->transpose_named_matrix();
+    if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION, one.sol))
+        one.sol.transpose_named_matrix();
     else {
         stream.close();
         Log::warning("Forward solution data not found.");
@@ -1351,21 +1351,21 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         return false;
     }
 
-    if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION_GRAD, *one.sol_grad.data()))
-        one.sol_grad->transpose_named_matrix();
+    if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION_GRAD, one.sol_grad))
+        one.sol_grad.transpose_named_matrix();
     else
-        one.sol_grad->clear();
+        one.sol_grad.clear();
 
-    if (one.sol->data.rows() != one.nchan ||
-        (one.sol->data.cols() != one.nsource && one.sol->data.cols() != 3 * one.nsource)) {
+    if (one.sol.data.rows() != one.nchan ||
+        (one.sol.data.cols() != one.nsource && one.sol.data.cols() != 3 * one.nsource)) {
         stream.close();
         Log::warning("Forward solution matrix has wrong dimensions.");
         //error(me,'Forward solution matrix has wrong dimensions');
         return false;
     }
-    if (!one.sol_grad->empty()) {
-        if (one.sol_grad->data.rows() != one.nchan ||
-            (one.sol_grad->data.cols() != 3 * one.nsource && one.sol_grad->data.cols() != 3 * 3 * one.nsource)) {
+    if (!one.sol_grad.empty()) {
+        if (one.sol_grad.data.rows() != one.nchan ||
+            (one.sol_grad.data.cols() != 3 * one.nsource && one.sol_grad.data.cols() != 3 * 3 * one.nsource)) {
             stream.close();
             Log::warning("Forward solution gradient matrix has wrong dimensions.");
             //error(me,'Forward solution gradient matrix has wrong dimensions');
@@ -1480,15 +1480,15 @@ void MNEForwardSolution::convert_to_surf_ori()
     MatrixXd tmp = this->source_nn.transpose().cast<double>();
     SparseMatrix<double> surf_rot = Linalg::make_block_diag(tmp, 3);
 
-    this->sol->data *= surf_rot;
+    this->sol.data *= surf_rot;
 
-    if (!this->sol_grad->empty()) {
+    if (!this->sol_grad.empty()) {
         SparseMatrix<double> t_matKron;
         SparseMatrix<double> t_eye(3, 3);
         for (qint32 i = 0; i < 3; ++i)
             t_eye.insert(i, i) = 1.0f;
         t_matKron = kroneckerProduct(surf_rot, t_eye); //kron(surf_rot,eye(3));
-        this->sol_grad->data *= t_matKron;
+        this->sol_grad.data *= t_matKron;
     }
     this->surf_ori = true;
     Log::info("[done]");
@@ -1503,16 +1503,16 @@ void MNEForwardSolution::to_fixed_ori()
         return;
     }
     qint32 count = 0;
-    for (qint32 i = 2; i < this->sol->data.cols(); i += 3) {
-        this->sol->data.col(count) = this->sol->data.col(i);
-        if (this->source_nn.rows() == this->sol->data.cols())
+    for (qint32 i = 2; i < this->sol.data.cols(); i += 3) {
+        this->sol.data.col(count) = this->sol.data.col(i);
+        if (this->source_nn.rows() == this->sol.data.cols())
             this->source_nn.row(count) = this->source_nn.row(i);
         ++count;
     }
-    this->sol->data.conservativeResize(this->sol->data.rows(), count);
+    this->sol.data.conservativeResize(this->sol.data.rows(), count);
     if (this->source_nn.rows() == 3 * count)
         this->source_nn.conservativeResize(count, Eigen::NoChange);
-    this->sol->ncol = this->sol->ncol / 3;
+    this->sol.ncol = this->sol.ncol / 3;
     this->source_ori = FIFFV_MNE_FIXED_ORI;
     Log::info("\tConverted the forward solution into the fixed-orientation mode.");
 }

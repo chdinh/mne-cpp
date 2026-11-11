@@ -108,16 +108,16 @@ static MNEInverseOperator makeSmallInverseOp(const FiffInfo& info,
     }
 
     // 3. Subsample gain matrix columns
-    const int nChan = fwd.sol->data.rows();
+    const int nChan = fwd.sol.data.rows();
     const int nKeep = keepIdx.size();
     MatrixXd G(nChan, nKeep * orient);
     for (int i = 0; i < nKeep; ++i)
         for (int j = 0; j < orient; ++j)
-            G.col(i * orient + j) = fwd.sol->data.col(keepIdx[i] * orient + j);
+            G.col(i * orient + j) = fwd.sol.data.col(keepIdx[i] * orient + j);
 
-    small.sol->data = G;
-    small.sol->nrow = G.rows();
-    small.sol->ncol = G.cols();
+    small.sol.data = G;
+    small.sol.nrow = G.rows();
+    small.sol.ncol = G.cols();
     small.nsource = nKeep;
 
     // 4. Subsample source positions / normals
@@ -340,15 +340,15 @@ private slots:
         }
 
         // Verify eigen_leads dimensions match
-        QCOMPARE(invRead.eigen_leads->data.rows(), smallInv.eigen_leads->data.rows());
-        QCOMPARE(invRead.eigen_leads->data.cols(), smallInv.eigen_leads->data.cols());
+        QCOMPARE(invRead.eigen_leads.data.rows(), smallInv.eigen_leads.data.rows());
+        QCOMPARE(invRead.eigen_leads.data.cols(), smallInv.eigen_leads.data.cols());
 
         // Verify eigen_fields dimensions match
-        QCOMPARE(invRead.eigen_fields->data.rows(), smallInv.eigen_fields->data.rows());
-        QCOMPARE(invRead.eigen_fields->data.cols(), smallInv.eigen_fields->data.cols());
+        QCOMPARE(invRead.eigen_fields.data.rows(), smallInv.eigen_fields.data.rows());
+        QCOMPARE(invRead.eigen_fields.data.cols(), smallInv.eigen_fields.data.cols());
 
         // Verify noise covariance dimensions
-        QCOMPARE(invRead.noise_cov->data.rows(), smallInv.noise_cov->data.rows());
+        QCOMPARE(invRead.noise_cov.data.rows(), smallInv.noise_cov.data.rows());
 
         qDebug() << "Inverse operator roundtrip: nchan=" << invRead.nchan
                  << "nsource=" << invRead.nsource
@@ -423,7 +423,7 @@ private slots:
         QVERIFY(evoked.data.rows() > 0);
 
         // Pick channels matching the inverse operator's noise covariance
-        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
+        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov.names);
         QVERIFY(pickedEvoked.data.rows() > 0);
 
         float tmin = pickedEvoked.times(0);
@@ -460,7 +460,7 @@ private slots:
             QSKIP("Evoked file not found");
 
         FiffEvoked evoked(evkPath.toStdU16String(), 0);
-        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
+        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov.names);
 
         float tmin = pickedEvoked.times(0);
         float tstep = 1.0f / pickedEvoked.info.sfreq;
@@ -495,7 +495,7 @@ private slots:
             QSKIP("Evoked file not found");
 
         FiffEvoked evoked(evkPath.toStdU16String(), 0);
-        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
+        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov.names);
 
         float tmin = pickedEvoked.times(0);
         float tstep = 1.0f / pickedEvoked.info.sfreq;
@@ -559,7 +559,7 @@ private slots:
             QSKIP("Evoked file not found");
 
         FiffEvoked evoked(evkPath.toStdU16String(), 0);
-        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov->names);
+        FiffEvoked pickedEvoked = evoked.pick_channels(invOp.noise_cov.names);
 
         float tmin = pickedEvoked.times(0);
         float tstep = 1.0f / pickedEvoked.info.sfreq;

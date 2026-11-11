@@ -199,7 +199,7 @@ void TestMneCtfCompPython::readsCompensationData()
     QCOMPARE(MNECTFCompDataSet::get_comp(set->chs, set->nch), 3);
     QCOMPARE(MNECTFCompDataSet::explain_comp(MNECTFCompDataSet::map_comp_kind(3)), QString("third order gradiometer"));
     // Both readers calibrate the stored matrix the same way.
-    QVERIFY((set->comps[3]->data->data.cast<double>() - raw.info.comps[3].data->data).cwiseAbs().maxCoeff() <= 1e-6 * raw.info.comps[3].data->data.cwiseAbs().maxCoeff());
+    QVERIFY((set->comps[3]->data->data.cast<double>() - raw.info.comps[3].data.data).cwiseAbs().maxCoeff() <= 1e-6 * raw.info.comps[3].data.data.cwiseAbs().maxCoeff());
 
     // Without a compensator set up applying changes nothing; staying at grade 3 needs none
     VectorXf ones = VectorXf::Ones(kNChan);

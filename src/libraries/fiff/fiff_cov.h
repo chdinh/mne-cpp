@@ -45,7 +45,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedDataPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -87,11 +86,9 @@ struct RejectionParams;
  *
  * @snippet ex_fiff_api/main.cpp fiff_cov_usage
  */
-class FIFFSHARED_EXPORT FiffCov : public QSharedData
+class FIFFSHARED_EXPORT FiffCov
 {
 public:
-    using SDPtr = QSharedDataPointer<FiffCov>; /**< Shared data pointer type for FiffCov. */
-
     //=========================================================================================================
     /**
      * Constructs the covariance data matrix.
@@ -115,20 +112,6 @@ public:
      * @return The covariance, or why the file holds none.
      */
     [[nodiscard]] static BASELIB::Expected<FiffCov> read(const std::filesystem::path& path);
-
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffCov   Covariance data matrix which should be copied.
-     */
-    FiffCov(const FiffCov& p_FiffCov);
-
-    //=========================================================================================================
-    /**
-     * Destroys the covariance data matrix.
-     */
-    ~FiffCov();
 
     //=========================================================================================================
     /**
@@ -252,16 +235,6 @@ public:
      * @return The grand-average covariance matrix, or empty FiffCov if covs is empty.
      */
     static FiffCov compute_grand_average(const std::vector<FiffCov>& covs);
-
-    //=========================================================================================================
-    /**
-     * Assignment Operator
-     *
-     * @param[in] rhs     FiffCov which should be assigned.
-     *
-     * @return the copied covariance matrix.
-     */
-    FiffCov& operator=(const FiffCov& rhs);
 
     //=========================================================================================================
     /**

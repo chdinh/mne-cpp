@@ -137,14 +137,14 @@ void TestInvLcmvPython::initTestCase()
     // The forward stores "MEG0113", the evoked and covariance files "MEG 0113"; both list them in the same order.
     MNEForwardSolution fullFwd((base + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String());
     StringList fwdGood;
-    for (const std::string& name : fullFwd.sol->row_names) {
+    for (const std::string& name : fullFwd.sol.row_names) {
         if (name.starts_with("MEG") && !FIFFLIB::same_channel(name, "MEG 2443"))
             fwdGood.push_back(name);
     }
     m_fwd = fullFwd.pick_channels(fwdGood);
-    QCOMPARE(static_cast<int>(m_fwd.sol->data.rows()), 305);
+    QCOMPARE(static_cast<int>(m_fwd.sol.data.rows()), 305);
     QCOMPARE(m_fwd.source_ori, FIFFV_MNE_FREE_ORI);
-    m_fwd.sol->row_names = good;
+    m_fwd.sol.row_names = good;
 
     m_evoked = sampleEvoked.pick_channels(good);
     m_evoked.info.bads.clear();
@@ -154,7 +154,7 @@ void TestInvLcmvPython::initTestCase()
     m_noiseCov = cov.pick_channels(good).prepare_noise_cov(m_info, good);
     QCOMPARE(static_cast<int>(m_noiseCov.eig.size()), 305);
 
-    const MatrixXd& G = m_fwd.sol->data;
+    const MatrixXd& G = m_fwd.sol.data;
     const VectorXd g1 = G.col(300) * 20e-9;
     const VectorXd g2 = G.col(15002) * 30e-9;
     m_dataCov = m_noiseCov;

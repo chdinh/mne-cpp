@@ -491,8 +491,8 @@ void TestFiffIoEvokedInfo::fiffInfo_makeCompensator()
     // from==to returns false (identity, no transformation needed)
     QVERIFY(!ok);
     // The data should be identity matrix
-    QVERIFY(comp.data->data.rows() == raw.info.nchan);
-    QVERIFY(comp.data->data.cols() == raw.info.nchan);
+    QVERIFY(comp.data.data.rows() == raw.info.nchan);
+    QVERIFY(comp.data.data.cols() == raw.info.nchan);
 }
 
 void TestFiffIoEvokedInfo::fiffInfo_writeToStream()

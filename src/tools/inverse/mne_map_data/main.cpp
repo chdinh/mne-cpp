@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 
     // 6. For each evoked set: apply inverse then forward
     // Get the forward solution matrix (sensors x sources)
-    const MatrixXd& G = fwd.sol->data; // nchan_fwd x nsource
+    const MatrixXd& G = fwd.sol.data; // nchan_fwd x nsource
 
     // Build output evoked set with target info
     FiffEvokedSet outEvokedSet;

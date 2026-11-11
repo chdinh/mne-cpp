@@ -695,7 +695,7 @@ void RtFiffRawViewModel::updateCompensator(int to)
         //We do not need to call this->m_pFiffInfo->set_current_comp(to);
         //Because we will set the compensators to the coil in the same FiffInfo which is already used to write to file.
         //Note that the data is written in raw form not in compensated form.
-        m_matComp = newComp.data->data;
+        m_matComp = newComp.data.data;
 
         m_matSparseCompMult = m_matComp.sparseView();
 

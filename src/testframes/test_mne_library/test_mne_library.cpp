@@ -747,8 +747,8 @@ void TestMneLibrary::inverseOp_readFullFile()
 
     const MNEInverseOperator inv(invPath.toStdU16String());
 
-    QVERIFY(inv.eigen_fields->data.rows() > 0);
-    QVERIFY(inv.source_cov->data.rows() > 0);
+    QVERIFY(inv.eigen_fields.data.rows() > 0);
+    QVERIFY(inv.source_cov.data.rows() > 0);
 }
 
 //=============================================================================================================
@@ -1202,9 +1202,9 @@ void TestMneLibrary::forwardSolution_toFixedOri()
 
     MNEForwardSolution fwdMeg = fwd.pick_types(true, false);
     QVERIFY(!fwdMeg.empty());
-    int origCols = fwdMeg.sol->ncol;
+    int origCols = fwdMeg.sol.ncol;
     fwdMeg.to_fixed_ori();
-    QVERIFY(fwdMeg.sol->ncol > 0 && fwdMeg.sol->ncol <= origCols);
+    QVERIFY(fwdMeg.sol.ncol > 0 && fwdMeg.sol.ncol <= origCols);
 }
 
 void TestMneLibrary::forwardSolution_pickChannels()
@@ -1219,9 +1219,9 @@ void TestMneLibrary::forwardSolution_pickChannels()
         QSKIP("Could not read forward solution");
 
     StringList include;
-    if (fwd.sol->row_names.size() >= 10) {
+    if (fwd.sol.row_names.size() >= 10) {
         for (int i = 0; i < 10; i++)
-            include.push_back(fwd.sol->row_names[i]);
+            include.push_back(fwd.sol.row_names[i]);
     }
     if (include.size() > 0) {
         MNEForwardSolution fwdPicked = fwd.pick_channels(include);
@@ -1246,7 +1246,7 @@ void TestMneLibrary::forwardSolution_computeDepthPrior()
     if (fwdMeg.empty())
         QSKIP("No MEG forward");
 
-    Eigen::MatrixXd Gain = fwdMeg.sol->data.cast<double>();
+    Eigen::MatrixXd Gain = fwdMeg.sol.data.cast<double>();
     FiffCov depth_prior = MNEForwardSolution::compute_depth_prior(
         Gain, raw.info, fwdMeg.isFixedOrient(), 0.8, 10.0);
     QVERIFY(depth_prior.data.rows() > 0);
@@ -1269,7 +1269,7 @@ void TestMneLibrary::forwardSolution_pickRegions()
 
     FiffRawData raw(rawPath().toStdString());
     FiffCov depthPrior = MNEForwardSolution::compute_depth_prior(
-        fwd.sol->data, raw.info, (fwd.source_ori == FIFFV_MNE_FIXED_ORI));
+        fwd.sol.data, raw.info, (fwd.source_ori == FIFFV_MNE_FIXED_ORI));
     QVERIFY(depthPrior.data.rows() > 0);
 
     FiffCov orientPrior = fwd.compute_orient_prior(0.2f);
@@ -1308,9 +1308,9 @@ void TestMneLibrary::namedMatrix_readFromStream()
     if (fwd.empty())
         QSKIP("Could not read forward solution");
 
-    QVERIFY(fwd.sol->data.rows() > 0);
-    QVERIFY(fwd.sol->nrow > 0);
-    QVERIFY(fwd.sol->ncol > 0);
+    QVERIFY(fwd.sol.data.rows() > 0);
+    QVERIFY(fwd.sol.nrow > 0);
+    QVERIFY(fwd.sol.ncol > 0);
 }
 
 void TestMneLibrary::namedMatrix_methods()
@@ -1782,14 +1782,14 @@ void TestMneLibrary::forwardSolution_readVerify()
         QSKIP("No test data");
     MNEForwardSolution fwd(fwdPath().toStdU16String());
     QVERIFY(!fwd.empty());
-    QVERIFY(fwd.sol->nrow > 0);
-    QVERIFY(fwd.sol->ncol > 0);
+    QVERIFY(fwd.sol.nrow > 0);
+    QVERIFY(fwd.sol.ncol > 0);
     QVERIFY(fwd.nsource > 0);
     QVERIFY(fwd.src.size() > 0);
     int totalVerts = 0;
     for (int i = 0; i < fwd.src.size(); ++i)
         totalVerts += fwd.src[i].nuse;
-    qDebug() << "Fwd:" << fwd.sol->nrow << "chs," << fwd.nsource << "src," << totalVerts << "verts";
+    qDebug() << "Fwd:" << fwd.sol.nrow << "chs," << fwd.nsource << "src," << totalVerts << "verts";
 }
 
 //=============================================================================================================
@@ -1820,7 +1820,7 @@ void TestMneLibrary::inverseOp_makeSmallChannelSet()
 
     // Make inverse operator
     MNEInverseOperator inv = MNEInverseOperator::make_inverse_operator(info, fwd, noiseCov, 0.2f, 0.8f);
-    QVERIFY(inv.eigen_fields->data.rows() > 0);
+    QVERIFY(inv.eigen_fields.data.rows() > 0);
 }
 
 void TestMneLibrary::inverseOp_writeReadRoundTrip()
@@ -1831,14 +1831,14 @@ void TestMneLibrary::inverseOp_writeReadRoundTrip()
         QSKIP("Inverse operator file not found");
 
     const MNEInverseOperator inv(invPath.toStdU16String());
-    QVERIFY(inv.eigen_fields->data.rows() > 0);
+    QVERIFY(inv.eigen_fields.data.rows() > 0);
 
     QTemporaryDir dir;
     const std::filesystem::path path = dir.filePath("round-trip-inv.fif").toStdU16String();
     QVERIFY(inv.write(path));
     const MNEInverseOperator inv2(path);
-    QCOMPARE(inv2.eigen_fields->data.rows(), inv.eigen_fields->data.rows());
-    QCOMPARE(inv2.source_cov->data.rows(), inv.source_cov->data.rows());
+    QCOMPARE(inv2.eigen_fields.data.rows(), inv.eigen_fields.data.rows());
+    QCOMPARE(inv2.source_cov.data.rows(), inv.source_cov.data.rows());
 }
 
 void TestMneLibrary::inverseOp_checkChNames()
@@ -1850,8 +1850,8 @@ void TestMneLibrary::inverseOp_checkChNames()
     const MNEInverseOperator inv(invPath.toStdU16String());
 
     // Inverse operator should have channel names
-    QVERIFY(inv.eigen_fields->data.rows() > 0);
-    QVERIFY(inv.noise_cov->names.size() > 0);
+    QVERIFY(inv.eigen_fields.data.rows() > 0);
+    QVERIFY(inv.noise_cov.names.size() > 0);
 }
 
 //=============================================================================================================

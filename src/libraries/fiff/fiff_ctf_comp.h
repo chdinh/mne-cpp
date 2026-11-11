@@ -130,12 +130,12 @@ public:
     bool calibrate(const std::vector<FiffChInfo>& chs);
 
 public:
-    fiff_int_t ctfkind;          /**< CTF kind. */
-    fiff_int_t kind;             /**< Fiff kind -> fiff_constants.h. */
-    bool save_calibrated;        /**< If data should be saved calibrated. */
-    Eigen::MatrixXd rowcals;     /**< Row calibrations. */
-    Eigen::MatrixXd colcals;     /**< Column calibrations. */
-    FiffNamedMatrix::SDPtr data; /**< Compensation data. */
+    fiff_int_t ctfkind;      /**< CTF kind. */
+    fiff_int_t kind;         /**< Fiff kind -> fiff_constants.h. */
+    bool save_calibrated;    /**< If data should be saved calibrated. */
+    Eigen::MatrixXd rowcals; /**< Row calibrations. */
+    Eigen::MatrixXd colcals; /**< Column calibrations. */
+    FiffNamedMatrix data;    /**< Compensation data. */
 };
 } // NAMESPACE
 

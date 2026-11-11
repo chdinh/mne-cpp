@@ -91,8 +91,8 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
                                          SparseMatrix<double>& noise_norm,
                                          std::vector<VectorXi>& vertno)
 {
-    MatrixXd t_eigen_leads = eigen_leads->data;
-    MatrixXd t_source_cov = source_cov->data;
+    MatrixXd t_eigen_leads = eigen_leads.data;
+    MatrixXd t_source_cov = source_cov.data;
     if (method != "MNE")
         noise_norm = noisenorm;
 
@@ -142,7 +142,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
             return false;
         }
 
-        bool is_loose = (0 < orient_prior->data(0, 0)) && (orient_prior->data(0, 0) < 1);
+        bool is_loose = (0 < orient_prior.data(0, 0)) && (orient_prior.data(0, 0) < 1);
         if (!is_loose) {
             Log::warning("The pick_normal parameter is only valid when working with loose orientations.\n");
             return false;
@@ -171,7 +171,7 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
     SparseMatrix<double> t_reginv(reginv.rows(), reginv.rows());
     t_reginv.setFromTriplets(tripletList.begin(), tripletList.end());
 
-    MatrixXd trans = t_reginv * eigen_fields->data * whitener * proj;
+    MatrixXd trans = t_reginv * eigen_fields.data * whitener * proj;
     //
     //   Transformation into current distributions by weighting the eigenleads
     //   with the weights computed above
@@ -211,14 +211,14 @@ bool MNEInverseOperator::assemble_kernel(const FsLabel& label,
 
 bool MNEInverseOperator::check_ch_names(const FiffInfo& measInfo) const
 {
-    StringList inv_ch_names = this->eigen_fields->col_names;
+    StringList inv_ch_names = this->eigen_fields.col_names;
 
     bool t_bContains = true;
-    if (this->eigen_fields->col_names.size() != this->noise_cov->names.size())
+    if (this->eigen_fields.col_names.size() != this->noise_cov.names.size())
         t_bContains = false;
     else {
-        for (qint32 i = 0; i < static_cast<int>(this->noise_cov->names.size()); ++i) {
-            if (inv_ch_names[i] != this->noise_cov->names[i]) {
+        for (qint32 i = 0; i < static_cast<int>(this->noise_cov.names.size()); ++i) {
+            if (inv_ch_names[i] != this->noise_cov.names[i]) {
                 t_bContains = false;
                 break;
             }
@@ -541,18 +541,17 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     //
     // 5. Compose the depth weight matrix
     //
-    FiffCov::SDPtr p_depth_prior;
+    FiffCov p_depth_prior;
     MatrixXd patch_areas;
     if (depth > 0) {
         // TODO: load patch_areas from forward solution
-        p_depth_prior = FiffCov::SDPtr(new FiffCov(MNEForwardSolution::compute_depth_prior(gain, gain_info, is_fixed_ori, depth, 10.0, patch_areas, limit_depth_chs)));
+        p_depth_prior = MNEForwardSolution::compute_depth_prior(gain, gain_info, is_fixed_ori, depth, 10.0, patch_areas, limit_depth_chs);
     } else {
-        p_depth_prior = FiffCov::SDPtr(new FiffCov());
-        p_depth_prior->data = MatrixXd::Ones(gain.cols(), 1);
-        p_depth_prior->kind = FIFFV_MNE_DEPTH_PRIOR_COV;
-        p_depth_prior->diag = true;
-        p_depth_prior->dim = gain.cols();
-        p_depth_prior->nfree = 1;
+        p_depth_prior.data = MatrixXd::Ones(gain.cols(), 1);
+        p_depth_prior.kind = FIFFV_MNE_DEPTH_PRIOR_COV;
+        p_depth_prior.diag = true;
+        p_depth_prior.dim = gain.cols();
+        p_depth_prior.nfree = 1;
     }
 
     // Deal with fixed orientation forward / inverse
@@ -567,13 +566,13 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
             } else {
                 // Convert to the fixed orientation forward solution now
                 qint32 count = 0;
-                for (qint32 i = 2; i < p_depth_prior->data.rows(); i += 3) {
-                    p_depth_prior->data.row(count) = p_depth_prior->data.row(i);
+                for (qint32 i = 2; i < p_depth_prior.data.rows(); i += 3) {
+                    p_depth_prior.data.row(count) = p_depth_prior.data.row(i);
                     gain.col(count) = gain.col(i);
                     ++count;
                 }
-                p_depth_prior->data.conservativeResize(count, 1);
-                p_depth_prior->dim = count;
+                p_depth_prior.data.conservativeResize(count, 1);
+                p_depth_prior.dim = count;
                 gain.conservativeResize(Eigen::NoChange, count);
 
                 forward.to_fixed_ori();
@@ -587,13 +586,13 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     // 6. Compose the source covariance matrix
     //
     Log::info("\tCreating the source covariance matrix\n");
-    FiffCov::SDPtr p_source_cov = p_depth_prior;
+    FiffCov p_source_cov = p_depth_prior;
 
     // apply loose orientations
-    FiffCov::SDPtr p_orient_prior;
+    FiffCov p_orient_prior;
     if (!is_fixed_ori) {
-        p_orient_prior = FiffCov::SDPtr(new FiffCov(forward.compute_orient_prior(loose)));
-        p_source_cov->data.array() *= p_orient_prior->data.array();
+        p_orient_prior = forward.compute_orient_prior(loose);
+        p_source_cov.data.array() *= p_orient_prior.data.array();
     }
 
     // 7. Apply fMRI weighting (not done)
@@ -614,7 +613,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     // Adjusting Source Covariance matrix to make trace of G*R*G' equal
     // to number of sensors.
     Log::info("\tAdjusting source covariance matrix.\n");
-    RowVectorXd source_std = p_source_cov->data.array().sqrt().transpose();
+    RowVectorXd source_std = p_source_cov.data.array().sqrt().transpose();
 
     for (qint32 i = 0; i < gain.rows(); ++i)
         gain.row(i) = gain.row(i).array() * source_std.array();
@@ -622,7 +621,7 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     double trace_GRGT = (gain * gain.transpose()).trace();
     double scaling_source_cov = static_cast<double>(n_nzero) / trace_GRGT;
 
-    p_source_cov->data.array() *= scaling_source_cov;
+    p_source_cov.data.array() *= scaling_source_cov;
 
     gain.array() *= sqrt(scaling_source_cov);
 
@@ -635,20 +634,20 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
     VectorXd p_sing = svd.singularValues();
     MatrixXd t_U = svd.matrixU();
     Linalg::sort<double>(p_sing, t_U);
-    FiffNamedMatrix::SDPtr p_eigen_fields = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(svd.matrixU().cols(),
-                                                                                       svd.matrixU().rows(),
-                                                                                       {},
-                                                                                       gain_info.ch_names,
-                                                                                       t_U.transpose()));
+    FiffNamedMatrix p_eigen_fields(svd.matrixU().cols(),
+                                   svd.matrixU().rows(),
+                                   {},
+                                   gain_info.ch_names,
+                                   t_U.transpose());
 
     p_sing = svd.singularValues();
     MatrixXd t_V = svd.matrixV();
     Linalg::sort<double>(p_sing, t_V);
-    FiffNamedMatrix::SDPtr p_eigen_leads = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(svd.matrixV().rows(),
-                                                                                      svd.matrixV().cols(),
-                                                                                      {},
-                                                                                      {},
-                                                                                      t_V));
+    FiffNamedMatrix p_eigen_leads(svd.matrixV().rows(),
+                                  svd.matrixV().cols(),
+                                  {},
+                                  {},
+                                  t_V);
     Log::info("\tlargest singular value = {:f}\n", p_sing.maxCoeff());
     Log::info("\tscaling factor to adjust the trace = {:f}\n", trace_GRGT);
 
@@ -687,19 +686,19 @@ MNEInverseOperator MNEInverseOperator::make_inverse_operator(const FiffInfo& inf
 
     // We set this for consistency with mne C code written inverses
     if (depth == 0)
-        p_depth_prior = FiffCov::SDPtr();
+        p_depth_prior = FiffCov();
 
-    inv.eigen_fields = p_eigen_fields;
-    inv.eigen_leads = p_eigen_leads;
+    inv.eigen_fields = std::move(p_eigen_fields);
+    inv.eigen_leads = std::move(p_eigen_leads);
     inv.sing = p_sing;
     inv.nchan = p_sing.rows();
     inv.nave = p_nave;
-    inv.depth_prior = p_depth_prior;
+    inv.depth_prior = std::move(p_depth_prior);
     // Fix the kind so I/O round-trips write FIFFV_MNE_SOURCE_COV.
-    p_source_cov->kind = FIFFV_MNE_SOURCE_COV;
-    inv.source_cov = p_source_cov;
-    inv.noise_cov = FiffCov::SDPtr(new FiffCov(p_outNoiseCov));
-    inv.orient_prior = p_orient_prior;
+    p_source_cov.kind = FIFFV_MNE_SOURCE_COV;
+    inv.source_cov = std::move(p_source_cov);
+    inv.noise_cov = std::move(p_outNoiseCov);
+    inv.orient_prior = std::move(p_orient_prior);
     inv.projs = info.projs;
     inv.eigen_leads_weighted = false;
     inv.source_ori = forward.source_ori;
@@ -729,12 +728,12 @@ MNEInverseOperator MNEInverseOperator::prepare_inverse_operator(qint32 nAve, flo
     //   Scale some of the stuff
     //
     float scale = static_cast<float>(inv.nave) / static_cast<float>(nAve);
-    inv.noise_cov->data *= scale;
-    inv.noise_cov->eig *= scale;
-    inv.source_cov->data *= scale;
+    inv.noise_cov.data *= scale;
+    inv.noise_cov.eig *= scale;
+    inv.source_cov.data *= scale;
     //
     if (inv.eigen_leads_weighted)
-        inv.eigen_leads->data *= sqrt(scale);
+        inv.eigen_leads.data *= sqrt(scale);
     //
     Log::info("\tScaled noise and source covariance from nave = {} to nave = {}\n", inv.nave, nAve);
     inv.nave = nAve;
@@ -748,40 +747,40 @@ MNEInverseOperator MNEInverseOperator::prepare_inverse_operator(qint32 nAve, flo
     //   Create the projection operator
     //
 
-    qint32 ncomp = FiffProj::make_projector(inv.projs, inv.noise_cov->names, inv.proj);
+    qint32 ncomp = FiffProj::make_projector(inv.projs, inv.noise_cov.names, inv.proj);
     if (ncomp > 0)
         Log::info("\tCreated an SSP operator (subspace dimension = {})\n", ncomp);
 
     //
     //   Create the whitener
     //
-    inv.whitener = MatrixXd::Zero(inv.noise_cov->dim, inv.noise_cov->dim);
+    inv.whitener = MatrixXd::Zero(inv.noise_cov.dim, inv.noise_cov.dim);
 
     qint32 nnzero, k;
-    if (inv.noise_cov->diag == 0) {
+    if (inv.noise_cov.diag == 0) {
         //
         //   Omit the zeroes due to projection. The eigenvalues are sorted per channel type, not
         //   globally, so the zeroes are not necessarily the first ncomp (mne-python compute_whitener).
         //
         nnzero = 0;
 
-        for (k = 0; k < inv.noise_cov->dim; ++k) {
-            if (inv.noise_cov->eig[k] > 0) {
-                inv.whitener(k, k) = 1.0 / sqrt(inv.noise_cov->eig[k]);
+        for (k = 0; k < inv.noise_cov.dim; ++k) {
+            if (inv.noise_cov.eig[k] > 0) {
+                inv.whitener(k, k) = 1.0 / sqrt(inv.noise_cov.eig[k]);
                 ++nnzero;
             }
         }
         //
         //   Rows of eigvec are the eigenvectors
         //
-        inv.whitener *= inv.noise_cov->eigvec;
-        Log::info("\tCreated the whitener using a full noise covariance matrix ({} small eigenvalues omitted)\n", inv.noise_cov->dim - nnzero);
+        inv.whitener *= inv.noise_cov.eigvec;
+        Log::info("\tCreated the whitener using a full noise covariance matrix ({} small eigenvalues omitted)\n", inv.noise_cov.dim - nnzero);
     } else {
         //
         //   No need to omit the zeroes due to projection
         //
-        for (k = 0; k < inv.noise_cov->dim; ++k)
-            inv.whitener(k, k) = 1.0 / sqrt(inv.noise_cov->data(k, 0));
+        for (k = 0; k < inv.noise_cov.dim; ++k)
+            inv.whitener(k, k) = 1.0 / sqrt(inv.noise_cov.data(k, 0));
 
         Log::info("\tCreated the whitener using a diagonal noise covariance matrix ({} small eigenvalues discarded)\n", ncomp);
     }
@@ -789,7 +788,7 @@ MNEInverseOperator MNEInverseOperator::prepare_inverse_operator(qint32 nAve, flo
     //   Finally, compute the noise-normalization factors
     //
     if (dSPM || sLORETA) {
-        VectorXd noise_norm = VectorXd::Zero(inv.eigen_leads->nrow);
+        VectorXd noise_norm = VectorXd::Zero(inv.eigen_leads.nrow);
         VectorXd noise_weight;
         if (dSPM) {
             Log::info("\tComputing noise-normalization factors (dSPM)...");
@@ -801,15 +800,15 @@ MNEInverseOperator MNEInverseOperator::prepare_inverse_operator(qint32 nAve, flo
         }
         VectorXd one;
         if (inv.eigen_leads_weighted) {
-            for (k = 0; k < inv.eigen_leads->nrow; ++k) {
-                one = inv.eigen_leads->data.block(k, 0, 1, inv.eigen_leads->data.cols()).cwiseProduct(noise_weight);
+            for (k = 0; k < inv.eigen_leads.nrow; ++k) {
+                one = inv.eigen_leads.data.block(k, 0, 1, inv.eigen_leads.data.cols()).cwiseProduct(noise_weight);
                 noise_norm[k] = sqrt(one.dot(one));
             }
         } else {
             double c;
-            for (k = 0; k < inv.eigen_leads->nrow; ++k) {
-                c = sqrt(inv.source_cov->data(k, 0));
-                one = c * (inv.eigen_leads->data.row(k).transpose()).cwiseProduct(noise_weight);
+            for (k = 0; k < inv.eigen_leads.nrow; ++k) {
+                c = sqrt(inv.source_cov.data(k, 0));
+                one = c * (inv.eigen_leads.data.row(k).transpose()).cwiseProduct(noise_weight);
                 noise_norm[k] = sqrt(one.dot(one));
             }
         }
@@ -932,31 +931,31 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
     //   The eigenleads and eigenfields
     //
     inv.eigen_leads_weighted = false;
-    if (!t_pStream.read_named_matrix(invs, FIFF_MNE_INVERSE_LEADS, *inv.eigen_leads.data())) {
+    if (!t_pStream.read_named_matrix(invs, FIFF_MNE_INVERSE_LEADS, inv.eigen_leads)) {
         inv.eigen_leads_weighted = true;
-        if (!t_pStream.read_named_matrix(invs, FIFF_MNE_INVERSE_LEADS_WEIGHTED, *inv.eigen_leads.data())) {
+        if (!t_pStream.read_named_matrix(invs, FIFF_MNE_INVERSE_LEADS_WEIGHTED, inv.eigen_leads)) {
             return fail(ErrorCode::Format, "cannot read the eigenleads of {}", name);
         }
     }
     //
     //   Having the eigenleads as columns is better for the inverse calculations
     //
-    inv.eigen_leads->transpose_named_matrix();
+    inv.eigen_leads.transpose_named_matrix();
 
-    if (!t_pStream.read_named_matrix(invs, FIFF_MNE_INVERSE_FIELDS, *inv.eigen_fields.data())) {
+    if (!t_pStream.read_named_matrix(invs, FIFF_MNE_INVERSE_FIELDS, inv.eigen_fields)) {
         return fail(ErrorCode::Format, "cannot read the eigenfields of {}", name);
     }
     Log::info("[done]\n");
     //
     //   Read the covariance matrices
     //
-    if (t_pStream.read_cov(invs, FIFFV_MNE_NOISE_COV, *inv.noise_cov.data())) {
+    if (t_pStream.read_cov(invs, FIFFV_MNE_NOISE_COV, inv.noise_cov)) {
         Log::info("\tNoise covariance matrix read.\n");
     } else {
         return fail(ErrorCode::Format, "cannot read the noise covariance of {}", name);
     }
 
-    if (t_pStream.read_cov(invs, FIFFV_MNE_SOURCE_COV, *inv.source_cov.data())) {
+    if (t_pStream.read_cov(invs, FIFFV_MNE_SOURCE_COV, inv.source_cov)) {
         Log::info("\tSource covariance matrix read.\n");
     } else {
         return fail(ErrorCode::Format, "cannot read the source covariance of {}", name);
@@ -964,20 +963,20 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
     //
     //   Read the various priors
     //
-    if (t_pStream.read_cov(invs, FIFFV_MNE_ORIENT_PRIOR_COV, *inv.orient_prior.data())) {
+    if (t_pStream.read_cov(invs, FIFFV_MNE_ORIENT_PRIOR_COV, inv.orient_prior)) {
         Log::info("\tOrientation priors read.\n");
     } else
-        inv.orient_prior->clear();
+        inv.orient_prior.clear();
 
-    if (t_pStream.read_cov(invs, FIFFV_MNE_DEPTH_PRIOR_COV, *inv.depth_prior.data())) {
+    if (t_pStream.read_cov(invs, FIFFV_MNE_DEPTH_PRIOR_COV, inv.depth_prior)) {
         Log::info("\tDepth priors read.\n");
     } else {
-        inv.depth_prior->clear();
+        inv.depth_prior.clear();
     }
-    if (t_pStream.read_cov(invs, FIFFV_MNE_FMRI_PRIOR_COV, *inv.fmri_prior.data())) {
+    if (t_pStream.read_cov(invs, FIFFV_MNE_FMRI_PRIOR_COV, inv.fmri_prior)) {
         Log::info("\tfMRI priors read.\n");
     } else {
-        inv.fmri_prior->clear();
+        inv.fmri_prior.clear();
     }
     //
     //   Read the source spaces
@@ -1075,35 +1074,35 @@ void MNEInverseOperator::write_to_stream(FiffStream& stream) const
     //   The eigenleads and eigenfields
     //
     if (this->eigen_leads_weighted) {
-        FiffNamedMatrix tmpMatrix(*this->eigen_leads.data());
+        FiffNamedMatrix tmpMatrix(eigen_leads);
         tmpMatrix.transpose_named_matrix();
         stream.write_named_matrix(FIFF_MNE_INVERSE_LEADS_WEIGHTED, tmpMatrix);
     } else {
-        FiffNamedMatrix tmpMatrix(*this->eigen_leads.data());
+        FiffNamedMatrix tmpMatrix(eigen_leads);
         tmpMatrix.transpose_named_matrix();
         stream.write_named_matrix(FIFF_MNE_INVERSE_LEADS, tmpMatrix);
     }
 
-    stream.write_named_matrix(FIFF_MNE_INVERSE_FIELDS, *this->eigen_fields.data());
+    stream.write_named_matrix(FIFF_MNE_INVERSE_FIELDS, eigen_fields);
     Log::info("\t[done]\n");
     //
     //   write the covariance matrices
     //
     Log::info("\tWriting noise covariance matrix.");
-    stream.write_cov(*this->noise_cov.data());
+    stream.write_cov(noise_cov);
 
     Log::info("\tWriting source covariance matrix.\n");
-    stream.write_cov(*this->source_cov.data());
+    stream.write_cov(source_cov);
     //
     //   write the various priors
     //
     Log::info("\tWriting orientation priors.\n");
-    if (this->orient_prior && !this->orient_prior->empty())
-        stream.write_cov(*this->orient_prior.data());
-    if (this->depth_prior && !this->depth_prior->empty())
-        stream.write_cov(*this->depth_prior.data());
-    if (this->fmri_prior && !this->fmri_prior->empty())
-        stream.write_cov(*this->fmri_prior.data());
+    if (!orient_prior.empty())
+        stream.write_cov(orient_prior);
+    if (!depth_prior.empty())
+        stream.write_cov(depth_prior);
+    if (!fmri_prior.empty())
+        stream.write_cov(fmri_prior);
 
     //
     //   Parent MRI data

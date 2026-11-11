@@ -59,10 +59,6 @@ constexpr int Z = 2;
 
 ComputeFwd::ComputeFwd(std::shared_ptr<ComputeFwdSettings> pSettings)
 : m_pSettings(pSettings)
-, m_meg_forward(new FiffNamedMatrix)
-, m_meg_forward_grad(new FiffNamedMatrix)
-, m_eeg_forward(new FiffNamedMatrix)
-, m_eeg_forward_grad(new FiffNamedMatrix)
 {
     initFwd();
 }
@@ -540,8 +536,8 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
                                              m_pSettings->fixed_ori,
                                              m_pSettings->r0,
                                              m_pSettings->use_threads,
-                                             *m_meg_forward.data(),
-                                             *m_meg_forward_grad.data(),
+                                             m_meg_forward,
+                                             m_meg_forward_grad,
                                              m_pSettings->compute_grad)) == FAIL) {
             return nullptr;
         }
@@ -552,8 +548,8 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
                                              m_pSettings->fixed_ori,
                                              m_eegModel.get(),
                                              m_pSettings->use_threads,
-                                             *m_eeg_forward.data(),
-                                             *m_eeg_forward_grad.data(),
+                                             m_eeg_forward,
+                                             m_eeg_forward_grad,
                                              m_pSettings->compute_grad)) == FAIL) {
             return nullptr;
         }
@@ -561,19 +557,19 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
 
     // Assemble combined sol
     if (iNMeg > 0 && iNEeg > 0) {
-        if (m_meg_forward->data.cols() != m_eeg_forward->data.cols()) {
+        if (m_meg_forward.data.cols() != m_eeg_forward.data.cols()) {
             BASELIB::Log::warning("The MEG and EEG forward solutions do not match");
             return nullptr;
         }
-        fwdSolution->sol->clear();
-        fwdSolution->sol->nrow = m_meg_forward->nrow + m_eeg_forward->nrow;
-        fwdSolution->sol->ncol = m_meg_forward->ncol;
-        fwdSolution->sol->data = MatrixXd(fwdSolution->sol->nrow, fwdSolution->sol->ncol);
-        fwdSolution->sol->data.block(0, 0, m_meg_forward->nrow, m_meg_forward->ncol) = m_meg_forward->data;
-        fwdSolution->sol->data.block(m_meg_forward->nrow, 0, m_eeg_forward->nrow, m_eeg_forward->ncol) = m_eeg_forward->data;
-        fwdSolution->sol->row_names = m_meg_forward->row_names;
-        fwdSolution->sol->row_names.insert(fwdSolution->sol->row_names.end(), m_eeg_forward->row_names.begin(), m_eeg_forward->row_names.end());
-        fwdSolution->sol->col_names = m_meg_forward->col_names;
+        fwdSolution->sol.clear();
+        fwdSolution->sol.nrow = m_meg_forward.nrow + m_eeg_forward.nrow;
+        fwdSolution->sol.ncol = m_meg_forward.ncol;
+        fwdSolution->sol.data = MatrixXd(fwdSolution->sol.nrow, fwdSolution->sol.ncol);
+        fwdSolution->sol.data.block(0, 0, m_meg_forward.nrow, m_meg_forward.ncol) = m_meg_forward.data;
+        fwdSolution->sol.data.block(m_meg_forward.nrow, 0, m_eeg_forward.nrow, m_eeg_forward.ncol) = m_eeg_forward.data;
+        fwdSolution->sol.row_names = m_meg_forward.row_names;
+        fwdSolution->sol.row_names.insert(fwdSolution->sol.row_names.end(), m_eeg_forward.row_names.begin(), m_eeg_forward.row_names.end());
+        fwdSolution->sol.col_names = m_meg_forward.col_names;
     } else if (iNMeg > 0) {
         fwdSolution->sol = m_meg_forward;
     } else {
@@ -582,19 +578,19 @@ std::unique_ptr<MNEForwardSolution> ComputeFwd::calculateFwd()
 
     if (m_pSettings->compute_grad) {
         if (iNMeg > 0 && iNEeg > 0) {
-            if (m_meg_forward_grad->data.cols() != m_eeg_forward_grad->data.cols()) {
+            if (m_meg_forward_grad.data.cols() != m_eeg_forward_grad.data.cols()) {
                 BASELIB::Log::warning("The MEG and EEG forward solutions do not match");
                 return nullptr;
             }
-            fwdSolution->sol_grad->clear();
-            fwdSolution->sol_grad->nrow = m_meg_forward_grad->nrow + m_eeg_forward_grad->nrow;
-            fwdSolution->sol_grad->ncol = m_meg_forward_grad->ncol;
-            fwdSolution->sol_grad->data = MatrixXd(fwdSolution->sol_grad->nrow, fwdSolution->sol_grad->ncol);
-            fwdSolution->sol_grad->data.block(0, 0, m_meg_forward_grad->nrow, m_meg_forward_grad->ncol) = m_meg_forward_grad->data;
-            fwdSolution->sol_grad->data.block(m_meg_forward_grad->nrow, 0, m_eeg_forward_grad->nrow, m_eeg_forward_grad->ncol) = m_eeg_forward_grad->data;
-            fwdSolution->sol_grad->row_names = m_meg_forward_grad->row_names;
-            fwdSolution->sol_grad->row_names.insert(fwdSolution->sol_grad->row_names.end(), m_eeg_forward_grad->row_names.begin(), m_eeg_forward_grad->row_names.end());
-            fwdSolution->sol_grad->col_names = m_meg_forward_grad->col_names;
+            fwdSolution->sol_grad.clear();
+            fwdSolution->sol_grad.nrow = m_meg_forward_grad.nrow + m_eeg_forward_grad.nrow;
+            fwdSolution->sol_grad.ncol = m_meg_forward_grad.ncol;
+            fwdSolution->sol_grad.data = MatrixXd(fwdSolution->sol_grad.nrow, fwdSolution->sol_grad.ncol);
+            fwdSolution->sol_grad.data.block(0, 0, m_meg_forward_grad.nrow, m_meg_forward_grad.ncol) = m_meg_forward_grad.data;
+            fwdSolution->sol_grad.data.block(m_meg_forward_grad.nrow, 0, m_eeg_forward_grad.nrow, m_eeg_forward_grad.ncol) = m_eeg_forward_grad.data;
+            fwdSolution->sol_grad.row_names = m_meg_forward_grad.row_names;
+            fwdSolution->sol_grad.row_names.insert(fwdSolution->sol_grad.row_names.end(), m_eeg_forward_grad.row_names.begin(), m_eeg_forward_grad.row_names.end());
+            fwdSolution->sol_grad.col_names = m_meg_forward_grad.col_names;
         } else if (iNMeg > 0) {
             fwdSolution->sol_grad = m_meg_forward_grad;
         } else {
@@ -678,8 +674,8 @@ bool ComputeFwd::updateHeadPos(const FiffCoordTrans& transDevHead, MNEForwardSol
                                          m_pSettings->fixed_ori,
                                          m_pSettings->r0,
                                          m_pSettings->use_threads,
-                                         *m_meg_forward.data(),
-                                         *m_meg_forward_grad.data(),
+                                         m_meg_forward,
+                                         m_meg_forward_grad,
                                          m_pSettings->compute_grad)) == FAIL) {
         return false;
     }
@@ -689,9 +685,9 @@ bool ComputeFwd::updateHeadPos(const FiffCoordTrans& transDevHead, MNEForwardSol
     fwd.info.dev_head_t = transDevHead;
 
     // update solution
-    fwd.sol->data.block(0, 0, m_meg_forward->nrow, m_meg_forward->ncol) = m_meg_forward->data;
+    fwd.sol.data.block(0, 0, m_meg_forward.nrow, m_meg_forward.ncol) = m_meg_forward.data;
     if (m_pSettings->compute_grad) {
-        fwd.sol_grad->data.block(0, 0, m_meg_forward_grad->nrow, m_meg_forward_grad->ncol) = m_meg_forward_grad->data;
+        fwd.sol_grad.data.block(0, 0, m_meg_forward_grad.nrow, m_meg_forward_grad.ncol) = m_meg_forward_grad.data;
     }
 
     return true;

@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
     if (t_Fwd.source_ori != -1) {
         std::cout << "\nfirst 10 rows and columns of the Gain Matrix:\n"
-                  << t_Fwd.sol->data.block(0, 0, 10, 10) << std::endl;
+                  << t_Fwd.sol.data.block(0, 0, 10, 10) << std::endl;
         std::cout << "\nfirst 10 dipole coordinates:\n"
                   << t_Fwd.source_rr.block(0, 0, 10, 3) << std::endl;
         std::cout << "\nfirst 10 dipole normales:\n"
@@ -103,15 +103,15 @@ int main(int argc, char* argv[])
     MNEForwardSolution t_clusteredFwd = t_Fwd.cluster_forward_solution(t_annotationSet, 20); //40);
 
     qDebug() << "==== Results ====";
-    qDebug() << "nrow: " << t_clusteredFwd.sol->nrow;
-    qDebug() << "ncol: " << t_clusteredFwd.sol->ncol;
+    qDebug() << "nrow: " << t_clusteredFwd.sol.nrow;
+    qDebug() << "ncol: " << t_clusteredFwd.sol.ncol;
     qDebug() << "row_names:";
-    qDebug() << t_clusteredFwd.sol->row_names;
+    qDebug() << t_clusteredFwd.sol.row_names;
     qDebug() << "col_names:";
-    qDebug() << t_clusteredFwd.sol->col_names;
+    qDebug() << t_clusteredFwd.sol.col_names;
     qDebug() << "write fwd data to ./test_fwd.txt ...";
-    MATHLIB::write_matrix(t_clusteredFwd.sol->data, QDir::temp().filePath("ex_read_fwd-clustered.txt").toStdString());
+    MATHLIB::write_matrix(t_clusteredFwd.sol.data, QDir::temp().filePath("ex_read_fwd-clustered.txt").toStdString());
     qDebug() << "[done]";
 
-    return t_clusteredFwd.sol->ncol > 0 && t_clusteredFwd.sol->ncol < t_Fwd.sol->ncol ? 0 : 1;
+    return t_clusteredFwd.sol.ncol > 0 && t_clusteredFwd.sol.ncol < t_Fwd.sol.ncol ? 0 : 1;
 }

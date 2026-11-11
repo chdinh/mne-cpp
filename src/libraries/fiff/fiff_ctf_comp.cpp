@@ -39,7 +39,6 @@ FiffCtfComp::FiffCtfComp()
 : ctfkind(-1)
 , kind(-1)
 , save_calibrated(false)
-, data(FiffNamedMatrix::SDPtr(new FiffNamedMatrix()))
 {
 }
 
@@ -70,7 +69,7 @@ void FiffCtfComp::clear()
     save_calibrated = false;
     rowcals = MatrixXd();
     colcals = MatrixXd();
-    data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix());
+    data = FiffNamedMatrix();
 }
 
 //=============================================================================================================
@@ -99,22 +98,22 @@ int uniqueChannel(const std::vector<FiffChInfo>& chs, const std::string& name)
 
 bool FiffCtfComp::calibrate(const std::vector<FiffChInfo>& chs)
 {
-    rowcals = MatrixXd::Ones(data->data.rows(), 1);
-    colcals = MatrixXd::Ones(data->data.cols(), 1);
+    rowcals = MatrixXd::Ones(data.data.rows(), 1);
+    colcals = MatrixXd::Ones(data.data.cols(), 1);
     if (save_calibrated)
         return true;
-    for (Index col = 0; col < data->data.cols(); ++col) {
-        const int p = uniqueChannel(chs, data->col_names[col]);
+    for (Index col = 0; col < data.data.cols(); ++col) {
+        const int p = uniqueChannel(chs, data.col_names[col]);
         if (p < 0)
             return false;
         colcals(col) = 1.0 / (static_cast<double>(chs[p].range) * chs[p].cal);
     }
-    for (Index row = 0; row < data->data.rows(); ++row) {
-        const int p = uniqueChannel(chs, data->row_names[row]);
+    for (Index row = 0; row < data.data.rows(); ++row) {
+        const int p = uniqueChannel(chs, data.row_names[row]);
         if (p < 0)
             return false;
         rowcals(row) = static_cast<double>(chs[p].range) * chs[p].cal;
     }
-    data->data = rowcals.asDiagonal() * data->data * colcals.asDiagonal();
+    data.data = rowcals.asDiagonal() * data.data * colcals.asDiagonal();
     return true;
 }

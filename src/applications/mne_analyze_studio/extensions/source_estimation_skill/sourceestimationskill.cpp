@@ -214,9 +214,9 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
 
     // ── Pick raw channels that match the inverse operator ────────────────────
     StringList invChNames;
-    invChNames.reserve(invOp->noise_cov->names.size());
-    for (int i = 0; i < static_cast<int>(invOp->noise_cov->names.size()); ++i) {
-        invChNames.push_back(invOp->noise_cov->names[i]);
+    invChNames.reserve(invOp->noise_cov.names.size());
+    for (int i = 0; i < static_cast<int>(invOp->noise_cov.names.size()); ++i) {
+        invChNames.push_back(invOp->noise_cov.names[i]);
     }
     const RowVectorXi picks = raw.info.pick_channels(invChNames);
     if (picks.size() == 0) {

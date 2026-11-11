@@ -74,9 +74,9 @@ MatrixXd makeLeadField()
 MNEForwardSolution makeForward(const MatrixXd& G)
 {
     MNEForwardSolution fwd;
-    fwd.sol->data = G;
-    fwd.sol->nrow = static_cast<int>(G.rows());
-    fwd.sol->ncol = static_cast<int>(G.cols());
+    fwd.sol.data = G;
+    fwd.sol.nrow = static_cast<int>(G.rows());
+    fwd.sol.ncol = static_cast<int>(G.cols());
     fwd.nsource = kSources;
     return fwd;
 }

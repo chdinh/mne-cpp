@@ -158,18 +158,18 @@ void TestMneForwardSolution::computeForward()
     QVERIFY(m_pFwdMEGEEGRead->nchan == m_pFwdMEGEEGRef->nchan);
 
     // Compare sol data row-by-row (Eigen 5 isApprox on full large matrices can crash)
-    QVERIFY(m_pFwdMEGEEGRead->sol->nrow == m_pFwdMEGEEGRef->sol->nrow);
-    QVERIFY(m_pFwdMEGEEGRead->sol->ncol == m_pFwdMEGEEGRef->sol->ncol);
-    QVERIFY(sameChannels(m_pFwdMEGEEGRead->sol->row_names, m_pFwdMEGEEGRef->sol->row_names));
-    QVERIFY(m_pFwdMEGEEGRead->sol->col_names == m_pFwdMEGEEGRef->sol->col_names);
-    for (Eigen::Index r = 0; r < m_pFwdMEGEEGRead->sol->data.rows(); ++r) {
-        QVERIFY(m_pFwdMEGEEGRead->sol->data.row(r).isApprox(m_pFwdMEGEEGRef->sol->data.row(r), 0.0001));
+    QVERIFY(m_pFwdMEGEEGRead->sol.nrow == m_pFwdMEGEEGRef->sol.nrow);
+    QVERIFY(m_pFwdMEGEEGRead->sol.ncol == m_pFwdMEGEEGRef->sol.ncol);
+    QVERIFY(sameChannels(m_pFwdMEGEEGRead->sol.row_names, m_pFwdMEGEEGRef->sol.row_names));
+    QVERIFY(m_pFwdMEGEEGRead->sol.col_names == m_pFwdMEGEEGRef->sol.col_names);
+    for (Eigen::Index r = 0; r < m_pFwdMEGEEGRead->sol.data.rows(); ++r) {
+        QVERIFY(m_pFwdMEGEEGRead->sol.data.row(r).isApprox(m_pFwdMEGEEGRef->sol.data.row(r), 0.0001));
     }
 
     // sol_grad may not be present in the forward solution files
-    if (m_pFwdMEGEEGRead->sol_grad->nrow > 0 && m_pFwdMEGEEGRef->sol_grad->nrow > 0) {
-        for (Eigen::Index r = 0; r < m_pFwdMEGEEGRead->sol_grad->data.rows(); ++r) {
-            QVERIFY(m_pFwdMEGEEGRead->sol_grad->data.row(r).isApprox(m_pFwdMEGEEGRef->sol_grad->data.row(r), 0.0001));
+    if (m_pFwdMEGEEGRead->sol_grad.nrow > 0 && m_pFwdMEGEEGRef->sol_grad.nrow > 0) {
+        for (Eigen::Index r = 0; r < m_pFwdMEGEEGRead->sol_grad.data.rows(); ++r) {
+            QVERIFY(m_pFwdMEGEEGRead->sol_grad.data.row(r).isApprox(m_pFwdMEGEEGRef->sol_grad.data.row(r), 0.0001));
         }
     }
 

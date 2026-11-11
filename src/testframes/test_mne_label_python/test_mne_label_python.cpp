@@ -231,8 +231,8 @@ void TestMneLabelPython::pickRegions_matchesPython()
     const int nsrc = nuseLh + nuseRh;
 
     QCOMPARE(f.nsource, nsrc);
-    QCOMPARE(static_cast<int>(f.sol->data.cols()), 3 * nsrc);
-    QCOMPARE(f.sol->ncol, 3 * nsrc);
+    QCOMPARE(static_cast<int>(f.sol.data.cols()), 3 * nsrc);
+    QCOMPARE(f.sol.ncol, 3 * nsrc);
     QCOMPARE(static_cast<int>(f.source_rr.rows()), nsrc);
     // Free orientation: three normals per source, as in mne-python.
     QCOMPARE(static_cast<int>(f.source_nn.rows()), 3 * nsrc);
@@ -250,7 +250,7 @@ void TestMneLabelPython::pickRegions_matchesPython()
     // The gain matrix is float32 on disk, so the sums of the same elements
     // agree to summation order (~1e-12 relative); 1e-9 catches one column
     // taken from a neighbouring source.
-    const double sum = f.sol->data.cwiseAbs().sum();
+    const double sum = f.sol.data.cwiseAbs().sum();
     QVERIFY2(std::fabs(sum - gainAbsSum) < 1e-9 * gainAbsSum, qPrintable(QString("gain abs sum %1, mne-python %2").arg(sum, 0, 'g', 17).arg(gainAbsSum, 0, 'g', 17)));
 
     // Positions are float32, so compare at float precision.
@@ -305,7 +305,7 @@ void TestMneLabelPython::clusterForward_invariants()
     // the requested cluster size on average.
     QCOMPARE(nAssigned, small.nsource);
     QCOMPARE(c.nsource, nClusters);
-    QCOMPARE(static_cast<int>(c.sol->data.cols()), 3 * nClusters);
+    QCOMPARE(static_cast<int>(c.sol.data.cols()), 3 * nClusters);
     QVERIFY(nClusters >= (small.nsource + 39) / 40);
 
     // D averages the sources of each cluster: columns sum to one per
@@ -316,7 +316,7 @@ void TestMneLabelPython::clusterForward_invariants()
     QVERIFY(((D.array() > 0).rowwise().count() == 1).all());
 
     // The clustered gain is the cluster average of the original gain columns.
-    QVERIFY((c.sol->data - small.sol->data * D).cwiseAbs().maxCoeff() < 1e-9 * small.sol->data.cwiseAbs().maxCoeff());
+    QVERIFY((c.sol.data - small.sol.data * D).cwiseAbs().maxCoeff() < 1e-9 * small.sol.data.cwiseAbs().maxCoeff());
 
     // Surface orientation, as make_inverse_operator applies it, rotates every cluster into the
     // frame of its centroid's normal (it read past vertno before nuse followed the clustering).
@@ -343,7 +343,7 @@ void TestMneLabelPython::clusterForward_invariants()
     QCOMPARE(static_cast<int>(Dw.rows()), 3 * small.nsource);
     QVERIFY((Dw.colwise().sum().array() - 1.0).abs().maxCoeff() < 1e-12);
     QVERIFY(((Dw.array() > 0).rowwise().count() == 1).all());
-    QVERIFY((cw.sol->data - small.sol->data * Dw).cwiseAbs().maxCoeff() < 1e-9 * small.sol->data.cwiseAbs().maxCoeff());
+    QVERIFY((cw.sol.data - small.sol.data * Dw).cwiseAbs().maxCoeff() < 1e-9 * small.sol.data.cwiseAbs().maxCoeff());
 
     // Fixed orientation is not supported and returns the input unchanged.
     MNEForwardSolution fixed = small;
@@ -424,14 +424,14 @@ void TestMneLabelPython::assembleKernel_label()
         prepared.getKernel() = kFull;
         const MatrixXd R = MNECorticalMap::makeCorticalMap(fwd, prepared, evoked.info);
         QCOMPARE(R.rows(), kFull.rows());
-        QCOMPARE(R.cols(), fwd.sol->data.cols());
+        QCOMPARE(R.cols(), fwd.sol.data.cols());
         // Only the inverse's 364 good channels of the 366-row forward enter K G.
-        QCOMPARE(static_cast<int>(prepared.eigen_fields->col_names.size()), 364);
+        QCOMPARE(static_cast<int>(prepared.eigen_fields.col_names.size()), 364);
         MNEForwardSolution surfFwd = fwd;
         surfFwd.convert_to_surf_ori();
-        MatrixXd G(364, fwd.sol->data.cols());
+        MatrixXd G(364, fwd.sol.data.cols());
         for (int c = 0; c < 364; ++c)
-            G.row(c) = surfFwd.sol->data.row(FIFFLIB::channel_index(surfFwd.sol->row_names, prepared.eigen_fields->col_names[c]));
+            G.row(c) = surfFwd.sol.data.row(FIFFLIB::channel_index(surfFwd.sol.row_names, prepared.eigen_fields.col_names[c]));
         QVERIFY((R - kFull * G).norm() <= 1e-12 * R.norm());
         QVERIFY2(std::abs(R.trace() - 43.488585536748346) <= 1e-5 * 43.488585536748346, qPrintable(QString::number(R.trace(), 'g', 17)));
         QVERIFY2(std::abs(R.norm() - 7.8792209245077) <= 1e-5 * 7.8792209245077, qPrintable(QString::number(R.norm(), 'g', 17)));
@@ -440,7 +440,7 @@ void TestMneLabelPython::assembleKernel_label()
         QVERIFY(MNECorticalMap::makeCorticalMap(fwd, inv, evoked.info).size() == 0);
         QTest::ignoreMessage(QtWarningMsg, "MNECorticalMap::makeCorticalMap - Forward solution is empty.");
         QVERIFY(MNECorticalMap::makeCorticalMap(MNEForwardSolution(), prepared, evoked.info).size() == 0);
-        const MNEForwardSolution noMeg = fwd.pick_channels({}, StringList(fwd.sol->row_names.begin() + 0, fwd.sol->row_names.begin() + 0 + 306));
+        const MNEForwardSolution noMeg = fwd.pick_channels({}, StringList(fwd.sol.row_names.begin() + 0, fwd.sol.row_names.begin() + 0 + 306));
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("Channel MEG \\d+ is not in the forward solution"));
         QVERIFY(MNECorticalMap::makeCorticalMap(noMeg, prepared, evoked.info).size() == 0);
     } else {

@@ -118,38 +118,6 @@ public:
 
     //=========================================================================================================
     /**
-     * New Lead Field to distribute
-     *
-     * @param[in] pNamedMatSol     The solution matrix (Lead Field) which should be distributed.
-     */
-    virtual void setSol(const FIFFLIB::FiffNamedMatrix::SDPtr& pNamedMatSol);
-
-    //=========================================================================================================
-    /**
-     * Get the Lied Field matrix
-     *
-     * @return The Lead Field matrix.
-     */
-    virtual QSharedDataPointer<FIFFLIB::FiffNamedMatrix>& getSol();
-
-    //=========================================================================================================
-    /**
-     * New gradient lead field to ditstribute
-     *
-     * @param[in] pNamedMatSolGrad     The gradient solution matrix (Lead Field) which should be distributed.
-     */
-    virtual void setSolGrad(const FIFFLIB::FiffNamedMatrix::SDPtr& pNamedMatSolGrad);
-
-    //=========================================================================================================
-    /**
-     * Get the gradient Lied Field matrix
-     *
-     * @return The gradient lead field.
-     */
-    virtual QSharedDataPointer<FIFFLIB::FiffNamedMatrix>& getSolGrad();
-
-    //=========================================================================================================
-    /**
      * Returns if the fwd solution is clustered.
      *
      * @return if Forward is Clustered.
@@ -171,9 +139,6 @@ private:
 
     std::shared_ptr<MNELIB::MNEForwardSolution> m_pFwdSolution; /**< The Mne Forward Solution. */
     std::shared_ptr<FIFFLIB::FiffInfo> m_pFiffInfo;             /**< The Fiff Info. */
-
-    QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_pNamedMatSol;     /**< The solution matrix (LF). */
-    QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_pNamedMatSolGrad; /**< The gradient solution matrix (LF). */
 };
 
 //=============================================================================================================

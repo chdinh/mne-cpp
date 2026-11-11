@@ -270,7 +270,7 @@ private slots:
         // Read forward solution
         MNEForwardSolution fwd(path.toStdU16String());
         QVERIFY(!fwd.empty());
-        QVERIFY(fwd.sol != nullptr || true);
+        QVERIFY(!fwd.sol.empty() || true);
         QVERIFY(fwd.source_nn.rows() > 0);
         QVERIFY(fwd.nchan > 0);
         QVERIFY(fwd.nsource > 0);

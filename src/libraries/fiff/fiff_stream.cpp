@@ -1053,8 +1053,8 @@ std::vector<FiffCtfComp> FiffStream::read_ctf_comp(const std::shared_ptr<FiffDir
         //
         //   Read the data we need
         //
-        FiffNamedMatrix::SDPtr mat(new FiffNamedMatrix());
-        this->read_named_matrix(node, FIFF_MNE_CTF_COMP_DATA, *mat);
+        FiffNamedMatrix mat;
+        this->read_named_matrix(node, FIFF_MNE_CTF_COMP_DATA, mat);
         for (p = 0; p < node->nent(); ++p) {
             kind = node->dir[p].kind;
             pos = node->dir[p].pos;
@@ -1104,7 +1104,7 @@ std::vector<FiffCtfComp> FiffStream::read_ctf_comp(const std::shared_ptr<FiffDir
             calibrated = static_cast<bool>(*t_pTag->toInt());
 
         one.save_calibrated = calibrated;
-        one.data = mat;
+        one.data = std::move(mat);
         if (!one.calibrate(p_Chs))
             return {};
         compdata.push_back(one);
@@ -1797,7 +1797,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
     if (projdata.size() > 0) {
         Log::info("\tRead a total of {} projection items:\n", projdata.size());
         for (std::int32_t k = 0; k < std::ssize(projdata); ++k) {
-            Log::info("\t\t{} ({} x {}) {}\n", projdata[k].desc, projdata[k].data->nrow, projdata[k].data->ncol, projdata[k].active ? "active" : "idle");
+            Log::info("\t\t{} ({} x {}) {}\n", projdata[k].desc, projdata[k].data.nrow, projdata[k].data.ncol, projdata[k].active ? "active" : "idle");
         }
     }
 
@@ -2491,13 +2491,13 @@ fiff_long_t FiffStream::write_ctf_comp(const std::vector<FiffCtfComp>& comps)
         //
         if (!comps[k].save_calibrated) {
             // A compensator built in memory has no calibration factors to undo
-            if (comp.rowcals.size() == comp.data->data.rows())
-                comp.data->data = comp.rowcals.reshaped().cwiseInverse().asDiagonal() * comp.data->data;
-            if (comp.colcals.size() == comp.data->data.cols())
-                comp.data->data = comp.data->data * comp.colcals.reshaped().cwiseInverse().asDiagonal();
+            if (comp.rowcals.size() == comp.data.data.rows())
+                comp.data.data = comp.rowcals.reshaped().cwiseInverse().asDiagonal() * comp.data.data;
+            if (comp.colcals.size() == comp.data.data.cols())
+                comp.data.data = comp.data.data * comp.colcals.reshaped().cwiseInverse().asDiagonal();
         }
 
-        this->write_named_matrix(FIFF_MNE_CTF_COMP_DATA, *comp.data.data());
+        this->write_named_matrix(FIFF_MNE_CTF_COMP_DATA, comp.data);
         this->end_block(FIFFB_MNE_CTF_COMP_DATA);
     }
     this->end_block(FIFFB_MNE_CTF_COMP);
@@ -3067,12 +3067,12 @@ fiff_long_t FiffStream::write_proj(const std::vector<FiffProj>& projs)
             this->write_float(FIFF_PROJ_ITEM_TIME, &fValue);
         }
 
-        this->write_int(FIFF_NCHAN, &proj.data->ncol);
-        this->write_int(FIFF_PROJ_ITEM_NVEC, &proj.data->nrow);
+        this->write_int(FIFF_NCHAN, &proj.data.ncol);
+        this->write_int(FIFF_PROJ_ITEM_NVEC, &proj.data.nrow);
         std::int32_t bValue = static_cast<std::int32_t>(proj.active);
         this->write_int(FIFF_MNE_PROJ_ITEM_ACTIVE, &bValue);
-        this->write_name_list(FIFF_PROJ_ITEM_CH_NAME_LIST, proj.data->col_names);
-        this->write_float_matrix(FIFF_PROJ_ITEM_VECTORS, proj.data->data.cast<float>()); //rows == length(names)
+        this->write_name_list(FIFF_PROJ_ITEM_CH_NAME_LIST, proj.data.col_names);
+        this->write_float_matrix(FIFF_PROJ_ITEM_VECTORS, proj.data.data.cast<float>()); //rows == length(names)
         this->end_block(FIFFB_PROJ_ITEM);
     }
     this->end_block(FIFFB_PROJ);

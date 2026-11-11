@@ -415,16 +415,15 @@ void TestFiffCoverage::testCtfCompRoundTrip()
         comp.ctfkind = 101;
         comp.kind = 101;
         comp.save_calibrated = false;
-        FiffNamedMatrix* data = new FiffNamedMatrix();
-        data->nrow = 2;
-        data->ncol = 3;
-        data->data = MatrixXd::Ones(2, 3);
-        data->row_names.push_back("MEG 0111");
-        data->row_names.push_back("MEG 0121");
-        data->col_names.push_back("REF01");
-        data->col_names.push_back("REF02");
-        data->col_names.push_back("REF03");
-        comp.data = FiffNamedMatrix::SDPtr(data);
+        FiffNamedMatrix& data = comp.data;
+        data.nrow = 2;
+        data.ncol = 3;
+        data.data = MatrixXd::Ones(2, 3);
+        data.row_names.push_back("MEG 0111");
+        data.row_names.push_back("MEG 0121");
+        data.col_names.push_back("REF01");
+        data.col_names.push_back("REF02");
+        data.col_names.push_back("REF03");
         comps.push_back(comp);
     }
 
@@ -457,7 +456,7 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     FiffCtfComp raw;
     raw.ctfkind = 1194410578;
     raw.save_calibrated = false;
-    raw.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(2, 3, {"MEG 0111", "MEG 0121"}, {"REF01", "REF02", "REF03"}, MatrixXd::Constant(2, 3, 1.0)));
+    raw.data = FiffNamedMatrix(2, 3, {"MEG 0111", "MEG 0121"}, {"REF01", "REF02", "REF03"}, MatrixXd::Constant(2, 3, 1.0));
     const auto writeComps = [](const QString& path, const std::vector<FiffCtfComp>& list) {
         QFile out(path);
         auto w = FiffStream::start_file(out);
@@ -480,17 +479,17 @@ void TestFiffCoverage::testCtfCompRoundTrip()
     QCOMPARE(first[0].kind, 1);
     MatrixXd calibrated(2, 3);
     calibrated << 2.0 / 0.5, 2.0 / 8.0, 2.0, 4.0 / 0.5, 4.0 / 8.0, 4.0;
-    QVERIFY(first[0].data->data.isApprox(calibrated));
+    QVERIFY(first[0].data.data.isApprox(calibrated));
     const QString secondPath = m_tmpDir.path() + "/ctf_comp_again.fif";
     writeComps(secondPath, first);
     const std::vector<FiffCtfComp> second = readComps(secondPath);
     QCOMPARE(second.size(), 1);
-    QVERIFY2(second[0].data->data.isApprox(calibrated), qPrintable(QString::number(second[0].data->data(0, 0))));
+    QVERIFY2(second[0].data.data.isApprox(calibrated), qPrintable(QString::number(second[0].data.data(0, 0))));
 
     // A compensator naming a channel the data lack makes the set unusable (mne raises), not half-read
     FiffCtfComp unknown = raw;
     unknown.ctfkind = 1194476114;
-    unknown.data = FiffNamedMatrix::SDPtr(new FiffNamedMatrix(1, 1, {"MEG 0111"}, {"REF99"}, MatrixXd::Ones(1, 1)));
+    unknown.data = FiffNamedMatrix(1, 1, {"MEG 0111"}, {"REF99"}, MatrixXd::Ones(1, 1));
     const QString brokenPath = m_tmpDir.path() + "/ctf_comp_unknown.fif";
     writeComps(brokenPath, {raw, unknown});
     QVERIFY(readComps(brokenPath).empty());

@@ -261,7 +261,6 @@ private slots:
         for (int i = 0; i < std::ssize(info.projs); ++i) {
             const FiffProj& proj = info.projs[i];
             QVERIFY(!proj.desc.empty() || true);
-            QVERIFY(proj.data != nullptr || proj.data == nullptr);
         }
 
         // Check comp

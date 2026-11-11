@@ -60,7 +60,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedDataPointer>
 #include <QSharedPointer>
 
 //=============================================================================================================
@@ -182,10 +181,10 @@ private:
     std::shared_ptr<FIFFLIB::FiffInfoBase> m_pInfoBase; /**< Measurement info. */
     std::shared_ptr<ComputeFwdSettings> m_pSettings;    /**< Forward computation settings. */
 
-    QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_meg_forward;      /**< MEG forward matrix. */
-    QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_meg_forward_grad; /**< MEG gradient forward matrix. */
-    QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_eeg_forward;      /**< EEG forward matrix. */
-    QSharedDataPointer<FIFFLIB::FiffNamedMatrix> m_eeg_forward_grad; /**< EEG gradient forward matrix. */
+    FIFFLIB::FiffNamedMatrix m_meg_forward;      /**< MEG forward matrix. */
+    FIFFLIB::FiffNamedMatrix m_meg_forward_grad; /**< MEG gradient forward matrix. */
+    FIFFLIB::FiffNamedMatrix m_eeg_forward;      /**< EEG forward matrix. */
+    FIFFLIB::FiffNamedMatrix m_eeg_forward_grad; /**< EEG gradient forward matrix. */
 
     std::filesystem::path m_qPath; /**< Coil definition file path. */
 };

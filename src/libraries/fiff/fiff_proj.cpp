@@ -109,12 +109,12 @@ std::vector<FiffProj> pcaProjectors(const MatrixXd& data, const std::vector<int>
         proj.kind = FIFFV_PROJ_ITEM_FIELD;
         proj.active = false;
         proj.desc = descs[static_cast<std::size_t>(v)];
-        proj.data->nrow = 1;
-        proj.data->ncol = static_cast<int>(chNames.size());
-        proj.data->col_names = chNames;
-        proj.data->data = MatrixXd::Zero(1, chNames.size());
+        proj.data.nrow = 1;
+        proj.data.ncol = static_cast<int>(chNames.size());
+        proj.data.col_names = chNames;
+        proj.data.data = MatrixXd::Zero(1, chNames.size());
         for (int c = 0; c < std::ssize(chIdx); ++c) {
-            proj.data->data(0, chIdx[c]) = svd.matrixU()(c, v);
+            proj.data.data(0, chIdx[c]) = svd.matrixU()(c, v);
         }
         projs.push_back(proj);
     }
@@ -131,7 +131,6 @@ FiffProj::FiffProj()
 : kind(-1)
 , active(false)
 , desc("")
-, data(FiffNamedMatrix::SDPtr(new FiffNamedMatrix()))
 {
 }
 
@@ -151,7 +150,7 @@ FiffProj::FiffProj(fiff_int_t p_kind, bool p_active, std::string p_desc, FiffNam
 : kind(p_kind)
 , active(p_active)
 , desc(std::move(p_desc))
-, data(FiffNamedMatrix::SDPtr(new FiffNamedMatrix(p_data)))
+, data(p_data)
 {
 }
 
@@ -198,7 +197,7 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
     for (k = 0; k < std::ssize(projs); ++k) {
         if (projs[k].active) {
             ++nproj;
-            nvec += projs[k].data->nrow;
+            nvec += projs[k].data.nrow;
         }
     }
 
@@ -229,8 +228,8 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
         if (projs[k].active) {
             FiffProj one = projs[k];
 
-            const std::set<std::string> unique(one.data->col_names.begin(), one.data->col_names.end());
-            if (one.data->col_names.size() != unique.size()) {
+            const std::set<std::string> unique(one.data.col_names.begin(), one.data.col_names.end());
+            if (one.data.col_names.size() != unique.size()) {
                 Log::warning("Channel name list in projection item {} contains duplicate items", k);
                 return 0;
             }
@@ -245,8 +244,8 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
             vecSel.setConstant(-1);
             p = 0;
             for (c = 0; c < nchan; ++c) {
-                for (i = 0; i < static_cast<int>(one.data->col_names.size()); ++i) {
-                    if (same_channel(ch_names[c], one.data->col_names[i])) {
+                for (i = 0; i < static_cast<int>(one.data.col_names.size()); ++i) {
+                    if (same_channel(ch_names[c], one.data.col_names[i])) {
                         isBad = false;
                         for (j = 0; j < static_cast<int>(bads.size()); ++j) {
                             if (same_channel(ch_names[c], bads[j])) {
@@ -268,21 +267,21 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
             // If there is something to pick, pickit
             //
             if (sel.cols() > 0)
-                for (v = 0; v < one.data->nrow; ++v)
+                for (v = 0; v < one.data.nrow; ++v)
                     for (i = 0; i < p; ++i)
-                        vecs(sel[i], nvec + v) = one.data->data(v, vecSel[i]);
+                        vecs(sel[i], nvec + v) = one.data.data(v, vecSel[i]);
 
             //
             //   Rescale for more straightforward detection of small singular values
             //
-            for (v = 0; v < one.data->nrow; ++v) {
+            for (v = 0; v < one.data.nrow; ++v) {
                 onesize = sqrt((vecs.col(nvec + v).transpose() * vecs.col(nvec + v))(0, 0));
                 if (onesize > 0.0) {
                     vecs.col(nvec + v) = vecs.col(nvec + v) / onesize;
                     ++nonzero;
                 }
             }
-            nvec += one.data->nrow;
+            nvec += one.data.nrow;
         }
     }
     //

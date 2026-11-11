@@ -466,7 +466,7 @@ void NoiseReduction::updateCompensator(int to)
         this->m_pFiffInfo->make_compensator(0, to, newComp); //Do this always from 0 since we always read new raw data, we never actually perform a multiplication on already existing data
 
         //this->m_pFiffInfo->set_current_comp(to);
-        MatrixXd matComp = newComp.data->data;
+        MatrixXd matComp = newComp.data.data;
 
         //
         // Make proj sparse

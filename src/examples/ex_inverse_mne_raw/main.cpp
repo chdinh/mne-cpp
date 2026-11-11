@@ -462,11 +462,11 @@ int main(int argc, char* argv[])
 
     VectorXd s;
 
-    double t_dConditionNumber = Linalg::getConditionNumber(t_Fwd.sol->data, s);
+    double t_dConditionNumber = Linalg::getConditionNumber(t_Fwd.sol.data, s);
 
     std::cout << "Condition Number:\n"
               << t_dConditionNumber << std::endl;
-    std::cout << "ForwardSolution" << t_Fwd.sol->data.block(0, 0, 10, 10) << std::endl;
+    std::cout << "ForwardSolution" << t_Fwd.sol.data.block(0, 0, 10, 10) << std::endl;
 
     //Source Estimate end
     //########################################################################################

@@ -467,14 +467,14 @@ private slots:
         proj.active = false;
         proj.desc = "test_proj";
 
-        FiffNamedMatrix::SDPtr data(new FiffNamedMatrix);
-        data->nrow = 1;
-        data->ncol = 3;
-        data->data = MatrixXd::Ones(1, 3);
-        data->row_names.push_back("comp1");
-        data->col_names.push_back("ch1");
-        data->col_names.push_back("ch2");
-        data->col_names.push_back("ch3");
+        FiffNamedMatrix data;
+        data.nrow = 1;
+        data.ncol = 3;
+        data.data = MatrixXd::Ones(1, 3);
+        data.row_names.push_back("comp1");
+        data.col_names.push_back("ch1");
+        data.col_names.push_back("ch2");
+        data.col_names.push_back("ch3");
         proj.data = data;
 
         // Activate

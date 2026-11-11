@@ -239,7 +239,7 @@ private slots:
 
         QVERIFY(!fwd.empty());
         QVERIFY(!fwd.isFixedOrient());
-        QVERIFY(fwd.sol->data.rows() > 0);
+        QVERIFY(fwd.sol.data.rows() > 0);
 
         VectorXi testSel(2);
         testSel << 0, 1;
@@ -247,7 +247,7 @@ private slots:
         QCOMPARE(triplets.size(), 6);
 
         MNEForwardSolution fwdMeg = fwd.pick_types(true, false);
-        QVERIFY(fwdMeg.sol->data.rows() > 0);
+        QVERIFY(fwdMeg.sol.data.rows() > 0);
     }
 
     void fwd_restrictGainMatrix()
@@ -447,7 +447,7 @@ private slots:
 
         // Test pick_types for EEG only
         MNEForwardSolution fwdEeg = fwd.pick_types(false, true);
-        QVERIFY(fwdEeg.sol->data.rows() > 0);
+        QVERIFY(fwdEeg.sol.data.rows() > 0);
 
         // Test nchan, nsource accessors
         QVERIFY(fwd.nchan > 0);
@@ -469,12 +469,12 @@ private slots:
         fwd.nsource = 2;
         fwd.nchan = nSensors;
 
-        FiffNamedMatrix::SDPtr solData(new FiffNamedMatrix);
-        solData->data = MatrixXd::Random(nSensors, nSources);
-        solData->nrow = nSensors;
-        solData->ncol = nSources;
+        FiffNamedMatrix solData;
+        solData.data = MatrixXd::Random(nSensors, nSources);
+        solData.nrow = nSensors;
+        solData.ncol = nSources;
         for (int i = 0; i < nSensors; ++i)
-            solData->row_names.push_back(QString("CH%1").arg(i).toStdString());
+            solData.row_names.push_back(QString("CH%1").arg(i).toStdString());
         fwd.sol = solData;
 
         FiffInfo info;
@@ -492,7 +492,7 @@ private slots:
         }
 
         // Test restrict_gain_matrix
-        MatrixXd gain = fwd.sol->data;
+        MatrixXd gain = fwd.sol.data;
         MNEForwardSolution::restrict_gain_matrix(gain, info);
         QCOMPARE(gain.rows(), nSensors);
     }
@@ -516,7 +516,7 @@ private slots:
         MNEInverseOperator inv(invPath.toStdU16String());
 
         // Verify construction loaded data
-        QVERIFY(inv.noise_cov->data.rows() > 0);
+        QVERIFY(inv.noise_cov.data.rows() > 0);
     }
 
     //=========================================================================
@@ -888,12 +888,12 @@ private slots:
             QSKIP("Inverse operator file not found");
 
         MNEInverseOperator invOp(invPath.toStdU16String());
-        QVERIFY(invOp.noise_cov->data.rows() > 0);
+        QVERIFY(invOp.noise_cov.data.rows() > 0);
 
         // Prepare inverse operator
         float lambda2 = 1.0f / 9.0f;
         MNEInverseOperator prepared = invOp.prepare_inverse_operator(1, lambda2, false, false);
-        QVERIFY(prepared.eigen_leads->data.rows() > 0);
+        QVERIFY(prepared.eigen_leads.data.rows() > 0);
     }
 
     void invOp_writeReadRoundtrip()
@@ -931,8 +931,8 @@ private slots:
         QCOMPARE(invRead.sing.size(), invOp.sing.size());
         QVERIFY(invRead.sing.isApprox(invOp.sing, 1e-5f));
         QVERIFY(invRead.source_nn.isApprox(invOp.source_nn, 1e-5f));
-        QVERIFY(invRead.eigen_fields->data.isApprox(invOp.eigen_fields->data, 1e-5f));
-        QVERIFY(invRead.eigen_leads->data.isApprox(invOp.eigen_leads->data, 1e-5f));
+        QVERIFY(invRead.eigen_fields.data.isApprox(invOp.eigen_fields.data, 1e-5f));
+        QVERIFY(invRead.eigen_leads.data.isApprox(invOp.eigen_leads.data, 1e-5f));
     }
 
     //=========================================================================

@@ -151,13 +151,13 @@ InvSourceEstimate InvPwlRapMusic::calculateInverse(const MatrixXd& p_matMeasurem
 
     MatrixXT t_matProj_Phi_s(t_matOrthProj.rows(), t_matPhi_s.cols());
     //new Version: Calculate projection before
-    MatrixXT t_matProj_LeadField(m_ForwardSolution.sol->data.rows(), m_ForwardSolution.sol->data.cols());
+    MatrixXT t_matProj_LeadField(m_ForwardSolution.sol.data.rows(), m_ForwardSolution.sol.data.cols());
 
     for (int r = 0; r < t_iMaxSearch; ++r) {
         t_matProj_Phi_s = t_matOrthProj * t_matPhi_s;
 
         //new Version: Calculating Projection before
-        t_matProj_LeadField = t_matOrthProj * m_ForwardSolution.sol->data; //Subtract the found sources from the current found source
+        t_matProj_LeadField = t_matOrthProj * m_ForwardSolution.sol.data; //Subtract the found sources from the current found source
 
         //###First Option###
         //Step 1: lt. Mosher 1998 -> Maybe tmp_Proj_Phi_S is already orthogonal -> so no SVD needed -> U_B = tmp_Proj_Phi_S;
@@ -269,8 +269,8 @@ InvSourceEstimate InvPwlRapMusic::calculateInverse(const MatrixXd& p_matMeasurem
         BASELIB::Log::debug("Iteration: {} of {} ; Correlation: {} ; Position (Idx+1): {} - {}\n\n", r + 1, t_iMaxSearch, t_val_roh_k, t_iIdx1 + 1, t_iIdx2 + 1);
 
         //Calculations with the max correlated dipole pair G_k_1
-        MatrixX6T t_matG_k_1(m_ForwardSolution.sol->data.rows(), 6);
-        InvRapMusic::getGainMatrixPair(m_ForwardSolution.sol->data, t_matG_k_1, t_iIdx1, t_iIdx2);
+        MatrixX6T t_matG_k_1(m_ForwardSolution.sol.data.rows(), 6);
+        InvRapMusic::getGainMatrixPair(m_ForwardSolution.sol.data, t_matG_k_1, t_iIdx1, t_iIdx2);
 
         MatrixX6T t_matProj_G_k_1(t_matOrthProj.rows(), t_matG_k_1.cols());
         t_matProj_G_k_1 = t_matOrthProj * t_matG_k_1; //Subtract the found sources from the current found source

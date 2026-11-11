@@ -47,8 +47,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedData>
-#include <QSharedDataPointer>
 #include <memory>
 
 //=============================================================================================================
@@ -71,11 +69,9 @@ namespace FIFFLIB
  *
  * @snippet ex_fiff_api/main.cpp fiff_proj_usage
  */
-class FIFFSHARED_EXPORT FiffNamedMatrix : public QSharedData
+class FIFFSHARED_EXPORT FiffNamedMatrix
 {
 public:
-    using SDPtr = QSharedDataPointer<FiffNamedMatrix>; /**< Shared data pointer type for FiffNamedMatrix. */
-
     //=========================================================================================================
     /**
      * Default constructor.
@@ -100,20 +96,6 @@ public:
 
     //=========================================================================================================
     /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffNamedMatrix  Named matrix which should be copied.
-     */
-    FiffNamedMatrix(const FiffNamedMatrix& p_FiffNamedMatrix);
-
-    //=========================================================================================================
-    /**
-     * Destroys the named matrix.
-     */
-    ~FiffNamedMatrix() = default;
-
-    //=========================================================================================================
-    /**
      * Initializes the named matrix.
      */
     void clear();
@@ -132,14 +114,6 @@ public:
      * Transpose a named matrix (FiffNamedMatrix)
      */
     void transpose_named_matrix();
-
-    //    //=========================================================================================================
-    //    /**
-    //    * Assignment Operator
-    //    *
-    //    * @return rhs   named matrix which hould be assigned.
-    //    */
-    //    inline FiffNamedMatrix& operator=(const FiffNamedMatrix& rhs);
 
     //=========================================================================================================
     /**
@@ -173,21 +147,6 @@ public:
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
-
-//inline FiffNamedMatrix& FiffNamedMatrix::operator=(const FiffNamedMatrix& rhs)
-//{
-//    // Check for self-assignment!
-//    if (this == &rhs)
-//        return *this;
-//    //Else
-//    nrow = rhs.nrow;
-//    ncol = rhs.ncol;
-//    row_names = rhs.row_names;
-//    col_names = rhs.col_names;
-//    data = rhs.data;
-
-//    return *this;
-//}
 
 inline bool FiffNamedMatrix::empty() const
 {

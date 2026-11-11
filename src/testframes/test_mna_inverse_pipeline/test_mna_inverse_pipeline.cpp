@@ -255,7 +255,7 @@ void TestMnaInversePipeline::registerRealOps()
                            bool pickNormal = attrs.value(QStringLiteral("pick_normal"), false).toBool();
 
                            // Pick channels that match the inverse operator's noise covariance
-                           FiffEvoked picked = evoked->pick_channels(invOp->noise_cov->names);
+                           FiffEvoked picked = evoked->pick_channels(invOp->noise_cov.names);
 
                            float tmin = picked.times(0);
                            float tstep = 1.0f / picked.info.sfreq;
@@ -413,10 +413,10 @@ void TestMnaInversePipeline::testExecuteRealPipeline()
         QVERIFY2(!fwd->empty(), "Forward solution is empty");
         QVERIFY2(fwd->nsource > 0,
                  qPrintable(QString("nsource = %1, expected > 0").arg(fwd->nsource)));
-        QVERIFY(fwd->sol->data.rows() > 0);
-        QVERIFY(fwd->sol->data.cols() > 0);
+        QVERIFY(fwd->sol.data.rows() > 0);
+        QVERIFY(fwd->sol.data.cols() > 0);
         QVERIFY(fwd->src.size() > 0);
-        qInfo() << "        " << fwd->sol->data.rows() << "channels,"
+        qInfo() << "        " << fwd->sol.data.rows() << "channels,"
                 << fwd->nsource << "sources," << fwd->src.size() << "hemispheres";
     }
 

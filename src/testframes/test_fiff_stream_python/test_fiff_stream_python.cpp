@@ -245,9 +245,9 @@ void TestFiffStreamPython::projectors()
     QCOMPARE(back[1].active, false);
     QCOMPARE(back[0].kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_FIELD));
     // Channel names are read without spaces (FIFF convention in MNE-CPP).
-    QCOMPARE(back[0].data->col_names, StringList({"MEG 0113", "MEG 0112", "MEG 0111"}));
-    QVERIFY((back[0].data->data - RowVector3d(0.6, 0.8, 0.0)).cwiseAbs().maxCoeff() < 1e-7);
-    QVERIFY((back[1].data->data - RowVector3d(0.0, 0.8, 0.6)).cwiseAbs().maxCoeff() < 1e-7);
+    QCOMPARE(back[0].data.col_names, StringList({"MEG 0113", "MEG 0112", "MEG 0111"}));
+    QVERIFY((back[0].data.data - RowVector3d(0.6, 0.8, 0.0)).cwiseAbs().maxCoeff() < 1e-7);
+    QVERIFY((back[1].data.data - RowVector3d(0.0, 0.8, 0.6)).cwiseAbs().maxCoeff() < 1e-7);
 }
 
 //=============================================================================================================
@@ -416,8 +416,8 @@ void TestFiffStreamPython::readsFloatCovariance()
     QCOMPARE(noise.projs[0].desc, QString("ECG-1"));
     QCOMPARE(noise.projs[0].kind, static_cast<fiff_int_t>(FIFFV_PROJ_ITEM_FIELD));
     QVERIFY(!noise.projs[0].active);
-    QCOMPARE(noise.projs[0].data->col_names, StringList({"A", "B", "C"}));
-    QVERIFY((noise.projs[0].data->data - RowVector3d(0.0, 0.6, 0.8)).cwiseAbs().maxCoeff() < 1e-7);
+    QCOMPARE(noise.projs[0].data.col_names, StringList({"A", "B", "C"}));
+    QVERIFY((noise.projs[0].data.data - RowVector3d(0.0, 0.6, 0.8)).cwiseAbs().maxCoeff() < 1e-7);
 
     FiffCov source;
     QVERIFY(stream.read_cov(stream.dirtree(), FIFFV_MNE_SOURCE_COV, source));
