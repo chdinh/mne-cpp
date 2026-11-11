@@ -308,6 +308,9 @@ aliases; replace the old spelling as below.
   `FIFF_DATA_SKIP` to `FIFF_MNE_DATA_SKIP_NOP` and back. It used to write the
   negated skip count in host byte order, which a skip of one buffer read back
   as -1 and others as garbage.
+- The MNE Scan acquisition plugins keep streaming when a block is
+  overwritten before they read it (the computer was busy); they used to stop
+  for good.
 
 ## [2.4.0] - 2026-10-27
 

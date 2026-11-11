@@ -238,7 +238,7 @@ void BrainAMP::run()
                                         std::chrono::milliseconds(100));
         if (read) {
             m_pRMTSA_BrainAMP->measurementData()->setValue(block);
-        } else if (read.error() != ACQLIB::AcqErrorCode::Timeout) {
+        } else if (read.error() != ACQLIB::AcqErrorCode::Timeout && read.error() != ACQLIB::AcqErrorCode::Overrun) {
             qWarning() << "[BrainAMP::run]" << QString::fromStdString(read.error().text());
             return;
         }

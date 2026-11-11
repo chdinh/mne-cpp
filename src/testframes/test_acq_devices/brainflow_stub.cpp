@@ -12,7 +12,7 @@
  * Three boards: Synthetic (-1), Cyton (0), which opens only on serial_port COM-STUB, and Ganglion (1), which is
  * described but never opens, as a board this platform's BrainFlow is built without. All have 12 rows at
  * 250 Hz: package number 0, EEG 1-4 (also the EMG rows) named Fz,Cz,Pz,Oz, accelerometer 5-7, temperature 8,
- * battery 9, timestamp 10, marker 11. Every get_board_data_count() offers ten new samples; in sample k, EEG row r
+ * battery 9, timestamp 10, marker 11. Samples arrive at 250 Hz from start_stream(); in sample k, EEG row r
  * holds r + k / 1000 uV, the timestamp is 1.7e9 + k / 250 s and the marker is 7 at k = 30. The version is
  * STUB_VERSION. Like BrainFlow, every input parameter must be in the JSON of a call.
  */
@@ -22,6 +22,7 @@
 //=============================================================================================================
 
 #include <algorithm>
+#include <chrono>
 #include <cstring>
 #include <string>
 #include <string_view>
@@ -53,7 +54,7 @@ constexpr int kBoardNotReady = 7;
 constexpr int kInvalidArguments = 13;
 constexpr int kUnsupportedBoard = 14;
 constexpr int kGeneralError = 17;
-constexpr int kPerCount = 10;
+constexpr double kRate = 250.0;
 
 constexpr std::string_view kDescription = R"({"accel_channels":[5,6,7],"battery_channel":9,"eeg_channels":[1,2,3,4],)"
                                           R"("eeg_names":"Fz,Cz,Pz,Oz","emg_channels":[1,2,3,4],"marker_channel":11,"name":"{}",)"
@@ -64,6 +65,7 @@ bool g_prepared = false;
 bool g_streaming = false;
 int g_sample = 0;
 int g_buffered = 0;
+std::chrono::steady_clock::rep g_started = 0; // ticks of start_stream()
 
 /** @return Whether @p json has every key BrainFlow reads; it throws on a missing one. */
 bool complete(const char* json)
@@ -104,7 +106,7 @@ STUB_EXPORT int get_board_descr(int board, int preset, char* description, int* l
         return kInvalidArguments;
     }
     *length = static_cast<int>(text.size());
-    std::memcpy(description, text.data(), text.size());
+    std::ranges::copy(text, description);
     return kOk;
 }
 
@@ -134,6 +136,7 @@ STUB_EXPORT int start_stream(int buffer, const char* streamer, int /*board*/, co
     g_streaming = true;
     g_sample = 0;
     g_buffered = 0;
+    g_started = std::chrono::steady_clock::now().time_since_epoch().count();
     return kOk;
 }
 
@@ -145,7 +148,8 @@ STUB_EXPORT int get_board_data_count(int preset, int* count, int /*board*/, cons
     if (!g_streaming) {
         return kBoardNotReady;
     }
-    g_buffered = kPerCount;
+    const std::chrono::duration<double> elapsed = std::chrono::steady_clock::now().time_since_epoch() - std::chrono::steady_clock::duration(g_started);
+    g_buffered = static_cast<int>(elapsed.count() * kRate) - g_sample;
     *count = g_buffered;
     return kOk;
 }

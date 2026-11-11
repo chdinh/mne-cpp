@@ -185,7 +185,7 @@ void FtBuffer::run()
         const auto read = m_reader.read(ACQLIB::AcqMatrixRef<double>::columnMajor(block.data(), channels, static_cast<std::size_t>(block.cols())),
                                         std::chrono::milliseconds(100));
         if (!read) {
-            if (read.error() == ACQLIB::AcqErrorCode::Timeout) {
+            if (read.error() == ACQLIB::AcqErrorCode::Timeout || read.error() == ACQLIB::AcqErrorCode::Overrun) {
                 continue;
             }
             qWarning() << "[FtBuffer::run]" << QString::fromStdString(read.error().text());
