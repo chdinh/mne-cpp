@@ -7,7 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.5.0
  * @date     November, 2026
- * @brief    A UDP socket bound to a local port, for devices that send their data as datagrams.
+ * @brief    A UDP socket bound to a local port or a multicast group, for devices that send their data as datagrams.
  */
 
 #ifndef COM_UDP_SOCKET_H
@@ -51,7 +51,9 @@ public:
     UdpSocket& operator=(const UdpSocket&) = delete;
 
     /**
-     * @param[in] address   Local IPv4 address to receive on, e.g. 0.0.0.0 for all.
+     * @param[in] address   Local IPv4 address to receive on, e.g. 0.0.0.0 for all; a multicast group (224.0.0.0 to
+     *                      239.255.255.255) is joined on the interface of the default route, and its port is shared
+     *                      with the other members on this machine.
      * @param[in] port      Local port; 0 lets the system choose one.
      *
      * @return The bound socket, invalid_argument for an address that is no IPv4 address, or the system's error
@@ -70,12 +72,25 @@ public:
      */
     [[nodiscard]] std::expected<std::size_t, std::error_code> receive(std::span<std::byte> buffer, std::chrono::milliseconds timeout);
 
+    /**
+     * Sends one datagram. To a multicast group it leaves through the interface of the default route and also
+     * reaches the members on this machine.
+     *
+     * @param[in] datagram   The datagram.
+     * @param[in] address    Destination IPv4 address.
+     * @param[in] port       Destination port.
+     *
+     * @return Empty, invalid_argument for an address that is no IPv4 address, or the system's error.
+     */
+    [[nodiscard]] std::error_code send_to(std::span<const std::byte> datagram, const std::string& address, std::uint16_t port);
+
 private:
 #ifdef _WIN32
     std::uintptr_t m_socket = ~std::uintptr_t{0};
 #else
     int m_socket = -1;
 #endif
+    bool m_multicast_out = false; // the outgoing multicast interface is set
 };
 
 } // namespace COMLIB

@@ -80,6 +80,29 @@ const auto size = udp->receive(datagram, 1s);
 
 ---
 
+### send_to(datagram, address, port)
+
+Sends one datagram.
+
+To a multicast group it leaves through the interface of the default route and also reaches the members on this machine.
+
+**Parameters:**
+
+- **datagram** : *std::span&lt; const std::byte &gt;*
+  The datagram.
+
+- **address** : *const std::string &*
+  Destination IPv4 address.
+
+- **port** : *std::uint16_t*
+  Destination port.
+
+**Returns:**
+
+- *std::error_code* — Empty, invalid_argument for an address that is no IPv4 address, or the system's error.
+
+---
+
 ## Static Methods
 
 ### bind(address, port)
@@ -87,7 +110,7 @@ const auto size = udp->receive(datagram, 1s);
 **Parameters:**
 
 - **address** : *const std::string &*
-  Local IPv4 address to receive on, e.g. 0.0.0.0 for all.
+  Local IPv4 address to receive on, e.g. 0.0.0.0 for all; a multicast group (224.0.0.0 to 239.255.255.255) is joined on the interface of the default route, and its port is shared with the other members on this machine.
 
 - **port** : *std::uint16_t*
   Local port; 0 lets the system choose one.

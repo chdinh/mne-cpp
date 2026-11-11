@@ -28,6 +28,42 @@ using namespace COMLIB;
 using namespace COMLIB::detail;
 
 //=============================================================================================================
+// STATIC HELPERS
+//=============================================================================================================
+
+namespace
+{
+
+bool is_multicast(const in_addr& address) noexcept
+{
+    return (ntohl(address.s_addr) >> 28) == 0xE;
+}
+
+/** @return The local address of the default route, as BrainFlow chooses it; INADDR_ANY without a route. */
+in_addr default_interface() noexcept
+{
+    in_addr any{};
+    any.s_addr = htonl(INADDR_ANY);
+    const Native probe = ::socket(AF_INET, SOCK_DGRAM, 0);
+    if (probe == kInvalid) {
+        return any;
+    }
+    sockaddr_in to{};
+    to.sin_family = AF_INET;
+    to.sin_port = htons(53);
+    ::inet_pton(AF_INET, "8.8.8.8", &to.sin_addr);
+    sockaddr_in local{};
+    socklen_t length = sizeof(local);
+    // Connecting a UDP socket sends nothing; it only picks the route
+    const bool routed = ::connect(probe, reinterpret_cast<const sockaddr*>(&to), sizeof(to)) == 0 &&
+        ::getsockname(probe, reinterpret_cast<sockaddr*>(&local), &length) == 0;
+    close_native(probe);
+    return routed ? local.sin_addr : any;
+}
+
+} // namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
@@ -42,6 +78,7 @@ UdpSocket::~UdpSocket()
 
 UdpSocket::UdpSocket(UdpSocket&& other) noexcept
 : m_socket(std::exchange(other.m_socket, kInvalidHandle))
+, m_multicast_out(std::exchange(other.m_multicast_out, false))
 {
 }
 
@@ -52,6 +89,7 @@ UdpSocket& UdpSocket::operator=(UdpSocket&& other) noexcept
     if (this != &other) {
         UdpSocket closing(std::move(*this));
         m_socket = std::exchange(other.m_socket, kInvalidHandle);
+        m_multicast_out = std::exchange(other.m_multicast_out, false);
     }
     return *this;
 }
@@ -77,7 +115,22 @@ std::expected<UdpSocket, std::error_code> UdpSocket::bind(const std::string& add
     socket.m_socket = static_cast<Handle>(s);
     int size = 4 << 20; // a burst of datagrams must not overflow while the reader waits
     ::setsockopt(s, SOL_SOCKET, SO_RCVBUF, reinterpret_cast<const char*>(&size), sizeof(size));
+    ip_mreq membership{};
+    const bool group = is_multicast(local.sin_addr);
+    if (group) {
+        const int on = 1;
+        ::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&on), sizeof(on));
+#ifdef SO_REUSEPORT
+        ::setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)); // BSD shares a wildcard-bound port only so
+#endif
+        membership.imr_multiaddr = local.sin_addr;
+        membership.imr_interface = default_interface();
+        local.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
     if (::bind(s, reinterpret_cast<const sockaddr*>(&local), sizeof(local)) != 0) {
+        return std::unexpected(last_error());
+    }
+    if (group && ::setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<const char*>(&membership), sizeof(membership)) != 0) {
         return std::unexpected(last_error());
     }
     return socket;
@@ -119,4 +172,38 @@ std::expected<std::size_t, std::error_code> UdpSocket::receive(std::span<std::by
         return std::unexpected(last_error());
     }
     return static_cast<std::size_t>(got);
+}
+
+//=============================================================================================================
+
+std::error_code UdpSocket::send_to(std::span<const std::byte> datagram, const std::string& address, std::uint16_t port)
+{
+    sockaddr_in to{};
+    to.sin_family = AF_INET;
+    to.sin_port = htons(port);
+    if (::inet_pton(AF_INET, address.c_str(), &to.sin_addr) != 1) {
+        return std::make_error_code(std::errc::invalid_argument);
+    }
+    const auto s = static_cast<Native>(m_socket);
+    if (is_multicast(to.sin_addr) && !m_multicast_out) {
+        const in_addr out = default_interface();
+#ifdef _WIN32
+        const DWORD loop = 1;
+#else
+        const unsigned char loop = 1;
+#endif
+        ::setsockopt(s, IPPROTO_IP, IP_MULTICAST_IF, reinterpret_cast<const char*>(&out), sizeof(out));
+        ::setsockopt(s, IPPROTO_IP, IP_MULTICAST_LOOP, reinterpret_cast<const char*>(&loop), sizeof(loop));
+        m_multicast_out = true;
+    }
+#ifdef _WIN32
+    const int sent = ::sendto(s, reinterpret_cast<const char*>(datagram.data()), static_cast<int>(datagram.size()), 0,
+                              reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+#else
+    const auto sent = ::sendto(s, datagram.data(), datagram.size(), 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+#endif
+    if (sent < 0) {
+        return last_error();
+    }
+    return {};
 }
