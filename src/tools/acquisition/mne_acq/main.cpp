@@ -25,8 +25,8 @@
 //=============================================================================================================
 
 #include <acq/acq.h>
-#include <acq/detail/acq_shared_library.h>
 #include <acq/devices/acq_devices.h>
+#include <acq/devices/brainflow/brainflow_stream.h>
 #include <acq/fiff/acq_fiff_replay.h>
 #include <acq/fiff/acq_recorder.h>
 #include <acq/lsl/acq_lsl.h>
@@ -55,12 +55,6 @@
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
-#include <QHostAddress>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QNetworkInterface>
-#include <QUdpSocket>
 #include <QTextStream>
 
 //=============================================================================================================
@@ -325,116 +319,48 @@ int streamLsl(AcqDevice& device, AcqReader& reader, const QString& name, double 
 
 //=============================================================================================================
 
-/** Row layout of a BrainFlow board's default preset, as BrainFlow's STREAMING_BOARD expects it. */
-struct BrainFlowLayout
-{
-    QString name;
-    int rows = 0;
-    int packageRow = -1;
-    int timestampRow = -1;
-    std::vector<int> dataRows;
-};
-
-/** Layout of @p board from BrainFlow's BoardController when it is installed; the synthetic board's otherwise. */
-std::optional<BrainFlowLayout> brainFlowLayout(int board)
-{
-    QJsonObject descr;
-    std::vector<std::string> candidates;
-    if (const std::string path = detail::acqEnvironment("MNE_CPP_BRAINFLOW_LIB"); !path.empty()) {
-        candidates.push_back(path);
-    }
-    if (const std::string dir = detail::acqPythonPackageDir("brainflow", "lib"); !dir.empty()) {
-        candidates.push_back(dir + "/" + detail::acqSharedLibraryName("BoardController"));
-    }
-    candidates.push_back(detail::acqSharedLibraryName("BoardController"));
-    if (auto library = detail::AcqSharedLibrary::load(candidates)) {
-        using GetBoardDescr = int (*)(int, int, char*, int*, int);
-        if (auto* get = reinterpret_cast<GetBoardDescr>(library->symbol("get_board_descr"))) {
-            std::vector<char> json(65536);
-            int length = 0;
-            if (get(board, 0, json.data(), &length, static_cast<int>(json.size())) == 0) {
-                descr = QJsonDocument::fromJson(QByteArray(json.data(), length)).object();
-            }
-        }
-    }
-    if (descr.isEmpty() && board == -1) {
-        // BrainFlow's synthetic board, default preset (brainflow_boards.cpp, MIT license)
-        descr = QJsonObject{{"name", "Synthetic"},
-                            {"num_rows", 32},
-                            {"package_num_channel", 0},
-                            {"timestamp_channel", 30},
-                            {"eeg_channels", QJsonArray{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}}};
-    }
-    if (descr.isEmpty()) {
-        return std::nullopt;
-    }
-    BrainFlowLayout layout;
-    layout.name = descr.value("name").toString();
-    layout.rows = descr.value("num_rows").toInt();
-    layout.packageRow = descr.value("package_num_channel").toInt(-1);
-    layout.timestampRow = descr.value("timestamp_channel").toInt(-1);
-    for (const QJsonValue row : descr.value("eeg_channels").toArray()) {
-        layout.dataRows.push_back(row.toInt());
-    }
-    return layout;
-}
-
 int streamBrainFlow(AcqDevice& device, AcqReader& reader, const QString& target, int board, double duration)
 {
-    const QHostAddress address(target.section(QLatin1Char(':'), 0, 0));
+    const std::string address = target.section(QLatin1Char(':'), 0, 0).toStdString();
     bool portOk = false;
     const auto port = target.section(QLatin1Char(':'), 1).toUShort(&portOk);
-    if (!address.isMulticast() || !portOk || port == 0) {
+    bool firstOk = false;
+    const int first = QString::fromStdString(address).section(QLatin1Char('.'), 0, 0).toInt(&firstOk);
+    if (!firstOk || first < 224 || first > 239 || !portOk || port == 0) {
         err() << QString::asprintf("mne_acq: --brainflow-multicast needs a multicast address:port, e.g. 225.1.1.1:6677\n");
         return kUsageError;
     }
-    const auto layout = brainFlowLayout(board);
-    if (!layout || layout->rows <= 0) {
-        err() << QString::asprintf("mne_acq: the layout of BrainFlow board %d needs BrainFlow (pip install brainflow or "
-                                   "MNE_CPP_BRAINFLOW_LIB); without it only the synthetic board (-1) is known\n",
-                                   board);
+    auto layout = detail::brainflow_board(std::to_string(board));
+    if (!layout) {
+        err() << QString::asprintf("mne_acq: %s\n", layout.error().text().c_str());
         return kRunError;
     }
-    QUdpSocket socket;
-    if (!socket.bind(QHostAddress(QHostAddress::AnyIPv4), 0)) {
-        err() << QString::asprintf("mne_acq: %s\n", qPrintable(socket.errorString()));
+    const detail::BrainFlowDescription& description = layout->second;
+    // STREAMING_BOARD reads packets of BRAINFLOW_BATCH_SIZE samples (default 3), so both sides must agree.
+    const int batchEnv = qEnvironmentVariableIntValue("BRAINFLOW_BATCH_SIZE");
+    const std::size_t batch = batchEnv > 1 && batchEnv < 100 ? static_cast<std::size_t>(batchEnv) : 3;
+    auto streamer = detail::BrainFlowStreamer::open(description, address, port, batch);
+    if (!streamer) {
+        err() << QString::asprintf("mne_acq: %s\n", streamer.error().text().c_str());
         return kRunError;
-    }
-    socket.setSocketOption(QAbstractSocket::MulticastLoopbackOption, 1);
-    // STREAMING_BOARD joins the group on the interface that routes to 8.8.8.8; send there, so a VPN is no obstacle.
-    QUdpSocket probe;
-    probe.connectToHost(QHostAddress(QStringLiteral("8.8.8.8")), 53);
-    if (probe.waitForConnected(1000)) {
-        for (const QNetworkInterface& candidate : QNetworkInterface::allInterfaces()) {
-            for (const QNetworkAddressEntry& entry : candidate.addressEntries()) {
-                if (entry.ip() == probe.localAddress()) {
-                    socket.setMulticastInterface(candidate);
-                }
-            }
-        }
     }
 
     const auto streamInfo = reader.stream().info();
     const std::size_t channels = streamInfo->channels.size();
-    const std::size_t mapped = std::min(channels, layout->dataRows.size());
-    // STREAMING_BOARD reads packets of BRAINFLOW_BATCH_SIZE rows (default 3), so both sides must agree.
-    const int batchEnv = qEnvironmentVariableIntValue("BRAINFLOW_BATCH_SIZE");
-    const std::size_t batch = batchEnv > 1 && batchEnv < 100 ? static_cast<std::size_t>(batchEnv) : 3;
+    const std::size_t mapped = std::min(channels, streamer->eeg_rows().size());
     out() << QString::asprintf("Publishing %s in BrainFlow's format to %s as board %d (%s): channels 1-%zu of %zu on "
-                               "its EEG rows, volts as microvolts, triggers in the stim channel's row, %zu samples per packet\n",
-                               device.description().uri.c_str(), qPrintable(target), board, qPrintable(layout->name),
-                               mapped, channels, batch);
+                               "its EEG rows, volts as microvolts, %zu samples per packet\n",
+                               device.description().uri.c_str(), qPrintable(target), board, description.name.c_str(), mapped,
+                               channels, batch);
     out().flush();
 
-    std::vector<double> scale(channels, 1.0);
-    for (std::size_t c = 0; c < channels; ++c) {
+    std::vector<double> scale(mapped, 1.0);
+    for (std::size_t c = 0; c < mapped; ++c) {
         if (streamInfo->channels[c].unit == AcqUnit::Volt) {
             scale[c] = 1e6;
         }
     }
-    const auto rows = static_cast<std::size_t>(layout->rows);
-    std::vector<double> packet;
-    packet.reserve(batch * rows);
+    std::vector<double> eeg(mapped);
     double t0 = -1.0;
     return pump(device, reader, duration, [&](const Block& block) {
         if (t0 < 0.0) {
@@ -442,24 +368,10 @@ int streamBrainFlow(AcqDevice& device, AcqReader& reader, const QString& target,
                 static_cast<double>(block.first) / streamInfo->sfreq;
         }
         for (std::size_t s = 0; s < block.samples; ++s) {
-            const std::uint64_t sample = block.first + s;
-            const std::size_t at = packet.size();
-            packet.resize(at + rows, 0.0);
-            double* row = packet.data() + at;
             for (std::size_t c = 0; c < mapped; ++c) {
-                row[layout->dataRows[c]] = block.values[s * channels + c] * scale[c];
+                eeg[c] = block.values[s * channels + c] * scale[c];
             }
-            if (layout->packageRow >= 0) {
-                row[layout->packageRow] = static_cast<double>(sample % 256);
-            }
-            if (layout->timestampRow >= 0) {
-                row[layout->timestampRow] = t0 + static_cast<double>(sample) / streamInfo->sfreq;
-            }
-            if (packet.size() == batch * rows) {
-                socket.writeDatagram(reinterpret_cast<const char*>(packet.data()),
-                                     static_cast<qint64>(packet.size()) * static_cast<qint64>(sizeof(double)), address, port);
-                packet.clear();
-            }
+            static_cast<void>(streamer->push(eeg, 0.0, t0 + static_cast<double>(block.first + s) / streamInfo->sfreq));
         }
     });
 }

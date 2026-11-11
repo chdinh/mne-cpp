@@ -175,6 +175,20 @@ aliases; replace the old spelling as below.
   Every row is a channel in BrainFlow's units, the timestamp row is the
   clock and the marker row gives events. Other BrainFlow versions and
   boards this platform's BrainFlow lacks are refused with the reason.
+- `streaming_board://<address>:<port>?board=<id or name>` receives what a
+  BrainFlow session streams with `add_streamer`, without BrainFlow: the
+  channels of `brainflow://`, the sender's markers as events. The layouts of
+  the synthetic board, Cyton, Ganglion and Cyton + Daisy are built in,
+  generated from BrainFlow by `scripts/acq/generate_brainflow_boards.py`;
+  other boards take theirs from an installed BrainFlow. `simulate=1` streams
+  a synthetic session to itself. `mne_acq stream --brainflow-multicast`
+  sends with the same code and no longer needs Qt Network, and knows the
+  same boards without BrainFlow.
+- `COMLIB::UdpSocket::bind` joins a multicast group given as address,
+  sharing its port; `send_to` sends a datagram, to a group through the
+  interface of the default route.
+- Device URI schemes may contain `_`, as BrainFlow's `streaming_board://`
+  does.
 - The BrainFlow MNE Scan plugin is back as a client of `brainflow://`: it
   streams any BrainFlow board through an installed BrainFlow, set up by
   board name or id and BrainFlow's input parameters, with every row of the

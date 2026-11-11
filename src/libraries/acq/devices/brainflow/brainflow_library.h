@@ -107,6 +107,12 @@ private:
 };
 
 /**
+ * @param[in] name   A board name.
+ * @return @p name in lower case without separators and a trailing "board": "CYTON_DAISY_BOARD" is "cytondaisy".
+ */
+std::string brainflow_board_key(std::string_view name);
+
+/**
  * @param[in] code   A BrainFlow exit code other than 0.
  * @param[in] call   The call that returned it.
  * @return The error: DeviceNotFound for a port that does not open, InvalidParameter for arguments or boards

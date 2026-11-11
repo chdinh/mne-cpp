@@ -20,7 +20,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "brainflow_library.h"
+#include "brainflow_stream.h"
 
 #include "../acq_devices.h"
 #include "../../acq_backend.h"
@@ -55,7 +55,6 @@ namespace
 {
 
 constexpr std::chrono::milliseconds kPoll(2);
-constexpr std::chrono::seconds kClockRefresh(1);
 constexpr int kBrainFlowBuffer = 450000; // samples BrainFlow keeps, as its bindings ask for
 constexpr int kNoBoard = -100;           // BrainFlow's master_board default
 constexpr int kUnsupportedBoard = 14;    // BrainFlow's UNSUPPORTED_BOARD_ERROR
@@ -64,38 +63,6 @@ constexpr int kUnsupportedBoard = 14;    // BrainFlow's UNSUPPORTED_BOARD_ERROR
 constexpr std::array<const char*, 10> kTextParams = {"serial_port", "mac_address", "ip_address", "ip_address_aux", "ip_address_anc",
                                                      "other_info", "serial_number", "file", "file_aux", "file_anc"};
 constexpr std::array<const char*, 6> kIntParams = {"ip_port", "ip_port_aux", "ip_port_anc", "ip_protocol", "timeout", "master_board"};
-
-/** A role of BrainFlow's rows; the first role of a row wins, as the ExG roles share rows. */
-struct Role
-{
-    const char* key;
-    const char* prefix; // channel name prefix; a single row is named prefix alone
-    AcqChannelKind kind;
-    AcqUnit unit;
-    double scale;
-};
-
-constexpr Role kRoles[] = {
-    {"eeg_channels", "EEG", AcqChannelKind::Eeg, AcqUnit::Volt, 1e-6},
-    {"emg_channels", "EMG", AcqChannelKind::Emg, AcqUnit::Volt, 1e-6},
-    {"ecg_channels", "ECG", AcqChannelKind::Ecg, AcqUnit::Volt, 1e-6},
-    {"eog_channels", "EOG", AcqChannelKind::Eog, AcqUnit::Volt, 1e-6},
-    {"accel_channels", "ACC", AcqChannelKind::Accelerometer, AcqUnit::Unknown, 1.0},
-    {"gyro_channels", "GYRO", AcqChannelKind::Gyroscope, AcqUnit::Unknown, 1.0},
-    {"eda_channels", "EDA", AcqChannelKind::Gsr, AcqUnit::Unknown, 1.0},
-    {"temperature_channels", "TEMP", AcqChannelKind::Temperature, AcqUnit::DegreeCelsius, 1.0},
-    {"ppg_channels", "PPG", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"optical_channels", "OPT", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"resistance_channels", "RES", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"magnetometer_channels", "MAG", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"rotation_channels", "ROT", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"analog_channels", "ANALOG", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"other_channels", "OTHER", AcqChannelKind::Misc, AcqUnit::Unknown, 1.0},
-    {"package_num_channel", "PACKAGE", AcqChannelKind::Misc, AcqUnit::None, 1.0},
-    {"battery_channel", "BATTERY", AcqChannelKind::Misc, AcqUnit::None, 1.0},
-    {"timestamp_channel", "TIMESTAMP", AcqChannelKind::Timestamp, AcqUnit::Second, 1.0},
-    {"marker_channel", "MARKER", AcqChannelKind::Marker, AcqUnit::None, 1.0},
-};
 
 struct Config
 {
@@ -140,11 +107,7 @@ AcqExpected<Config> parseConfig(const AcqUri& uri)
     if (const auto library = uri.param("library")) {
         c.library = {std::string(*library)};
     } else {
-        c.library = {acqEnvironment("MNE_CPP_BRAINFLOW_LIB")};
-        if (const std::string pip = acqPythonPackageDir("brainflow", "lib"); !pip.empty()) {
-            c.library.push_back(pip + "/" + acqSharedLibraryName("BoardController"));
-        }
-        c.library.push_back(acqSharedLibraryName("BoardController"));
+        c.library = brainflow_library_candidates();
     }
     // Every parameter is in the JSON: BrainFlow refuses a missing one
     c.params = "{";
@@ -175,43 +138,6 @@ AcqExpected<int> boardId(const BrainFlowLibrary& library, const std::string& boa
         return id;
     }
     return library.find_board(board);
-}
-
-/** @return The stream of @p description: a channel per row. */
-AcqStreamInfo streamInfo(const BrainFlowDescription& description, int board)
-{
-    AcqStreamInfo info;
-    info.name = "eeg";
-    info.sourceId = std::format("brainflow:{}", board);
-    info.format = AcqSampleFormat::Float64;
-    info.layout = AcqLayout::Interleaved;
-    info.sfreq = description.sampling_rate;
-    info.channels.resize(description.rows);
-    std::vector<bool> named(description.rows, false);
-    for (const Role& role : kRoles) {
-        const std::span<const int> rows = description.role(role.key);
-        const bool eeg = std::string_view(role.key) == "eeg_channels" && description.eeg_names.size() == rows.size();
-        for (std::size_t r = 0; r < rows.size(); ++r) {
-            const auto row = static_cast<std::size_t>(rows[r]);
-            if (named[row]) {
-                continue;
-            }
-            named[row] = true;
-            AcqChannelInfo& channel = info.channels[row];
-            channel.name = eeg ? description.eeg_names[r] : std::string(role.key).ends_with("_channel") ? role.prefix
-                                                                                                        : std::format("{} {:03}", role.prefix, r + 1);
-            channel.kind = role.kind;
-            channel.unit = role.unit;
-            channel.scale = role.scale;
-        }
-    }
-    for (std::size_t row = 0; row < description.rows; ++row) {
-        if (!named[row]) {
-            info.channels[row].name = std::format("ROW {:03}", row);
-            info.channels[row].kind = AcqChannelKind::Misc;
-        }
-    }
-    return info;
 }
 
 class BrainFlowBackend final : public AcqBackend
@@ -248,11 +174,11 @@ public:
         std::unique_ptr<BrainFlowBackend> backend(new BrainFlowBackend(std::move(*config), std::move(*library), *board, *description, uri.toString()));
         AcqStreamOptions options;
         options.capacitySamples = static_cast<std::size_t>(std::max(4 * description->sampling_rate, 1024));
-        auto writer = backend->addInputStream(streamInfo(*description, *board), options);
+        auto writer = backend->addInputStream(brainflow_stream_info(*description, std::format("brainflow:{}", *board)), options);
         if (!writer) {
             return writer.error();
         }
-        backend->m_writer = *writer;
+        backend->m_writer = BrainFlowRowWriter(**writer, *description);
         return std::unique_ptr<AcqBackend>(std::move(backend));
     }
 
@@ -276,7 +202,7 @@ public:
             return brainflow_error(code, "start_stream");
         }
         m_stop.store(false, std::memory_order_relaxed);
-        m_clocked = false;
+        m_writer.restart();
         auto thread = start_thread(m_config.thread, [this] { run(); });
         if (!thread) {
             m_library->stop_stream(m_board, m_config.params.c_str());
@@ -305,13 +231,6 @@ private:
     , m_rows(description.rows)
     , m_max_block(static_cast<std::size_t>(std::max(description.sampling_rate, 256)))
     {
-        if (const auto row = description.role("timestamp_channel"); !row.empty()) {
-            m_timestamp_row = static_cast<std::size_t>(row.front());
-        }
-        if (const auto row = description.role("marker_channel"); !row.empty()) {
-            m_marker_row = static_cast<std::size_t>(row.front());
-        }
-        m_sfreq = description.sampling_rate;
         m_data.reserve(m_rows * m_max_block);
     }
 
@@ -333,73 +252,16 @@ private:
                 reportError(brainflow_error(code, "get_board_data"));
                 return;
             }
-            if (!write(samples)) {
+            // BrainFlow's buffer is row after row
+            const AcqError written = m_writer.write(m_data.data(), samples, 1, samples, [this] { return m_stop.load(std::memory_order_acquire); });
+            if (written.code() == AcqErrorCode::DeviceStopped) {
+                return;
+            }
+            if (!written.ok()) {
+                reportError(written);
                 return;
             }
         }
-    }
-
-    /** Transposes BrainFlow's rows of @p samples samples into the ring, with their markers and clock. */
-    bool write(std::size_t samples)
-    {
-        AcqExpected<AcqWriteView> view = AcqError(AcqErrorCode::Timeout);
-        while (!view && view.error() == AcqErrorCode::Timeout) {
-            if (m_stop.load(std::memory_order_acquire)) {
-                return false;
-            }
-            view = m_writer->beginWrite(samples, kPoll); // a gating reader may not have freed the space yet
-        }
-        if (!view) {
-            reportError(view.error());
-            return false;
-        }
-        // BrainFlow's buffer is row after row; the stream is sample after sample
-        std::size_t done = 0;
-        for (std::size_t p = 0; p < view->partCount(); ++p) {
-            const AcqWritePart& part = view->part(p);
-            for (std::size_t s = 0; s < part.samples; ++s, ++done) {
-                for (std::size_t r = 0; r < m_rows; ++r) {
-                    std::memcpy(part.at(r, s), &m_data[r * samples + done], sizeof(double));
-                }
-            }
-        }
-        const std::uint64_t first = m_writer->writePosition();
-        if (m_marker_row) {
-            const double* markers = m_data.data() + *m_marker_row * samples;
-            for (std::size_t s = 0; s < samples; ++s) {
-                if (markers[s] != 0.0) {
-                    if (AcqError e = m_writer->pushEvent({first + s, 0, static_cast<std::int32_t>(std::lround(markers[s]))}); !e.ok()) {
-                        reportError(e);
-                        return false;
-                    }
-                }
-            }
-        }
-        m_writer->commit(samples);
-        if (m_timestamp_row) {
-            publishClock(first + samples - 1, m_data[*m_timestamp_row * samples + samples - 1]);
-        }
-        return true;
-    }
-
-    /** Anchors the clock at @p sample, taken at @p timestamp seconds since 1970; refreshed once a second. */
-    void publishClock(std::uint64_t sample, double timestamp)
-    {
-        const auto steady = std::chrono::steady_clock::now();
-        if (m_clocked && steady - m_last_clock < kClockRefresh) {
-            return;
-        }
-        m_clocked = true;
-        m_last_clock = steady;
-        const auto steadyNs = std::chrono::duration_cast<std::chrono::nanoseconds>(steady.time_since_epoch()).count();
-        const auto utcNs = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-        AcqClockModel clock;
-        clock.sfreq = m_sfreq;
-        clock.anchorSample = sample;
-        clock.utcOffsetNs = utcNs - steadyNs;
-        clock.anchorHostNs = std::llround(timestamp * 1e9) - clock.utcOffsetNs;
-        clock.source = AcqClockSource::Device;
-        m_writer->setClock(clock);
     }
 
     Config m_config;
@@ -409,13 +271,8 @@ private:
     std::string m_uri;
     std::size_t m_rows = 0;
     std::size_t m_max_block = 0; // samples of a read
-    double m_sfreq = 0.0;
-    std::optional<std::size_t> m_timestamp_row;
-    std::optional<std::size_t> m_marker_row;
-    std::vector<double> m_data; // BrainFlow's rows of the last read, reused
-    AcqWriter* m_writer = nullptr;
-    bool m_clocked = false;
-    std::chrono::steady_clock::time_point m_last_clock;
+    std::vector<double> m_data;  // BrainFlow's rows of the last read, reused
+    BrainFlowRowWriter m_writer;
     std::thread m_thread;
     std::atomic<bool> m_stop{false};
 };

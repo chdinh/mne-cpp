@@ -146,21 +146,6 @@ private:
     std::size_t m_at = 0;
 };
 
-/** @return @p name in lower case without separators and a trailing "board": "CYTON_DAISY_BOARD" is "cytondaisy". */
-std::string normalized(std::string_view name)
-{
-    std::string out;
-    for (const char c : name) {
-        if (std::isalnum(static_cast<unsigned char>(c)) != 0) {
-            out += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-        }
-    }
-    if (out.size() > 5 && out.ends_with("board")) {
-        out.resize(out.size() - 5);
-    }
-    return out;
-}
-
 /** @return The major version of "major.minor.patch", or nullopt. */
 std::optional<int> major_of(std::string_view version)
 {
@@ -248,17 +233,17 @@ AcqExpected<BrainFlowDescription> BrainFlowLibrary::description(int board) const
 
 AcqExpected<int> BrainFlowLibrary::find_board(std::string_view name) const
 {
-    const std::string wanted = normalized(name);
+    const std::string wanted = brainflow_board_key(name);
     std::string known;
     for (int board = kFirstBoard; board <= kLastBoard; ++board) {
         auto description = this->description(board);
         if (!description) {
             continue;
         }
-        if (normalized(description->name) == wanted) {
+        if (brainflow_board_key(description->name) == wanted) {
             return board;
         }
-        known += (known.empty() ? "" : ", ") + normalized(description->name);
+        known += (known.empty() ? "" : ", ") + brainflow_board_key(description->name);
     }
     return AcqError(AcqErrorCode::InvalidParameter, std::format("BrainFlow {} has no board '{}'; pass a board id or one of: {}", m_version, name, known));
 }
@@ -375,4 +360,20 @@ AcqError ACQLIB::detail::brainflow_error(int code, std::string_view call)
     }
     const std::string_view name = code >= 0 && static_cast<std::size_t>(code) < kNames.size() ? kNames[static_cast<std::size_t>(code)] : "unknown";
     return {kind, std::format("BrainFlow {} failed: {} ({})", call, name, code)};
+}
+
+//=============================================================================================================
+
+std::string ACQLIB::detail::brainflow_board_key(std::string_view name)
+{
+    std::string out;
+    for (const char c : name) {
+        if (std::isalnum(static_cast<unsigned char>(c)) != 0) {
+            out += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        }
+    }
+    if (out.size() > 5 && out.ends_with("board")) {
+        out.resize(out.size() - 5);
+    }
+    return out;
 }

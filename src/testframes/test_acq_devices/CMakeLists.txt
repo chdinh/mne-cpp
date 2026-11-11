@@ -31,7 +31,8 @@ add_library(brainflow_stub_old SHARED brainflow_stub.cpp)
 target_compile_definitions(brainflow_stub_old PRIVATE STUB_VERSION="4.9.2")
 add_dependencies(${PROJECT_NAME} brainflow_stub brainflow_stub_old)
 target_compile_definitions(${PROJECT_NAME} PRIVATE BRAINFLOW_STUB="$<TARGET_FILE:brainflow_stub>"
-                                                   BRAINFLOW_STUB_OLD="$<TARGET_FILE:brainflow_stub_old>")
+                                                   BRAINFLOW_STUB_OLD="$<TARGET_FILE:brainflow_stub_old>"
+                                                   BRAINFLOW_STREAM_SCRIPT="${CMAKE_CURRENT_SOURCE_DIR}/brainflow_stream.py")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE FALSE MACOSX_BUNDLE FALSE)
 

@@ -39,6 +39,8 @@ set(SOURCES
   rtserver/rtserver_simulator.cpp
   brainflow/brainflow_backend.cpp
   brainflow/brainflow_library.cpp
+  brainflow/brainflow_stream.cpp
+  brainflow/streaming_board_backend.cpp
 )
 
 set(PRIVATE_HEADERS
@@ -56,6 +58,8 @@ set(PRIVATE_HEADERS
   natus/natus_transport.h
   rtserver/rtserver_transport.h
   brainflow/brainflow_library.h
+  brainflow/brainflow_stream.h
+  brainflow/brainflow_boards.inc
   transport_error.h
 )
 

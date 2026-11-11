@@ -50,6 +50,9 @@
 // QT INCLUDES
 //=============================================================================================================
 
+#include <QProcess>
+#include <QStandardPaths>
+#include <QTemporaryDir>
 #include <QtTest>
 
 //=============================================================================================================
@@ -1241,6 +1244,11 @@ private slots:
     void testBrainFlowLibraryUnavailable();
     void testBrainFlowRefusesUnsupportedVersion();
     void testBrainFlowSyntheticBoard();
+    void testStreamingBoardDecodesDatagrams();
+    void testStreamingBoardSimulates();
+    void testStreamingBoardInvalidParameters_data();
+    void testStreamingBoardInvalidParameters();
+    void testStreamingBoardMatchesBrainFlow();
 };
 
 //=============================================================================================================
@@ -3024,6 +3032,247 @@ void TestAcqDevices::testBrainFlowSyntheticBoard()
     QVERIFY(reader->release(*view).ok());
     QCOMPARE(device->stream().clock().source, AcqClockSource::Device);
     QVERIFY(device->stop().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testStreamingBoardDecodesDatagrams()
+{
+#if defined(_WIN32)
+    QSKIP("the sender uses POSIX sockets");
+#else
+    const int probe = ::socket(AF_INET, SOCK_DGRAM, 0);
+    sockaddr_in to{};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    socklen_t length = sizeof(to);
+    QVERIFY(::bind(probe, reinterpret_cast<sockaddr*>(&to), sizeof(to)) == 0);
+    QVERIFY(::getsockname(probe, reinterpret_cast<sockaddr*>(&to), &length) == 0);
+    ::close(probe);
+
+    // The synthetic board: 32 rows at 250 Hz, EEG in rows 1-16, timestamp in row 30, marker in row 31
+    auto device = AcqDevice::open(std::format("streaming_board://127.0.0.1:{}?board=synthetic", ntohs(to.sin_port)));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().backend, std::string("streaming_board"));
+    const auto info = device->stream().info();
+    QCOMPARE(info->channelCount(), std::size_t(32));
+    QCOMPARE(info->sfreq, 250.0);
+    QCOMPARE(info->channels[1].name, std::string("Fz"));
+    QCOMPARE(info->channels[1].kind, AcqChannelKind::Eeg);
+    QCOMPARE(info->channels[31].kind, AcqChannelKind::Marker);
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+
+    constexpr double kStart = 1.8e9;
+    const auto sample = [](std::size_t s) {
+        std::array<double, 32> rows{};
+        for (std::size_t r = 0; r < rows.size(); ++r) {
+            rows[r] = static_cast<double>(s * 100 + r);
+        }
+        rows[30] = kStart + static_cast<double>(s) / 250.0;
+        rows[31] = s == 1 ? 5.0 : 0.0;
+        return rows;
+    };
+    const int sender = ::socket(AF_INET, SOCK_DGRAM, 0);
+    const auto send = [&](std::size_t first, std::size_t count, std::size_t cut = 0) {
+        std::vector<double> datagram;
+        for (std::size_t s = first; s < first + count; ++s) {
+            const auto rows = sample(s);
+            datagram.insert(datagram.end(), rows.begin(), rows.end());
+        }
+        ::sendto(sender, datagram.data(), datagram.size() * sizeof(double) - cut, 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+    };
+    send(0, 2);    // any number of samples per datagram
+    send(2, 1, 8); // not whole samples: dropped
+    send(2, 1);
+
+    std::vector<double> got;
+    std::vector<AcqEvent> events;
+    while (got.size() < 3 * 32) {
+        auto view = reader->acquire(1, 2s);
+        QVERIFY2(view, view ? "" : view.error().text().c_str());
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            const AcqBlockPart& part = view->part(p);
+            for (std::size_t s = 0; s < part.samples; ++s) {
+                for (std::size_t c = 0; c < 32; ++c) {
+                    double v = 0.0;
+                    std::memcpy(&v, part.at(c, s), sizeof(v));
+                    got.push_back(v);
+                }
+            }
+        }
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            events.push_back(view->events()[e]);
+        }
+        QVERIFY(reader->release(*view).ok());
+    }
+    QCOMPARE(got.size(), std::size_t(3 * 32));
+    for (std::size_t s = 0; s < 3; ++s) {
+        const auto rows = sample(s);
+        for (std::size_t r = 0; r < 32; ++r) {
+            QCOMPARE(got[s * 32 + r], rows[r]);
+        }
+    }
+    QCOMPARE(events.size(), std::size_t(1));
+    QCOMPARE(events[0].sample, std::uint64_t(1));
+    QCOMPARE(events[0].code, 5);
+    QCOMPARE(device->stream().clock().source, AcqClockSource::Device);
+    ::close(sender);
+    QVERIFY(device->stop().ok());
+#endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testStreamingBoardSimulates()
+{
+    auto device = AcqDevice::open("streaming_board://?simulate=1");
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const auto info = device->stream().info();
+    QCOMPARE(info->channelCount(), std::size_t(32));
+    QCOMPARE(info->channels[16].name, std::string("F8"));
+    AcqReaderOptions gating;
+    gating.gating = true;
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless, gating);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+
+    // The synthetic session's first trial starts after a second; its EEG is tens of microvolts
+    std::size_t samples = 0;
+    double peak = 0.0;
+    std::vector<AcqEvent> events;
+    const auto deadline = std::chrono::steady_clock::now() + 5s;
+    while (events.empty() && std::chrono::steady_clock::now() < deadline) {
+        auto view = reader->acquire(1, 1s);
+        QVERIFY2(view, view ? "" : view.error().text().c_str());
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            const AcqBlockPart& part = view->part(p);
+            for (std::size_t s = 0; s < part.samples; ++s, ++samples) {
+                double v = 0.0;
+                std::memcpy(&v, part.at(1, s), sizeof(v));
+                peak = std::max(peak, std::abs(v * info->channels[1].scale));
+            }
+        }
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            events.push_back(view->events()[e]);
+        }
+        QVERIFY(reader->release(*view).ok());
+    }
+    QVERIFY(!events.empty());
+    QVERIFY(events.front().code == 1 || events.front().code == 2);
+    QVERIFY(samples > 200);
+    QVERIFY2(peak > 1e-6 && peak < 1e-3, qPrintable(QString::number(peak)));
+    QVERIFY(device->stop().ok());
+    QVERIFY(device->start().ok()); // a restart streams again
+    QVERIFY(reader->acquire(1, 2s));
+    QVERIFY(device->stop().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testStreamingBoardInvalidParameters_data()
+{
+    QTest::addColumn<QString>("uri");
+    QTest::newRow("no board") << "streaming_board://127.0.0.1:6677";
+    QTest::newRow("no port") << "streaming_board://127.0.0.1?board=synthetic";
+    QTest::newRow("port 0") << "streaming_board://127.0.0.1:0?board=synthetic";
+    QTest::newRow("port text") << "streaming_board://127.0.0.1:x?board=synthetic";
+    QTest::newRow("no address") << "streaming_board://localhost:6677?board=synthetic";
+    QTest::newRow("unknown board") << "streaming_board://127.0.0.1:6677?board=nosuchboard";
+    QTest::newRow("simulator target") << "streaming_board://127.0.0.1:6677?simulate=1";
+    QTest::newRow("unknown key") << "streaming_board://?simulate=1&colour=red";
+}
+
+void TestAcqDevices::testStreamingBoardInvalidParameters()
+{
+    QFETCH(QString, uri);
+    QCOMPARE(openError(uri.toStdString()), AcqErrorCode::InvalidParameter);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testStreamingBoardMatchesBrainFlow()
+{
+#if defined(_WIN32)
+    QSKIP("the free port is found with POSIX sockets");
+#else
+    // BrainFlow's synthetic board streams to us while BrainFlow keeps its own copy: both must agree sample by sample
+    const QString python = QStandardPaths::findExecutable(QStringLiteral("python3"));
+    if (python.isEmpty()) {
+        QSKIP("no python3 on the PATH");
+    }
+    const int probe = ::socket(AF_INET, SOCK_DGRAM, 0);
+    sockaddr_in to{};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    socklen_t length = sizeof(to);
+    QVERIFY(::bind(probe, reinterpret_cast<sockaddr*>(&to), sizeof(to)) == 0);
+    QVERIFY(::getsockname(probe, reinterpret_cast<sockaddr*>(&to), &length) == 0);
+    ::close(probe);
+    const int port = ntohs(to.sin_port);
+
+    auto device = AcqDevice::open(std::format("streaming_board://127.0.0.1:{}?board=-1", port));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    QVERIFY(device->start().ok());
+
+    QTemporaryDir dir;
+    const QString out = dir.filePath(QStringLiteral("brainflow.f64"));
+    QProcess process;
+    process.start(python, {QStringLiteral(BRAINFLOW_STREAM_SCRIPT), QStringLiteral("127.0.0.1"), QString::number(port), QStringLiteral("3"), out});
+    QVERIFY(process.waitForStarted());
+    std::vector<double> got;
+    std::vector<AcqEvent> events;
+    while (process.state() != QProcess::NotRunning || reader->available() > 0) {
+        process.waitForFinished(10);
+        auto view = reader->acquire(1, 10ms);
+        if (!view) {
+            continue;
+        }
+        for (std::size_t p = 0; p < view->partCount(); ++p) {
+            const AcqBlockPart& part = view->part(p);
+            for (std::size_t s = 0; s < part.samples; ++s) {
+                for (std::size_t c = 0; c < 32; ++c) {
+                    double v = 0.0;
+                    std::memcpy(&v, part.at(c, s), sizeof(v));
+                    got.push_back(v);
+                }
+            }
+        }
+        for (std::size_t e = 0; e < view->events().size(); ++e) {
+            events.push_back(view->events()[e]);
+        }
+        QVERIFY(reader->release(*view).ok());
+    }
+    if (process.exitCode() == 2) {
+        QSKIP("BrainFlow is not installed for python3");
+    }
+    QVERIFY2(process.exitCode() == 0, process.readAll().constData());
+    QVERIFY(device->stop().ok());
+
+    std::ifstream file(out.toStdString(), std::ios::binary);
+    std::array<std::int64_t, 2> shape{};
+    file.read(reinterpret_cast<char*>(shape.data()), sizeof(shape));
+    QCOMPARE(shape[0], std::int64_t(32));
+    const auto samples = static_cast<std::size_t>(shape[1]);
+    std::vector<double> brainflow(32 * samples);
+    file.read(reinterpret_cast<char*>(brainflow.data()), static_cast<std::streamsize>(brainflow.size() * sizeof(double)));
+    QVERIFY(file);
+
+    // BrainFlow streams whole batches, so its copy may hold a last partial batch more
+    QVERIFY2(got.size() / 32 <= samples && got.size() / 32 + 3 > samples, qPrintable(QString("%1 of %2").arg(got.size() / 32).arg(samples)));
+    for (std::size_t s = 0; s < got.size() / 32; ++s) {
+        for (std::size_t r = 0; r < 32; ++r) {
+            QCOMPARE(got[s * 32 + r], brainflow[r * samples + s]);
+        }
+    }
+    // The sender's marker arrives as an event at its sample; BrainFlow's own STREAMING_BOARD would lose it
+    QCOMPARE(events.size(), std::size_t(1));
+    QCOMPARE(events[0].code, 7);
+    QCOMPARE(brainflow[31 * samples + events[0].sample], 7.0);
+#endif
 }
 
 //=============================================================================================================
