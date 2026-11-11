@@ -41,6 +41,7 @@ set(SOURCES
   brainflow/brainflow_library.cpp
   brainflow/brainflow_stream.cpp
   brainflow/streaming_board_backend.cpp
+  brainflow/brainflow_file_backend.cpp
 )
 
 set(PRIVATE_HEADERS

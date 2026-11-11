@@ -3,9 +3,10 @@
 #   Christoph Dinh <christoph.dinh@mne-cpp.org>
 """Stream BrainFlow's synthetic board with add_streamer and write what BrainFlow itself read.
 
-Usage: brainflow_stream.py ADDRESS PORT SECONDS OUT
+Usage: brainflow_stream.py ADDRESS PORT SECONDS OUT [FILE]
 
-The board streams to streaming_board://ADDRESS:PORT and inserts marker 7 after a second. OUT holds the number of rows
+The board streams to streaming_board://ADDRESS:PORT, and to FILE with BrainFlow's file streamer if given, and
+inserts marker 7 after a second. OUT holds the number of rows
 and samples as two int64 values, then the rows x samples array in row-major float64. Exit code 2 when BrainFlow is
 not installed.
 """
@@ -25,6 +26,8 @@ BoardShim.disable_board_logger()
 board = BoardShim(BoardIds.SYNTHETIC_BOARD.value, BrainFlowInputParams())
 board.prepare_session()
 board.add_streamer(f"streaming_board://{address}:{port}")
+if len(sys.argv) > 5:
+    board.add_streamer(f"file://{sys.argv[5]}:w")
 board.start_stream()
 time.sleep(1.0)
 board.insert_marker(7)

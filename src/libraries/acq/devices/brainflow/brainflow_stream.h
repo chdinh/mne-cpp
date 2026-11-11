@@ -79,6 +79,12 @@ public:
         m_clocked = false;
     }
 
+    /** Ends the stream after the samples written. */
+    void finish() noexcept
+    {
+        m_writer->finish();
+    }
+
     /**
      * Writes @p samples samples; row r of sample s is data[s * sampleStride + r * rowStride].
      *

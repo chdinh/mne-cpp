@@ -140,6 +140,14 @@ ACQDEVICESSHARED_EXPORT AcqError register_brainflow_scheme();
 ACQDEVICESSHARED_EXPORT AcqError register_streaming_board_scheme();
 
 /**
+ * Registers the brainflow_file:// scheme (a file BrainFlow wrote, replayed without BrainFlow) with
+ * AcqDeviceRegistry::instance(), as registerBrainAmpScheme() does for brainamp://.
+ *
+ * @return Success, or the error of the registration.
+ */
+ACQDEVICESSHARED_EXPORT AcqError register_brainflow_file_scheme();
+
+/**
  * Registers every scheme of this library, as the functions above do one by one; for programs that offer all
  * sources, such as mne_acq.
  *

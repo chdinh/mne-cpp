@@ -1248,6 +1248,11 @@ private slots:
     void testStreamingBoardSimulates();
     void testStreamingBoardInvalidParameters_data();
     void testStreamingBoardInvalidParameters();
+    void testBrainFlowFileReplays();
+    void testBrainFlowFileRefusesMalformedFiles_data();
+    void testBrainFlowFileRefusesMalformedFiles();
+    void testBrainFlowFileMatchesBrainFlow();
+    void testStreamingBoardMatchesBrainFlow_data();
     void testStreamingBoardMatchesBrainFlow();
 };
 
@@ -3192,8 +3197,16 @@ void TestAcqDevices::testStreamingBoardInvalidParameters()
 
 //=============================================================================================================
 
+void TestAcqDevices::testStreamingBoardMatchesBrainFlow_data()
+{
+    QTest::addColumn<QString>("address");
+    QTest::newRow("unicast") << "127.0.0.1";
+    QTest::newRow("multicast") << "239.255.43.22";
+}
+
 void TestAcqDevices::testStreamingBoardMatchesBrainFlow()
 {
+    QFETCH(QString, address);
 #if defined(_WIN32)
     QSKIP("the free port is found with POSIX sockets");
 #else
@@ -3212,7 +3225,31 @@ void TestAcqDevices::testStreamingBoardMatchesBrainFlow()
     ::close(probe);
     const int port = ntohs(to.sin_port);
 
-    auto device = AcqDevice::open(std::format("streaming_board://127.0.0.1:{}?board=-1", port));
+    if (address != QStringLiteral("127.0.0.1")) {
+        // A plain socket in the group must hear another process first; managed firewalls drop that for unsigned programs
+        const int member = ::socket(AF_INET, SOCK_DGRAM, 0);
+        const int on = 1;
+        ::setsockopt(member, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
+        sockaddr_in local{};
+        local.sin_family = AF_INET;
+        local.sin_port = htons(static_cast<std::uint16_t>(port));
+        ip_mreq membership{};
+        ::inet_pton(AF_INET, address.toLatin1().constData(), &membership.imr_multiaddr);
+        QVERIFY(::bind(member, reinterpret_cast<sockaddr*>(&local), sizeof(local)) == 0);
+        QVERIFY(::setsockopt(member, IPPROTO_IP, IP_ADD_MEMBERSHIP, &membership, sizeof(membership)) == 0);
+        QProcess::execute(python, {QStringLiteral("-c"), QStringLiteral("import socket; socket.socket(socket.AF_INET, socket.SOCK_DGRAM)"
+                                                                        ".sendto(b'x', ('%1', %2))")
+                                                             .arg(address)
+                                                             .arg(port)});
+        pollfd ready{member, POLLIN, 0};
+        const bool heard = ::poll(&ready, 1, 1000) > 0;
+        ::close(member);
+        if (!heard) {
+            QSKIP("this machine drops multicast datagrams from other programs");
+        }
+    }
+
+    auto device = AcqDevice::open(std::format("streaming_board://{}:{}?board=-1", address.toStdString(), port));
     QVERIFY2(device, device ? "" : device.error().text().c_str());
     auto reader = device->stream().reader(AcqReader::ReadMode::Lossless);
     QVERIFY(reader);
@@ -3221,7 +3258,7 @@ void TestAcqDevices::testStreamingBoardMatchesBrainFlow()
     QTemporaryDir dir;
     const QString out = dir.filePath(QStringLiteral("brainflow.f64"));
     QProcess process;
-    process.start(python, {QStringLiteral(BRAINFLOW_STREAM_SCRIPT), QStringLiteral("127.0.0.1"), QString::number(port), QStringLiteral("3"), out});
+    process.start(python, {QStringLiteral(BRAINFLOW_STREAM_SCRIPT), address, QString::number(port), QStringLiteral("3"), out});
     QVERIFY(process.waitForStarted());
     std::vector<double> got;
     std::vector<AcqEvent> events;
@@ -3273,6 +3310,128 @@ void TestAcqDevices::testStreamingBoardMatchesBrainFlow()
     QCOMPARE(events[0].code, 7);
     QCOMPARE(brainflow[31 * samples + events[0].sample], 7.0);
 #endif
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowFileReplays()
+{
+    // Ganglion: 15 rows at 200 Hz, EEG in rows 1-4, timestamp in row 13, marker in row 14
+    QTemporaryDir dir;
+    const std::string path = dir.filePath(QStringLiteral("ganglion.csv")).toStdString();
+    {
+        std::ofstream file(path);
+        for (int s = 0; s < 5; ++s) {
+            for (int r = 0; r < 15; ++r) {
+                const double value = r == 13 ? 1.8e9 + s / 200.0 : r == 14 ? (s == 3 ? 4.0 : 0.0)
+                                                                           : s * 100 + r + 0.25;
+                file << std::format("{:.6f}{}", value, r < 14 ? '\t' : '\n');
+            }
+        }
+        file << "\r\n"; // blank lines and Windows line ends are fine
+    }
+    auto device = AcqDevice::open(std::format("brainflow_file://{}?board=ganglion&realtime=0", path));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    QCOMPARE(device->description().backend, std::string("brainflow_file"));
+    const auto info = device->stream().info();
+    QCOMPARE(info->channelCount(), std::size_t(15));
+    QCOMPARE(info->sfreq, 200.0);
+    QCOMPARE(info->channels[1].kind, AcqChannelKind::Eeg);
+    const Recording recording = record_device(*device);
+    QCOMPARE(recording.frames(), std::size_t(5));
+    QCOMPARE(recording.at(2, 1), 201.25 * 1e-6);
+    QCOMPARE(recording.at(4, 13), 1.8e9 + 4 / 200.0);
+    QCOMPARE(recording.events.size(), std::size_t(1));
+    QCOMPARE(recording.events[0].sample, std::uint64_t(3));
+    QCOMPARE(recording.events[0].code, 4);
+
+    // Real time: 5 samples at 200 Hz take 25 ms; a loop goes on past the end
+    auto looped = AcqDevice::open(std::format("brainflow_file://{}?board=1&loop=1", path));
+    QVERIFY(looped);
+    auto reader = looped->stream().reader(AcqReader::ReadMode::Lossless);
+    QVERIFY(reader);
+    const auto started = std::chrono::steady_clock::now();
+    QVERIFY(looped->start().ok());
+    QVERIFY(reader->acquire(12, 2s));
+    QVERIFY(std::chrono::steady_clock::now() - started >= 50ms);
+    QVERIFY(looped->stop().ok());
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowFileRefusesMalformedFiles_data()
+{
+    QTest::addColumn<QString>("content");
+    QTest::addColumn<QString>("parameters");
+    QTest::addColumn<int>("code");
+    const QString row = QStringLiteral("0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\n");
+    QTest::newRow("other board") << row << "board=synthetic" << int(AcqErrorCode::UnsupportedFormat);
+    QTest::newRow("short line") << row + "1\t2\n"
+                                << "board=ganglion" << int(AcqErrorCode::UnsupportedFormat);
+    QTest::newRow("text") << QString(row).replace(QStringLiteral("7"), QStringLiteral("x")) << "board=ganglion" << int(AcqErrorCode::UnsupportedFormat);
+    QTest::newRow("commas") << QString(row).replace(QLatin1Char('\t'), QLatin1Char(',')) << "board=ganglion" << int(AcqErrorCode::UnsupportedFormat);
+    QTest::newRow("empty") << "\n"
+                           << "board=ganglion" << int(AcqErrorCode::UnsupportedFormat);
+    QTest::newRow("no board") << row << "realtime=0" << int(AcqErrorCode::InvalidParameter);
+    QTest::newRow("unknown board") << row << "board=nosuchboard" << int(AcqErrorCode::InvalidParameter);
+    QTest::newRow("speed") << row << "board=ganglion&speed=0" << int(AcqErrorCode::InvalidParameter);
+}
+
+void TestAcqDevices::testBrainFlowFileRefusesMalformedFiles()
+{
+    QFETCH(QString, content);
+    QFETCH(QString, parameters);
+    QFETCH(int, code);
+    QTemporaryDir dir;
+    const std::string path = dir.filePath(QStringLiteral("file.csv")).toStdString();
+    std::ofstream(path) << content.toStdString();
+    QCOMPARE(int(openError(std::format("brainflow_file://{}?{}", path, parameters.toStdString()))), code);
+    QCOMPARE(openError("brainflow_file:///no/such/file.csv?board=ganglion"), AcqErrorCode::DeviceNotFound);
+}
+
+//=============================================================================================================
+
+void TestAcqDevices::testBrainFlowFileMatchesBrainFlow()
+{
+    // What BrainFlow's file streamer wrote replays as the samples BrainFlow itself read, to its six decimals
+    const QString python = QStandardPaths::findExecutable(QStringLiteral("python3"));
+    if (python.isEmpty()) {
+        QSKIP("no python3 on the PATH");
+    }
+    QTemporaryDir dir;
+    const QString out = dir.filePath(QStringLiteral("brainflow.f64"));
+    const QString csv = dir.filePath(QStringLiteral("brainflow.csv"));
+    QProcess process;
+    process.start(python, {QStringLiteral(BRAINFLOW_STREAM_SCRIPT), QStringLiteral("127.0.0.1"), QStringLiteral("9"), QStringLiteral("2"), out, csv});
+    QVERIFY(process.waitForFinished(30000));
+    if (process.exitCode() == 2) {
+        QSKIP("BrainFlow is not installed for python3");
+    }
+    QVERIFY2(process.exitCode() == 0, process.readAll().constData());
+
+    std::ifstream file(out.toStdString(), std::ios::binary);
+    std::array<std::int64_t, 2> shape{};
+    file.read(reinterpret_cast<char*>(shape.data()), sizeof(shape));
+    const auto samples = static_cast<std::size_t>(shape[1]);
+    std::vector<double> brainflow(32 * samples);
+    file.read(reinterpret_cast<char*>(brainflow.data()), static_cast<std::streamsize>(brainflow.size() * sizeof(double)));
+    QVERIFY(file);
+
+    auto device = AcqDevice::open(std::format("brainflow_file://{}?board=synthetic&realtime=0", csv.toStdString()));
+    QVERIFY2(device, device ? "" : device.error().text().c_str());
+    const Recording recording = record_device(*device);
+    QCOMPARE(recording.frames(), samples);
+    const auto info = device->stream().info();
+    for (std::size_t s = 0; s < samples; ++s) {
+        for (std::size_t r = 0; r < 32; ++r) {
+            const double expected = brainflow[r * samples + s] * info->channels[r].scale;
+            QVERIFY2(std::abs(recording.at(s, r) - expected) <= 5e-7 * info->channels[r].scale,
+                     qPrintable(QString("sample %1 row %2: %3 vs %4").arg(s).arg(r).arg(recording.at(s, r), 0, 'g', 17).arg(expected, 0, 'g', 17)));
+        }
+    }
+    QCOMPARE(recording.events.size(), std::size_t(1));
+    QCOMPARE(recording.events[0].code, 7);
+    QCOMPARE(brainflow[31 * samples + recording.events[0].sample], 7.0);
 }
 
 //=============================================================================================================

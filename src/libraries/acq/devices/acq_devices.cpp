@@ -25,7 +25,8 @@ ACQLIB::AcqError ACQLIB::register_device_schemes()
     for (AcqError (*registration)() : {&registerBrainAmpScheme, &registerTmsiScheme, &register_gusbamp_scheme, &register_eego_scheme,
                                        &register_neuromag_scheme, &register_polhemus_scheme, &register_ftbuffer_scheme,
                                        &register_rtserver_scheme, &register_natus_scheme, &register_babymeg_scheme,
-                                       &register_brainflow_scheme, &register_streaming_board_scheme}) {
+                                       &register_brainflow_scheme, &register_streaming_board_scheme,
+                                       &register_brainflow_file_scheme}) {
         if (AcqError error = registration(); !error.ok()) {
             return error;
         }

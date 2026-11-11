@@ -59,6 +59,7 @@ mne_acq view <uri> [--window s] [--duration s] [--screenshot file.png]
 | `rtserver://127.0.0.1:4217?simfile=/data/run_raw.fif` | The active connector of an `mne_rt_server`, here its FIFF file simulator replaying a file on the server's computer |
 | `brainflow://cyton?serial_port=/dev/ttyUSB0` | Any board BrainFlow supports, through an installed BrainFlow 5 (see below) |
 | `streaming_board://225.1.1.1:6677?board=cyton` | What a BrainFlow session streams with `add_streamer`, without BrainFlow (see below) |
+| `brainflow_file:///data/session.csv?board=cyton` | A file BrainFlow wrote, replayed without BrainFlow (see below) |
 
 The vendor amplifiers (`eego://`, `natus://`, `babymeg://`, ...) are listed by `mne_acq list`, each with its
 parameters.
@@ -89,6 +90,15 @@ the board's layout to itself.
 
 ```bash
 mne_acq record "streaming_board://225.1.1.1:6677?board=cyton" session_raw.fif --duration 60
+```
+
+Files BrainFlow wrote with its file streamer (`add_streamer("file://session.csv:w")`) or `DataFilter.write_file`
+hold a sample per line, the board's rows separated by tabs. `brainflow_file://` replays them without BrainFlow, with
+the channels of `brainflow://`, the markers as events and the timestamps as clock; `board=` names the board that
+recorded the file. `realtime=0` replays as fast as the samples are read, which converts a BrainFlow file to FIFF:
+
+```bash
+mne_acq record "brainflow_file:///data/session.csv?board=cyton&realtime=0" session_raw.fif
 ```
 
 ## BrainFlow Output

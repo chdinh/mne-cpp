@@ -184,9 +184,16 @@ aliases; replace the old spelling as below.
   a synthetic session to itself. `mne_acq stream --brainflow-multicast`
   sends with the same code and no longer needs Qt Network, and knows the
   same boards without BrainFlow.
+- `brainflow_file:///<file>?board=<id or name>` replays a file BrainFlow
+  wrote (its file streamer or `DataFilter.write_file`) without BrainFlow,
+  paced (`realtime`, `speed`) or as fast as it is read, once or in a
+  `loop`; `mne_acq record "brainflow_file://...&realtime=0" out.fif`
+  converts it to FIFF with the markers as events.
 - `COMLIB::UdpSocket::bind` joins a multicast group given as address,
-  sharing its port; `send_to` sends a datagram, to a group through the
-  interface of the default route.
+  sharing its port, on the system's multicast interface and on that of the
+  default route, which differ behind a VPN (BrainFlow's streamer sends on
+  the first, its receiver listens on the second); `send_to` sends a
+  datagram, to a group through the interface of the default route.
 - Device URI schemes may contain `_`, as BrainFlow's `streaming_board://`
   does.
 - The BrainFlow MNE Scan plugin is back as a client of `brainflow://`: it
