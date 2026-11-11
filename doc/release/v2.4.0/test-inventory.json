@@ -18,7 +18,7 @@
     "without_timeout": 0,
     "requirements": {
       "freesurfer": 2,
-      "python": 12,
+      "python": 13,
       "sample-data": 20,
       "test-data": 122
     },
@@ -657,10 +657,12 @@
         "unit"
       ],
       "timeout": 120,
-      "requirements": [],
+      "requirements": [
+        "python"
+      ],
       "gui": false,
-      "qskip_sites": 10,
-      "spawns_processes": false,
+      "qskip_sites": 14,
+      "spawns_processes": true,
       "ci_excluded_on": [],
       "ci": {
         "macos-26": "absent",
@@ -1775,7 +1777,7 @@
       "timeout": 60,
       "requirements": [],
       "gui": false,
-      "qskip_sites": 6,
+      "qskip_sites": 8,
       "spawns_processes": false,
       "ci_excluded_on": [],
       "ci": {

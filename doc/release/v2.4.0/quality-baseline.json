@@ -253,10 +253,10 @@
       }
     },
     "G3_api_documentation": {
-      "public_api_units": 566,
-      "exported_not_registered": 1,
-      "example_eligible": 413,
-      "eligible_backed_percent": 99.76,
+      "public_api_units": 567,
+      "exported_not_registered": 2,
+      "example_eligible": 414,
+      "eligible_backed_percent": 99.52,
       "snippets": 448,
       "registered_test_percent": 40.88
     },

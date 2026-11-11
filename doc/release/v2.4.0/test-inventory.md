@@ -30,7 +30,7 @@ CI evidence: https://github.com/mne-tools/mne-cpp/actions/runs/39457390522 (comm
 | Requirement | Tests |
 |---|---:|
 | freesurfer | 2 |
-| python | 12 |
+| python | 13 |
 | sample-data | 20 |
 | test-data | 122 |
 | GUI (`QTEST_MAIN`) | 46 |

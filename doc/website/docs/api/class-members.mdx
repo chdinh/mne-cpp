@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6388 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6396 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -399,6 +399,8 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **BoundsFn** `[type]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Per-kind callback that returns a layer's AABB in world coordinates.
 - **box_height** `[var]` in [LayoutOptions](/docs/api/channels/layout-options) — Height of each channel box, in layout units.
 - **box_width** `[var]` in [LayoutOptions](/docs/api/channels/layout-options) — Width of each channel box, in layout units.
+- **BrainFlowRowWriter** `[fn]` in `BrainFlowRowWriter`
+- **BrainFlowRowWriter** `[fn]` in `BrainFlowRowWriter`
 - **BrainRenderer** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Default Constructor.
 - **brainShader** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **BrainSurface** `[fn]` in [BrainSurface](/docs/api/disp3-d/brain-surface) — Default Constructor.
@@ -1425,6 +1427,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **eeg_names** `[var]` in `BrainFlowDescription` — Names of the EEG rows, empty if BrainFlow has none.
 - **eeg_pot** `[var]` in [dipoleFitFuncsRec](/docs/api/inv/dipole-fit-funcs-rec) — EEG forward calculation function.
 - **eeg_reg** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Noise-covariance matrix regularization for EEG.
+- **eeg_rows** `[fn]` in `BrainFlowStreamer`
 - **eeg_sphere_rad** `[var]` in [ComputeFwdSettings](/docs/api/fwd/compute-fwd-settings) — Scalp radius to use in EEG sphere model.
 - **eeg_sphere_rad** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Scalp radius to use in EEG sphere model.
 - **eeg_std** `[var]` in [InvDipoleFitSettings](/docs/api/inv/inv-dipole-fit-settings) — Standard deviation for EEG if noise covariance is not specified.
@@ -3747,6 +3750,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **open** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Open and parse the file header.
 - **open** `[fn]` in [AcqDevice](/docs/api/acq/acq-device) — Opens a source through [`AcqDeviceRegistry`](/docs/api/acq/acq-device-registry), e.g.
 - **open** `[fn]` in [AcqDeviceRegistry](/docs/api/acq/acq-device-registry)
+- **open** `[fn]` in `BrainFlowStreamer`
 - **open** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Open and parse the file header.
 - **open** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Open and parse the file header.
 - **open** `[fn]` in `FiffEvokedFile`
@@ -4208,6 +4212,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **pull_chunk** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of multichannel data from the inlet.
 - **pull_chunk_float** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of float data (non-template version).
 - **pull_chunk_float** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Pull a chunk of float data with the timestamp of every sample.
+- **push** `[fn]` in `BrainFlowStreamer` — Adds a sample and sends the datagram once it holds a batch.
 - **push** `[fn]` in [CircularBuffer](/docs/api/base/circular-buffer) — Appends `element`.
 - **push** `[fn]` in [CircularBuffer](/docs/api/base/circular-buffer) — Appends all of `elements`, or none.
 - **push_back** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Appends an annotation.
@@ -4559,6 +4564,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **resolution** `[var]` in `BrainAmpSetup`
 - **resolution** `[var]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info) — Scaling factor (calibration value).
 - **resolvedAttributes** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance)
+- **restart** `[fn]` in `BrainFlowRowWriter` — Anchors the clock at the next write, as after a start.
 - **restart** `[fn]` in [RtAveraging](/docs/api/dsp/rt-averaging) — Restarts the thread by interrupting its computation queue, quitting, waiting and then starting it again.
 - **restart** `[fn]` in [RtConnectivity](/docs/api/dsp/rt-connectivity) — Restarts the thread by interrupting its computation queue, quitting, waiting and then starting it again.
 - **restart** `[fn]` in [RtHpi](/docs/api/dsp/rt-hpi) — Restarts the thread by interrupting its computation queue, quitting, waiting and then starting it again.
@@ -4788,7 +4794,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **schema** `[fn]` in [MnaOpRegistry](/docs/api/mna/mna-op-registry) — Get the schema for an operation type.
 - **scheme** `[var]` in [AcqDiscoveredDevice](/docs/api/acq/acq-discovered-device) — Scheme of the uri.
 - **scheme** `[var]` in [AcqSchemeInfo](/docs/api/acq/acq-scheme-info) — e.g.
-- **scheme** `[var]` in [AcqUri](/docs/api/acq/acq-uri) — Lower-case scheme without "://".
+- **scheme** `[var]` in [AcqUri](/docs/api/acq/acq-uri) — Lower-case scheme without "://": a letter, then letters, digits, +, -, .
 - **schemes** `[fn]` in [AcqDeviceRegistry](/docs/api/acq/acq-device-registry)
 - **sChName** `[var]` in [ArtifactRejectionData](/docs/api/mne/artifact-rejection-data) — Channel name.
 - **script** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Inline source code, interpreter, language.
@@ -4860,6 +4866,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **selectTris** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — Select tris for this label from a given surface file.
 - **selectTris** `[fn]` in [FsLabel](/docs/api/fs/fs-label) — Select tris for this label from a given tri matrix.
 - **send** `[fn]` in `RtServerTransport` — Sends a command tag on the data port.
+- **send_to** `[fn]` in [UdpSocket](/docs/api/com/udp-socket) — Sends one datagram.
 - **sendMouseLoc** `[signal]` in [SpectrumView](/docs/api/disp/spectrum-view) — Signals for sending the mouse location to the delegate.
 - **sensEeg** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
 - **sensMeg** `[var]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile)
@@ -6326,6 +6333,7 @@ Index of 6388 public class members (functions, variables, typedefs, enums) acros
 - **write** `[fn]` in [BidsDatasetDescription](/docs/api/bids/bids-dataset-description) — Write a dataset_description.json file.
 - **write** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Write this dataset to a BIDS-compliant directory.
 - **write** `[fn]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Convenience overload — write with default options.
+- **write** `[fn]` in `BrainFlowRowWriter` — Writes `samples` samples; row r of sample s is data[s * sampleStride + r * rowStride].
 - **write** `[fn]` in [ByteStream](/docs/api/base/byte-stream) — Writes `bytes` bytes at the current position, overwriting or extending the stream.
 - **write** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes the annotations to a .csv file, or to JSON for any other extension.
 - **write** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Writes the transform to a new FIFF file, as mne.write_trans.

@@ -117,6 +117,7 @@
         "test_tool_list_source_space"
       ],
       "cross-validated-live": [
+        "test_acq_devices",
         "test_acq_dlpack",
         "test_acq_lsl",
         "test_acq_recorder",

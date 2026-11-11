@@ -3,10 +3,10 @@
   "generated_by": "scripts/quality/audit_api_evidence.py",
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
-    "exported_classes": 473,
-    "exported_free_functions": 189,
+    "exported_classes": 474,
+    "exported_free_functions": 192,
     "registered_classes": 565,
-    "exported_not_registered": 1,
+    "exported_not_registered": 2,
     "registered_function_modules": 14,
     "registered_header_only": 79,
     "registered_stale": 0,
@@ -17,8 +17,8 @@
     "registered_with_python_equiv": 97,
     "registered_without_api_page": 0,
     "with_snippet": 448,
-    "public_api_units": 566,
-    "example_eligible": 413,
+    "public_api_units": 567,
+    "example_eligible": 414,
     "example_exempt": 153,
     "eligible_backed_by_registry_example": 412,
     "eligible_used_by_some_example": 356,
@@ -27,10 +27,10 @@
   },
   "by_library": {
     "acq": {
-      "public": 54,
+      "public": 55,
       "registered": 53,
       "with_test": 50,
-      "eligible": 36,
+      "eligible": 37,
       "eligible_with_registry_example": 35,
       "eligible_used_by_example": 10,
       "with_snippet": 49
@@ -405,8 +405,23 @@
       "library": "acq"
     },
     {
+      "name": "register_streaming_board_scheme",
+      "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
       "name": "register_device_schemes",
       "header": "acq/devices/acq_devices.h",
+      "library": "acq"
+    },
+    {
+      "name": "builtin_brainflow_board",
+      "header": "acq/devices/brainflow/brainflow_stream.h",
+      "library": "acq"
+    },
+    {
+      "name": "brainflow_board",
+      "header": "acq/devices/brainflow/brainflow_stream.h",
       "library": "acq"
     },
     {
@@ -2266,6 +2281,25 @@
     {
       "name": "AcqSharedLibrary",
       "header": "acq/detail/acq_shared_library.h",
+      "library": "acq",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": false,
+      "registry_status": null,
+      "test": null,
+      "test_resolves": false,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": null,
+      "python_equiv": null,
+      "example_eligible": true,
+      "exempt_reason": null
+    },
+    {
+      "name": "BrainFlowStreamer",
+      "header": "acq/devices/brainflow/brainflow_stream.h",
       "library": "acq",
       "kind": "exported-class",
       "exported": true,
