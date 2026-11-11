@@ -77,7 +77,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QTcpSocket>
 #include <QDebug>
 #include <cstdint>
 
@@ -318,16 +317,6 @@ void FiffStream::writeRaw(const void* data, fiff_long_t bytes)
 {
     if (bytes > 0)
         m_bytes->write(data, static_cast<std::size_t>(bytes));
-}
-
-//=============================================================================================================
-
-void FiffStream::skipRaw(fiff_long_t bytes)
-{
-    if (m_device && m_device->isSequential())
-        m_device->skip(bytes);
-    else
-        seekTo(tell() + bytes);
 }
 
 //=============================================================================================================
@@ -1837,9 +1826,7 @@ std::optional<FiffTag> FiffStream::read_tag_info(bool skip)
     tag.resize(size);
 
     if (skip) {
-        if (qobject_cast<QTcpSocket*>(this->device())) {
-            skipRaw(tag.size());
-        } else if (tag.next > 0) {
+        if (tag.next > 0) {
             if (!seekTo(tag.next)) {
                 return std::nullopt;
             }
@@ -1848,26 +1835,6 @@ std::optional<FiffTag> FiffStream::read_tag_info(bool skip)
                 return std::nullopt;
             }
         }
-    }
-    return tag;
-}
-
-//=============================================================================================================
-
-std::optional<FiffTag> FiffStream::read_rt_tag()
-{
-    while (this->device()->bytesAvailable() < 16) {
-        this->device()->waitForReadyRead(10);
-    }
-    auto tag = read_tag_info(false);
-    if (!tag) {
-        return std::nullopt;
-    }
-    while (this->device()->bytesAvailable() < tag->size()) {
-        this->device()->waitForReadyRead(10);
-    }
-    if (!read_tag_data(*tag)) {
-        return std::nullopt;
     }
     return tag;
 }

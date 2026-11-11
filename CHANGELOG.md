@@ -272,6 +272,8 @@ aliases; replace the old spelling as below.
   `if (!x.sol.empty())`, and `FiffCov::SDPtr(new FiffCov(c))` becomes `c`.
   `SCMEASLIB::RealTimeFwdSolution` loses `setSol`, `getSol`, `setSolGrad`
   and `getSolGrad` (`setSolGrad` overwrote `sol`); use `getValue()->sol`.
+- `FiffStream::read_rt_tag` is gone: nothing called it, and the real-time
+  server reads its socket with `read_tag_info(false)` and `read_tag_data`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella
   headers for their library.
 - `lsl://?simulate=1` publishes a synthetic EEG session as an LSL stream

@@ -507,14 +507,6 @@ public:
 
     //=========================================================================================================
     /**
-     * Reads the next tag of a real-time stream, waiting until it has arrived.
-     *
-     * @return The tag, or nothing if it cannot be read.
-     */
-    [[nodiscard]] std::optional<FiffTag> read_rt_tag();
-
-    //=========================================================================================================
-    /**
      * Reads one tag, with its payload in host byte order.
      *
      * @param[in] pos   Where the tag starts, or -1 for the current position.
@@ -1003,7 +995,6 @@ private:
     void seekToEnd();
     void readRaw(void* data, fiff_long_t bytes);
     void writeRaw(const void* data, fiff_long_t bytes);
-    void skipRaw(fiff_long_t bytes);
 
     // Reads one value in the stream's byte order; a short read yields 0 and marks the stream failed
     template<BASELIB::Swappable T>
