@@ -413,6 +413,7 @@ void TestAcqFiffReplay::rejectsBadUris()
     QCOMPARE(code(uriOf(m_float, "speed=0")), AcqErrorCode::InvalidParameter);
     QCOMPARE(code(uriOf(m_float, "colour=red")), AcqErrorCode::InvalidParameter);
     QCOMPARE(code(uriOf(m_float, "stim=EEG%20001&realtime=0")), AcqErrorCode::None);
+    QCOMPARE(code(uriOf(m_float, "stim=sti014&realtime=0")), AcqErrorCode::None); // names match as in MNE-C
 
     const QString text = m_dir.filePath(QStringLiteral("not_raw.fif"));
     QFile file(text);

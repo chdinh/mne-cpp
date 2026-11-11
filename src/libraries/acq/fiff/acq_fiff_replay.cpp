@@ -22,6 +22,7 @@
 #include "../acq_thread.h"
 #include "../detail/acq_uri_params.h"
 
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_raw_data.h>
@@ -160,32 +161,18 @@ void toHostOrder(std::byte* data, std::size_t elements, std::size_t size) noexce
     }
 }
 
-/** @return The channel called @p name, ignoring spaces ("STI014" finds "STI 014"); -1 if none. */
-int channelIndex(const FiffInfo& info, std::string name)
-{
-    std::erase(name, ' ');
-    for (std::size_t k = 0; k < info.ch_names.size(); ++k) {
-        std::string compact = info.ch_names[k];
-        std::erase(compact, ' ');
-        if (compact == name) {
-            return static_cast<int>(k);
-        }
-    }
-    return -1;
-}
-
 /** @return The index of the trigger channel, -1 if there is none, or InvalidParameter for an unknown @p name. */
 AcqExpected<int> stimChannel(const FiffInfo& info, const std::string& name)
 {
     if (!name.empty()) {
-        const int index = channelIndex(info, name);
+        const int index = channel_index(info.ch_names, name);
         if (index < 0) {
             return invalid("stim=" + name + ": the file has no such channel");
         }
         return index;
     }
     for (const char* candidate : {"STI101", "STI014"}) {
-        const int index = channelIndex(info, candidate);
+        const int index = channel_index(info.ch_names, candidate);
         if (index >= 0) {
             return index;
         }
