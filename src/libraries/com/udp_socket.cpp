@@ -130,8 +130,22 @@ std::expected<UdpSocket, std::error_code> UdpSocket::bind(const std::string& add
     if (::bind(s, reinterpret_cast<const sockaddr*>(&local), sizeof(local)) != 0) {
         return std::unexpected(last_error());
     }
-    if (group && ::setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<const char*>(&membership), sizeof(membership)) != 0) {
-        return std::unexpected(last_error());
+    if (group) {
+        // Senders that leave the interface to the system use its multicast route, others the default route
+        // (BrainFlow's streamer the former, its receiver the latter); both differ behind a VPN
+        bool joined = false;
+        std::error_code error;
+        for (const std::uint32_t network_interface : {htonl(INADDR_ANY), membership.imr_interface.s_addr}) {
+            membership.imr_interface.s_addr = network_interface;
+            if (::setsockopt(s, IPPROTO_IP, IP_ADD_MEMBERSHIP, reinterpret_cast<const char*>(&membership), sizeof(membership)) == 0) {
+                joined = true;
+            } else {
+                error = last_error();
+            }
+        }
+        if (!joined) {
+            return std::unexpected(error);
+        }
     }
     return socket;
 }

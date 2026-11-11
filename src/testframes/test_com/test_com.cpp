@@ -246,34 +246,6 @@ void TestCom::udpReceivesDatagrams()
 
 void TestCom::udpSharesAMulticastGroup()
 {
-#ifdef _WIN32
-    QSKIP("the route probe uses POSIX sockets");
-#else
-    // Groups are joined on the interface of the default route; a firewall that drops this unsigned test's datagrams
-    // there (macOS does in stealth mode) is no fault of the socket
-    const int probe = ::socket(AF_INET, SOCK_DGRAM, 0);
-    sockaddr_in route{};
-    route.sin_family = AF_INET;
-    route.sin_port = htons(53);
-    ::inet_pton(AF_INET, "8.8.8.8", &route.sin_addr);
-    sockaddr_in local{};
-    socklen_t length = sizeof(local);
-    if (::connect(probe, reinterpret_cast<const sockaddr*>(&route), sizeof(route)) == 0 &&
-        ::getsockname(probe, reinterpret_cast<sockaddr*>(&local), &length) == 0) {
-        std::array<char, INET_ADDRSTRLEN> address{};
-        ::inet_ntop(AF_INET, &local.sin_addr, address.data(), address.size());
-        auto receiver = UdpSocket::bind("0.0.0.0", 0);
-        auto knock = UdpSocket::bind("0.0.0.0", 0);
-        QVERIFY(receiver && knock);
-        std::array<std::byte, 1> one{};
-        QVERIFY(!knock->send_to(one, address.data(), receiver->port()));
-        if (!receiver->receive(one, 500ms)) {
-            ::close(probe);
-            QSKIP("a firewall drops datagrams to this machine's default-route address");
-        }
-    }
-    ::close(probe);
-
     // Two members of a group on one port both receive what a sender on this machine sends to the group
     const std::string group = "239.255.43.21";
     auto first = UdpSocket::bind(group, 0);
@@ -298,7 +270,6 @@ void TestCom::udpSharesAMulticastGroup()
     QVERIFY(!sender->send_to(datagram, "127.0.0.1", plain->port()));
     QVERIFY(plain->receive(buffer, 1s));
     QVERIFY(sender->send_to(datagram, "localhost", plain->port()) == std::errc::invalid_argument);
-#endif
 }
 
 //=============================================================================================================
