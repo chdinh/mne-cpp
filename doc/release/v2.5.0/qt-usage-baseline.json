@@ -32,7 +32,7 @@
       "ml",
       "report"
     ],
-    "tokens": 13503,
+    "tokens": 13472,
     "gui_outside_design": []
   },
   "libraries": {
@@ -240,21 +240,20 @@
       ]
     },
     "fiff": {
-      "tokens": 144,
+      "tokens": 113,
       "by_category": {
         "containers": 1,
-        "files": 19,
-        "global": 17,
+        "files": 8,
+        "global": 16,
         "json": 37,
         "network": 5,
-        "objects_signals": 4,
         "other": 3,
         "regex": 2,
-        "strings": 55,
+        "strings": 40,
         "time": 1
       },
-      "public_header_includes": 5,
-      "q_object": 1,
+      "public_header_includes": 4,
+      "q_object": 0,
       "files": 73,
       "modules": [
         "Core",

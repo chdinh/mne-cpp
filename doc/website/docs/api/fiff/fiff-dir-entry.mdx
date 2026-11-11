@@ -60,7 +60,7 @@ const FiffDirEntry firstBuffer = raw.rawdir.front().ent;
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 110"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 108"
 int samples = 0;
 for (const FiffRawDir& buffer : raw.rawdir)
     samples += buffer.nsamp;

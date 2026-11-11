@@ -1283,7 +1283,7 @@ stream.setLittleEndian(littleEndian);
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 120"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 118"
 FiffStream stream(rawPath.toStdU16String());
 ok &= stream.open();
 const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end

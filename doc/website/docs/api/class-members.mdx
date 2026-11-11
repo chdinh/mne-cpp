@@ -631,6 +631,7 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **clear** `[fn]` in [FiffDigPointSet](/docs/api/fiff/fiff-dig-point-set) — Removes every point.
 - **clear** `[fn]` in [FiffEvoked](/docs/api/fiff/fiff-evoked) — Initializes fiff evoked data.
 - **clear** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Initializes fiff evoked data set.
+- **clear** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Consumer: creates the shared directory if needed, removes the files of earlier sessions and starts counting from the first file again.
 - **clear** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Resets the File identifier.
 - **clear** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Initializes FIFF measurement information.
 - **clear** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — Initializes light FIFF measurement information.
@@ -997,10 +998,10 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **coordinateSystem** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Coordinate system from *_coordsystem.json.
 - **coordinateSystem** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
 - **coordsystemJsonPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the coordsystem.json sidecar.
+- **copy_realtime_file** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Producer: copies an unfinished FIFF recording into the shared directory and closes its raw block.
 - **copy_tree** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Copies directory subtrees from fidin to fidout.
 - **copyData** `[var]` in `WriteOptions` — Copy the raw data file into the BIDS directory.
 - **copyProcessingHistory** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Copy the FIFF processing history block from one file to another.
-- **copyRealtimeFile** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Copies an unfinished FIFF file into the shared directory and closes its raw block; the copy appears there only once it is complete.
 - **CoregSettingsView** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Constructs a [`CoregSettingsView`](/docs/api/disp/coreg-settings-view) object.
 - **correct_auto_elements** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Correct the auto (self-coupling) elements of the linear collocation matrix.
 - **Correlation** `[fn]` in [Correlation](/docs/api/connectivity/correlation) — Constructs a [`Correlation`](/docs/api/connectivity/correlation) object.
@@ -1303,6 +1304,7 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **direction** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Input or output.
 - **direction** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Input or Output.
 - **directory** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Constructs the directory path for this entity combination.
+- **directory** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer)
 - **directory** `[fn]` in [FigureExporter](/docs/api/disp/figure-exporter) — Returns the directory figures are written to.
 - **dirtree** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Returns the directory compiled into a tree tree is set when `open()` was called.
 - **dirty** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Whether node needs re-execution.
@@ -1687,8 +1689,7 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Constructs a fiff evoked data set.
 - **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Reads evoked data sets of a FIFF file, like `read()`; throws [`Error`](/docs/api/base/error) if it cannot.
 - **FiffEvokedSet** `[fn]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — Copy constructor.
-- **FiffFileSharer** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Constructs a [`FiffFileSharer`](/docs/api/fiff/fiff-file-sharer) with default paramaters (based on m_sDefaultDirectory and m_sDefaultFileName).
-- **FiffFileSharer** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Constructs a [`FiffFileSharer`](/docs/api/fiff/fiff-file-sharer) to watch/save to sDirName.
+- **FiffFileSharer** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer)
 - **FiffId** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Default Constructor.
 - **FiffId** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Copy constructor.
 - **FiffInfo** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — Constructors the fiff measurement file information.
@@ -2583,7 +2584,6 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **initialize** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Initialize resources (shaders, pipelines) for the given RHI and render pass.
 - **initialize_custom_lights** `[fn]` in [MNEMshDisplaySurfaceSet](/docs/api/mne/mne-msh-display-surface-set) — Create a default set of 8 directional lights if custom lights have not been initialized yet.
 - **initPainterPaths** `[fn]` in [RtFiffRawViewDelegate](/docs/api/disp/rt-fiff-raw-view-delegate) — Initializes painter path variables to fit number of channels in the model/view.
-- **initWatcher** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Sets member QFileSystemWatcher to watch set directory.
 - **iNNeighbors** `[var]` in [LofBadChannelParams](/docs/api/dsp/lof-bad-channel-params) — Number of neighbours for LOF (k parameter).
 - **iNout** `[var]` in `Basis` — N_out = iOrderOut*(iOrderOut+2).
 - **inputHashes** `[var]` in [MnaProvenance](/docs/api/mna/mna-provenance) — portName → SHA-256
@@ -3539,6 +3539,7 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **neval** `[var]` in [InvEcd](/docs/api/inv/inv-ecd) — Number of function evaluations required for this fit.
 - **nevent** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Returns the number of events in the list.
 - **new_file_id** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Constructs a (hopefully) unique file id.
+- **new_files** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Consumer: the files shared since the last call, in the order they were shared.
 - **new_fit_user** `[fn]` in [FwdEegSphereModel](/docs/api/fwd/fwd-eeg-sphere-model) — Allocate and initialize a fitting workspace for Berg-Scherg parameter estimation.
 - **newAverageActivationMap** `[signal]` in [AverageSelectionView](/docs/api/disp/average-selection-view) — Emmited when new average activation is available.
 - **newAverageActivationMap** `[signal]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Emmited when new average activation is available.
@@ -3549,7 +3550,6 @@ Index of 6387 public class members (functions, variables, typedefs, enums) acros
 - **newEegMappingAvailable** `[signal]` in [RtSensorDataController](/docs/api/disp3-d/rt-sensor-data-controller) — Emitted when a new EEG mapping matrix has been computed by the background worker.
 - **newEegMappingAvailable** `[signal]` in [RtSensorInterpolationMatWorker](/docs/api/disp3-d/rt-sensor-interpolation-mat-worker) — Emitted when new EEG mapping data is available.
 - **newFiffFileLoaded** `[fn]` in [ChannelSelectionView](/docs/api/disp/channel-selection-view) — call this whenever a new file was loaded.
-- **newFileAtPath** `[signal]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Emits path of new shared fiff file.
 - **newFrame** `[fn]` in [BrainRenderer](/docs/api/disp3-d/brain-renderer) — Start a new frame: frees all per-draw uniform slots.
 - **newHpiFitResultAvailable** `[signal]` in [RtHpi](/docs/api/dsp/rt-hpi)
 - **newInterpolationMatrixLeftAvailable** `[signal]` in [RtSourceDataController](/docs/api/disp3-d/rt-source-data-controller) — Emitted when a new left hemisphere interpolation matrix has been computed.

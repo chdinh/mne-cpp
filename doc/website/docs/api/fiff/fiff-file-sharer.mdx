@@ -15,61 +15,73 @@ sidebar_position: 23
 class FIFFLIB::FiffFileSharer
 ```
 
-Copies FIFF recordings into a shared directory and signals their arrival to a watching consumer.
+Copies FIFF recordings into a shared directory and lists the ones a consumer has not seen yet.
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"
-// Hand a finished recording to another application through a watched directory.
-QDir::setCurrent(tmp.path());
-FiffFileSharer consumer("shared");
-QStringList arrived;
-QObject::connect(&consumer, &FiffFileSharer::newFileAtPath, [&](const QString& path) { arrived << path; });
-consumer.initWatcher();
-FiffFileSharer producer("shared");
-producer.copyRealtimeFile(rawPath); // shared/realtime_file0_raw.fif
-```
-
-### Inheritance
-
-```mermaid
-classDiagram
-    QObject <|-- FiffFileSharer
+// Hand a finished recording to another application through a shared directory.
+const std::filesystem::path shared = std::filesystem::path(tmp.path().toStdU16String()) / "shared";
+FiffFileSharer consumer(shared);
+consumer.clear();
+FiffFileSharer producer(shared);
+producer.copy_realtime_file(rawPath.toStdU16String()).value();           // shared/realtime_file0_raw.fif
+const std::vector<std::filesystem::path> arrived = consumer.new_files(); // call it when a watcher reports a change
 ```
 
 ---
 
 ## Public Methods
 
-### FiffFileSharer()
-
-Constructs a [`FiffFileSharer`](/docs/api/fiff/fiff-file-sharer) with default paramaters (based on m_sDefaultDirectory and m_sDefaultFileName).
-
----
-
-### FiffFileSharer(sDirName)
-
-Constructs a [`FiffFileSharer`](/docs/api/fiff/fiff-file-sharer) to watch/save to sDirName.
+### FiffFileSharer(directory)
 
 **Parameters:**
 
-- **sDirName** : *const QString &*
-  Directory to/from which data will saved/read
+- **directory** : *const std::filesystem::path &*
+  The shared directory; a relative path is taken from the current directory now.
 
 ---
 
-### copyRealtimeFile(sSourcePath)
+### directory()
 
-Copies an unfinished FIFF file into the shared directory and closes its raw block; the copy appears there only once it is complete.
+**Returns:**
+
+- *const std::filesystem::path &* — The shared directory, absolute.
+
+---
+
+### copy_realtime_file(source)
+
+Producer: copies an unfinished FIFF recording into the shared directory and closes its raw block.
+
+The copy appears under its name only once it is complete.
 
 **Parameters:**
 
-- **sSourcePath** : *const QString &*
-  source file to ber copied
+- **source** : *const std::filesystem::path &*
+  The recording, still being written.
+
+**Returns:**
+
+- *[Expected](/docs/api/base/expected)&lt; std::filesystem::path &gt;* — The shared file, or an Io error if the directory cannot be made or the source cannot be copied.
 
 ---
 
-### initWatcher()
+### new_files()
 
-Sets member QFileSystemWatcher to watch set directory.
+Consumer: the files shared since the last call, in the order they were shared.
+
+**Returns:**
+
+- *std::vector&lt; std::filesystem::path &gt;* — Paths of complete FIFF files.
+
+---
+
+### clear()
+
+Consumer: creates the shared directory if needed, removes the files of earlier sessions and starts counting from the first file again.
+
+**Returns:**
+
+- *bool* — Whether the directory exists and is empty.
 
 ---
 
@@ -86,20 +98,17 @@ Sets member QFileSystemWatcher to watch set directory.
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 150"
-// Hand a finished recording to another application through a watched directory.
-QDir::setCurrent(tmp.path());
-FiffFileSharer consumer("shared");
-QStringList arrived;
-QObject::connect(&consumer, &FiffFileSharer::newFileAtPath, [&](const QString& path) { arrived << path; });
-consumer.initWatcher();
-FiffFileSharer producer("shared");
-producer.copyRealtimeFile(rawPath); // shared/realtime_file0_raw.fif
-QEventLoop loop;
-QTimer::singleShot(5000, &loop, &QEventLoop::quit);
-QObject::connect(&consumer, &FiffFileSharer::newFileAtPath, &loop, &QEventLoop::quit);
-if (arrived.isEmpty())
-    loop.exec();
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 148"
+// Hand a finished recording to another application through a shared directory.
+const std::filesystem::path shared = std::filesystem::path(tmp.path().toStdU16String()) / "shared";
+FiffFileSharer consumer(shared);
+consumer.clear();
+FiffFileSharer producer(shared);
+producer.copy_realtime_file(rawPath.toStdU16String()).value();           // shared/realtime_file0_raw.fif
+const std::vector<std::filesystem::path> arrived = consumer.new_files(); // call it when a watcher reports a change
+const FiffRawData sharedRaw(arrived.empty() ? shared : arrived.front());
+ok &= expect(arrived.size() == 1 && sharedRaw.last_samp - sharedRaw.first_samp + 1 == 6007,
+             "FiffFileSharer: the consumer gets the shared recording and it reads back with all 6007 samples");
 ````
 
 ## Authors of this file
