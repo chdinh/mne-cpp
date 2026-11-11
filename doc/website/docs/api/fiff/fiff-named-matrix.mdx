@@ -25,13 +25,6 @@ std::vector<FiffProj> projs = info.projs;
 FiffProj::activate_projs(projs);
 ```
 
-### Inheritance
-
-```mermaid
-classDiagram
-    QSharedData <|-- FiffNamedMatrix
-```
-
 ---
 
 ## Public Methods
@@ -64,23 +57,6 @@ Constructs named matrix with given parameters.
 
 - **p_data** : *const Eigen::MatrixXd &*
   Data of the named matrix.
-
----
-
-### FiffNamedMatrix(p_FiffNamedMatrix)
-
-Copy constructor.
-
-**Parameters:**
-
-- **p_FiffNamedMatrix** : *const FiffNamedMatrix &*
-  Named matrix which should be copied.
-
----
-
-### ~FiffNamedMatrix()
-
-Destroys the named matrix.
 
 ---
 
@@ -121,7 +97,7 @@ FIFF library: measurement info, channels, digitizer, transforms, projectors, cov
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 181"
 FiffProj::activate_projs(projs);
-ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data->nrow == 1 && pca.data->ncol == 102 && projs[0].active,
+ok &= expect(pca.desc == "PCA-v1" && !pca.active && pca.data.nrow == 1 && pca.data.ncol == 102 && projs[0].active,
              "FiffProj/FiffNamedMatrix: PCA-v1 is 1 x 102 and inactive until activated");
 ````
 

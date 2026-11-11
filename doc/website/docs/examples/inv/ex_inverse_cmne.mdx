@@ -257,8 +257,8 @@ int main(int argc, char* argv[])
     aparc.toLabels(FsSurfaceSet("sample", 2, "white", subjects.toStdU16String()), auditory, colors,
                    {"superiortemporal-lh", "transversetemporal-lh", "superiortemporal-rh", "transversetemporal-rh"});
     const MNEForwardSolution fwd = MNEForwardSolution((data + "/Result/ref-sample_audvis-meg-eeg-oct-6-fwd.fif").toStdU16String(), {.force_fixed = true, .surf_ori = true}).pick_regions({auditory.begin(), auditory.end()});
-    const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(fwd.sol->row_names);
-    const FiffEvoked evoked = FiffEvoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0).pick_channels(fwd.sol->row_names); // "Left Auditory"
+    const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(fwd.sol.row_names);
+    const FiffEvoked evoked = FiffEvoked((data + "/MEG/sample/sample_audvis-ave.fif").toStdU16String(), 0).pick_channels(fwd.sol.row_names); // "Left Auditory"
     const std::vector<VectorXi> vertno = fwd.src.get_vertno();
     const int nLh = static_cast<int>(vertno[0].size());
     VectorXi vertices(nLh + vertno[1].size());
@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
 
     //! [inv_cmne_usage]
     const MatrixXd sourceCov = MatrixXd::Identity(fwd.nsource, fwd.nsource);
-    InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol->data, noiseCov.data, sourceCov, settings);
+    InvCMNEResult cmne = InvCMNE::compute(evoked.data, fwd.sol.data, noiseCov.data, sourceCov, settings);
     if (cmne.stcCmne.empty()) {
         std::println(stderr, "The CMNE model does not fit {} sources.", fwd.nsource);
         return EXIT_FAILURE;

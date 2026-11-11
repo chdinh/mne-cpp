@@ -30,13 +30,6 @@ FiffCov cov((dir + "/sample_audvis-cov.fif").toStdString());
 const FiffCov megCov = cov.pick_channels(StringList(info.ch_names.begin() + 0, info.ch_names.begin() + 0 + 306), cov.bads); // good MEG channels only
 ```
 
-### Inheritance
-
-```mermaid
-classDiagram
-    QSharedData <|-- FiffCov
-```
-
 ---
 
 ## Public Methods
@@ -55,23 +48,6 @@ Reads the noise covariance of a FIFF file, like `read()`; throws [`Error`](/docs
 
 - **path** : *const std::filesystem::path &*
   The file.
-
----
-
-### FiffCov(p_FiffCov)
-
-Copy constructor.
-
-**Parameters:**
-
-- **p_FiffCov** : *const FiffCov &*
-  Covariance data matrix which should be copied.
-
----
-
-### ~FiffCov()
-
-Destroys the covariance data matrix.
 
 ---
 
@@ -175,21 +151,6 @@ Writes the covariance to a new FIFF file, like mne.Covariance.save.
 **Returns:**
 
 - *[Expected](/docs/api/base/expected)&lt; void &gt;* — Nothing, or why the file cannot be written.
-
----
-
-### operator=(rhs)
-
-Assignment Operator.
-
-**Parameters:**
-
-- **rhs** : *const [FiffCov](/docs/api/fiff/fiff-cov) &*
-  [`FiffCov`](/docs/api/fiff/fiff-cov) which should be assigned.
-
-**Returns:**
-
-- *[FiffCov](/docs/api/fiff/fiff-cov) &* — the copied covariance matrix.
 
 ---
 

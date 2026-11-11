@@ -112,7 +112,7 @@ const FiffRawData ctf(parser.value(ctfOption).toStdString());
 FiffCtfComp toGrade1;
 ok &= ctf.info.make_compensator(0, 1, toGrade1); // uncompensated -> grade 1
 // mne._fiff.compensator.make_compensator(info, 0, 1) on ctf_grade0_raw.fif: 36 x 36, ||C - I||_F = 0.1947596520139745
-const MatrixXd& compensator = toGrade1.data->data;
+const MatrixXd& compensator = toGrade1.data.data;
 ok &= expect(ctf.info.comps.size() == 5 && compensator.rows() == 36 && std::abs((compensator - MatrixXd::Identity(36, 36)).norm() - 0.1947596520139745) < 1e-6,
              "FiffCtfComp: 5 compensation grades; the grade-1 compensator matches mne make_compensator");
 ````

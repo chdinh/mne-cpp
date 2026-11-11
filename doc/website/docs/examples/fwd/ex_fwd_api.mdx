@@ -326,14 +326,14 @@ int main(int argc, char* argv[])
     const bool written = fwd->write(solPath).has_value();
     //! [compute_fwd_usage]
     // mne _compute_forwards_meeg on the 78 V1 sources: |G| of source 0, x component, over 306 MEG channels
-    ok &= expect(fwd && fwd->nsource == 78 && fwd->sol->data.rows() == 366 && near(fwd->sol->data.col(0).head(306).norm(), 1.2455023232288232e-3, 1e-4),
+    ok &= expect(fwd && fwd->nsource == 78 && fwd->sol.data.rows() == 366 && near(fwd->sol.data.col(0).head(306).norm(), 1.2455023232288232e-3, 1e-4),
                  "ComputeFwd: 78 V1 sources, 366 channels, sphere-model gain matches mne");
 
     //! [fwd_read_usage]
     const MNEForwardSolution back(solPath);                         // all 366 rows, like mne.read_forward_solution
     const MNEForwardSolution good(solPath, {.exclude_bads = true}); // without the channels marked bad
     //! [fwd_read_usage]
-    ok &= expect(written && back.nsource == 78 && back.nchan == 366 && good.nchan == 364 && (back.sol->data - fwd->sol->data).norm() <= 1e-6 * fwd->sol->data.norm(),
+    ok &= expect(written && back.nsource == 78 && back.nchan == 366 && good.nchan == 364 && (back.sol.data - fwd->sol.data).norm() <= 1e-6 * fwd->sol.data.norm(),
                  "MNEForwardSolution reads all 366 rows back; exclude_bads drops the 2 bads");
 
     std::println("{}", ok ? "All fwd checks passed." : "fwd checks FAILED.");

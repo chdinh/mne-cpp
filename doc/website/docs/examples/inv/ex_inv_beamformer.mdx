@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
     const FiffCov noiseCov = FiffCov((data + "/MEG/sample/sample_audvis-cov.fif").toStdString()).pick_channels(good).prepare_noise_cov(info, good);
 
     // 20 nAm at V1 source 10 and 30 nAm at source 50, both along z.
-    const MatrixXd& G = fwd.sol->data;
+    const MatrixXd& G = fwd.sol.data;
     const VectorXd g1 = G.col(3 * 10 + 2) * 20e-9;
     const VectorXd g2 = G.col(3 * 50 + 2) * 30e-9;
 

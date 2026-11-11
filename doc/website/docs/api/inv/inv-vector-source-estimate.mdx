@@ -25,7 +25,7 @@ data has shape (n_vertices*3 x n_times). Rows are interleaved: [x0,y0,z0, x1,y1,
 
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 // The MNE kernel keeps x, y and z per source: an apply_inverse(..., pick_ori="vector") estimate.
-const MatrixXd goodData = evoked.pick_channels(inverse.noise_cov->names).data;
+const MatrixXd goodData = evoked.pick_channels(inverse.noise_cov.names).data;
 const InvVectorSourceEstimate vectorStc(kernel * goodData, stc.vertices, stc.tmin, stc.tstep);
 const InvSourceEstimate magnitude = vectorStc.magnitude(); // 70 x 421 vector lengths
 ```
@@ -131,7 +131,7 @@ Inverse library: minimum-norm estimates, resolution matrices, label time courses
 
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 193"
 // The MNE kernel keeps x, y and z per source: an apply_inverse(..., pick_ori="vector") estimate.
-const MatrixXd goodData = evoked.pick_channels(inverse.noise_cov->names).data;
+const MatrixXd goodData = evoked.pick_channels(inverse.noise_cov.names).data;
 const InvVectorSourceEstimate vectorStc(kernel * goodData, stc.vertices, stc.tmin, stc.tstep);
 const InvSourceEstimate magnitude = vectorStc.magnitude(); // 70 x 421 vector lengths
 // mne.minimum_norm.apply_inverse(evoked, inv, 1/9, "MNE", pick_ori="vector"): sum of lengths 4.31370e-4
