@@ -405,14 +405,14 @@ void TestMneBrowseData::testRawModelWriteFiff()
 
     QString outPath = m_tempDir.path() + "/rawmodel_output.fif";
     QFile outFile(outPath);
-    bool ok = model.writeFiffData(&outFile);
+    bool ok = model.writeFiffData(outFile.fileName());
     QVERIFY(ok);
     QVERIFY(QFile::exists(outPath));
     QFileInfo fi(outPath);
     QVERIFY(fi.size() > 0);
 
     QFile unwritable(m_tempDir.filePath(QStringLiteral("no/such/dir/out.fif")));
-    QVERIFY(!model.writeFiffData(&unwritable));
+    QVERIFY(!model.writeFiffData(unwritable.fileName()));
 }
 
 void TestMneBrowseData::testRawModelChannelInfo()

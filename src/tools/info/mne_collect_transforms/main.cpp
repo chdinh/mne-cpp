@@ -153,8 +153,7 @@ int main(int argc, char* argv[])
     }
 
     if (!outName.isEmpty()) {
-        QFile outFile(outName);
-        auto outStream = FiffStream::start_file(outFile);
+        auto outStream = FiffStream::start_file(outName.toStdU16String());
         if (!outStream) {
             qCritical("Cannot open output file: %s", qPrintable(outName));
             return 1;

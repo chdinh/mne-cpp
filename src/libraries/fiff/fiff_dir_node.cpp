@@ -30,6 +30,8 @@
 #include "fiff_tag.h"
 #include "fiff_explain.h"
 #include <cstdint>
+
+#include <QString>
 //#include "fiff_ctf_comp.h"
 //#include "fiff_proj.h"
 //#include "fiff_info.h"
@@ -81,15 +83,6 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<c
             //
             if (p_Nodes[k]->dir[p].kind == FIFF_BLOCK_ID || p_Nodes[k]->dir[p].kind == FIFF_PARENT_BLOCK_ID || p_Nodes[k]->dir[p].kind == FIFF_PARENT_FILE_ID)
                 continue;
-
-            //
-            //   Read and write tags, pass data through transparently
-            //
-            if (!source.device()->seek(p_Nodes[k]->dir[p].pos)) //fseek(fidin, nodes(k).dir(p).pos, 'bof') == -1
-            {
-                BASELIB::Log::warning("Could not seek to the tag\n");
-                return false;
-            }
 
             // Copy the tag verbatim; read_tag and write_tag reproduce its bytes
             source.setLittleEndian(false);

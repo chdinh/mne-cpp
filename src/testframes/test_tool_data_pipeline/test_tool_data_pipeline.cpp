@@ -1770,7 +1770,7 @@ private slots:
         QVERIFY2(m_lastExitCode == 0, qPrintable(output));
 
         QFile file(outFile);
-        FIFFLIB::FiffStream stream(&file);
+        FIFFLIB::FiffStream stream(outFile.toStdU16String());
         QVERIFY(stream.open());
         const std::vector<FIFFLIB::FiffProj> projectors = stream.read_proj(stream.dirtree());
         stream.close();
@@ -2277,8 +2277,7 @@ private slots:
         // Like an MNE-C -sol.fif: the surfaces and the linear potential solution (one row per vertex)
         MNELIB::MNEBem bem(outPath.toStdU16String());
         QCOMPARE(bem.size(), 1);
-        QFile solFile(outPath);
-        FIFFLIB::FiffStream stream(&solFile);
+        FIFFLIB::FiffStream stream(outPath.toStdU16String());
         QVERIFY(stream.open());
         const std::vector<std::shared_ptr<FIFFLIB::FiffDirNode>> bemNodes = stream.dirtree()->dir_tree_find(FIFFB_BEM);
         QCOMPARE(bemNodes.size(), 1);

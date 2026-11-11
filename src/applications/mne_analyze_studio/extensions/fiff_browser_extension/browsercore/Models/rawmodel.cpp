@@ -350,14 +350,13 @@ bool RawModel::loadFiffData(QIODevice* qFile)
         return false;
     }
 
-    if (QFile* sourceFile = qobject_cast<QFile*>(qFile)) {
-        QSharedPointer<QFile> persistentFile(new QFile(sourceFile->fileName()));
-        if (!persistentFile->exists()) {
+    if (const QFile* sourceFile = qobject_cast<const QFile*>(qFile)) {
+        if (!sourceFile->exists()) {
             qWarning() << "RawModel: ERROR! Could not open source file" << sourceFile->fileName();
             endResetModel();
             return false;
         }
-        m_pSourceDevice = persistentFile;
+        m_pfiffIO = QSharedPointer<FiffIO>::create(std::filesystem::path(sourceFile->fileName().toStdU16String()));
     } else {
         if (!qFile->isOpen() && !qFile->open(QIODevice::ReadOnly)) {
             qWarning() << "RawModel: ERROR! Could not open source device.";
@@ -369,21 +368,20 @@ bool RawModel::loadFiffData(QIODevice* qFile)
             qFile->seek(0);
         }
 
-        m_sourceBuffer = qFile->readAll();
-        QSharedPointer<QBuffer> persistentBuffer(new QBuffer(&m_sourceBuffer));
-        m_pSourceDevice = persistentBuffer;
+        const QByteArray contents = qFile->readAll();
+        const auto* begin = reinterpret_cast<const std::byte*>(contents.constData());
+        m_pfiffIO = QSharedPointer<FiffIO>::create();
+        m_pfiffIO->read(std::vector<std::byte>(begin, begin + contents.size()));
     }
-
-    m_pfiffIO = QSharedPointer<FiffIO>(new FiffIO(*m_pSourceDevice));
-    if (!m_pfiffIO->m_qlistRaw.empty()) {
-        m_iAbsFiffCursor = m_pfiffIO->m_qlistRaw[0]->first_samp; //Set cursor somewhere into fiff file [in samples]
+    if (!m_pfiffIO->raw.empty()) {
+        m_iAbsFiffCursor = m_pfiffIO->raw[0]->first_samp; //Set cursor somewhere into fiff file [in samples]
         m_iCurAbsScrollPos = 0;
         m_bStartReached = true;
 
         int start = m_iAbsFiffCursor;
         int end = start + m_iWindowSize - 1;
 
-        if (!m_pfiffIO->m_qlistRaw[0]->read_raw_segment(t_data, t_times, start, end))
+        if (!m_pfiffIO->raw[0]->read_raw_segment(t_data, t_times, start, end))
             return false;
 
         newDataPackage = QSharedPointer<DataPackage>(new DataPackage(t_data, MatrixXdR(t_times)));
@@ -413,14 +411,13 @@ bool RawModel::loadFiffData(QIODevice* qFile)
 
 //*************************************************************************************************************
 
-bool RawModel::writeFiffData(QIODevice* p_IODevice)
+bool RawModel::writeFiffData(const QString& path)
 {
     RowVectorXd cals;
     SparseMatrix<double> mult;
     RowVectorXi sel;
 
-    //    std::cout << "Writing file " << QFile(&p_IODevice).fileName().toUtf8() << std::endl;
-    auto outfid = FiffStream::start_writing_raw(FiffStream::byteStream(*p_IODevice, QIODevice::WriteOnly), *m_pFiffInfo, cals);
+    auto outfid = FiffStream::start_writing_raw(path.toStdU16String(), *m_pFiffInfo, cals);
     if (!outfid) {
         return false;
     }
@@ -448,7 +445,7 @@ bool RawModel::writeFiffData(QIODevice* p_IODevice)
         if (last > to)
             last = to;
 
-        if (!m_pfiffIO->m_qlistRaw[0]->read_raw_segment(data, times, mult, first, last, sel)) {
+        if (!m_pfiffIO->raw[0]->read_raw_segment(data, times, mult, first, last, sel)) {
             qWarning("error during read_raw_segment");
             return false;
         }
@@ -477,11 +474,11 @@ bool RawModel::writeFiffData(QIODevice* p_IODevice)
 void RawModel::loadFiffInfos()
 {
     //loads chinfos
-    for (qint32 i = 0; i < m_pfiffIO->m_qlistRaw[0]->info.nchan; ++i)
-        m_chInfolist.push_back(m_pfiffIO->m_qlistRaw[0]->info.chs[i]);
+    for (qint32 i = 0; i < m_pfiffIO->raw[0]->info.nchan; ++i)
+        m_chInfolist.push_back(m_pfiffIO->raw[0]->info.chs[i]);
 
     //loads fiffInfo
-    m_pFiffInfo = std::make_shared<FiffInfo>(m_pfiffIO->m_qlistRaw[0]->info);
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_pfiffIO->raw[0]->info);
 }
 
 
@@ -491,11 +488,6 @@ void RawModel::clearModel()
 {
     //FiffIO object
     m_pfiffIO.clear();
-    if (m_pSourceDevice) {
-        m_pSourceDevice->close();
-        m_pSourceDevice.clear();
-    }
-    m_sourceBuffer.clear();
     m_pFiffInfo = std::make_shared<FiffInfo>();
     m_bFileloaded = false;
     m_chInfolist.clear();
@@ -542,7 +534,7 @@ void RawModel::resetPosition(qint32 position)
     int end = start + m_iWindowSize - 1;
 
     m_Mutex.lock();
-    if (!m_pfiffIO->m_qlistRaw[0]->read_raw_segment(t_data, t_times, start, end))
+    if (!m_pfiffIO->raw[0]->read_raw_segment(t_data, t_times, start, end))
         qWarning() << "RawModel: Error resetting position of Fiff file!";
     m_Mutex.unlock();
 
@@ -628,7 +620,7 @@ QPair<MatrixXd, MatrixXd> RawModel::readSegment(fiff_int_t from, fiff_int_t to)
     QPair<MatrixXd, MatrixXd> datatime;
 
     QMutexLocker locker(&m_Mutex);
-    if (!m_pfiffIO->m_qlistRaw[0]->read_raw_segment(datatime.first, datatime.second, from, to)) {
+    if (!m_pfiffIO->raw[0]->read_raw_segment(datatime.first, datatime.second, from, to)) {
         qCritical("[RawModel::readSegment] Error when reading raw data.");
         return datatime;
     }
@@ -929,7 +921,7 @@ void RawModel::updateProjections()
 {
     //  Update the SSP projector
     if (m_pFiffInfo) {
-        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->m_qlistRaw.empty()) {
+        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->raw.empty()) {
             qInfo() << "RawModel::updateProjections skipped because raw data is not loaded yet.";
             return;
         }
@@ -975,9 +967,9 @@ void RawModel::updateProjections()
             //                matSparseProj.setFromTriplets(tripletList.begin(), tripletList.end());
 
             //set projection matrix for upcoming read raw segement calls
-            m_pfiffIO->m_qlistRaw[0]->proj = matProj;
+            m_pfiffIO->raw[0]->proj = matProj;
         } else {
-            m_pfiffIO->m_qlistRaw[0]->proj.resize(0, 0);
+            m_pfiffIO->raw[0]->proj.resize(0, 0);
         }
 
         if (m_iCurAbsScrollPos == 0)
@@ -996,7 +988,7 @@ void RawModel::updateCompensator(int to)
     //  Update the compensator
     //
     if (m_pFiffInfo) {
-        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->m_qlistRaw.empty()) {
+        if (!m_bFileloaded || !m_pfiffIO || m_pfiffIO->raw.empty()) {
             qInfo() << "RawModel::updateCompensator skipped because raw data is not loaded yet.";
             return;
         }
@@ -1012,7 +1004,7 @@ void RawModel::updateCompensator(int to)
         this->m_pFiffInfo->set_current_comp(to);
 
         //set compensator for upcoming read raw segement calls
-        m_pfiffIO->m_qlistRaw[0]->comp = newComp;
+        m_pfiffIO->raw[0]->comp = newComp;
 
         if (m_iCurAbsScrollPos == 0)
             resetPosition(m_iCurAbsScrollPos + firstSample());

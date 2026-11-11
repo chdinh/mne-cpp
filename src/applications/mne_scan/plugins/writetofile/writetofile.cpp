@@ -394,7 +394,7 @@ void WriteToFile::toggleRecordingFile()
 
         //Start/Prepare writing process. Actual writing is done in run() method.
         m_mutex.lock();
-        m_pOutfid = FiffStream::start_writing_raw(FiffStream::byteStream(m_qFileOut, QIODevice::WriteOnly),
+        m_pOutfid = FiffStream::start_writing_raw(m_qFileOut.fileName().toStdU16String(),
                                                   *m_pFiffInfo,
                                                   m_mCals);
         if (!m_pOutfid) {
@@ -454,7 +454,7 @@ void WriteToFile::splitRecordingFile()
     //start next file
     m_qFileOut.setFileName(nextFileName);
     MatrixXi sel;
-    m_pOutfid = FiffStream::start_writing_raw(FiffStream::byteStream(m_qFileOut, QIODevice::WriteOnly),
+    m_pOutfid = FiffStream::start_writing_raw(m_qFileOut.fileName().toStdU16String(),
                                               *m_pFiffInfo,
                                               m_mCals,
                                               sel,
@@ -493,14 +493,17 @@ void WriteToFile::clipRecording(bool bChecked)
 
     QMutexLocker locker(&m_mutex);
 
-    m_qFileOut.close();
+    if (!m_pOutfid) {
+        return;
+    }
+    m_pOutfid->close();
     m_FileSharer.copyRealtimeFile(m_qFileOut.fileName());
-    if (!m_qFileOut.open(QIODevice::ReadWrite)) {
+    if (!m_pOutfid->reopen()) {
         qWarning() << "Could not reopen realtime file:" << m_qFileOut.fileName();
         return;
     }
-
-    m_qFileOut.seek(m_qFileOut.size());
+    BASELIB::ByteStream& bytes = m_pOutfid->byte_stream();
+    bytes.seek(bytes.size());
 }
 
 //=============================================================================================================

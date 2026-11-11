@@ -287,12 +287,11 @@ void putStim(std::byte* at, Pack pack, std::int32_t value)
 template<typename Write>
 QByteArray fiffTags(Write&& write)
 {
-    QByteArray bytes;
-    QBuffer buffer(&bytes);
-    buffer.open(QIODevice::WriteOnly);
-    FiffStream stream(&buffer);
+    auto bytes = std::make_unique<BASELIB::MemoryByteStream>();
+    const BASELIB::MemoryByteStream& written = *bytes;
+    FiffStream stream(std::move(bytes));
     write(stream);
-    return bytes;
+    return QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()));
 }
 
 std::string lockName(AcqLockState lock)

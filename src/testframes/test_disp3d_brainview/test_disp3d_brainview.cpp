@@ -530,7 +530,7 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
     const QString devOnly = dir.filePath(QStringLiteral("dev-head-trans.fif"));
     for (const QString& path : {reordered, devOnly}) {
         QFile out(path);
-        auto stream = FIFFLIB::FiffStream::start_file(out);
+        auto stream = FIFFLIB::FiffStream::start_file(path.toStdU16String());
         QVERIFY(stream);
         if (path == reordered) {
             stream->write_coord_trans(allTrans.head_surf_RAS_t.inverted());

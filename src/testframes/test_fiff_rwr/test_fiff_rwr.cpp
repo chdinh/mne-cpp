@@ -62,11 +62,21 @@ std::uint64_t fnv1a(const QByteArray& bytes)
     return hash;
 }
 
+std::unique_ptr<BASELIB::MemoryByteStream> memoryOf(const QByteArray& bytes)
+{
+    const auto* begin = reinterpret_cast<const std::byte*>(bytes.constData());
+    return std::make_unique<BASELIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + bytes.size()));
+}
+
+QByteArray bytesOf(const BASELIB::MemoryByteStream& stream)
+{
+    return QByteArray(reinterpret_cast<const char*>(stream.data().data()), static_cast<qsizetype>(stream.size()));
+}
+
 // File bytes with the file and block IDs zeroed, since they carry the time of writing
 QByteArray stableBytes(QByteArray bytes)
 {
-    QBuffer buffer(&bytes);
-    FiffStream stream(&buffer);
+    FiffStream stream(memoryOf(bytes));
     if (!stream.open())
         return {};
     const std::vector<FiffDirEntry> dir = stream.dir();
@@ -79,10 +89,9 @@ QByteArray stableBytes(QByteArray bytes)
 }
 
 // Kind, type and size of every tag in order: computed float data may round differently per compiler
-QByteArray tagLayout(QByteArray bytes)
+QByteArray tagLayout(const QByteArray& bytes)
 {
-    QBuffer buffer(&bytes);
-    FiffStream stream(&buffer);
+    FiffStream stream(memoryOf(bytes));
     if (!stream.open())
         return {};
     QByteArray layout;
@@ -115,7 +124,7 @@ private slots:
     void compareInfo();
     void tagsRewriteByteIdentical_data();
     void tagsRewriteByteIdentical();
-    void readsWithoutQtDevice();
+    void readsFromAByteStream();
     void opensAndStartsFilesByPath();
     void readsRawByPathAndStream();
     void writersStable_data();
@@ -353,15 +362,11 @@ void TestFiffRWR::tagsRewriteByteIdentical()
     const QByteArray original = file.readAll();
     file.close();
 
-    FiffStream stream(&file);
+    FiffStream stream(path.toStdU16String());
     QVERIFY(stream.open());
     QVERIFY(!stream.dir().empty());
 
     // Every tag read and written again must reproduce the bytes in the file, header and payload
-    QByteArray rewritten;
-    QBuffer buffer(&rewritten);
-    QVERIFY(buffer.open(QIODevice::WriteOnly));
-    FiffStream out(&buffer);
     for (const FiffDirEntry& entry : stream.dir()) {
         // The stored directory ends with a sentinel entry
         if (entry.pos < 0)
@@ -369,11 +374,12 @@ void TestFiffRWR::tagsRewriteByteIdentical()
         const std::optional<FiffTag> tag = stream.read_tag(entry.pos);
         QVERIFY(tag);
         QCOMPARE(tag->kind, entry.kind);
-        rewritten.clear();
-        buffer.seek(0);
+        auto memory = std::make_unique<BASELIB::MemoryByteStream>();
+        const BASELIB::MemoryByteStream& written = *memory;
+        FiffStream out(std::move(memory));
         out.write_tag(*tag, 0);
         const QByteArray expected = original.mid(entry.pos, 16 + entry.size);
-        if (rewritten != expected)
+        if (bytesOf(written) != expected)
             QFAIL(qPrintable(QString("tag kind %1 type %2 at %3 differs").arg(entry.kind).arg(entry.type).arg(entry.pos)));
     }
     const FiffDirEntry& first = stream.dirtree()->dir.front();
@@ -388,14 +394,11 @@ void TestFiffRWR::tagsRewriteByteIdentical()
 
 void TestFiffRWR::readsRawByPathAndStream()
 {
-    // A path, a stream on a QFile and a stream on bytes in memory give the same raw data
+    // A path and a stream on bytes in memory give the same raw data
     const QString path = testDataDir() + "/MEG/sample/sample_audvis_trunc_raw.fif";
     const FiffRawData byPath(path.toStdString());
     QFile qtFile(path);
-    const FiffRawData byDevice(FiffStream::byteStream(qtFile, QIODevice::ReadOnly));
-    QVERIFY(!qtFile.isOpen());
     QVERIFY(qtFile.open(QIODevice::ReadOnly));
-    QVERIFY(!FiffStream::byteStream(qtFile, QIODevice::WriteOnly | QIODevice::Append));
     std::vector<std::byte> fileBytes(static_cast<std::size_t>(qtFile.size()));
     QVERIFY(qtFile.read(reinterpret_cast<char*>(fileBytes.data()), qtFile.size()) == qtFile.size());
     qtFile.close();
@@ -405,8 +408,6 @@ void TestFiffRWR::readsRawByPathAndStream()
     MatrixXd expected, times, data;
     QVERIFY(byPath.read_raw_segment(expected, times, from, to));
     QVERIFY(byPath.read_raw_segment(data, times, from, to));
-    QVERIFY(data == expected);
-    QVERIFY(byDevice.read_raw_segment(data, times, from, to));
     QVERIFY(data == expected);
     QVERIFY(inMemory.read_raw_segment(data, times, from, to));
     QVERIFY(data == expected);
@@ -445,23 +446,20 @@ void TestFiffRWR::readsRawByPathAndStream()
 
 //=============================================================================================================
 
-void TestFiffRWR::readsWithoutQtDevice()
+void TestFiffRWR::readsFromAByteStream()
 {
-    // A stream on a plain file byte stream sees the same directory and tags as one on a QFile
+    // A stream on a file byte stream sees the same directory and tags as one on its path
     const QString path = testDataDir() + "/MEG/sample/sample_audvis-cov.fif";
-    QFile qtFile(path);
-    FiffStream qtStream(&qtFile);
-    QVERIFY(!qtStream.isOpen());
-    QVERIFY(qtStream.open());
-    QVERIFY(qtStream.isOpen());
+    FiffStream byPath(path.toStdU16String());
+    QVERIFY(byPath.open());
+    QVERIFY(byPath.isOpen());
 
     auto bytes = BASELIB::FileByteStream::open(path.toStdString(), BASELIB::FileByteStream::Mode::Read);
     QVERIFY(bytes);
     FiffStream stream(std::move(bytes));
-    QVERIFY(stream.device() == nullptr);
     QVERIFY(stream.open());
-    QCOMPARE(stream.nent(), qtStream.nent());
-    QCOMPARE(stream.id().machid[0], qtStream.id().machid[0]);
+    QCOMPARE(stream.nent(), byPath.nent());
+    QCOMPARE(stream.id().machid[0], byPath.id().machid[0]);
 
     for (int i = 0; i < stream.nent(); ++i) {
         const FiffDirEntry& entry = stream.dir()[i];
@@ -469,16 +467,16 @@ void TestFiffRWR::readsWithoutQtDevice()
             continue;
         const std::optional<FiffTag> tag = stream.read_tag(entry.pos);
         QVERIFY(tag);
-        const std::optional<FiffTag> qtTag = qtStream.read_tag(entry.pos);
-        QVERIFY(qtTag);
-        QCOMPARE(tag->kind, qtTag->kind);
-        QCOMPARE(QByteArray(tag->data(), tag->size()), QByteArray(qtTag->data(), qtTag->size()));
+        const std::optional<FiffTag> pathTag = byPath.read_tag(entry.pos);
+        QVERIFY(pathTag);
+        QCOMPARE(tag->kind, pathTag->kind);
+        QCOMPARE(QByteArray(tag->data(), tag->size()), QByteArray(pathTag->data(), pathTag->size()));
     }
 
     FiffCov cov;
     QVERIFY(stream.read_cov(stream.dirtree(), FIFFV_MNE_NOISE_COV, cov));
     QCOMPARE(cov.dim, 366);
-    qtStream.close();
+    byPath.close();
 }
 
 //=============================================================================================================
@@ -488,7 +486,6 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     const std::string path = (testDataDir() + "/MEG/sample/all-trans.fif").toStdString();
     auto in = FiffStream::open(path);
     QVERIFY(in);
-    QVERIFY(in->device() == nullptr);
     QVERIFY(in->isOpen());
     QCOMPARE(in->streamName(), QString::fromStdString(path));
     QVERIFY(in->nent() > 0);

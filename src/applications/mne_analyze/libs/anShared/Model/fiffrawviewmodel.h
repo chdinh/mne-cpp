@@ -122,9 +122,13 @@ public:
 
     //=========================================================================================================
     /**
-     * Helper function for initialization
+     * Shows the first raw data set of @p io.
+     *
+     * @param[in] io   The data read.
+     *
+     * @return Whether @p io has raw data.
      */
-    bool initFiffData(QIODevice& p_IODevice);
+    bool initFiffData(QSharedPointer<FIFFLIB::FiffIO> io);
 
     //=========================================================================================================
     /**
@@ -611,8 +615,6 @@ private:
 
     // data stuff
     QFile m_file;
-    QByteArray m_byteLoadedData;
-    QBuffer m_buffer;
 
     // Filter stuff
     qint32 m_iMaxFilterLength;                             /**< Max order of the current filters. */
@@ -678,8 +680,8 @@ inline qint32 FiffRawViewModel::absoluteFirstSample() const
     // The default constructor leaves m_pFiffIO null, which is the state the
     // model is in before a file is opened. Checking the raw list without
     // checking the pointer first dereferences null and crashes.
-    if (m_pFiffIO && m_pFiffIO->m_qlistRaw.empty() == false)
-        return m_pFiffIO->m_qlistRaw[0]->first_samp;
+    if (m_pFiffIO && m_pFiffIO->raw.empty() == false)
+        return m_pFiffIO->raw[0]->first_samp;
     else {
         qWarning() << "[FiffRawViewModel::firstSample] Raw list is empty, returning -1";
         return -1;
@@ -698,8 +700,8 @@ inline qint32 FiffRawViewModel::currentLastSample() const
 inline qint32 FiffRawViewModel::absoluteLastSample() const
 {
     // Same null pointer case as absoluteFirstSample above.
-    if (m_pFiffIO && m_pFiffIO->m_qlistRaw.empty() == false)
-        return m_pFiffIO->m_qlistRaw[0]->last_samp;
+    if (m_pFiffIO && m_pFiffIO->raw.empty() == false)
+        return m_pFiffIO->raw[0]->last_samp;
     else {
         qWarning() << "[FiffRawViewModel::lastSample] Raw list is empty, returning -1";
         return -1;

@@ -84,7 +84,7 @@ int fixSamples(FiffTag& tag, int channel, int nchan, Fix fix)
 std::string fixFile(const QString& path, bool fix32)
 {
     QFile file(path);
-    auto stream = FiffStream::open_update(file);
+    auto stream = FiffStream::open_update(path.toStdU16String());
     if (!stream) {
         return "cannot open the file for update";
     }

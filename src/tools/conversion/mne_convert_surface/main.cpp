@@ -233,7 +233,7 @@ static bool readFifSurface(const QString& filename, MatrixX3f& rr, MatrixX3i& tr
 static bool writeFifSurface(const QString& filename, const MatrixX3f& rr, const MatrixX3i& tris, int surfId)
 {
     QFile file(filename);
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(filename.toStdU16String());
     if (!stream) {
         qCritical() << "Cannot create FIF file:" << filename;
         return false;

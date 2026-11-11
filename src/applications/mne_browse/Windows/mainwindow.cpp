@@ -221,7 +221,7 @@ FIFFLIB::FiffCov computeCovarianceFromEpochLists(const QList<MNELIB::MNEEpochDat
 }
 
 bool writeFilteredRawFile(const QString& rawFilePath,
-                          QIODevice* pIODevice,
+                          const QString& outputPath,
                           const MNEBROWSE::SessionFilter& filter)
 {
     FIFFLIB::FiffRawData raw(rawFilePath.toStdU16String());
@@ -232,7 +232,7 @@ bool writeFilteredRawFile(const QString& rawFilePath,
 
     Eigen::RowVectorXd cals;
 
-    auto outfid = FIFFLIB::FiffStream::start_writing_raw(FIFFLIB::FiffStream::byteStream(*pIODevice, QIODevice::WriteOnly), raw.info, cals);
+    auto outfid = FIFFLIB::FiffStream::start_writing_raw(outputPath.toStdU16String(), raw.info, cals);
     if (!outfid) {
         qWarning() << "[MainWindow] Could not open output stream for filtered write.";
         return false;
@@ -3120,10 +3120,10 @@ void MainWindow::writeFile()
     //Run the file writing in seperate thread
     writeFileFutureWatcher.setFuture(QtConcurrent::run([this, &qFileOutput, filterCopy, useFilteredWrite]() {
         if (useFilteredWrite) {
-            return writeFilteredRawFile(m_qFileRaw.fileName(), &qFileOutput, filterCopy);
+            return writeFilteredRawFile(m_qFileRaw.fileName(), qFileOutput.fileName(), filterCopy);
         }
 
-        return rawModel()->writeFiffData(&qFileOutput);
+        return rawModel()->writeFiffData(qFileOutput.fileName());
     }));
 
     progressDialog.exec();

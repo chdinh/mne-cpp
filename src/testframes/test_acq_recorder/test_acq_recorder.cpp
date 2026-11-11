@@ -703,8 +703,7 @@ void TestAcqRecorder::recordsNativeFormats()
             }
         }
     }
-    QFile again(path);
-    FiffStream stream(&again);
+    FiffStream stream(path.toStdU16String());
     QVERIFY(stream.open());
     FiffAnnotations annotations;
     fiff_int_t origTime[2] = {0, 0};
@@ -751,8 +750,7 @@ void TestAcqRecorder::recordsLostSamplesAsSkips()
     Eigen::MatrixXd data, times;
     QVERIFY(raw.read_raw_segment(data, times));
     QCOMPARE(data.cols(), static_cast<Eigen::Index>(samples));
-    QFile again(path);
-    FiffStream stream(&again);
+    FiffStream stream(path.toStdU16String());
     QVERIFY(stream.open());
     FiffAnnotations annotations;
     fiff_int_t origTime[2] = {0, 0};

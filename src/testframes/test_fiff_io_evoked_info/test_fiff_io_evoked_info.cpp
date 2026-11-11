@@ -131,61 +131,81 @@ void TestFiffIoEvokedInfo::cleanupTestCase()
 void TestFiffIoEvokedInfo::fiffIO_defaultConstruction()
 {
     FiffIO fio;
-    QVERIFY(fio.m_qlistRaw.empty());
-    QVERIFY(fio.m_qlistEvoked.empty());
+    QVERIFY(fio.raw.empty());
+    QVERIFY(fio.evoked.empty());
 }
 
 void TestFiffIoEvokedInfo::fiffIO_readRawFile()
 {
-    QFile file(rawPath());
+    FiffIO fio(rawPath().toStdU16String());
+    QCOMPARE(fio.raw.size(), std::size_t(1));
+    QVERIFY(fio.raw.front()->info.nchan > 0);
 
-    FiffIO fio(file);
-    QVERIFY(!fio.m_qlistRaw.empty());
-    QVERIFY(fio.m_qlistRaw.front()->info.nchan > 0);
+    // The same file held in memory gives the same raw data
+    QFile file(rawPath());
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QByteArray contents = file.readAll();
+    const auto* begin = reinterpret_cast<const std::byte*>(contents.constData());
+    FiffIO inMemory;
+    QVERIFY(inMemory.read(std::vector<std::byte>(begin, begin + contents.size())));
+    QCOMPARE(inMemory.raw.size(), std::size_t(1));
+    QCOMPARE(inMemory.raw.front()->last_samp, fio.raw.front()->last_samp);
+    QVERIFY(!inMemory.read(std::vector<std::byte>(16)));
 }
 
 void TestFiffIoEvokedInfo::fiffIO_readAveFile()
 {
-    QFile file(avePath());
-
-    // Read the averaged data
     FiffIO fio;
-    bool ok = fio.read(file);
-    QVERIFY(ok);
+    QVERIFY(fio.read(avePath().toStdU16String()));
+    QCOMPARE(fio.evoked.size(), std::size_t(4));
+    QVERIFY(fio.raw.empty());
+
+    // Evoked data sets are written to one file, all of them or the one asked for
+    QTemporaryDir tmpDir;
+    QVERIFY(tmpDir.isValid());
+    const std::string all = tmpDir.filePath("all-ave.fif").toStdString();
+    const std::string second = tmpDir.filePath("second-ave.fif").toStdString();
+    QVERIFY(fio.write(all, FIFFB_EVOKED));
+    QVERIFY(fio.write(second, FIFFB_EVOKED, 1));
+    QVERIFY(!fio.write(second, FIFFB_EVOKED, 4));
+    const FiffIO back(all);
+    QCOMPARE(back.evoked.size(), std::size_t(4));
+    QCOMPARE(back.evoked[2]->comment, fio.evoked[2]->comment);
+    QVERIFY(back.evoked[2]->data.isApprox(fio.evoked[2]->data, 1e-6));
+    const FiffIO one(second);
+    QCOMPARE(one.evoked.size(), std::size_t(1));
+    QCOMPARE(one.evoked[0]->comment, fio.evoked[1]->comment);
 }
 
 void TestFiffIoEvokedInfo::fiffIO_writeRawRoundTrip()
 {
-    QFile fileIn(rawPath());
-
-    FiffIO fioIn(fileIn);
-    QVERIFY(!fioIn.m_qlistRaw.empty());
+    FiffIO fioIn(rawPath().toStdU16String());
+    QVERIFY(!fioIn.raw.empty());
 
     // Write to temporary file
     QTemporaryDir tmpDir;
     QVERIFY(tmpDir.isValid());
     QString outPath = tmpDir.path() + "/test_write_raw.fif";
-    QFile fileOut(outPath);
-    QVERIFY(fileOut.open(QIODevice::WriteOnly));
+    QVERIFY(fioIn.write_raw(outPath.toStdString(), 0));
+    const FiffIO back(outPath.toStdString());
+    QCOMPARE(back.raw.size(), std::size_t(1));
+    QCOMPARE(back.raw.front()->first_samp, fioIn.raw.front()->first_samp);
+    QCOMPARE(back.raw.front()->last_samp, fioIn.raw.front()->last_samp);
 
-    QVERIFY(fioIn.write_raw(fileOut, 0));
-    fileOut.close();
+    // All raw data sets at once go to one file each, named after the given one
+    QVERIFY(fioIn.write(outPath.toStdString(), FIFFB_RAW_DATA));
+    QVERIFY(QFileInfo(tmpDir.path() + "/test_write_raw_raw-0.fif").size() > 0);
 
-    // Verify the output file exists and is non-empty
-    QVERIFY(QFile::exists(outPath));
-    QVERIFY(QFileInfo(outPath).size() > 0);
-
-    QFile unwritable(tmpDir.filePath(QStringLiteral("no/such/dir/out.fif")));
-    QVERIFY(!fioIn.write_raw(unwritable, 0));
+    QVERIFY(!fioIn.write_raw(tmpDir.filePath(QStringLiteral("no/such/dir/out.fif")).toStdString(), 0));
+    QVERIFY(!fioIn.write_raw(outPath.toStdString(), 1));
 }
 
 void TestFiffIoEvokedInfo::fiffIO_setupRead()
 {
-    QFile file(rawPath());
     FiffInfo info;
     std::shared_ptr<FiffDirNode> dirTree;
 
-    bool ok = FiffIO::setup_read(file, info, dirTree);
+    bool ok = FiffIO::setup_read(rawPath().toStdU16String(), info, dirTree);
     QVERIFY(ok);
     QVERIFY(info.nchan > 0);
     QVERIFY(dirTree != nullptr);
@@ -505,7 +525,7 @@ void TestFiffIoEvokedInfo::fiffInfo_writeToStream()
     QFile outFile(outPath);
     QVERIFY(outFile.open(QIODevice::WriteOnly));
 
-    auto pStream = FiffStream::start_file(outFile);
+    auto pStream = FiffStream::start_file(outPath.toStdU16String());
     pStream->start_block(FIFFB_MEAS);
     raw.info.writeToStream(*pStream);
     pStream->end_block(FIFFB_MEAS);

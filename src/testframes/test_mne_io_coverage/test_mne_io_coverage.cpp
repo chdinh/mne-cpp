@@ -60,8 +60,8 @@ private slots:
     void testFiffIODefault()
     {
         FiffIO io;
-        QCOMPARE(io.m_qlistRaw.size(), 0);
-        QCOMPARE(io.m_qlistEvoked.size(), 0);
+        QCOMPARE(io.raw.size(), 0);
+        QCOMPARE(io.evoked.size(), 0);
     }
 
     void testFiffIOReadRaw()
@@ -70,9 +70,9 @@ private slots:
             QSKIP("Raw file not found");
 
         QFile file(m_sRawFile);
-        FiffIO io(file);
+        FiffIO io(m_sRawFile.toStdU16String());
 
-        QVERIFY(io.m_qlistRaw.size() > 0);
+        QVERIFY(io.raw.size() > 0);
     }
 
     void testFiffIOReadEvoked()
@@ -81,9 +81,9 @@ private slots:
             QSKIP("Evoked file not found");
 
         QFile file(m_sEvokedFile);
-        FiffIO io(file);
+        FiffIO io(m_sEvokedFile.toStdU16String());
 
-        QVERIFY(io.m_qlistEvoked.size() > 0);
+        QVERIFY(io.evoked.size() > 0);
     }
 
     void testFiffIOSetupRead()
@@ -94,7 +94,7 @@ private slots:
         QFile file(m_sRawFile);
         FiffInfo info;
         std::shared_ptr<FiffDirNode> dirTree;
-        bool ok = FiffIO::setup_read(file, info, dirTree);
+        bool ok = FiffIO::setup_read(m_sRawFile.toStdU16String(), info, dirTree);
         QVERIFY(ok);
         QVERIFY(info.ch_names.size() > 0);
     }
@@ -104,22 +104,13 @@ private slots:
         if (!QFile::exists(m_sRawFile))
             QSKIP("Raw file not found");
 
-        QFile file(m_sRawFile);
-        FiffIO io(file);
-
-        if (io.m_qlistRaw.size() > 0) {
-            QTemporaryDir tmpDir;
-            QVERIFY(tmpDir.isValid());
-            QString outFile = tmpDir.path() + "/test_raw_write.fif";
-            QFile out(outFile);
-            bool written = io.write_raw(out, 0);
-            // Exercise the write code path
-            if (written) {
-                QVERIFY(QFileInfo(outFile).size() > 0);
-            } else {
-                qWarning() << "write_raw returned false — code path exercised";
-            }
-        }
+        FiffIO io(m_sRawFile.toStdU16String());
+        QCOMPARE(io.raw.size(), std::size_t(1));
+        QTemporaryDir tmpDir;
+        QVERIFY(tmpDir.isValid());
+        const QString outFile = tmpDir.path() + "/test_raw_write.fif";
+        QVERIFY(io.write_raw(outFile.toStdU16String(), 0));
+        QVERIFY(QFileInfo(outFile).size() > 0);
     }
 
     // ── MNERawInfo ──────────────────────────────────────────────────────────
@@ -153,7 +144,7 @@ private slots:
             QSKIP("Raw file not found");
 
         QFile file(m_sRawFile);
-        FiffStream stream(&file);
+        FiffStream stream(m_sRawFile.toStdU16String());
         if (!stream.open())
             QSKIP("Could not open FIFF stream");
 
@@ -177,8 +168,7 @@ private slots:
         if (!QFile::exists(m_sRawFile))
             QSKIP("Raw file not found");
 
-        QFile file(m_sRawFile);
-        FiffStream stream(&file);
+        FiffStream stream(m_sRawFile.toStdU16String());
         if (!stream.open())
             QSKIP("Could not open FIFF stream");
 

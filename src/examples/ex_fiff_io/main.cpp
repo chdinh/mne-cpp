@@ -60,16 +60,11 @@ int main(int argc, char* argv[])
 {
     QCoreApplication a(argc, argv);
 
-    //create list of fiff data to read
-    std::vector<QIODevice*> t_listSampleFilesIn;
-    t_listSampleFilesIn.push_back(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif"));
-    //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis_raw.fif"));
-    //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-ave.fif"));
-    //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-no-filter-ave.fif"));
-    //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-meg-eeg-oct-6-fwd.fif"));
-    //    t_listSampleFilesIn.append(new QFile(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_audvis-cov.fif"));
+    // The files to read; raw and evoked data are collected from all of them
+    const QString sample = QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/";
+    const std::vector<std::filesystem::path> files{(sample + "sample_audvis_raw.fif").toStdU16String()};
 
-    FiffIO p_fiffIO(t_listSampleFilesIn);
+    FiffIO p_fiffIO(files);
 
     std::cout << p_fiffIO << std::endl;
 
@@ -77,12 +72,11 @@ int main(int argc, char* argv[])
 
     //Read raw data samples
     MatrixXd data, times;
-    readSuccessful = p_fiffIO.m_qlistRaw[0]->read_raw_segment_times(data, times, 100, 102);
+    readSuccessful = p_fiffIO.raw[0]->read_raw_segment_times(data, times, 100, 102);
 
     if (readSuccessful) {
         //Write some raw data
-        QFile t_fileToWrite(QCoreApplication::applicationDirPath() + "/../resources/data/MNE-sample-data/MEG/sample/sample_write/sample_out.fif");
-        p_fiffIO.write(t_fileToWrite, FIFFB_RAW_DATA, -1);
+        p_fiffIO.write((sample + "sample_write/sample_out.fif").toStdU16String(), FIFFB_RAW_DATA);
     } else {
         qDebug() << "Could not read raw segment.";
     }

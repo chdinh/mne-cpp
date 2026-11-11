@@ -148,8 +148,7 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
 
 std::optional<MNEDerivSet> MNEDerivSet::read(const std::filesystem::path& path)
 {
-    QFile file(path);
-    FiffStream stream(&file);
+    FiffStream stream(path);
     if (!stream.open()) {
         return std::nullopt;
     }
@@ -258,8 +257,7 @@ bool MNEDerivSet::write(const std::filesystem::path& path) const
         BASELIB::Log::warning("MNEDerivSet::write - No derivations to write");
         return false;
     }
-    QFile file(path);
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(path);
     if (!stream) {
         return false;
     }

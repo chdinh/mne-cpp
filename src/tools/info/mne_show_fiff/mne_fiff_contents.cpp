@@ -184,8 +184,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const MNEShowFiffSett
 
 bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, bool verbose, const QList<int>& tags, int indent_step, bool long_strings, bool blocks_only)
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name.toStdU16String());
 
     FiffDirEntry this_ent;
     std::optional<FiffTag> tag;

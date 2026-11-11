@@ -605,7 +605,7 @@ void TestMriIO::testCorFifWriteRead()
 
     // Read back and verify FIFF structure
     QFile file(corFifPath);
-    FiffStream stream(&file);
+    FiffStream stream(corFifPath.toStdU16String());
     QVERIFY(stream.open());
 
     // Find and verify blocks
@@ -616,8 +616,8 @@ void TestMriIO::testCorFifWriteRead()
     int sliceCount = 0;
 
     // Scan through the file tags
-    stream.device()->seek(0);
-    while (!stream.device()->atEnd()) {
+    stream.byte_stream().seek(0);
+    while (!stream.byte_stream().atEnd()) {
         tag = stream.read_tag();
         if (!tag)
             break;
@@ -971,14 +971,13 @@ void TestMriIO::testCorFifWriteReadSynthetic()
     QVERIFY(QFile::exists(corPath));
 
     // Read back and verify structure
-    QFile file(corPath);
-    FiffStream stream(&file);
+    FiffStream stream(corPath.toStdU16String());
     QVERIFY(stream.open());
 
     std::optional<FiffTag> tag;
     int sliceCount = 0;
-    stream.device()->seek(0);
-    while (!stream.device()->atEnd()) {
+    stream.byte_stream().seek(0);
+    while (!stream.byte_stream().atEnd()) {
         tag = stream.read_tag();
         if (!tag)
             break;

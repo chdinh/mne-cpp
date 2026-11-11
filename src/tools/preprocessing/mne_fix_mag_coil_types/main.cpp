@@ -48,7 +48,7 @@ using namespace FIFFLIB;
 static int processFile(const QString& name, bool doMagnes, QString& summary)
 {
     QFile file(name);
-    auto stream = FiffStream::open_update(file);
+    auto stream = FiffStream::open_update(name.toStdU16String());
     if (!stream) {
         qCritical("Cannot open file for update: %s", qPrintable(name));
         return -1;
@@ -96,7 +96,7 @@ static int processFile(const QString& name, bool doMagnes, QString& summary)
             }
 
             if (modified) {
-                stream->device()->seek(stream->dir()[k].pos);
+                stream->byte_stream().seek(stream->dir()[k].pos);
                 stream->write_ch_info(ch);
             }
         }

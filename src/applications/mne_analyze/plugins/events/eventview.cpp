@@ -477,7 +477,7 @@ void EventView::onDetectTriggers(const QString& sChannelName,
 
     // The arguments are temporaries of the emitting call, so the worker gets copies
     m_sDetectedStimChannel = sChannelName;
-    std::shared_ptr<FIFFLIB::FiffRawData> raw = m_pFiffRawModel->getFiffIO()->m_qlistRaw.front();
+    std::shared_ptr<FIFFLIB::FiffRawData> raw = m_pFiffRawModel->getFiffIO()->raw.front();
     m_Future = QtConcurrent::run([sChannelName = QString(sChannelName), dThreshold, raw] {
         return detectTriggerCalculations(sChannelName, dThreshold, *raw);
     });

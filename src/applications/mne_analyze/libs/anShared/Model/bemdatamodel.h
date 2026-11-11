@@ -24,7 +24,7 @@
 #include "../Utils/types.h"
 #include "abstractmodel.h"
 
-#include <fiff/fiff_io.h>
+#include <fiff/fiff_stream.h>
 
 #include <mne/mne_bem.h>
 
@@ -34,7 +34,6 @@
 
 #include <QObject>
 #include <QSharedPointer>
-#include <QBuffer>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -131,11 +130,7 @@ private:
     /**
      * Helper function for initialization
      */
-    void initBemData(QIODevice& p_IODevice);
-
-    QFile m_file; /**< The IO file. */
-    QByteArray m_byteLoadedData;
-    QBuffer m_buffer;
+    void initBemData(std::unique_ptr<FIFFLIB::FiffStream> stream);
 
     std::shared_ptr<MNELIB::MNEBem> m_pBem; /**< Data. */
 

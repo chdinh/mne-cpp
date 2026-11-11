@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 
     // Open FIFF file for in-place update
     QFile file(fifName);
-    auto stream = FiffStream::open_update(file);
+    auto stream = FiffStream::open_update(fifName.toStdU16String());
     if (!stream) {
         qCritical("Cannot open file for update: %s", qPrintable(fifName));
         return 1;
@@ -211,8 +211,7 @@ int main(int argc, char* argv[])
                         ch.kind = a.toKind;
                     }
                     qInfo("%s", qPrintable(line));
-                    std::optional<FiffTag> dummyTag; // unused
-                    stream->device()->seek(stream->dir()[k].pos);
+                    stream->byte_stream().seek(stream->dir()[k].pos);
                     stream->write_ch_info(ch);
                     break;
                 }

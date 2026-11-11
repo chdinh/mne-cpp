@@ -47,7 +47,7 @@ using namespace MNELIB;
 // DEFINE GLOBAL DSPLIB METHODS
 //=============================================================================================================
 
-bool DSPLIB::filterFile(QIODevice& pIODevice,
+bool DSPLIB::filterFile(const std::filesystem::path& path,
                         const std::shared_ptr<FiffRawData>& pFiffRawData,
                         int type,
                         double dCenterfreq,
@@ -74,7 +74,7 @@ bool DSPLIB::filterFile(QIODevice& pIODevice,
                                        dSFreq,
                                        designMethod);
 
-    return filterFile(pIODevice,
+    return filterFile(path,
                       pFiffRawData,
                       filter,
                       vecPicks,
@@ -83,7 +83,7 @@ bool DSPLIB::filterFile(QIODevice& pIODevice,
 
 //=============================================================================================================
 
-bool DSPLIB::filterFile(QIODevice& pIODevice,
+bool DSPLIB::filterFile(const std::filesystem::path& path,
                         const std::shared_ptr<FiffRawData>& pFiffRawData,
                         const FilterKernel& filterKernel,
                         const RowVectorXi& vecPicks,
@@ -94,7 +94,7 @@ bool DSPLIB::filterFile(QIODevice& pIODevice,
     RowVectorXd cals;
     SparseMatrix<double> mult;
     RowVectorXi sel;
-    auto outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), pFiffRawData->info, cals);
+    auto outfid = FiffStream::start_writing_raw(path, pFiffRawData->info, cals);
     if (!outfid) {
         return false;
     }

@@ -88,7 +88,7 @@ static bool writeMriDescription(const QString& filename,
                                 int width, int height, int nslice)
 {
     QFile file(filename);
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(filename.toStdU16String());
     if (!stream) {
         qCritical() << "Cannot create output FIFF file:" << filename;
         return false;

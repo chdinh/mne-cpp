@@ -480,7 +480,7 @@ private slots:
             QSKIP("BEM solution file not found");
 
         // Read via stream to exercise file parsing
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         std::vector<std::shared_ptr<FiffDirNode>> bemSolBlocks = stream.dirtree()->dir_tree_find(FIFFB_BEM);

@@ -272,6 +272,21 @@ aliases; replace the old spelling as below.
   `if (!x.sol.empty())`, and `FiffCov::SDPtr(new FiffCov(c))` becomes `c`.
   `SCMEASLIB::RealTimeFwdSolution` loses `setSol`, `getSol`, `setSolGrad`
   and `getSolGrad` (`setSolGrad` overwrote `sol`); use `getValue()->sol`.
+- `FiffStream`, `FiffIO` and `DSPLIB::filterFile` take a
+  `std::filesystem::path` or a `BASELIB::ByteStream` instead of a `QIODevice`;
+  `fiff_stream.h` and `fiff_io.h` no longer include Qt. `FiffStream(path)`
+  reads a file, `FiffStream(std::make_unique<BASELIB::MemoryByteStream>(bytes))`
+  bytes in memory; `start_file` and `open_update` take a path (or bytes for
+  `start_file`), `open()` takes no mode, and `byte_stream()` replaces
+  `device()`. `FiffStream(QByteArray*, mode)` and `FiffStream::byteStream` are
+  gone. `FiffIO` reads paths or bytes, its lists are `raw` and `evoked`
+  (were `m_qlistRaw`, `m_qlistEvoked`), it is no longer a `QObject`, and
+  `write(path, FIFFB_EVOKED)` now writes the evoked sets instead of nothing.
+  Migration: `QFile f(name); FiffStream s(&f);` becomes
+  `FiffStream s(name.toStdU16String());`, and
+  `start_writing_raw(FiffStream::byteStream(file, QIODevice::WriteOnly), ...)`
+  becomes `start_writing_raw(file.fileName().toStdU16String(), ...)`.
+  `BASELIB::FileByteStream::resize` cuts or extends a file.
 - `FiffStream::read_rt_tag` is gone: nothing called it, and the real-time
   server reads its socket with `read_tag_info(false)` and `read_tag_data`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

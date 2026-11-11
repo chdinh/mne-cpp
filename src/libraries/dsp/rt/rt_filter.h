@@ -84,9 +84,9 @@ struct FilterObject
 
 //=========================================================================================================
 /**
- * Creates a user designed filter kernel, filters data from an input file and writes the filtered data to a pIODevice.
+ * Creates a user designed filter kernel, filters data from an input file and writes the filtered data to a file.
  *
- * @param[in] pIODevice            The IO device to write to.
+ * @param[in] path                 The file to write.
  * @param[in] pFiffRawData         The fiff raw data object to read from.
  * @param[in] type                 The type of the filter: LPF, HPF, BPF, NOTCH (from enum FilterType).
  * @param[in] dCenterfreq          The center of the frequency.
@@ -100,7 +100,7 @@ struct FilterObject
  *
  * @return Returns true if successful, false otherwise.
  */
-DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
+DSPSHARED_EXPORT bool filterFile(const std::filesystem::path& path,
                                  const std::shared_ptr<FIFFLIB::FiffRawData>& pFiffRawData,
                                  int type,
                                  double dCenterfreq,
@@ -115,9 +115,9 @@ DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
 //=========================================================================================================
 /**
  * Filters data from an input file based on an existing filter kernel and writes the filtered data to a
- * pIODevice.
+ * file.
  *
- * @param[in] pIODevice            The IO device to write to.
+ * @param[in] path                 The file to write.
  * @param[in] pFiffRawData         The fiff raw data object to read from.
  * @param[in] filterKernel         The list of filter kernels to use.
  * @param[in] vecPicks             Channel indexes to filter. Default is filter all channels.
@@ -125,7 +125,7 @@ DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
  *
  * @return Returns true if successful, false otherwise.
  */
-DSPSHARED_EXPORT bool filterFile(QIODevice& pIODevice,
+DSPSHARED_EXPORT bool filterFile(const std::filesystem::path& path,
                                  const std::shared_ptr<FIFFLIB::FiffRawData>& pFiffRawData,
                                  const DSPLIB::FilterKernel& filterKernel,
                                  const Eigen::RowVectorXi& vecPicks = Eigen::RowVectorXi(),

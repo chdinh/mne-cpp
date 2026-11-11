@@ -62,8 +62,7 @@ namespace
  */
 bool containsBemSurfaces(const QString& sFilePath)
 {
-    QFile file(sFilePath);
-    FIFFLIB::FiffStream pStream(&file);
+    FIFFLIB::FiffStream pStream(sFilePath.toStdU16String());
 
     if (!pStream.open()) {
         return false;

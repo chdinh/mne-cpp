@@ -168,7 +168,7 @@ static std::vector<FiffProj> readProjFile(const QString& fileName)
 {
     std::vector<FiffProj> projs;
     QFile file(fileName);
-    FiffStream stream(&file);
+    FiffStream stream(fileName.toStdU16String());
     if (!stream.open()) {
         qWarning() << "  WARNING: Could not open projection file" << fileName;
         return projs;

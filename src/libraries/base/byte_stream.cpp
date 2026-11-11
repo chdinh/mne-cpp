@@ -264,6 +264,28 @@ bool FileByteStream::flush()
 
 //=============================================================================================================
 
+bool FileByteStream::resize(std::uint64_t size)
+{
+    if (!m_file || m_mode == Mode::Read || !flush()) {
+        return false;
+    }
+    std::error_code ec;
+    std::filesystem::resize_file(m_path, size, ec);
+    if (ec) {
+        return false;
+    }
+    m_size = size;
+    m_lastWrite = false;
+    const std::uint64_t position = std::min(m_pos, size);
+    if (!seekFile(m_file, position)) {
+        return false;
+    }
+    m_pos = position;
+    return true;
+}
+
+//=============================================================================================================
+
 Expected<std::vector<std::byte>> BASELIB::read_file_bytes(const std::filesystem::path& path, Compression compression)
 {
     std::ifstream file(path, std::ios::binary | std::ios::ate);

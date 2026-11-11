@@ -78,8 +78,7 @@ int main(int argc, char* argv[])
     qInfo("Destination file : %s", qPrintable(destName));
 
     // Read all tags from the source file
-    QFile addFile(addName);
-    FiffStream addStream(&addFile);
+    FiffStream addStream(addName.toStdU16String());
     if (!addStream.open()) {
         qCritical("Cannot open source file: %s", qPrintable(addName));
         return 1;
@@ -108,8 +107,7 @@ int main(int argc, char* argv[])
     }
 
     // Open destination file for update and append tags
-    QFile destFile(destName);
-    auto destStream = FiffStream::open_update(destFile);
+    auto destStream = FiffStream::open_update(destName.toStdU16String());
     if (!destStream) {
         qCritical("Cannot open destination file for update: %s", qPrintable(destName));
         return 1;

@@ -226,8 +226,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
 {
     const QString path = m_dir.filePath("roundtrip-src.fif");
     {
-        QFile file(path);
-        auto stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(path.toStdU16String());
         QVERIFY(stream);
         for (const auto& s : m_spaces)
             QCOMPARE(s->writeToStream(*stream, false), 0);
@@ -253,8 +252,7 @@ void TestMneSourceSpaceOpsPython::writeRoundTrip()
     // Writing only the selected points keeps exactly the used vertices.
     const QString selPath = m_dir.filePath("selected-src.fif");
     {
-        QFile file(selPath);
-        auto stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(selPath.toStdU16String());
         QVERIFY(stream);
         QCOMPARE(m_spaces[0]->writeToStream(*stream, true), 0);
         stream->end_file();
@@ -306,7 +304,7 @@ void TestMneSourceSpaceOpsPython::volumeNeighborsRoundTrip()
     const QString selPath = m_dir.filePath("volume-selected-src.fif");
     for (bool selected : {false, true}) {
         QFile file(selected ? selPath : path);
-        auto stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(QString(selected ? selPath : path).toStdU16String());
         QVERIFY(stream);
         QCOMPARE(vol->writeToStream(*stream, selected), 0);
         stream->end_file();
@@ -469,8 +467,7 @@ void TestMneSourceSpaceOpsPython::readsPythonVolumeSpace()
     // identically (type, vertno, rr, shape, MRI dims and name, all three transforms, neighbours).
     const QString path = m_dir.filePath("python-vol-src.fif");
     {
-        QFile file(path);
-        auto stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(path.toStdU16String());
         QVERIFY(stream);
         QCOMPARE(v.writeToStream(*stream, false), 0);
         stream->end_file();

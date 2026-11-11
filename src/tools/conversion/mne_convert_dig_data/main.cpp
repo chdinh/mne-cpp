@@ -67,7 +67,7 @@ static QList<DigPt> readFifDig(const QString& filename)
 {
     QList<DigPt> points;
     QFile file(filename);
-    FiffStream stream(&file);
+    FiffStream stream(filename.toStdU16String());
     if (!stream.open()) {
         qCritical("Cannot open FIFF file: %s", qPrintable(filename));
         return points;
@@ -138,8 +138,7 @@ static QList<DigPt> readHpts(const QString& filename)
 
 static bool writeFifDig(const QString& filename, const QList<DigPt>& points)
 {
-    QFile outFile(filename);
-    auto outStream = FiffStream::start_file(outFile);
+    auto outStream = FiffStream::start_file(filename.toStdU16String());
     if (!outStream) {
         qCritical("Cannot open output FIFF file: %s", qPrintable(filename));
         return false;

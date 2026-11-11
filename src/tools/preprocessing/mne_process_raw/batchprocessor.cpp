@@ -228,8 +228,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                         std::string projSaveName, projLogName;
                         composeSaveNames(rawName, settings.saveProjTag, settings.saveHere,
                                          projSaveName, projLogName);
-                        QFile projOutFile(QString::fromStdString(projSaveName));
-                        auto pProjStream = FiffStream::start_file(projOutFile);
+                        auto pProjStream = FiffStream::start_file(projSaveName);
                         if (pProjStream) {
                             pProjStream->write_proj(newProjs);
                             pProjStream->end_file();
@@ -240,8 +239,7 @@ int BatchProcessor::run(const ProcessingSettings& settings)
                 // Load projections from files
                 std::vector<FiffProj> loadedProjs;
                 for (const std::string& projFile : settings.projFiles) {
-                    QFile pFile(QString::fromStdString(projFile));
-                    FiffStream pStream(&pFile);
+                    FiffStream pStream(projFile);
                     if (pStream.open()) {
                         std::vector<std::shared_ptr<FiffDirNode>> projNodes = pStream.dirtree()->dir_tree_find(FIFFB_PROJ);
                         if (!projNodes.empty()) {

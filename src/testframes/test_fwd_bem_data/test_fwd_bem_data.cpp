@@ -375,7 +375,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM solution not found");
 
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         // Navigate the tree
@@ -413,7 +413,7 @@ private slots:
             QSKIP("Transform file not found");
 
         FiffCoordTrans trans;
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_PARENT_MRI_FILE);

@@ -843,8 +843,7 @@ void TestFiffCorePython::readTransformFromNode()
     QFETCH(float, tx);
     QFETCH(float, tz);
 
-    QFile file(dataPath("all-trans.fif"));
-    FiffStream stream(&file);
+    FiffStream stream(QString(dataPath("all-trans.fif")).toStdU16String());
     QVERIFY(stream.open());
 
     const auto read = FiffCoordTrans::read_from_node(stream, stream.dirtree(), from, to);
@@ -1021,8 +1020,7 @@ void TestFiffCorePython::transSet_headToMniMatchesPython()
     QTemporaryDir dir;
     const QString file = dir.filePath("chain-trans.fif");
     {
-        QFile out(file);
-        auto stream = FiffStream::start_file(out);
+        auto stream = FiffStream::start_file(file.toStdU16String());
         chain.write(*stream);
         stream->write_coord_trans(chain.RAS_MNI_tal_t.inverted());
         stream->end_file();

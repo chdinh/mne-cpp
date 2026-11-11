@@ -132,8 +132,7 @@ int main(int argc, char* argv[])
 
     // 2. Load target measurement info
     qInfo("Loading target info: %s", qPrintable(toFile));
-    QFile fTo(toFile);
-    FiffStream toStream(&fTo);
+    FiffStream toStream(toFile.toStdU16String());
     if (!toStream.open()) {
         qCritical("Cannot open target file: %s", qPrintable(toFile));
         return 1;

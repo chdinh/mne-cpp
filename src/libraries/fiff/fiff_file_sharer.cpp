@@ -70,12 +70,11 @@ void FiffFileSharer::copyRealtimeFile(const QString& sSourcePath)
     if (!QFile::copy(sSourcePath, sPartPath))
         return;
 
-    QFile newFile(sPartPath);
-    if (newFile.open(QIODevice::ReadWrite)) {
-        newFile.seek(newFile.size());
-        FIFFLIB::FiffStream stream(&newFile);
+    // The copy is cut mid-recording: close its raw data blocks so it reads as a complete file
+    if (auto bytes = BASELIB::FileByteStream::open(sPartPath.toStdU16String(), BASELIB::FileByteStream::Mode::ReadWrite)) {
+        bytes->seek(bytes->size());
+        FIFFLIB::FiffStream stream(std::move(bytes));
         stream.finish_writing_raw();
-        newFile.close();
     }
     QFile::remove(sFilePath);
     QFile::rename(sPartPath, sFilePath);

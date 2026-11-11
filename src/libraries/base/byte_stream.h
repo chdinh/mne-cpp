@@ -254,6 +254,16 @@ public:
     /** @return Whether everything written has reached the operating system. */
     bool flush();
 
+    //=========================================================================================================
+    /**
+     * Cuts the file to, or extends it with zeros to, @p size bytes; the position moves back to the new end if it was past it.
+     *
+     * @param[in] size   New length in bytes.
+     *
+     * @return Whether the file has the new length; never for a read-only stream.
+     */
+    bool resize(std::uint64_t size);
+
 private:
     FileByteStream(std::FILE* file, Mode mode, std::filesystem::path path);
 

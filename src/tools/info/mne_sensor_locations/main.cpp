@@ -95,8 +95,7 @@ int main(int argc, char* argv[])
     }
 
     // Read measurement info
-    QFile fMeas(measFile);
-    FiffStream stream(&fMeas);
+    FiffStream stream(measFile.toStdU16String());
     if (!stream.open()) {
         qCritical("Cannot open FIFF file: %s", qPrintable(measFile));
         return 1;

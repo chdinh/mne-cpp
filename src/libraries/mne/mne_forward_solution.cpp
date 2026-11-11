@@ -300,8 +300,7 @@ Expected<void> MNEForwardSolution::write(const std::filesystem::path& path) cons
     //   Update the directory
     //
     {
-        QFile fileIn(QString::fromStdU16String(path.u16string()));
-        auto t_pStreamIn = FiffStream::open_update(fileIn);
+        auto t_pStreamIn = FiffStream::open_update(path);
         if (t_pStreamIn) {
             const auto& dir = t_pStreamIn->dir();
             for (const FiffDirEntry& entry : dir) {

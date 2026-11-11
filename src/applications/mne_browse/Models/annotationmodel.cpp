@@ -845,7 +845,7 @@ bool AnnotationModel::loadAnnotationJson(QFile& qFile)
 
 bool AnnotationModel::loadAnnotationFif(QFile& qFile)
 {
-    FIFFLIB::FiffStream stream(&qFile);
+    FIFFLIB::FiffStream stream(qFile.fileName().toStdU16String());
     if (!stream.open()) {
         qWarning() << "AnnotationModel: could not open annotation fif" << qFile.fileName();
         return false;
@@ -1244,7 +1244,7 @@ bool AnnotationModel::saveAnnotationJson(QFile& qFile) const
 
 bool AnnotationModel::saveAnnotationFif(QFile& qFile) const
 {
-    auto stream = FIFFLIB::FiffStream::start_file(qFile);
+    auto stream = FIFFLIB::FiffStream::start_file(std::filesystem::path(qFile.fileName().toStdU16String()));
     if (!stream) {
         qWarning() << "AnnotationModel: could not write annotation fif" << qFile.fileName();
         return false;

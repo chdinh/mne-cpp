@@ -242,8 +242,7 @@ int main(int argc, char* argv[])
     // Write output
     qInfo("\nWriting source space with patch info to: %s", qPrintable(outFile));
 
-    QFile outF(outFile);
-    auto outStream = FiffStream::start_file(outF);
+    auto outStream = FiffStream::start_file(outFile.toStdU16String());
     if (!outStream) {
         qCritical("Cannot open output file: %s", qPrintable(outFile));
         return 1;

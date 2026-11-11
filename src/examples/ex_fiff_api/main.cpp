@@ -223,8 +223,7 @@ int main(int argc, char* argv[])
                  "FiffEvokedSet/FiffEvoked: 4 conditions; Left Auditory averages 55 epochs over 421 samples");
 
     //! [fiff_stream_usage]
-    QFile structureFile(dir + "/sample_audvis-ave.fif");
-    FiffStream stream(&structureFile);
+    FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
     const bool opened = stream.open();
     const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
     const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -236,8 +235,7 @@ int main(int argc, char* argv[])
 
     //! [fiff_explain_usage]
     // The block tree of a transform file, as MNE-C fiff_dir_tree prints it, with the names of tags and units
-    QFile transFile(dir + "/all-trans.fif");
-    FiffStream transStream(&transFile);
+    FiffStream transStream(QString(dir + "/all-trans.fif").toStdU16String());
     transStream.open();
     QString tree;
     QTextStream treeOut(&tree);
@@ -277,10 +275,9 @@ int main(int argc, char* argv[])
     ok &= expect(facadeBads == info.bads, "FiffStream::read_bad_channels finds the same 2 bads as FiffInfo");
 
     //! [fiff_io_usage]
-    QFile ioFile(dir + "/sample_audvis-ave.fif");
-    FiffIO io(ioFile); // detects what the file holds (raw, evoked, fwd, ...)
+    FiffIO io(QString(dir + "/sample_audvis-ave.fif").toStdU16String()); // detects what the file holds (raw, evoked, fwd, ...)
     //! [fiff_io_usage]
-    ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.empty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
+    ok &= expect(io.evoked.size() == 4 && io.raw.empty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
 
     std::println("{}", ok ? "All fiff checks passed." : "fiff checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

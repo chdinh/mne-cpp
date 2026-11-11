@@ -353,7 +353,7 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
      */
 {
     QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     std::shared_ptr<FiffDirNode> bem_node;
     int method;
@@ -1119,8 +1119,7 @@ int FwdBemModel::fwd_bem_save_model(const std::filesystem::path& name) const
         BASELIB::Log::warning("[FwdBemModel::fwd_bem_save_model] Unknown BEM method : {}", bem_method);
         return FAIL;
     }
-    QFile file(name);
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(name);
     if (!stream) {
         return FAIL;
     }

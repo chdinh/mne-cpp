@@ -305,7 +305,7 @@ void TestMneCovPython::rejectsBadInput()
         QFile file(m_dir.filePath(name));
         if (!file.open(QIODevice::WriteOnly))
             return {};
-        auto stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(m_dir.filePath(name).toStdU16String());
         if (block)
             stream->start_block(FIFFB_MNE_COV);
         const fiff_int_t kind = FIFFV_MNE_NOISE_COV;

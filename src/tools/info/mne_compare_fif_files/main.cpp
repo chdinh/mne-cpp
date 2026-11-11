@@ -120,10 +120,8 @@ int main(int argc, char* argv[])
     }
 
     // Open both files
-    QFile f1(file1);
-    QFile f2(file2);
-    FiffStream stream1(&f1);
-    FiffStream stream2(&f2);
+    FiffStream stream1(file1.toStdU16String());
+    FiffStream stream2(file2.toStdU16String());
 
     if (!stream1.open()) {
         qCritical("Cannot parse FIFF: %s", qPrintable(file1));

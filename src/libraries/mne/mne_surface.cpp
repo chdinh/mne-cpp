@@ -385,8 +385,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface2(const std::filesystem:
 
 std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::path& name, int which, bool add_geometry, float& sigma, bool check_too_many_neighbors)
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     std::vector<std::shared_ptr<FiffDirNode>> surfs;
     std::vector<std::shared_ptr<FiffDirNode>> bems;

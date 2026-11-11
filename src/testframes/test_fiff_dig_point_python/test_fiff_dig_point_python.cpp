@@ -276,8 +276,7 @@ void TestFiffDigPointPython::writeRoundTrip()
     QVERIFY_THROWS_EXCEPTION(BASELIB::Error, FiffDigPointSet(dir.filePath("absent.fif").toStdString()));
 
     // FIFF_MNE_COORD_FRAME in the isotrak block puts every point into that frame, as mne's _read_dig_fif
-    QFile framed(dir.filePath("framed.fif"));
-    QVERIFY(framed.open(QIODevice::WriteOnly));
+    const std::string framed = dir.filePath("framed.fif").toStdString();
     auto stream = FiffStream::start_file(framed);
     stream->start_block(FIFFB_MEAS);
     stream->start_block(FIFFB_MEAS_INFO);
@@ -290,8 +289,8 @@ void TestFiffDigPointPython::writeRoundTrip()
     stream->end_block(FIFFB_MEAS_INFO);
     stream->end_block(FIFFB_MEAS);
     stream->end_file();
-    framed.close();
-    const FiffDigPointSet inMri(framed.fileName().toStdString());
+    stream.reset();
+    const FiffDigPointSet inMri(framed);
     QCOMPARE(inMri.size(), 2);
     QCOMPARE(inMri[0].coord_frame, FIFFV_COORD_MRI);
     QCOMPARE(inMri[1].coord_frame, FIFFV_COORD_MRI);

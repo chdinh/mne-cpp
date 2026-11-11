@@ -11,10 +11,10 @@
  *           Juan GPC <jgarciaprieto@mgh.harvard.edu>
  * @since    0.1.0
  * @date     October 2012
- * @brief    FIFF binary tag-stream layer: wraps a QIODevice to read and write FIFF tags, directories, blocks and the structured records nested inside them.
+ * @brief    FIFF binary tag-stream layer: reads and writes FIFF tags, directories, blocks and the structured records nested inside them.
  *
- * @ref FIFFLIB::FiffStream is the workhorse of FIFFLIB. It owns a @c QIODevice
- * (typically a @c QFile or a @c QTcpSocket for realtime), reads and
+ * @ref FIFFLIB::FiffStream is the workhorse of FIFFLIB. It owns a
+ * @ref BASELIB::ByteStream "byte stream" (a file, or bytes in memory), reads and
  * writes the 16-byte FIFF tag header, decodes payloads through the
  * endian-swap helpers in @ref fiff_byte_swap.h, and assembles the
  * directory and block tree on the way in. The high-level methods then
@@ -27,10 +27,6 @@
  * record-level writers (@ref FIFFLIB::FiffStream::write_id "write_id", @ref FIFFLIB::FiffStream::write_ch_info "write_ch_info",
  * @ref FIFFLIB::FiffStream::write_coord_trans "write_coord_trans", ...) emit a fully spec-compliant FIFF file
  * that round-trips through MNE-Python and MNE-C unchanged.
- *
- * All bytes go through a @ref BASELIB::ByteStream "byte stream", either one
- * wrapping the given @c QIODevice, which keeps sockets and Qt files working,
- * or one the caller passes in, such as a @ref BASELIB::FileByteStream.
  */
 
 #ifndef FIFF_STREAM_H
@@ -58,12 +54,6 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QByteArray>
-#include <QIODevice>
 #include <expected>
 #include <filesystem>
 #include <memory>
@@ -102,9 +92,9 @@ struct FiffDeviceInfo;
 
 //=============================================================================================================
 /**
- * @brief FIFF tag-stream reader/writer: wraps a QIODevice and exposes typed read_* / write_* methods for every FIFF block and record kind.
+ * @brief FIFF tag-stream reader/writer: exposes typed read_* / write_* methods for every FIFF block and record kind.
  *
- * Reads or writes one @c QIODevice. Builds the FIFF directory and
+ * Reads or writes one byte stream. Builds the FIFF directory and
  * @ref FiffDirNode block tree on @ref open and exposes typed loaders /
  * emitters for every structured record (id, channel info, coord trans,
  * named matrix, dig point, projector, CTF comp, raw segment, evoked,
@@ -120,24 +110,15 @@ class FIFFSHARED_EXPORT FiffStream
 public:
     //=========================================================================================================
     /**
-     * Constructs a fiff stream that uses the I/O device p_pIODevice.
+     * Constructs a fiff stream that reads a file; open() opens it and reads its directory.
      *
-     * @param[in] p_pIODevice    A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path   The file; if it cannot be opened, open() fails.
      */
-    explicit FiffStream(QIODevice* p_pIODevice);
+    explicit FiffStream(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Constructs a fiff stream that operates on a byte array, a. The mode describes how the device is to be used.
-     *
-     * @param[in] a      The byte array.
-     * @param[in] mode   The open mode.
-     */
-    explicit FiffStream(QByteArray* a, QIODevice::OpenMode mode);
-
-    //=========================================================================================================
-    /**
-     * Constructs a fiff stream on a byte stream, e.g. a file opened without Qt.
+     * Constructs a fiff stream on a byte stream, e.g. bytes in memory.
      *
      * @param[in] bytes  The byte stream, already open; the fiff stream owns it.
      * @param[in] name   Name reported by streamName(), e.g. the file path.
@@ -163,9 +144,10 @@ public:
 
     //=========================================================================================================
     /**
-     * @return The Qt device the stream reads and writes, or nullptr for a stream on a byte stream.
+     * @return The bytes the stream reads and writes, e.g. to rewind them or to take what was written to memory;
+     *         a stream constructed from a path has them only once it is open.
      */
-    QIODevice* device() const;
+    BASELIB::ByteStream& byte_stream() const;
 
     //=========================================================================================================
     /**
@@ -259,7 +241,7 @@ public:
 
     //=========================================================================================================
     /**
-     * Writes the closing tags to a fif file and closes the file
+     * Writes the tag that ends a FIFF file; the file is complete once the stream is closed or destroyed.
      */
     void end_file();
 
@@ -285,21 +267,11 @@ public:
 
     //=========================================================================================================
     /**
-     * QFile::open
-     *
-     * unmask base class open function
-     */
-    //    using QFile::open;
-
-    //=========================================================================================================
-    /**
-     * Opens a fif file and provides the directory of tags
-     *
-     * @param[in] mode      The open mode (Default = ReadOnly).
+     * Reads the file id and the directory of tags, scanning the file if it has no directory.
      *
      * @return true if succeeded, false otherwise.
      */
-    bool open(QIODevice::OpenModeFlag mode = QIODevice::ReadOnly);
+    bool open();
 
     //=========================================================================================================
     /**
@@ -517,17 +489,6 @@ public:
 
     //=========================================================================================================
     /**
-     * Byte stream over a Qt device, for callers that hold a QIODevice such as a socket or a QBuffer.
-     *
-     * @param[in] device   The device; it must outlive the byte stream. It is opened in @p mode unless already open.
-     * @param[in] mode     How to open the device.
-     *
-     * @return The byte stream, or nullptr if the device cannot be opened.
-     */
-    static std::unique_ptr<BASELIB::ByteStream> byteStream(QIODevice& device, QIODevice::OpenMode mode);
-
-    //=========================================================================================================
-    /**
      * fiff_split_name_list
      *
      * Splits a FIFF name list at its separator ":".
@@ -550,13 +511,13 @@ public:
 
     //=========================================================================================================
     /**
-     * Opens a fiff file for writing and writes the compulsory header tags
+     * Writes the compulsory header tags to bytes that are not a file, e.g. in memory.
      *
-     * @param[in] p_IODevice    The IODevice (like QFile or QTCPSocket) to open. It is recommended that the name ends with .fif.
+     * @param[in] bytes   Where to write; the returned stream owns them.
      *
-     * @return The opened file.
+     * @return The stream, or nullptr if @p bytes is null.
      */
-    static std::unique_ptr<FiffStream> start_file(QIODevice& p_IODevice);
+    static std::unique_ptr<FiffStream> start_file(std::unique_ptr<BASELIB::ByteStream> bytes);
 
     //=========================================================================================================
     /**
@@ -570,13 +531,14 @@ public:
 
     //=========================================================================================================
     /**
-     * Open fiff file for update
+     * Opens an existing FIFF file for update, as MNE-C's fiff_open_update: tags can be rewritten in place, and
+     * new tags go to the end, where its directory, which is dropped, used to be.
      *
-     * @param[in] p_IODevice    The IODevice (like QFile or QTCPSocket) to open. It is recommended that the name ends with .fif.
+     * @param[in] path   The file.
      *
-     * @return The opened file stream.
+     * @return The stream, or nullptr if the file does not exist or is not a FIFF file.
      */
-    static std::unique_ptr<FiffStream> open_update(QIODevice& p_IODevice);
+    static std::unique_ptr<FiffStream> open_update(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
@@ -1018,20 +980,14 @@ private:
     }
 
 private:
-    std::unique_ptr<QIODevice> m_ownedDevice; /**< Buffer created for the byte-array constructor. */
-    QIODevice* m_device = nullptr;            /**< Qt device, or nullptr for a stream on a byte stream. */
-    std::unique_ptr<BASELIB::ByteStream> m_bytes;
-    std::string m_name; /**< File path of a stream on a byte stream. */
+    std::filesystem::path m_path;                 /**< File of the path constructor, opened by open(). */
+    std::unique_ptr<BASELIB::ByteStream> m_bytes; /**< Null until a path is opened, or if it cannot be. */
+    std::string m_name;                           /**< File path, or empty for bytes in memory. */
     bool m_littleEndian = false;
     bool m_readFailed = false;
-    //    char         *file_name;    /**< Name of the file. */ -> Use streamName() instead
-    //    FILE         *fd;           /**< The normal file descriptor. */ -> file descitpion is part of the stream: stream->device()
     FiffId m_id;                            /**< The file identifier. */
     std::vector<FiffDirEntry> m_dir;        /**< This is the directory. If no directory exists, open automatically scans the file to create one. */
-                                            //    int         nent;           /**< How many entries? */ -> Use nent() instead
     std::shared_ptr<FiffDirNode> m_dirtree; /**< Directory compiled into a tree. */
-    //    char        *ext_file_name; /**< Name of the file holding the external data. */
-    //    FILE        *ext_fd;        /**< The file descriptor of the above file if open . */
 };
 } // NAMESPACE
 

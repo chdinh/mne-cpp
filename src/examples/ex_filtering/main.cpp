@@ -77,7 +77,6 @@ int main(int argc, char* argv[])
     parser.process(a);
 
     // Init data loading and writing
-    QFile fileOut(parser.value(outputOption));
 
     std::shared_ptr<FiffRawData> pRaw = std::make_shared<FiffRawData>(parser.value(inputOption).toStdString());
 
@@ -86,7 +85,7 @@ int main(int argc, char* argv[])
 
     // Filtering
     printf("Filtering...");
-    if (DSPLIB::filterFile(fileOut,
+    if (DSPLIB::filterFile(parser.value(outputOption).toStdU16String(),
                            pRaw,
                            FilterKernel::filterTypeIndex("BPF"),
                            10,

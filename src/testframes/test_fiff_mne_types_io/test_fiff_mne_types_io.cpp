@@ -84,7 +84,7 @@ void TestFiffMneTypesIO::initTestCase()
 void TestFiffMneTypesIO::checkFiffCoordTrans()
 {
     QFile file(sEvokedName);
-    FiffStream stream(&file);
+    FiffStream stream(sEvokedName.toStdU16String());
     if (!stream.open())
         QFAIL("Failed to open data file.");
 

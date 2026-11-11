@@ -428,9 +428,8 @@ void TestMneAnonymize::testDefaultAnonymizationOfTags()
     MNEANONYMIZE::SettingsControllerCl controller(arguments);
     controller.run();
 
-    QFile fFileOut(sFileOut);
-    auto outStream = std::make_unique<FiffStream>(&fFileOut);
-    if (outStream->open(QIODevice::ReadOnly)) {
+    auto outStream = std::make_unique<FiffStream>(sFileOut.toStdU16String());
+    if (outStream->open()) {
         qInfo() << "output file opened correctly " << sFileIn;
     } else {
         QFAIL("Output file could not be loaded.");
@@ -467,9 +466,8 @@ void TestMneAnonymize::compareBirthdayOffsetOption()
     MNEANONYMIZE::SettingsControllerCl controller(arguments);
     controller.run();
 
-    QFile fFileOut(sFileOut);
-    FiffStream outStream(&fFileOut);
-    if (outStream.open(QIODevice::ReadOnly)) {
+    FiffStream outStream(sFileOut.toStdU16String());
+    if (outStream.open()) {
         qInfo() << "output file opened correctly " << sFileIn;
     } else {
         QFAIL("Output file could not be loaded.");
@@ -506,10 +504,9 @@ void TestMneAnonymize::compareMeasureDateOffsetOption()
     MNEANONYMIZE::SettingsControllerCl controller(arguments);
     controller.run();
 
-    QFile fFileOut(sFileOut);
 
-    FiffStream outStream(&fFileOut);
-    if (outStream.open(QIODevice::ReadOnly)) {
+    FiffStream outStream(sFileOut.toStdU16String());
+    if (outStream.open()) {
         qInfo() << "output file opened correctly " << sFileIn;
     } else {
         QFAIL("Output file could not be loaded.");
@@ -527,7 +524,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
 {
     FiffTag pTag;
 
-    stream.device()->seek(0);
+    stream.byte_stream().seek(0);
 
     while (pTag.next != -1) {
         auto read = stream.read_tag();

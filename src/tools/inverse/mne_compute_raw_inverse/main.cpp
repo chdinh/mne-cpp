@@ -85,8 +85,7 @@ constexpr auto BIG_TIME = 1e6f;
 
 static bool isRawFile(const QString& fileName)
 {
-    QFile file(fileName);
-    FiffStream stream(&file);
+    FiffStream stream(fileName.toStdU16String());
     if (!stream.open()) {
         return false;
     }

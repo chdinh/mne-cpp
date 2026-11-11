@@ -53,8 +53,7 @@ using namespace FIFFLIB;
 
 std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& path, int offset)
 {
-    QFile file(path);
-    FiffStream stream(&file);
+    FiffStream stream(path);
     if (!stream.open()) {
         return std::nullopt;
     }
@@ -142,8 +141,7 @@ std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& 
 
 bool MNEEventList::writeFif(const std::filesystem::path& path, int offset) const
 {
-    QFile file(path);
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(path);
     if (!stream) {
         return false;
     }

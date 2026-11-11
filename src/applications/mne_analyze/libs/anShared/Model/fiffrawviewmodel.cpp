@@ -103,14 +103,15 @@ FiffRawViewModel::FiffRawViewModel(const QString& sFilePath,
                 postBlockLoad(m_blockLoadFutureWatcher.future().result());
             });
 
+    auto io = QSharedPointer<FiffIO>::create();
     if (byteLoadedData.isEmpty()) {
         m_file.setFileName(sFilePath);
-        initFiffData(m_file);
+        io->read(sFilePath.toStdU16String());
     } else {
-        m_byteLoadedData = byteLoadedData;
-        m_buffer.setData(m_byteLoadedData);
-        initFiffData(m_buffer);
+        const auto* begin = reinterpret_cast<const std::byte*>(byteLoadedData.constData());
+        io->read(std::vector<std::byte>(begin, begin + byteLoadedData.size()));
     }
+    initFiffData(io);
 
     updateEndStartFlags();
 }
@@ -126,12 +127,11 @@ FiffRawViewModel::~FiffRawViewModel()
 
 //=============================================================================================================
 
-bool FiffRawViewModel::initFiffData(QIODevice& p_IODevice)
+bool FiffRawViewModel::initFiffData(QSharedPointer<FIFFLIB::FiffIO> io)
 {
-    // build FiffIO
-    m_pFiffIO = QSharedPointer<FiffIO>::create(p_IODevice);
+    m_pFiffIO = std::move(io);
 
-    if (m_pFiffIO->m_qlistRaw.empty()) {
+    if (m_pFiffIO->raw.empty()) {
         qWarning() << "[FiffRawViewModel::loadFiffData] File does not contain any Fiff data";
         return false;
     }
@@ -139,27 +139,24 @@ bool FiffRawViewModel::initFiffData(QIODevice& p_IODevice)
     m_ChannelInfoList.clear();
 
     // load channel infos
-    for (qint32 i = 0; i < m_pFiffIO->m_qlistRaw[0]->info.nchan; ++i) {
-        m_ChannelInfoList.push_back(m_pFiffIO->m_qlistRaw[0]->info.chs[i]);
+    for (qint32 i = 0; i < m_pFiffIO->raw[0]->info.nchan; ++i) {
+        m_ChannelInfoList.push_back(m_pFiffIO->raw[0]->info.chs[i]);
     }
 
     // load FiffInfo
-    m_pFiffInfo = std::make_shared<FiffInfo>(m_pFiffIO->m_qlistRaw[0]->info);
+    m_pFiffInfo = std::make_shared<FiffInfo>(m_pFiffIO->raw[0]->info);
 
     // build datastructure that is to be filled with data from the file
     MatrixXd data, times;
 
     // Fiff file is not empty, set cursor somewhere into Fiff file
-    m_iFiffCursorBegin = m_pFiffIO->m_qlistRaw[0]->first_samp;
+    m_iFiffCursorBegin = m_pFiffIO->raw[0]->first_samp;
     m_iSamplesPerBlock = m_pFiffInfo->sfreq;
     reloadAllData();
 
     qInfo() << "[FiffRawViewModel::initFiffData] Loaded" << m_lData.size() << "blocks with size" << data.rows() << "x" << m_iSamplesPerBlock;
 
-    qDebug() << "FIRST SAMPLE OFFSET IN ANALYZE:" << m_pFiffIO->m_qlistRaw[0]->first_samp;
-
-    // need to close the file manually
-    p_IODevice.close();
+    qDebug() << "FIRST SAMPLE OFFSET IN ANALYZE:" << m_pFiffIO->raw[0]->first_samp;
 
     m_bIsInit = true;
 
@@ -227,24 +224,26 @@ QVariant FiffRawViewModel::data(const QModelIndex& index,
 
 bool FiffRawViewModel::saveToFile(const QString& sPath)
 {
-    if (!m_pFiffIO || m_pFiffIO->m_qlistRaw.empty()) {
+    if (!m_pFiffIO || m_pFiffIO->raw.empty()) {
         return false;
     }
 #ifdef WASMBUILD
     // The browser offers the bytes as a download; sPath has no meaning there.
-    Q_UNUSED(sPath)
-    QBuffer device;
+    const QString target = QDir::temp().filePath(getModelName());
 #else
-    QFile device(sPath);
+    const QString& target = sPath;
 #endif
+    const std::filesystem::path path = target.toStdU16String();
     // The same channels as in the view; an empty pick list would filter every channel, triggers included
     const bool ok = m_bPerformFiltering && m_lFilterChannelList.size() > 0
-        ? DSPLIB::filterFile(device, m_pFiffIO->m_qlistRaw[0], m_filterKernel, m_lFilterChannelList)
-        : m_pFiffIO->write_raw(device, 0);
+        ? DSPLIB::filterFile(path, m_pFiffIO->raw[0], m_filterKernel, m_lFilterChannelList)
+        : m_pFiffIO->write_raw(path, 0);
 #ifdef WASMBUILD
-    if (ok) {
-        QFileDialog::saveFileContent(device.data(), getModelName());
+    QFile file(target);
+    if (ok && file.open(QIODevice::ReadOnly)) {
+        QFileDialog::saveFileContent(file.readAll(), getModelName());
     }
+    file.remove();
 #endif
     return ok;
 }
@@ -692,7 +691,7 @@ int FiffRawViewModel::loadEarlierBlocks(qint32 numBlocks)
     }
 
     // Read the raw data
-    if (m_pFiffIO->m_qlistRaw[0]->read_raw_segment(matData, matTimes, start, end)) {
+    if (m_pFiffIO->raw[0]->read_raw_segment(matData, matTimes, start, end)) {
         // qDebug() << "[FiffRawViewModel::loadFiffData] Successfully read a block ";
     } else {
         qWarning() << "[FiffRawViewModel::loadEarlierBlocks] Could not read block ";
@@ -781,7 +780,7 @@ int FiffRawViewModel::loadLaterBlocks(qint32 numBlocks)
             iFilterDelay = 0;
         }
 
-        if (end + iFilterDelay < m_pFiffIO->m_qlistRaw[0]->last_samp) {
+        if (end + iFilterDelay < m_pFiffIO->raw[0]->last_samp) {
             end += m_filterKernel.getFilterOrder() / 2;
         } else {
             iFilterDelay = 0;
@@ -789,7 +788,7 @@ int FiffRawViewModel::loadLaterBlocks(qint32 numBlocks)
     }
 
     // read data
-    if (m_pFiffIO->m_qlistRaw[0]->read_raw_segment(matData, matTimes, start, end)) {
+    if (m_pFiffIO->raw[0]->read_raw_segment(matData, matTimes, start, end)) {
         // qDebug() << "[FiffRawViewModel::loadFiffData] Successfully read a block ";
     } else {
         qWarning() << "[FiffRawViewModel::loadLaterBlocks] Could not read block ";
@@ -913,7 +912,7 @@ void FiffRawViewModel::reloadAllData()
         end += m_filterKernel.getFilterOrder() / 2;
 
         // Check if we have reached the beginning of the file
-        if (start - iFilterDelay >= m_pFiffIO->m_qlistRaw[0]->first_samp) {
+        if (start - iFilterDelay >= m_pFiffIO->raw[0]->first_samp) {
             start -= m_filterKernel.getFilterOrder() / 2;
         } else {
             // Add another filter delay because we need enough data to sucessfully filter with arbiritary filter lengths
@@ -924,7 +923,7 @@ void FiffRawViewModel::reloadAllData()
     }
 
     // read in all blocks
-    if (m_pFiffIO->m_qlistRaw[0]->read_raw_segment(matData, matTimes, start, end)) {
+    if (m_pFiffIO->raw[0]->read_raw_segment(matData, matTimes, start, end)) {
         // qDebug() << "[FiffRawmodel::loadFiffData] Successfully read a block ";
     } else {
         qWarning() << "[FiffRawViewModel::loadFiffData] Could not read samples " << start << " to " << end;
@@ -1017,7 +1016,7 @@ void FiffRawViewModel::readFromRealtimeFile(const QString& path)
     m_iLastFileEndSample = this->absoluteLastSample();
     m_file.remove();
     m_file.setFileName(path);
-    if (initFiffData(m_file)) {
+    if (initFiffData(QSharedPointer<FiffIO>::create(std::filesystem::path(path.toStdU16String())))) {
         updateEndStartFlags();
         emit newRealtimeData();
     }

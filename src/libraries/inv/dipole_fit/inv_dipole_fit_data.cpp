@@ -550,8 +550,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         BASELIB::Log::info("{} bad channels read from {}.", nbad, badname.toStdString());
     }
     {
-        QFile measFile(measname);
-        FiffStream measStream(&measFile);
+        FiffStream measStream(measname.toStdU16String());
         if (measStream.open()) {
             file_bads = measStream.read_bad_channels(measStream.dirtree());
             file_nbad = static_cast<int>(file_bads.size());
@@ -659,8 +658,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
 
         BASELIB::Log::info("{} compensation data sets in {}", comp_data->ncomp, measname.toStdString());
         {
-            QFile compFile(measname);
-            FiffStream compStream(&compFile);
+            FiffStream compStream(measname.toStdU16String());
             if (!compStream.open())
                 return nullptr;
             FiffInfo compInfo;

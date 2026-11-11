@@ -88,7 +88,7 @@ bool MriCorFifIO::write(const std::string& fileName,
     //
 
     QFile file(QString::fromStdString(fileName));
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(fileName);
 
     if (!stream) {
         BASELIB::Log::critical("MriCorFifIO::write - Could not open file for writing: {}", fileName);

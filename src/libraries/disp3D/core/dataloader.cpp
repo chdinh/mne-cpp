@@ -57,7 +57,7 @@ DataLoader::SensorLoadResult DataLoader::loadSensors(const QString& fifPath,
 
     FiffInfo info;
     FiffDigPointSet digSet;
-    FiffStream stream(&file);
+    FiffStream stream(fifPath.toStdU16String());
 
     if (stream.open()) {
         std::shared_ptr<FiffDirNode> tree = stream.dirtree();

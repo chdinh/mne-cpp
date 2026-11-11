@@ -258,8 +258,7 @@ void TestFiffCovPython::missingKind_isReported()
 {
     // Asking for a kind the file does not contain has to fail rather than
     // return whatever covariance happens to be there first.
-    QFile covFile(covPath());
-    FiffStream stream(&covFile);
+    FiffStream stream(covPath().toStdU16String());
     QVERIFY(stream.open());
 
     FiffCov cov;

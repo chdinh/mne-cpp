@@ -477,8 +477,7 @@ int mne_read_bad_channel_list_from_node(FiffStream& stream,
 int mne_read_bad_channel_list(const std::filesystem::path& name, StringList& listp, int& nlistp)
 
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     int res;
 
@@ -1251,8 +1250,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     std::unique_ptr<MNERawInfo> info;
     std::unique_ptr<MNERawData> data;
 
-    auto filePtr = std::make_unique<QFile>(name);
-    auto stream = std::make_unique<FiffStream>(filePtr.get());
+    auto stream = std::make_unique<FiffStream>(name);
     //    fiffFile           in    = NULL;
 
     FiffDirEntry dir;
@@ -1298,7 +1296,6 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
 
     data = std::make_unique<MNERawData>();
     data->filename = name;
-    data->file = std::move(filePtr);
     data->stream = std::move(stream);
     data->info = std::move(info);
     /*

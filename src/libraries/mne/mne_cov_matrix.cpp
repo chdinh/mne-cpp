@@ -132,8 +132,7 @@ MNECovMatrix::~MNECovMatrix()
 
 std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& name, int kind)
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     std::optional<FiffTag> t_pTag;
     std::vector<std::shared_ptr<FiffDirNode>> nodes;

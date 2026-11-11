@@ -386,7 +386,7 @@ void Averaging::computeAverage()
     triggerLoadingStart("Calculating average...");
 
     m_Future = QtConcurrent::run([&, this] {
-        return this->averageCalculation(*this->m_pFiffRawModel->getFiffIO()->m_qlistRaw.front().get(),
+        return this->averageCalculation(*this->m_pFiffRawModel->getFiffIO()->raw.front().get(),
                                         m_pFiffRawModel->getEventModel()->getEventMatrix(),
                                         m_filterKernel,
                                         *m_pFiffRawModel->getFiffInfo());

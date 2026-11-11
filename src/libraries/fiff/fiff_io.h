@@ -33,24 +33,16 @@
 //=============================================================================================================
 
 #include "fiff_global.h"
-#include <memory>
-
-#include <vector>
-#include "fiff_info.h"
 #include "fiff_types.h"
-
 #include "fiff_raw_data.h"
 #include "fiff_evoked.h"
+#include "fiff_dir_node.h"
 
-#include "fiff_stream.h"
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QList>
-#include <QFile>
-#include <QIODevice>
+#include <cstddef>
+#include <filesystem>
+#include <memory>
+#include <ostream>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -64,167 +56,105 @@ namespace FIFFLIB
  * @brief One-call FIFF reader/writer: opens a file, dispatches to the right specialized loader and returns ready-to-use FIFFLIB containers.
  *
  * Sniffs the FIFF block tree, dispatches @ref FiffRawData /
- * @ref FiffEvokedSet / @ref FiffCov / @ref FiffInfo loaders as
- * appropriate, and returns shared pointers so the resulting objects can
- * be freely passed across the rest of the pipeline. Front-end parity
- * with @c mne.io.read_raw_fif and friends.
+ * @ref FiffEvokedSet loaders as appropriate, and returns shared pointers so the
+ * resulting objects can be freely passed across the rest of the pipeline. Front-end
+ * parity with @c mne.io.read_raw_fif and @c mne.read_evokeds.
  *
  * @snippet ex_fiff_api/main.cpp fiff_io_usage
  */
-class FIFFSHARED_EXPORT FiffIO : public QObject
+class FIFFSHARED_EXPORT FiffIO
 {
 public:
-    //    enum Type {
-    //        _RAW = FIFFB_RAW_DATA, //102
-    //        _EVOKED = FIFFB_EVOKED, //104
-    //        _PROJ = FIFFB_PROJ, //313
-    //        _FWD = FIFFB_MNE_FORWARD_SOLUTION, //352
-    //        _COV = FIFFB_MNE_COV, //355
-    //        _NAMED_MATRIX = FIFFB_MNE_NAMED_MATRIX //357
-    //    };
+    FiffIO() = default;
 
     //=========================================================================================================
     /**
-     * Constructs a FiffIO
+     * Reads the raw and evoked data of a file.
      *
+     * @param[in] path   The file.
      */
-    FiffIO();
+    explicit FiffIO(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Destroys the FiffIO.
-     */
-    ~FiffIO();
-
-    //=========================================================================================================
-    /**
-     * Constructs a FiffIO object by reading from a I/O device pIODevice.
+     * Reads the raw and evoked data of several files.
      *
-     * @param[in] pIODevice    A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] paths   The files.
      */
-    FiffIO(QIODevice& pIODevice);
+    explicit FiffIO(const std::vector<std::filesystem::path>& paths);
 
     //=========================================================================================================
     /**
-     * Constructs a FiffIO object that uses the I/O device pIODevice.
+     * Reads the measurement info of a file.
      *
-     * @param[in] p_qlistIODevices    A QList of fiff IO devices like a fiff QFile or QTCPSocket.
-     */
-    FiffIO(std::vector<QIODevice*>& p_qlistIODevices);
-
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_FiffIO    FiffIO, which should be copied.
-     */
-    FiffIO(const FiffIO& p_FiffIO);
-
-    //=========================================================================================================
-    /**
-     * Setup a FiffStream
-     *
-     * @param[in] pIODevice      An fiff IO device like a fiff QFile or QTCPSocket.
-     * @param[in] info           Overall info for fiff IO device.
-     * @param[out] dirTree       Node directory structure.
+     * @param[in] path       The file.
+     * @param[out] info      The measurement info.
+     * @param[out] dirTree   The node of the measurement info.
      *
      * @return true if succeeded, false otherwise.
      */
-    static bool setup_read(QIODevice& pIODevice,
-                           FiffInfo& info,
-                           std::shared_ptr<FiffDirNode>& dirTree);
+    static bool setup_read(const std::filesystem::path& path, FiffInfo& info, std::shared_ptr<FiffDirNode>& dirTree);
 
     //=========================================================================================================
     /**
-     * Read data from a pIODevice.
+     * Appends the raw and evoked data of a file.
      *
-     * @param[in] pIODevice    A fiff IO device like a fiff QFile or QTCPSocket.
+     * @param[in] path   The file.
      *
-     * @return false if the directory tree could not be read, true otherwise.
+     * @return false if the file has no directory tree, true otherwise.
      */
-    bool read(QIODevice& pIODevice);
+    bool read(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
-     * Read data from a QList of pIODevices.
+     * Appends the raw data of a FIFF file held in memory; evoked data can only be read from a file.
      *
-     * @param[in] p_qlistIODevices    A QList of fiff IO devices like a fiff QFile or QTCPSocket.
+     * @param[in] bytes   The file contents.
      *
-     * @return true if all devices were read successfully, false otherwise.
+     * @return false if the bytes hold no FIFF directory tree, true otherwise.
      */
-    bool read(std::vector<QIODevice>& p_qlistIODevices);
+    bool read(std::vector<std::byte> bytes);
 
     //=========================================================================================================
     /**
-     * Write data to a single pIODevice.
+     * Writes data of one type to a FIFF file.
      *
-     * @param[in] pIODevice   A fiff IO device like a fiff QFile or QTCPSocket.
-     * @param[in] type        Type of data to write (fiff constants types, e.g. FIFFB_RAW_DATA).
-     * @param[in] idx         Index of type, -1 for all entities of this type.
+     * @param[in] path   The file. Raw data sets written all at once go to one file each, named after it with
+     *                   "_raw-<index>" before ".fif"; evoked data sets go to one file together.
+     * @param[in] type   FIFFB_RAW_DATA or FIFFB_EVOKED.
+     * @param[in] idx    Index of the data set, -1 for all.
      *
      * @return true if succeeded, false otherwise.
      */
-    bool write(QIODevice& pIODevice,
-               const fiff_int_t type,
-               const fiff_int_t idx) const;
+    bool write(const std::filesystem::path& path, fiff_int_t type, fiff_int_t idx = -1) const;
 
     //=========================================================================================================
     /**
-     * Write whole data of a type to a fiff file.
+     * Writes one raw data set to a FIFF file.
      *
-     * @param[in] p_QFile   Output file (name extended with type and index, e.g. sample_audvis-type-1.fif).
-     * @param[in] type      Type of data to write (fiff constants types, e.g. FIFFB_RAW_DATA).
-     * @param[in] idx       Index of type, -1 for all entities of this type.
+     * @param[in] path   The file.
+     * @param[in] idx    Index of the raw data set.
      *
      * @return true if succeeded, false otherwise.
      */
-    bool write(QFile& p_QFile,
-               const fiff_int_t type,
-               const fiff_int_t idx) const;
+    bool write_raw(const std::filesystem::path& path, fiff_int_t idx) const;
 
-    //=========================================================================================================
-    /**
-     * Write raw data to a pIODevice.
-     *
-     * @param[in] pIODevice   A fiff IO device like a fiff QFile or QTCPSocket.
-     * @param[in] idx         Index of type, -1 for all entities of this type.
-     *
-     * @return true if succeeded, false otherwise.
-     */
-    bool write_raw(QIODevice& pIODevice,
-                   const fiff_int_t idx) const;
-
-    //=========================================================================================================
-    /**
-     * Overloading ostream for printing member infos.
-     *
-     * @param[in] out       The output stream.
-     * @param[in] p_fiffIO  The FiffIO whose members shall be printed.
-     *
-     * @return The output stream with the FiffIO data appended.
-     */
-
-    friend std::ostream& operator<<(std::ostream& out,
-                                    const FiffIO& p_fiffIO)
+    friend std::ostream& operator<<(std::ostream& out, const FiffIO& io)
     {
         out << "\n\n---------------------- Fiff data read summary ---------------------- " << std::endl;
         out << "fiff data contains" << std::endl;
-        out << p_fiffIO.m_qlistRaw.size() << " raw data sets" << std::endl;
-        out << p_fiffIO.m_qlistEvoked.size() << " evoked sets" << std::endl;
-        //        out << p_fiffIO.m_qlistFwd.size() << " forward solutions" << std::endl;
+        out << io.raw.size() << " raw data sets" << std::endl;
+        out << io.evoked.size() << " evoked sets" << std::endl;
         return out;
     }
 
-public:
-    std::vector<std::shared_ptr<FiffRawData>> m_qlistRaw;   /**< List of raw data sets. */
-    std::vector<std::shared_ptr<FiffEvoked>> m_qlistEvoked; /**< List of evoked data sets. */
-    //    std::vector<std::shared_ptr<MNEForwardSolution> > m_qlistFwd;
-    //FiffCov, MNEInverseOperator, FsAnnotationSet,
-};
+    std::vector<std::shared_ptr<FiffRawData>> raw;   /**< Raw data sets. */
+    std::vector<std::shared_ptr<FiffEvoked>> evoked; /**< Evoked data sets. */
 
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
+private:
+    /** Reads the info of @p stream and its raw data from @p rawBytes; @return the directory tree of the info, or nullptr. */
+    std::shared_ptr<FiffDirNode> readRaw(FiffStream& stream, std::unique_ptr<BASELIB::ByteStream> rawBytes);
+};
 
 } // NAMESPACE
 

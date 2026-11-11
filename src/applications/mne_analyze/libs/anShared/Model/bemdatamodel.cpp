@@ -51,12 +51,10 @@ BemDataModel::BemDataModel(const QString& sFilePath,
 , m_pBem(std::make_shared<MNEBem>())
 {
     if (byteLoadedData.isEmpty()) {
-        m_file.setFileName(sFilePath);
-        initBemData(m_file);
+        initBemData(std::make_unique<FIFFLIB::FiffStream>(sFilePath.toStdU16String()));
     } else {
-        m_byteLoadedData = byteLoadedData;
-        m_buffer.setData(m_byteLoadedData);
-        initBemData(m_buffer);
+        const auto* begin = reinterpret_cast<const std::byte*>(byteLoadedData.constData());
+        initBemData(std::make_unique<FIFFLIB::FiffStream>(std::make_unique<BASELIB::MemoryByteStream>(std::vector<std::byte>(begin, begin + byteLoadedData.size()))));
     }
 }
 
@@ -68,12 +66,9 @@ BemDataModel::~BemDataModel()
 
 //=============================================================================================================
 
-void BemDataModel::initBemData(QIODevice& qIODevice)
+void BemDataModel::initBemData(std::unique_ptr<FIFFLIB::FiffStream> stream)
 {
-    // build Bem
-    FIFFLIB::FiffStream stream(&qIODevice);
-    auto bem = MNEBem::read(stream);
-    qIODevice.close();
+    auto bem = MNEBem::read(*stream);
     if (!bem) {
         qWarning() << "[BemDataModel::initBemData]" << bem.error().what();
         return;

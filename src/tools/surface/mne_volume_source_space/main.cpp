@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;
     }
-    auto outStream = FiffStream::start_file(outF);
+    auto outStream = FiffStream::start_file(outFile.toStdU16String());
     if (!outStream) {
         qCritical("Cannot write output file: %s", qPrintable(outFile));
         return 1;

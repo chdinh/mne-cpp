@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 
     // Open file for update
     QFile file(rawFile);
-    auto stream = FiffStream::open_update(file);
+    auto stream = FiffStream::open_update(rawFile.toStdU16String());
     if (!stream) {
         qCritical("Cannot open FIFF file for update: %s", qPrintable(rawFile));
         return 1;

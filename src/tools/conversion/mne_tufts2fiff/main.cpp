@@ -296,8 +296,7 @@ int main(int argc, char* argv[])
     //
     // Write FIFF output
     //
-    QFile outF(outFile);
-    auto stream = FiffStream::start_file(outF);
+    auto stream = FiffStream::start_file(outFile.toStdU16String());
     if (!stream) {
         qCritical("Cannot create output FIFF file.");
         return 1;

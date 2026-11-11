@@ -515,7 +515,7 @@ void TestInvRtLibrary::rtprocessing_filterFile()
     tmpFile.setAutoRemove(true);
     QVERIFY(tmpFile.open());
 
-    bool ok = DSPLIB::filterFile(tmpFile, pRaw, 2, 10.0, 5.0, 2.0,
+    bool ok = DSPLIB::filterFile(tmpFile.fileName().toStdU16String(), pRaw, 2, 10.0, 5.0, 2.0,
                                  pRaw->info.sfreq, 512);
     QVERIFY(ok);
     QVERIFY(tmpFile.size() > 0);

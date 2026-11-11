@@ -401,8 +401,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
 
 std::unique_ptr<MNEProjOp> MNEProjOp::read(const std::filesystem::path& name)
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     if (!stream.open())
         return nullptr;

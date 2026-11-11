@@ -25,23 +25,16 @@
 //=============================================================================================================
 
 #include "fiff_io.h"
-#include <memory>
-#include <base/log.h>
-
-#include <vector>
 #include "fiff_evoked_set.h"
 #include "fiff_stream.h"
 
+#include <base/log.h>
 #include <base/string_utils.h>
 
-//=============================================================================================================
-// STL INCLUDES
-//=============================================================================================================
-
 #include <cmath>
-#include <iostream>
-#include <stdexcept>
 #include <cstdint>
+#include <exception>
+#include <format>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -54,242 +47,157 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffIO::FiffIO()
+FiffIO::FiffIO(const std::filesystem::path& path)
 {
+    read(path);
 }
 
 //=============================================================================================================
 
-FiffIO::~FiffIO()
+FiffIO::FiffIO(const std::vector<std::filesystem::path>& paths)
 {
+    for (const std::filesystem::path& path : paths) {
+        read(path);
+    }
 }
 
 //=============================================================================================================
 
-FiffIO::FiffIO(QIODevice& pIODevice)
+bool FiffIO::setup_read(const std::filesystem::path& path, FiffInfo& info, std::shared_ptr<FiffDirNode>& dirTree)
 {
-    // execute read method
-    FiffIO::read(pIODevice);
+    BASELIB::Log::info("Opening fiff data {}...\n", BASELIB::utf8FromPath(path));
+    FiffStream stream(path);
+    return stream.open() && stream.read_meas_info(stream.dirtree(), info, dirTree);
 }
 
 //=============================================================================================================
 
-FiffIO::FiffIO(std::vector<QIODevice*>& p_qlistIODevices)
+std::shared_ptr<FiffDirNode> FiffIO::readRaw(FiffStream& stream, std::unique_ptr<BASELIB::ByteStream> rawBytes)
 {
-    for (auto* device : p_qlistIODevices)
-        read(*device);
-}
-
-//=============================================================================================================
-
-bool FiffIO::setup_read(QIODevice& pIODevice,
-                        FiffInfo& info,
-                        std::shared_ptr<FiffDirNode>& dirTree)
-{
-    //Open the file
-    FiffStream p_pStream(&pIODevice);
-    const std::string t_sFileName = p_pStream.streamName();
-
-    BASELIB::Log::info("Opening fiff data {}...\n", t_sFileName);
-
-    if (!p_pStream.open())
-        return false;
-
-    //Read the measurement info
-    if (!p_pStream.read_meas_info(p_pStream.dirtree(), info, dirTree))
-        return false;
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool FiffIO::read(QIODevice& pIODevice)
-{
-    //Read dirTree from fiff data (raw,evoked,fwds,cov)
-    FiffInfo t_fiffInfo;
-    std::shared_ptr<FiffDirNode> t_dirTree;
-    bool hasRaw = false;
-    bool hasEvoked = false; // hasFwds=false;
-
-    FiffIO::setup_read(pIODevice, t_fiffInfo, t_dirTree);
-    pIODevice.close(); //file can be closed, since IODevice is already read
-
-    if (!t_dirTree) {
+    FiffInfo info;
+    std::shared_ptr<FiffDirNode> infoNode;
+    if (!stream.open() || !stream.read_meas_info(stream.dirtree(), info, infoNode) || !infoNode) {
         BASELIB::Log::warning("[FiffIO::read] Dir tree could not be read");
-        return false;
+        return nullptr;
     }
-
-    //Search dirTree for specific data types
-    if (t_dirTree->has_kind(FIFFB_EVOKED)) {
-        hasEvoked = true;
-    }
-
-    if (t_dirTree->has_kind(FIFFB_RAW_DATA) ||
-        t_dirTree->has_kind(FIFFB_PROCESSED_DATA) ||
-        t_dirTree->has_kind(FIFFB_CONTINUOUS_DATA) ||
-        t_dirTree->has_kind(FIFFB_SMSH_RAW_DATA)) {
-        hasRaw = true;
-    }
-
-    // if(t_Tree.has_kind(FIFFB_MNE_FORWARD_SOLUTION))
-    //     hasFwds = true;
-
-    //Read all sort of types
-    //raw data
-    if (hasRaw) {
+    const std::shared_ptr<FiffDirNode>& tree = stream.dirtree();
+    if (tree->has_kind(FIFFB_RAW_DATA) || tree->has_kind(FIFFB_PROCESSED_DATA) || tree->has_kind(FIFFB_CONTINUOUS_DATA) ||
+        tree->has_kind(FIFFB_SMSH_RAW_DATA)) {
         try {
-            std::shared_ptr<FiffRawData> p_fiffRawData(new FiffRawData(FiffStream::byteStream(pIODevice, QIODevice::ReadOnly)));
-            pIODevice.close();
-
-            //append to corresponding member qlist
-            m_qlistRaw.push_back(p_fiffRawData);
-
+            raw.push_back(std::make_shared<FiffRawData>(std::move(rawBytes)));
             BASELIB::Log::info("Finished reading raw data!\n");
         } catch (const std::exception& e) {
             BASELIB::Log::warning("[FiffIO::read] Could not read raw data: {}", e.what());
-            pIODevice.close();
         }
     }
+    return tree;
+}
 
-    //evoked data + projections
-    if (hasEvoked) {
-        const auto* file = qobject_cast<const QFile*>(&pIODevice);
-        if (!file) {
-            BASELIB::Log::warning("[FiffIO::read] Evoked data can only be read from a file.");
+//=============================================================================================================
+
+bool FiffIO::read(const std::filesystem::path& path)
+{
+    FiffStream stream(path);
+    const std::shared_ptr<FiffDirNode> tree = readRaw(stream, BASELIB::FileByteStream::open(path, BASELIB::FileByteStream::Mode::Read));
+    if (!tree) {
+        return false;
+    }
+    if (tree->has_kind(FIFFB_EVOKED)) {
+        if (auto set = FiffEvokedSet::read(path)) {
+            for (const FiffEvoked& one : set->evoked) {
+                evoked.push_back(std::make_shared<FiffEvoked>(one));
+            }
         } else {
-            if (auto set = FiffEvokedSet::read(file->fileName().toStdU16String())) {
-                for (const FiffEvoked& evoked : set->evoked) {
-                    m_qlistEvoked.push_back(std::make_shared<FiffEvoked>(evoked));
-                }
-            } else {
-                BASELIB::Log::warning("[FiffIO::read] {}", set.error().what());
-            }
+            BASELIB::Log::warning("[FiffIO::read] {}", set.error().what());
         }
     }
-
-    //    //forward solutions
-    //    if(hasFwds) {
-    //        MNEForwardSolution p_forwardSolution(pIODevice);
-
-    //        //append to corresponding member qlist
-    //        m_qlistFwd.append(std::shared_ptr<MNEForwardSolution>(&p_forwardSolution));
-    //    }
-
-    //print summary
-    //std::cout << *this << std::endl;
-
     return true;
 }
 
 //=============================================================================================================
 
-bool FiffIO::write(QIODevice& pIODevice,
-                   const fiff_int_t type,
-                   const fiff_int_t idx) const
+bool FiffIO::read(std::vector<std::byte> bytes)
+{
+    FiffStream stream(std::make_unique<BASELIB::MemoryByteStream>(bytes));
+    const std::shared_ptr<FiffDirNode> tree = readRaw(stream, std::make_unique<BASELIB::MemoryByteStream>(std::move(bytes)));
+    if (tree && tree->has_kind(FIFFB_EVOKED)) {
+        BASELIB::Log::warning("[FiffIO::read] Evoked data can only be read from a file.");
+    }
+    return tree != nullptr;
+}
+
+//=============================================================================================================
+
+bool FiffIO::write(const std::filesystem::path& path, fiff_int_t type, fiff_int_t idx) const
 {
     switch (type) {
         case FIFFB_RAW_DATA: {
-            FiffIO::write_raw(pIODevice, idx);
-            BASELIB::Log::debug("Finished writing single raw data with index {} .", idx);
-        }
-        case FIFFB_EVOKED:
-            //ToDo: write evoked set to file
-            ;
-    }
-
-    return true;
-}
-
-//=============================================================================================================
-
-bool FiffIO::write(QFile& p_QFile,
-                   const fiff_int_t type,
-                   const fiff_int_t idx) const
-{
-    BASELIB::Log::info("------------------------ Writing fiff data ------------------------");
-
-    switch (type) {
-        case FIFFB_RAW_DATA: {
-            QString t_nameoftype = "raw";
-
-            if (idx == -1) {
-                for (std::int32_t i = 0; i < std::ssize(m_qlistRaw); ++i) {
-                    QString t_fname;
-                    //insert
-                    std::int32_t p = p_QFile.fileName().indexOf(".fif");
-                    t_fname = p_QFile.fileName().insert(p, "_" + t_nameoftype + "-" + QString::number(i));
-
-                    //assign new file name
-                    BASELIB::Log::info("\nWriting set with index {} to file {} ...\n", i, t_fname.toStdString());
-                    QFile t_file(t_fname);
-
-                    FiffIO::write_raw(t_file, i);
-                }
-            } else {
-                FiffIO::write_raw(p_QFile, idx);
+            if (idx >= 0) {
+                return write_raw(path, idx);
             }
-            BASELIB::Log::info("\nFinished Writing {} raw data sets!\n", m_qlistRaw.size());
+            bool ok = true;
+            for (fiff_int_t i = 0; i < static_cast<fiff_int_t>(raw.size()); ++i) {
+                std::filesystem::path one = path;
+                one.replace_filename(std::format("{}_raw-{}{}", BASELIB::utf8FromPath(path.stem()), i, BASELIB::utf8FromPath(path.extension())));
+                BASELIB::Log::info("Writing raw data set {} to {} ...", i, BASELIB::utf8FromPath(one));
+                ok &= write_raw(one, i);
+            }
+            return ok;
         }
-        case FIFFB_EVOKED:
-
-            //ToDo: write evoked set to file
-            ;
+        case FIFFB_EVOKED: {
+            if (evoked.empty() || idx >= static_cast<fiff_int_t>(evoked.size())) {
+                return false;
+            }
+            FiffEvokedSet set;
+            set.info = evoked.front()->info;
+            for (fiff_int_t i = 0; i < static_cast<fiff_int_t>(evoked.size()); ++i) {
+                if (idx < 0 || i == idx) {
+                    set.evoked.push_back(*evoked[i]);
+                }
+            }
+            if (auto saved = set.save(path); !saved) {
+                BASELIB::Log::warning("[FiffIO::write] {}", saved.error().what());
+                return false;
+            }
+            return true;
+        }
+        default:
+            return false;
     }
-
-    return true;
 }
 
 //=============================================================================================================
 
-bool FiffIO::write_raw(QIODevice& pIODevice,
-                       const fiff_int_t idx) const
+bool FiffIO::write_raw(const std::filesystem::path& path, fiff_int_t idx) const
 {
+    if (idx < 0 || idx >= static_cast<fiff_int_t>(raw.size())) {
+        return false;
+    }
+    const FiffRawData& data = *raw[idx];
     RowVectorXd cals;
-    SparseMatrix<double> mult;
-    RowVectorXi sel;
-    auto outfid = FiffStream::start_writing_raw(FiffStream::byteStream(pIODevice, QIODevice::WriteOnly), this->m_qlistRaw[idx]->info, cals);
+    auto outfid = FiffStream::start_writing_raw(path, data.info, cals);
     if (!outfid) {
         return false;
     }
 
-    //Setup reading parameters
-    fiff_int_t from = m_qlistRaw[idx]->first_samp;
-    fiff_int_t to = m_qlistRaw[idx]->last_samp;
-    const double quantum_sec = 30.0; //read and write in 30 sec junks
-    fiff_int_t quantum = static_cast<fiff_int_t>(std::ceil(quantum_sec * m_qlistRaw[idx]->info.sfreq));
-
-    // Uncomment to read the whole file at once. Warning Matrix may be none-initialisable because its huge
-    //quantum = to - from + 1;
-
-    // Read and write all the data
-    bool first_buffer = true;
-
-    fiff_int_t first, last;
-    MatrixXd data;
+    // Read and write in 30 s chunks
+    const fiff_int_t quantum = static_cast<fiff_int_t>(std::ceil(30.0 * data.info.sfreq));
+    SparseMatrix<double> mult;
+    RowVectorXi sel;
+    MatrixXd buffer;
     MatrixXd times;
-
-    for (first = from; first < to; first += quantum) {
-        last = first + quantum - 1;
-        if (last > to)
-            last = to;
-
-        if (!m_qlistRaw[idx]->read_raw_segment(data, times, mult, first, last, sel)) {
+    for (fiff_int_t first = data.first_samp; first < data.last_samp; first += quantum) {
+        const fiff_int_t last = std::min(first + quantum - 1, data.last_samp);
+        if (!data.read_raw_segment(buffer, times, mult, first, last, sel)) {
             BASELIB::Log::warning("error during read_raw_segment\n");
             return false;
         }
-
-        BASELIB::Log::info("Writing...");
-        if (first_buffer) {
-            if (first > 0)
-                outfid->write_int(FIFF_FIRST_SAMPLE, &first);
-            first_buffer = false;
+        if (first == data.first_samp && first > 0) {
+            fiff_int_t firstSample = first;
+            outfid->write_int(FIFF_FIRST_SAMPLE, &firstSample);
         }
-        outfid->write_raw_buffer(data, cals);
-        BASELIB::Log::info("[done]\n");
+        outfid->write_raw_buffer(buffer, cals);
     }
-
     outfid->finish_writing_raw();
-
     return true;
 }

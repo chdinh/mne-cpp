@@ -17,7 +17,7 @@
  * @date     October 2012
  * @brief    Implementation of @ref FiffStream: FIFF tag I/O, directory and block-tree construction, and the typed read_* / write_* methods.
  *
- * Owns one @c QIODevice. Builds the directory and @ref FiffDirNode tree
+ * Owns one byte stream. Builds the directory and @ref FiffDirNode tree
  * on open; trades tag streams for typed FIFFLIB objects on read; emits
  * spec-compliant FIFF on write. Files emitted here round-trip through
  * @c mne.io.fiff unchanged.
@@ -72,8 +72,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QBuffer>
-#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -92,91 +90,13 @@ using namespace BASELIB;
 using namespace Eigen;
 
 //=============================================================================================================
-// DEFINE LOCAL CLASSES
-//=============================================================================================================
-
-namespace
-{
-
-// Byte stream over a Qt device, so sockets and Qt files keep working
-class QIODeviceByteStream : public BASELIB::ByteStream
-{
-public:
-    explicit QIODeviceByteStream(QIODevice* device)
-    : m_device(device)
-    {
-    }
-
-    std::size_t read(void* data, std::size_t bytes) override
-    {
-        const std::int64_t n = m_device->read(static_cast<char*>(data), static_cast<std::int64_t>(bytes));
-        return n > 0 ? static_cast<std::size_t>(n) : 0;
-    }
-
-    std::size_t write(const void* data, std::size_t bytes) override
-    {
-        const std::int64_t n = m_device->write(static_cast<const char*>(data), static_cast<std::int64_t>(bytes));
-        return n > 0 ? static_cast<std::size_t>(n) : 0;
-    }
-
-    bool seek(std::uint64_t position) override
-    {
-        return m_device->seek(static_cast<std::int64_t>(position));
-    }
-
-    std::uint64_t pos() const override
-    {
-        return static_cast<std::uint64_t>(m_device->pos());
-    }
-
-    std::uint64_t size() const override
-    {
-        return static_cast<std::uint64_t>(m_device->size());
-    }
-
-    void close() override
-    {
-        m_writable = m_device->isWritable();
-        m_device->close();
-    }
-
-    bool isOpen() const override
-    {
-        return m_device->isOpen();
-    }
-
-    bool reopen() override
-    {
-        // Reopening never truncates: a device written to comes back read-write
-        return m_device->isOpen() || m_device->open(m_writable ? QIODevice::ReadWrite : QIODevice::ReadOnly);
-    }
-
-private:
-    QIODevice* m_device;
-    bool m_writable = false;
-};
-
-} // namespace
-
-//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffStream::FiffStream(QIODevice* p_pIODevice)
-: m_device(p_pIODevice)
-, m_bytes(std::make_unique<QIODeviceByteStream>(p_pIODevice))
+FiffStream::FiffStream(const std::filesystem::path& path)
+: m_path(path)
+, m_name(BASELIB::utf8FromPath(path))
 {
-}
-
-//=============================================================================================================
-
-FiffStream::FiffStream(QByteArray* a,
-                       QIODevice::OpenMode mode)
-: m_ownedDevice(std::make_unique<QBuffer>(a))
-, m_device(m_ownedDevice.get())
-, m_bytes(std::make_unique<QIODeviceByteStream>(m_device))
-{
-    m_device->open(mode);
 }
 
 //=============================================================================================================
@@ -228,15 +148,6 @@ std::unique_ptr<FiffStream> FiffStream::start_file(std::unique_ptr<FiffStream> s
 
 //=============================================================================================================
 
-std::unique_ptr<BASELIB::ByteStream> FiffStream::byteStream(QIODevice& device, QIODevice::OpenMode mode)
-{
-    if (device.isOpen() ? (device.openMode() & mode) != mode : !device.open(mode))
-        return {};
-    return std::make_unique<QIODeviceByteStream>(&device);
-}
-
-//=============================================================================================================
-
 FiffStream::~FiffStream() = default;
 
 FiffStream::FiffStream(FiffStream&&) noexcept = default;
@@ -245,9 +156,9 @@ FiffStream& FiffStream::operator=(FiffStream&&) noexcept = default;
 
 //=============================================================================================================
 
-QIODevice* FiffStream::device() const
+BASELIB::ByteStream& FiffStream::byte_stream() const
 {
-    return m_device;
+    return *m_bytes;
 }
 
 //=============================================================================================================
@@ -263,6 +174,10 @@ bool FiffStream::reopen()
 {
     if (isOpen())
         return true;
+    if (!m_bytes && !m_path.empty()) {
+        m_bytes = BASELIB::FileByteStream::open(m_path, BASELIB::FileByteStream::Mode::Read);
+        return m_bytes != nullptr;
+    }
     return m_bytes && m_bytes->reopen();
 }
 
@@ -298,9 +213,7 @@ bool FiffStream::seekTo(fiff_long_t pos)
 
 void FiffStream::seekToEnd()
 {
-    // Appending tags without a position goes to the end of files; other Qt devices write where they are
-    if (!m_device || qobject_cast<QFile*>(m_device))
-        m_bytes->seek(m_bytes->size());
+    m_bytes->seek(m_bytes->size());
 }
 
 //=============================================================================================================
@@ -323,9 +236,7 @@ void FiffStream::writeRaw(const void* data, fiff_long_t bytes)
 
 std::string FiffStream::streamName()
 {
-    if (QFile* t_pFile = qobject_cast<QFile*>(this->device()))
-        return t_pFile->fileName().toStdString();
-    return m_name.empty() ? std::string("TCPSocket") : m_name;
+    return m_name.empty() ? std::string("memory") : m_name;
 }
 
 //=============================================================================================================
@@ -441,7 +352,7 @@ bool FiffStream::get_evoked_entries(const std::vector<std::shared_ptr<FiffDirNod
 
 //=============================================================================================================
 
-bool FiffStream::open(QIODevice::OpenModeFlag mode)
+bool FiffStream::open()
 {
     const std::string t_sFileName = this->streamName();
     std::optional<FiffTag> t_pTag;
@@ -449,7 +360,7 @@ bool FiffStream::open(QIODevice::OpenModeFlag mode)
     /*
      * Try to open...
      */
-    if (m_device ? !m_device->open(mode) : !reopen()) {
+    if (!reopen()) {
         Log::critical("Cannot open {}\n", t_sFileName); //consider throw
         return false;
     }
@@ -802,17 +713,17 @@ bool FiffStream::attach_env(const std::string& workingDir, const std::string& co
     /*
      * Update next info to be sequential
      */
-    std::int64_t next_tmp = device()->pos();
+    const fiff_long_t next_tmp = tell();
     /*
      * Go to the end of the file
      */
-    device()->seek(device()->size());
+    seekToEnd();
     /*
      * Copy the beginning of old directory
      */
     std::vector<FiffDirEntry> new_dir(old_dir.begin(), old_dir.begin() + where + 1);
 
-    std::int64_t old_end = device()->pos();
+    const fiff_long_t old_end = tell();
     /*
      * Write the MNE_ENV block tags
      */
@@ -1885,106 +1796,54 @@ fiff_long_t FiffStream::start_block(fiff_int_t kind)
 
 //=============================================================================================================
 
-std::unique_ptr<FiffStream> FiffStream::start_file(QIODevice& p_IODevice)
+std::unique_ptr<FiffStream> FiffStream::start_file(std::unique_ptr<BASELIB::ByteStream> bytes)
 {
-    auto p_pStream = std::make_unique<FiffStream>(&p_IODevice);
-    const std::string t_sFileName = p_pStream->streamName();
-
-    if (!p_IODevice.isOpen()) {
-        if (!p_pStream->device()->open(QIODevice::WriteOnly)) {
-            Log::warning("Cannot write to {}\n", t_sFileName); //consider throw
-            std::unique_ptr<FiffStream> p_pEmptyStream;
-            return p_pEmptyStream;
-        }
-    }
-
-    //
-    //   Write the compulsory items
-    //
-    p_pStream->write_id(FIFF_FILE_ID); //1
-    int null_pointer = FIFFV_NEXT_NONE;
-    p_pStream->write_int(FIFF_DIR_POINTER, &null_pointer); //2
-    p_pStream->write_int(FIFF_FREE_LIST, &null_pointer);   //3
-    //
-    //   Ready for more
-    //
-    return p_pStream;
+    return bytes ? start_file(std::make_unique<FiffStream>(std::move(bytes))) : nullptr;
 }
 
 //=============================================================================================================
 
-std::unique_ptr<FiffStream> FiffStream::open_update(QIODevice& p_IODevice)
+std::unique_ptr<FiffStream> FiffStream::open_update(const std::filesystem::path& path)
 {
-    auto t_pStream = std::make_unique<FiffStream>(&p_IODevice);
-    const std::string t_sFileName = t_pStream->streamName();
-
-    /*
-     * ReadWrite creates the file, so a path that is not there would be turned into
-     * an empty file that then fails to parse, leaving the caller's directory dirty.
-     * Updating a file that does not exist is never the intent.
-     */
-    QFile* t_pFile = qobject_cast<QFile*>(&p_IODevice);
-    if (t_pFile != nullptr && !t_pFile->exists()) {
-        Log::critical("Cannot open {} for update: no such file", t_sFileName);
-        return std::unique_ptr<FiffStream>();
+    const std::string name = BASELIB::utf8FromPath(path);
+    auto bytes = BASELIB::FileByteStream::open(path, BASELIB::FileByteStream::Mode::ReadWrite);
+    if (!bytes) {
+        Log::critical("Cannot open {} for update", name);
+        return nullptr;
+    }
+    BASELIB::FileByteStream& file = *bytes;
+    auto stream = std::make_unique<FiffStream>(std::move(bytes), name);
+    if (!stream->open()) {
+        return nullptr;
     }
 
-    /*
-     * Try to open...
-     */
-    if (!t_pStream->open(QIODevice::ReadWrite)) {
-        Log::critical("Cannot open {}\n", t_sFileName); //consider throw
-        return std::unique_ptr<FiffStream>();
+    // The last tag ends the file, so tags appended later must be chained to it explicitly
+    fiff_long_t pointerpos = stream->dir()[stream->nent() - 2].pos;
+    std::optional<FiffTag> tag = stream->read_tag(pointerpos);
+    if (!tag) {
+        Log::critical("Could not read last tag in the directory list!");
+        return nullptr;
+    }
+    if (tag->next != FIFFV_NEXT_NONE) {
+        tag->next = FIFFV_NEXT_NONE;
+        stream->write_tag(*tag, pointerpos);
     }
 
-    std::optional<FiffTag> t_pTag;
-    long dirpos, pointerpos;
-
-    QFile* file = qobject_cast<QFile*>(t_pStream->device());
-
-    if (file != nullptr) {
-        /*
-        * Ensure that the last tag in the directory has next set to FIFF_NEXT_NONE
-        */
-        pointerpos = t_pStream->dir()[t_pStream->nent() - 2].pos;
-        if (t_pTag = t_pStream->read_tag(pointerpos); !t_pTag) {
-            Log::critical("Could not read last tag in the directory list!");
-            t_pStream->close();
-            return std::unique_ptr<FiffStream>();
-        }
-        if (t_pTag->next != FIFFV_NEXT_NONE) {
-            t_pTag->next = FIFFV_NEXT_NONE;
-            t_pStream->write_tag(*t_pTag, pointerpos);
-        }
-        /*
-        * Read directory pointer
-        */
-        pointerpos = t_pStream->dir()[1].pos;
-        if (t_pTag = t_pStream->read_tag(pointerpos); !t_pTag) {
-            Log::critical("Could not read directory pointer!");
-            t_pStream->close();
-            return std::unique_ptr<FiffStream>();
-        }
-        /*
-        * Do we have a directory?
-        */
-        dirpos = *t_pTag->toInt();
-        if (dirpos > 0) {
-            /*
-            * Yes! We will ignore it.
-            */
-            t_pStream->write_dir_pointer(-1, pointerpos);
-            /*
-            * Clean up the trailing end
-            */
-            file->resize(dirpos); //truncate file to new size
-        }
-        /*
-        * Seek to end for writing
-        */
-        t_pStream->device()->seek(file->size()); //SEEK_END
+    // A directory would be outdated by the update: drop it and cut it off the file
+    pointerpos = stream->dir()[1].pos;
+    if (tag = stream->read_tag(pointerpos); !tag) {
+        Log::critical("Could not read directory pointer!");
+        return nullptr;
     }
-    return t_pStream;
+    if (const fiff_int_t dirpos = *tag->toInt(); dirpos > 0) {
+        stream->write_dir_pointer(-1, pointerpos);
+        if (!file.resize(static_cast<std::uint64_t>(dirpos))) {
+            Log::critical("Cannot remove the directory of {}", name);
+            return nullptr;
+        }
+    }
+    stream->seekToEnd();
+    return stream;
 }
 
 //=============================================================================================================
@@ -2061,8 +1920,7 @@ std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<FiffSt
     bool have_hpi_result = false;
     bool have_isotrak = false;
     if (blocks.size() > 0 && !info.filename.empty()) {
-        QFile t_qFile(QString::fromStdString(info.filename)); //ToDo this has to be adapted for TCPSocket
-        FiffStream source(&t_qFile);
+        FiffStream source(BASELIB::pathFromUtf8(info.filename));
 
         if (!source.open()) {
             Log::warning("Cannot copy the measurement blocks of {} ; writing the info without them", info.filename);
@@ -3288,8 +3146,7 @@ bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, co
     srcStream.close();
 
     // Open destination file for update
-    QFile dstFile(QString::fromStdU16String(toPath.u16string()));
-    auto dstStream = FiffStream::open_update(dstFile);
+    auto dstStream = FiffStream::open_update(toPath);
     if (!dstStream) {
         Log::warning("FiffStream::copyProcessingHistory - Cannot open destination file {} for update", toPath.string());
         return false;
@@ -3304,7 +3161,7 @@ bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, co
     }
     lastTag->next = FIFFV_NEXT_SEQ;
     dstStream->write_tag(*lastTag, lastPos);
-    dstStream->device()->seek(dstStream->device()->size());
+    dstStream->seekToEnd();
 
     for (const Item& item : items) {
         if (item.blockStart)

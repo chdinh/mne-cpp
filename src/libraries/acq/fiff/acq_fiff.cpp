@@ -103,9 +103,7 @@ QByteArray serialize(const FiffInfo& info)
 
 bool deserialize(const std::vector<std::byte>& data, FiffInfo& info)
 {
-    QByteArray bytes(reinterpret_cast<const char*>(data.data()), static_cast<int>(data.size()));
-    QBuffer buffer(&bytes);
-    FiffStream stream(&buffer);
+    FiffStream stream(std::make_unique<BASELIB::MemoryByteStream>(data));
     if (!stream.open()) {
         return false;
     }

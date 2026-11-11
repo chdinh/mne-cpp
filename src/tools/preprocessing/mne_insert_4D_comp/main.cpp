@@ -272,8 +272,7 @@ int main(int argc, char* argv[])
     //
     // Write output FIFF with merged channels
     //
-    QFile fOut(outFile);
-    auto outStream = FiffStream::start_file(fOut);
+    auto outStream = FiffStream::start_file(outFile.toStdU16String());
     if (!outStream) {
         qCritical("Cannot create output file.");
         return 1;

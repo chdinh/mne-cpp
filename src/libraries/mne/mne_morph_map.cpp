@@ -280,8 +280,7 @@ MNEMorphMap MNEMorphMap::compute(const MatrixX3f& fromRr, const MatrixX3i& fromT
 
 std::optional<MNEMorphMap> MNEMorphMap::read(const std::filesystem::path& path, const std::string& fromSubj, const std::string& toSubj, int hemi)
 {
-    QFile file(path);
-    FiffStream stream(&file);
+    FiffStream stream(path);
     if (hemi < 0 || hemi > 1 || !stream.open()) {
         return std::nullopt;
     }
@@ -320,8 +319,7 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const std::filesystem::path& path, 
 
 bool MNEMorphMap::write(const std::filesystem::path& path, const std::vector<const MNEMorphMap*>& maps)
 {
-    QFile file(path);
-    auto stream = FiffStream::start_file(file);
+    auto stream = FiffStream::start_file(path);
     if (!stream) {
         return false;
     }

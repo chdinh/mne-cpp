@@ -196,7 +196,7 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
     plugin.splitRecordingFile();
     QVERIFY(!plugin.m_pOutfid);
     QVERIFY(!plugin.m_bWriteToFile);
-    FIFFLIB::FiffStream finished(&first); // the first file was finished and links to the next one
+    FIFFLIB::FiffStream finished(QString(tmpDir.filePath(QStringLiteral("rec_raw.fif"))).toStdU16String()); // the first file was finished and links to the next one
     QVERIFY(finished.open());
     QVERIFY(finished.dirtree()->has_kind(FIFFB_REF));
 
@@ -205,7 +205,7 @@ void TestWriteToFileStatus::recording_refusesUnwritableFile()
     plugin.m_sRecordFileName = recordFileName;
     plugin.m_iSplitCount = 0;
     plugin.m_qFileOut.setFileName(recordFileName);
-    plugin.m_pOutfid = FIFFLIB::FiffStream::start_writing_raw(FIFFLIB::FiffStream::byteStream(plugin.m_qFileOut, QIODevice::WriteOnly), *plugin.m_pFiffInfo, plugin.m_mCals);
+    plugin.m_pOutfid = FIFFLIB::FiffStream::start_writing_raw(plugin.m_qFileOut.fileName().toStdU16String(), *plugin.m_pFiffInfo, plugin.m_mCals);
     plugin.m_bWriteToFile = true;
     plugin.splitRecordingFile();
     QVERIFY(plugin.m_pOutfid);

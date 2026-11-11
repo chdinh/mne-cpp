@@ -348,8 +348,7 @@ bool FiffInfo::readMegEegChannels(const std::string& name,
                                   int& nmegp,
                                   int& neegp)
 {
-    QFile file(QString::fromStdString(name));
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     if (!stream.open())
         return false;

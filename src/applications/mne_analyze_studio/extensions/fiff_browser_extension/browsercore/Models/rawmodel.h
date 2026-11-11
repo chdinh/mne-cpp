@@ -188,10 +188,10 @@ public:
     /**
      * Writes the current legacy model state back to a FIFF file.
      *
-     * @param[in] p_IODevice  Destination device.
+     * @param[in] path        The file to write.
      * @return True on success.
      */
-    bool writeFiffData(QIODevice* p_IODevice);
+    bool writeFiffData(const QString& path);
 
     //=========================================================================================================
     /** Returns true when a Fiff file is loaded. */
@@ -284,8 +284,6 @@ private:
     std::vector<FiffChInfo> m_chInfolist;                    /**< Cached channel metadata for the loaded raw file. */
     std::shared_ptr<FiffInfo> m_pFiffInfo;                   /**< Shared measurement info of the loaded raw file. */
     QSharedPointer<FIFFLIB::FiffIO> m_pfiffIO;               /**< Legacy FIFF I/O backend used by the table model path. */
-    QSharedPointer<QIODevice> m_pSourceDevice;               /**< Persistent source device used by the legacy raw model. */
-    QByteArray m_sourceBuffer;                               /**< In-memory copy for non-file-backed source devices. */
     QMap<QString, std::shared_ptr<MNEOperator>> m_Operators; /**< Available processing operators keyed by operator name. */
 
     bool m_bStartReached; /**< True when the buffered window touches the file start. */
@@ -570,8 +568,8 @@ public:
 
 inline qint32 RawModel::sizeOfFiffData()
 {
-    if (!m_pfiffIO->m_qlistRaw.empty())
-        return (m_pfiffIO->m_qlistRaw[0]->last_samp - m_pfiffIO->m_qlistRaw[0]->first_samp);
+    if (!m_pfiffIO->raw.empty())
+        return (m_pfiffIO->raw[0]->last_samp - m_pfiffIO->raw[0]->first_samp);
     else
         return 0;
 }
@@ -581,8 +579,8 @@ inline qint32 RawModel::sizeOfFiffData()
 
 inline qint32 RawModel::firstSample() const
 {
-    if (!m_pfiffIO->m_qlistRaw.empty())
-        return m_pfiffIO->m_qlistRaw[0]->first_samp;
+    if (!m_pfiffIO->raw.empty())
+        return m_pfiffIO->raw[0]->first_samp;
     else
         return 0;
 }
@@ -592,8 +590,8 @@ inline qint32 RawModel::firstSample() const
 
 inline qint32 RawModel::lastSample() const
 {
-    if (!m_pfiffIO->m_qlistRaw.empty())
-        return m_pfiffIO->m_qlistRaw[0]->last_samp;
+    if (!m_pfiffIO->raw.empty())
+        return m_pfiffIO->raw[0]->last_samp;
     else
         return 0;
 }
@@ -614,7 +612,7 @@ inline qint32 RawModel::sizeOfPreloadedData() const
 
 inline qint32 RawModel::relFiffCursor() const
 {
-    return (m_iAbsFiffCursor - m_pfiffIO->m_qlistRaw[0]->first_samp);
+    return (m_iAbsFiffCursor - m_pfiffIO->raw[0]->first_samp);
 }
 
 
@@ -630,9 +628,9 @@ inline qint32 RawModel::absFiffCursor() const
 
 inline qint32 RawModel::channelUnit(int row) const
 {
-    if (!m_pfiffIO || m_pfiffIO->m_qlistRaw.empty())
+    if (!m_pfiffIO || m_pfiffIO->raw.empty())
         return FIFF_UNIT_NONE;
-    return m_pfiffIO->m_qlistRaw[0]->info.chs[row].unit;
+    return m_pfiffIO->raw[0]->info.chs[row].unit;
 }
 
 } // NAMESPACE

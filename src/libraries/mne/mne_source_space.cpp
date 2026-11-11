@@ -1656,7 +1656,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
  */
 {
     QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     std::vector<std::unique_ptr<MNESourceSpace>> local_spaces;
     std::unique_ptr<MNESourceSpace> new_space;

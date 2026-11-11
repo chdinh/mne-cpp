@@ -197,14 +197,11 @@ private slots:
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());
         QString outPath = tmpDir.path() + "/filtered.fif";
-        QFile outFile(outPath);
-        QVERIFY(outFile.open(QIODevice::WriteOnly));
 
         RowVectorXi picks(3);
         picks << 0, 1, 2;
         FilterKernel fk("LPF", 0, 64, 0.2, 0.0, 0.01, raw->info.sfreq, 0);
-        bool ok = filterFile(outFile, raw, fk, picks);
-        outFile.close();
+        bool ok = filterFile(outPath.toStdU16String(), raw, fk, picks);
         QVERIFY(ok);
 
         // Same samples, and the channels not picked are copied unchanged at their own times
@@ -224,8 +221,7 @@ private slots:
         QVERIFY2((b.topRows(3) - whole).cwiseAbs().maxCoeff() <= 1e-4 * whole.cwiseAbs().maxCoeff(),
                  qPrintable(QString::number((b.topRows(3) - whole).cwiseAbs().maxCoeff() / whole.cwiseAbs().maxCoeff())));
 
-        QFile unwritable(tmpDir.filePath(QStringLiteral("no/such/dir/out.fif")));
-        QVERIFY(!filterFile(unwritable, raw, fk, picks));
+        QVERIFY(!filterFile(tmpDir.filePath(QStringLiteral("no/such/dir/out.fif")).toStdU16String(), raw, fk, picks));
     }
 };
 

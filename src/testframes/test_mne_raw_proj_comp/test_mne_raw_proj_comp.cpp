@@ -541,7 +541,7 @@ void TestMneRawProjComp::projOp_readFromFile()
         QFile file(dir.filePath(name));
         if (!file.open(QIODevice::WriteOnly))
             return QString();
-        auto stream = FiffStream::start_file(file);
+        auto stream = FiffStream::start_file(dir.filePath(name).toStdU16String());
         if (block) {
             stream->start_block(FIFFB_PROJ);
             const fiff_int_t two = 2;
@@ -727,8 +727,7 @@ void TestMneRawProjComp::rawInfo_loadFromFile()
 
 void TestMneRawProjComp::rawInfo_findNodes()
 {
-    QFile file(rawPath());
-    FiffStream stream(&file);
+    FiffStream stream(rawPath().toStdU16String());
     QVERIFY(stream.open());
 
     // find_raw searches from the root via dir_tree_find
@@ -750,8 +749,7 @@ void TestMneRawProjComp::rawInfo_findNodes()
 
 void TestMneRawProjComp::rawInfo_getMeasInfo()
 {
-    QFile file(rawPath());
-    FiffStream stream(&file);
+    FiffStream stream(rawPath().toStdU16String());
     QVERIFY(stream.open());
 
     // find_raw to get a node inside the FIFFB_MEAS block

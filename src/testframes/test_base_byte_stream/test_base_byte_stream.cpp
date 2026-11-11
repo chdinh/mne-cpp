@@ -269,6 +269,24 @@ void TestUtilsByteStream::fileStreamRoundTripAndModes()
     QCOMPARE(back, values);
     QVERIFY(stream->atEnd());
     QCOMPARE(stream->write("x", 1), std::size_t(0)); // read-only
+    QVERIFY(!stream->resize(4));
+    stream.reset();
+
+    // Cutting a file short drops its tail, as FIFF does when it discards a directory before appending.
+    auto update = FileByteStream::open(path, FileByteStream::Mode::ReadWrite);
+    QVERIFY(update);
+    QVERIFY(update->seek(20));
+    QVERIFY(update->resize(12));
+    QCOMPARE(update->size(), std::uint64_t(12));
+    QCOMPARE(update->pos(), std::uint64_t(12));
+    QVERIFY(update->writeBigEndian(4.5));
+    update.reset();
+    QCOMPARE(std::filesystem::file_size(path), std::uintmax_t(20));
+    auto reread = FileByteStream::open(path, FileByteStream::Mode::Read);
+    QVERIFY(reread && reread->seek(4));
+    QVERIFY(reread->readBigEndian(back.data(), 2));
+    QCOMPARE(back[0], 1.0);
+    QCOMPARE(back[1], 4.5);
 }
 
 //=============================================================================================================

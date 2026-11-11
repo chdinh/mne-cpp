@@ -209,7 +209,7 @@ int FiffAnonymizer::anonymizeFile()
     printIfVerbose("Reading info in the file.");
     processHeaderTags();
 
-    while ((m_pTag->next != -1) && (!m_pInStream->device()->atEnd())) {
+    while ((m_pTag->next != -1) && (!m_pInStream->byte_stream().atEnd())) {
         readTag();
         censorTag();
         writeTag();
@@ -768,23 +768,21 @@ void FiffAnonymizer::setSubjectHisId(const QString& sSubjectHisId)
 
 int FiffAnonymizer::openInOutStreams()
 {
-    m_pInStream = std::make_unique<FIFFLIB::FiffStream>(&m_fFileIn);
-
-    m_pOutStream = std::make_unique<FIFFLIB::FiffStream>(&m_fFileOut);
-
-    if (m_pInStream->device()->open(QIODevice::ReadOnly)) {
-        printIfVerbose("Input file opened correctly: " + m_fFileIn.fileName());
-    } else {
+    auto in = BASELIB::FileByteStream::open(m_fFileIn.fileName().toStdU16String(), BASELIB::FileByteStream::Mode::Read);
+    if (!in) {
         qCritical() << "Problem opening the input file: " << m_fFileIn.fileName();
         return 1;
     }
+    printIfVerbose("Input file opened correctly: " + m_fFileIn.fileName());
+    m_pInStream = std::make_unique<FIFFLIB::FiffStream>(std::move(in), m_fFileIn.fileName().toStdString());
 
-    if (m_pOutStream->device()->open(QIODevice::WriteOnly)) {
-        printIfVerbose("Output file opened correctly: " + m_fFileOut.fileName());
-    } else {
+    auto out = BASELIB::FileByteStream::open(m_fFileOut.fileName().toStdU16String(), BASELIB::FileByteStream::Mode::Write);
+    if (!out) {
         qCritical() << "Problem opening the output file: " << m_fFileOut.fileName();
         return 1;
     }
+    printIfVerbose("Output file opened correctly: " + m_fFileOut.fileName());
+    m_pOutStream = std::make_unique<FIFFLIB::FiffStream>(std::move(out), m_fFileOut.fileName().toStdString());
     return 0;
 }
 

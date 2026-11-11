@@ -525,7 +525,7 @@ void TestMneBrowseApp::annotatesDraggedRangeLikePython()
     // Reference values produced by t = raw.times[[600, 900]]; raw.set_annotations(mne.Annotations([t[0]],
     // [t[1] - t[0]], ["BAD_drag"])) (mne 1.11.0): onsets count from orig_time = meas_date
     QFile annotFile(annotPath);
-    FIFFLIB::FiffStream stream(&annotFile);
+    FIFFLIB::FiffStream stream(annotPath.toStdU16String());
     QVERIFY(stream.open());
     const std::vector<std::shared_ptr<FIFFLIB::FiffDirNode>> blocks = stream.dirtree()->dir_tree_find(3810);
     QCOMPARE(blocks.size(), 1);

@@ -222,8 +222,7 @@ void TestFiffRawFormatsPython::readsAcquisitionSkip()
     QCOMPARE(part(0, 10), 0.0);
 
     // The bad_acq_skip annotation as mne.annotations._read_annotations_fif returns it (no orig_time).
-    QFile again(fixture("skip"));
-    FiffStream stream(&again);
+    FiffStream stream(QString(fixture("skip")).toStdU16String());
     QVERIFY(stream.open());
     FiffAnnotations annotations;
     fiff_int_t origTime[2] = {0, 0};
@@ -235,8 +234,7 @@ void TestFiffRawFormatsPython::readsAcquisitionSkip()
     QCOMPARE(annotations[0].description, std::string("bad_acq_skip"));
     QVERIFY(annotations[0].ch_names.empty());
 
-    QFile none(fixture("single"));
-    FiffStream noAnnotations(&none);
+    FiffStream noAnnotations(QString(fixture("single")).toStdU16String());
     QVERIFY(noAnnotations.open());
     QVERIFY(!noAnnotations.read_annotations(noAnnotations.dirtree(), annotations, origTime));
     QVERIFY(annotations.empty());

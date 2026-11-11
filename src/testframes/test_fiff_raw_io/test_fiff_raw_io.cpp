@@ -88,7 +88,7 @@ private slots:
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
         QVERIFY(file.exists());
 
-        FiffStream stream(&file);
+        FiffStream stream(QString(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdU16String());
         QVERIFY(stream.open());
 
         // Check the directory tree was read
@@ -107,8 +107,7 @@ private slots:
         if (!hasData())
             QSKIP("No test data");
 
-        QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        auto stream = std::make_unique<FiffStream>(&file);
+        auto stream = std::make_unique<FiffStream>(QString(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdU16String());
         stream->open();
 
         // Find measurement info block
@@ -143,7 +142,7 @@ private slots:
             QSKIP("No test data");
 
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif");
-        FiffStream stream(&file);
+        FiffStream stream(QString(m_sDataPath + "/MEG/sample/sample_audvis_trunc_raw.fif").toStdU16String());
         stream.open();
 
         // Read first few tags from directory
@@ -294,7 +293,7 @@ private slots:
         QFile tmpFile(dir.filePath("raw.fif"));
 
         RowVectorXd cals;
-        auto outStream = FiffStream::start_writing_raw(FiffStream::byteStream(tmpFile, QIODevice::WriteOnly), raw.info, cals);
+        auto outStream = FiffStream::start_writing_raw(tmpFile.fileName().toStdU16String(), raw.info, cals);
         QVERIFY(outStream != nullptr);
 
         // Read and write first 1 second
@@ -404,8 +403,7 @@ private slots:
         QCOMPARE(cov.projs.size(), 4);
 
         // Try stream-based reading
-        QFile file2(m_sDataPath + "/MEG/sample/sample_audvis-cov.fif");
-        FiffStream stream(&file2);
+        FiffStream stream(QString(m_sDataPath + "/MEG/sample/sample_audvis-cov.fif").toStdU16String());
         if (stream.open()) {
             std::vector<std::shared_ptr<FiffDirNode>> covNodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_COV);
             QVERIFY(covNodes.size() > 0 || true);
@@ -446,8 +444,7 @@ private slots:
             QSKIP("No test data");
 
         // Read the head<->MRI transform
-        QFile file(m_sDataPath + "/MEG/sample/all-trans.fif");
-        FiffStream stream(&file);
+        FiffStream stream(QString(m_sDataPath + "/MEG/sample/all-trans.fif").toStdU16String());
         QVERIFY(stream.open());
 
         // Search for coordinate transforms
@@ -481,7 +478,7 @@ private slots:
         if (!file.exists())
             QSKIP("icp-trans.fif not found");
 
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         for (std::size_t i = 0; i < stream.dir().size(); ++i) {
@@ -533,7 +530,7 @@ private slots:
             QSKIP("No test data");
 
         QFile file(m_sDataPath + "/MEG/sample/sample_audvis-ave.fif");
-        FiffStream stream(&file);
+        FiffStream stream(QString(m_sDataPath + "/MEG/sample/sample_audvis-ave.fif").toStdU16String());
         QVERIFY(stream.open());
 
         // Find evoked blocks
@@ -572,7 +569,7 @@ private slots:
         if (!file.exists())
             QSKIP("Forward solution file not found");
 
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         // Find MNE forward solution block
@@ -599,7 +596,7 @@ private slots:
         if (!file.exists())
             QSKIP("BEM file not found");
 
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         // Find BEM surface blocks
@@ -622,7 +619,7 @@ private slots:
         if (!file.exists())
             QSKIP("Source space file not found");
 
-        FiffStream stream(&file);
+        FiffStream stream(path.toStdU16String());
         QVERIFY(stream.open());
 
         // Find source space blocks

@@ -784,7 +784,7 @@ void EventModel::updateSelectedGroups(const QList<QModelIndex>& indexList)
 void EventModel::getEventsFromNewData()
 {
     auto info = m_pFiffModel->getFiffInfo();
-    auto raw = m_pFiffModel->getFiffIO()->m_qlistRaw.front().get();
+    auto raw = m_pFiffModel->getFiffIO()->raw.front().get();
 
     auto previousLastSample = m_pFiffModel->getPreviousLastSample();
 

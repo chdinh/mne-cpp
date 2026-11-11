@@ -43,7 +43,7 @@
       ]
     },
     "acq/fiff": {
-      "tokens": 46,
+      "tokens": 43,
       "public_header_includes": 0,
       "modules": [
         "Core"
@@ -118,7 +118,7 @@
       ]
     },
     "dsp": {
-      "tokens": 437,
+      "tokens": 432,
       "public_header_includes": 17,
       "modules": [
         "Concurrent",
@@ -126,8 +126,8 @@
       ]
     },
     "fiff": {
-      "tokens": 216,
-      "public_header_includes": 10,
+      "tokens": 144,
+      "public_header_includes": 5,
       "modules": [
         "Core",
         "Network"
@@ -141,7 +141,7 @@
       ]
     },
     "fwd": {
-      "tokens": 32,
+      "tokens": 31,
       "public_header_includes": 5,
       "modules": [
         "Concurrent",
@@ -156,7 +156,7 @@
       ]
     },
     "inv": {
-      "tokens": 293,
+      "tokens": 291,
       "public_header_includes": 47,
       "modules": [
         "Concurrent",
@@ -189,8 +189,8 @@
       ]
     },
     "mne": {
-      "tokens": 449,
-      "public_header_includes": 74,
+      "tokens": 432,
+      "public_header_includes": 73,
       "modules": [
         "Concurrent",
         "Core"

@@ -68,8 +68,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const std::filesystem::path& name,
       * one for MEG, one for MEG compensation channels, and one for EEG
       */
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     std::vector<FIFFLIB::FiffChInfo> chs;
     int nchan = 0;
@@ -318,8 +317,7 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const std::filesystem
      * Read all CTF compensation data from a given file
      */
 {
-    QFile file(name);
-    FiffStream stream(&file);
+    FiffStream stream(name);
 
     std::unique_ptr<MNECTFCompDataSet> set;
     std::vector<std::shared_ptr<FiffDirNode>> nodes;

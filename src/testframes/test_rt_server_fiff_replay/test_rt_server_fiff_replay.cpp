@@ -61,6 +61,17 @@ using namespace FIFFLIB;
 namespace
 {
 
+/** @return The bytes of the tags @p write puts on a FIFF stream. */
+template<typename Write>
+QByteArray tagBytes(Write&& write)
+{
+    auto bytes = std::make_unique<BASELIB::MemoryByteStream>();
+    const BASELIB::MemoryByteStream& written = *bytes;
+    FiffStream stream(std::move(bytes));
+    write(stream);
+    return QByteArray(reinterpret_cast<const char*>(written.data().data()), static_cast<qsizetype>(written.size()));
+}
+
 /** @return The reply of the server's command port to @p line, framed as mne_rt_server frames its commands. */
 QString send(QTcpSocket& socket, const QString& line)
 {
@@ -94,8 +105,7 @@ class MeasInfoServer
 public:
     explicit MeasInfoServer(const FiffInfo& info)
     {
-        FiffStream out(&m_info, QIODevice::WriteOnly);
-        info.writeToStream(out);
+        m_info = tagBytes([&info](FiffStream& out) { info.writeToStream(out); });
         for (quint16 port = 40217; port < 40417 && m_port == 0; port += 2) {
             if (m_commands.listen(QHostAddress::LocalHost, port) && m_data.listen(QHostAddress::LocalHost, port + 1)) {
                 m_port = port;
@@ -123,9 +133,10 @@ public:
         while (data->bytesAvailable() < 20 && data->waitForReadyRead(5000)) {
         }
         data->read(20);
-        FiffStream out(data);
-        const fiff_int_t id = 1;
-        out.write_int(FIFF_MNE_RT_CLIENT_ID, &id);
+        data->write(tagBytes([](FiffStream& out) {
+            const fiff_int_t id = 1;
+            out.write_int(FIFF_MNE_RT_CLIENT_ID, &id);
+        }));
         data->waitForBytesWritten(5000);
         QDataStream in(commands);
         in.setVersion(QDataStream::Qt_6_0);
