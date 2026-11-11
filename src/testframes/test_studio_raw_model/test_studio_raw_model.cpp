@@ -156,6 +156,14 @@ void TestStudioRawModel::writeAndReopen()
     QCOMPARE(writtenModel.rowCount(), model.rowCount());
     QCOMPARE(writtenModel.firstSample(), model.firstSample());
     QCOMPARE(writtenModel.lastSample(), model.lastSample());
+
+    // The samples come back as they were; the source's channel ranges are not 1
+    const FIFFLIB::FiffRawData source(rawFilePath().toStdU16String());
+    const FIFFLIB::FiffRawData written(outputPath.toStdU16String());
+    Eigen::MatrixXd expected, actual, times;
+    QVERIFY(source.read_raw_segment(expected, times, source.first_samp, source.first_samp + 99));
+    QVERIFY(written.read_raw_segment(actual, times, written.first_samp, written.first_samp + 99));
+    QVERIFY2(actual.isApprox(expected, 1e-5), qPrintable(QString::number(actual.cwiseAbs().maxCoeff() / expected.cwiseAbs().maxCoeff())));
 }
 
 void TestStudioRawModel::browserWidgetNavigatesTheRecording()

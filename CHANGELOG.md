@@ -311,6 +311,9 @@ aliases; replace the old spelling as below.
 - The MNE Scan acquisition plugins keep streaming when a block is
   overwritten before they read it (the computer was busy); they used to stop
   for good.
+- The raw data browser of MNE Analyze Studio saves samples at their true
+  scale; it divided them by the channel range (3276.8 for most channels of
+  the sample data).
 
 ## [2.4.0] - 2026-10-27
 

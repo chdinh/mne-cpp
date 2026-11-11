@@ -414,8 +414,6 @@ bool RawModel::loadFiffData(QIODevice* qFile)
 bool RawModel::writeFiffData(const QString& path)
 {
     RowVectorXd cals;
-    SparseMatrix<double> mult;
-    RowVectorXi sel;
 
     auto outfid = FiffStream::start_writing_raw(path.toStdU16String(), *m_pFiffInfo, cals);
     if (!outfid) {
@@ -445,7 +443,7 @@ bool RawModel::writeFiffData(const QString& path)
         if (last > to)
             last = to;
 
-        if (!m_pfiffIO->raw[0]->read_raw_segment(data, times, mult, first, last, sel)) {
+        if (!m_pfiffIO->raw[0]->read_raw_segment(data, times, first, last)) {
             qWarning("error during read_raw_segment");
             return false;
         }
@@ -456,7 +454,8 @@ bool RawModel::writeFiffData(const QString& path)
                 outfid->write_int(FIFF_FIRST_SAMPLE, &first);
             first_buffer = false;
         }
-        outfid->write_raw_buffer(data, mult);
+        // start_writing_raw stores range 1, so the buffer is scaled by cal alone
+        outfid->write_raw_buffer(data, cals);
         qInfo("[done]");
 
         emit writeProgressChanged(first);
