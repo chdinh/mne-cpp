@@ -32,7 +32,7 @@
       "ml",
       "report"
     ],
-    "tokens": 14028,
+    "tokens": 13615,
     "gui_outside_design": []
   },
   "libraries": {
@@ -220,18 +220,18 @@
       ]
     },
     "dsp": {
-      "tokens": 454,
+      "tokens": 437,
       "by_category": {
         "containers": 79,
         "files": 29,
-        "global": 138,
+        "global": 121,
         "objects_signals": 84,
         "other": 3,
         "regex": 3,
         "strings": 97,
         "threads": 21
       },
-      "public_header_includes": 28,
+      "public_header_includes": 17,
       "q_object": 12,
       "files": 94,
       "modules": [
@@ -240,21 +240,21 @@
       ]
     },
     "fiff": {
-      "tokens": 620,
+      "tokens": 224,
       "by_category": {
-        "containers": 3,
+        "containers": 1,
         "files": 81,
-        "global": 401,
+        "global": 19,
         "json": 37,
         "network": 6,
-        "objects_signals": 14,
+        "objects_signals": 5,
         "other": 3,
         "regex": 2,
         "smart_pointers": 6,
-        "strings": 66,
+        "strings": 63,
         "time": 1
       },
-      "public_header_includes": 56,
+      "public_header_includes": 13,
       "q_object": 1,
       "files": 73,
       "modules": [

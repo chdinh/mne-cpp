@@ -130,10 +130,10 @@ Returns matrix dimensions Refactors: fiff_get_matrix_dims (fiff_matrix.c).
 
 **Parameters:**
 
-- **p_ndim** : *qint32 &*
+- **p_ndim** : *std::int32_t &*
   number of dimensions.
 
-- **p_Dims** : *std::vector&lt; qint32 &gt; &*
+- **p_Dims** : *std::vector&lt; std::int32_t &gt; &*
   vector containing the size of each dimension.
 
 **Returns:**
@@ -168,7 +168,7 @@ to Byte Fast access; Data are deleted if tag gets deleted, and vice versa
 
 **Returns:**
 
-- *const quint8 ** — type cast of the tag data pointer.
+- *const std::uint8_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -178,7 +178,7 @@ to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice ve
 
 **Returns:**
 
-- *const quint16 ** — type cast of the tag data pointer.
+- *const std::uint16_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -188,7 +188,7 @@ to Short Fast access; Data are deleted if tag gets deleted, and vice versa
 
 **Returns:**
 
-- *const qint16 ** — type cast of the tag data pointer.
+- *const std::int16_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -198,7 +198,7 @@ to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 
 **Returns:**
 
-- *const quint32 ** — type cast of the tag data pointer.
+- *const std::uint32_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -208,7 +208,7 @@ to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 
 **Returns:**
 
-- *const qint32 ** — type cast of the tag data pointer.
+- *const std::int32_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -218,7 +218,7 @@ to Julian Fast access; Data are deleted if tag gets deleted, and vice versa
 
 **Returns:**
 
-- *const qint32 ** — type cast of the tag data pointer.
+- *const std::int32_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -258,7 +258,7 @@ to DauPack16 Fast access; Data are deleted if tag gets deleted, and vice versa
 
 **Returns:**
 
-- *const qint16 ** — type cast of the tag data pointer.
+- *const std::int16_t ** — type cast of the tag data pointer.
 
 ---
 
@@ -463,7 +463,7 @@ This corresponds to the old sizeof(fiffTagRec) - sizeof(fiff_data_t *).
 
 **Returns:**
 
-- *qint32* — the byte size of the on-disk tag info header.
+- *std::int32_t* — the byte size of the on-disk tag info header.
 
 ---
 
