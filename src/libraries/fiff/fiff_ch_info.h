@@ -47,8 +47,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QString>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -56,6 +54,7 @@
 
 #include <Eigen/Core>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -118,7 +117,7 @@ public:
      *
      * @return the size of the old struct fiffChInfoRec.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
     //=========================================================================================================
     /**
@@ -174,7 +173,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffChInfo::storageSize()
+inline std::int32_t FiffChInfo::storageSize()
 {
     // On-disk layout: scanNo, logNo, kind, range, cal, chpos, unit, unit_mul, ch_name[16]
     // (in memory a std::string, on disk a fixed 16-char name)

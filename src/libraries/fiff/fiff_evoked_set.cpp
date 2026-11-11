@@ -56,6 +56,7 @@
 //=============================================================================================================
 
 #include <QFile>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -135,7 +136,7 @@ FiffEvokedSet FiffEvokedSet::pick_channels(const StringList& include,
 
 bool FiffEvokedSet::compensate_to(fiff_int_t to)
 {
-    const qint32 now = info.get_current_comp();
+    const std::int32_t now = info.get_current_comp();
 
     if (now == to) {
         Log::info("Data is already compensated as desired.\n");
@@ -167,7 +168,7 @@ bool FiffEvokedSet::find_evoked(const FiffEvokedSet& p_FiffEvokedSet) const
     } else
         Log::info("\nFound {} evoked response data sets in {} :\n", p_FiffEvokedSet.evoked.size(), p_FiffEvokedSet.info.filename);
 
-    for (qint32 i = 0; i < std::ssize(p_FiffEvokedSet.evoked); ++i) {
+    for (std::int32_t i = 0; i < std::ssize(p_FiffEvokedSet.evoked); ++i) {
         Log::info("{} ({})\n", p_FiffEvokedSet.evoked.at(i).comment, p_FiffEvokedSet.evoked.at(i).aspectKindToString());
     }
 

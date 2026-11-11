@@ -64,9 +64,6 @@
 
 #include <QByteArray>
 #include <QIODevice>
-#include <QSharedPointer>
-#include <QString>
-#include <QStringList>
 #include <expected>
 #include <filesystem>
 #include <memory>

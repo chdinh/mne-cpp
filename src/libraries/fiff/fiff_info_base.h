@@ -52,9 +52,8 @@
 
 #include <map>
 #include <string>
-#include <QStringList>
-#include <QSharedPointer>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -125,7 +124,7 @@ public:
      *
      * @return Type of channel as in mne.channel_type ('grad', 'mag', 'eeg', 'seeg', 'ecog', 'hbo', 'eyegaze', ...).
      */
-    std::string channel_type(qint32 idx) const;
+    std::string channel_type(std::int32_t idx) const;
 
     //=========================================================================================================
     /**

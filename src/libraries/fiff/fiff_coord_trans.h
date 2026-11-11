@@ -47,7 +47,6 @@
 
 #include <base/error.h>
 
-#include <QMetaType>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -64,6 +63,7 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -448,7 +448,7 @@ public:
      *
      * @return the size of the old struct fiffCoordTransRec.
      */
-    inline static qint32 storage_size();
+    inline static std::int32_t storage_size();
 
     //========================================================================================================
     /**
@@ -536,7 +536,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffCoordTrans::storage_size()
+inline std::int32_t FiffCoordTrans::storage_size()
 {
     // On-disk layout: from, to, rot[3][3], move[3], invrot[3][3], invmove[3]
     // (C++ class uses Matrix4f but on-disk stores 3x3 rot + 3-vec separately)
@@ -553,10 +553,5 @@ inline bool operator==(const FiffCoordTrans& a, const FiffCoordTrans& b)
             a.invtrans.isApprox(b.invtrans, 0.0001f));
 }
 } // NAMESPACE
-
-#ifndef metatype_fiffcoordtrans
-#define metatype_fiffcoordtrans
-Q_DECLARE_METATYPE(FIFFLIB::FiffCoordTrans); /**< Provides QT META type declaration of the FIFFLIB::FiffCoordTrans type. For signal/slot usage.*/
-#endif
 
 #endif // FIFF_COORD_TRANS_H

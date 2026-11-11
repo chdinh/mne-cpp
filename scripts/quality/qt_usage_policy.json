@@ -118,16 +118,16 @@
       ]
     },
     "dsp": {
-      "tokens": 454,
-      "public_header_includes": 28,
+      "tokens": 437,
+      "public_header_includes": 17,
       "modules": [
         "Concurrent",
         "Core"
       ]
     },
     "fiff": {
-      "tokens": 620,
-      "public_header_includes": 56,
+      "tokens": 224,
+      "public_header_includes": 13,
       "modules": [
         "Core",
         "Network"

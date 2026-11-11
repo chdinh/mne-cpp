@@ -51,8 +51,6 @@
 #include <QList>
 #include <QFile>
 #include <QIODevice>
-#include <QSharedPointer>
-#include <QDebug>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB

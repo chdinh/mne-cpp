@@ -38,6 +38,7 @@
 #include <unordered_set>
 
 #include <stdexcept>
+#include <cstdint>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -114,7 +115,7 @@ std::string channelTypeName(const FiffChInfo& ch)
 
 //=============================================================================================================
 
-std::string FiffInfoBase::channel_type(qint32 idx) const
+std::string FiffInfoBase::channel_type(std::int32_t idx) const
 {
     std::string type = channelTypeName(this->chs[idx]);
     if (type.empty())
@@ -205,11 +206,11 @@ void FiffInfoBase::clear()
 RowVectorXi FiffInfoBase::pick_types(const std::string& meg, bool eeg, bool stim, const StringList& include, const StringList& exclude) const
 {
     // A default-constructed info has nchan -1; count the channels actually present.
-    const qint32 nchPresent = static_cast<qint32>(this->chs.size());
+    const std::int32_t nchPresent = static_cast<std::int32_t>(this->chs.size());
     RowVectorXi pick = RowVectorXi::Zero(nchPresent);
 
     fiff_int_t kind;
-    qint32 k;
+    std::int32_t k;
     for (k = 0; k < nchPresent; ++k) {
         kind = this->chs[k].kind;
 
@@ -228,7 +229,7 @@ RowVectorXi FiffInfoBase::pick_types(const std::string& meg, bool eeg, bool stim
     }
 
     // restrict channels to selection if provided
-    qint32 p = 0;
+    std::int32_t p = 0;
     StringList myinclude;
     for (k = 0; k < nchPresent; ++k) {
         if (pick(0, k)) {
@@ -237,7 +238,7 @@ RowVectorXi FiffInfoBase::pick_types(const std::string& meg, bool eeg, bool stim
         }
     }
     myinclude.insert(myinclude.end(), include.begin(), include.end());
-    p += static_cast<qint32>(include.size());
+    p += static_cast<std::int32_t>(include.size());
 
     RowVectorXi sel;
     if (p != 0)
@@ -259,7 +260,7 @@ RowVectorXi FiffInfoBase::pick_channels(const StringList& ch_names, const String
 {
     RowVectorXi sel = RowVectorXi::Zero(static_cast<Index>(ch_names.size()));
     std::unordered_set<std::string> selected;
-    qint32 count = 0;
+    std::int32_t count = 0;
     for (std::size_t k = 0; k < ch_names.size(); ++k) {
         const std::string& name = ch_names[k];
         if ((include.empty() || has_channel(include, name)) && !has_channel(exclude, name) && selected.insert(name).second) {
@@ -283,8 +284,8 @@ FiffInfoBase FiffInfoBase::pick_info(const RowVectorXi* sel) const
     res.chs.clear();
     res.ch_names.clear();
 
-    qint32 idx;
-    for (qint32 i = 0; i < sel->size(); ++i) {
+    std::int32_t idx;
+    for (std::int32_t i = 0; i < sel->size(); ++i) {
         idx = (*sel)(0, i);
         res.chs.push_back(this->chs[idx]);
         res.ch_names.push_back(this->ch_names[static_cast<std::size_t>(idx)]);

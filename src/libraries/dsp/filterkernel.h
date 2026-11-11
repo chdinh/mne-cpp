@@ -44,7 +44,6 @@
 #include "dsp_global.h"
 
 #include <vector>
-//#include "filter.h"
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -58,7 +57,6 @@
 
 #include <QString>
 #include <QMetaType>
-#include <QDebug>
 
 //=============================================================================================================
 // DEFINE NAMESPACE DSPLIB

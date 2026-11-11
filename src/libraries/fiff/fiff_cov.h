@@ -46,9 +46,6 @@
 //=============================================================================================================
 
 #include <QSharedDataPointer>
-#include <QSharedPointer>
-#include <QString>
-#include <QStringList>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -63,6 +60,7 @@
 #include <expected>
 #include <filesystem>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -312,32 +310,32 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
 
     if (t_bIsShort) {
         const int nchan = std::min(static_cast<int>(p_FiffCov.names.size()), 6);
-        for (qint32 i = 0; i < nchan / 2; ++i)
+        for (std::int32_t i = 0; i < nchan / 2; ++i)
             out << p_FiffCov.names[i].c_str() << " ";
         out << "... ";
-        for (qint32 i = static_cast<int>(p_FiffCov.names.size()) - nchan / 2; i < static_cast<int>(p_FiffCov.names.size()); ++i)
+        for (std::int32_t i = static_cast<int>(p_FiffCov.names.size()) - nchan / 2; i < static_cast<int>(p_FiffCov.names.size()); ++i)
             out << p_FiffCov.names[i].c_str() << " ";
         out << std::endl;
     }
 
     out << "\tdata " << p_FiffCov.data.rows() << " x " << p_FiffCov.data.cols() << ":\n\t";
     if (t_bIsShort) {
-        qint32 nrows = p_FiffCov.data.rows() > 6 ? 6 : p_FiffCov.data.rows();
-        qint32 ncols = p_FiffCov.data.cols() > 6 ? 6 : p_FiffCov.data.cols();
-        for (qint32 i = 0; i < nrows / 2; ++i) {
-            for (qint32 j = 0; j < ncols / 2; ++j)
+        std::int32_t nrows = p_FiffCov.data.rows() > 6 ? 6 : p_FiffCov.data.rows();
+        std::int32_t ncols = p_FiffCov.data.cols() > 6 ? 6 : p_FiffCov.data.cols();
+        for (std::int32_t i = 0; i < nrows / 2; ++i) {
+            for (std::int32_t j = 0; j < ncols / 2; ++j)
                 out << p_FiffCov.data(i, j) << " ";
             out << "... ";
-            for (qint32 j = p_FiffCov.data.cols() - ncols / 2; j < p_FiffCov.data.cols(); ++j)
+            for (std::int32_t j = p_FiffCov.data.cols() - ncols / 2; j < p_FiffCov.data.cols(); ++j)
                 out << p_FiffCov.data(i, j) << " ";
             out << "\n\t";
         }
         out << "...\n\t";
-        for (qint32 i = p_FiffCov.data.rows() - nrows / 2; i < p_FiffCov.data.rows(); ++i) {
-            for (qint32 j = 0; j < ncols / 2; ++j)
+        for (std::int32_t i = p_FiffCov.data.rows() - nrows / 2; i < p_FiffCov.data.rows(); ++i) {
+            for (std::int32_t j = 0; j < ncols / 2; ++j)
                 out << p_FiffCov.data(i, j) << " ";
             out << "... ";
-            for (qint32 j = p_FiffCov.data.cols() - ncols / 2; j < p_FiffCov.data.cols(); ++j)
+            for (std::int32_t j = p_FiffCov.data.cols() - ncols / 2; j < p_FiffCov.data.cols(); ++j)
                 out << p_FiffCov.data(i, j) << " ";
             out << "\n\t";
         }
@@ -345,45 +343,45 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
     }
     //Projectors
     out << "\tprojectors " << p_FiffCov.projs.size() << ":\n";
-    for (qint32 i = 0; i < std::ssize(p_FiffCov.projs); ++i)
+    for (std::int32_t i = 0; i < std::ssize(p_FiffCov.projs); ++i)
         out << "\t" << p_FiffCov.projs[i];
 
     //Bads
     out << "\tbads " << p_FiffCov.bads.size() << ":\n\t";
-    for (qint32 i = 0; i < static_cast<int>(p_FiffCov.bads.size()); ++i)
+    for (std::int32_t i = 0; i < static_cast<int>(p_FiffCov.bads.size()); ++i)
         out << p_FiffCov.bads[i].c_str() << " ";
 
     out << "\n\tfree: " << p_FiffCov.nfree << std::endl;
 
     out << "\teig " << p_FiffCov.eig.size() << ":\n\t";
     if (t_bIsShort) {
-        qint32 nrows = p_FiffCov.eig.size() > 6 ? 6 : p_FiffCov.eig.size();
-        for (qint32 i = 0; i < nrows / 2; ++i)
+        std::int32_t nrows = p_FiffCov.eig.size() > 6 ? 6 : p_FiffCov.eig.size();
+        for (std::int32_t i = 0; i < nrows / 2; ++i)
             out << p_FiffCov.eig[i] << " ";
         out << "... ";
-        for (qint32 i = p_FiffCov.eig.size() - nrows / 2; i < p_FiffCov.eig.size(); ++i)
+        for (std::int32_t i = p_FiffCov.eig.size() - nrows / 2; i < p_FiffCov.eig.size(); ++i)
             out << p_FiffCov.eig[i] << " ";
         out << "\n\t";
     }
 
     out << "\n\teigvec " << p_FiffCov.eigvec.rows() << " x " << p_FiffCov.eigvec.cols() << ":\n\t";
     if (t_bIsShort) {
-        qint32 nrows = p_FiffCov.eigvec.rows() > 6 ? 6 : p_FiffCov.eigvec.rows();
-        qint32 ncols = p_FiffCov.eigvec.cols() > 6 ? 6 : p_FiffCov.eigvec.cols();
-        for (qint32 i = 0; i < nrows / 2; ++i) {
-            for (qint32 j = 0; j < ncols / 2; ++j)
+        std::int32_t nrows = p_FiffCov.eigvec.rows() > 6 ? 6 : p_FiffCov.eigvec.rows();
+        std::int32_t ncols = p_FiffCov.eigvec.cols() > 6 ? 6 : p_FiffCov.eigvec.cols();
+        for (std::int32_t i = 0; i < nrows / 2; ++i) {
+            for (std::int32_t j = 0; j < ncols / 2; ++j)
                 out << p_FiffCov.eigvec(i, j) << " ";
             out << "... ";
-            for (qint32 j = p_FiffCov.eigvec.cols() - ncols / 2; j < p_FiffCov.eigvec.cols(); ++j)
+            for (std::int32_t j = p_FiffCov.eigvec.cols() - ncols / 2; j < p_FiffCov.eigvec.cols(); ++j)
                 out << p_FiffCov.eigvec(i, j) << " ";
             out << "\n\t";
         }
         out << "...\n\t";
-        for (qint32 i = p_FiffCov.eigvec.rows() - nrows / 2; i < p_FiffCov.eigvec.rows(); ++i) {
-            for (qint32 j = 0; j < ncols / 2; ++j)
+        for (std::int32_t i = p_FiffCov.eigvec.rows() - nrows / 2; i < p_FiffCov.eigvec.rows(); ++i) {
+            for (std::int32_t j = 0; j < ncols / 2; ++j)
                 out << p_FiffCov.eigvec(i, j) << " ";
             out << "... ";
-            for (qint32 j = p_FiffCov.eigvec.cols() - ncols / 2; j < p_FiffCov.eigvec.cols(); ++j)
+            for (std::int32_t j = p_FiffCov.eigvec.cols() - ncols / 2; j < p_FiffCov.eigvec.cols(); ++j)
                 out << p_FiffCov.eigvec(i, j) << " ";
             out << "\n\t";
         }
@@ -392,15 +390,5 @@ inline std::ostream& operator<<(std::ostream& out, const FIFFLIB::FiffCov& p_Fif
     return out;
 }
 } // NAMESPACE
-
-#ifndef metatype_fiffcovsptr
-#define metatype_fiffcovsptr
-Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffCov>); /**< Provides QT META type declaration of the std::shared_ptr<FIFFLIB::FiffCov> type. For signal/slot usage.*/
-#endif
-
-#ifndef metatype_fiffcov
-#define metatype_fiffcov
-Q_DECLARE_METATYPE(FIFFLIB::FiffCov); /**< Provides QT META type declaration of the FIFFLIB::FiffCov type. For signal/slot usage.*/
-#endif
 
 #endif // FIFF_COV_H

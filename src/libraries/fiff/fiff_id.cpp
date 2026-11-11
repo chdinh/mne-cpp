@@ -36,6 +36,7 @@
 #include <QDateTime>
 
 #include <ctime>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -168,7 +169,7 @@ void FiffId::print() const
 std::string FiffId::toMachidString() const
 {
     // Two 32-bit words as 16 upper-case hex digits, colon after every pair: XX:XX:...:XX
-    const std::string hex = std::format("{:08X}{:08X}", static_cast<quint32>(machid[0]), static_cast<quint32>(machid[1]));
+    const std::string hex = std::format("{:08X}{:08X}", static_cast<std::uint32_t>(machid[0]), static_cast<std::uint32_t>(machid[1]));
     std::string out;
     out.reserve(hex.size() * 3 / 2);
     for (std::size_t i = 0; i < hex.size(); i += 2) {
@@ -210,6 +211,6 @@ std::string FiffId::toString() const
         timebuf[0] = '\0';
     }
 
-    return std::format("{}.{} 0x{:x}{:x} {}", version >> 16, version & 0xFFFF, static_cast<quint32>(machid[0]),
-                       static_cast<quint32>(machid[1]), timebuf);
+    return std::format("{}.{} 0x{:x}{:x} {}", version >> 16, version & 0xFFFF, static_cast<std::uint32_t>(machid[0]),
+                       static_cast<std::uint32_t>(machid[1]), timebuf);
 }

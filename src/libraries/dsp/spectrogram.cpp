@@ -47,7 +47,7 @@ using namespace Eigen;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-MatrixXd Spectrogram::makeSpectrogram(VectorXd signal, qint32 windowSize = 0)
+MatrixXd Spectrogram::makeSpectrogram(VectorXd signal, std::int32_t windowSize = 0)
 {
     //QElapsedTimer timer;
     //timer.start();
@@ -85,13 +85,13 @@ MatrixXd Spectrogram::makeSpectrogram(VectorXd signal, qint32 windowSize = 0)
 
 //=============================================================================================================
 
-VectorXd Spectrogram::gaussWindow(qint32 sample_count, qreal scale, quint32 translation)
+VectorXd Spectrogram::gaussWindow(std::int32_t sample_count, double scale, std::uint32_t translation)
 {
     VectorXd gauss = VectorXd::Zero(sample_count);
 
-    for (qint32 n = 0; n < sample_count; n++) {
-        qreal t = (qreal(n) - translation) / scale;
-        gauss[n] = exp(-M_PI * pow(t, 2)) * pow(sqrt(scale), (-1)) * pow(qreal(2), (0.25));
+    for (std::int32_t n = 0; n < sample_count; n++) {
+        double t = (double(n) - translation) / scale;
+        gauss[n] = exp(-M_PI * pow(t, 2)) * pow(sqrt(scale), (-1)) * pow(double(2), (0.25));
     }
 
     return gauss;
@@ -109,9 +109,9 @@ MatrixXd Spectrogram::compute(const SpectogramInputData& inputData)
     MatrixXd tf_matrix = MatrixXd::Zero(inputData.vecInputData.rows() / 2, inputData.vecInputData.rows());
     VectorXd envelope, windowed_sig, real_coeffs;
     VectorXcd fft_win_sig;
-    qint32 window_size = inputData.window_size;
+    std::int32_t window_size = inputData.window_size;
 
-    for (quint32 translate = inputData.iRangeLow; translate < inputData.iRangeHigh; translate++) {
+    for (std::uint32_t translate = inputData.iRangeLow; translate < inputData.iRangeHigh; translate++) {
         envelope = gaussWindow(inputData.vecInputData.rows(), window_size, translate);
 
         windowed_sig = VectorXd::Zero(inputData.vecInputData.rows());

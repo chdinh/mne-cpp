@@ -23,6 +23,7 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QTextStream>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -53,16 +54,16 @@ enum ExplanationClass
     ChannelKindClass = 5
 };
 
-quint64 key(int exclass, int kind)
+std::uint64_t key(int exclass, int kind)
 {
-    return (static_cast<quint64>(static_cast<quint32>(exclass)) << 32) | static_cast<quint32>(kind);
+    return (static_cast<std::uint64_t>(static_cast<std::uint32_t>(exclass)) << 32) | static_cast<std::uint32_t>(kind);
 }
 
-const std::unordered_map<quint64, std::string>& explanations()
+const std::unordered_map<std::uint64_t, std::string>& explanations()
 {
-    static const std::unordered_map<quint64, std::string> table = [] {
+    static const std::unordered_map<std::uint64_t, std::string> table = [] {
         initFiffExplanationsResource();
-        std::unordered_map<quint64, std::string> entries;
+        std::unordered_map<std::uint64_t, std::string> entries;
         QFile file(QStringLiteral(":/fiff/fiff_explanations.txt"));
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
             BASELIB::Log::warning("[FiffExplain] the built-in explanation table is missing");
@@ -73,7 +74,7 @@ const std::unordered_map<quint64, std::string>& explanations()
         QTextStream in(&file);
         while (!in.atEnd()) {
             const QRegularExpressionMatch m = line.match(in.readLine());
-            const quint64 k = m.hasMatch() ? key(m.captured(1).toInt(), m.captured(2).toInt()) : 0;
+            const std::uint64_t k = m.hasMatch() ? key(m.captured(1).toInt(), m.captured(2).toInt()) : 0;
             if (m.hasMatch()) {
                 entries.try_emplace(k, m.captured(3).simplified().toStdString());
             }

@@ -43,8 +43,8 @@
 //=============================================================================================================
 
 #include <string>
-#include <QSharedPointer>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -154,7 +154,7 @@ public:
      *
      * @return the size of the old struct fiffIdRec.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
     //=========================================================================================================
     /**
@@ -201,7 +201,7 @@ inline bool FiffId::empty() const
 
 //=============================================================================================================
 
-inline qint32 FiffId::storageSize()
+inline std::int32_t FiffId::storageSize()
 {
     return sizeof(FiffId::version) + sizeof(FiffId::machid) + FiffTime::storageSize();
 }

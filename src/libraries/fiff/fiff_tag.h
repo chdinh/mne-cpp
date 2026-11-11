@@ -105,7 +105,6 @@
 #include <QByteArray>
 
 #include <optional>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -114,6 +113,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -235,7 +235,7 @@ public:
      *
      * @return true if dimensions are available.
      */
-    bool getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) const;
+    bool getMatrixDimensions(std::int32_t& p_ndim, std::vector<std::int32_t>& p_Dims) const;
 
     //=========================================================================================================
     /**
@@ -263,7 +263,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const quint8* toByte() const;
+    inline const std::uint8_t* toByte() const;
 
     //=========================================================================================================
     /**
@@ -272,7 +272,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const quint16* toUnsignedShort() const;
+    inline const std::uint16_t* toUnsignedShort() const;
 
     //=========================================================================================================
     /**
@@ -281,7 +281,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const qint16* toShort() const;
+    inline const std::int16_t* toShort() const;
 
     //=========================================================================================================
     /**
@@ -290,7 +290,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const quint32* toUnsignedInt() const;
+    inline const std::uint32_t* toUnsignedInt() const;
 
     //=========================================================================================================
     /**
@@ -299,7 +299,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    const qint32* toInt() const;
+    const std::int32_t* toInt() const;
 
     //=========================================================================================================
     /**
@@ -308,7 +308,7 @@ public:
     *
     * @return type cast of the tag data pointer.
     */
-    const qint32* toJulian() const;
+    const std::int32_t* toJulian() const;
 
     //=========================================================================================================
     /**
@@ -343,7 +343,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const qint16* toDauPack16() const;
+    inline const std::int16_t* toDauPack16() const;
 
     //
     // Structures
@@ -520,7 +520,7 @@ public:
      *
      * @return the byte size of the on-disk tag info header.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
 public:
     fiff_int_t kind; /**< Tag number.
@@ -537,7 +537,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffTag::storageSize()
+inline std::int32_t FiffTag::storageSize()
 {
     // On-disk layout: kind, type, size, next (4 x fiff_int_t)
     // Note: 'size' is not a class member (QByteArray::size() is used at runtime),
@@ -550,42 +550,42 @@ inline qint32 FiffTag::storageSize()
 // Simple types
 //=============================================================================================================
 
-inline const quint8* FiffTag::toByte() const
+inline const std::uint8_t* FiffTag::toByte() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_BYTE)
         return nullptr;
     else
-        return reinterpret_cast<const quint8*>(this->data());
+        return reinterpret_cast<const std::uint8_t*>(this->data());
 }
 
 //=============================================================================================================
 
-inline const quint16* FiffTag::toUnsignedShort() const
+inline const std::uint16_t* FiffTag::toUnsignedShort() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_USHORT)
         return nullptr;
     else
-        return reinterpret_cast<const quint16*>(this->data());
+        return reinterpret_cast<const std::uint16_t*>(this->data());
 }
 
 //=============================================================================================================
 
-inline const qint16* FiffTag::toShort() const
+inline const std::int16_t* FiffTag::toShort() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_SHORT)
         return nullptr;
     else
-        return reinterpret_cast<const qint16*>(this->data());
+        return reinterpret_cast<const std::int16_t*>(this->data());
 }
 
 //=============================================================================================================
 
-inline const quint32* FiffTag::toUnsignedInt() const
+inline const std::uint32_t* FiffTag::toUnsignedInt() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_UINT)
         return nullptr;
     else
-        return reinterpret_cast<const quint32*>(this->data());
+        return reinterpret_cast<const std::uint32_t*>(this->data());
 }
 
 //=============================================================================================================
@@ -619,12 +619,12 @@ inline std::string FiffTag::toString() const
 
 //=============================================================================================================
 
-inline const qint16* FiffTag::toDauPack16() const
+inline const std::int16_t* FiffTag::toDauPack16() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_DAU_PACK16)
         return nullptr;
     else
-        return reinterpret_cast<const qint16*>(this->data());
+        return reinterpret_cast<const std::int16_t*>(this->data());
 }
 
 //=============================================================================================================
@@ -637,7 +637,7 @@ inline FiffId FiffTag::toFiffID() const
     if (this->isMatrix() || this->getType() != FIFFT_ID_STRUCT || this->isNull() || this->size() < FiffId::storageSize())
         return p_fiffID;
     else {
-        const auto* t_pInt32 = reinterpret_cast<const qint32*>(this->data());
+        const auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
 
         p_fiffID.version = t_pInt32[0];
         p_fiffID.machid[0] = t_pInt32[1];
@@ -657,7 +657,7 @@ inline FiffDigPoint FiffTag::toDigPoint() const
     if (this->isMatrix() || this->getType() != FIFFT_DIG_POINT_STRUCT || this->isNull() || this->size() < FiffDigPoint::storageSize())
         return t_fiffDigPoint;
     else {
-        auto* t_pInt32 = reinterpret_cast<const qint32*>(this->data());
+        auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
 
         t_fiffDigPoint.kind = t_pInt32[0];
         t_fiffDigPoint.ident = t_pInt32[1];
@@ -680,7 +680,7 @@ inline FiffCoordTrans FiffTag::toCoordTrans() const
     if (this->isMatrix() || this->getType() != FIFFT_COORD_TRANS_STRUCT || this->isNull() || this->size() < FiffCoordTrans::storage_size())
         return p_FiffCoordTrans;
     else {
-        auto* t_pInt32 = reinterpret_cast<const qint32*>(this->data());
+        auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
         p_FiffCoordTrans.from = t_pInt32[0];
         p_FiffCoordTrans.to = t_pInt32[1];
 
@@ -721,7 +721,7 @@ inline FiffChInfo FiffTag::toChInfo() const
     if (this->isMatrix() || this->getType() != FIFFT_CH_INFO_STRUCT || this->isNull() || this->size() < FiffChInfo::storageSize())
         return p_FiffChInfo;
     else {
-        auto* t_pInt32 = reinterpret_cast<const qint32*>(this->data());
+        auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
         p_FiffChInfo.scanNo = t_pInt32[0];
         p_FiffChInfo.logNo = t_pInt32[1];
         p_FiffChInfo.kind = t_pInt32[2];
@@ -734,7 +734,7 @@ inline FiffChInfo FiffTag::toChInfo() const
         //
         //   Read the coil coordinate system definition
         //
-        qint32 r;
+        std::int32_t r;
         // r0
         for (r = 0; r < 3; ++r)
             p_FiffChInfo.chpos.r0[r] = t_pFloat[6 + r];
@@ -811,7 +811,7 @@ inline std::vector<FiffDirEntry> FiffTag::toDirEntry() const
     if (this->isMatrix() || this->getType() != FIFFT_DIR_ENTRY_STRUCT || this->data() == nullptr) {
         return entries;
     }
-    const auto* ints = reinterpret_cast<const qint32*>(this->data());
+    const auto* ints = reinterpret_cast<const std::int32_t*>(this->data());
     const auto count = static_cast<std::size_t>(this->size() / FiffDirEntry::storageSize());
     entries.reserve(count);
     for (std::size_t k = 0; k < count; ++k) {

@@ -19,7 +19,7 @@
  * on-disk representation is a @c FIFF_MNE_NROW + @c FIFF_MNE_NCOL pair
  * plus a dense or sparse matrix tag plus two string-list tags with the
  * row and column names. @ref FIFFLIB::FiffNamedMatrix bundles all of that into a
- * single object: the Eigen matrix and the two @c QStringList name
+ * single object: the Eigen matrix and the two @c StringList name
  * vectors, with the same default-construction semantics as
  * @c numpy.zeros + name lists in @c mne.SourceEstimate / @c mne.Forward.
  */
@@ -47,10 +47,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
 #include <QSharedData>
 #include <QSharedDataPointer>
-#include <QSharedPointer>
 #include <memory>
 
 //=============================================================================================================

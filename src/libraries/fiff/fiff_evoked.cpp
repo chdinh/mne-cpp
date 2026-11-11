@@ -41,6 +41,7 @@
 #include <format>
 #include <iterator>
 #include <string_view>
+#include <cstdint>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -134,7 +135,7 @@ FiffEvoked FiffEvoked::pick_channels(const StringList& include,
     //   Create the reduced data set
     //
     MatrixXd selBlock = MatrixXd::Zero(sel.cols(), res.data.cols());
-    for (qint32 l = 0; l < sel.cols(); ++l) {
+    for (std::int32_t l = 0; l < sel.cols(); ++l) {
         if (sel(0, l) < res.data.rows()) {
             selBlock.block(l, 0, 1, selBlock.cols()) = res.data.block(sel(0, l), 0, 1, selBlock.cols());
         } else {
@@ -249,7 +250,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     fiff_int_t tag_kind, pos, first = 0, last = 0;
     std::optional<FiffTag> t_pTag;
     std::string comment;
-    qint32 k;
+    std::int32_t k;
     for (k = 0; k < my_evoked->nent(); ++k) {
         tag_kind = my_evoked->dir[k].kind;
         pos = my_evoked->dir[k].pos;
@@ -299,7 +300,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         if (sfreq > 0.0f)
             info.sfreq = sfreq;
     }
-    qint32 nsamp = last - first + 1;
+    std::int32_t nsamp = last - first + 1;
     Log::info("\tFound the data of interest:\n");
     Log::info("\t\tt = {:10.2f} ... {:10.2f} ms ({})\n", 1000 * static_cast<float>(first) / info.sfreq, 1000 * static_cast<float>(last) / info.sfreq, comment);
     if (info.comps.size() > 0)
@@ -338,7 +339,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         nave = 1;
     Log::info("\t\tnave = {} - aspect type = {}\n", nave, aspect_kind);
 
-    qint32 nepoch = static_cast<int>(epoch.size());
+    std::int32_t nepoch = static_cast<int>(epoch.size());
     if (nepoch != 1 && nepoch != info.nchan) {
         return fail(ErrorCode::Format, "{} epoch tags for {} channels in {}", nepoch, info.nchan, file);
     }
@@ -400,7 +401,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
     } else {
         //   Create the projector
         MatrixXd projection;
-        qint32 nproj = info.make_projector(projection);
+        std::int32_t nproj = info.make_projector(projection);
         if (nproj == 0) {
             Log::warning("\tThe projection vectors do not apply to these channels\n");
             p_FiffEvoked.proj = MatrixXd();
@@ -453,7 +454,7 @@ void FiffEvoked::setInfo(const FiffInfo& p_info,
     } else {
         //   Create the projector
         MatrixXd projection;
-        qint32 nproj = info.make_projector(projection);
+        std::int32_t nproj = info.make_projector(projection);
         if (nproj == 0) {
             Log::warning("\tThe projection vectors do not apply to these channels\n");
             this->proj = MatrixXd();

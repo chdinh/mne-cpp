@@ -40,6 +40,8 @@
 
 #include <Eigen/Core>
 
+#include <cstdint>
+
 //=============================================================================================================
 // DEFINE NAMESPACE DSPLIB
 //=============================================================================================================
@@ -53,9 +55,9 @@ namespace DSPLIB
 struct SpectogramInputData
 {
     Eigen::VectorXd vecInputData;
-    quint32 iRangeLow;
-    quint32 iRangeHigh;
-    qint32 window_size;
+    std::uint32_t iRangeLow;
+    std::uint32_t iRangeHigh;
+    std::int32_t window_size;
 };
 
 /**
@@ -77,7 +79,7 @@ public:
      *         column j the window centred on sample j.
      */
     static Eigen::MatrixXd makeSpectrogram(Eigen::VectorXd signal,
-                                           qint32 windowSize);
+                                           std::int32_t windowSize);
 
 private:
     //=========================================================================================================
@@ -90,9 +92,9 @@ private:
      *
      * @return samples of window-vector.
      */
-    static Eigen::VectorXd gaussWindow(qint32 sample_count,
-                                       qreal scale,
-                                       quint32 translation);
+    static Eigen::VectorXd gaussWindow(std::int32_t sample_count,
+                                       double scale,
+                                       std::uint32_t translation);
 
     //=========================================================================================================
     /**

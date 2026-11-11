@@ -35,6 +35,7 @@
 #include <fstream>
 #include <iterator>
 #include <limits>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -83,7 +84,7 @@ QJsonObject FIFFLIB::extrasToJson(const FiffAnnotation::Extras& extras)
                           } else if constexpr (std::is_same_v<T, std::string>) {
                               return QString::fromStdString(v);
                           } else if constexpr (std::is_same_v<T, std::int64_t>) {
-                              return static_cast<qint64>(v);
+                              return static_cast<std::int64_t>(v);
                           } else {
                               return v;
                           }

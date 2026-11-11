@@ -54,6 +54,7 @@
 #include <format>
 #include <fstream>
 #include <sstream>
+#include <cstdint>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -530,7 +531,7 @@ FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag& tag)
     if (tag.isMatrix() || tag.getType() != FIFFT_COORD_TRANS_STRUCT || tag.data() == nullptr)
         return t;
 
-    const auto* t_pInt32 = reinterpret_cast<const qint32*>(tag.data());
+    const auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(tag.data());
     t.from = t_pInt32[0];
     t.to = t_pInt32[1];
 

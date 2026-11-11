@@ -50,7 +50,6 @@
 
 #include <base/error.h>
 
-#include <QSharedPointer>
 
 #include <filesystem>
 #include <memory>

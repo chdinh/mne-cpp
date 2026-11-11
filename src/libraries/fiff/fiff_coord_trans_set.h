@@ -35,7 +35,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <filesystem>
 
 #include <memory>

@@ -46,8 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QStringList>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -347,15 +345,5 @@ public:
     std::vector<FiffEvoked> evoked; /**< List of Fiff Evoked Data. */
 };
 } // NAMESPACE
-
-#ifndef metatype_fiffevokedset
-#define metatype_fiffevokedset
-Q_DECLARE_METATYPE(FIFFLIB::FiffEvokedSet); /**< Provides QT META type declaration of the FIFFLIB::FiffEvokedSet type. For signal/slot and QVariant usage.*/
-#endif
-
-#ifndef metatype_fiffevokedsetsptr
-#define metatype_fiffevokedsetsptr
-Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffEvokedSet>); /**< Provides QT META type declaration of the FIFFLIB::FiffEvokedSet type. For signal/slot and QVariant usage.*/
-#endif
 
 #endif // FIFF_EVOKED_SET_H

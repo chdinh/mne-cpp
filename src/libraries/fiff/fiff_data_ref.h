@@ -31,7 +31,7 @@
 
 #include "fiff_global.h"
 
-#include <QtGlobal>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -45,7 +45,7 @@ namespace FIFFLIB
  * @brief External data reference: type, endian, byte size and offset into an external FIFF payload file.
  *
  * Mirrors the original @c fiffDataRefRec exactly: a 24-byte record made of
- * two @c qint32 (type, endianness flag) followed by two @c qint64 (payload
+ * two @c std::int32_t (type, endianness flag) followed by two @c std::int64_t (payload
  * size in bytes, byte offset into the external file). The 64-bit fields
  * let referenced payloads exceed 2 GiB, which is required by long
  * continuous Neuromag recordings split into multi-file FIFF trees.
@@ -80,20 +80,20 @@ public:
      *
      * @return the size of the old struct fiffDataRefRec.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
 public:
-    qint32 type;   /**< Type of the data. */
-    qint32 endian; /**< Are the data in the little or big endian byte order. */
-    qint64 size;   /**< Size of the data, can be over 2 GB. */
-    qint64 offset; /**< Offset to the data in the external file. */
+    std::int32_t type;   /**< Type of the data. */
+    std::int32_t endian; /**< Are the data in the little or big endian byte order. */
+    std::int64_t size;   /**< Size of the data, can be over 2 GB. */
+    std::int64_t offset; /**< Offset to the data in the external file. */
 };
 
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffDataRef::storageSize()
+inline std::int32_t FiffDataRef::storageSize()
 {
     return sizeof(FiffDataRef::type) + sizeof(FiffDataRef::endian) + sizeof(FiffDataRef::size) + sizeof(FiffDataRef::offset);
 }

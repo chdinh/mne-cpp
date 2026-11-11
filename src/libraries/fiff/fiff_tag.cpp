@@ -38,6 +38,7 @@
 //=============================================================================================================
 
 #include <QTcpSocket>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -77,7 +78,7 @@ bool FiffTag::isMatrix() const
 
 //=============================================================================================================
 
-bool FiffTag::getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) const
+bool FiffTag::getMatrixDimensions(std::int32_t& p_ndim, std::vector<std::int32_t>& p_Dims) const
 {
     p_Dims.clear();
     p_ndim = 0;
@@ -88,31 +89,31 @@ bool FiffTag::getMatrixDimensions(qint32& p_ndim, std::vector<qint32>& p_Dims) c
     // The dimensions trail the data: [nz,] dims..., ndim. A corrupt file must not make the readers
     // index outside the tag, so the trailer has to fit and a dense matrix has to fit before it.
     //
-    const qint32* t_pInt32 = reinterpret_cast<const qint32*>(this->data());
+    const std::int32_t* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
     const qsizetype nInts = this->size() / 4;
-    const qint32 ndim = t_pInt32[nInts - 1];
+    const std::int32_t ndim = t_pInt32[nInts - 1];
     const int coding = fiff_type_matrix_coding(this->type);
     const bool sparse = coding == FIFFTS_MC_CCS || coding == FIFFTS_MC_RCS;
     if (coding != FIFFTS_MC_DENSE && !sparse) {
         BASELIB::Log::warning("Cannot handle other than dense or sparse matrices yet.");
         return false;
     }
-    const qint32 nTrailer = ndim + (sparse ? 2 : 1);
+    const std::int32_t nTrailer = ndim + (sparse ? 2 : 1);
     if (ndim <= 0 || ndim > FIFFC_MATRIX_MAX_DIM || nTrailer > nInts)
         return false;
 
-    std::vector<qint32> dims;
-    qint64 nValues = 1;
+    std::vector<std::int32_t> dims;
+    std::int64_t nValues = 1;
     for (qsizetype i = nInts - nTrailer; i < nInts - 1; ++i) {
         if (t_pInt32[i] < 0)
             return false;
         dims.push_back(t_pInt32[i]);
-        nValues = std::min<qint64>(nValues * t_pInt32[i], this->size()); // capped: enough to compare, no overflow
+        nValues = std::min<std::int64_t>(nValues * t_pInt32[i], this->size()); // capped: enough to compare, no overflow
     }
     if (!sparse) {
         const int base = this->getType();
-        const qint64 valueSize = (base == FIFFT_DOUBLE || base == FIFFT_COMPLEX_FLOAT) ? 8 : (base == FIFFT_COMPLEX_DOUBLE ? 16 : 4);
-        if (nValues * valueSize > static_cast<qint64>(nInts - nTrailer) * 4)
+        const std::int64_t valueSize = (base == FIFFT_DOUBLE || base == FIFFT_COMPLEX_FLOAT) ? 8 : (base == FIFFT_COMPLEX_DOUBLE ? 16 : 4);
+        if (nValues * valueSize > static_cast<std::int64_t>(nInts - nTrailer) * 4)
             return false;
     }
 
@@ -718,24 +719,24 @@ fiff_int_t FiffTag::fiff_type_matrix_coding(fiff_int_t type)
 
 //=============================================================================================================
 
-const qint32* FiffTag::toInt() const
+const std::int32_t* FiffTag::toInt() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_INT) {
         BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)\n", this->kind, this->getType());
         return nullptr;
     } else
-        return reinterpret_cast<const qint32*>(this->data());
+        return reinterpret_cast<const std::int32_t*>(this->data());
 }
 
 //=============================================================================================================
 
-const qint32* FiffTag::toJulian() const
+const std::int32_t* FiffTag::toJulian() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_JULIAN) {
         BASELIB::Log::warning("Expected a julian tag : {} (found data type {} instead)\n", this->kind, this->getType());
         return nullptr;
     } else
-        return reinterpret_cast<const qint32*>(this->data());
+        return reinterpret_cast<const std::int32_t*>(this->data());
 }
 
 //=============================================================================================================
@@ -745,8 +746,8 @@ Eigen::MatrixXi FiffTag::toIntMatrix() const
     if (!this->isMatrix() || this->getType() != FIFFT_INT || this->data() == nullptr)
         return Eigen::MatrixXi();
 
-    qint32 ndim;
-    std::vector<qint32> dims;
+    std::int32_t ndim;
+    std::vector<std::int32_t> dims;
     this->getMatrixDimensions(ndim, dims);
 
     if (ndim != 2) {
@@ -772,8 +773,8 @@ Eigen::MatrixXf FiffTag::toFloatMatrix() const
         return Eigen::MatrixXf();
     }
 
-    qint32 ndim;
-    std::vector<qint32> dims;
+    std::int32_t ndim;
+    std::vector<std::int32_t> dims;
     this->getMatrixDimensions(ndim, dims);
 
     if (ndim != 2) {

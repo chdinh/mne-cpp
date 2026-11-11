@@ -49,6 +49,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -142,12 +143,12 @@ void FiffInfo::clear()
 
 //=============================================================================================================
 
-qint32 FiffInfo::get_current_comp()
+std::int32_t FiffInfo::get_current_comp()
 {
-    qint32 comp = 0;
-    qint32 first_comp = -1;
+    std::int32_t comp = 0;
+    std::int32_t first_comp = -1;
 
-    qint32 k = 0;
+    std::int32_t k = 0;
     for (k = 0; k < this->nchan; ++k) {
         if (this->chs[k].kind == FIFFV_MEG_CH) {
             comp = this->chs[k].chpos.coil_type >> 16;
@@ -203,10 +204,10 @@ bool FiffInfo::make_compensator(fiff_int_t from, fiff_int_t to, FiffCtfComp& ctf
     const MatrixXd eye = MatrixXd::Identity(this->nchan, this->nchan);
     comp_tmp = (eye - C2) * (eye - C1).partialPivLu().inverse();
 
-    qint32 k;
+    std::int32_t k;
     if (exclude_comp_chs) {
         VectorXi pick = VectorXi::Zero(this->nchan);
-        qint32 npick = 0;
+        std::int32_t npick = 0;
         for (k = 0; k < this->nchan; ++k) {
             if (this->chs[k].kind != FIFFV_REF_MEG_CH) {
                 pick(npick) = k;
@@ -236,7 +237,7 @@ bool FiffInfo::make_compensator(fiff_int_t kind, MatrixXd& this_comp) const //pr
 {
     FiffNamedMatrix::SDPtr this_data;
     MatrixXd presel, postsel;
-    qint32 k, col, c, ch = 0, row, row_ch = 0, channelAvailable;
+    std::int32_t k, col, c, ch = 0, row, row_ch = 0, channelAvailable;
 
     for (k = 0; k < std::ssize(this->comps); ++k) {
         if (this->comps[k].kind == kind) {
@@ -304,8 +305,8 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
     res.chs.clear();
     res.ch_names.clear();
 
-    qint32 idx;
-    for (qint32 i = 0; i < sel.size(); ++i) {
+    std::int32_t idx;
+    for (std::int32_t i = 0; i < sel.size(); ++i) {
         idx = sel[i];
         res.chs.push_back(this->chs[idx]);
         res.ch_names.push_back(this->ch_names[idx]);
@@ -321,13 +322,13 @@ FiffInfo FiffInfo::pick_info(const RowVectorXi& sel) const
 std::vector<FiffChInfo> FiffInfo::set_current_comp(std::vector<FiffChInfo>& listFiffChInfo, fiff_int_t value)
 {
     std::vector<FiffChInfo> newList;
-    qint32 k;
+    std::int32_t k;
     fiff_int_t coil_type;
 
     for (k = 0; k < std::ssize(listFiffChInfo); ++k)
         newList.push_back(listFiffChInfo[k]);
 
-    qint32 lower_half = 65535; // hex2dec('FFFF');
+    std::int32_t lower_half = 65535; // hex2dec('FFFF');
     for (k = 0; k < std::ssize(listFiffChInfo); ++k) {
         if (listFiffChInfo[k].kind == FIFFV_MEG_CH) {
             coil_type = listFiffChInfo[k].chpos.coil_type & lower_half;
@@ -445,7 +446,7 @@ void FiffInfo::writeToStream(FiffStream& stream) const
     //
     if (this->dig.size() > 0 && !have_isotrak) {
         stream.start_block(FIFFB_ISOTRAK);
-        for (qint32 k = 0; k < std::ssize(this->dig); ++k)
+        for (std::int32_t k = 0; k < std::ssize(this->dig); ++k)
             stream.write_dig_point(this->dig[k]);
 
         stream.end_block(FIFFB_ISOTRAK);
@@ -489,7 +490,7 @@ void FiffInfo::writeToStream(FiffStream& stream) const
     //
     MatrixXd cals(1, nchanToWrite);
 
-    for (qint32 k = 0; k < nchanToWrite; ++k) {
+    for (std::int32_t k = 0; k < nchanToWrite; ++k) {
         //
         //    Scan numbers may have been messed up
         //

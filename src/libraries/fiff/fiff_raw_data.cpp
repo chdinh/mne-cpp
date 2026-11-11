@@ -228,6 +228,7 @@ void FiffRawData::clear()
 //=============================================================================================================
 #include <QElapsedTimer>
 #include <QDebug>
+#include <cstdint>
 bool FiffRawData::read_raw_segment(MatrixXd& data,
                                    MatrixXd& times,
                                    fiff_int_t from,
@@ -260,9 +261,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     //
     //  Initialize the data and calibration vector
     //
-    qint32 nchan = this->info.nchan;
-    qint32 dest = 0; //1;
-    qint32 i, k, r;
+    std::int32_t nchan = this->info.nchan;
+    std::int32_t dest = 0; //1;
+    std::int32_t i, k, r;
 
     using T = Eigen::Triplet<double>;
     std::vector<T> tripletList;
@@ -556,9 +557,9 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     //
     //  Initialize the data and calibration vector
     //
-    qint32 nchan = this->info.nchan;
-    qint32 dest = 0; //1;
-    qint32 i, k, r;
+    std::int32_t nchan = this->info.nchan;
+    std::int32_t dest = 0; //1;
+    std::int32_t i, k, r;
 
     using T = Eigen::Triplet<double>;
     std::vector<T> tripletList;
@@ -840,7 +841,7 @@ bool FiffRawData::read_raw_segment_times(MatrixXd& data,
     //
     //   Read it
     //
-    return this->read_raw_segment(data, times, static_cast<qint32>(from), static_cast<qint32>(to), sel);
+    return this->read_raw_segment(data, times, static_cast<std::int32_t>(from), static_cast<std::int32_t>(to), sel);
 }
 
 //=============================================================================================================

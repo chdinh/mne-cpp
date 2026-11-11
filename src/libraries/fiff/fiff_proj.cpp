@@ -53,6 +53,7 @@
 
 #include <array>
 #include <stdexcept>
+#include <cstdint>
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -217,7 +218,7 @@ fiff_int_t FiffProj::make_projector(const std::vector<FiffProj>& projs, const St
     MatrixXd vecs = MatrixXd::Zero(nchan, nvec);
     nvec = 0;
     fiff_int_t nonzero = 0;
-    qint32 p, c, i, j, v;
+    std::int32_t p, c, i, j, v;
     double onesize;
     bool isBad = false;
     RowVectorXi sel(nchan);

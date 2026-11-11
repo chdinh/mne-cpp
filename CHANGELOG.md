@@ -255,6 +255,12 @@ aliases; replace the old spelling as below.
   does not answer within 30 s; it used to spin forever.
 - `FiffTag::toInt`, `toJulian`, `toIntMatrix` and `toFloatMatrix` are no longer
   inline.
+- The `fiff` headers use `std::int32_t` and the other `<cstdint>` types instead
+  of `qint32`, ..., and include no Qt header they do not need (Qt includes in
+  public headers 56 -> 13); `fiff_long_t` is `std::int64_t`. Their
+  `Q_DECLARE_METATYPE` declarations are gone: Qt 6 puts the types into a
+  `QVariant` without them. Code that took `QString`, `QSharedPointer` or
+  `QDebug` from a `fiff` header includes them itself.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella
   headers for their library.
 - `lsl://?simulate=1` publishes a synthetic EEG session as an LSL stream

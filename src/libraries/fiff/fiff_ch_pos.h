@@ -40,8 +40,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -103,7 +103,7 @@ public:
      *
      * @return the size of the old struct fiffChPosRec.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
     //=========================================================================================================
     /**
@@ -128,7 +128,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffChPos::storageSize()
+inline std::int32_t FiffChPos::storageSize()
 {
     return sizeof(FiffChPos::coil_type) + sizeof(FiffChPos::r0) + sizeof(FiffChPos::ex) + sizeof(FiffChPos::ey) + sizeof(FiffChPos::ez);
 }

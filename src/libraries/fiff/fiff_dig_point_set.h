@@ -37,7 +37,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 #include "fiff_stream.h"
 #include "fiff_dig_point.h"
@@ -268,15 +267,5 @@ private:
 };
 
 } // namespace FIFFLIB
-
-#ifndef metatype_fiffdigpointset
-#define metatype_fiffdigpointset
-Q_DECLARE_METATYPE(FIFFLIB::FiffDigPointSet); /**< Provides QT META type declaration of the FIFFLIB::FiffDigPointSet type. For signal/slot usage.*/
-#endif
-
-#ifndef metatype_fiffdigpointset_sptr
-#define metatype_fiffdigpointset_sptr
-Q_DECLARE_METATYPE(std::shared_ptr<FIFFLIB::FiffDigPointSet>); /**< Provides QT META type declaration of the std::shared_ptr<FIFFLIB::FiffDigPointSet> type. For signal/slot usage.*/
-#endif
 
 #endif // FIFFLIB_FIFF_DIG_POINT_SET_H

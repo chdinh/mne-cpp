@@ -27,7 +27,7 @@
 
 #include "fiff_global.h"
 
-#include <QtGlobal>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -68,7 +68,7 @@ public:
      * @param[in] p_secs    GMT time in seconds since epoch.
      * @param[in] p_usecs   Fraction of seconds in microseconds.
      */
-    FiffTime(qint32 p_secs, qint32 p_usecs)
+    FiffTime(std::int32_t p_secs, std::int32_t p_usecs)
     : secs(p_secs)
     , usecs(p_usecs)
     {
@@ -86,18 +86,18 @@ public:
      *
      * @return the size of the old struct fiffTimeRec.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
 public:
-    qint32 secs;  /**< GMT time in seconds since epoch. */
-    qint32 usecs; /**< Fraction of seconds in microseconds. */
+    std::int32_t secs;  /**< GMT time in seconds since epoch. */
+    std::int32_t usecs; /**< Fraction of seconds in microseconds. */
 };
 
 //=============================================================================================================
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffTime::storageSize()
+inline std::int32_t FiffTime::storageSize()
 {
     return sizeof(FiffTime::secs) + sizeof(FiffTime::usecs);
 }

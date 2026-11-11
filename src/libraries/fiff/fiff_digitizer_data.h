@@ -35,7 +35,6 @@
 
 #include <Eigen/Core>
 
-#include <QSharedPointer>
 
 #include <filesystem>
 #include <optional>

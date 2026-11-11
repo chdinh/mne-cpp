@@ -30,7 +30,7 @@
 // INCLUDES
 //=============================================================================================================
 
-#include <QtGlobal>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -47,10 +47,10 @@ namespace FIFFLIB
  *
  * @return The value with its byte order reversed.
  */
-[[nodiscard]] inline qint16 swap_short(qint16 source)
+[[nodiscard]] inline std::int16_t swap_short(std::int16_t source)
 {
     auto* csource = reinterpret_cast<unsigned char*>(&source);
-    qint16 result;
+    std::int16_t result;
     auto* cresult = reinterpret_cast<unsigned char*>(&result);
     cresult[0] = csource[1];
     cresult[1] = csource[0];
@@ -65,10 +65,10 @@ namespace FIFFLIB
  *
  * @return The value with its byte order reversed.
  */
-[[nodiscard]] inline qint32 swap_int(qint32 source)
+[[nodiscard]] inline std::int32_t swap_int(std::int32_t source)
 {
     auto* csource = reinterpret_cast<unsigned char*>(&source);
-    qint32 result;
+    std::int32_t result;
     auto* cresult = reinterpret_cast<unsigned char*>(&result);
     cresult[0] = csource[3];
     cresult[1] = csource[2];
@@ -83,7 +83,7 @@ namespace FIFFLIB
  *
  * @param[in, out] source   Pointer to the value whose four bytes are reversed in place.
  */
-inline void swap_intp(qint32* source)
+inline void swap_intp(std::int32_t* source)
 {
     auto* csource = reinterpret_cast<unsigned char*>(source);
     unsigned char c;
@@ -103,10 +103,10 @@ inline void swap_intp(qint32* source)
  *
  * @return The value with its byte order reversed.
  */
-[[nodiscard]] inline qint64 swap_long(qint64 source)
+[[nodiscard]] inline std::int64_t swap_long(std::int64_t source)
 {
     auto* csource = reinterpret_cast<unsigned char*>(&source);
-    qint64 result;
+    std::int64_t result;
     auto* cresult = reinterpret_cast<unsigned char*>(&result);
     cresult[0] = csource[7];
     cresult[1] = csource[6];
@@ -125,7 +125,7 @@ inline void swap_intp(qint32* source)
  *
  * @param[in, out] source   Pointer to the value whose eight bytes are reversed in place.
  */
-inline void swap_longp(qint64* source)
+inline void swap_longp(std::int64_t* source)
 {
     auto* csource = reinterpret_cast<unsigned char*>(source);
     unsigned char c;

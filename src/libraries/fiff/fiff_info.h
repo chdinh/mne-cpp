@@ -56,9 +56,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QStringList>
-#include <QSharedPointer>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -172,7 +171,7 @@ public:
      *
      * @return the current compensation.
      */
-    qint32 get_current_comp();
+    std::int32_t get_current_comp();
 
     //=========================================================================================================
     /**
@@ -184,7 +183,7 @@ public:
      *
      * @return nproj - How many items in the projector.
      */
-    inline qint32 make_projector(Eigen::MatrixXd& proj) const;
+    inline std::int32_t make_projector(Eigen::MatrixXd& proj) const;
 
     //=========================================================================================================
     /**
@@ -197,7 +196,7 @@ public:
      *
      * @return nproj - How many items in the projector.
      */
-    inline qint32 make_projector(Eigen::MatrixXd& proj, const StringList& p_chNames) const;
+    inline std::int32_t make_projector(Eigen::MatrixXd& proj, const StringList& p_chNames) const;
 
     //=========================================================================================================
     /**
@@ -317,14 +316,14 @@ public:                                //Public because it's a mne struct
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffInfo::make_projector(Eigen::MatrixXd& proj) const
+inline std::int32_t FiffInfo::make_projector(Eigen::MatrixXd& proj) const
 {
     return FiffProj::make_projector(this->projs, this->ch_names, proj, this->bads);
 }
 
 //=============================================================================================================
 
-inline qint32 FiffInfo::make_projector(Eigen::MatrixXd& proj, const StringList& p_chNames) const
+inline std::int32_t FiffInfo::make_projector(Eigen::MatrixXd& proj, const StringList& p_chNames) const
 {
     return FiffProj::make_projector(this->projs, p_chNames, proj, this->bads);
 }

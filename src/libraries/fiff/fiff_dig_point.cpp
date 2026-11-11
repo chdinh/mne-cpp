@@ -27,6 +27,7 @@
 #include "fiff_stream.h"
 #include "fiff_dir_node.h"
 #include "fiff_tag.h"
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -43,6 +44,6 @@ FiffDigPoint::FiffDigPoint()
 , ident(-1)
 , coord_frame(-1)
 {
-    for (qint32 i = 0; i < 3; ++i)
+    for (std::int32_t i = 0; i < 3; ++i)
         r[i] = -1;
 }

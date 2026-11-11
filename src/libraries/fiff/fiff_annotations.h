@@ -33,7 +33,6 @@
 
 #include <base/error.h>
 
-#include <QSharedPointer>
 
 #include <cstddef>
 #include <cstdint>

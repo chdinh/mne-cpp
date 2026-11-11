@@ -29,6 +29,7 @@
 #include "fiff_stream.h"
 #include "fiff_tag.h"
 #include "fiff_explain.h"
+#include <cstdint>
 //#include "fiff_ctf_comp.h"
 //#include "fiff_proj.h"
 //#include "fiff_info.h"
@@ -63,7 +64,7 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<c
     if (p_Nodes.size() <= 0)
         return false;
 
-    qint32 k, p;
+    std::int32_t k, p;
 
     for (k = 0; k < std::ssize(p_Nodes); ++k) {
         target.start_block(p_Nodes[k]->type); //8
@@ -140,7 +141,7 @@ std::optional<FiffTag> FiffDirNode::find_tag(FiffStream& stream, fiff_int_t find
 
 bool FiffDirNode::has_tag(fiff_int_t findkind)
 {
-    for (qint32 p = 0; p < this->nent(); ++p)
+    for (std::int32_t p = 0; p < this->nent(); ++p)
         if (this->dir.at(p).kind == findkind)
             return true;
     return false;

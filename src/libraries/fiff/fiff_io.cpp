@@ -41,6 +41,7 @@
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -213,10 +214,10 @@ bool FiffIO::write(QFile& p_QFile,
             QString t_nameoftype = "raw";
 
             if (idx == -1) {
-                for (qint32 i = 0; i < std::ssize(m_qlistRaw); ++i) {
+                for (std::int32_t i = 0; i < std::ssize(m_qlistRaw); ++i) {
                     QString t_fname;
                     //insert
-                    qint32 p = p_QFile.fileName().indexOf(".fif");
+                    std::int32_t p = p_QFile.fileName().indexOf(".fif");
                     t_fname = p_QFile.fileName().insert(p, "_" + t_nameoftype + "-" + QString::number(i));
 
                     //assign new file name

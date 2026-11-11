@@ -44,9 +44,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
-#include <QDebug>
 #include <memory>
+#include <cstdint>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -87,7 +86,7 @@ public:
      *
      * @return the size of the old struct fiffDigPointRec.
      */
-    inline static qint32 storageSize();
+    inline static std::int32_t storageSize();
 
 public:
     fiff_int_t kind;        /**< FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA or FIFFV_POINT_EEG. */
@@ -100,7 +99,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FiffDigPoint::storageSize()
+inline std::int32_t FiffDigPoint::storageSize()
 {
     return sizeof(FiffDigPoint::kind) + sizeof(FiffDigPoint::ident) + sizeof(FiffDigPoint::r); // coord_frame is not part of on-disk format
 }

@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include "fiff_ch_pos.h"
+#include <cstdint>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -46,7 +47,7 @@ FiffChPos::FiffChPos()
 FiffChPos::FiffChPos(const FiffChPos& p_FiffChPos)
 : coil_type(p_FiffChPos.coil_type)
 {
-    for (qint32 i = 0; i < 3; ++i) {
+    for (std::int32_t i = 0; i < 3; ++i) {
         r0[i] = p_FiffChPos.r0[i];
         ex[i] = p_FiffChPos.ex[i];
         ey[i] = p_FiffChPos.ey[i];
