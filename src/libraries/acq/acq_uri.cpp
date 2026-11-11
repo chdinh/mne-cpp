@@ -124,7 +124,8 @@ AcqExpected<AcqUri> AcqUri::parse(std::string_view uri)
     AcqUri out;
     for (std::size_t i = 0; i < separator; ++i) {
         const char c = uri[i];
-        const bool ok = isAlpha(c) || (i > 0 && (isDigit(c) || c == '+' || c == '-' || c == '.'));
+        // RFC 3986 characters, and '_' as in BrainFlow's streaming_board://
+        const bool ok = isAlpha(c) || (i > 0 && (isDigit(c) || c == '+' || c == '-' || c == '.' || c == '_'));
         if (!ok) {
             return invalid(uri, i, std::string("invalid scheme character '") + c + "'");
         }

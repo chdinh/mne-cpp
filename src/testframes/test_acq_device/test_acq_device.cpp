@@ -315,6 +315,12 @@ void TestAcqDevice::testUriParse()
     QCOMPARE(lsl->target, std::string("EEG?stream"));
     QCOMPARE(*lsl->param("type"), std::string_view("a&b"));
 
+    // BrainFlow's streamer strings have an underscore in the scheme
+    auto streamer = AcqUri::parse("streaming_board://225.1.1.1:6677");
+    QVERIFY(streamer);
+    QCOMPARE(streamer->scheme, std::string("streaming_board"));
+    QCOMPARE(streamer->target, std::string("225.1.1.1:6677"));
+
     auto bare = AcqUri::parse("synthetic://");
     QVERIFY(bare);
     QVERIFY(bare->target.empty());
@@ -330,6 +336,7 @@ void TestAcqDevice::testUriInvalid_data()
     QTest::newRow("no separator") << "synthetic";
     QTest::newRow("empty scheme") << "://x";
     QTest::newRow("digit first") << "1abc://";
+    QTest::newRow("underscore first") << "_abc://";
     QTest::newRow("space in scheme") << "syn thetic://";
     QTest::newRow("empty key") << "a://x?=1";
     QTest::newRow("empty segment") << "a://x?k=1&&j=2";
@@ -388,6 +395,8 @@ void TestAcqDevice::testRegistryErrors()
     QCOMPARE(registry.registerScheme({"synthetic", "again", "", {}}, factory).code(), AcqErrorCode::InvalidParameter);
     QCOMPARE(registry.registerScheme({"Bad Scheme", "", "", {}}, factory).code(), AcqErrorCode::InvalidParameter);
     QCOMPARE(registry.registerScheme({"ab cd", "", "", {}}, factory).code(), AcqErrorCode::InvalidParameter);
+    QCOMPARE(registry.registerScheme({"_ab", "", "", {}}, factory).code(), AcqErrorCode::InvalidParameter);
+    QVERIFY(registry.registerScheme({"under_score", "", "", {}}, factory).ok());
     QCOMPARE(registry.registerScheme({"noop", "", "", {}}, {}).code(), AcqErrorCode::InvalidParameter);
 
     QVERIFY(registry.registerScheme({"nullbackend", "", "", {}}, [](const AcqUri&) -> AcqExpected<std::unique_ptr<AcqBackend>> {

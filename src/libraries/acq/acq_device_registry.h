@@ -51,7 +51,7 @@ ACQ_STD_MEMBERS_BEGIN
  */
 struct ACQSHARED_EXPORT AcqUri
 {
-    std::string scheme;                                      /**< Lower-case scheme without "://". */
+    std::string scheme;                                      /**< Lower-case scheme without "://": a letter, then letters, digits, +, -, . or _. */
     std::string target;                                      /**< Everything between "://" and "?". */
     std::vector<std::pair<std::string, std::string>> params; /**< Query parameters. */
 

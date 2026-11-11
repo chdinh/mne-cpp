@@ -38,7 +38,7 @@ bool validScheme(std::string_view scheme) noexcept
         return false;
     }
     for (const char c : scheme) {
-        const bool ok = (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.';
+        const bool ok = (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '+' || c == '-' || c == '.' || c == '_';
         if (!ok) {
             return false;
         }
