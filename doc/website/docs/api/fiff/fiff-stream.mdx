@@ -21,13 +21,12 @@ sidebar_position: 1
 class FIFFLIB::FiffStream
 ```
 
-FIFF tag-stream reader/writer: wraps a QIODevice and exposes typed read_* / write_* methods for every FIFF block and record kind.
+FIFF tag-stream reader/writer: exposes typed read_* / write_* methods for every FIFF block and record kind.
 
-Reads or writes one `QIODevice`. Builds the FIFF directory and [`FiffDirNode`](/docs/api/fiff/fiff-dir-node) block tree on `open` and exposes typed loaders / emitters for every structured record (id, channel info, coord trans, named matrix, dig point, projector, CTF comp, raw segment, evoked, covariance). The on-disk format is the Elekta/Neuromag FIFF specification — files emitted here round-trip through `mne.io.fiff` in MNE-Python without modification.
+Reads or writes one byte stream. Builds the FIFF directory and [`FiffDirNode`](/docs/api/fiff/fiff-dir-node) block tree on `open` and exposes typed loaders / emitters for every structured record (id, channel info, coord trans, named matrix, dig point, projector, CTF comp, raw segment, evoked, covariance). The on-disk format is the Elekta/Neuromag FIFF specification — files emitted here round-trip through `mne.io.fiff` in MNE-Python without modification.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream stream(&structureFile);
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -39,30 +38,14 @@ stream.close();
 
 ## Public Methods
 
-### FiffStream(p_pIODevice)
+### FiffStream(path)
 
-Constructs a fiff stream that uses the I/O device p_pIODevice.
-
-**Parameters:**
-
-- **p_pIODevice** : *QIODevice **
-  A fiff IO device like a fiff QFile or QTCPSocket.
-
----
-
-### FiffStream(a, mode)
-
-Constructs a fiff stream that operates on a byte array, a.
-
-The mode describes how the device is to be used.
+Constructs a fiff stream that reads a file; `open()` opens it and reads its directory.
 
 **Parameters:**
 
-- **a** : *QByteArray **
-  The byte array.
-
-- **mode** : *QIODevice::OpenMode*
-  The open mode.
+- **path** : *const std::filesystem::path &*
+  The file; if it cannot be opened, `open()` fails.
 
 ---
 
@@ -70,7 +53,7 @@ The mode describes how the device is to be used.
 
 Constructs a fiff stream on a byte stream, e.g.
 
-a file opened without Qt.
+bytes in memory.
 
 **Parameters:**
 
@@ -102,11 +85,11 @@ a file opened without Qt.
 
 ---
 
-### device()
+### byte_stream()
 
 **Returns:**
 
-- *QIODevice ** — The Qt device the stream reads and writes, or nullptr for a stream on a byte stream.
+- *[ByteStream](/docs/api/base/byte-stream) &* — The bytes the stream reads and writes, e.g. to rewind them or to take what was written to memory; a stream constructed from a path has them only once it is open.
 
 ---
 
@@ -227,7 +210,7 @@ Writes a FIFF_BLOCK_END tag.
 
 ### end_file()
 
-Writes the closing tags to a fif file and closes the file.
+Writes the tag that ends a FIFF file; the file is complete once the stream is closed or destroyed.
 
 ---
 
@@ -261,16 +244,9 @@ Helper to get all evoked entries.
 
 ---
 
-### open(mode)
+### open()
 
-QFile::open.
-
-unmask base class open function Opens a fif file and provides the directory of tags
-
-**Parameters:**
-
-- **mode** : *QIODevice::OpenModeFlag*
-  The open mode (Default = ReadOnly).
+Reads the file id and the directory of tags, scanning the file if it has no directory.
 
 **Returns:**
 
@@ -581,16 +557,6 @@ Reads the header of the tag at the current position.
 **Returns:**
 
 - *std::optional&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt;* — The tag with its size but without payload, or nothing if the stream ends.
-
----
-
-### read_rt_tag()
-
-Reads the next tag of a real-time stream, waiting until it has arrived.
-
-**Returns:**
-
-- *std::optional&lt; [FiffTag](/docs/api/fiff/fiff-tag) &gt;* — The tag, or nothing if it cannot be read.
 
 ---
 
@@ -1132,24 +1098,6 @@ Opens a FIFF file for reading and reads its tag directory.
 
 ---
 
-### byteStream(device, mode)
-
-Byte stream over a Qt device, for callers that hold a QIODevice such as a socket or a QBuffer.
-
-**Parameters:**
-
-- **device** : *QIODevice &*
-  The device; it must outlive the byte stream. It is opened in `mode` unless already open.
-
-- **mode** : *QIODevice::OpenMode*
-  How to open the device.
-
-**Returns:**
-
-- *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;* — The byte stream, or nullptr if the device cannot be opened.
-
----
-
 ### split_name_list(p_sNameList)
 
 fiff_split_name_list
@@ -1167,18 +1115,20 @@ Splits a FIFF name list at its separator ":".
 
 ---
 
-### start_file(p_IODevice)
+### start_file(bytes)
 
-Opens a fiff file for writing and writes the compulsory header tags.
+Writes the compulsory header tags to bytes that are not a file, e.g.
+
+in memory.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The IODevice (like QFile or QTCPSocket) to open. It is recommended that the name ends with .fif.
+- **bytes** : *std::unique_ptr&lt; [ByteStream](/docs/api/base/byte-stream) &gt;*
+  Where to write; the returned stream owns them.
 
 **Returns:**
 
-- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The opened file.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The stream, or nullptr if `bytes` is null.
 
 ---
 
@@ -1197,18 +1147,18 @@ Creates or truncates a FIFF file and writes the compulsory header tags.
 
 ---
 
-### open_update(p_IODevice)
+### open_update(path)
 
-Open fiff file for update.
+Opens an existing FIFF file for update, as MNE-C's fiff_open_update: tags can be rewritten in place, and new tags go to the end, where its directory, which is dropped, used to be.
 
 **Parameters:**
 
-- **p_IODevice** : *QIODevice &*
-  The IODevice (like QFile or QTCPSocket) to open. It is recommended that the name ends with .fif.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 **Returns:**
 
-- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The opened file stream.
+- *std::unique_ptr&lt; [FiffStream](/docs/api/fiff/fiff-stream) &gt;* — The stream, or nullptr if the file does not exist or is not a FIFF file.
 
 ---
 
@@ -1310,8 +1260,7 @@ Opens the source file, locates the FIFFB_PROCESSING_HISTORY block, reads all tag
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 226"
-QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream stream(&structureFile);
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -1325,8 +1274,8 @@ ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 
 
 Read a FIFF file from a memory buffer with a chosen byte order and summarise its contents.
 
-````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 126"
-FIFFLIB::FiffStream stream(&buffer);
+````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 105"
+FIFFLIB::FiffStream stream(std::make_unique<BASELIB::MemoryByteStream>(std::move(bytes)));
 stream.setLittleEndian(littleEndian);
 ````
 
@@ -1335,8 +1284,7 @@ stream.setLittleEndian(littleEndian);
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
 ````cpp title="src/examples/ex_fiff_structure/main.cpp, line 120"
-QFile structureFile(rawPath);
-FiffStream stream(&structureFile);
+FiffStream stream(rawPath.toStdU16String());
 ok &= stream.open();
 const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970

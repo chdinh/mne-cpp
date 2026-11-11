@@ -20,8 +20,7 @@ FIFF tag: 16-byte header (kind, type, size, next) plus payload, with typed decod
 Holds the four header fields exactly as stored on disk and a `QByteArray` with the raw payload. Decoders convert the payload to the appropriate C++ representation: scalars via `toInt` / `toFloat` / `toDouble`, dense and sparse matrices via `toFloatMatrix` / `toSparseFloatMatrix`, and the structured FIFF records into their class wrappers (`toFiffId`, `toCoordTrans`, `toChInfo`, `toChPos`, `toDigPoint`, ...). Used by [`FiffStream`](/docs/api/fiff/fiff-stream) both for streaming reads and for assembling tags before write_tag.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream stream(&structureFile);
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -480,8 +479,8 @@ This corresponds to the old sizeof(fiffTagRec) - sizeof(fiff_data_t *).
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 227"
-FiffStream stream(&structureFile);
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 226"
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access

@@ -20,8 +20,7 @@ Recursive FIFF block-tree node: block kind, block ID, directly contained directo
 Each node corresponds to one `FIFFB_BLOCK_START` ... `FIFFB_BLOCK_END` pair in the on-disk tag stream. The full tree is built once by `FiffStream::make_dir_tree` after the directory tag is parsed, and is then traversed by every higher-level reader ([`FiffInfo`](/docs/api/fiff/fiff-info), [`FiffRawData`](/docs/api/fiff/fiff-raw-data), [`FiffEvoked`](/docs/api/fiff/fiff-evoked), [`FiffCov`](/docs/api/fiff/fiff-cov), ...) via `dir_tree_find`. The static `copy_tree` helper streams an entire sub-tree from one [`FiffStream`](/docs/api/fiff/fiff-stream) to another preserving block IDs, which is how MNE-CPP writes derived files that keep provenance back to the source recording.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream stream(&structureFile);
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -31,8 +30,7 @@ stream.close();
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 // The block tree of a transform file, as MNE-C fiff_dir_tree prints it, with the names of tags and units
-QFile transFile(dir + "/all-trans.fif");
-FiffStream transStream(&transFile);
+FiffStream transStream(QString(dir + "/all-trans.fif").toStdU16String());
 transStream.open();
 QString tree;
 QTextStream treeOut(&tree);
@@ -212,8 +210,7 @@ Copies directory subtrees from fidin to fidout.
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
 ````cpp title="src/examples/ex_fiff_api/main.cpp, line 226"
-QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream stream(&structureFile);
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -227,7 +224,7 @@ ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 
 
 Read a FIFF file from a memory buffer with a chosen byte order and summarise its contents.
 
-````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 130"
+````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 109"
 FIFFLIB::FiffInfo FifInfo;
 std::shared_ptr<FIFFLIB::FiffDirNode> DirNode;
 ````

@@ -20,8 +20,7 @@ FIFF time stamp: Unix seconds plus a microsecond fraction matching the on-disk `
 Layout is two 32-bit fields (secs, usecs) — the exact representation used by `FIFF_MEAS_DATE` and the per-buffer timestamps embedded in raw data blocks, so an instance can be streamed in and out without per-field marshalling.
 
 ```cpp title="src/examples/ex_fiff_structure/main.cpp"
-QFile structureFile(rawPath);
-FiffStream stream(&structureFile);
+FiffStream stream(rawPath.toStdU16String());
 ok &= stream.open();
 const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
@@ -85,8 +84,8 @@ Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 121"
-FiffStream stream(&structureFile);
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 120"
+FiffStream stream(rawPath.toStdU16String());
 ok &= stream.open();
 const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970

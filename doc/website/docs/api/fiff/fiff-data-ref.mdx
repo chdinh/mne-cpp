@@ -69,7 +69,7 @@ Size of the old struct (fiffDataRefRec) 2*int + 2*long = 2*4 + 2*8 = 24.
 
 FIFF library: fixed-length epochs, CTF compensation, the file directory and raw buffers, and handing recordings to another application.
 
-````cpp title="src/examples/ex_fiff_structure/main.cpp, line 132"
+````cpp title="src/examples/ex_fiff_structure/main.cpp, line 131"
 // A reference to data in an external file: 2 x 32-bit type and byte order, 2 x 64-bit size and offset.
 FiffDataRef reference;
 reference.size = 3LL << 31; // beyond 2 GiB

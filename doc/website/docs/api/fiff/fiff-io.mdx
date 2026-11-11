@@ -17,18 +17,10 @@ class FIFFLIB::FiffIO
 
 One-call FIFF reader/writer: opens a file, dispatches to the right specialized loader and returns ready-to-use `FIFFLIB` containers.
 
-Sniffs the FIFF block tree, dispatches [`FiffRawData`](/docs/api/fiff/fiff-raw-data) / [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set) / [`FiffCov`](/docs/api/fiff/fiff-cov) / [`FiffInfo`](/docs/api/fiff/fiff-info) loaders as appropriate, and returns shared pointers so the resulting objects can be freely passed across the rest of the pipeline. Front-end parity with `mne.io.read_raw_fif` and friends.
+Sniffs the FIFF block tree, dispatches [`FiffRawData`](/docs/api/fiff/fiff-raw-data) / [`FiffEvokedSet`](/docs/api/fiff/fiff-evoked-set) loaders as appropriate, and returns shared pointers so the resulting objects can be freely passed across the rest of the pipeline. Front-end parity with `mne.io.read_raw_fif` and `mne.read_evokeds`.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile ioFile(dir + "/sample_audvis-ave.fif");
-FiffIO io(ioFile); // detects what the file holds (raw, evoked, fwd, ...)
-```
-
-### Inheritance
-
-```mermaid
-classDiagram
-    QObject <|-- FiffIO
+FiffIO io(QString(dir + "/sample_audvis-ave.fif").toStdU16String()); // detects what the file holds (raw, evoked, fwd, ...)
 ```
 
 ---
@@ -37,93 +29,74 @@ classDiagram
 
 ### FiffIO()
 
-Constructs a [`FiffIO`](/docs/api/fiff/fiff-io).
-
 ---
 
-### ~FiffIO()
+### FiffIO(path)
 
-Destroys the [`FiffIO`](/docs/api/fiff/fiff-io).
-
----
-
-### FiffIO(pIODevice)
-
-Constructs a [`FiffIO`](/docs/api/fiff/fiff-io) object by reading from a I/O device pIODevice.
+Reads the raw and evoked data of a file.
 
 **Parameters:**
 
-- **pIODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 ---
 
-### FiffIO(p_qlistIODevices)
+### FiffIO(paths)
 
-Constructs a [`FiffIO`](/docs/api/fiff/fiff-io) object that uses the I/O device pIODevice.
+Reads the raw and evoked data of several files.
 
 **Parameters:**
 
-- **p_qlistIODevices** : *std::vector&lt; QIODevice * &gt; &*
-  A QList of fiff IO devices like a fiff QFile or QTCPSocket.
+- **paths** : *const std::vector&lt; std::filesystem::path &gt; &*
+  The files.
 
 ---
 
-### FiffIO(p_FiffIO)
+### read(path)
 
-Copy constructor.
-
-**Parameters:**
-
-- **p_FiffIO** : *const FiffIO &*
-  [`FiffIO`](/docs/api/fiff/fiff-io), which should be copied.
-
----
-
-### read(pIODevice)
-
-Read data from a pIODevice.
+Appends the raw and evoked data of a file.
 
 **Parameters:**
 
-- **pIODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 **Returns:**
 
-- *bool* — false if the directory tree could not be read, true otherwise.
+- *bool* — false if the file has no directory tree, true otherwise.
 
 ---
 
-### read(p_qlistIODevices)
+### read(bytes)
 
-Read data from a QList of pIODevices.
+Appends the raw data of a FIFF file held in memory; evoked data can only be read from a file.
 
 **Parameters:**
 
-- **p_qlistIODevices** : *std::vector&lt; QIODevice &gt; &*
-  A QList of fiff IO devices like a fiff QFile or QTCPSocket.
+- **bytes** : *std::vector&lt; std::byte &gt;*
+  The file contents.
 
 **Returns:**
 
-- *bool* — true if all devices were read successfully, false otherwise.
+- *bool* — false if the bytes hold no FIFF directory tree, true otherwise.
 
 ---
 
-### write(pIODevice, type, idx)
+### write(path, type, idx)
 
-Write data to a single pIODevice.
+Writes data of one type to a FIFF file.
 
 **Parameters:**
 
-- **pIODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file. Raw data sets written all at once go to one file each, named after it with "_raw-&lt;index&gt;" before ".fif"; evoked data sets go to one file together.
 
-- **type** : *const fiff_int_t*
-  Type of data to write (fiff constants types, e.g. FIFFB_RAW_DATA).
+- **type** : *fiff_int_t*
+  FIFFB_RAW_DATA or FIFFB_EVOKED.
 
-- **idx** : *const fiff_int_t*
-  Index of type, -1 for all entities of this type.
+- **idx** : *fiff_int_t*
+  Index of the data set, -1 for all.
 
 **Returns:**
 
@@ -131,38 +104,17 @@ Write data to a single pIODevice.
 
 ---
 
-### write(p_QFile, type, idx)
+### write_raw(path, idx)
 
-Write whole data of a type to a fiff file.
-
-**Parameters:**
-
-- **p_QFile** : *QFile &*
-  Output file (name extended with type and index, e.g. sample_audvis-type-1.fif).
-
-- **type** : *const fiff_int_t*
-  Type of data to write (fiff constants types, e.g. FIFFB_RAW_DATA).
-
-- **idx** : *const fiff_int_t*
-  Index of type, -1 for all entities of this type.
-
-**Returns:**
-
-- *bool* — true if succeeded, false otherwise.
-
----
-
-### write_raw(pIODevice, idx)
-
-Write raw data to a pIODevice.
+Writes one raw data set to a FIFF file.
 
 **Parameters:**
 
-- **pIODevice** : *QIODevice &*
-  A fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file.
 
-- **idx** : *const fiff_int_t*
-  Index of type, -1 for all entities of this type.
+- **idx** : *fiff_int_t*
+  Index of the raw data set.
 
 **Returns:**
 
@@ -172,20 +124,20 @@ Write raw data to a pIODevice.
 
 ## Static Methods
 
-### setup_read(pIODevice, info, dirTree)
+### setup_read(path, info, dirTree)
 
-Setup a [`FiffStream`](/docs/api/fiff/fiff-stream).
+Reads the measurement info of a file.
 
 **Parameters:**
 
-- **pIODevice** : *QIODevice &*
-  An fiff IO device like a fiff QFile or QTCPSocket.
+- **path** : *const std::filesystem::path &*
+  The file.
 
 - **info** : *[FiffInfo](/docs/api/fiff/fiff-info) &*
-  Overall info for fiff IO device.
+  The measurement info.
 
 - **dirTree** : *std::shared_ptr&lt; [FiffDirNode](/docs/api/fiff/fiff-dir-node) &gt; &*
-  Node directory structure.
+  The node of the measurement info.
 
 **Returns:**
 
@@ -206,26 +158,25 @@ Setup a [`FiffStream`](/docs/api/fiff/fiff-stream).
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 280"
-QFile ioFile(dir + "/sample_audvis-ave.fif");
-FiffIO io(ioFile); // detects what the file holds (raw, evoked, fwd, ...)
-ok &= expect(io.m_qlistEvoked.size() == 4 && io.m_qlistRaw.empty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 278"
+FiffIO io(QString(dir + "/sample_audvis-ave.fif").toStdU16String()); // detects what the file holds (raw, evoked, fwd, ...)
+ok &= expect(io.evoked.size() == 4 && io.raw.empty(), "FiffIO finds the 4 evoked sets in an -ave.fif file");
 ````
 
 ### [ex_fiff_io](../../examples/mne/ex_fiff_io.mdx)
 
 Read the data sets of a FIFF file through the generic FiffIO interface and write its raw data back to disk.
 
-````cpp title="src/examples/ex_fiff_io/main.cpp, line 72"
-FiffIO p_fiffIO(t_listSampleFilesIn);
+````cpp title="src/examples/ex_fiff_io/main.cpp, line 67"
+FiffIO p_fiffIO(files);
 ````
 
 ### [ex_fiff_sniffer](../../examples/fiff/ex_fiff_sniffer.mdx)
 
 Read a FIFF file from a memory buffer with a chosen byte order and summarise its contents.
 
-````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 136"
-FIFFLIB::FiffIO p_fiffIO(t_fileRaw);
+````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 115"
+FIFFLIB::FiffIO p_fiffIO(parser.value(inputOption).toStdU16String());
 ````
 
 ## Authors of this file

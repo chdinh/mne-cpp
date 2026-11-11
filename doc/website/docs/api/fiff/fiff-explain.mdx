@@ -21,8 +21,7 @@ Every lookup returns an empty string for a value the table does not know.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 // The block tree of a transform file, as MNE-C fiff_dir_tree prints it, with the names of tags and units
-QFile transFile(dir + "/all-trans.fif");
-FiffStream transStream(&transFile);
+FiffStream transStream(QString(dir + "/all-trans.fif").toStdU16String());
 transStream.open();
 QString tree;
 QTextStream treeOut(&tree);
@@ -134,7 +133,7 @@ Name of a channel kind (FIFFV_*_CH), e.g.
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 243"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 241"
 QTextStream treeOut(&tree);
 transStream.dirtree()->print(treeOut);
 transStream.close();

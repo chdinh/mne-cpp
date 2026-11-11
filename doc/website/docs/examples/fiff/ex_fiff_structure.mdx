@@ -246,8 +246,7 @@ int main(int argc, char* argv[])
                  "FiffRawDir/FiffDirEntry: 2 data buffers cover the 6007 samples from sample 12900");
 
     //! [fiff_dir_entry_usage]
-    QFile structureFile(rawPath);
-    FiffStream stream(&structureFile);
+    FiffStream stream(rawPath.toStdU16String());
     ok &= stream.open();
     const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, type, size, position) + a kind -1 end
     const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970

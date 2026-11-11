@@ -20,8 +20,7 @@ class FIFFLIB::FiffId
 On-disk layout is a 20-byte record (version + 2x4-byte machine ID + 8-byte [`FiffTime`](/docs/api/fiff/fiff-time)). The `machid` is filled from the host MAC address by ``FiffStream::write_id`` when generating new identifiers, matching the Neuromag acquisition stack so file lineage stays reconstructible.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
-QFile structureFile(dir + "/sample_audvis-ave.fif");
-FiffStream stream(&structureFile);
+FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
@@ -177,7 +176,7 @@ Size of the old struct (fiffIdRec) 5*int = 5*4 = 20.
 
 FIFF library: measurement info, channels, digitizer, transforms, projectors, covariance, events, annotations, evoked sets and the low-level file structure.
 
-````cpp title="src/examples/ex_fiff_api/main.cpp, line 228"
+````cpp title="src/examples/ex_fiff_api/main.cpp, line 227"
 const bool opened = stream.open();
 const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->dir_tree_find(FIFFB_MEAS_INFO);
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
