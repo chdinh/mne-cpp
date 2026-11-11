@@ -996,9 +996,12 @@ void FiffRawViewModel::setRealtime(bool bRealtime)
 {
     m_bRealtime = bRealtime;
     if (m_bRealtime) {
-        m_FileSharer.initWatcher();
-        connect(&m_FileSharer, &FIFFLIB::FiffFileSharer::newFileAtPath,
-                this, &FiffRawViewModel::readFromRealtimeFile, Qt::UniqueConnection);
+        m_FileSharer.clear();
+        m_watcher.addPath(QString::fromStdU16String(m_FileSharer.directory().u16string()));
+        connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, [this] {
+            for (const std::filesystem::path& path : m_FileSharer.new_files()) {
+                readFromRealtimeFile(QString::fromStdU16String(path.u16string()));
+            } }, Qt::UniqueConnection);
     }
 }
 

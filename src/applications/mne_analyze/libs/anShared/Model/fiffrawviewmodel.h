@@ -636,7 +636,8 @@ private:
     int m_iDistanceTimerSpacer; /**< The distance for the horizontal time spacers in the view in ms. */
     int m_iScroller;
 
-    FIFFLIB::FiffFileSharer m_FileSharer; /**<  Handles receiving files from shared directory for receving from realtime recording. */
+    FIFFLIB::FiffFileSharer m_FileSharer; /**< Lists the recordings MNE Scan shares during a realtime session. */
+    QFileSystemWatcher m_watcher;         /**< Tells when MNE Scan shared another recording. */
 
     qint32 m_iScrollPos; /**< Position of the scrollbar */
 

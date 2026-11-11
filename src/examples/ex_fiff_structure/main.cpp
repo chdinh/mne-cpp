@@ -38,8 +38,6 @@
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFile>
-#include <QEventLoop>
-#include <QTimer>
 #include <QTemporaryDir>
 
 //=============================================================================================================
@@ -147,23 +145,17 @@ int main(int argc, char* argv[])
                  "FiffCtfComp: 5 compensation grades; the grade-1 compensator matches mne make_compensator");
 
     //! [fiff_file_sharer_usage]
-    // Hand a finished recording to another application through a watched directory.
-    QDir::setCurrent(tmp.path());
-    FiffFileSharer consumer("shared");
-    QStringList arrived;
-    QObject::connect(&consumer, &FiffFileSharer::newFileAtPath, [&](const QString& path) { arrived << path; });
-    consumer.initWatcher();
-    FiffFileSharer producer("shared");
-    producer.copyRealtimeFile(rawPath); // shared/realtime_file0_raw.fif
+    // Hand a finished recording to another application through a shared directory.
+    const std::filesystem::path shared = std::filesystem::path(tmp.path().toStdU16String()) / "shared";
+    FiffFileSharer consumer(shared);
+    consumer.clear();
+    FiffFileSharer producer(shared);
+    producer.copy_realtime_file(rawPath.toStdU16String()).value();           // shared/realtime_file0_raw.fif
+    const std::vector<std::filesystem::path> arrived = consumer.new_files(); // call it when a watcher reports a change
     //! [fiff_file_sharer_usage]
-    QEventLoop loop;
-    QTimer::singleShot(5000, &loop, &QEventLoop::quit);
-    QObject::connect(&consumer, &FiffFileSharer::newFileAtPath, &loop, &QEventLoop::quit);
-    if (arrived.isEmpty())
-        loop.exec();
-    const FiffRawData sharedRaw(tmp.filePath("shared/realtime_file0_raw.fif").toStdString());
-    ok &= expect(!arrived.isEmpty() && sharedRaw.last_samp - sharedRaw.first_samp + 1 == 6007,
-                 "FiffFileSharer: the copied recording arrives at the watcher and reads back with all 6007 samples");
+    const FiffRawData sharedRaw(arrived.empty() ? shared : arrived.front());
+    ok &= expect(arrived.size() == 1 && sharedRaw.last_samp - sharedRaw.first_samp + 1 == 6007,
+                 "FiffFileSharer: the consumer gets the shared recording and it reads back with all 6007 samples");
 
     std::println("{}", ok ? "All fiff structure checks passed." : "fiff structure checks FAILED.");
     return ok ? EXIT_SUCCESS : EXIT_FAILURE;

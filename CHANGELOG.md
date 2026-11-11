@@ -287,6 +287,15 @@ aliases; replace the old spelling as below.
   `start_writing_raw(FiffStream::byteStream(file, QIODevice::WriteOnly), ...)`
   becomes `start_writing_raw(file.fileName().toStdU16String(), ...)`.
   `BASELIB::FileByteStream::resize` cuts or extends a file.
+- `FIFFLIB::FiffFileSharer` is a plain class without Qt and no longer watches
+  its directory: `copy_realtime_file(path)` shares a recording and returns
+  the shared file (or an `Io` error), `new_files()` lists the files shared
+  since the last call, and `clear()` empties the directory. A shared file
+  only appears under its name once it is complete. Migration: replace
+  `copyRealtimeFile` with `copy_realtime_file`, and `initWatcher()` plus the
+  `newFileAtPath` signal with `clear()`, a `QFileSystemWatcher` on
+  `directory()`, and `new_files()` in its `directoryChanged` handler.
+  The fiff library no longer runs moc.
 - `FiffStream::read_rt_tag` is gone: nothing called it, and the real-time
   server reads its socket with `read_tag_info(false)` and `read_tag_data`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

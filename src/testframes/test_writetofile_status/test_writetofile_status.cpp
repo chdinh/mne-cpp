@@ -16,7 +16,9 @@
 #include <memory>
 #include <writetofile/FormFiles/writetofilestatuswidget.h>
 
+#include <fiff/fiff_ch_info.h>
 #include <fiff/fiff_dir_node.h>
+#include <fiff/fiff_info.h>
 #include <fiff/fiff_stream.h>
 
 #include <QApplication>

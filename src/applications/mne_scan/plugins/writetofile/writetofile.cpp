@@ -24,6 +24,7 @@
 
 #include <disp/viewers/projectsettingsview.h>
 #include <scMeas/realtimemultisamplearray.h>
+#include <fiff/fiff_info.h>
 #include <fiff/fiff_stream.h>
 
 #include <QFileInfo>
@@ -497,7 +498,9 @@ void WriteToFile::clipRecording(bool bChecked)
         return;
     }
     m_pOutfid->close();
-    m_FileSharer.copyRealtimeFile(m_qFileOut.fileName());
+    if (const auto shared = m_FileSharer.copy_realtime_file(m_qFileOut.fileName().toStdU16String()); !shared) {
+        qWarning() << "Could not share realtime file:" << QString::fromStdString(shared.error().what());
+    }
     if (!m_pOutfid->reopen()) {
         qWarning() << "Could not reopen realtime file:" << m_qFileOut.fileName();
         return;

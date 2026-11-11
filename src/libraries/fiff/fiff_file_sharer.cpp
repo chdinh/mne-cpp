@@ -7,10 +7,7 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Implementation of @ref FiffFileSharer: refcounted memory-mapped view of a FIFF file shared across consumers.
- *
- * Backs zero-copy access for the realtime pipeline, the GUI viewer and
- * the recording dumper without duplicating I/O.
+ * @brief    Implementation of @ref FiffFileSharer.
  */
 
 //=============================================================================================================
@@ -18,114 +15,94 @@
 //=============================================================================================================
 
 #include "fiff_file_sharer.h"
-#include <base/log.h>
+#include "fiff_stream.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
+#include <base/string_utils.h>
 
-#include <QDir>
+#include <format>
+#include <system_error>
 
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
 using namespace FIFFLIB;
-
-//=============================================================================================================
-// DEFINE STATIC MEMBERS
-//=============================================================================================================
-
-const static char m_sDefaultDirectory[]("realtime_shared_files");
-const static char m_sDefaultFileName[]("realtime_file");
+using BASELIB::ErrorCode;
+using BASELIB::fail;
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-FiffFileSharer::FiffFileSharer()
-: FiffFileSharer(m_sDefaultDirectory)
+FiffFileSharer::FiffFileSharer(const std::filesystem::path& directory)
+: m_directory(std::filesystem::absolute(directory))
 {
 }
 
 //=============================================================================================================
 
-FiffFileSharer::FiffFileSharer(const QString& sDirName)
-: m_sDirectory(QDir::currentPath() + "/" + sDirName)
-, m_iFileIndex(0)
+const std::filesystem::path& FiffFileSharer::directory() const
 {
+    return m_directory;
 }
 
 //=============================================================================================================
 
-void FiffFileSharer::copyRealtimeFile(const QString& sSourcePath)
+std::filesystem::path FiffFileSharer::fileAt(int index) const
 {
-    if (!initSharedDirectory())
-        return;
+    return m_directory / std::format("realtime_file{}_raw.fif", index);
+}
 
-    // Complete the copy under a temporary name and rename it, so the watcher never sees a half-written file.
-    const QString sFilePath(m_sDirectory + "/" + m_sDefaultFileName + QString::number(m_iFileIndex++) + "_raw.fif");
-    const QString sPartPath(sFilePath + ".part");
-    QFile::remove(sPartPath);
-    if (!QFile::copy(sSourcePath, sPartPath))
-        return;
+//=============================================================================================================
 
+BASELIB::Expected<std::filesystem::path> FiffFileSharer::copy_realtime_file(const std::filesystem::path& source)
+{
+    std::error_code ec;
+    std::filesystem::create_directories(m_directory, ec);
+    std::filesystem::path target = fileAt(m_next);
+    // Complete the copy under another name and rename it, so a consumer never sees a half-written file
+    std::filesystem::path part = target;
+    part += ".part";
+    if (ec || !std::filesystem::copy_file(source, part, std::filesystem::copy_options::overwrite_existing, ec)) {
+        return fail(ErrorCode::Io, "cannot copy {} to {}: {}", BASELIB::utf8FromPath(source), BASELIB::utf8FromPath(part), ec.message());
+    }
     // The copy is cut mid-recording: close its raw data blocks so it reads as a complete file
-    if (auto bytes = BASELIB::FileByteStream::open(sPartPath.toStdU16String(), BASELIB::FileByteStream::Mode::ReadWrite)) {
+    if (auto bytes = BASELIB::FileByteStream::open(part, BASELIB::FileByteStream::Mode::ReadWrite)) {
         bytes->seek(bytes->size());
-        FIFFLIB::FiffStream stream(std::move(bytes));
-        stream.finish_writing_raw();
+        FiffStream(std::move(bytes)).finish_writing_raw();
     }
-    QFile::remove(sFilePath);
-    QFile::rename(sPartPath, sFilePath);
+    std::filesystem::rename(part, target, ec);
+    if (ec) {
+        std::filesystem::remove(part, ec);
+        return fail(ErrorCode::Io, "cannot share {}", BASELIB::utf8FromPath(target));
+    }
+    ++m_next;
+    return target;
 }
 
 //=============================================================================================================
 
-void FiffFileSharer::initWatcher()
+std::vector<std::filesystem::path> FiffFileSharer::new_files()
 {
-    if (initSharedDirectory()) {
-        clearSharedDirectory();
-        m_fileWatcher.addPath(m_sDirectory);
-        connect(&m_fileWatcher, &QFileSystemWatcher::directoryChanged,
-                this, &FiffFileSharer::onDirectoryChanged, Qt::UniqueConnection);
-    } else {
-        BASELIB::Log::warning("[FiffFileSharer::initWatcher] Unable to initilaize shared directory");
+    std::vector<std::filesystem::path> files;
+    std::error_code ec;
+    for (std::filesystem::path next = fileAt(m_next); std::filesystem::exists(next, ec); next = fileAt(++m_next)) {
+        files.push_back(std::move(next));
     }
+    return files;
 }
 
 //=============================================================================================================
 
-void FiffFileSharer::clearSharedDirectory()
+bool FiffFileSharer::clear()
 {
-    QDir directory(m_sDirectory);
-    directory.setNameFilters(QStringList("*.*"));
-    directory.setFilter(QDir::Files);
-    for (auto& file : directory.entryList()) {
-        directory.remove(file);
+    std::error_code ec;
+    std::filesystem::create_directories(m_directory, ec);
+    for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(m_directory, ec)) {
+        if (entry.is_regular_file(ec)) {
+            std::filesystem::remove(entry.path(), ec);
+        }
     }
-}
-
-//=============================================================================================================
-
-void FiffFileSharer::onDirectoryChanged(const QString& sPath)
-{
-    // Files appear complete (renamed into place), so every new one can be reported as soon as it is listed.
-    QString filePath(sPath + "/" + m_sDefaultFileName + QString::number(m_iFileIndex) + "_raw.fif");
-    while (QFile::exists(filePath)) {
-        emit newFileAtPath(filePath);
-        filePath = sPath + "/" + m_sDefaultFileName + QString::number(++m_iFileIndex) + "_raw.fif";
-    }
-}
-
-//=============================================================================================================
-
-bool FiffFileSharer::initSharedDirectory()
-{
-    QDir sharedDirectory(m_sDirectory);
-    if (!sharedDirectory.exists()) {
-        sharedDirectory.mkpath(".");
-    }
-
-    return sharedDirectory.exists();
+    m_next = 0;
+    return std::filesystem::is_directory(m_directory, ec) && std::filesystem::is_empty(m_directory, ec);
 }

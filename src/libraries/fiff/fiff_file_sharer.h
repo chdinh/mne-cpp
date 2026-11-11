@@ -7,12 +7,12 @@
  * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
  * @since    2.0.0
  * @date     March 2026
- * @brief    Hands finished FIFF recordings from one application to another through a watched directory.
+ * @brief    Hands finished FIFF recordings from one application to another through a shared directory.
  *
- * The producer (e.g. MNE Scan's file writer) calls @ref FIFFLIB::FiffFileSharer::copyRealtimeFile, which copies a
- * recording into the shared directory as @c realtime_file<N>_raw.fif and closes its raw block so it is a complete
- * FIFF file. The consumer (e.g. MNE Analyze) calls @ref FIFFLIB::FiffFileSharer::initWatcher and receives
- * @c newFileAtPath once the next file has been written.
+ * The producer (e.g. MNE Scan's file writer) calls @ref FIFFLIB::FiffFileSharer::copy_realtime_file, which copies
+ * a recording into the shared directory as @c realtime_file<N>_raw.fif and closes its raw block so it is a complete
+ * FIFF file. The consumer (e.g. MNE Analyze) calls @ref FIFFLIB::FiffFileSharer::new_files whenever it is told the
+ * directory changed, for instance by a file system watcher.
  */
 
 #ifndef FIFF_FILE_SHARER_H
@@ -22,13 +22,12 @@
 // INCLUDES
 //=============================================================================================================
 
-#include "fiff_io.h"
+#include "fiff_global.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
+#include <base/error.h>
 
-#include <QFileSystemWatcher>
+#include <filesystem>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FIFFLIB
@@ -39,81 +38,57 @@ namespace FIFFLIB
 
 //=============================================================================================================
 /**
- * @brief Copies FIFF recordings into a shared directory and signals their arrival to a watching consumer.
+ * @brief Copies FIFF recordings into a shared directory and lists the ones a consumer has not seen yet.
  *
  * @snippet ex_fiff_structure/main.cpp fiff_file_sharer_usage
  */
-class FIFFSHARED_EXPORT FiffFileSharer : public QObject
+class FIFFSHARED_EXPORT FiffFileSharer
 {
-    Q_OBJECT
 public:
     //=========================================================================================================
     /**
-     * Constructs a FiffFileSharer with default paramaters (based on m_sDefaultDirectory and m_sDefaultFileName)
+     * @param[in] directory   The shared directory; a relative path is taken from the current directory now.
      */
-    FiffFileSharer();
+    explicit FiffFileSharer(const std::filesystem::path& directory = "realtime_shared_files");
+
+    /** @return The shared directory, absolute. */
+    const std::filesystem::path& directory() const;
 
     //=========================================================================================================
     /**
-     * Constructs a FiffFileSharer to watch/save to sDirName
+     * Producer: copies an unfinished FIFF recording into the shared directory and closes its raw block. The copy
+     * appears under its name only once it is complete.
      *
-     * @param[in] sDirName      Directory to/from which data will saved/read
-     */
-    FiffFileSharer(const QString& sDirName);
-
-    //=========================================================================================================
-    /**
-     * Copies an unfinished FIFF file into the shared directory and closes its raw block; the copy appears
-     * there only once it is complete
+     * @param[in] source   The recording, still being written.
      *
-     * @param[in] sSourcePath   source file to ber copied
+     * @return The shared file, or an Io error if the directory cannot be made or the source cannot be copied.
      */
-    void copyRealtimeFile(const QString& sSourcePath);
+    [[nodiscard]] BASELIB::Expected<std::filesystem::path> copy_realtime_file(const std::filesystem::path& source);
 
     //=========================================================================================================
     /**
-     * Sets member QFileSystemWatcher to watch set directory
+     * Consumer: the files shared since the last call, in the order they were shared.
+     *
+     * @return Paths of complete FIFF files.
      */
-    void initWatcher();
+    [[nodiscard]] std::vector<std::filesystem::path> new_files();
+
+    //=========================================================================================================
+    /**
+     * Consumer: creates the shared directory if needed, removes the files of earlier sessions and starts counting
+     * from the first file again.
+     *
+     * @return Whether the directory exists and is empty.
+     */
+    bool clear();
 
 private:
-    //=========================================================================================================
-    /**
-     * Creates specified shared directory if it does not exist.
-     *
-     * @return Returns whether shared directory exists in file structure.
-     */
-    bool initSharedDirectory();
+    /** @return The path of shared file @p index. */
+    std::filesystem::path fileAt(int index) const;
 
-    //=========================================================================================================
-    /**
-     * Clears shared directory of old shared files.
-     */
-    void clearSharedDirectory();
-
-    //=========================================================================================================
-    /**
-     * Called when the watched directory changes; emits newFileAtPath for every new complete file.
-     *
-     * @param[in] sPath     Path of directory that was changed.
-     */
-    void onDirectoryChanged(const QString& sPath);
-
-    QFileSystemWatcher m_fileWatcher; /**< Watches m_sDirectory for new files. */
-
-    QString m_sDirectory; /**< Directory where files will be saved to / read from. */
-    int m_iFileIndex;     /**< File counter to give files unique name */
-
-signals:
-
-    //=========================================================================================================
-    /**
-     * Emits path of new shared fiff file.
-     *
-     * @param[in] sPath     Path of new shared fiff file.
-     */
-    void newFileAtPath(const QString& sPath);
+    std::filesystem::path m_directory;
+    int m_next = 0; /**< Index of the next file to share (producer) or to report (consumer). */
 };
-} //namespace
+} // namespace FIFFLIB
 
 #endif // FIFF_FILE_SHARER_H

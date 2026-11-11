@@ -8,7 +8,6 @@ project(mne_fiff LANGUAGES CXX)
 
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(QT_REQUIRED_COMPONENTS Core Network)
