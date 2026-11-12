@@ -103,7 +103,7 @@ public:
      *
      * @return the size of the old struct fiffChPosRec.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
     //=========================================================================================================
     /**
@@ -128,7 +128,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline std::int32_t FiffChPos::storageSize()
+inline std::int32_t FiffChPos::storage_size()
 {
     return sizeof(FiffChPos::coil_type) + sizeof(FiffChPos::r0) + sizeof(FiffChPos::ex) + sizeof(FiffChPos::ey) + sizeof(FiffChPos::ez);
 }

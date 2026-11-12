@@ -300,7 +300,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
     if (t_pTag = node->find_tag(stream, FIFF_NCHAN); !t_pTag)
         global_nchan = 0;
     else {
-        global_nchan = *t_pTag->toInt();
+        global_nchan = *t_pTag->to_int();
         //        TAG_FREE(tag);
     }
     /*
@@ -314,14 +314,14 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         item_desc.clear();
 
         if (t_pTag = node->find_tag(stream, FIFF_NAME); t_pTag) {
-            item_desc += t_pTag->toString();
+            item_desc += t_pTag->to_string();
         }
 
         /*
             * Take the first line of description if it exists
             */
         if (t_pTag = node->find_tag(stream, FIFF_DESCRIPTION); t_pTag) {
-            desc_tag = QString::fromStdString(t_pTag->toString());
+            desc_tag = QString::fromStdString(t_pTag->to_string());
             int pos;
             if ((pos = desc_tag.indexOf("\n")) >= 0)
                 desc_tag.truncate(pos);
@@ -335,7 +335,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         if (t_pTag = node->find_tag(stream, FIFF_NCHAN); !t_pTag) {
             item_nchan = global_nchan;
         } else {
-            item_nchan = *t_pTag->toInt();
+            item_nchan = *t_pTag->to_int();
         }
         if (item_nchan <= 0) {
             BASELIB::Log::critical("Number of channels incorrectly specified for one of the projection items.");
@@ -348,7 +348,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
             return nullptr;
         }
 
-        item_names = FiffStream::split_name_list(t_pTag->toString());
+        item_names = FiffStream::split_name_list(t_pTag->to_string());
 
         if (static_cast<int>(item_names.size()) != item_nchan) {
             BASELIB::Log::critical("Channel name list incorrectly specified for proj item # {}", k + 1);
@@ -361,14 +361,14 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         if (t_pTag = node->find_tag(stream, FIFF_PROJ_ITEM_KIND); !t_pTag) {
             return nullptr;
         }
-        item_kind = *t_pTag->toInt();
+        item_kind = *t_pTag->to_int();
         /*
             * How many vectors
             */
         if (t_pTag = node->find_tag(stream, FIFF_PROJ_ITEM_NVEC); !t_pTag) {
             return nullptr;
         }
-        item_nvec = *t_pTag->toInt();
+        item_nvec = *t_pTag->to_int();
         /*
             * The projection data
             */
@@ -376,13 +376,13 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
             return nullptr;
         }
 
-        MatrixXf item_vectors = t_pTag->toFloatMatrix().transpose();
+        MatrixXf item_vectors = t_pTag->to_float_matrix().transpose();
 
         /*
             * Is this item active?
             */
         if (t_pTag = node->find_tag(stream, FIFF_MNE_PROJ_ITEM_ACTIVE); t_pTag) {
-            item_active = *t_pTag->toInt();
+            item_active = *t_pTag->to_int();
         } else
             item_active = false;
         /*

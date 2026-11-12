@@ -206,25 +206,25 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
         if (t_pTag = tmp_node->find_tag(stream, kind); !t_pTag)
             return nullptr;
 
-        t_pTag->getMatrixDimensions(ndim, dims);
+        t_pTag->matrix_dimensions(ndim, dims);
         if (ndim != 2) {
             BASELIB::Log::critical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
             return nullptr;
         }
 
-        data = t_pTag->toFloatMatrix().transpose();
+        data = t_pTag->to_float_matrix().transpose();
         dataFound = true;
     } else {
         for (int k = 0; k < tmp_node->nchild(); ++k) {
             if (tmp_node->children[k]->type == FIFFB_MNE_NAMED_MATRIX) {
                 if (t_pTag = tmp_node->children[k]->find_tag(stream, kind); t_pTag) {
-                    t_pTag->getMatrixDimensions(ndim, dims);
+                    t_pTag->matrix_dimensions(ndim, dims);
                     if (ndim != 2) {
                         BASELIB::Log::critical("MNENamedMatrix::read - Only two-dimensional matrices are supported.");
                         return nullptr;
                     }
 
-                    data = t_pTag->toFloatMatrix().transpose();
+                    data = t_pTag->to_float_matrix().transpose();
                     dataFound = true;
                     tmp_node = tmp_node->children[k];
                     break;
@@ -242,7 +242,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_NROW); !t_pTag) {
         nrow = static_cast<int>(data.rows());
     } else {
-        nrow = *t_pTag->toInt();
+        nrow = *t_pTag->to_int();
         if (nrow != data.rows()) {
             BASELIB::Log::critical("MNENamedMatrix::read - FIFF_MNE_NROW tag ({}) conflicts with matrix data ({}).", nrow, data.rows());
             return nullptr;
@@ -252,7 +252,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_NCOL); !t_pTag) {
         ncol = static_cast<int>(data.cols());
     } else {
-        ncol = *t_pTag->toInt();
+        ncol = *t_pTag->to_int();
         if (ncol != data.cols()) {
             BASELIB::Log::critical("MNENamedMatrix::read - FIFF_MNE_NCOL tag ({}) conflicts with matrix data ({}).", ncol, data.cols());
             return nullptr;
@@ -263,7 +263,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
      * Read optional row and column name lists.
      */
     if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_ROW_NAMES); t_pTag) {
-        const std::string s = t_pTag->toString();
+        const std::string s = t_pTag->to_string();
         rownames = FiffStream::split_name_list(s);
         if (static_cast<int>(rownames.size()) != nrow) {
             BASELIB::Log::critical("MNENamedMatrix::read - Row name count ({}) does not match nrow ({}).", rownames.size(), nrow);
@@ -272,7 +272,7 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
     }
 
     if (t_pTag = tmp_node->find_tag(stream, FIFF_MNE_COL_NAMES); t_pTag) {
-        const std::string s = t_pTag->toString();
+        const std::string s = t_pTag->to_string();
         colnames = FiffStream::split_name_list(s);
         if (static_cast<int>(colnames.size()) != ncol) {
             BASELIB::Log::critical("MNENamedMatrix::read - Column name count ({}) does not match ncol ({}).", colnames.size(), ncol);

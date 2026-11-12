@@ -623,7 +623,7 @@ void TestMriIO::testCorFifWriteRead()
             break;
 
         if (tag->kind == FIFF_BLOCK_START) {
-            fiff_int_t blockKind = *tag->toInt();
+            fiff_int_t blockKind = *tag->to_int();
             if (blockKind == FIFFB_MRI)
                 foundMriBlock = true;
             if (blockKind == FIFFB_MRI_SET)
@@ -982,7 +982,7 @@ void TestMriIO::testCorFifWriteReadSynthetic()
         if (!tag)
             break;
         if (tag->kind == FIFF_BLOCK_START) {
-            fiff_int_t blockKind = *tag->toInt();
+            fiff_int_t blockKind = *tag->to_int();
             if (blockKind == FIFFB_MRI_SLICE)
                 sliceCount++;
         }

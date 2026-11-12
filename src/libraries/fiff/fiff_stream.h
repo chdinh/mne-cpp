@@ -121,7 +121,7 @@ public:
      * Constructs a fiff stream on a byte stream, e.g. bytes in memory.
      *
      * @param[in] bytes  The byte stream, already open; the fiff stream owns it.
-     * @param[in] name   Name reported by streamName(), e.g. the file path.
+     * @param[in] name   Name reported by stream_name(), e.g. the file path.
      */
     explicit FiffStream(std::unique_ptr<BASELIB::ByteStream> bytes, std::string name = {});
 
@@ -153,7 +153,7 @@ public:
     /**
      * @return Whether the underlying device or byte stream is open.
      */
-    bool isOpen() const;
+    bool is_open() const;
 
     //=========================================================================================================
     /**
@@ -169,13 +169,13 @@ public:
      *
      * @param[in] littleEndian  True to read and write little-endian.
      */
-    void setLittleEndian(bool littleEndian);
+    void set_little_endian(bool littleEndian);
 
     //=========================================================================================================
     /**
      * @return True when the stream reads and writes little-endian.
      */
-    bool isLittleEndian() const;
+    bool is_little_endian() const;
 
     //=========================================================================================================
     /**
@@ -183,7 +183,7 @@ public:
      *
      * @return the name of the current stream.
      */
-    std::string streamName();
+    std::string stream_name();
 
     //=========================================================================================================
     /**
@@ -919,7 +919,7 @@ public:
      *
      * @since 2.2.0
      */
-    static bool copyProcessingHistory(const std::filesystem::path& fromPath, const std::filesystem::path& toPath);
+    static bool copy_processing_history(const std::filesystem::path& fromPath, const std::filesystem::path& toPath);
 
 private:
     /** Writes the file id, directory pointer and free list that open every FIFF file. */
@@ -953,10 +953,10 @@ private:
     std::vector<FiffDirEntry> make_dir(bool* ok = nullptr);
 
     fiff_long_t tell() const;
-    bool seekTo(fiff_long_t pos);
-    void seekToEnd();
-    void readRaw(void* data, fiff_long_t bytes);
-    void writeRaw(const void* data, fiff_long_t bytes);
+    bool seek(fiff_long_t pos);
+    void seek_to_end();
+    void read_raw(void* data, fiff_long_t bytes);
+    void write_raw(const void* data, fiff_long_t bytes);
 
     // Reads one value in the stream's byte order; a short read yields 0 and marks the stream failed
     template<BASELIB::Swappable T>

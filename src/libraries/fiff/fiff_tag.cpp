@@ -60,16 +60,16 @@ FiffTag::FiffTag()
 
 //=============================================================================================================
 
-fiff_int_t FiffTag::getMatrixCoding() const
+fiff_int_t FiffTag::matrix_coding() const
 {
     return IS_MATRIX & this->type;
 }
 
 //=============================================================================================================
 
-bool FiffTag::isMatrix() const
+bool FiffTag::is_matrix() const
 {
-    if (this->getMatrixCoding() != 0)
+    if (this->matrix_coding() != 0)
         return true;
     else
         return false;
@@ -77,11 +77,11 @@ bool FiffTag::isMatrix() const
 
 //=============================================================================================================
 
-bool FiffTag::getMatrixDimensions(std::int32_t& p_ndim, std::vector<std::int32_t>& p_Dims) const
+bool FiffTag::matrix_dimensions(std::int32_t& p_ndim, std::vector<std::int32_t>& p_Dims) const
 {
     p_Dims.clear();
     p_ndim = 0;
-    if (!this->isMatrix() || this->data() == nullptr || this->size() < 4)
+    if (!this->is_matrix() || this->data() == nullptr || this->size() < 4)
         return false;
 
     //
@@ -110,7 +110,7 @@ bool FiffTag::getMatrixDimensions(std::int32_t& p_ndim, std::vector<std::int32_t
         nValues = std::min<std::int64_t>(nValues * t_pInt32[i], this->size()); // capped: enough to compare, no overflow
     }
     if (!sparse) {
-        const int base = this->getType();
+        const int base = this->data_type();
         const std::int64_t valueSize = (base == FIFFT_DOUBLE || base == FIFFT_COMPLEX_FLOAT) ? 8 : (base == FIFFT_COMPLEX_DOUBLE ? 16 : 4);
         if (nValues * valueSize > static_cast<std::int64_t>(nInts - nTrailer) * 4)
             return false;
@@ -123,9 +123,9 @@ bool FiffTag::getMatrixDimensions(std::int32_t& p_ndim, std::vector<std::int32_t
 
 //=============================================================================================================
 
-fiff_int_t FiffTag::getType() const
+fiff_int_t FiffTag::data_type() const
 {
-    if (this->isMatrix()) {
+    if (this->is_matrix()) {
         return DATA_TYPE & this->type;
     } else {
         return this->type;
@@ -134,7 +134,7 @@ fiff_int_t FiffTag::getType() const
 
 //=============================================================================================================
 
-Eigen::SparseMatrix<double> FiffTag::toSparseFloatMatrix() const
+Eigen::SparseMatrix<double> FiffTag::to_sparse_float_matrix() const
 {
     const std::unique_ptr<FiffSparseMatrix> mat = FiffSparseMatrix::fiff_get_float_sparse_matrix(*this);
     return mat ? Eigen::SparseMatrix<double>(mat->eigen().cast<double>()) : Eigen::SparseMatrix<double>();
@@ -142,12 +142,12 @@ Eigen::SparseMatrix<double> FiffTag::toSparseFloatMatrix() const
 
 //=============================================================================================================
 
-std::string FiffTag::getInfo() const
+std::string FiffTag::info() const
 {
     std::string t_qStringInfo;
 
-    if (this->isMatrix()) {
-        switch (this->getType()) {
+    if (this->is_matrix()) {
+        switch (this->data_type()) {
             case FIFFT_INT:
                 t_qStringInfo = "Matrix of type FIFFT_INT";
                 break;
@@ -170,7 +170,7 @@ std::string FiffTag::getInfo() const
                 t_qStringInfo = "Matrix of unknown type";
         }
     } else {
-        switch (this->getType()) {
+        switch (this->data_type()) {
             //
             // Simple types
             //
@@ -527,9 +527,9 @@ void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
             break;
 
         case FIFFT_DIR_ENTRY_STRUCT:
-            np = static_cast<int>(tag.size() / FiffDirEntry::storageSize());
+            np = static_cast<int>(tag.size() / FiffDirEntry::storage_size());
             for (k = 0; k < np; k++) {
-                offset = tag.data() + k * FiffDirEntry::storageSize();
+                offset = tag.data() + k * FiffDirEntry::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 ithis[0] = swap_int(ithis[0]); //kind
                 ithis[1] = swap_int(ithis[1]); //type
@@ -539,9 +539,9 @@ void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
             break;
 
         case FIFFT_ID_STRUCT:
-            np = static_cast<int>(tag.size() / FiffId::storageSize());
+            np = static_cast<int>(tag.size() / FiffId::storage_size());
             for (k = 0; k < np; k++) {
-                offset = tag.data() + k * FiffId::storageSize();
+                offset = tag.data() + k * FiffId::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 ithis[0] = swap_int(ithis[0]); //version
                 ithis[1] = swap_int(ithis[1]); //machid[0]
@@ -553,9 +553,9 @@ void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
 
         case FIFFT_CH_INFO_STRUCT:
 
-            np = static_cast<int>(tag.size() / FiffChInfo::storageSize());
+            np = static_cast<int>(tag.size() / FiffChInfo::storage_size());
             for (k = 0; k < np; k++) {
-                offset = tag.data() + k * FiffChInfo::storageSize();
+                offset = tag.data() + k * FiffChInfo::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -575,9 +575,9 @@ void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
 
         case FIFFT_CH_POS_STRUCT:
 
-            np = static_cast<int>(tag.size() / FiffChPos::storageSize());
+            np = static_cast<int>(tag.size() / FiffChPos::storage_size());
             for (k = 0; k < np; ++k) {
-                offset = tag.data() + k * FiffChPos::storageSize();
+                offset = tag.data() + k * FiffChPos::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -590,10 +590,10 @@ void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
 
         case FIFFT_DIG_POINT_STRUCT:
 
-            np = static_cast<int>(tag.size() / FiffDigPoint::storageSize());
+            np = static_cast<int>(tag.size() / FiffDigPoint::storage_size());
 
             for (k = 0; k < np; k++) {
-                offset = tag.data() + k * FiffDigPoint::storageSize();
+                offset = tag.data() + k * FiffDigPoint::storage_size();
                 ithis = reinterpret_cast<fiff_int_t*>(offset);
                 fthis = reinterpret_cast<float*>(offset);
 
@@ -623,7 +623,7 @@ void FiffTag::convert_tag_data(FiffTag& tag, int from_endian, int to_endian)
             break;
 
         case FIFFT_DATA_REF_STRUCT:
-            np = static_cast<int>(tag.size() / FiffDataRef::storageSize());
+            np = static_cast<int>(tag.size() / FiffDataRef::storage_size());
             for (drthis = reinterpret_cast<FiffDataRef*>(tag.data()), k = 0; k < np; k++, drthis++) {
                 drthis->type = swap_int(drthis->type);
                 drthis->endian = swap_int(drthis->endian);
@@ -662,10 +662,10 @@ fiff_int_t FiffTag::fiff_type_matrix_coding(fiff_int_t type)
 
 //=============================================================================================================
 
-const std::int32_t* FiffTag::toInt() const
+const std::int32_t* FiffTag::to_int() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_INT) {
-        BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)\n", this->kind, this->getType());
+    if (this->is_matrix() || this->data_type() != FIFFT_INT) {
+        BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)\n", this->kind, this->data_type());
         return nullptr;
     } else
         return reinterpret_cast<const std::int32_t*>(this->data());
@@ -673,10 +673,10 @@ const std::int32_t* FiffTag::toInt() const
 
 //=============================================================================================================
 
-const std::int32_t* FiffTag::toJulian() const
+const std::int32_t* FiffTag::to_julian() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_JULIAN) {
-        BASELIB::Log::warning("Expected a julian tag : {} (found data type {} instead)\n", this->kind, this->getType());
+    if (this->is_matrix() || this->data_type() != FIFFT_JULIAN) {
+        BASELIB::Log::warning("Expected a julian tag : {} (found data type {} instead)\n", this->kind, this->data_type());
         return nullptr;
     } else
         return reinterpret_cast<const std::int32_t*>(this->data());
@@ -684,14 +684,14 @@ const std::int32_t* FiffTag::toJulian() const
 
 //=============================================================================================================
 
-Eigen::MatrixXi FiffTag::toIntMatrix() const
+Eigen::MatrixXi FiffTag::to_int_matrix() const
 {
-    if (!this->isMatrix() || this->getType() != FIFFT_INT || this->data() == nullptr)
+    if (!this->is_matrix() || this->data_type() != FIFFT_INT || this->data() == nullptr)
         return Eigen::MatrixXi();
 
     std::int32_t ndim;
     std::vector<std::int32_t> dims;
-    this->getMatrixDimensions(ndim, dims);
+    this->matrix_dimensions(ndim, dims);
 
     if (ndim != 2) {
         BASELIB::Log::warning("Only two-dimensional matrices are supported at this time");
@@ -706,19 +706,19 @@ Eigen::MatrixXi FiffTag::toIntMatrix() const
 
 //=============================================================================================================
 
-Eigen::MatrixXf FiffTag::toFloatMatrix() const
+Eigen::MatrixXf FiffTag::to_float_matrix() const
 {
-    if (!this->isMatrix() || this->getType() != FIFFT_FLOAT || this->data() == nullptr)
+    if (!this->is_matrix() || this->data_type() != FIFFT_FLOAT || this->data() == nullptr)
         return Eigen::MatrixXf(); //NULL;
 
     if (fiff_type_matrix_coding(this->type) != FIFFTS_MC_DENSE) {
-        BASELIB::Log::warning("Error in FiffTag::toFloatMatrix(): Matrix is not dense!");
+        BASELIB::Log::warning("Error in FiffTag::to_float_matrix(): Matrix is not dense!");
         return Eigen::MatrixXf();
     }
 
     std::int32_t ndim;
     std::vector<std::int32_t> dims;
-    this->getMatrixDimensions(ndim, dims);
+    this->matrix_dimensions(ndim, dims);
 
     if (ndim != 2) {
         BASELIB::Log::warning("Only two-dimensional matrices are supported at this time");

@@ -85,7 +85,7 @@ BASELIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<FiffStream> str
 {
     using BASELIB::ErrorCode;
     using BASELIB::fail;
-    const std::string name = stream->streamName();
+    const std::string name = stream->stream_name();
     if (!stream->open()) {
         return fail(ErrorCode::Io, "cannot open {}", name);
     }
@@ -123,7 +123,7 @@ BASELIB::Expected<FiffRawData> FiffRawData::read(std::unique_ptr<FiffStream> str
     }
     const auto readInt = [&stream](const FiffDirEntry& entry) -> std::optional<fiff_int_t> {
         const std::optional<FiffTag> tag = stream->read_tag(entry.pos);
-        const fiff_int_t* value = tag ? tag->toInt() : nullptr;
+        const fiff_int_t* value = tag ? tag->to_int() : nullptr;
         return value ? std::optional<fiff_int_t>(*value) : std::nullopt;
     };
 
@@ -338,7 +338,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     //    mult.makeCompressed();
 
     FiffStream& fid = *this->file;
-    const bool open_here = !fid.isOpen();
+    const bool open_here = !fid.is_open();
     if (open_here && !fid.reopen()) {
         BASELIB::Log::warning("Cannot open file {}", this->info.filename);
         return false;
@@ -373,15 +373,15 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 if (mult.cols() == 0) {
                     if (sel.cols() == 0) {
                         if (t_pTag->type == FIFFT_DAU_PACK16)
-                            one = cal * (Map<const MatrixDau16>(t_pTag->toDauPack16(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixDau16>(t_pTag->to_dau_pack16(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_INT)
-                            one = cal * (Map<const MatrixXi>(t_pTag->toInt(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixXi>(t_pTag->to_int(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_FLOAT)
-                            one = cal * (Map<const MatrixXf>(t_pTag->toFloat(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixXf>(t_pTag->to_float(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_SHORT)
-                            one = cal * (Map<const MatrixShort>(t_pTag->toShort(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixShort>(t_pTag->to_short(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_DOUBLE)
-                            one = cal * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
+                            one = cal * Map<const MatrixXd>(t_pTag->to_double(), nchan, thisRawDir.nsamp);
                         else {
                             BASELIB::Log::warning("Data Storage Format not known yet [1]!! Type: {}\n", t_pTag->type);
                             if (open_here)
@@ -393,27 +393,27 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                         newData.resize(sel.cols(), thisRawDir.nsamp); //ToDo this can be done much faster, without newData
 
                         if (t_pTag->type == FIFFT_DAU_PACK16) {
-                            tmp_data = (Map<const MatrixDau16>(t_pTag->toDauPack16(), nchan, thisRawDir.nsamp)).cast<double>();
+                            tmp_data = (Map<const MatrixDau16>(t_pTag->to_dau_pack16(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_INT) {
-                            tmp_data = (Map<const MatrixXi>(t_pTag->toInt(), nchan, thisRawDir.nsamp)).cast<double>();
+                            tmp_data = (Map<const MatrixXi>(t_pTag->to_int(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_FLOAT) {
-                            tmp_data = (Map<const MatrixXf>(t_pTag->toFloat(), nchan, thisRawDir.nsamp)).cast<double>();
+                            tmp_data = (Map<const MatrixXf>(t_pTag->to_float(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_SHORT) {
-                            tmp_data = (Map<const MatrixShort>(t_pTag->toShort(), nchan, thisRawDir.nsamp)).cast<double>();
+                            tmp_data = (Map<const MatrixShort>(t_pTag->to_short(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_DOUBLE) {
-                            tmp_data = Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
+                            tmp_data = Map<const MatrixXd>(t_pTag->to_double(), nchan, thisRawDir.nsamp);
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
@@ -428,15 +428,15 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                     }
                 } else {
                     if (t_pTag->type == FIFFT_DAU_PACK16)
-                        one = mult * (Map<const MatrixDau16>(t_pTag->toDauPack16(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixDau16>(t_pTag->to_dau_pack16(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_INT)
-                        one = mult * (Map<const MatrixXi>(t_pTag->toInt(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixXi>(t_pTag->to_int(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_FLOAT)
-                        one = mult * (Map<const MatrixXf>(t_pTag->toFloat(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixXf>(t_pTag->to_float(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_SHORT)
-                        one = mult * (Map<const MatrixShort>(t_pTag->toShort(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixShort>(t_pTag->to_short(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_DOUBLE)
-                        one = mult * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
+                        one = mult * Map<const MatrixXd>(t_pTag->to_double(), nchan, thisRawDir.nsamp);
                     else {
                         BASELIB::Log::warning("Data Storage Format not known yet [3]!! Type: {}\n", t_pTag->type);
                         if (open_here)
@@ -636,7 +636,7 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
     //
 
     FiffStream& fid = *this->file;
-    const bool open_here = !fid.isOpen();
+    const bool open_here = !fid.is_open();
     if (open_here && !fid.reopen()) {
         BASELIB::Log::warning("Cannot open file {}", this->info.filename);
         return false;
@@ -671,15 +671,15 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                 if (mult.cols() == 0) {
                     if (sel.cols() == 0) {
                         if (t_pTag->type == FIFFT_DAU_PACK16)
-                            one = cal * (Map<const MatrixDau16>(t_pTag->toDauPack16(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixDau16>(t_pTag->to_dau_pack16(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_INT)
-                            one = cal * (Map<const MatrixXi>(t_pTag->toInt(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixXi>(t_pTag->to_int(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_FLOAT)
-                            one = cal * (Map<const MatrixXf>(t_pTag->toFloat(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixXf>(t_pTag->to_float(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_SHORT)
-                            one = cal * (Map<const MatrixShort>(t_pTag->toShort(), nchan, thisRawDir.nsamp)).cast<double>();
+                            one = cal * (Map<const MatrixShort>(t_pTag->to_short(), nchan, thisRawDir.nsamp)).cast<double>();
                         else if (t_pTag->type == FIFFT_DOUBLE)
-                            one = cal * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
+                            one = cal * Map<const MatrixXd>(t_pTag->to_double(), nchan, thisRawDir.nsamp);
                         else {
                             BASELIB::Log::warning("Data Storage Format not known yet [1]!! Type: {}\n", t_pTag->type);
                             if (open_here)
@@ -691,27 +691,27 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                         MatrixXd newData(sel.cols(), thisRawDir.nsamp); //ToDo this can be done much faster, without newData
 
                         if (t_pTag->type == FIFFT_DAU_PACK16) {
-                            MatrixXd tmp_data = (Map<const MatrixDau16>(t_pTag->toDauPack16(), nchan, thisRawDir.nsamp)).cast<double>();
+                            MatrixXd tmp_data = (Map<const MatrixDau16>(t_pTag->to_dau_pack16(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_INT) {
-                            MatrixXd tmp_data = (Map<const MatrixXi>(t_pTag->toInt(), nchan, thisRawDir.nsamp)).cast<double>();
+                            MatrixXd tmp_data = (Map<const MatrixXi>(t_pTag->to_int(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_FLOAT) {
-                            MatrixXd tmp_data = (Map<const MatrixXf>(t_pTag->toFloat(), nchan, thisRawDir.nsamp)).cast<double>();
+                            MatrixXd tmp_data = (Map<const MatrixXf>(t_pTag->to_float(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_SHORT) {
-                            MatrixXd tmp_data = (Map<const MatrixShort>(t_pTag->toShort(), nchan, thisRawDir.nsamp)).cast<double>();
+                            MatrixXd tmp_data = (Map<const MatrixShort>(t_pTag->to_short(), nchan, thisRawDir.nsamp)).cast<double>();
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
                         } else if (t_pTag->type == FIFFT_DOUBLE) {
-                            MatrixXd tmp_data = Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
+                            MatrixXd tmp_data = Map<const MatrixXd>(t_pTag->to_double(), nchan, thisRawDir.nsamp);
 
                             for (r = 0; r < sel.size(); ++r)
                                 newData.block(r, 0, 1, thisRawDir.nsamp) = tmp_data.block(sel[r], 0, 1, thisRawDir.nsamp);
@@ -726,15 +726,15 @@ bool FiffRawData::read_raw_segment(MatrixXd& data,
                     }
                 } else {
                     if (t_pTag->type == FIFFT_DAU_PACK16)
-                        one = mult * (Map<const MatrixDau16>(t_pTag->toDauPack16(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixDau16>(t_pTag->to_dau_pack16(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_INT)
-                        one = mult * (Map<const MatrixXi>(t_pTag->toInt(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixXi>(t_pTag->to_int(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_FLOAT)
-                        one = mult * (Map<const MatrixXf>(t_pTag->toFloat(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixXf>(t_pTag->to_float(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_SHORT)
-                        one = mult * (Map<const MatrixShort>(t_pTag->toShort(), nchan, thisRawDir.nsamp)).cast<double>();
+                        one = mult * (Map<const MatrixShort>(t_pTag->to_short(), nchan, thisRawDir.nsamp)).cast<double>();
                     else if (t_pTag->type == FIFFT_DOUBLE)
-                        one = mult * Map<const MatrixXd>(t_pTag->toDouble(), nchan, thisRawDir.nsamp);
+                        one = mult * Map<const MatrixXd>(t_pTag->to_double(), nchan, thisRawDir.nsamp);
                     else {
                         BASELIB::Log::warning("Data Storage Format not known yet [3]!! Type: {}\n", t_pTag->type);
                         if (open_here)

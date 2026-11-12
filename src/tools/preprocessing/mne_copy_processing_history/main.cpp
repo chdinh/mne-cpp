@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if (!FiffStream::copyProcessingHistory(fromFile.toStdU16String(), toFile.toStdU16String())) {
+    if (!FiffStream::copy_processing_history(fromFile.toStdU16String(), toFile.toStdU16String())) {
         qCritical("Failed to copy processing history from %s to %s", qPrintable(fromFile), qPrintable(toFile));
         return 1;
     }

@@ -1105,10 +1105,10 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
         if (t_pTag = fwd->find_tag(t_pStream, FIFF_MNE_INCLUDED_METHODS); !t_pTag) {
             return fail(ErrorCode::Format, "a forward solution in {} lists no methods", name);
         }
-        if (*t_pTag->toInt() == FIFFV_MNE_MEG) {
+        if (*t_pTag->to_int() == FIFFV_MNE_MEG) {
             Log::info("MEG solution found");
             megnode = fwd;
-        } else if (*t_pTag->toInt() == FIFFV_MNE_EEG) {
+        } else if (*t_pTag->to_int() == FIFFV_MNE_EEG) {
             Log::info("EEG solution found");
             eegnode = fwd;
         }
@@ -1175,7 +1175,7 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     if (t_pTag = parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS); !t_pTag) {
         return fail(ErrorCode::Format, "no MRI/head coordinate transformation in {}", name);
     } else {
-        fwd.mri_head_t = t_pTag->toCoordTrans();
+        fwd.mri_head_t = t_pTag->to_coord_trans();
 
         if (fwd.mri_head_t.from != FIFFV_COORD_MRI || fwd.mri_head_t.to != FIFFV_COORD_HEAD) {
             fwd.mri_head_t.invert_transform();
@@ -1315,7 +1315,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         return false;
     }
 
-    one.source_ori = *t_pTag->toInt();
+    one.source_ori = *t_pTag->to_int();
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         stream.close();
@@ -1323,7 +1323,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         return false;
     }
 
-    one.coord_frame = *t_pTag->toInt();
+    one.coord_frame = *t_pTag->to_int();
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         stream.close();
@@ -1331,7 +1331,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         return false;
     }
 
-    one.nsource = *t_pTag->toInt();
+    one.nsource = *t_pTag->to_int();
 
     if (t_pTag = p_Node->find_tag(stream, FIFF_NCHAN); !t_pTag) {
         stream.close();
@@ -1339,7 +1339,7 @@ bool MNEForwardSolution::read_one(FiffStream& stream,
         return false;
     }
 
-    one.nchan = *t_pTag->toInt();
+    one.nchan = *t_pTag->to_int();
 
     if (stream.read_named_matrix(p_Node, FIFF_MNE_FORWARD_SOLUTION, one.sol))
         one.sol.transpose_named_matrix();

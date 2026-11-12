@@ -63,23 +63,23 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
     auto matrix = std::make_unique<MNESparseNamedMatrix>();
     matrix->nrow = data->rows();
     matrix->ncol = data->cols();
-    if (const auto nrow = block->find_tag(stream, FIFF_MNE_NROW); nrow && *nrow->toInt() != matrix->nrow) {
+    if (const auto nrow = block->find_tag(stream, FIFF_MNE_NROW); nrow && *nrow->to_int() != matrix->nrow) {
         BASELIB::Log::critical("MNESparseNamedMatrix::read - FIFF_MNE_NROW conflicts with the matrix data.");
         return nullptr;
     }
-    if (const auto ncol = block->find_tag(stream, FIFF_MNE_NCOL); ncol && *ncol->toInt() != matrix->ncol) {
+    if (const auto ncol = block->find_tag(stream, FIFF_MNE_NCOL); ncol && *ncol->to_int() != matrix->ncol) {
         BASELIB::Log::critical("MNESparseNamedMatrix::read - FIFF_MNE_NCOL conflicts with the matrix data.");
         return nullptr;
     }
     if (tag = block->find_tag(stream, FIFF_MNE_ROW_NAMES); tag) {
-        matrix->rowlist = FiffStream::split_name_list(tag->toString());
+        matrix->rowlist = FiffStream::split_name_list(tag->to_string());
         if (static_cast<int>(matrix->rowlist.size()) != matrix->nrow) {
             BASELIB::Log::critical("MNESparseNamedMatrix::read - Incorrect number of entries in the row name list.");
             return nullptr;
         }
     }
     if (tag = block->find_tag(stream, FIFF_MNE_COL_NAMES); tag) {
-        matrix->collist = FiffStream::split_name_list(tag->toString());
+        matrix->collist = FiffStream::split_name_list(tag->to_string());
         if (static_cast<int>(matrix->collist.size()) != matrix->ncol) {
             BASELIB::Log::critical("MNESparseNamedMatrix::read - Incorrect number of entries in the column name list.");
             return nullptr;

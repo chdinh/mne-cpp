@@ -66,7 +66,7 @@ static QString explained(const std::string& name)
 
 void MNEFiffContents::print_file_id(QTextStream& out, const FiffTag& tag)
 {
-    FiffId id = tag.toFiffID();
+    FiffId id = tag.to_fiff_id();
     struct tm* ltime;
     time_t time_val;
     char buf[100];
@@ -101,7 +101,7 @@ void MNEFiffContents::print_file_id(QTextStream& out, const FiffTag& tag)
 
 void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag& tag)
 {
-    FiffChInfo info = tag.toChInfo();
+    FiffChInfo info = tag.to_ch_info();
     // FIFF_UNIT_NONE has an empty symbol; only units the table does not know are "N/A"
     const std::string unit = FiffExplain::unit(info.unit);
     const std::string text1 = info.unit == FIFF_UNIT_NONE || !unit.empty() ? unit : std::string("N/A");
@@ -118,7 +118,7 @@ void MNEFiffContents::print_ch_info(QTextStream& out, const FiffTag& tag)
 
 void MNEFiffContents::print_transform(QTextStream& out, const FiffTag& tag)
 {
-    FiffCoordTrans t = tag.toCoordTrans();
+    FiffCoordTrans t = tag.to_coord_trans();
     int k, p;
     int frame;
     out << "\t";
@@ -141,7 +141,7 @@ void MNEFiffContents::print_transform(QTextStream& out, const FiffTag& tag)
 
 void MNEFiffContents::print_dig_point(QTextStream& out, const FiffTag& tag)
 {
-    FiffDigPoint point = tag.toDigPoint();
+    FiffDigPoint point = tag.to_dig_point();
     switch (point.kind) {
         case FIFFV_POINT_CARDINAL:
             out << QString::asprintf("\tcardinal %3d ", point.ident);
@@ -210,7 +210,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                     for (int k = 0; k < indent; k++)
                         out << " ";
                     if (tag = stream.read_tag(this_ent.pos); tag) {
-                        block = *tag->toInt();
+                        block = *tag->to_int();
                         out << QString::asprintf("%-d = %-s\n", block, explained(FiffExplain::block(block)).toUtf8().constData());
                     }
                 }
@@ -248,7 +248,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                         out << " ";
                     out << QString::asprintf("%4d = %-s", this_ent.kind, explained(FiffExplain::tag(this_ent.kind)).toUtf8().constData());
                     if (tag = stream.read_tag(this_ent.pos); tag) {
-                        block = *tag->toInt();
+                        block = *tag->to_int();
                         out << QString::asprintf("\t%-d = %-s", block, explained(FiffExplain::block(block)).toUtf8().constData());
                     }
                     if (this_ent.kind == FIFF_BLOCK_START)
@@ -271,14 +271,14 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (this_ent.kind == FIFF_BLOCK_START ||
                                         this_ent.kind == FIFF_BLOCK_END) {
-                                        block = *tag->toInt();
+                                        block = *tag->to_int();
                                         out << QString::asprintf("\t%-d = %s", block, explained(FiffExplain::block(block)).toUtf8().constData());
                                     } else if (this_ent.kind == FIFF_MEAS_DATE) {
                                         QDateTime ltime;
-                                        ltime.setSecsSinceEpoch(tag->toInt()[0]);
+                                        ltime.setSecsSinceEpoch(tag->to_int()[0]);
                                         out << QString::asprintf("\t%s", ltime.toString().toUtf8().constData());
                                     } else if (tag->size() == sizeof(fiff_int_t))
-                                        out << QString::asprintf("\t%d", *tag->toInt());
+                                        out << QString::asprintf("\t%d", *tag->to_int());
                                     else
                                         out << QString::asprintf("\t%d ints", static_cast<int>(tag->size() / sizeof(fiff_int_t)));
                                 }
@@ -286,7 +286,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                             case FIFFT_UINT:
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (tag->size() == sizeof(fiff_int_t))
-                                        out << QString::asprintf("\t%d", *tag->toUnsignedInt());
+                                        out << QString::asprintf("\t%d", *tag->to_unsigned_int());
                                     else
                                         out << QString::asprintf("\t%d u_ints", static_cast<int>(tag->size() / sizeof(fiff_int_t)));
                                 }
@@ -299,9 +299,9 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 break;
                             case FIFFT_STRING:
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
-                                    s = QString::fromStdString(tag->toString());
+                                    s = QString::fromStdString(tag->to_string());
                                     if (long_strings)
-                                        out << QString::asprintf("\t%s", tag->toString().c_str());
+                                        out << QString::asprintf("\t%s", tag->to_string().c_str());
                                     else {
                                         if ((s.indexOf("\n")) != -1)
                                             s.replace(s.indexOf("\n"), 2, "\0");
@@ -316,7 +316,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                             case FIFFT_FLOAT:
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (tag->size() == sizeof(fiff_float_t))
-                                        out << QString::asprintf("\t%g", *tag->toFloat());
+                                        out << QString::asprintf("\t%g", *tag->to_float());
                                     else
                                         out << QString::asprintf("\t%d floats", static_cast<int>(tag->size() / sizeof(fiff_float_t)));
                                 }
@@ -324,14 +324,14 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                             case FIFFT_DOUBLE:
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
                                     if (tag->size() == sizeof(fiff_double_t))
-                                        out << QString::asprintf("\t%g", *tag->toDouble());
+                                        out << QString::asprintf("\t%g", *tag->to_double());
                                     else
                                         out << QString::asprintf("\t%d doubles", static_cast<int>(tag->size() / sizeof(fiff_double_t)));
                                 }
                                 break;
                             case FIFFT_COMPLEX_FLOAT:
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
-                                    const float* fdata = tag->toFloat();
+                                    const float* fdata = tag->to_float();
                                     if (tag->size() == 2 * sizeof(fiff_float_t))
                                         out << QString::asprintf("\t(%g %g)", fdata[0], fdata[1]);
                                     else
@@ -341,7 +341,7 @@ bool MNEFiffContents::show_fiff_contents(QTextStream& out, const QString& name, 
                                 break;
                             case FIFFT_COMPLEX_DOUBLE:
                                 if (tag = stream.read_tag(this_ent.pos); tag) {
-                                    const double* ddata = tag->toDouble();
+                                    const double* ddata = tag->to_double();
                                     if (tag->size() == 2 * sizeof(fiff_double_t))
                                         out << QString::asprintf("\t(%g %g)", ddata[0], ddata[1]);
                                     else

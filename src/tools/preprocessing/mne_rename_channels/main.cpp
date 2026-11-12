@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
         if (stream->dir()[k].kind == FIFF_CH_INFO) {
             std::optional<FiffTag> tag;
             tag = stream->read_tag(stream->dir()[k].pos);
-            FiffChInfo ch = tag->toChInfo();
+            FiffChInfo ch = tag->to_ch_info();
 
             for (const ChannelAlias& a : aliases) {
                 if (ch.ch_name == a.from) {

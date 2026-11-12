@@ -2283,12 +2283,12 @@ private slots:
         QCOMPARE(bemNodes.size(), 1);
         const auto approx = bemNodes[0]->find_tag(stream, FIFF_BEM_APPROX);
         QVERIFY(approx);
-        QCOMPARE(*approx->toInt(), FIFFV_BEM_APPROX_LINEAR);
+        QCOMPARE(*approx->to_int(), FIFFV_BEM_APPROX_LINEAR);
         const auto tag = bemNodes[0]->find_tag(stream, FIFF_BEM_POT_SOLUTION);
         QVERIFY(tag);
         qint32 ndim;
         std::vector<qint32> dims;
-        tag->getMatrixDimensions(ndim, dims);
+        tag->matrix_dimensions(ndim, dims);
         QCOMPARE(dims[0], bem[0].np);
         QCOMPARE(dims[1], bem[0].np);
     }

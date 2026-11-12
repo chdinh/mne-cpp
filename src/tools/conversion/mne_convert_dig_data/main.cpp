@@ -77,7 +77,7 @@ static QList<DigPt> readFifDig(const QString& filename)
         if (stream.dir()[k].kind == FIFF_DIG_POINT) {
             std::optional<FiffTag> tag;
             tag = stream.read_tag(stream.dir()[k].pos);
-            FiffDigPoint dp = tag->toDigPoint();
+            FiffDigPoint dp = tag->to_dig_point();
             DigPt p;
             p.kind = dp.kind;
             p.ident = dp.ident;

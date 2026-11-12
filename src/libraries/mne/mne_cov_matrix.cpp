@@ -175,7 +175,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
         if (t_pTag = nodes[k]->find_tag(stream, FIFF_MNE_COV_KIND); !t_pTag)
             continue;
 
-        if (*t_pTag->toInt() == kind) {
+        if (*t_pTag->to_int() == kind) {
             covnode = nodes[k];
             break;
         }
@@ -192,13 +192,13 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
         stream.close();
         return nullptr;
     }
-    ncov = *t_pTag->toInt();
+    ncov = *t_pTag->to_int();
 
     if (t_pTag = nodes[k]->find_tag(stream, FIFF_MNE_COV_NFREE); t_pTag) {
-        nfree = *t_pTag->toInt();
+        nfree = *t_pTag->to_int();
     }
     if (t_pTag = covnode->find_tag(stream, FIFF_MNE_ROW_NAMES); t_pTag) {
-        names = FiffStream::split_name_list(t_pTag->toString());
+        names = FiffStream::split_name_list(t_pTag->to_string());
         nnames = static_cast<int>(names.size());
         if (nnames != ncov) {
             BASELIB::Log::critical("Incorrect number of channel names for a covariance matrix");
@@ -211,9 +211,9 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
             stream.close();
             return nullptr;
         } else {
-            if (t_pTag->getType() == FIFFT_DOUBLE) {
+            if (t_pTag->data_type() == FIFFT_DOUBLE) {
                 cov_diag.resize(ncov);
-                d = t_pTag->toDouble();
+                d = t_pTag->to_double();
                 for (p = 0; p < ncov; p++)
                     cov_diag[p] = d[p];
                 /*
@@ -224,9 +224,9 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
                     stream.close();
                     return nullptr;
                 }
-            } else if (t_pTag->getType() == FIFFT_FLOAT) {
+            } else if (t_pTag->data_type() == FIFFT_FLOAT) {
                 cov_diag.resize(ncov);
-                f = t_pTag->toFloat();
+                f = t_pTag->to_float();
                 for (p = 0; p < ncov; p++)
                     cov_diag[p] = f[p];
             } else {
@@ -237,9 +237,9 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
         }
     } else {
         nn = ncov * (ncov + 1) / 2;
-        if (t_pTag->getType() == FIFFT_DOUBLE) {
+        if (t_pTag->data_type() == FIFFT_DOUBLE) {
             cov.resize(nn);
-            d = t_pTag->toDouble();
+            d = t_pTag->to_double();
             for (p = 0; p < nn; p++)
                 cov[p] = d[p];
             if (cov.sum() == 0.0) {
@@ -247,9 +247,9 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
                 stream.close();
                 return nullptr;
             }
-        } else if (t_pTag->getType() == FIFFT_FLOAT) {
+        } else if (t_pTag->data_type() == FIFFT_FLOAT) {
             cov.resize(nn);
-            f = t_pTag->toFloat();
+            f = t_pTag->to_float();
             for (p = 0; p < nn; p++)
                 cov[p] = f[p];
         } else {
@@ -261,14 +261,14 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
         }
 
         if (t_pTag = nodes[k]->find_tag(stream, FIFF_MNE_COV_EIGENVALUES); t_pTag) {
-            const double* lambda_data = static_cast<const double*>(t_pTag->toDouble());
+            const double* lambda_data = static_cast<const double*>(t_pTag->to_double());
             lambda = Eigen::Map<const Eigen::VectorXd>(lambda_data, ncov);
             if (t_pTag = nodes[k]->find_tag(stream, FIFF_MNE_COV_EIGENVECTORS); !t_pTag) {
                 stream.close();
                 return nullptr;
             }
 
-            tmp_eigen = t_pTag->toFloatMatrix().transpose();
+            tmp_eigen = t_pTag->to_float_matrix().transpose();
             eigen.resize(tmp_eigen.rows(), tmp_eigen.cols());
             for (int r = 0; r < tmp_eigen.rows(); ++r)
                 for (int c = 0; c < tmp_eigen.cols(); ++c)

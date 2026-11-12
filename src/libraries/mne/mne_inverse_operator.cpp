@@ -879,17 +879,17 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
         return fail(ErrorCode::Format, "no included methods in {}", name);
     }
 
-    inv.methods = *t_pTag->toInt();
+    inv.methods = *t_pTag->to_int();
     //
     if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_SOURCE_ORIENTATION); !t_pTag) {
         return fail(ErrorCode::Format, "no source orientation constraints in {}", name);
     }
-    inv.source_ori = *t_pTag->toInt();
+    inv.source_ori = *t_pTag->to_int();
     //
     if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         return fail(ErrorCode::Format, "no source count in {}", name);
     }
-    inv.nsource = *t_pTag->toInt();
+    inv.nsource = *t_pTag->to_int();
     inv.nchan = 0;
     //
     //   Coordinate frame
@@ -897,13 +897,13 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
     if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         return fail(ErrorCode::Format, "no coordinate frame in {}", name);
     }
-    inv.coord_frame = *t_pTag->toInt();
+    inv.coord_frame = *t_pTag->to_int();
     //
     //   Units of the source estimates. Optional: files written before this was
     //   recorded simply do not carry it, so a missing tag is not an error.
     //
     if (t_pTag = invs->find_tag(t_pStream, FIFF_MNE_INVERSE_SOURCE_UNIT); t_pTag)
-        inv.units = *t_pTag->toInt();
+        inv.units = *t_pTag->to_int();
     else
         inv.units = -1;
     //
@@ -913,7 +913,7 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
         return fail(ErrorCode::Format, "no source orientation information in {}", name);
     }
 
-    inv.source_nn = t_pTag->toFloatMatrix();
+    inv.source_nn = t_pTag->to_float_matrix();
     inv.source_nn.transposeInPlace();
 
     Log::info("[done]\n");
@@ -925,7 +925,7 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
         return fail(ErrorCode::Format, "no singular values in {}", name);
     }
 
-    inv.sing = Map<const VectorXf>(t_pTag->toFloat(), t_pTag->size() / 4).cast<double>();
+    inv.sing = Map<const VectorXf>(t_pTag->to_float(), t_pTag->size() / 4).cast<double>();
     inv.nchan = inv.sing.rows();
     //
     //   The eigenleads and eigenfields
@@ -995,7 +995,7 @@ Expected<MNEInverseOperator> MNEInverseOperator::read(const std::filesystem::pat
     if (t_pTag = parent_mri[0]->find_tag(t_pStream, FIFF_COORD_TRANS); !t_pTag) {
         return fail(ErrorCode::Format, "no MRI/head coordinate transformation in {}", name);
     } else {
-        mri_head_t = t_pTag->toCoordTrans();
+        mri_head_t = t_pTag->to_coord_trans();
         if (mri_head_t.from != FIFFV_COORD_MRI || mri_head_t.to != FIFFV_COORD_HEAD) {
             mri_head_t.invert_transform();
             if (mri_head_t.from != FIFFV_COORD_MRI || mri_head_t.to != FIFFV_COORD_HEAD) {

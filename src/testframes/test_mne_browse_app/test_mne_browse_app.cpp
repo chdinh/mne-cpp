@@ -534,7 +534,7 @@ void TestMneBrowseApp::annotatesDraggedRangeLikePython()
         if (entry.kind != 3568 && entry.kind != 3569)
             continue;
         if (const auto tag = stream.read_tag(entry.pos))
-            times[entry.kind] = QVector<float>(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+            times[entry.kind] = QVector<float>(tag->to_float(), tag->to_float() + tag->size() / 4);
     }
     annotFile.close();
     QCOMPARE(times[3568].size(), 1);

@@ -129,7 +129,7 @@ int FiffCoordTransSet::read(const std::filesystem::path& path)
         if (!tag) {
             continue;
         }
-        const FiffCoordTrans t = tag->toCoordTrans();
+        const FiffCoordTrans t = tag->to_coord_trans();
         for (const auto& link : links) {
             if (t.from == link.from && t.to == link.to) {
                 this->*link.member = t;

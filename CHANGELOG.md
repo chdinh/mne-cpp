@@ -305,6 +305,21 @@ aliases; replace the old spelling as below.
   `std::ranges::equal(a->bytes(), b->bytes())`, `QString(tag.data())` becomes
   `QString::fromStdString(tag.toString())`, and `char* p = tag.data()` becomes
   `std::byte* p = tag.data()`.
+- `FiffTag`, `FiffStream` and the FIFF record types use snake_case member
+  names, without aliases. Migration on `FiffTag`: `getType` -> `data_type`,
+  `isMatrix` -> `is_matrix`, `getMatrixCoding` -> `matrix_coding`,
+  `getMatrixDimensions` -> `matrix_dimensions`, `getInfo` -> `info`, and every
+  decoder `toXxx` -> `to_xxx` (`toInt` -> `to_int`, `toFloatMatrix` ->
+  `to_float_matrix`, `toSparseFloatMatrix` -> `to_sparse_float_matrix`,
+  `toFiffID` -> `to_fiff_id`, `toChInfo` -> `to_ch_info`, `toDauPack16` ->
+  `to_dau_pack16`, ...). On `FiffStream`: `isOpen` -> `is_open`,
+  `streamName` -> `stream_name`, `setLittleEndian`/`isLittleEndian` ->
+  `set_little_endian`/`is_little_endian`, `copyProcessingHistory` ->
+  `copy_processing_history`, `seekTo` -> `seek`, `seekToEnd` -> `seek_to_end`,
+  `readRaw`/`writeRaw` -> `read_raw`/`write_raw`. `storageSize()` of `FiffTag`,
+  `FiffId`, `FiffTime`, `FiffChInfo`, `FiffChPos`, `FiffDigPoint`,
+  `FiffDirEntry` and `FiffDataRef` is `storage_size()`, and `FiffId::toString`
+  is `to_string`.
 - `FiffStream::read_rt_tag` is gone: nothing called it, and the real-time
   server reads its socket with `read_tag_info(false)` and `read_tag_data`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

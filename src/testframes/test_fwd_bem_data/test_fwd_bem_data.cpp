@@ -425,7 +425,7 @@ private slots:
             if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
                 std::optional<FiffTag> tag;
                 tag = stream.read_tag(stream.dir()[i].pos);
-                trans = tag->toCoordTrans();
+                trans = tag->to_coord_trans();
                 break;
             }
         }

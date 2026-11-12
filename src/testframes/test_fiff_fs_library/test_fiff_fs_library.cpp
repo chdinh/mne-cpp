@@ -1404,7 +1404,7 @@ void TestFiffFsLibrary::fiffStream_readTagInfoAndData()
 
 void TestFiffFsLibrary::fiff_microCoveragePush()
 {
-    qint32 storageSize = FiffDataRef::storageSize();
+    qint32 storageSize = FiffDataRef::storage_size();
     QVERIFY(storageSize > 0);
     FiffDigitizerData digData;
     QVERIFY(digData.nfids() == 0);

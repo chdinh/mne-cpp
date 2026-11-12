@@ -17,7 +17,7 @@
  * multiple physical files while keeping a single logical FIFF tree, and
  * how MNE-Python's @c mne.io.Raw chains @c .fif fragments through the
  * @c next_fname mechanism. @ref FIFFLIB::FiffDataRef is the in-memory representation
- * of that record; @ref FIFFLIB::FiffDataRef::storageSize "FiffDataRef::storageSize" matches the on-disk size
+ * of that record; @ref FIFFLIB::FiffDataRef::storage_size "FiffDataRef::storage_size" matches the on-disk size
  * exactly so @ref FIFFLIB::FiffStream can stream the data ref directly into a
  * buffer with no per-field marshalling.
  */
@@ -80,7 +80,7 @@ public:
      *
      * @return the size of the old struct fiffDataRefRec.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
 public:
     std::int32_t type;   /**< Type of the data. */
@@ -93,7 +93,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline std::int32_t FiffDataRef::storageSize()
+inline std::int32_t FiffDataRef::storage_size()
 {
     return sizeof(FiffDataRef::type) + sizeof(FiffDataRef::endian) + sizeof(FiffDataRef::size) + sizeof(FiffDataRef::offset);
 }

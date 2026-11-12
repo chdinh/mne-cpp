@@ -454,7 +454,7 @@ void TestFiffRWR::readsFromAByteStream()
     const QString path = testDataDir() + "/MEG/sample/sample_audvis-cov.fif";
     FiffStream byPath(path.toStdU16String());
     QVERIFY(byPath.open());
-    QVERIFY(byPath.isOpen());
+    QVERIFY(byPath.is_open());
 
     auto bytes = BASELIB::FileByteStream::open(path.toStdString(), BASELIB::FileByteStream::Mode::Read);
     QVERIFY(bytes);
@@ -488,8 +488,8 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     const std::string path = (testDataDir() + "/MEG/sample/all-trans.fif").toStdString();
     auto in = FiffStream::open(path);
     QVERIFY(in);
-    QVERIFY(in->isOpen());
-    QCOMPARE(in->streamName(), QString::fromStdString(path));
+    QVERIFY(in->is_open());
+    QCOMPARE(in->stream_name(), QString::fromStdString(path));
     QVERIFY(in->nent() > 0);
     const auto missing = FiffStream::open(m_tempDir.filePath("missing.fif").toStdString());
     QVERIFY(!missing);
@@ -511,9 +511,9 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     const std::optional<FiffTag> firstTag = in->read_tag(in->dir()[1].pos);
     QVERIFY(firstTag);
     in->close();
-    QVERIFY(!in->isOpen());
+    QVERIFY(!in->is_open());
     QVERIFY(in->reopen());
-    QVERIFY(in->isOpen());
+    QVERIFY(in->is_open());
     const std::optional<FiffTag> again = in->read_tag(in->dir()[1].pos);
     QVERIFY(again);
     QCOMPARE(again->kind, firstTag->kind);
@@ -532,7 +532,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     }
     out->end_file();
     out->close();
-    QVERIFY(!out->isOpen());
+    QVERIFY(!out->is_open());
     auto back = FiffStream::open(outPath);
     QVERIFY(back);
     int transforms = 0;

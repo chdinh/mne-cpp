@@ -193,8 +193,8 @@ void TestFiffStreamPython::sparseMatrices()
     QFETCH(int, kind);
     const std::optional<FiffTag> tag = m_stream->dirtree()->find_tag(*m_stream, kind);
     QVERIFY(tag);
-    QVERIFY(tag->isMatrix());
-    const MatrixXd back = MatrixXd(tag->toSparseFloatMatrix());
+    QVERIFY(tag->is_matrix());
+    const MatrixXd back = MatrixXd(tag->to_sparse_float_matrix());
     QCOMPARE(back.rows(), 3);
     QCOMPARE(back.cols(), 4);
     QVERIFY2((back - sparseReference().cast<double>()).cwiseAbs().maxCoeff() == 0.0,
@@ -211,7 +211,7 @@ void TestFiffStreamPython::intMatrix()
     expected << 1, 2, 3, 4, 5, 6;
     // Like the float decoders, toIntMatrix returns the transpose of the
     // stored row-major matrix; callers transpose it back.
-    QCOMPARE(MatrixXi(tag->toIntMatrix().transpose()), expected);
+    QCOMPARE(MatrixXi(tag->to_int_matrix().transpose()), expected);
 }
 
 //=============================================================================================================
@@ -253,7 +253,7 @@ void TestFiffStreamPython::coordTrans()
 {
     const std::optional<FiffTag> tag = m_stream->dirtree()->find_tag(*m_stream, FIFF_COORD_TRANS);
     QVERIFY(tag);
-    const FiffCoordTrans t = tag->toCoordTrans();
+    const FiffCoordTrans t = tag->to_coord_trans();
     QCOMPARE(t.from, static_cast<fiff_int_t>(FIFFV_COORD_DEVICE));
     QCOMPARE(t.to, static_cast<fiff_int_t>(FIFFV_COORD_HEAD));
     QVERIFY((t.trans.block<3, 3>(0, 0) - m_rot).cwiseAbs().maxCoeff() < 1e-7f);
@@ -265,13 +265,13 @@ void TestFiffStreamPython::coordTrans()
     FiffTag truncated;
     truncated.assign(tag->bytes().first(8));
     truncated.type = FIFFT_COORD_TRANS_STRUCT;
-    QCOMPARE(truncated.toCoordTrans().from, FiffCoordTrans().from);
+    QCOMPARE(truncated.to_coord_trans().from, FiffCoordTrans().from);
     truncated.type = FIFFT_DIG_POINT_STRUCT;
-    QCOMPARE(truncated.toDigPoint().kind, FiffDigPoint().kind);
+    QCOMPARE(truncated.to_dig_point().kind, FiffDigPoint().kind);
     truncated.type = FIFFT_ID_STRUCT;
-    QCOMPARE(truncated.toFiffID().version, FiffId().version);
+    QCOMPARE(truncated.to_fiff_id().version, FiffId().version);
     truncated.type = FIFFT_CH_INFO_STRUCT;
-    QCOMPARE(truncated.toChInfo().ch_name, FiffChInfo().ch_name);
+    QCOMPARE(truncated.to_ch_info().ch_name, FiffChInfo().ch_name);
 }
 
 //=============================================================================================================
@@ -305,7 +305,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
         w->write_int(FIFF_NCHAN, &nchan);
         w->end_file();
     }
-    QVERIFY(FiffStream::copyProcessingHistory(src.toStdU16String(), dst.toStdU16String()));
+    QVERIFY(FiffStream::copy_processing_history(src.toStdU16String(), dst.toStdU16String()));
 
     std::vector<std::shared_ptr<FiffDirNode>> dstRuns;
     QVERIFY(historyOf(dst, dstRuns));
@@ -322,7 +322,7 @@ void TestFiffStreamPython::copiesProcessingHistory()
         QFile f(dst);
         return f.open(QIODevice::ReadOnly) ? f.readAll() : QByteArray();
     }();
-    QVERIFY(!FiffStream::copyProcessingHistory(m_dir.filePath("missing.fif").toStdU16String(), dst.toStdU16String()));
+    QVERIFY(!FiffStream::copy_processing_history(m_dir.filePath("missing.fif").toStdU16String(), dst.toStdU16String()));
     const QString plain = m_dir.filePath("history-none.fif");
     {
         auto w = FiffStream::start_file(plain.toStdU16String());
@@ -331,8 +331,8 @@ void TestFiffStreamPython::copiesProcessingHistory()
         w->write_int(FIFF_NCHAN, &nchan);
         w->end_file();
     }
-    QVERIFY(!FiffStream::copyProcessingHistory(plain.toStdU16String(), dst.toStdU16String()));
-    QVERIFY(!FiffStream::copyProcessingHistory(src.toStdU16String(), m_dir.filePath("missing-dst.fif").toStdU16String()));
+    QVERIFY(!FiffStream::copy_processing_history(plain.toStdU16String(), dst.toStdU16String()));
+    QVERIFY(!FiffStream::copy_processing_history(src.toStdU16String(), m_dir.filePath("missing-dst.fif").toStdU16String()));
     QVERIFY(!QFile::exists(m_dir.filePath("missing-dst.fif")));
     QFile after(dst);
     QVERIFY(after.open(QIODevice::ReadOnly));
@@ -367,16 +367,16 @@ void TestFiffStreamPython::attachesEnvironment()
     const auto workingDir = env[0]->find_tag(r, FIFF_MNE_ENV_WORKING_DIR);
     QVERIFY(workingDir);
     // Strings are written as UTF-8: the tag holds the bytes, not the characters, of a non-ASCII path.
-    QCOMPARE(workingDir->toString(), QStringLiteral("/data/stüdy"));
+    QCOMPARE(workingDir->to_string(), QStringLiteral("/data/stüdy"));
     const auto commandLine = env[0]->find_tag(r, FIFF_MNE_ENV_COMMAND_LINE);
     QVERIFY(commandLine);
-    QCOMPARE(commandLine->toString(), QString("mne_process --raw a.fif"));
+    QCOMPARE(commandLine->to_string(), QString("mne_process --raw a.fif"));
     // The measurement block written before is still there.
     const std::vector<std::shared_ptr<FiffDirNode>> meas = r.dirtree()->dir_tree_find(FIFFB_MEAS);
     QCOMPARE(meas.size(), 1);
     const auto nchan = meas[0]->find_tag(r, FIFF_NCHAN);
     QVERIFY(nchan);
-    QCOMPARE(*nchan->toInt(), 3);
+    QCOMPARE(*nchan->to_int(), 3);
     r.close();
 }
 
@@ -482,20 +482,20 @@ void TestFiffStreamPython::readsTagTypes()
 
     std::optional<FiffTag> t = tag(901);
     QVERIFY(t);
-    QCOMPARE(t->toDouble()[0], 1.25);
-    QCOMPARE(t->toDouble()[1], -2.5e-12);
-    QCOMPARE(t->toDouble()[2], 3.0e200);
+    QCOMPARE(t->to_double()[0], 1.25);
+    QCOMPARE(t->to_double()[1], -2.5e-12);
+    QCOMPARE(t->to_double()[2], 3.0e200);
     t = tag(902);
-    QCOMPARE(t->toShort()[0], qint16(-3));
-    QCOMPARE(t->toShort()[2], qint16(-32000));
+    QCOMPARE(t->to_short()[0], qint16(-3));
+    QCOMPARE(t->to_short()[2], qint16(-32000));
     t = tag(903);
-    QCOMPARE(t->toUnsignedShort()[1], quint16(40000));
-    QCOMPARE(t->toUnsignedShort()[2], quint16(65535));
+    QCOMPARE(t->to_unsigned_short()[1], quint16(40000));
+    QCOMPARE(t->to_unsigned_short()[2], quint16(65535));
     t = tag(904);
-    QCOMPARE(*t->toJulian(), 2461318); // 2026-10-04
+    QCOMPARE(*t->to_julian(), 2461318); // 2026-10-04
     t = tag(905);
-    QCOMPARE(t->toDauPack16()[0], qint16(-7));
-    QCOMPARE(t->toDauPack16()[1], qint16(12345));
+    QCOMPARE(t->to_dau_pack16()[0], qint16(-7));
+    QCOMPARE(t->to_dau_pack16()[1], qint16(12345));
     // Complex and matrix payloads have no typed accessor; read the swapped data directly.
     auto floats = [](const FiffTag& x) {
         return reinterpret_cast<const float*>(x.data());
@@ -509,11 +509,11 @@ void TestFiffStreamPython::readsTagTypes()
     qint32 ndim;
     std::vector<qint32> dims;
     t = tag(907);
-    QVERIFY(t->getMatrixDimensions(ndim, dims));
+    QVERIFY(t->matrix_dimensions(ndim, dims));
     QCOMPARE(dims, std::vector<qint32>({3, 2}));
     QCOMPARE(reinterpret_cast<const double*>(t->data())[5], 6.5);
     t = tag(908);
-    QVERIFY(t->getMatrixDimensions(ndim, dims));
+    QVERIFY(t->matrix_dimensions(ndim, dims));
     QCOMPARE(dims, std::vector<qint32>({2, 1}));
     QCOMPARE(floats(*t)[3], -4.0f);
 
@@ -522,16 +522,16 @@ void TestFiffStreamPython::readsTagTypes()
     for (int kind : {909, 910}) {
         t = tag(kind);
         QVERIFY(t);
-        QCOMPARE(MatrixXd(t->toSparseFloatMatrix()), expected);
+        QCOMPARE(MatrixXd(t->to_sparse_float_matrix()), expected);
     }
 
     // getInfo names the type of each tag as make_tag_types_fixture.py wrote it.
     const QList<QPair<int, QString>> infos{{901, "Simple type FIFFT_DOUBLE"}, {902, "Simple type FIFFT_SHORT"}, {903, "Simple type FIFFT_USHORT"}, {904, "Simple type FIFFT_JULIAN"}, {905, "Simple type FIFFT_DAU_PACK16"}, {906, "Simple type FIFFT_COMPLEX_FLOAT"}, {907, "Matrix of type FIFFT_DOUBLE"}, {908, "Matrix of type FIFFT_COMPLEX_FLOAT"}, {909, "Matrix of type FIFFT_FLOAT"}};
     for (const auto& [kind, info] : infos)
-        QCOMPARE(tag(kind)->getInfo(), info);
+        QCOMPARE(tag(kind)->info(), info);
     FiffTag unknown;
     unknown.type = 9999;
-    QCOMPARE(unknown.getInfo(), QString("Structure unknown"));
+    QCOMPARE(unknown.info(), QString("Structure unknown"));
 
     // write_tag must turn every payload back into file byte order.
     const QString copyPath = m_dir.filePath("tag-types-copy.fif");
@@ -762,7 +762,7 @@ void TestFiffStreamPython::writesAnnotationsAndDevice()
     QVERIFY(packedReader.open());
     const std::optional<FiffTag> pack = packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).front()->find_tag(packedReader, FIFF_DATA_PACK);
     QVERIFY(pack);
-    QCOMPARE(*pack->toInt(), FIFFT_DAU_PACK16);
+    QCOMPARE(*pack->to_int(), FIFFT_DAU_PACK16);
     const std::optional<FiffTag> lineFreq = packedReader.dirtree()->dir_tree_find(FIFFB_MEAS_INFO).front()->find_tag(packedReader, FIFF_LINE_FREQ);
     QVERIFY(!lineFreq);
 }

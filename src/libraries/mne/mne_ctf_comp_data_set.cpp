@@ -112,7 +112,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const std::filesystem::path& name,
                     stream.close();
                     return FIFF_FAIL;
                 }
-                nchan = *t_pTag->toInt();
+                nchan = *t_pTag->to_int();
 
                 for (j = 0; j < nchan; j++) {
                     chs.push_back(FiffChInfo());
@@ -126,7 +126,6 @@ int mne_read_meg_comp_eeg_ch_info_32(const std::filesystem::path& name,
                     stream.close();
                     return FIFF_FAIL;
                 }
-                //            t = t_pTag->toCoordTrans();
                 t = FiffCoordTrans::from_tag(*t_pTag);
                 if (t.from != FIFFV_COORD_DEVICE || t.to != FIFFV_COORD_HEAD)
                     t = FiffCoordTrans();
@@ -138,7 +137,7 @@ int mne_read_meg_comp_eeg_ch_info_32(const std::filesystem::path& name,
                     return FIFF_FAIL;
                 }
 
-                this_ch = t_pTag->toChInfo();
+                this_ch = t_pTag->to_ch_info();
                 if (this_ch.scanNo <= 0 || this_ch.scanNo > nchan) {
                     BASELIB::Log::critical("FIFF_CH_INFO : scan # out of range {} ({})!", this_ch.scanNo, nchan);
                     stream.close();
@@ -388,14 +387,14 @@ std::unique_ptr<MNECTFCompDataSet> MNECTFCompDataSet::read(const std::filesystem
         }
         t_pTag = comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_KIND);
         if (t_pTag) {
-            kind = *t_pTag->toInt();
+            kind = *t_pTag->to_int();
         } else {
             stream.close();
             return nullptr;
         }
         t_pTag = comps[k]->find_tag(stream, FIFF_MNE_CTF_COMP_CALIBRATED);
         if (t_pTag) {
-            calibrated = *t_pTag->toInt();
+            calibrated = *t_pTag->to_int();
         } else
             calibrated = 0;
         /*

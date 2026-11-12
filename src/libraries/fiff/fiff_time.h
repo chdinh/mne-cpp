@@ -86,7 +86,7 @@ public:
      *
      * @return the size of the old struct fiffTimeRec.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
 public:
     std::int32_t secs;  /**< GMT time in seconds since epoch. */
@@ -97,7 +97,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline std::int32_t FiffTime::storageSize()
+inline std::int32_t FiffTime::storage_size()
 {
     return sizeof(FiffTime::secs) + sizeof(FiffTime::usecs);
 }

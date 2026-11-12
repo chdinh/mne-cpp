@@ -199,7 +199,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     }
 
     if (!id.empty())
-        BASELIB::Log::info("\tMeasurement file id: {}\n", id.toString());
+        BASELIB::Log::info("\tMeasurement file id: {}\n", id.to_string());
 
     /*
        * Pick out the necessary channels

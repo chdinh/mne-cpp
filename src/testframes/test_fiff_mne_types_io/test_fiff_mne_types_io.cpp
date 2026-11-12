@@ -99,7 +99,7 @@ void TestFiffMneTypesIO::checkFiffCoordTrans()
             if (t_pTag = stream.read_tag(stream.dir()[k].pos); !t_pTag)
                 QFAIL("Failed to read FIFF_COORD_TRANS tag.");
             refTransReference = *(fiffCoordTrans_REF)t_pTag->data();
-            transTest = t_pTag->toCoordTrans();
+            transTest = t_pTag->to_coord_trans();
 
             //CHECKS
             QVERIFY(refTransReference.from == transTest.from);

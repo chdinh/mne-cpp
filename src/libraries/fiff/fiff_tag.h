@@ -23,8 +23,8 @@
  * column-compressed sparse (@c MATRIX_CODING_CCS) or row-compressed
  * sparse (@c MATRIX_CODING_RCS) storage. @ref FIFFLIB::FiffTag is the C++ wrapper
  * that holds the header fields, the raw payload bytes and a small set of
- * typed accessors (@c toInt, @c toFloat, @c toMatrix, @c toCoordTrans,
- * @c toChInfo, ...) that decode the payload on demand into the relevant
+ * typed accessors (@c to_int, @c to_float, @c to_float_matrix, @c to_coord_trans,
+ * @c to_ch_info, ...) that decode the payload on demand into the relevant
  * FIFFLIB class.
  *
  * The header also re-publishes the @c IS_MATRIX / @c MATRIX_CODING_*
@@ -140,11 +140,11 @@ inline constexpr auto DATA_TYPE = 0x0000FFFF;           /**< DATA_TYPE encoding 
  *
  * Holds the four header fields exactly as stored on disk and the raw
  * payload bytes. Decoders convert the payload to the
- * appropriate C++ representation: scalars via @c toInt / @c toFloat /
- * @c toDouble, dense and sparse matrices via @c toFloatMatrix /
- * @c toSparseFloatMatrix, and the structured FIFF records into their
- * class wrappers (@c toFiffId, @c toCoordTrans, @c toChInfo,
- * @c toChPos, @c toDigPoint, ...). Used by @ref FiffStream both for
+ * appropriate C++ representation: scalars via @c to_int / @c to_float /
+ * @c to_double, dense and sparse matrices via @c to_float_matrix /
+ * @c to_sparse_float_matrix, and the structured FIFF records into their
+ * class wrappers (@c to_fiff_id, @c to_coord_trans, @c to_ch_info,
+ * @c to_dig_point, @c to_dir_entry, ...). Used by @ref FiffStream both for
  * streaming reads and for assembling tags before write_tag.
  *
  * @snippet ex_fiff_api/main.cpp fiff_stream_usage
@@ -206,7 +206,7 @@ public:
      *
      * @return Matrix coding.
      */
-    fiff_int_t getMatrixCoding() const;
+    fiff_int_t matrix_coding() const;
 
     //=========================================================================================================
     /**
@@ -214,7 +214,7 @@ public:
      *
      * @return true if tag contains a matrix.
      */
-    bool isMatrix() const;
+    bool is_matrix() const;
 
     //=========================================================================================================
     /**
@@ -226,7 +226,7 @@ public:
      *
      * @return true if dimensions are available.
      */
-    bool getMatrixDimensions(std::int32_t& p_ndim, std::vector<std::int32_t>& p_Dims) const;
+    bool matrix_dimensions(std::int32_t& p_ndim, std::vector<std::int32_t>& p_Dims) const;
 
     //=========================================================================================================
     /**
@@ -234,7 +234,7 @@ public:
      *
      * @return the tag type.
      */
-    fiff_int_t getType() const;
+    fiff_int_t data_type() const;
 
     //=========================================================================================================
     /**
@@ -242,7 +242,7 @@ public:
      *
      * @return the tag type information.
      */
-    std::string getInfo() const;
+    std::string info() const;
 
     //
     // Simple types
@@ -254,7 +254,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const std::uint8_t* toByte() const;
+    inline const std::uint8_t* to_byte() const;
 
     //=========================================================================================================
     /**
@@ -263,7 +263,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const std::uint16_t* toUnsignedShort() const;
+    inline const std::uint16_t* to_unsigned_short() const;
 
     //=========================================================================================================
     /**
@@ -272,7 +272,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const std::int16_t* toShort() const;
+    inline const std::int16_t* to_short() const;
 
     //=========================================================================================================
     /**
@@ -281,7 +281,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const std::uint32_t* toUnsignedInt() const;
+    inline const std::uint32_t* to_unsigned_int() const;
 
     //=========================================================================================================
     /**
@@ -290,7 +290,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    const std::int32_t* toInt() const;
+    const std::int32_t* to_int() const;
 
     //=========================================================================================================
     /**
@@ -299,7 +299,7 @@ public:
     *
     * @return type cast of the tag data pointer.
     */
-    const std::int32_t* toJulian() const;
+    const std::int32_t* to_julian() const;
 
     //=========================================================================================================
     /**
@@ -308,7 +308,7 @@ public:
     *
     * @return type cast of the tag data pointer.
     */
-    inline const float* toFloat() const;
+    inline const float* to_float() const;
 
     //=========================================================================================================
     /**
@@ -317,7 +317,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const double* toDouble() const;
+    inline const double* to_double() const;
 
     //=========================================================================================================
     /**
@@ -325,7 +325,7 @@ public:
      *
      * @return converts data to a string.
      */
-    inline std::string toString() const;
+    inline std::string to_string() const;
 
     //=========================================================================================================
     /**
@@ -334,7 +334,7 @@ public:
      *
      * @return type cast of the tag data pointer.
      */
-    inline const std::int16_t* toDauPack16() const;
+    inline const std::int16_t* to_dau_pack16() const;
 
     //
     // Structures
@@ -345,7 +345,7 @@ public:
      *
      * @return Fiff universially unique identifier.
      */
-    inline FiffId toFiffID() const;
+    inline FiffId to_fiff_id() const;
 
     //=========================================================================================================
     /**
@@ -353,7 +353,7 @@ public:
      *
      * @return Fiff point descriptor.
      */
-    inline FiffDigPoint toDigPoint() const;
+    inline FiffDigPoint to_dig_point() const;
 
     //=========================================================================================================
     /**
@@ -361,7 +361,7 @@ public:
      *
      * @return Fiff coordinate transformation descriptor.
      */
-    inline FiffCoordTrans toCoordTrans() const;
+    inline FiffCoordTrans to_coord_trans() const;
 
     //=========================================================================================================
     /**
@@ -369,7 +369,7 @@ public:
      *
      * @return Fiff channel info descriptor.
      */
-    inline FiffChInfo toChInfo() const;
+    inline FiffChInfo to_ch_info() const;
 
     //=========================================================================================================
     /**
@@ -377,7 +377,7 @@ public:
      *
      * @return List of directory entry descriptors.
      */
-    inline std::vector<FiffDirEntry> toDirEntry() const;
+    inline std::vector<FiffDirEntry> to_dir_entry() const;
 
     //
     // MATRIX
@@ -388,7 +388,7 @@ public:
      *
      * @return Integer matrix.
      */
-    Eigen::MatrixXi toIntMatrix() const;
+    Eigen::MatrixXi to_int_matrix() const;
 
     //=========================================================================================================
     /**
@@ -398,7 +398,7 @@ public:
      *
      * @return the parsed float matrix.
      */
-    Eigen::MatrixXf toFloatMatrix() const;
+    Eigen::MatrixXf to_float_matrix() const;
 
     //=========================================================================================================
     /**
@@ -409,7 +409,7 @@ public:
      * @return a sparse double matrix which is newly created from the parsed float; empty if the tag is
      *         no valid sparse float matrix (see FiffSparseMatrix::fiff_get_float_sparse_matrix).
      */
-    Eigen::SparseMatrix<double> toSparseFloatMatrix() const;
+    Eigen::SparseMatrix<double> to_sparse_float_matrix() const;
 
     //
     //from fiff_combat.c
@@ -505,7 +505,7 @@ public:
      *
      * @return the byte size of the on-disk tag info header.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
     //
     // Payload
@@ -580,7 +580,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline std::int32_t FiffTag::storageSize()
+inline std::int32_t FiffTag::storage_size()
 {
     // On-disk layout: kind, type, size, next (4 x fiff_int_t)
     // The on-disk size field is the payload size, size()
@@ -592,9 +592,9 @@ inline std::int32_t FiffTag::storageSize()
 // Simple types
 //=============================================================================================================
 
-inline const std::uint8_t* FiffTag::toByte() const
+inline const std::uint8_t* FiffTag::to_byte() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_BYTE)
+    if (this->is_matrix() || this->data_type() != FIFFT_BYTE)
         return nullptr;
     else
         return reinterpret_cast<const std::uint8_t*>(this->data());
@@ -602,9 +602,9 @@ inline const std::uint8_t* FiffTag::toByte() const
 
 //=============================================================================================================
 
-inline const std::uint16_t* FiffTag::toUnsignedShort() const
+inline const std::uint16_t* FiffTag::to_unsigned_short() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_USHORT)
+    if (this->is_matrix() || this->data_type() != FIFFT_USHORT)
         return nullptr;
     else
         return reinterpret_cast<const std::uint16_t*>(this->data());
@@ -612,9 +612,9 @@ inline const std::uint16_t* FiffTag::toUnsignedShort() const
 
 //=============================================================================================================
 
-inline const std::int16_t* FiffTag::toShort() const
+inline const std::int16_t* FiffTag::to_short() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_SHORT)
+    if (this->is_matrix() || this->data_type() != FIFFT_SHORT)
         return nullptr;
     else
         return reinterpret_cast<const std::int16_t*>(this->data());
@@ -622,9 +622,9 @@ inline const std::int16_t* FiffTag::toShort() const
 
 //=============================================================================================================
 
-inline const std::uint32_t* FiffTag::toUnsignedInt() const
+inline const std::uint32_t* FiffTag::to_unsigned_int() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_UINT)
+    if (this->is_matrix() || this->data_type() != FIFFT_UINT)
         return nullptr;
     else
         return reinterpret_cast<const std::uint32_t*>(this->data());
@@ -632,9 +632,9 @@ inline const std::uint32_t* FiffTag::toUnsignedInt() const
 
 //=============================================================================================================
 
-inline const float* FiffTag::toFloat() const
+inline const float* FiffTag::to_float() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_FLOAT)
+    if (this->is_matrix() || this->data_type() != FIFFT_FLOAT)
         return nullptr;
     else
         return reinterpret_cast<const float*>(this->data());
@@ -642,9 +642,9 @@ inline const float* FiffTag::toFloat() const
 
 //=============================================================================================================
 
-inline const double* FiffTag::toDouble() const
+inline const double* FiffTag::to_double() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_DOUBLE)
+    if (this->is_matrix() || this->data_type() != FIFFT_DOUBLE)
         return nullptr;
     else
         return reinterpret_cast<const double*>(this->data());
@@ -652,18 +652,18 @@ inline const double* FiffTag::toDouble() const
 
 //=============================================================================================================
 
-inline std::string FiffTag::toString() const
+inline std::string FiffTag::to_string() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_STRING)
+    if (this->is_matrix() || this->data_type() != FIFFT_STRING)
         return {};
     return std::string(reinterpret_cast<const char*>(data()), size());
 }
 
 //=============================================================================================================
 
-inline const std::int16_t* FiffTag::toDauPack16() const
+inline const std::int16_t* FiffTag::to_dau_pack16() const
 {
-    if (this->isMatrix() || this->getType() != FIFFT_DAU_PACK16)
+    if (this->is_matrix() || this->data_type() != FIFFT_DAU_PACK16)
         return nullptr;
     else
         return reinterpret_cast<const std::int16_t*>(this->data());
@@ -673,10 +673,10 @@ inline const std::int16_t* FiffTag::toDauPack16() const
 // Structures
 //=============================================================================================================
 
-inline FiffId FiffTag::toFiffID() const
+inline FiffId FiffTag::to_fiff_id() const
 {
     FiffId p_fiffID;
-    if (this->isMatrix() || this->getType() != FIFFT_ID_STRUCT || this->size() < static_cast<std::size_t>(FiffId::storageSize()))
+    if (this->is_matrix() || this->data_type() != FIFFT_ID_STRUCT || this->size() < static_cast<std::size_t>(FiffId::storage_size()))
         return p_fiffID;
     else {
         const auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -693,10 +693,10 @@ inline FiffId FiffTag::toFiffID() const
 
 //=============================================================================================================
 
-inline FiffDigPoint FiffTag::toDigPoint() const
+inline FiffDigPoint FiffTag::to_dig_point() const
 {
     FiffDigPoint t_fiffDigPoint;
-    if (this->isMatrix() || this->getType() != FIFFT_DIG_POINT_STRUCT || this->size() < static_cast<std::size_t>(FiffDigPoint::storageSize()))
+    if (this->is_matrix() || this->data_type() != FIFFT_DIG_POINT_STRUCT || this->size() < static_cast<std::size_t>(FiffDigPoint::storage_size()))
         return t_fiffDigPoint;
     else {
         auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -716,10 +716,10 @@ inline FiffDigPoint FiffTag::toDigPoint() const
 
 //=============================================================================================================
 
-inline FiffCoordTrans FiffTag::toCoordTrans() const
+inline FiffCoordTrans FiffTag::to_coord_trans() const
 {
     FiffCoordTrans p_FiffCoordTrans;
-    if (this->isMatrix() || this->getType() != FIFFT_COORD_TRANS_STRUCT || this->size() < static_cast<std::size_t>(FiffCoordTrans::storage_size()))
+    if (this->is_matrix() || this->data_type() != FIFFT_COORD_TRANS_STRUCT || this->size() < static_cast<std::size_t>(FiffCoordTrans::storage_size()))
         return p_FiffCoordTrans;
     else {
         auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -756,11 +756,11 @@ inline FiffCoordTrans FiffTag::toCoordTrans() const
 /**
  * to fiff CH INFO STRUCT
  */
-inline FiffChInfo FiffTag::toChInfo() const
+inline FiffChInfo FiffTag::to_ch_info() const
 {
     FiffChInfo p_FiffChInfo;
 
-    if (this->isMatrix() || this->getType() != FIFFT_CH_INFO_STRUCT || this->size() < static_cast<std::size_t>(FiffChInfo::storageSize()))
+    if (this->is_matrix() || this->data_type() != FIFFT_CH_INFO_STRUCT || this->size() < static_cast<std::size_t>(FiffChInfo::storage_size()))
         return p_FiffChInfo;
     else {
         auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -838,14 +838,14 @@ inline FiffChInfo FiffTag::toChInfo() const
 
 //=============================================================================================================
 
-inline std::vector<FiffDirEntry> FiffTag::toDirEntry() const
+inline std::vector<FiffDirEntry> FiffTag::to_dir_entry() const
 {
     std::vector<FiffDirEntry> entries;
-    if (this->isMatrix() || this->getType() != FIFFT_DIR_ENTRY_STRUCT) {
+    if (this->is_matrix() || this->data_type() != FIFFT_DIR_ENTRY_STRUCT) {
         return entries;
     }
     const auto* ints = reinterpret_cast<const std::int32_t*>(this->data());
-    const auto count = size() / static_cast<std::size_t>(FiffDirEntry::storageSize());
+    const auto count = size() / static_cast<std::size_t>(FiffDirEntry::storage_size());
     entries.reserve(count);
     for (std::size_t k = 0; k < count; ++k) {
         entries.push_back({ints[k * 4], ints[k * 4 + 1], ints[k * 4 + 2], ints[k * 4 + 3]});

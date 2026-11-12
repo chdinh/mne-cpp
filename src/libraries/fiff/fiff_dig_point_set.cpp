@@ -83,9 +83,9 @@ BASELIB::Expected<FiffDigPointSet> FiffDigPointSet::read(const std::filesystem::
 
 BASELIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
 {
-    const bool openHere = !stream.isOpen();
+    const bool openHere = !stream.is_open();
     if (openHere && !stream.open()) {
-        return BASELIB::fail(BASELIB::ErrorCode::Io, "cannot open {}", stream.streamName());
+        return BASELIB::fail(BASELIB::ErrorCode::Io, "cannot open {}", stream.stream_name());
     }
 
     FiffDigPointSet dig;
@@ -101,10 +101,10 @@ BASELIB::Expected<FiffDigPointSet> FiffDigPointSet::read(FiffStream& stream)
                 return BASELIB::fail(BASELIB::ErrorCode::Format, "cannot read the digitizer tag at {}", entry.pos);
             }
             if (entry.kind == FIFF_DIG_POINT) {
-                dig.m_points.push_back(tag->toDigPoint());
+                dig.m_points.push_back(tag->to_dig_point());
             } else {
                 // Applies to every point of the block, as mne's _read_dig_fif
-                coordFrame = *tag->toInt();
+                coordFrame = *tag->to_int();
             }
         }
     }

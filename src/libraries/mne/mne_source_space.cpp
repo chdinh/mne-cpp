@@ -1687,7 +1687,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
             stream.close();
             return FIFF_FAIL;
         }
-        new_space->np = *t_pTag->toInt();
+        new_space->np = *t_pTag->to_int();
         if (new_space->np == 0) {
             BASELIB::Log::critical("No points in this source space");
             stream.close();
@@ -1697,33 +1697,33 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
             stream.close();
             return FIFF_FAIL;
         }
-        MatrixXf tmp_rr = t_pTag->toFloatMatrix().transpose();
+        MatrixXf tmp_rr = t_pTag->to_float_matrix().transpose();
         new_space->rr = tmp_rr;
         if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NORMALS); !t_pTag) {
             stream.close();
             return FIFF_FAIL;
         }
-        MatrixXf tmp_nn = t_pTag->toFloatMatrix().transpose();
+        MatrixXf tmp_nn = t_pTag->to_float_matrix().transpose();
         new_space->nn = tmp_nn;
         if (t_pTag = node->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
             new_space->coord_frame = FIFFV_COORD_MRI;
         } else {
-            new_space->coord_frame = *t_pTag->toInt();
+            new_space->coord_frame = *t_pTag->to_int();
         }
         if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_ID); t_pTag) {
-            new_space->id = *t_pTag->toInt();
+            new_space->id = *t_pTag->to_int();
         }
         if (t_pTag = node->find_tag(stream, FIFF_SUBJ_HIS_ID); t_pTag) {
-            new_space->subject = t_pTag->toString();
+            new_space->subject = t_pTag->to_string();
         }
         if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TYPE); t_pTag) {
-            new_space->type = *t_pTag->toInt();
+            new_space->type = *t_pTag->to_int();
         }
         ntri = 0;
         if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_NTRI); t_pTag) {
-            ntri = *t_pTag->toInt();
+            ntri = *t_pTag->to_int();
         } else if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NTRI); t_pTag) {
-            ntri = *t_pTag->toInt();
+            ntri = *t_pTag->to_int();
         }
         if (ntri > 0) {
             if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_TRIANGLES); !t_pTag) {
@@ -1733,7 +1733,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 }
             }
 
-            MatrixXi tmp_itris = t_pTag->toIntMatrix().transpose();
+            MatrixXi tmp_itris = t_pTag->to_int_matrix().transpose();
             tmp_itris.array() -= 1;
             new_space->itris = tmp_itris;
             new_space->ntri = ntri;
@@ -1756,14 +1756,14 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 new_space->vertno.resize(0);
             }
         } else {
-            new_space->nuse = *t_pTag->toInt();
+            new_space->nuse = *t_pTag->to_int();
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_SELECTION); !t_pTag) {
                 stream.close();
                 return FIFF_FAIL;
             }
 
             {
-                Eigen::Map<const Eigen::VectorXi> inuseMap(t_pTag->toInt(), new_space->np);
+                Eigen::Map<const Eigen::VectorXi> inuseMap(t_pTag->to_int(), new_space->np);
                 new_space->inuse = inuseMap;
             }
             if (new_space->nuse > 0) {
@@ -1780,7 +1780,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 */
             ntri = 0;
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NUSE_TRI); t_pTag) {
-                ntri = *t_pTag->toInt();
+                ntri = *t_pTag->to_int();
             }
             if (ntri > 0) {
                 if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_USE_TRIANGLES); !t_pTag) {
@@ -1788,7 +1788,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                     return FIFF_FAIL;
                 }
 
-                MatrixXi tmp_itris = t_pTag->toIntMatrix().transpose();
+                MatrixXi tmp_itris = t_pTag->to_int_matrix().transpose();
                 tmp_itris.array() -= 1;
                 new_space->use_itris = tmp_itris;
                 new_space->nuse_tri = ntri;
@@ -1797,7 +1797,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 * The patch information becomes relevant here
                 */
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEAREST); t_pTag) {
-                Eigen::Map<const Eigen::VectorXi> nearestMap(t_pTag->toInt(), new_space->np);
+                Eigen::Map<const Eigen::VectorXi> nearestMap(t_pTag->to_int(), new_space->np);
                 new_space->nearest.resize(new_space->np);
                 for (k = 0; k < new_space->np; k++) {
                     new_space->nearest[k].vert = k;
@@ -1809,7 +1809,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                     stream.close();
                     return FIFF_FAIL;
                 }
-                Eigen::Map<const Eigen::VectorXf> nearestDistMap(t_pTag->toFloat(), new_space->np);
+                Eigen::Map<const Eigen::VectorXf> nearestDistMap(t_pTag->to_float(), new_space->np);
                 for (k = 0; k < new_space->np; k++) {
                     new_space->nearest[k].dist = nearestDistMap[k];
                 }
@@ -1818,9 +1818,8 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
             * We may have the distance matrix
             */
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST_LIMIT); t_pTag) {
-                new_space->dist_limit = *t_pTag->toFloat();
+                new_space->dist_limit = *t_pTag->to_float();
                 if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_DIST); t_pTag) {
-                    //                    SparseMatrix<double> tmpSparse = t_pTag->toSparseFloatMatrix();
                     auto dist_lower = FiffSparseMatrix::fiff_get_float_sparse_matrix(*t_pTag);
                     if (!dist_lower) {
                         stream.close();
@@ -1847,11 +1846,11 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
             ntot = nvert = 0;
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NEIGHBORS); t_pTag) {
                 ntot = static_cast<int>(t_pTag->size() / sizeof(fiff_int_t));
-                neighborsVec = Eigen::Map<const Eigen::VectorXi>(t_pTag->toInt(), ntot);
+                neighborsVec = Eigen::Map<const Eigen::VectorXi>(t_pTag->to_int(), ntot);
             }
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NNEIGHBORS); t_pTag) {
                 nvert = static_cast<int>(t_pTag->size() / sizeof(fiff_int_t));
-                nneighborsVec = Eigen::Map<const Eigen::VectorXi>(t_pTag->toInt(), nvert);
+                nneighborsVec = Eigen::Map<const Eigen::VectorXi>(t_pTag->to_int(), nvert);
             }
             if (neighborsVec.size() > 0 && nneighborsVec.size() > 0) {
                 if (nvert != new_space->np) {
@@ -1880,7 +1879,7 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 */
             new_space->voxel_surf_RAS_t = FiffCoordTrans::read_from_node(stream, node, FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS).value_or(FiffCoordTrans());
             if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_VOXEL_DIMS); t_pTag) {
-                Eigen::Map<const Eigen::Vector3i> volDimsMap(t_pTag->toInt());
+                Eigen::Map<const Eigen::Vector3i> volDimsMap(t_pTag->to_int());
                 Eigen::Map<Eigen::Vector3i>(new_space->vol_dims) = volDimsMap;
             }
             {
@@ -1889,14 +1888,14 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                 if (mris.size() == 0) { /* The old way */
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, node, FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());
                     if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_MRI_FILE); t_pTag) {
-                        new_space->MRI_volume = t_pTag->toString();
+                        new_space->MRI_volume = t_pTag->to_string();
                     }
                     if (t_pTag = node->find_tag(stream, FIFF_MNE_SOURCE_SPACE_INTERPOLATOR); t_pTag) {
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(*t_pTag));
                     }
                 } else {
                     if (t_pTag = mris[0]->find_tag(stream, FIFF_MNE_FILE_NAME); t_pTag) {
-                        new_space->MRI_volume = t_pTag->toString();
+                        new_space->MRI_volume = t_pTag->to_string();
                     }
                     new_space->MRI_surf_RAS_RAS_t = FiffCoordTrans::read_from_node(stream, mris[0], FIFFV_MNE_COORD_SURFACE_RAS, FIFFV_MNE_COORD_RAS).value_or(FiffCoordTrans());
                     new_space->MRI_voxel_surf_RAS_t = FiffCoordTrans::read_from_node(stream, mris[0], FIFFV_MNE_COORD_MRI_VOXEL, FIFFV_MNE_COORD_SURFACE_RAS).value_or(FiffCoordTrans());
@@ -1905,13 +1904,13 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
                         new_space->interpolator = std::move(*FiffSparseMatrix::fiff_get_float_sparse_matrix(*t_pTag));
                     }
                     if (t_pTag = mris[0]->find_tag(stream, FIFF_MRI_WIDTH); t_pTag) {
-                        new_space->MRI_vol_dims[0] = *t_pTag->toInt();
+                        new_space->MRI_vol_dims[0] = *t_pTag->to_int();
                     }
                     if (t_pTag = mris[0]->find_tag(stream, FIFF_MRI_HEIGHT); t_pTag) {
-                        new_space->MRI_vol_dims[1] = *t_pTag->toInt();
+                        new_space->MRI_vol_dims[1] = *t_pTag->to_int();
                     }
                     if (t_pTag = mris[0]->find_tag(stream, FIFF_MRI_DEPTH); t_pTag) {
-                        new_space->MRI_vol_dims[2] = *t_pTag->toInt();
+                        new_space->MRI_vol_dims[2] = *t_pTag->to_int();
                     }
                 }
             }

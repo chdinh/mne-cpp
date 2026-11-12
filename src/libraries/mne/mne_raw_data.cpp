@@ -399,7 +399,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
             BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
-        this_samplef = t_pTag->toFloat();
+        this_samplef = t_pTag->to_float();
         for (s = 0; s < nsamp; s++, this_samplef += nchan) {
             for (c = 0; c < npick; c++)
                 data(c, s) = mult[c] * this_samplef[pickno[c]];
@@ -419,7 +419,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
             BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
-        this_sample = t_pTag->toInt();
+        this_sample = t_pTag->to_int();
         for (s = 0; s < nsamp; s++, this_sample += nchan) {
             for (c = 0; c < npick; c++)
                 data(c, s) = mult[c] * this_sample[pickno[c]];
@@ -429,7 +429,7 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
             BASELIB::Log::critical("Incorrect number of samples in buffer.");
             return FAIL;
         }
-        const double* this_sampled = t_pTag->toDouble();
+        const double* this_sampled = t_pTag->to_double();
         for (s = 0; s < nsamp; s++, this_sampled += nchan) {
             for (c = 0; c < npick; c++)
                 data(c, s) = static_cast<float>(mult[c] * this_sampled[pickno[c]]);
@@ -464,8 +464,8 @@ int mne_read_bad_channel_list_from_node(FiffStream& stream,
 
         t_pTag = bad->find_tag(stream, FIFF_MNE_CH_NAME_LIST);
         if (t_pTag) {
-            names = QString::fromStdString(t_pTag->toString());
-            list = FiffStream::split_name_list(t_pTag->toString());
+            names = QString::fromStdString(t_pTag->to_string());
+            list = FiffStream::split_name_list(t_pTag->to_string());
             nlist = static_cast<int>(list.size());
         }
     }
@@ -1363,7 +1363,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         //            goto bad;
         if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
             return nullptr;
-        data->first_samp = *t_pTag->toInt();
+        data->first_samp = *t_pTag->to_int();
         current_dir0++;
         ndir--;
     }
@@ -1373,7 +1373,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         //            goto bad;
         if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
             return nullptr;
-        nsamp_skip = data->info->buf_size * (*t_pTag->toInt());
+        nsamp_skip = data->info->buf_size * (*t_pTag->to_int());
         BASELIB::Log::info("Data skip of {} samples in the beginning\n", nsamp_skip);
         current_dir0++;
         ndir--;
@@ -1382,7 +1382,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
             //                goto bad;
             if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
                 return nullptr;
-            data->first_samp += *t_pTag->toInt();
+            data->first_samp += *t_pTag->to_int();
             current_dir0++;
             ndir--;
         }
@@ -1442,7 +1442,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
             //                goto bad;
             if (t_pTag = data->stream->read_tag(dir.pos); !t_pTag)
                 return nullptr;
-            data->bufs[k].ns = data->info->buf_size * (*t_pTag->toInt());
+            data->bufs[k].ns = data->info->buf_size * (*t_pTag->to_int());
         }
         data->bufs[k].firsts = k == 0 ? data->first_samp : data->bufs[k - 1].lasts + 1;
         data->bufs[k].lasts = data->bufs[k].firsts + data->bufs[k].ns - 1;

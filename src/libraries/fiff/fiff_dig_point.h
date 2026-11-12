@@ -86,7 +86,7 @@ public:
      *
      * @return the size of the old struct fiffDigPointRec.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
 public:
     fiff_int_t kind;        /**< FIFFV_POINT_CARDINAL, FIFFV_POINT_HPI, FIFFV_POINT_EXTRA or FIFFV_POINT_EEG. */
@@ -99,7 +99,7 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline std::int32_t FiffDigPoint::storageSize()
+inline std::int32_t FiffDigPoint::storage_size()
 {
     return sizeof(FiffDigPoint::kind) + sizeof(FiffDigPoint::ident) + sizeof(FiffDigPoint::r); // coord_frame is not part of on-disk format
 }

@@ -85,12 +85,12 @@ bool FiffDirNode::copy_tree(FiffStream& source, const FiffId& in_id, std::span<c
                 continue;
 
             // Copy the tag verbatim; read_tag and write_tag reproduce its bytes
-            source.setLittleEndian(false);
+            source.set_little_endian(false);
             std::optional<FiffTag> tag;
             if (tag = source.read_tag(p_Nodes[k]->dir[p].pos); !tag)
                 return false;
             tag->next = FIFFV_NEXT_SEQ;
-            target.setLittleEndian(false);
+            target.set_little_endian(false);
             target.write_tag(*tag);
         }
         for (p = 0; p < p_Nodes[k]->nchild(); ++p) {

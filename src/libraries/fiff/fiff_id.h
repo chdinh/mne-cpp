@@ -154,7 +154,7 @@ public:
      *
      * @return the size of the old struct fiffIdRec.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
     //=========================================================================================================
     /**
@@ -172,7 +172,7 @@ public:
      *
      * @return Formatted string describing the ID.
      */
-    std::string toString() const;
+    std::string to_string() const;
 
     /**
      * Compares two FiffId instances for equality.
@@ -201,9 +201,9 @@ inline bool FiffId::empty() const
 
 //=============================================================================================================
 
-inline std::int32_t FiffId::storageSize()
+inline std::int32_t FiffId::storage_size()
 {
-    return sizeof(FiffId::version) + sizeof(FiffId::machid) + FiffTime::storageSize();
+    return sizeof(FiffId::version) + sizeof(FiffId::machid) + FiffTime::storage_size();
 }
 
 //=============================================================================================================

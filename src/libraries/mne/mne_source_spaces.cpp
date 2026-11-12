@@ -63,30 +63,30 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
     if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_ID); !t_pTag)
         p_Hemisphere.id = FIFFV_MNE_SURF_UNKNOWN;
     else
-        p_Hemisphere.id = *t_pTag->toInt();
+        p_Hemisphere.id = *t_pTag->to_int();
 
 
     //=====================================================================
     if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NPOINTS); !t_pTag) {
         return fail(ErrorCode::Format, "a source space in {} has no vertex count", name);
     }
-    p_Hemisphere.np = *t_pTag->toInt();
+    p_Hemisphere.np = *t_pTag->to_int();
 
     //=====================================================================
     if (t_pTag = p_Tree->find_tag(stream, FIFF_BEM_SURF_NTRI); !t_pTag) {
         if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_NTRI); !t_pTag)
             p_Hemisphere.ntri = 0;
         else
-            p_Hemisphere.ntri = *t_pTag->toInt();
+            p_Hemisphere.ntri = *t_pTag->to_int();
     } else {
-        p_Hemisphere.ntri = *t_pTag->toInt();
+        p_Hemisphere.ntri = *t_pTag->to_int();
     }
 
     //=====================================================================
     if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_COORD_FRAME); !t_pTag) {
         return fail(ErrorCode::Format, "a source space in {} has no coordinate frame", name);
     }
-    p_Hemisphere.coord_frame = *t_pTag->toInt();
+    p_Hemisphere.coord_frame = *t_pTag->to_int();
 
     //=====================================================================
     //
@@ -96,7 +96,7 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
         return fail(ErrorCode::Format, "a source space in {} has no vertices", name);
     }
 
-    p_Hemisphere.rr = t_pTag->toFloatMatrix().transpose();
+    p_Hemisphere.rr = t_pTag->to_float_matrix().transpose();
     qint32 rows_rr = p_Hemisphere.rr.rows();
 
     if (rows_rr != p_Hemisphere.np) {
@@ -108,7 +108,7 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
         return fail(ErrorCode::Format, "a source space in {} has no vertex normals", name);
     }
 
-    p_Hemisphere.nn = t_pTag->toFloatMatrix().transpose();
+    p_Hemisphere.nn = t_pTag->to_float_matrix().transpose();
     qint32 rows_nn = p_Hemisphere.nn.rows();
 
     if (rows_nn != p_Hemisphere.np) {
@@ -121,11 +121,11 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
             if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_TRIANGLES); !t_pTag) {
                 return fail(ErrorCode::Format, "a source space in {} has no triangles", name);
             } else {
-                p_Hemisphere.itris = t_pTag->toIntMatrix().transpose();
+                p_Hemisphere.itris = t_pTag->to_int_matrix().transpose();
                 p_Hemisphere.itris.array() -= 1; //0 based indizes
             }
         } else {
-            p_Hemisphere.itris = t_pTag->toIntMatrix().transpose();
+            p_Hemisphere.itris = t_pTag->to_int_matrix().transpose();
             p_Hemisphere.itris.array() -= 1; //0 based indizes
         }
         if (p_Hemisphere.itris.rows() != p_Hemisphere.ntri) {
@@ -144,11 +144,11 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
         VectorXi p_defaultVector;
         p_Hemisphere.vertno = p_defaultVector;
     } else {
-        p_Hemisphere.nuse = *t_pTag->toInt();
+        p_Hemisphere.nuse = *t_pTag->to_int();
         if (t_pTag = p_Tree->find_tag(stream, FIFF_MNE_SOURCE_SPACE_SELECTION); !t_pTag) {
             return fail(ErrorCode::Format, "a source space in {} has no source selection", name);
         }
-        p_Hemisphere.inuse = VectorXi(Map<const VectorXi>(t_pTag->toInt(), t_pTag->size() / 4, 1)); //use copy constructor, for the sake of easy memory management
+        p_Hemisphere.inuse = VectorXi(Map<const VectorXi>(t_pTag->to_int(), t_pTag->size() / 4, 1)); //use copy constructor, for the sake of easy memory management
 
         p_Hemisphere.vertno = VectorXi::Zero(p_Hemisphere.nuse);
         if (p_Hemisphere.inuse.rows() != p_Hemisphere.np) {
@@ -175,8 +175,8 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
         p_Hemisphere.nuse_tri = 0;
         p_Hemisphere.use_itris = p_defaultMatrix;
     } else {
-        p_Hemisphere.nuse_tri = *t_pTag1->toInt();
-        p_Hemisphere.use_itris = t_pTag2->toIntMatrix().transpose();
+        p_Hemisphere.nuse_tri = *t_pTag1->to_int();
+        p_Hemisphere.use_itris = t_pTag2->to_int_matrix().transpose();
         p_Hemisphere.use_itris.array() -= 1; //0 based indizes
     }
 
@@ -189,8 +189,8 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
         p_Hemisphere.nearest.clear();
     } else {
         //res.nearest = tag1.data + 1;
-        VectorXi nearestIdx = VectorXi(Map<const VectorXi>(t_pTag1->toInt(), t_pTag1->size() / 4, 1));
-        VectorXd nearestDist = VectorXd((Map<const VectorXf>(t_pTag2->toFloat(), t_pTag2->size() / 4, 1)).cast<double>());
+        VectorXi nearestIdx = VectorXi(Map<const VectorXi>(t_pTag1->to_int(), t_pTag1->size() / 4, 1));
+        VectorXd nearestDist = VectorXd((Map<const VectorXf>(t_pTag2->to_float(), t_pTag2->size() / 4, 1)).cast<double>());
         p_Hemisphere.setNearestData(nearestIdx, nearestDist);
     }
 
@@ -213,7 +213,7 @@ Expected<MNEHemisphere> read_source_space(FiffStream& stream, const std::shared_
                 p_Hemisphere.dist = std::move(*dist_full);
             }
         }
-        p_Hemisphere.dist_limit = *t_pTag2->toFloat(); //ToDo Check if this is realy always a float and not a matrix
+        p_Hemisphere.dist_limit = *t_pTag2->to_float(); //ToDo Check if this is realy always a float and not a matrix
     }
 
     return p_Hemisphere;
@@ -458,8 +458,8 @@ Expected<MNESourceSpaces> MNESourceSpaces::read(const std::filesystem::path& pat
 
 Expected<MNESourceSpaces> MNESourceSpaces::read(FiffStream& stream, bool add_geom)
 {
-    const std::string name = stream.streamName();
-    if (!stream.isOpen() && !stream.open()) {
+    const std::string name = stream.stream_name();
+    if (!stream.is_open() && !stream.open()) {
         return fail(ErrorCode::Io, "cannot open {}", name);
     }
     const std::vector<std::shared_ptr<FiffDirNode>> nodes = stream.dirtree()->dir_tree_find(FIFFB_MNE_SOURCE_SPACE);

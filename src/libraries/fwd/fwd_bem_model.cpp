@@ -238,11 +238,11 @@ int FwdBemModel::get_int(FiffStream& stream, const std::shared_ptr<FiffDirNode>&
 {
     std::optional<FiffTag> t_pTag;
     if (t_pTag = node->find_tag(stream, what); t_pTag) {
-        if (t_pTag->getType() != FIFFT_INT) {
-            BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)", what, t_pTag->getType());
+        if (t_pTag->data_type() != FIFFT_INT) {
+            BASELIB::Log::warning("Expected an integer tag : {} (found data type {} instead)", what, t_pTag->data_type());
             return FAIL;
         }
-        *res = *t_pTag->toInt();
+        *res = *t_pTag->to_int();
         return OK;
     }
     return FAIL;
@@ -408,7 +408,7 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
         }
         qint32 ndim;
         std::vector<qint32> dims;
-        t_pTag->getMatrixDimensions(ndim, dims);
+        t_pTag->matrix_dimensions(ndim, dims);
 
         if (ndim != 2) {
             BASELIB::Log::warning("Expected a two-dimensional solution matrix instead of a {} dimensional one", ndim);
@@ -423,12 +423,12 @@ int FwdBemModel::fwd_bem_load_solution(const std::filesystem::path& name, int be
             return NOT_FOUND;
         }
 
-        MatrixXf tmp_sol = t_pTag->toFloatMatrix().transpose();
+        MatrixXf tmp_sol = t_pTag->to_float_matrix().transpose();
         nSolutions = dims[1];
     }
     fwd_bem_free_solution();
     sol_name = name;
-    solution = t_pTag->toFloatMatrix().transpose();
+    solution = t_pTag->to_float_matrix().transpose();
     this->nsol = nSolutions;
     this->bem_method = method;
     stream.close();

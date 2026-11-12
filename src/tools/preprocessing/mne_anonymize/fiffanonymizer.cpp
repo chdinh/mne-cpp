@@ -238,7 +238,7 @@ void FiffAnonymizer::censorTag()
         case FIFF_PARENT_BLOCK_ID:
         case FIFF_REF_FILE_ID:
         case FIFF_REF_BLOCK_ID: {
-            FIFFLIB::FiffId inId = m_pTag->toFiffID();
+            FIFFLIB::FiffId inId = m_pTag->to_fiff_id();
             QDateTime inMeasDate = QDateTime::fromSecsSinceEpoch(inId.time.secs, QTimeZone::LocalTime);
             emit readingIdMeasurementDate(inMeasDate);
 
@@ -271,7 +271,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_MEAS_DATE: {
-            QDateTime inMeasDate(QDateTime::fromSecsSinceEpoch(*m_pTag->toInt(), QTimeZone::LocalTime));
+            QDateTime inMeasDate(QDateTime::fromSecsSinceEpoch(*m_pTag->to_int(), QTimeZone::LocalTime));
             emit readingFileMeasurementDate(inMeasDate);
             QDateTime outMeasDate;
 
@@ -308,7 +308,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_ID: {
-            qint32 inSubjID(*m_pTag->toInt());
+            qint32 inSubjID(*m_pTag->to_int());
             emit readingSubjectId(inSubjID);
             qint32 outSubjID(m_iSubjectId);
             memcpy(m_pTag->data(), &outSubjID, sizeof(qint32));
@@ -340,7 +340,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_BIRTH_DAY: {
-            QDate inBirthday(QDate::fromJulianDay(*m_pTag->toJulian()));
+            QDate inBirthday(QDate::fromJulianDay(*m_pTag->to_julian()));
             emit readingSubjectBirthday(inBirthday);
             QDate outBirthday;
 
@@ -357,7 +357,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_SEX: {
-            qint32 inSubjectSex(*m_pTag->toInt());
+            qint32 inSubjectSex(*m_pTag->to_int());
             emit readingSubjectSex(inSubjectSex);
             if (m_bBruteMode) {
                 qint32 outSubjSex(m_iSubjectSex);
@@ -367,7 +367,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_HAND: {
-            qint32 inSubjectHand(*m_pTag->toInt());
+            qint32 inSubjectHand(*m_pTag->to_int());
             emit readingSubjectHand(inSubjectHand);
             if (m_bBruteMode) {
                 qint32 newSubjHand(m_iSubjectHand);
@@ -377,7 +377,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_WEIGHT: {
-            float inWeight(*m_pTag->toFloat());
+            float inWeight(*m_pTag->to_float());
             emit readingSubjectWeight(inWeight);
             if (m_bBruteMode) {
                 float outWeight(m_fSubjectWeight);
@@ -387,7 +387,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_SUBJ_HEIGHT: {
-            float inHeight(*m_pTag->toFloat());
+            float inHeight(*m_pTag->to_float());
             emit readingSubjectHeight(inHeight);
             if (m_bBruteMode) {
                 float outHeight(m_fSubjectHeight);
@@ -413,7 +413,7 @@ void FiffAnonymizer::censorTag()
             break;
         }
         case FIFF_PROJ_ID: {
-            qint32 inProjID(*m_pTag->toInt());
+            qint32 inProjID(*m_pTag->to_int());
             emit readingProjectId(inProjID);
             if (m_bBruteMode) {
                 qint32 newProjID(m_iProjectId);
@@ -544,7 +544,7 @@ void FiffAnonymizer::processHeaderTags()
     //free list
     readTag();
 
-    if ((m_pTag->kind == FIFF_FREE_LIST) && (*m_pTag->toInt() > 0)) {
+    if ((m_pTag->kind == FIFF_FREE_LIST) && (*m_pTag->to_int() > 0)) {
         qWarning() << "This file contains a Free List of tags. It will not be copied to the output file.";
     } else {
         // output this tag, whatever kind it is, to the oupput file.
@@ -558,7 +558,7 @@ void FiffAnonymizer::processHeaderTags()
 void FiffAnonymizer::updateBlockTypeList()
 {
     if (m_pTag->kind == FIFF_BLOCK_START) {
-        m_pBlockTypeList->push(*m_pTag->toInt());
+        m_pBlockTypeList->push(*m_pTag->to_int());
     }
 
     if (m_pTag->kind == FIFF_BLOCK_END) {
@@ -571,7 +571,7 @@ void FiffAnonymizer::updateBlockTypeList()
 bool FiffAnonymizer::checkValidFiffFormatVersion()
 {
     if (m_pTag->kind == FIFF_FILE_ID) {
-        FIFFLIB::FiffId fileId = m_pTag->toFiffID();
+        FIFFLIB::FiffId fileId = m_pTag->to_fiff_id();
         int inMayorVersion = (static_cast<uint32_t>(fileId.version) & 0xFFFF0000) >> 16;
         int inMinorVersion = (static_cast<uint32_t>(fileId.version) & 0x0000FFFF);
         double inVersion = inMayorVersion + inMinorVersion / 10.0;

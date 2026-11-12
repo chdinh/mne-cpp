@@ -117,7 +117,7 @@ public:
      *
      * @return the size of the old struct fiffChInfoRec.
      */
-    inline static std::int32_t storageSize();
+    inline static std::int32_t storage_size();
 
     //=========================================================================================================
     /**
@@ -173,11 +173,11 @@ public:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline std::int32_t FiffChInfo::storageSize()
+inline std::int32_t FiffChInfo::storage_size()
 {
     // On-disk layout: scanNo, logNo, kind, range, cal, chpos, unit, unit_mul, ch_name[16]
     // (in memory a std::string, on disk a fixed 16-char name)
-    return 3 * sizeof(fiff_int_t) + 2 * sizeof(fiff_float_t) + FiffChPos::storageSize() + 2 * sizeof(fiff_int_t) + 16;
+    return 3 * sizeof(fiff_int_t) + 2 * sizeof(fiff_float_t) + FiffChPos::storage_size() + 2 * sizeof(fiff_int_t) + 16;
 }
 
 //=============================================================================================================

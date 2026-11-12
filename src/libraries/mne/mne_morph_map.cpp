@@ -287,15 +287,15 @@ std::optional<MNEMorphMap> MNEMorphMap::read(const std::filesystem::path& path, 
     std::optional<FiffTag> tag;
     for (const std::shared_ptr<FiffDirNode>& node : stream.dirtree()->dir_tree_find(FIFFB_MNE_MORPH_MAP)) {
         const auto hemiTag = node->find_tag(stream, FIFF_MNE_HEMI);
-        if (!hemiTag || *hemiTag->toInt() != kHemiKind[hemi]) {
+        if (!hemiTag || *hemiTag->to_int() != kHemiKind[hemi]) {
             continue;
         }
         const auto fromTag = node->find_tag(stream, FIFF_MNE_MORPH_MAP_FROM);
-        if (!fromTag || fromTag->toString() != fromSubj) {
+        if (!fromTag || fromTag->to_string() != fromSubj) {
             continue;
         }
         const auto toTag = node->find_tag(stream, FIFF_MNE_MORPH_MAP_TO);
-        if (!toTag || toTag->toString() != toSubj) {
+        if (!toTag || toTag->to_string() != toSubj) {
             continue;
         }
         if (tag = node->find_tag(stream, FIFF_MNE_MORPH_MAP); !tag) {

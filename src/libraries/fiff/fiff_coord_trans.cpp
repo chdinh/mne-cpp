@@ -528,7 +528,7 @@ BASELIB::Expected<FiffCoordTrans> FiffCoordTrans::read_ascii(const std::filesyst
 FiffCoordTrans FiffCoordTrans::from_tag(const FiffTag& tag)
 {
     FiffCoordTrans t;
-    if (tag.isMatrix() || tag.getType() != FIFFT_COORD_TRANS_STRUCT || tag.data() == nullptr)
+    if (tag.is_matrix() || tag.data_type() != FIFFT_COORD_TRANS_STRUCT || tag.data() == nullptr)
         return t;
 
     const auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(tag.data());

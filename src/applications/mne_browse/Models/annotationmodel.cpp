@@ -875,7 +875,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
         }
 
         if (directoryEntry.kind == FiffMneBaselineMin) {
-            if (const float* values = tag->toFloat()) {
+            if (const float* values = tag->to_float()) {
                 const int count = static_cast<int>(tag->size() / sizeof(float));
                 onsetSeconds.resize(count);
                 for (int index = 0; index < count; ++index) {
@@ -883,7 +883,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
                 }
             }
         } else if (directoryEntry.kind == FiffMneBaselineMax) {
-            if (const float* values = tag->toFloat()) {
+            if (const float* values = tag->to_float()) {
                 const int count = static_cast<int>(tag->size() / sizeof(float));
                 endSeconds.resize(count);
                 for (int index = 0; index < count; ++index) {
@@ -893,9 +893,9 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
         } else if (directoryEntry.kind == FIFF_MEAS_DATE) {
             haveOrigTime = true;
         } else if (directoryEntry.kind == FIFF_COMMENT) {
-            descriptions = decodeMneChannelNames(QString::fromStdString(tag->toString()));
+            descriptions = decodeMneChannelNames(QString::fromStdString(tag->to_string()));
         } else if (directoryEntry.kind == FiffMneEpochsDropLog) {
-            const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString()));
+            const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->to_string()));
             const QJsonArray rows = document.array();
             channelNames.resize(rows.size());
             for (int row = 0; row < rows.size(); ++row) {
@@ -908,7 +908,7 @@ bool AnnotationModel::loadAnnotationFif(QFile& qFile)
                 }
             }
         } else if (directoryEntry.kind == FIFF_FREE_LIST) {
-            const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString()));
+            const QJsonDocument document = QJsonDocument::fromJson(QByteArray::fromStdString(tag->to_string()));
             const QJsonArray rows = document.array();
             extras.resize(rows.size());
             for (int row = 0; row < rows.size(); ++row) {

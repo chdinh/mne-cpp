@@ -66,7 +66,7 @@ struct FiffDirEntry
     fiff_int_t pos = -1;  /**< Location in file; the data is located at pos + FIFFC_DATA_OFFSET. */
 
     /** @return The size of one entry in a FIFF directory tag. */
-    static constexpr std::int32_t storageSize()
+    static constexpr std::int32_t storage_size()
     {
         return 4 * sizeof(fiff_int_t);
     }

@@ -191,7 +191,7 @@ FiffId& FiffId::getDefault()
 
 //=============================================================================================================
 
-std::string FiffId::toString() const
+std::string FiffId::to_string() const
 {
     time_t secs = time.secs;
 

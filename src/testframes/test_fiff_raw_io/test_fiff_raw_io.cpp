@@ -457,7 +457,7 @@ private slots:
             if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
                 const auto tag = stream.read_tag(stream.dir()[i].pos);
                 QVERIFY(tag);
-                FiffCoordTrans trans = tag->toCoordTrans();
+                FiffCoordTrans trans = tag->to_coord_trans();
                 QVERIFY(trans.from >= 0);
                 QVERIFY(trans.to >= 0);
                 // Verify transform matrix
@@ -484,7 +484,7 @@ private slots:
         for (std::size_t i = 0; i < stream.dir().size(); ++i) {
             if (stream.dir()[i].kind == FIFF_COORD_TRANS) {
                 const auto tag = stream.read_tag(stream.dir()[i].pos);
-                FiffCoordTrans trans = tag->toCoordTrans();
+                FiffCoordTrans trans = tag->to_coord_trans();
 
                 // Test operations on the transform
                 FiffCoordTrans inv = trans.inverted();
@@ -547,7 +547,7 @@ private slots:
                 const auto tag = stream.read_tag(entry.pos);
                 QVERIFY(tag);
                 if (tag->kind == FIFF_SFREQ) {
-                    float sfreq = *tag->toFloat();
+                    float sfreq = *tag->to_float();
                     QVERIFY(sfreq > 0);
                 }
             }

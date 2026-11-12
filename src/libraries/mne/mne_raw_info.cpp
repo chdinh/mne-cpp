@@ -192,7 +192,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
             case FIFF_NCHAN:
                 if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
-                *nchan = *t_pTag->toInt();
+                *nchan = *t_pTag->to_int();
 
                 for (j = 0; j < *nchan; j++) {
                     ch.push_back(FiffChInfo());
@@ -204,21 +204,21 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
             case FIFF_SFREQ:
                 if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
-                *sfreq = *t_pTag->toFloat();
+                *sfreq = *t_pTag->to_float();
                 to_find--;
                 break;
 
             case FIFF_LOWPASS:
                 if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
-                *lowpass = *t_pTag->toFloat();
+                *lowpass = *t_pTag->to_float();
                 to_find--;
                 break;
 
             case FIFF_HIGHPASS:
                 if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
-                *highpass = *t_pTag->toFloat();
+                *highpass = *t_pTag->to_float();
                 to_find--;
                 break;
 
@@ -226,7 +226,7 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
                 if (t_pTag = stream.read_tag(pos); !t_pTag)
                     return (-1);
 
-                this_ch = t_pTag->toChInfo();
+                this_ch = t_pTag->to_ch_info();
                 if (this_ch.scanNo <= 0 || this_ch.scanNo > *nchan) {
                     BASELIB::Log::critical("FIFF_CH_INFO : scan # out of range!");
                     return (-1);

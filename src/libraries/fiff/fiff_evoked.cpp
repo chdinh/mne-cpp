@@ -186,7 +186,7 @@ Expected<FiffEvokedFile> FiffEvokedFile::open(const std::filesystem::path& path)
     if (!stream.read_meas_info(stream.dirtree(), file.info, meas)) {
         return fail(ErrorCode::Format, "No measurement info in {}", file.m_file);
     }
-    file.info.filename = stream.streamName();
+    file.info.filename = stream.stream_name();
     if (meas->dir_tree_find(FIFFB_PROCESSED_DATA).empty()) {
         return fail(ErrorCode::NotFound, "No processed data in {}", file.m_file);
     }
@@ -257,27 +257,27 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         switch (tag_kind) {
             case FIFF_COMMENT:
                 t_pTag = m_stream.read_tag(pos);
-                comment = t_pTag->toString();
+                comment = t_pTag->to_string();
                 break;
             case FIFF_FIRST_SAMPLE:
                 t_pTag = m_stream.read_tag(pos);
-                first = *t_pTag->toInt();
+                first = *t_pTag->to_int();
                 break;
             case FIFF_LAST_SAMPLE:
                 t_pTag = m_stream.read_tag(pos);
-                last = *t_pTag->toInt();
+                last = *t_pTag->to_int();
                 break;
             case FIFF_NCHAN:
                 t_pTag = m_stream.read_tag(pos);
-                nchan = *t_pTag->toInt();
+                nchan = *t_pTag->to_int();
                 break;
             case FIFF_SFREQ:
                 t_pTag = m_stream.read_tag(pos);
-                sfreq = *t_pTag->toFloat();
+                sfreq = *t_pTag->to_float();
                 break;
             case FIFF_CH_INFO:
                 t_pTag = m_stream.read_tag(pos);
-                chs.push_back(t_pTag->toChInfo());
+                chs.push_back(t_pTag->to_ch_info());
                 break;
         }
     }
@@ -319,15 +319,15 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         switch (tag_kind) {
             case FIFF_COMMENT:
                 t_pTag = m_stream.read_tag(pos);
-                comment = t_pTag->toString();
+                comment = t_pTag->to_string();
                 break;
             case FIFF_ASPECT_KIND:
                 t_pTag = m_stream.read_tag(pos);
-                aspect_kind = *t_pTag->toInt();
+                aspect_kind = *t_pTag->to_int();
                 break;
             case FIFF_NAVE:
                 t_pTag = m_stream.read_tag(pos);
-                nave = *t_pTag->toInt();
+                nave = *t_pTag->to_int();
                 break;
             case FIFF_EPOCH:
                 t_pTag = m_stream.read_tag(pos);
@@ -348,7 +348,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         //
         //   Only one epoch
         //
-        all_data = epoch[0].toFloatMatrix().cast<double>();
+        all_data = epoch[0].to_float_matrix().cast<double>();
         all_data.transposeInPlace();
         //
         //   May need a transpose if the number of channels is one
@@ -365,7 +365,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
             if (n != all_data.cols()) {
                 return fail(ErrorCode::Format, "Old style epochs of lengths {} and {} in {}", n, all_data.cols(), file);
             }
-            all_data.row(k) = Map<const RowVectorXf>(epoch[k].toFloat(), n).cast<double>();
+            all_data.row(k) = Map<const RowVectorXf>(epoch[k].to_float(), n).cast<double>();
         }
     }
     if (all_data.cols() != nsamp) {

@@ -118,7 +118,7 @@ std::string fixFile(const QString& path, bool fix32)
                 continue;
             }
             std::optional<FiffTag> tag = stream->read_tag(entry.pos);
-            if (!tag || !same_channel(tag->toChInfo().ch_name, "STI 014") || tag->toChInfo().range == 1.0f) {
+            if (!tag || !same_channel(tag->to_ch_info().ch_name, "STI 014") || tag->to_ch_info().range == 1.0f) {
                 continue;
             }
             const float range = 1.0f;

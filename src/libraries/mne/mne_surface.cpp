@@ -410,7 +410,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
     if (bems.size() > 0) {
         node = bems[0];
         if (t_pTag = node->find_tag(stream, FIFF_BEM_COORD_FRAME); t_pTag) {
-            coord_frame = *t_pTag->toInt();
+            coord_frame = *t_pTag->to_int();
         }
     }
     surfs = stream.dirtree()->dir_tree_find(FIFFB_BEM_SURF);
@@ -423,7 +423,7 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
         for (k = 0; k < std::ssize(surfs); ++k) {
             node = surfs[k];
             if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_ID); t_pTag) {
-                id = *t_pTag->toInt();
+                id = *t_pTag->to_int();
                 if (id == which)
                     break;
             }
@@ -440,37 +440,37 @@ std::unique_ptr<MNESurface> MNESurface::read_bem_surface(const std::filesystem::
         stream.close();
         return nullptr;
     }
-    nnode = *t_pTag->toInt();
+    nnode = *t_pTag->to_int();
 
     if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_NTRI); !t_pTag) {
         stream.close();
         return nullptr;
     }
-    ntri_count = *t_pTag->toInt();
+    ntri_count = *t_pTag->to_int();
 
     if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_NODES); !t_pTag) {
         stream.close();
         return nullptr;
     }
-    tmp_nodes = t_pTag->toFloatMatrix().transpose();
+    tmp_nodes = t_pTag->to_float_matrix().transpose();
 
     if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_NORMALS); t_pTag) {
-        tmp_node_normals = t_pTag->toFloatMatrix().transpose();
+        tmp_node_normals = t_pTag->to_float_matrix().transpose();
     }
 
     if (t_pTag = node->find_tag(stream, FIFF_BEM_SURF_TRIANGLES); !t_pTag) {
         stream.close();
         return nullptr;
     }
-    tmp_triangles = t_pTag->toIntMatrix().transpose();
+    tmp_triangles = t_pTag->to_int_matrix().transpose();
 
     if (t_pTag = node->find_tag(stream, FIFF_MNE_COORD_FRAME); t_pTag) {
-        coord_frame = *t_pTag->toInt();
+        coord_frame = *t_pTag->to_int();
     } else if (t_pTag = node->find_tag(stream, FIFF_BEM_COORD_FRAME); t_pTag) {
-        coord_frame = *t_pTag->toInt();
+        coord_frame = *t_pTag->to_int();
     }
     if (t_pTag = node->find_tag(stream, FIFF_BEM_SIGMA); t_pTag) {
-        sigmaLocal = *t_pTag->toFloat();
+        sigmaLocal = *t_pTag->to_float();
     }
 
     stream.close();

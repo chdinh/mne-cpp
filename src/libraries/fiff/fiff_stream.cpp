@@ -163,7 +163,7 @@ BASELIB::ByteStream& FiffStream::byte_stream() const
 
 //=============================================================================================================
 
-bool FiffStream::isOpen() const
+bool FiffStream::is_open() const
 {
     return m_bytes && m_bytes->isOpen();
 }
@@ -172,7 +172,7 @@ bool FiffStream::isOpen() const
 
 bool FiffStream::reopen()
 {
-    if (isOpen())
+    if (is_open())
         return true;
     if (!m_bytes && !m_path.empty()) {
         m_bytes = BASELIB::FileByteStream::open(m_path, BASELIB::FileByteStream::Mode::Read);
@@ -183,14 +183,14 @@ bool FiffStream::reopen()
 
 //=============================================================================================================
 
-void FiffStream::setLittleEndian(bool littleEndian)
+void FiffStream::set_little_endian(bool littleEndian)
 {
     m_littleEndian = littleEndian;
 }
 
 //=============================================================================================================
 
-bool FiffStream::isLittleEndian() const
+bool FiffStream::is_little_endian() const
 {
     return m_littleEndian;
 }
@@ -204,21 +204,21 @@ fiff_long_t FiffStream::tell() const
 
 //=============================================================================================================
 
-bool FiffStream::seekTo(fiff_long_t pos)
+bool FiffStream::seek(fiff_long_t pos)
 {
     return pos >= 0 && m_bytes->seek(static_cast<std::uint64_t>(pos));
 }
 
 //=============================================================================================================
 
-void FiffStream::seekToEnd()
+void FiffStream::seek_to_end()
 {
     m_bytes->seek(m_bytes->size());
 }
 
 //=============================================================================================================
 
-void FiffStream::readRaw(void* data, fiff_long_t bytes)
+void FiffStream::read_raw(void* data, fiff_long_t bytes)
 {
     if (bytes > 0 && m_bytes->read(data, static_cast<std::size_t>(bytes)) != static_cast<std::size_t>(bytes))
         m_readFailed = true;
@@ -226,7 +226,7 @@ void FiffStream::readRaw(void* data, fiff_long_t bytes)
 
 //=============================================================================================================
 
-void FiffStream::writeRaw(const void* data, fiff_long_t bytes)
+void FiffStream::write_raw(const void* data, fiff_long_t bytes)
 {
     if (bytes > 0)
         m_bytes->write(data, static_cast<std::size_t>(bytes));
@@ -234,7 +234,7 @@ void FiffStream::writeRaw(const void* data, fiff_long_t bytes)
 
 //=============================================================================================================
 
-std::string FiffStream::streamName()
+std::string FiffStream::stream_name()
 {
     return m_name.empty() ? std::string("memory") : m_name;
 }
@@ -316,7 +316,7 @@ bool FiffStream::get_evoked_entries(const std::vector<std::shared_ptr<FiffDirNod
         for (const FiffDirEntry& entry : ev->dir) {
             if (entry.kind == FIFF_COMMENT) {
                 t_pTag = this->read_tag(entry.pos);
-                comments.push_back(t_pTag->toString());
+                comments.push_back(t_pTag->to_string());
             }
         }
         const std::vector<std::shared_ptr<FiffDirNode>> aspects = ev->dir_tree_find(FIFFB_ASPECT);
@@ -326,7 +326,7 @@ bool FiffStream::get_evoked_entries(const std::vector<std::shared_ptr<FiffDirNod
         for (const FiffDirEntry& entry : aspects.front()->dir) {
             if (entry.kind == FIFF_ASPECT_KIND) {
                 t_pTag = this->read_tag(entry.pos);
-                aspect_kinds.push_back(*t_pTag->toInt());
+                aspect_kinds.push_back(*t_pTag->to_int());
             }
         }
     }
@@ -354,7 +354,7 @@ bool FiffStream::get_evoked_entries(const std::vector<std::shared_ptr<FiffDirNod
 
 bool FiffStream::open()
 {
-    const std::string t_sFileName = this->streamName();
+    const std::string t_sFileName = this->stream_name();
     std::optional<FiffTag> t_pTag;
 
     /*
@@ -376,7 +376,7 @@ bool FiffStream::open()
         close();
         return false;
     }
-    m_id = t_pTag->toFiffID();
+    m_id = t_pTag->to_fiff_id();
 
     t_pTag = this->read_tag();
     if (t_pTag->kind != FIFF_DIR_POINTER) {
@@ -390,7 +390,7 @@ bool FiffStream::open()
     //
     Log::info("Creating tag directory for {}...", t_sFileName);
     m_dir.clear();
-    std::int32_t dirpos = *t_pTag->toInt();
+    std::int32_t dirpos = *t_pTag->to_int();
     /*
      * Do we have a directory or not?
      */
@@ -406,7 +406,7 @@ bool FiffStream::open()
             Log::critical("Could not read the tag directory (file probably damaged)!");
             return false;
         }
-        m_dir = t_pTag->toDirEntry();
+        m_dir = t_pTag->to_dir_entry();
     }
 
     /*
@@ -428,7 +428,7 @@ bool FiffStream::open()
     //
     //   Back to the beginning
     //
-    seekTo(SEEK_SET); //fseek(fid,0,'bof');
+    seek(SEEK_SET); //fseek(fid,0,'bof');
     return true;
 }
 
@@ -457,7 +457,7 @@ std::shared_ptr<FiffDirNode> FiffStream::make_subtree(const std::vector<FiffDirE
         if (t_pTag = this->read_tag(dentry[current].pos); !t_pTag)
             return defaultNode;
         else
-            node->type = *t_pTag->toInt();
+            node->type = *t_pTag->to_int();
     } else {
         node->id = this->id();
     }
@@ -488,7 +488,7 @@ std::shared_ptr<FiffDirNode> FiffStream::make_subtree(const std::vector<FiffDirE
             if (((dentry[current].kind == FIFF_PARENT_BLOCK_ID || dentry[current].kind == FIFF_FILE_ID) && node->id.empty()) || dentry[current].kind == FIFF_BLOCK_ID) {
                 if (t_pTag = this->read_tag(dentry[current].pos); !t_pTag)
                     return defaultNode;
-                node->id = t_pTag->toFiffID();
+                node->id = t_pTag->to_fiff_id();
             }
             dir.push_back(dentry[current]);
         }
@@ -511,7 +511,7 @@ StringList FiffStream::read_bad_channels(const std::shared_ptr<FiffDirNode>& p_N
 
     if (node.size() > 0)
         if (t_pTag = node[0]->find_tag(*this, FIFF_MNE_CH_NAME_LIST); t_pTag)
-            bads = split_name_list(t_pTag->toString());
+            bads = split_name_list(t_pTag->to_string());
 
     return bads;
 }
@@ -548,15 +548,15 @@ bool FiffStream::read_annotations(const std::shared_ptr<FiffDirNode>& p_Node, Fi
         }
         switch (entry.kind) {
             case FIFF_MNE_BASELINE_MIN:
-                onsets.assign(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+                onsets.assign(tag->to_float(), tag->to_float() + tag->size() / 4);
                 break;
             case FIFF_MNE_BASELINE_MAX:
-                ends.assign(tag->toFloat(), tag->toFloat() + tag->size() / 4);
+                ends.assign(tag->to_float(), tag->to_float() + tag->size() / 4);
                 break;
             case FIFF_COMMENT:
                 // Unlike channel name lists, descriptions keep spaces; colons inside them are stored as {COLON}.
-                if (!tag->toString().empty()) {
-                    for (std::string& name : BASELIB::split(tag->toString(), ':')) {
+                if (!tag->to_string().empty()) {
+                    for (std::string& name : BASELIB::split(tag->to_string(), ':')) {
                         for (std::size_t at = name.find("{COLON}"); at != std::string::npos; at = name.find("{COLON}", at + 1)) {
                             name.replace(at, 7, ":");
                         }
@@ -565,20 +565,20 @@ bool FiffStream::read_annotations(const std::shared_ptr<FiffDirNode>& p_Node, Fi
                 }
                 break;
             case FIFF_MEAS_DATE:
-                if (tag->getType() == FIFFT_DOUBLE && tag->size() >= 16) {
-                    origTime[0] = static_cast<fiff_int_t>(tag->toDouble()[0]);
-                    origTime[1] = static_cast<fiff_int_t>(tag->toDouble()[1]);
-                } else if (tag->getType() == FIFFT_DOUBLE && tag->size() == 8) {
-                    const double stamp = tag->toDouble()[0];
+                if (tag->data_type() == FIFFT_DOUBLE && tag->size() >= 16) {
+                    origTime[0] = static_cast<fiff_int_t>(tag->to_double()[0]);
+                    origTime[1] = static_cast<fiff_int_t>(tag->to_double()[1]);
+                } else if (tag->data_type() == FIFFT_DOUBLE && tag->size() == 8) {
+                    const double stamp = tag->to_double()[0];
                     origTime[0] = static_cast<fiff_int_t>(std::floor(stamp));
                     origTime[1] = static_cast<fiff_int_t>(std::lround((stamp - std::floor(stamp)) * 1e6));
                 }
                 break;
             case FIFF_MNE_EPOCHS_DROP_LOG:
-                channelNames = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString())).array();
+                channelNames = QJsonDocument::fromJson(QByteArray::fromStdString(tag->to_string())).array();
                 break;
             case FIFF_FREE_LIST:
-                extras = QJsonDocument::fromJson(QByteArray::fromStdString(tag->toString())).array();
+                extras = QJsonDocument::fromJson(QByteArray::fromStdString(tag->to_string())).array();
                 break;
             default:
                 break;
@@ -681,7 +681,7 @@ bool FiffStream::attach_env(const std::string& workingDir, const std::string& co
             if (dir()[k].kind == FIFF_BLOCK_START) {
                 if (t_pTag = read_tag(dir()[k].pos); !t_pTag)
                     return false;
-                if (*(t_pTag->toInt()) == insert_blocks[b]) {
+                if (*(t_pTag->to_int()) == insert_blocks[b]) {
                     insert = k;
                     break;
                 }
@@ -717,7 +717,7 @@ bool FiffStream::attach_env(const std::string& workingDir, const std::string& co
     /*
      * Go to the end of the file
      */
-    seekToEnd();
+    seek_to_end();
     /*
      * Copy the beginning of old directory
      */
@@ -778,7 +778,7 @@ bool FiffStream::read_cov(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t
     for (p = 0; p < std::ssize(covs); ++p) {
         tag = covs[p]->find_tag(*this, FIFF_MNE_COV_KIND);
         success = tag.has_value();
-        if (success && *tag->toInt() == cov_kind) {
+        if (success && *tag->to_int() == cov_kind) {
             const std::shared_ptr<FiffDirNode>& current = covs[p];
             //
             //   Find all the necessary data
@@ -787,14 +787,14 @@ bool FiffStream::read_cov(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t
                 Log::warning("Covariance matrix dimension not found.\n");
                 return false;
             }
-            dim = *tag->toInt();
+            dim = *tag->to_int();
             if (tag = current->find_tag(*this, FIFF_MNE_COV_NFREE); !tag)
                 nfree = -1;
             else
-                nfree = *tag->toInt();
+                nfree = *tag->to_int();
 
             if (tag = current->find_tag(*this, FIFF_MNE_ROW_NAMES); tag) {
-                names = FiffStream::split_name_list(tag->toString());
+                names = FiffStream::split_name_list(tag->to_string());
                 if (static_cast<int>(names.size()) != dim) {
                     Log::warning("Number of names does not match covariance matrix dimension\n");
                     return false;
@@ -809,9 +809,9 @@ bool FiffStream::read_cov(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t
                     //   Diagonal is stored
                     //
                     if (tag->type == FIFFT_DOUBLE) {
-                        cov_diag = Map<const VectorXd>(tag->toDouble(), dim);
+                        cov_diag = Map<const VectorXd>(tag->to_double(), dim);
                     } else if (tag->type == FIFFT_FLOAT) {
-                        cov_diag = Map<const VectorXf>(tag->toFloat(), dim).cast<double>();
+                        cov_diag = Map<const VectorXf>(tag->to_float(), dim).cast<double>();
                     } else {
                         Log::critical("Illegal data type for covariance matrix\n");
                         return false;
@@ -824,11 +824,11 @@ bool FiffStream::read_cov(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t
                 VectorXd vals;
                 nn = dim * (dim + 1) / 2;
                 if (tag->type == FIFFT_DOUBLE) {
-                    vals = Map<const VectorXd>(tag->toDouble(), nn);
+                    vals = Map<const VectorXd>(tag->to_double(), nn);
                 } else if (tag->type == FIFFT_FLOAT) {
-                    vals = Map<const VectorXf>(tag->toFloat(), nn).cast<double>();
+                    vals = Map<const VectorXf>(tag->to_float(), nn).cast<double>();
                 } else {
-                    Log::debug("{}", tag->getInfo());
+                    Log::debug("{}", tag->info());
                     return false;
                 }
 
@@ -894,8 +894,8 @@ bool FiffStream::read_cov(const std::shared_ptr<FiffDirNode>& p_Node, fiff_int_t
             const auto tag1 = current->find_tag(*this, FIFF_MNE_COV_EIGENVALUES);
             const auto tag2 = tag1 ? current->find_tag(*this, FIFF_MNE_COV_EIGENVECTORS) : std::nullopt;
             if (tag1 && tag2) {
-                eig = VectorXd(Map<const VectorXd>(tag1->toDouble(), dim));
-                eigvec = tag2->toFloatMatrix().cast<double>();
+                eig = VectorXd(Map<const VectorXd>(tag1->to_double(), dim));
+                eigvec = tag2->to_float_matrix().cast<double>();
                 eigvec.transposeInPlace();
             }
             //
@@ -971,7 +971,7 @@ std::vector<FiffCtfComp> FiffStream::read_ctf_comp(const std::shared_ptr<FiffDir
         //   Get the compensation kind and map it to a simple number
         //
         FiffCtfComp one;
-        one.ctfkind = *t_pTag->toInt();
+        one.ctfkind = *t_pTag->to_int();
 
         t_pTag.reset();
 
@@ -1001,7 +1001,7 @@ std::vector<FiffCtfComp> FiffStream::read_ctf_comp(const std::shared_ptr<FiffDir
         if (!t_pTag)
             calibrated = false;
         else
-            calibrated = static_cast<bool>(*t_pTag->toInt());
+            calibrated = static_cast<bool>(*t_pTag->to_int());
 
         one.save_calibrated = calibrated;
         one.data = std::move(mat);
@@ -1034,22 +1034,22 @@ BASELIB::Expected<FiffDigitizerData> FiffStream::read_digitizer_data(const std::
             }
             const std::optional<FiffTag> tag = this->read_tag(entry.pos);
             if (!tag) {
-                return BASELIB::fail(BASELIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->streamName());
+                return BASELIB::fail(BASELIB::ErrorCode::Format, "cannot read the digitizer tag at {} of {}", entry.pos, this->stream_name());
             }
             if (entry.kind == FIFF_DIG_POINT) {
-                dig.points.push_back(tag->toDigPoint());
+                dig.points.push_back(tag->to_dig_point());
             } else {
-                dig.coord_frame = *tag->toInt();
+                dig.coord_frame = *tag->to_int();
             }
         }
     }
     if (dig.points.empty()) {
-        return BASELIB::fail(BASELIB::ErrorCode::NotFound, "no digitizer points in {}", this->streamName());
+        return BASELIB::fail(BASELIB::ErrorCode::NotFound, "no digitizer points in {}", this->stream_name());
     }
     for (FiffDigPoint& point : dig.points) {
         point.coord_frame = dig.coord_frame;
     }
-    dig.filename = BASELIB::pathFromUtf8(this->streamName());
+    dig.filename = BASELIB::pathFromUtf8(this->stream_name());
     dig.active.assign(dig.points.size(), true);
     dig.discard.assign(dig.points.size(), false);
     return dig;
@@ -1083,7 +1083,7 @@ bool FiffStream::read_meas_info_base(const std::shared_ptr<FiffDirNode>& p_Node,
         pos = parent_meg[0]->dir[k].pos;
         if (kind == FIFF_CH_INFO) {
             t_pTag = this->read_tag(pos);
-            chs.push_back(t_pTag->toChInfo());
+            chs.push_back(t_pTag->to_ch_info());
         }
     }
 
@@ -1101,7 +1101,7 @@ bool FiffStream::read_meas_info_base(const std::shared_ptr<FiffDirNode>& p_Node,
     //   Get the MEG device <-> head coordinate transformation
     //
     if (t_pTag = parent_meg[0]->find_tag(*this, FIFF_COORD_TRANS); t_pTag) {
-        cand = t_pTag->toCoordTrans();
+        cand = t_pTag->to_coord_trans();
         if (cand.from == FIFFV_COORD_DEVICE && cand.to == FIFFV_COORD_HEAD)
             p_InfoForward.dev_head_t = cand;
         else if (cand.from == FIFFV_MNE_COORD_CTF_HEAD && cand.to == FIFFV_COORD_HEAD)
@@ -1184,37 +1184,37 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
         switch (kind) {
             case FIFF_NCHAN:
                 t_pTag = this->read_tag(pos);
-                nchan = *t_pTag->toInt();
+                nchan = *t_pTag->to_int();
                 break;
             case FIFF_SFREQ:
                 t_pTag = this->read_tag(pos);
-                sfreq = *t_pTag->toFloat();
+                sfreq = *t_pTag->to_float();
                 break;
             case FIFF_LINE_FREQ:
                 t_pTag = this->read_tag(pos);
-                linefreq = *t_pTag->toFloat();
+                linefreq = *t_pTag->to_float();
                 break;
             case FIFF_CH_INFO:
                 t_pTag = this->read_tag(pos);
-                chs.push_back(t_pTag->toChInfo());
+                chs.push_back(t_pTag->to_ch_info());
                 break;
             case FIFF_LOWPASS:
                 t_pTag = this->read_tag(pos);
-                lowpass = *t_pTag->toFloat();
+                lowpass = *t_pTag->to_float();
                 break;
             case FIFF_HIGHPASS:
                 t_pTag = this->read_tag(pos);
-                highpass = *t_pTag->toFloat();
+                highpass = *t_pTag->to_float();
                 break;
             case FIFF_MEAS_DATE:
                 t_pTag = this->read_tag(pos);
-                meas_date[0] = t_pTag->toInt()[0];
-                meas_date[1] = t_pTag->toInt()[1];
+                meas_date[0] = t_pTag->to_int()[0];
+                meas_date[1] = t_pTag->to_int()[1];
                 break;
             case FIFF_COORD_TRANS:
                 //ToDo: This has to be debugged!!
                 t_pTag = this->read_tag(pos);
-                cand = t_pTag->toCoordTrans();
+                cand = t_pTag->to_coord_trans();
                 all_coord_trans.push_back(cand);
                 if (cand.from == FIFFV_COORD_DEVICE && cand.to == FIFFV_COORD_HEAD)
                     dev_head_t = cand;
@@ -1223,36 +1223,36 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
                 break;
             case FIFF_PROJ_ID:
                 t_pTag = this->read_tag(pos);
-                proj_id = *t_pTag->toInt();
+                proj_id = *t_pTag->to_int();
                 break;
             case FIFF_PROJ_NAME:
                 t_pTag = this->read_tag(pos);
-                proj_name = t_pTag->toString();
+                proj_name = t_pTag->to_string();
                 break;
             case FIFF_XPLOTTER_LAYOUT:
                 t_pTag = this->read_tag(pos);
-                xplotter_layout = t_pTag->toString();
+                xplotter_layout = t_pTag->to_string();
                 break;
             case FIFF_EXPERIMENTER:
                 t_pTag = this->read_tag(pos);
-                experimenter = t_pTag->toString();
+                experimenter = t_pTag->to_string();
                 break;
             case FIFF_DESCRIPTION:
                 t_pTag = this->read_tag(pos);
-                description = t_pTag->toString();
+                description = t_pTag->to_string();
                 break;
             case FIFF_GANTRY_ANGLE:
                 t_pTag = this->read_tag(pos);
                 // MNE-Python writes this as float; older writers used int.
-                if (t_pTag->getType() == FIFFT_FLOAT) {
-                    gantry_angle = static_cast<fiff_int_t>(*t_pTag->toFloat());
-                } else if (t_pTag->getType() == FIFFT_INT) {
-                    gantry_angle = *t_pTag->toInt();
+                if (t_pTag->data_type() == FIFFT_FLOAT) {
+                    gantry_angle = static_cast<fiff_int_t>(*t_pTag->to_float());
+                } else if (t_pTag->data_type() == FIFFT_INT) {
+                    gantry_angle = *t_pTag->to_int();
                 }
                 break;
             case FIFF_UTC_OFFSET:
                 t_pTag = this->read_tag(pos);
-                utc_offset = t_pTag->toString();
+                utc_offset = t_pTag->to_string();
                 break;
         }
     }
@@ -1287,7 +1287,7 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
                 pos = hpi_result[0]->dir[k].pos;
                 if (kind == FIFF_COORD_TRANS) {
                     t_pTag = this->read_tag(pos);
-                    cand = t_pTag->toCoordTrans();
+                    cand = t_pTag->to_coord_trans();
                     if (cand.from == FIFFV_COORD_DEVICE && cand.to == FIFFV_COORD_HEAD)
                         dev_head_t = cand;
                     else if (cand.from == FIFFV_MNE_COORD_CTF_HEAD && cand.to == FIFFV_COORD_HEAD)
@@ -1312,14 +1312,14 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
             pos = isotrak[0]->dir[k].pos;
             if (kind == FIFF_DIG_POINT) {
                 t_pTag = this->read_tag(pos);
-                dig.push_back(t_pTag->toDigPoint());
+                dig.push_back(t_pTag->to_dig_point());
             } else {
                 if (kind == FIFF_MNE_COORD_FRAME) {
                     t_pTag = this->read_tag(pos);
-                    coord_frame = *t_pTag->toInt();
+                    coord_frame = *t_pTag->to_int();
                 } else if (kind == FIFF_COORD_TRANS) {
                     t_pTag = this->read_tag(pos);
-                    dig_trans = t_pTag->toCoordTrans();
+                    dig_trans = t_pTag->to_coord_trans();
                 }
             }
         }
@@ -1343,10 +1343,10 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
             pos = acqpars[0]->dir[k].pos;
             if (kind == FIFF_DACQ_PARS) {
                 t_pTag = this->read_tag(pos);
-                acq_pars = t_pTag->toString();
+                acq_pars = t_pTag->to_string();
             } else if (kind == FIFF_DACQ_STIM) {
                 t_pTag = this->read_tag(pos);
-                acq_stim = t_pTag->toString();
+                acq_stim = t_pTag->to_string();
             }
         }
     }
@@ -1364,7 +1364,7 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
                 continue;
             }
             if (const auto tag = this->read_tag(device[0]->dir[k].pos)) {
-                *field = tag->toString();
+                *field = tag->to_string();
             }
         }
     }
@@ -1487,7 +1487,7 @@ bool FiffStream::read_meas_info(const std::shared_ptr<FiffDirNode>& p_Node, Fiff
                 }
 
                 t_pTag = this->read_tag(hpi_coil->dir[e].pos);
-                info.hpi_coil_freqs.push_back(*t_pTag->toFloat());
+                info.hpi_coil_freqs.push_back(*t_pTag->to_float());
                 break;
             }
         }
@@ -1538,7 +1538,7 @@ bool FiffStream::read_named_matrix(const std::shared_ptr<FiffDirNode>& p_Node, f
         Log::warning("Matrix data missing.\n");
         return false;
     } else {
-        mat.data = t_pTag->toFloatMatrix().cast<double>();
+        mat.data = t_pTag->to_float_matrix().cast<double>();
         mat.data.transposeInPlace();
     }
 
@@ -1546,23 +1546,23 @@ bool FiffStream::read_named_matrix(const std::shared_ptr<FiffDirNode>& p_Node, f
     mat.ncol = mat.data.cols();
 
     if (t_pTag = node->find_tag(*this, FIFF_MNE_NROW); t_pTag)
-        if (*t_pTag->toInt() != mat.nrow) {
+        if (*t_pTag->to_int() != mat.nrow) {
             Log::warning("Number of rows in matrix data and FIFF_MNE_NROW tag do not match");
             return false;
         }
     if (t_pTag = node->find_tag(*this, FIFF_MNE_NCOL); t_pTag)
-        if (*t_pTag->toInt() != mat.ncol) {
+        if (*t_pTag->to_int() != mat.ncol) {
             Log::warning("Number of columns in matrix data and FIFF_MNE_NCOL tag do not match");
             return false;
         }
 
     std::string row_names;
     if (t_pTag = node->find_tag(*this, FIFF_MNE_ROW_NAMES); t_pTag)
-        row_names = t_pTag->toString();
+        row_names = t_pTag->to_string();
 
     std::string col_names;
     if (t_pTag = node->find_tag(*this, FIFF_MNE_COL_NAMES); t_pTag)
-        col_names = t_pTag->toString();
+        col_names = t_pTag->to_string();
 
     //
     //   Put it together
@@ -1600,7 +1600,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
     t_pTag = t_qListNodes[0]->find_tag(*this, FIFF_NCHAN);
     fiff_int_t global_nchan = 0;
     if (t_pTag)
-        global_nchan = *t_pTag->toInt();
+        global_nchan = *t_pTag->to_int();
 
     fiff_int_t nchan;
     std::vector<std::shared_ptr<FiffDirNode>> t_qListItems = t_qListNodes[0]->dir_tree_find(FIFFB_PROJ_ITEM);
@@ -1611,18 +1611,18 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
         const std::shared_ptr<FiffDirNode>& t_pFiffDirTreeItem = t_qListItems[i];
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_NCHAN);
         if (t_pTag)
-            nchan = *t_pTag->toInt();
+            nchan = *t_pTag->to_int();
         else
             nchan = global_nchan;
 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_DESCRIPTION);
         std::string desc;
         if (t_pTag) {
-            desc = t_pTag->toString();
+            desc = t_pTag->to_string();
         } else {
             t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_NAME);
             if (t_pTag)
-                desc = t_pTag->toString();
+                desc = t_pTag->to_string();
             else {
                 Log::warning("Projection item description missing\n");
                 return projdata;
@@ -1641,7 +1641,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_KIND);
         fiff_int_t kind;
         if (t_pTag) {
-            kind = *t_pTag->toInt();
+            kind = *t_pTag->to_int();
         } else {
             Log::warning("Projection item kind missing");
             return projdata;
@@ -1649,7 +1649,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_NVEC);
         fiff_int_t nvec;
         if (t_pTag) {
-            nvec = *t_pTag->toInt();
+            nvec = *t_pTag->to_int();
         } else {
             Log::warning("Number of projection vectors not specified\n");
             return projdata;
@@ -1657,7 +1657,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_CH_NAME_LIST);
         StringList names;
         if (t_pTag) {
-            names = split_name_list(t_pTag->toString());
+            names = split_name_list(t_pTag->to_string());
         } else {
             Log::warning("Projection item channel list missing\n");
             return projdata;
@@ -1665,7 +1665,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_PROJ_ITEM_VECTORS);
         MatrixXd data; // = nullptr;
         if (t_pTag) {
-            data = t_pTag->toFloatMatrix().cast<double>();
+            data = t_pTag->to_float_matrix().cast<double>();
             data.transposeInPlace();
         } else {
             Log::warning("Projection item data missing\n");
@@ -1674,7 +1674,7 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
         t_pTag = t_pFiffDirTreeItem->find_tag(*this, FIFF_MNE_PROJ_ITEM_ACTIVE);
         bool active;
         if (t_pTag)
-            active = *t_pTag->toInt();
+            active = *t_pTag->to_int();
         else
             active = false;
 
@@ -1709,14 +1709,14 @@ std::vector<FiffProj> FiffStream::read_proj(const std::shared_ptr<FiffDirNode>& 
 bool FiffStream::read_tag_data(FiffTag& tag, fiff_long_t pos)
 {
     if (pos >= 0) {
-        seekTo(pos);
+        seek(pos);
     }
     if (tag.size() > 0) {
-        readRaw(tag.data(), tag.size());
+        read_raw(tag.data(), tag.size());
         FiffTag::convert_tag_data(tag, FIFFV_BIG_ENDIAN, FIFFV_NATIVE_ENDIAN);
     }
     if (tag.next != FIFFV_NEXT_SEQ) {
-        seekTo(tag.next);
+        seek(tag.next);
     }
     return !std::exchange(m_readFailed, false);
 }
@@ -1738,11 +1738,11 @@ std::optional<FiffTag> FiffStream::read_tag_info(bool skip)
 
     if (skip) {
         if (tag.next > 0) {
-            if (!seekTo(tag.next)) {
+            if (!seek(tag.next)) {
                 return std::nullopt;
             }
         } else if (tag.size() > 0 && tag.next == FIFFV_NEXT_SEQ) {
-            if (!seekTo(tell() + tag.size())) {
+            if (!seek(tell() + tag.size())) {
                 return std::nullopt;
             }
         }
@@ -1755,7 +1755,7 @@ std::optional<FiffTag> FiffStream::read_tag_info(bool skip)
 std::optional<FiffTag> FiffStream::read_tag(fiff_long_t pos)
 {
     if (pos >= 0) {
-        seekTo(pos);
+        seek(pos);
     }
     FiffTag tag;
     read(tag.kind);
@@ -1768,11 +1768,11 @@ std::optional<FiffTag> FiffStream::read_tag(fiff_long_t pos)
     }
     tag.resize(size);
     if (size > 0) {
-        readRaw(tag.data(), size);
+        read_raw(tag.data(), size);
         FiffTag::convert_tag_data(tag, m_littleEndian ? FIFFV_LITTLE_ENDIAN : FIFFV_BIG_ENDIAN, FIFFV_NATIVE_ENDIAN);
     }
     if (tag.next != FIFFV_NEXT_SEQ) {
-        seekTo(tag.next);
+        seek(tag.next);
     }
     if (std::exchange(m_readFailed, false)) {
         return std::nullopt;
@@ -1835,14 +1835,14 @@ std::unique_ptr<FiffStream> FiffStream::open_update(const std::filesystem::path&
         Log::critical("Could not read directory pointer!");
         return nullptr;
     }
-    if (const fiff_int_t dirpos = *tag->toInt(); dirpos > 0) {
+    if (const fiff_int_t dirpos = *tag->to_int(); dirpos > 0) {
         stream->write_dir_pointer(-1, pointerpos);
         if (!file.resize(static_cast<std::uint64_t>(dirpos))) {
             Log::critical("Cannot remove the directory of {}", name);
             return nullptr;
         }
     }
-    stream->seekToEnd();
+    stream->seek_to_end();
     return stream;
 }
 
@@ -2042,9 +2042,9 @@ std::unique_ptr<FiffStream> FiffStream::start_writing_raw(std::unique_ptr<FiffSt
 fiff_long_t FiffStream::write_tag(const FiffTag& tag, fiff_long_t pos)
 {
     if (pos >= 0) {
-        seekTo(pos);
+        seek(pos);
     } else {
-        seekToEnd();
+        seek_to_end();
     }
     pos = tell();
 
@@ -2058,7 +2058,7 @@ fiff_long_t FiffStream::write_tag(const FiffTag& tag, fiff_long_t pos)
         // read_tag hands out host byte order; FIFF files are big-endian.
         FiffTag fileTag(tag);
         FiffTag::convert_tag_data(fileTag, FIFFV_NATIVE_ENDIAN, FIFFV_BIG_ENDIAN);
-        writeRaw(fileTag.data(), datasize);
+        write_raw(fileTag.data(), datasize);
     }
     return pos;
 }
@@ -2128,12 +2128,12 @@ fiff_long_t FiffStream::write_ch_info(const FiffChInfo& ch)
 
     len = static_cast<int>(ch_name.size());
 
-    writeRaw(ch_name.c_str(), len);
+    write_raw(ch_name.c_str(), len);
 
     if (len < 16) {
         const char* chNull = "";
         for (std::int32_t i = 0; i < 16 - len; ++i)
-            writeRaw(chNull, 1);
+            write_raw(chNull, 1);
     }
 
     return pos;
@@ -2369,9 +2369,9 @@ fiff_long_t FiffStream::write_dir_pointer(fiff_int_t dirpos, fiff_long_t pos, fi
      * Write entires to specified position
      */
     if (pos >= 0) {
-        seekTo(pos);
+        seek(pos);
     } else { //SEEK_END
-        seekToEnd();
+        seek_to_end();
     }
     pos = tell();
 
@@ -2405,9 +2405,9 @@ fiff_long_t FiffStream::write_dir_entries(const std::vector<FiffDirEntry>& dir, 
      * Write entires to specified position
      */
     if (pos >= 0) {
-        seekTo(pos);
+        seek(pos);
     } else { //SEEK_END
-        seekToEnd();
+        seek_to_end();
     }
 
     pos = tell();
@@ -3053,7 +3053,7 @@ fiff_long_t FiffStream::write_string(fiff_int_t kind,
     write(static_cast<std::int32_t>(datasize));
     write(static_cast<std::int32_t>(FIFFV_NEXT_SEQ));
 
-    writeRaw(data.data(), datasize);
+    write_raw(data.data(), datasize);
 
     return pos;
 }
@@ -3069,7 +3069,7 @@ void FiffStream::write_rt_command(fiff_int_t command, const std::string& data)
     write(static_cast<std::int32_t>(FIFFV_NEXT_SEQ));
     write(command);
 
-    writeRaw(data.data(), datasize);
+    write_raw(data.data(), datasize);
 }
 
 //=============================================================================================================
@@ -3080,7 +3080,7 @@ std::vector<FiffDirEntry> FiffStream::make_dir(bool* ok)
     if (ok) {
         *ok = false;
     }
-    if (!seekTo(SEEK_SET)) {
+    if (!seek(SEEK_SET)) {
         return dir;
     }
     for (;;) {
@@ -3104,11 +3104,11 @@ std::vector<FiffDirEntry> FiffStream::make_dir(bool* ok)
 
 //=============================================================================================================
 
-bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, const std::filesystem::path& toPath)
+bool FiffStream::copy_processing_history(const std::filesystem::path& fromPath, const std::filesystem::path& toPath)
 {
     auto opened = FiffStream::open(fromPath);
     if (!opened) {
-        Log::warning("FiffStream::copyProcessingHistory - Cannot parse source FIFF file {}", fromPath.string());
+        Log::warning("FiffStream::copy_processing_history - Cannot parse source FIFF file {}", fromPath.string());
         return false;
     }
     FiffStream& srcStream = *opened;
@@ -3116,7 +3116,7 @@ bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, co
     // Find the FIFFB_PROCESSING_HISTORY block in the directory tree
     std::vector<std::shared_ptr<FiffDirNode>> histNodes = srcStream.dirtree()->dir_tree_find(FIFFB_PROCESSING_HISTORY);
     if (histNodes.empty()) {
-        Log::warning("FiffStream::copyProcessingHistory - No processing history block found in {}", fromPath.string());
+        Log::warning("FiffStream::copy_processing_history - No processing history block found in {}", fromPath.string());
         srcStream.close();
         return false;
     }
@@ -3148,7 +3148,7 @@ bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, co
     // Open destination file for update
     auto dstStream = FiffStream::open_update(toPath);
     if (!dstStream) {
-        Log::warning("FiffStream::copyProcessingHistory - Cannot open destination file {} for update", toPath.string());
+        Log::warning("FiffStream::copy_processing_history - Cannot open destination file {} for update", toPath.string());
         return false;
     }
 
@@ -3161,7 +3161,7 @@ bool FiffStream::copyProcessingHistory(const std::filesystem::path& fromPath, co
     }
     lastTag->next = FIFFV_NEXT_SEQ;
     dstStream->write_tag(*lastTag, lastPos);
-    dstStream->seekToEnd();
+    dstStream->seek_to_end();
 
     for (const Item& item : items) {
         if (item.blockStart)

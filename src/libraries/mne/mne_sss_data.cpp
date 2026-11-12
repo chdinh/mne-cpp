@@ -120,40 +120,40 @@ std::unique_ptr<MNESssData> MNESssData::read_from_node(FiffStream& stream, const
         if (t_pTag = node->find_tag(stream, FIFF_SSS_JOB); !t_pTag) {
             return nullptr;
         }
-        s->job = *t_pTag->toInt();
+        s->job = *t_pTag->to_int();
 
         if (t_pTag = node->find_tag(stream, FIFF_SSS_FRAME); !t_pTag) {
             return nullptr;
         }
-        s->coord_frame = *t_pTag->toInt();
+        s->coord_frame = *t_pTag->to_int();
 
         if (t_pTag = node->find_tag(stream, FIFF_SSS_ORIGIN); !t_pTag) {
             return nullptr;
         }
-        r0 = t_pTag->toFloat();
+        r0 = t_pTag->to_float();
         Eigen::Map<Eigen::Vector3f>(s->origin) = Eigen::Map<const Eigen::Vector3f>(r0);
 
         if (t_pTag = node->find_tag(stream, FIFF_SSS_ORD_IN); !t_pTag) {
             return nullptr;
         }
-        s->in_order = *t_pTag->toInt();
+        s->in_order = *t_pTag->to_int();
 
         if (t_pTag = node->find_tag(stream, FIFF_SSS_ORD_OUT); !t_pTag) {
             return nullptr;
         }
-        s->out_order = *t_pTag->toInt();
+        s->out_order = *t_pTag->to_int();
 
         if (t_pTag = node->find_tag(stream, FIFF_SSS_NMAG); !t_pTag) {
             return nullptr;
         }
-        s->nchan = *t_pTag->toInt();
+        s->nchan = *t_pTag->to_int();
 
         if (t_pTag = node->find_tag(stream, FIFF_SSS_COMPONENTS); !t_pTag) {
             return nullptr;
         }
         {
             int ncomp = static_cast<int>(t_pTag->size() / sizeof(fiff_int_t));
-            const int* raw = t_pTag->toInt();
+            const int* raw = t_pTag->to_int();
             s->comp_info = Eigen::VectorXi::Map(raw, ncomp);
 
             if (ncomp != (s->in_order * (2 + s->in_order) + s->out_order * (2 + s->out_order))) {
