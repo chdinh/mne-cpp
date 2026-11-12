@@ -104,7 +104,7 @@ Returns the machine ID as a human-readable string.
 
 ---
 
-### toString()
+### to_string()
 
 Returns a human-readable string representation of this ID.
 
@@ -153,7 +153,7 @@ Returns a default [`FiffId`](/docs/api/fiff/fiff-id) object to be used as a muta
 
 ---
 
-### storageSize()
+### storage_size()
 
 Size of the old struct (fiffIdRec) 5*int = 5*4 = 20.
 
@@ -182,7 +182,7 @@ const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->di
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.empty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->to_int() == 376 && !fileId.empty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 

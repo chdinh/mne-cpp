@@ -46,7 +46,7 @@ Destroys the [`FiffDataRef`](/docs/api/fiff/fiff-data-ref).
 
 ## Static Methods
 
-### storageSize()
+### storage_size()
 
 Size of the old struct (fiffDataRefRec) 2*int + 2*long = 2*4 + 2*8 = 24.
 
@@ -74,7 +74,7 @@ FIFF library: fixed-length epochs, CTF compensation, the file directory and raw 
 FiffDataRef reference;
 reference.size = 3LL << 31; // beyond 2 GiB
 reference.offset = 1024;
-ok &= expect(FiffDataRef::storageSize() == 24 && reference.size > std::numeric_limits<qint32>::max(), "FiffDataRef: 24-byte record with 64-bit size and offset");
+ok &= expect(FiffDataRef::storage_size() == 24 && reference.size > std::numeric_limits<qint32>::max(), "FiffDataRef: 24-byte record with 64-bit size and offset");
 ````
 
 ## Authors of this file

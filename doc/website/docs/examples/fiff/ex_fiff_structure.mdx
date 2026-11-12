@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     stream.close();
     //! [fiff_dir_entry_usage]
     // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
-    ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
+    ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storage_size() == 8 && FiffDirEntry::storage_size() == 16,
                  "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");
 
     //! [fiff_data_ref_usage]
@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
     reference.size = 3LL << 31; // beyond 2 GiB
     reference.offset = 1024;
     //! [fiff_data_ref_usage]
-    ok &= expect(FiffDataRef::storageSize() == 24 && reference.size > std::numeric_limits<qint32>::max(), "FiffDataRef: 24-byte record with 64-bit size and offset");
+    ok &= expect(FiffDataRef::storage_size() == 24 && reference.size > std::numeric_limits<qint32>::max(), "FiffDataRef: 24-byte record with 64-bit size and offset");
 
     //! [fiff_ctf_comp_usage]
     // CTF third-order gradient compensation: info.comps holds one FiffCtfComp per grade.

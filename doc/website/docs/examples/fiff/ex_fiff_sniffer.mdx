@@ -226,7 +226,7 @@ int main(int argc, char* argv[])
         }
 
         FIFFLIB::FiffStream stream(std::make_unique<BASELIB::MemoryByteStream>(std::move(bytes)));
-        stream.setLittleEndian(littleEndian);
+        stream.set_little_endian(littleEndian);
 
         if (stream.open()) {
             FIFFLIB::FiffInfo FifInfo;

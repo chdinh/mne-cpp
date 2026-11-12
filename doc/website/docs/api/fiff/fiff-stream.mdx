@@ -61,7 +61,7 @@ bytes in memory.
   The byte stream, already open; the fiff stream owns it.
 
 - **name** : *std::string*
-  Name reported by `streamName()`, e.g. the file path.
+  Name reported by `stream_name()`, e.g. the file path.
 
 ---
 
@@ -93,7 +93,7 @@ bytes in memory.
 
 ---
 
-### isOpen()
+### is_open()
 
 **Returns:**
 
@@ -111,7 +111,7 @@ Opens a closed stream again without truncating it; the directory read before sta
 
 ---
 
-### setLittleEndian(littleEndian)
+### set_little_endian(littleEndian)
 
 Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
 
@@ -122,7 +122,7 @@ Sets the byte order of the stream; FIFF files are big-endian, some raw data file
 
 ---
 
-### isLittleEndian()
+### is_little_endian()
 
 **Returns:**
 
@@ -130,7 +130,7 @@ Sets the byte order of the stream; FIFF files are big-endian, some raw data file
 
 ---
 
-### streamName()
+### stream_name()
 
 Get the stream name.
 
@@ -1226,7 +1226,7 @@ in memory.
 
 ---
 
-### copyProcessingHistory(fromPath, toPath)
+### copy_processing_history(fromPath, toPath)
 
 Copy the FIFF processing history block from one file to another.
 
@@ -1266,7 +1266,7 @@ const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->di
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.empty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->to_int() == 376 && !fileId.empty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 
@@ -1276,7 +1276,7 @@ Read a FIFF file from a memory buffer with a chosen byte order and summarise its
 
 ````cpp title="src/examples/ex_fiff_sniffer/main.cpp, line 105"
 FIFFLIB::FiffStream stream(std::make_unique<BASELIB::MemoryByteStream>(std::move(bytes)));
-stream.setLittleEndian(littleEndian);
+stream.set_little_endian(littleEndian);
 ````
 
 ### [ex_fiff_structure](../../examples/fiff/ex_fiff_structure.mdx)
@@ -1290,7 +1290,7 @@ const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, t
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
 stream.close();
 // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
-ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
+ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storage_size() == 8 && FiffDirEntry::storage_size() == 16,
              "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");
 ````
 

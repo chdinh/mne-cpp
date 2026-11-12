@@ -61,7 +61,7 @@ Destroys the [`FiffTime`](/docs/api/fiff/fiff-time).
 
 ## Static Methods
 
-### storageSize()
+### storage_size()
 
 Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
 
@@ -91,7 +91,7 @@ const std::vector<FiffDirEntry>& directory = stream.dir(); // every tag (kind, t
 const FiffTime created = stream.id().time;                 // seconds and microseconds since 1970
 stream.close();
 // mne fiff_open: 640 entries; file_id secs 1411146352, usecs 0
-ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storageSize() == 8 && FiffDirEntry::storageSize() == 16,
+ok &= expect(directory.size() == 641 && directory.back().kind == -1 && created.secs == 1411146352 && created.usecs == 0 && FiffTime::storage_size() == 8 && FiffDirEntry::storage_size() == 16,
              "FiffDirEntry/FiffTime: the 640 tags of mne fiff_open plus the end entry; the file id was written at 1411146352 s");
 ````
 

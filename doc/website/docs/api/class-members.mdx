@@ -1001,10 +1001,10 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **coordinateSystem** `[var]` in [BidsRawData](/docs/api/bids/bids-raw-data) — Coordinate system from *_coordsystem.json.
 - **coordinateSystem** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation)
 - **coordsystemJsonPath** `[fn]` in [BIDSPath](/docs/api/bids/bids-path) — Returns the path for the coordsystem.json sidecar.
+- **copy_processing_history** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Copy the FIFF processing history block from one file to another.
 - **copy_realtime_file** `[fn]` in [FiffFileSharer](/docs/api/fiff/fiff-file-sharer) — Producer: copies an unfinished FIFF recording into the shared directory and closes its raw block.
 - **copy_tree** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Copies directory subtrees from fidin to fidout.
 - **copyData** `[var]` in `WriteOptions` — Copy the raw data file into the BIDS directory.
-- **copyProcessingHistory** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Copy the FIFF processing history block from one file to another.
 - **CoregSettingsView** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Constructs a [`CoregSettingsView`](/docs/api/disp/coreg-settings-view) object.
 - **correct_auto_elements** `[fn]` in [FwdBemModel](/docs/api/fwd/fwd-bem-model) — Correct the auto (self-coupling) elements of the linear collocation matrix.
 - **Correlation** `[fn]` in [Correlation](/docs/api/connectivity/correlation) — Constructs a [`Correlation`](/docs/api/connectivity/correlation) object.
@@ -1122,6 +1122,7 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **data** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the data stored under the given role for the item referred to by the index.
 - **data_filt** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Optionally filtered copy of the data.
 - **data_proj** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Data after SSP projection (kept separately for some programs).
+- **data_type** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides the tag type information.
 - **data_white** `[var]` in [MNEMeasDataSet](/docs/api/mne/mne-meas-data-set) — Whitened data (noise-normalised).
 - **dataChanged** `[signal]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Emitted whenever stored data changes (new data appended or replaced).
 - **dataKind** `[var]` in [MnaOpSchemaPort](/docs/api/mna/mna-op-schema-port) — Expected data kind.
@@ -2218,7 +2219,6 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **getInfo** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Return measurement metadata as FiffInfo.
 - **getInfo** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return measurement metadata as FiffInfo.
 - **getInfo** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Return measurement metadata as FiffInfo.
-- **getInfo** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Type information as a string.
 - **getInfo** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Returns the fiff info.
 - **getIntermediateSumData** `[fn]` in [ConnectivitySettings](/docs/api/connectivity/connectivity-settings)
 - **getIsChannelBad** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns true or fals whether the provided channel is bad.
@@ -2242,8 +2242,6 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **getLowpassFreq** `[fn]` in [FilterKernel](/docs/api/dsp/filter-kernel)
 - **getMappedChannelsList** `[fn]` in [ChannelInfoModel](/docs/api/disp/channel-info-model) — Updates the layout map.
 - **getMarkers** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Return all parsed markers from the .vmrk file.
-- **getMatrixCoding** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides information about matrix coding.
-- **getMatrixDimensions** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Returns matrix dimensions Refactors: fiff_get_matrix_dims (fiff_matrix.c).
 - **getMaxIter** `[fn]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Get the maximum number of icp iterations.
 - **getMaxSamples** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the maximal number of samples of the downsampled data to display.
 - **getMaxValueFromRawViewModel** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Get maximum range of respective channel type.
@@ -2313,7 +2311,6 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **getTriggerName** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the current trigger name.
 - **getTriggerThreshold** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the current trigger threshold.
 - **getTriggerType** `[fn]` in [ConnectivitySettingsView](/docs/api/disp/connectivity-settings-view) — Get the current trigger type.
-- **getType** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides the tag type information.
 - **getUI** `[fn]` in [ScaleControl](/docs/api/disp/scale-control) — getUI Return a pointer to the GUI of the [`ScaleControl`](/docs/api/disp/scale-control).
 - **getUnit** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns the unit of a given channel number.
 - **getUnit** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Returns the unit of a given channel number.
@@ -2564,6 +2561,7 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **info** `[var]` in `FiffEvokedFile` — The measurement info shared by all data sets.
 - **info** `[var]` in [FiffEvokedSet](/docs/api/fiff/fiff-evoked-set) — FIFF measurement information.
 - **info** `[var]` in [FiffRawData](/docs/api/fiff/fiff-raw-data) — Fiff measurement information.
+- **info** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Type information as a string.
 - **info** `[fn]` in [Log](/docs/api/base/log) — As `debug()`, at info level.
 - **info** `[var]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — light weighted measurement info.
 - **info** `[var]` in [MNEInverseOperator](/docs/api/mne/mne-inverse-operator) — Lightweight measurement info (channel names, types, etc.).
@@ -2704,9 +2702,12 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **is_eeg_electrode** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an EEG electrode.
 - **is_eeg_electrode_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains an EEG electrode of a specified type.
 - **is_left_hemi** `[fn]` in [MNESourceSpace](/docs/api/mne/mne-source-space) — Determine whether this source space is on the left hemisphere based on the average x-coordinate of all vertices.
+- **is_little_endian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **is_loaded** `[fn]` in [FsAtlasLookup](/docs/api/fs/fs-atlas-lookup) — Check whether a parcellation volume has been loaded.
 - **is_magnetometer_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an magnetometer.
 - **is_magnetometer_coil_type** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Checks if a set of templates contains a magnetometer of a specified type.
+- **is_matrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides information if tag contains a matrix.
+- **is_open** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **is_open** `[fn]` in [SerialPort](/docs/api/com/serial-port)
 - **is_package_available** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Checks whether a package can be imported, without importing it.
 - **is_planar_coil** `[fn]` in [FwdCoil](/docs/api/fwd/fwd-coil) — Checks if this is an planar coil.
@@ -2740,17 +2741,14 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **isHeld** `[fn]` in [AcqViewLease](/docs/api/acq/acq-view-lease)
 - **isInfoPanelVisible** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Whether the info panel is currently visible.
 - **isInit** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Returns whether this class is initalized.
-- **isLittleEndian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **isLoaded** `[fn]` in [MlOnnxModel](/docs/api/ml/ml-onnx-model)
 - **isLoaded** `[fn]` in [SensorFieldMapper](/docs/api/disp3-d/sensor-field-mapper)
 - **isLoaded** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager)
 - **isLoaded** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Check if source estimate data is loaded.
 - **isLoading** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager)
-- **isMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides information if tag contains a matrix.
 - **isMeasurement** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **isObjectVisible** `[fn]` in [ViewVisibilityProfile](/docs/api/disp3-d/view-visibility-profile) — Query visibility of a named object.
 - **isOpen** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
-- **isOpen** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream)
 - **isOpen** `[fn]` in [FileByteStream](/docs/api/base/file-byte-stream)
 - **isPlaying** `[var]` in [SubView](/docs/api/disp3-d/sub-view)
 - **isRealtimeSensorStreaming** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Check whether real-time sensor streaming is active.
@@ -3176,6 +3174,8 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **matrix** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor) — Const row-major Eigen::Map for 2-D tensors.
 - **Matrix6T** `[type]` in [InvRapMusic](/docs/api/inv/inv-rap-music) — Defines Eigen::Matrix&lt;T, 6, 6&gt; as `Matrix6T` type.
 - **Matrix6XT** `[type]` in [InvRapMusic](/docs/api/inv/inv-rap-music) — Defines Eigen::Matrix&lt;T, 6, Eigen::Dynamic&gt; as `Matrix6XT` type.
+- **matrix_coding** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Provides information about matrix coding.
+- **matrix_dimensions** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Returns matrix dimensions Refactors: fiff_get_matrix_dims (fiff_matrix.c).
 - **MatrixX6T** `[type]` in [InvRapMusic](/docs/api/inv/inv-rap-music) — Defines Eigen::Matrix&lt;T, Eigen::Dynamic, 6&gt; as `MatrixX6T` type.
 - **MatrixXT** `[type]` in [InvRapMusic](/docs/api/inv/inv-rap-music) — Defines Eigen::Matrix&lt;T, Eigen::Dynamic, Eigen::Dynamic&gt; as `MatrixXT` type.
 - **matRoiG** `[var]` in [RegionData](/docs/api/mne/region-data) — Reshaped region gain matrix sources x sensors(x,y,z).
@@ -4903,6 +4903,7 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **set_hub** `[fn]` in [NetworkNode](/docs/api/connectivity/network-node) — Marks the node as hub or not.
 - **set_level** `[fn]` in [Log](/docs/api/base/log) — Sets the lowest level that is written; messages below it are dropped before they are formatted.
 - **set_line_callback** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Sets the callback invoked for every stdout and stderr line.
+- **set_little_endian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
 - **set_method** `[fn]` in [Network](/docs/api/connectivity/network)
 - **set_progress_callback** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Sets the callback invoked for every progress line.
 - **set_sampling_frequency** `[fn]` in [Network](/docs/api/connectivity/network)
@@ -5131,7 +5132,6 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **setLayerVisible** `[fn]` in [MultimodalScene](/docs/api/disp3-d/multimodal-scene) — Toggle visibility of a layer.
 - **setLeadType** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Set a lead's type when it is declared rather than inferred.
 - **setLightingEnabled** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Enable or disable lighting for the scene.
-- **setLittleEndian** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Sets the byte order of the stream; FIFF files are big-endian, some raw data files little-endian.
 - **setLiveMarkers** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Replace the set of live overlay markers.
 - **setLiveRay** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set a semi-transparent ray cylinder between two world-space points.
 - **setLoadingBarVisible** `[slot]` in [ProgressView](/docs/api/disp/progress-view) — Sets whether loading bar is visible.
@@ -5670,15 +5670,15 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **stopStream** `[fn]` in [MnaGraphExecutor](/docs/api/mna/mna-graph-executor) — Stop a running stream.
 - **stopStreaming** `[fn]` in [RtSensorStreamManager](/docs/api/disp3-d/rt-sensor-stream-manager) — Stop real-time sensor streaming.
 - **stopStreaming** `[fn]` in [SourceEstimateManager](/docs/api/disp3-d/source-estimate-manager) — Stop real-time streaming.
+- **storage_size** `[fn]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Size of the old struct (fiffChInfoRec) 20*int + 16 = 20*4 + 16 = 96.
+- **storage_size** `[fn]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Size of the old struct (fiffChPosRec) 13*int = 13*4 = 52.
 - **storage_size** `[fn]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Size of the old struct (fiffCoordTransRec) 26*int = 26*4 = 104.
-- **storageSize** `[fn]` in [FiffChInfo](/docs/api/fiff/fiff-ch-info) — Size of the old struct (fiffChInfoRec) 20*int + 16 = 20*4 + 16 = 96.
-- **storageSize** `[fn]` in [FiffChPos](/docs/api/fiff/fiff-ch-pos) — Size of the old struct (fiffChPosRec) 13*int = 13*4 = 52.
-- **storageSize** `[fn]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Size of the old struct (fiffDataRefRec) 2*int + 2*long = 2*4 + 2*8 = 24.
-- **storageSize** `[fn]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Size of the old struct (fiffDigPointRec) 5*int = 5*4 = 20.
-- **storageSize** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)
-- **storageSize** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Size of the old struct (fiffIdRec) 5*int = 5*4 = 20.
-- **storageSize** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Size of the on-disk tag info header: kind + type + size + next = 4 x fiff_int_t.
-- **storageSize** `[fn]` in [FiffTime](/docs/api/fiff/fiff-time) — Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
+- **storage_size** `[fn]` in [FiffDataRef](/docs/api/fiff/fiff-data-ref) — Size of the old struct (fiffDataRefRec) 2*int + 2*long = 2*4 + 2*8 = 24.
+- **storage_size** `[fn]` in [FiffDigPoint](/docs/api/fiff/fiff-dig-point) — Size of the old struct (fiffDigPointRec) 5*int = 5*4 = 20.
+- **storage_size** `[fn]` in [FiffDirEntry](/docs/api/fiff/fiff-dir-entry)
+- **storage_size** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Size of the old struct (fiffIdRec) 5*int = 5*4 = 20.
+- **storage_size** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — Size of the on-disk tag info header: kind + type + size + next = 4 x fiff_int_t.
+- **storage_size** `[fn]` in [FiffTime](/docs/api/fiff/fiff-time) — Size of the old struct (fiffTimeRec) 2*int = 2*4 = 8.
 - **storeHeadPosition** `[fn]` in [InvHpiFit](/docs/api/inv/inv-hpi-fit) — Store results from dev_Head_t as quaternions in position matrix.
 - **storeTrans** `[signal]` in [CoregSettingsView](/docs/api/disp/coreg-settings-view) — Emit this signal whenever the transformation should be stored.
 - **stream** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
@@ -5690,12 +5690,12 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **stream_info** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Construct a new [`stream_info`](/docs/api/lsl/stream_info) object.
 - **stream_info** `[fn]` in [stream_info](/docs/api/lsl/stream_info) — Copy constructor.
 - **stream_inlet** `[fn]` in [stream_inlet](/docs/api/lsl/stream_inlet) — Construct a new [`stream_inlet`](/docs/api/lsl/stream_inlet) from a resolved [`stream_info`](/docs/api/lsl/stream_info).
+- **stream_name** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Get the stream name.
 - **stream_outlet** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Construct a [`stream_outlet`](/docs/api/lsl/stream_outlet) for the given [`stream_info`](/docs/api/lsl/stream_info).
 - **streamBufferMs** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Ring-buffer length in ms (0 = unbounded).
 - **streamData** `[slot]` in [RtSensorDataWorker](/docs/api/disp3-d/rt-sensor-data-worker) — Stream one frame of data.
 - **streamData** `[slot]` in [RtSourceDataWorker](/docs/api/disp3-d/rt-source-data-worker) — Stream one frame of data.
 - **streamEndpoint** `[var]` in [MnaPort](/docs/api/mna/mna-port) — Protocol-specific address (e.g. "localhost:4218" for fiff-rt).
-- **streamName** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Get the stream name.
 - **streamProtocol** `[var]` in [MnaPort](/docs/api/mna/mna-port) — "fiff-rt", "lsl", "ftbuffer", "shm", "" = internal signal/slot
 - **streams** `[fn]` in [AcqBackend](/docs/api/acq/acq-backend)
 - **streams** `[fn]` in [AcqDevice](/docs/api/acq/acq-device)
@@ -5853,10 +5853,28 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **tmin** `[fn]` in [SourceEstimateOverlay](/docs/api/disp3-d/source-estimate-overlay) — Get the minimum time value.
 - **to** `[var]` in [FiffCoordTrans](/docs/api/fiff/fiff-coord-trans) — Destination coordinate system.
 - **to** `[var]` in [MNEEvent](/docs/api/mne/mne-event) — Trigger value after the transition.
+- **to_byte** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Byte Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_ch_info** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff CH INFO
+- **to_coord_trans** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff COORD TRANS
+- **to_dau_pack16** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to DauPack16 Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_dig_point** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff DIG POINT
+- **to_dir_entry** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff DIR ENTRY
+- **to_double** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Double Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_fiff_id** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff ID
 - **to_fixed_ori** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Helper to convert the forward solution to fixed ori from free.
+- **to_float** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Float Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_float_matrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff FIFFT FLOAT MATRIX
 - **to_html** `[fn]` in [Report](/docs/api/report/report-class)
+- **to_int** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_int_matrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff FIFFT INT MATRIX
+- **to_julian** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Julian Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_short** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Short Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_sparse_float_matrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to sparse fiff FIFFT FLOAT MATRIX
+- **to_string** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Returns a human-readable string representation of this ID.
+- **to_string** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to String
 - **to_subj** `[var]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Destination subject.
-- **toByte** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Byte Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_unsigned_int** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_unsigned_short** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toCbor** `[fn]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Serialize to QCborMap.
 - **toCbor** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **toCbor** `[fn]` in [MnaNode](/docs/api/mna/mna-node)
@@ -5871,24 +5889,15 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **toCbor** `[fn]` in [MnaVerification](/docs/api/mna/mna-verification)
 - **toCbor** `[fn]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check)
 - **toCbor** `[fn]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result)
-- **toChInfo** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff CH INFO
-- **toCoordTrans** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff COORD TRANS
-- **toDauPack16** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to DauPack16 Fast access; Data are deleted if tag gets deleted, and vice versa
-- **toDigPoint** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff DIG POINT
-- **toDirEntry** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff DIR ENTRY
-- **toDouble** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Double Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toEigen** `[fn]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Returns the map as a matrix that takes source vertex values to destination vertices.
 - **toEigenSparse** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Convert to Eigen::SparseMatrix&lt;double&gt; (cast from float).
 - **toFiffChInfo** `[fn]` in [BrainVisionChannelInfo](/docs/api/bids/brain-vision-channel-info)
 - **toFiffChInfo** `[fn]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **toFiffCoordTrans** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Convert parsed transform to a FiffCoordTrans.
 - **toFiffDigPoints** `[fn]` in [BidsElectrode](/docs/api/bids/bids-electrode) — Convert a list of BIDS electrodes to a FIFF digitizer point set.
-- **toFiffID** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff ID
 - **toFiffRawData** `[fn]` in [AbstractFormatReader](/docs/api/bids/abstract-format-reader) — Convert the entire dataset to a FiffRawData structure.
 - **toFiffRawData** `[fn]` in [BrainVisionReader](/docs/api/bids/brain-vision-reader) — Convert the entire dataset to a FiffRawData structure.
 - **toFiffRawData** `[fn]` in [EDFReader](/docs/api/bids/edf-reader) — Convert the entire dataset to a FiffRawData structure.
-- **toFloat** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Float Fast access; Data are deleted if tag gets deleted, and vice versa
-- **toFloatMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff FIFFT FLOAT MATRIX
 - **toggleFreeze** `[fn]` in [EvokedSetModel](/docs/api/disp/evoked-set-model) — Toggle freeze for all channels when a channel is double clicked.
 - **toggleFreeze** `[fn]` in [FrequencySpectrumModel](/docs/api/disp/frequency-spectrum-model) — Toggle freeze for all channels when a channel is double clicked.
 - **toggleFreeze** `[fn]` in [RtFiffRawViewModel](/docs/api/disp/rt-fiff-raw-view-model) — Toggle freeze for all channels when a channel is double clicked.
@@ -5896,8 +5905,6 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **toggleSingleView** `[signal]` in [Control3DView](/docs/api/disp/control3-d-view) — Notifies the 'Single View' radio button has been checked.
 - **toggleTimeFormat** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Toggle time format between float seconds and HH:MM:SS clock time.
 - **toggleTimeFormat** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget) — Toggle the time format between float seconds and HH:MM:SS clock time.
-- **toInt** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
-- **toIntMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to fiff FIFFT INT MATRIX
 - **toJson** `[fn]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Serialize to QJsonObject.
 - **toJson** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **toJson** `[fn]` in [MnaNode](/docs/api/mna/mna-node)
@@ -5913,7 +5920,6 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **toJson** `[fn]` in [MnaVerification](/docs/api/mna/mna-verification)
 - **toJson** `[fn]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check)
 - **toJson** `[fn]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result)
-- **toJulian** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Julian Fast access; Data are deleted if tag gets deleted, and vice versa
 - **token** `[fn]` in [RenderKey](/docs/api/disp3-d/render-key)
 - **toLabels** `[fn]` in [FsAnnotation](/docs/api/fs/fs-annotation) — python labels_from_parc
 - **toLabels** `[fn]` in [FsAnnotationSet](/docs/api/fs/fs-annotation-set) — python labels_from_parc
@@ -5924,20 +5930,14 @@ Index of 6395 public class members (functions, variables, typedefs, enums) acros
 - **toMatrixXf** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **toolVersion** `[var]` in [MnaNode](/docs/api/mna/mna-node) — Version of tool that last executed this node.
 - **topologicalSort** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
-- **toShort** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Short Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toSi** `[fn]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
-- **toSparseFloatMatrix** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to sparse fiff FIFFT FLOAT MATRIX
 - **toString** `[fn]` in [AcqUri](/docs/api/acq/acq-uri)
-- **toString** `[fn]` in [FiffId](/docs/api/fiff/fiff-id) — Returns a human-readable string representation of this ID.
-- **toString** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to String
 - **tot_area** `[var]` in [MNESurfaceOrVolume](/docs/api/mne/mne-surface-or-volume) — Total area of the surface, computed from the triangles (m^2).
 - **total_degree** `[fn]` in [Network](/docs/api/connectivity/network) — Returns the sum of all node degrees, i.e.
 - **totalContactCount** `[fn]` in [ElectrodeObject](/docs/api/disp3-d/electrode-object)
 - **totalLogicalChannels** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Total number of logical channels available for scrolling (respects active filter).
 - **totalPointCount** `[fn]` in [DigitizerSetTreeItem](/docs/api/disp3-d/digitizer-set-tree-item) — Returns the total number of digitizer points across all categories.
 - **totalSamples** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
-- **toUnsignedInt** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
-- **toUnsignedShort** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice versa
 - **toVolume** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Extract a 3D volume for a given time point, filling the grid with zeros where no source is active.
 - **TPassType** `[enum]` in [CosineFilter](/docs/api/dsp/cosine-filter)
 - **TPassType** `[enum]` in [ParksMcClellan](/docs/api/dsp/parks-mc-clellan)

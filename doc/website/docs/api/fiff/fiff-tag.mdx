@@ -17,7 +17,7 @@ class FIFFLIB::FiffTag
 
 FIFF tag: 16-byte header (kind, type, size, next) plus payload, with typed decoders for every FIFFT_* type.
 
-Holds the four header fields exactly as stored on disk and the raw payload bytes. Decoders convert the payload to the appropriate C++ representation: scalars via `toInt` / `toFloat` / `toDouble`, dense and sparse matrices via `toFloatMatrix` / `toSparseFloatMatrix`, and the structured FIFF records into their class wrappers (`toFiffId`, `toCoordTrans`, `toChInfo`, `toChPos`, `toDigPoint`, ...). Used by [`FiffStream`](/docs/api/fiff/fiff-stream) both for streaming reads and for assembling tags before write_tag.
+Holds the four header fields exactly as stored on disk and the raw payload bytes. Decoders convert the payload to the appropriate C++ representation: scalars via `to_int` / `to_float` / `to_double`, dense and sparse matrices via `to_float_matrix` / `to_sparse_float_matrix`, and the structured FIFF records into their class wrappers (`to_fiff_id`, `to_coord_trans`, `to_ch_info`, `to_dig_point`, `to_dir_entry`, ...). Used by [`FiffStream`](/docs/api/fiff/fiff-stream) both for streaming reads and for assembling tags before write_tag.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
@@ -96,7 +96,7 @@ Destroys the [`FiffTag`](/docs/api/fiff/fiff-tag).
 
 ---
 
-### getMatrixCoding()
+### matrix_coding()
 
 Provides information about matrix coding.
 
@@ -106,7 +106,7 @@ Provides information about matrix coding.
 
 ---
 
-### isMatrix()
+### is_matrix()
 
 Provides information if tag contains a matrix.
 
@@ -116,7 +116,7 @@ Provides information if tag contains a matrix.
 
 ---
 
-### getMatrixDimensions(p_ndim, p_Dims)
+### matrix_dimensions(p_ndim, p_Dims)
 
 Returns matrix dimensions Refactors: fiff_get_matrix_dims (fiff_matrix.c).
 
@@ -134,7 +134,7 @@ Returns matrix dimensions Refactors: fiff_get_matrix_dims (fiff_matrix.c).
 
 ---
 
-### getType()
+### data_type()
 
 Provides the tag type information.
 
@@ -144,7 +144,7 @@ Provides the tag type information.
 
 ---
 
-### getInfo()
+### info()
 
 Type information as a string.
 
@@ -154,7 +154,7 @@ Type information as a string.
 
 ---
 
-### toByte()
+### to_byte()
 
 to Byte Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -164,7 +164,7 @@ to Byte Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toUnsignedShort()
+### to_unsigned_short()
 
 to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -174,7 +174,7 @@ to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice ve
 
 ---
 
-### toShort()
+### to_short()
 
 to Short Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -184,7 +184,7 @@ to Short Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toUnsignedInt()
+### to_unsigned_int()
 
 to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -194,7 +194,7 @@ to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toInt()
+### to_int()
 
 to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -204,7 +204,7 @@ to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toJulian()
+### to_julian()
 
 to Julian Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -214,7 +214,7 @@ to Julian Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toFloat()
+### to_float()
 
 to Float Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -224,7 +224,7 @@ to Float Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toDouble()
+### to_double()
 
 to Double Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -234,7 +234,7 @@ to Double Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toString()
+### to_string()
 
 to String
 
@@ -244,7 +244,7 @@ to String
 
 ---
 
-### toDauPack16()
+### to_dau_pack16()
 
 to DauPack16 Fast access; Data are deleted if tag gets deleted, and vice versa
 
@@ -254,7 +254,7 @@ to DauPack16 Fast access; Data are deleted if tag gets deleted, and vice versa
 
 ---
 
-### toFiffID()
+### to_fiff_id()
 
 to fiff ID
 
@@ -264,7 +264,7 @@ to fiff ID
 
 ---
 
-### toDigPoint()
+### to_dig_point()
 
 to fiff DIG POINT
 
@@ -274,7 +274,7 @@ to fiff DIG POINT
 
 ---
 
-### toCoordTrans()
+### to_coord_trans()
 
 to fiff COORD TRANS
 
@@ -284,7 +284,7 @@ to fiff COORD TRANS
 
 ---
 
-### toChInfo()
+### to_ch_info()
 
 to fiff CH INFO
 
@@ -296,7 +296,7 @@ to fiff CH INFO STRUCT
 
 ---
 
-### toDirEntry()
+### to_dir_entry()
 
 to fiff DIR ENTRY
 
@@ -306,7 +306,7 @@ to fiff DIR ENTRY
 
 ---
 
-### toIntMatrix()
+### to_int_matrix()
 
 to fiff FIFFT INT MATRIX
 
@@ -316,7 +316,7 @@ to fiff FIFFT INT MATRIX
 
 ---
 
-### toFloatMatrix()
+### to_float_matrix()
 
 to fiff FIFFT FLOAT MATRIX
 
@@ -328,7 +328,7 @@ parses a fiff float matrix
 
 ---
 
-### toSparseFloatMatrix()
+### to_sparse_float_matrix()
 
 to sparse fiff FIFFT FLOAT MATRIX
 
@@ -507,7 +507,7 @@ These return information about the matrix coding.
 
 ---
 
-### storageSize()
+### storage_size()
 
 Size of the on-disk tag info header: kind + type + size + next = 4 x fiff_int_t.
 
@@ -539,7 +539,7 @@ const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->di
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->toInt() == 376 && !fileId.empty() && fileId.version > 0,
+ok &= expect(opened && measNodes.size() == 1 && nchan && *nchan->to_int() == 376 && !fileId.empty() && fileId.version > 0,
              "FiffStream/FiffDirNode/FiffTag/FiffId: the FIFF_NCHAN tag of the measurement block reads 376");
 ````
 
