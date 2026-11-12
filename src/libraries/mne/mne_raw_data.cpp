@@ -25,8 +25,8 @@
 
 #include <vector>
 #include <base/string_utils.h>
+#include <fiff/fiff_ch_name.h>
 
-#include <QFile>
 #include <QTextStream>
 
 #include <Eigen/Core>
@@ -1265,16 +1265,9 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     if (MNERawInfo::load(name, allow_maxshield, info) == FAIL)
         return nullptr;
 
-    // FiffTag::toChInfo strips the spaces from channel names, so compare without them.
-    const auto withoutSpaces = [](std::string_view name) {
-        std::string result;
-        std::ranges::copy_if(name, std::back_inserter(result), [](char c) { return c != ' '; });
-        return result;
-    };
-    const std::string trigger = withoutSpaces(MNE_DEFAULT_TRIGGER_CH);
     for (k = 0; k < info->nchan; k++) {
         FiffChInfo& ch = info->chInfo[k];
-        if (withoutSpaces(ch.ch_name) == trigger) {
+        if (FIFFLIB::same_channel(ch.ch_name, MNE_DEFAULT_TRIGGER_CH)) {
             if (std::fabs(1.0 - ch.range) > 1e-5) {
                 ch.range = 1.0;
                 BASELIB::Log::info("{} range set to {:f}\n", MNE_DEFAULT_TRIGGER_CH, ch.range);

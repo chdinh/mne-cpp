@@ -28,11 +28,13 @@
 
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_coord_trans.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_evoked.h>
 
+#include <cstdlib>
+#include <string_view>
 #include <vector>
 
-#include <QFile>
 #include <QTextStream>
 
 //=============================================================================================================
@@ -156,7 +158,6 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     const MatrixXf data = evoked.data.cast<float>(); /* nchan × nsamp, already calibrated */
     const FiffCoordTrans& devHeadT = evoked.info.dev_head_t;
 
-    QString stim14_name;
     /*
      * Desired channels
      */
@@ -173,11 +174,8 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
     float tmin, tmax;
     int k, p, c, np, n1, n2;
 
-    stim14_name = qEnvironmentVariable(MNE_ENV_TRIGGER_CH);
-    if (stim14_name.isEmpty() || stim14_name.size() == 0)
-        stim14_name = MNE_DEFAULT_TRIGGER_CH;
-    // FiffTag::toChInfo strips the spaces from channel names.
-    stim14_name.remove(' ');
+    const char* trigger = std::getenv(MNE_ENV_TRIGGER_CH);
+    const std::string_view stim14_name = trigger && *trigger ? trigger : MNE_DEFAULT_TRIGGER_CH;
 
     if (!fresh) {
         for (int i = 0; i < target.nchan; i++)
@@ -213,7 +211,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
                     break;
                 }
             }
-            if (QString::fromStdString(chs[c].ch_name).remove(' ') == stim14_name) {
+            if (FIFFLIB::same_channel(chs[c].ch_name, stim14_name)) {
                 stim14 = c;
             }
         }
@@ -230,7 +228,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
                 sel[nchan] = c;
                 nchan++;
             }
-            if (QString::fromStdString(chs[c].ch_name).remove(' ') == stim14_name) {
+            if (FIFFLIB::same_channel(chs[c].ch_name, stim14_name)) {
                 stim14 = c;
             }
         }
@@ -294,14 +292,14 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
             if (target.proj && target.proj->nitems > 0) {
                 BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
                 QTextStream errStream(stderr);
-                target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
+                target.proj->report(errStream, "\t\t");
             }
         } else {
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
                 BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
                 QTextStream errStream(stderr);
-                target.proj->report(errStream, QStringLiteral("\t\t").toStdString());
+                target.proj->report(errStream, "\t\t");
             }
             target.comp = MNECTFCompDataSet::read(name);
             if (!target.comp) {

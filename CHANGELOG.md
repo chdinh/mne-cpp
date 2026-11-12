@@ -320,6 +320,9 @@ aliases; replace the old spelling as below.
   `FiffId`, `FiffTime`, `FiffChInfo`, `FiffChPos`, `FiffDigPoint`,
   `FiffDirEntry` and `FiffDataRef` is `storage_size()`, and `FiffId::toString`
   is `to_string`.
+- `MNEMeasData` and `MNERawData` find the trigger channel (`STI 014` or
+  `MNE_TRIGGER_CH_NAME`) with `FIFFLIB::same_channel`, like every other
+  channel lookup: spaces and case are ignored.
 - `FiffStream::read_rt_tag` is gone: nothing called it, and the real-time
   server reads its socket with `read_tag_info(false)` and `read_tag_data`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella

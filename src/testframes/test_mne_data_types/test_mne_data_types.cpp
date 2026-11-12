@@ -29,6 +29,7 @@
 #include <mne/mne.h>
 #include <mne/mne_global.h>
 #include <mne/mne_surface_patch.h>
+#include <fiff/fiff_ch_name.h>
 #include <fiff/fiff_info.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_coord_trans.h>
@@ -1472,6 +1473,28 @@ private slots:
     //=========================================================================
     // MNEMeasDataSet coverage
     //=========================================================================
+
+    void measData_readEvokedSetFindsTheTriggerChannel()
+    {
+        const QString avePath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif";
+        if (!QFile::exists(avePath))
+            QSKIP("Sample evoked file not found");
+        const auto evoked = FiffEvoked::read(avePath.toStdU16String(), 0, {}, false);
+        QVERIFY(evoked.has_value());
+        const int stim = FIFFLIB::channel_index(evoked->info.ch_names, "STI 014");
+        if (stim < 0)
+            QSKIP("Sample evoked file has no STI 014");
+
+        for (const char* name : {"", "STI014"}) {
+            qputenv(MNE_ENV_TRIGGER_CH, name);
+            const auto meas = MNEMeasData::mne_read_meas_data(avePath.toStdU16String(), 1, nullptr, nullptr, {}, 0);
+            QVERIFY(meas && meas->current);
+            QVERIFY2(meas->current->stim14.size() == meas->current->np, name);
+            const float value = static_cast<float>(evoked->data(stim, 0) / evoked->info.chs[stim].cal);
+            QCOMPARE(meas->current->stim14[0], value);
+        }
+        qunsetenv(MNE_ENV_TRIGGER_CH);
+    }
 
     void measDataSet_construction()
     {
