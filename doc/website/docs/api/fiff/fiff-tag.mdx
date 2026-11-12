@@ -17,7 +17,7 @@ class FIFFLIB::FiffTag
 
 FIFF tag: 16-byte header (kind, type, size, next) plus payload, with typed decoders for every FIFFT_* type.
 
-Holds the four header fields exactly as stored on disk and a `QByteArray` with the raw payload. Decoders convert the payload to the appropriate C++ representation: scalars via `toInt` / `toFloat` / `toDouble`, dense and sparse matrices via `toFloatMatrix` / `toSparseFloatMatrix`, and the structured FIFF records into their class wrappers (`toFiffId`, `toCoordTrans`, `toChInfo`, `toChPos`, `toDigPoint`, ...). Used by [`FiffStream`](/docs/api/fiff/fiff-stream) both for streaming reads and for assembling tags before write_tag.
+Holds the four header fields exactly as stored on disk and the raw payload bytes. Decoders convert the payload to the appropriate C++ representation: scalars via `toInt` / `toFloat` / `toDouble`, dense and sparse matrices via `toFloatMatrix` / `toSparseFloatMatrix`, and the structured FIFF records into their class wrappers (`toFiffId`, `toCoordTrans`, `toChInfo`, `toChPos`, `toDigPoint`, ...). Used by [`FiffStream`](/docs/api/fiff/fiff-stream) both for streaming reads and for assembling tags before write_tag.
 
 ```cpp title="src/examples/ex_fiff_api/main.cpp"
 FiffStream stream(QString(dir + "/sample_audvis-ave.fif").toStdU16String());
@@ -26,13 +26,6 @@ const std::vector<std::shared_ptr<FiffDirNode>> measNodes = stream.dirtree()->di
 const std::optional<FiffTag> nchan = measNodes.front()->find_tag(stream, FIFF_NCHAN); // raw tag access
 const FiffId fileId = stream.id();
 stream.close();
-```
-
-### Inheritance
-
-```mermaid
-classDiagram
-    QByteArray <|-- FiffTag
 ```
 
 ---
@@ -305,8 +298,6 @@ to fiff CH INFO STRUCT
 
 ### toDirEntry()
 
-to fiff OLD PACK
-
 to fiff DIR ENTRY
 
 **Returns:**
@@ -346,6 +337,68 @@ parses a sparse fiff float matrix and returns a double sparse matrix to make sur
 **Returns:**
 
 - *Eigen::SparseMatrix&lt; double &gt;* — a sparse double matrix which is newly created from the parsed float; empty if the tag is no valid sparse float matrix (see `FiffSparseMatrix::fiff_get_float_sparse_matrix`).
+
+---
+
+### data()
+
+**Returns:**
+
+- *std::byte ** — The payload bytes.
+
+---
+
+### data()
+
+---
+
+### size()
+
+**Returns:**
+
+- *std::size_t* — The payload size in bytes, the tag's on-disk `size` field.
+
+---
+
+### empty()
+
+**Returns:**
+
+- *bool* — Whether the payload is empty.
+
+---
+
+### resize(bytes)
+
+Resizes the payload; new bytes are zero.
+
+**Parameters:**
+
+- **bytes** : *std::size_t*
+  The new payload size in bytes.
+
+---
+
+### bytes()
+
+**Returns:**
+
+- *std::span&lt; std::byte &gt;* — The payload as a span.
+
+---
+
+### bytes()
+
+---
+
+### assign(bytes)
+
+Replaces the payload with a copy of `bytes`.
+
+**Parameters:**
+
+- **bytes** : *std::span&lt; const std::byte &gt;*
+  The new payload.
 
 ---
 
