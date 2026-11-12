@@ -117,6 +117,9 @@ _OUTPUT_DIR_RE = re.compile(r"\bRUNTIME_OUTPUT_DIRECTORY(?:_[A-Z]+)?\b")
 _BARE_RETURN_RE = re.compile(r"^[ \t]*return[ \t]*\([ \t]*\)", re.MULTILINE | re.IGNORECASE)
 # Assertions that cannot fail: QVERIFY(true) and QVERIFY(x || !x)
 _PLACEHOLDER_ASSERT_RE = re.compile(r"QVERIFY\(\s*true\s*\)|QVERIFY\(\s*!?\s*(.+?)\s*\|\|\s*!?\s*\1\s*\)")
+# A fixed file name in a directory every test process shares; X-templates (QTemporaryFile) are unique.
+_SHARED_SCRATCH_RE = re.compile(
+    r'QDir::tempPath\(\)\s*\+\s*"/([^"/]+)"|QCoreApplication::applicationDirPath\(\)\s*\+\s*"/(?!\.\.)([^"/]*\.\w+)"')
 
 
 def strip_cmake_comments(text: str) -> str:
@@ -155,6 +158,7 @@ class TestEntry:
     overrides_output_dir: bool = False
     guarded_registration: bool = False
     placeholder_assertions: int = 0
+    shared_scratch_files: list[str] = field(default_factory=list)
 
     @property
     def cmake_path(self) -> str:
@@ -204,6 +208,12 @@ def parse_leaf(directory: Path) -> TestEntry:
     entry.placeholder_assertions = sum(
         len(_PLACEHOLDER_ASSERT_RE.findall(source.read_text(encoding="utf-8", errors="replace")))
         for source in sorted(directory.glob("*.cpp")))
+    entry.shared_scratch_files = [
+        f"{source.name}: {name}"
+        for source in sorted(directory.glob("*.cpp"))
+        for match in _SHARED_SCRATCH_RE.findall(source.read_text(encoding="utf-8", errors="replace"))
+        if "XXXXXX" not in (name := match[0] or match[1])
+    ]
     cmake = directory / "CMakeLists.txt"
     if not cmake.is_file():
         return entry
@@ -441,6 +451,20 @@ def check_output_directory_overrides(entries: dict[str, TestEntry]) -> list[Find
                 )
             )
     return findings
+
+
+def check_shared_scratch_files(entries: dict[str, TestEntry]) -> list[Finding]:
+    """Parallel ctest runs (and overlapping suites) must not share scratch files."""
+    return [
+        error(
+            "TI014",
+            entry.cmake_path,
+            f"'{name}' writes fixed-name files into a shared directory ({', '.join(entry.shared_scratch_files)}); "
+            "use a QTemporaryDir so concurrent runs cannot clobber each other.",
+        )
+        for name, entry in sorted(entries.items())
+        if entry.shared_scratch_files
+    ]
 
 
 def check_names(entries: dict[str, TestEntry]) -> list[Finding]:
@@ -783,6 +807,7 @@ def run(args: argparse.Namespace) -> int:
     findings += check_add_test(entries)
     findings += check_conditional_registration(entries, policy)
     findings += check_output_directory_overrides(entries)
+    findings += check_shared_scratch_files(entries)
     findings += check_names(entries)
     findings += check_labels(entries, policy)
     findings += check_timeouts(entries, policy)

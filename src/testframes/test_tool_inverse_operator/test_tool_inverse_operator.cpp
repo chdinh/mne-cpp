@@ -17,6 +17,7 @@
 #include <QtTest>
 #include <QProcess>
 #include <QCoreApplication>
+#include <QTemporaryDir>
 #include <QTemporaryFile>
 
 //=============================================================================================================
@@ -31,6 +32,7 @@ private:
     QString m_sBinDir;
     QString m_sResourcePath;
     QString m_sInvFile; // Inverse operator file created by testInverseOperatorCompute
+    QTemporaryDir m_scratch;
 
     QString runTool(const QString& toolName, const QStringList& args, int timeoutMs = 30000)
     {
@@ -97,7 +99,7 @@ private slots:
         }
 
         // Write inverse operator to a known path for reuse by mne_compute_mne test
-        QString outPath = QDir::tempPath() + "/test_inv_operator.fif";
+        QString outPath = m_scratch.filePath("test_inv_operator.fif");
 
         QString output = runTool("mne_inverse_operator", {"--fwd", fwdFile, "--noisecov", covFile, "--meg", "--inv", outPath}, 60000);
 
@@ -138,7 +140,7 @@ private slots:
             QSKIP("sample_audvis-ave.fif not available");
         }
 
-        QString stcPrefix = QDir::tempPath() + "/test_compute_mne";
+        QString stcPrefix = m_scratch.filePath("test_compute_mne");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--method", "MNE", "--snr", "3", "--out", stcPrefix}, 120000);
 
@@ -170,7 +172,7 @@ private slots:
             QSKIP("sample_audvis-ave.fif not available");
         }
 
-        QString stcPrefix = QDir::tempPath() + "/test_compute_dspm";
+        QString stcPrefix = m_scratch.filePath("test_compute_dspm");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--spm", "--snr", "3", "--out", stcPrefix}, 120000);
 
@@ -200,7 +202,7 @@ private slots:
             QSKIP("sample_audvis-ave.fif not available");
         }
 
-        QString stcPrefix = QDir::tempPath() + "/test_compute_sloreta";
+        QString stcPrefix = m_scratch.filePath("test_compute_sloreta");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--sLORETA", "--snr", "3", "--out", stcPrefix}, 120000);
 
@@ -210,17 +212,6 @@ private slots:
 
         QFile::remove(stcPrefix + "-lh.stc");
         QFile::remove(stcPrefix + "-rh.stc");
-    }
-
-    //=========================================================================================================
-    // Cleanup: remove temporary inverse operator file
-    //=========================================================================================================
-
-    void cleanupTestCase()
-    {
-        if (!m_sInvFile.isEmpty()) {
-            QFile::remove(m_sInvFile);
-        }
     }
 };
 

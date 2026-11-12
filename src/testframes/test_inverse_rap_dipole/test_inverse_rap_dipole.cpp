@@ -169,7 +169,8 @@ private slots:
             set.addEcd(d);
         }
 
-        QString tmpFile = QDir::tempPath() + "/test_ecd_roundtrip.bdip";
+        QTemporaryDir scratch;
+        QString tmpFile = scratch.filePath("test_ecd_roundtrip.bdip");
         bool saved = set.save_dipoles_bdip(tmpFile);
         QVERIFY(saved);
         QFile::remove(tmpFile);

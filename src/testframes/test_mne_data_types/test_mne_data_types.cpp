@@ -1271,7 +1271,8 @@ private slots:
         FiffEvokedSet evokedSet(avePath.toStdU16String());
 
         // Save to temp file
-        QString tmpPath = QDir::tempPath() + "/test_evoked_set_save.fif";
+        QTemporaryDir scratch;
+        QString tmpPath = scratch.filePath("test_evoked_set_save.fif");
         QVERIFY(evokedSet.save(tmpPath.toStdU16String()));
 
         // Read back and verify

@@ -361,7 +361,8 @@ void TestFiffFsLibrary::fiff_evokedSetSave()
     FiffEvokedSet evokedSet(avePath().toStdU16String());
     QVERIFY(evokedSet.evoked.size() > 0);
 
-    QString tmpPath = QCoreApplication::applicationDirPath() + "/test_evoked_save_tmp.fif";
+    QTemporaryDir scratch;
+    QString tmpPath = scratch.filePath("test_evoked_save_tmp.fif");
     QVERIFY(evokedSet.save(tmpPath.toStdU16String()));
     QVERIFY(QFile::exists(tmpPath));
 
@@ -425,7 +426,8 @@ void TestFiffFsLibrary::fiff_digPointSetRoundtrip()
     QVERIFY(!digSet.empty());
 
     // Write to file
-    QString tmpPath = QCoreApplication::applicationDirPath() + "/test_dig_tmp.fif";
+    QTemporaryDir scratch;
+    QString tmpPath = scratch.filePath("test_dig_tmp.fif");
     QFile::remove(tmpPath);
     QVERIFY(digSet.write(tmpPath.toStdString()).has_value());
 
@@ -724,7 +726,8 @@ void TestFiffFsLibrary::fs_surfaceReadCurv()
 void TestFiffFsLibrary::fs_annotationReadWrite()
 {
     int nv = 100;
-    QString tmpPath = QCoreApplication::applicationDirPath() + "/test_annot_tmp";
+    QTemporaryDir scratch;
+    QString tmpPath = scratch.filePath("test_annot_tmp");
     {
         QFile outFile(tmpPath);
         QVERIFY(outFile.open(QIODevice::WriteOnly));

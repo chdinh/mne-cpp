@@ -409,7 +409,8 @@ private slots:
         if (!m_bFwdLoaded)
             QSKIP("Forward solution not loaded");
 
-        QString tmpFile = QDir::tempPath() + "/test_fwd_roundtrip.fif";
+        QTemporaryDir scratch;
+        QString tmpFile = scratch.filePath("test_fwd_roundtrip.fif");
         const bool written = m_fwd.write(tmpFile.toStdU16String()).has_value();
         QVERIFY(written);
         if (written) {

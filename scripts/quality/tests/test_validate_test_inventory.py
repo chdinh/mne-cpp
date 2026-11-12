@@ -432,6 +432,38 @@ class TestOutputDirectoryOverride(ValidatorTestCase):
         self.assertEqual([], vti.check_output_directory_overrides(entries))
 
 
+class TestSharedScratchFiles(ValidatorTestCase):
+    def write_source(self, body: str) -> None:
+        self.fixture.add_test_dir("test_alpha")
+        (self.fixture.testframes / "test_alpha" / "test_alpha.cpp").write_text(body, encoding="utf-8")
+
+    def test_fixed_name_in_the_temp_directory_is_an_error(self) -> None:
+        self.write_source('QString f = QDir::tempPath() + "/test_roundtrip.fif";\n')
+        entries, _ = self.fixture.collect()
+        self.assertIn("TI014", self.codes(vti.check_shared_scratch_files(entries)))
+
+    def test_fixed_output_prefix_in_the_temp_directory_is_an_error(self) -> None:
+        self.write_source('QString stcPrefix = QDir::tempPath() + "/test_pipeline_mne";\n')
+        entries, _ = self.fixture.collect()
+        self.assertIn("TI014", self.codes(vti.check_shared_scratch_files(entries)))
+
+    def test_fixed_name_next_to_the_binary_is_an_error(self) -> None:
+        self.write_source('QString f = QCoreApplication::applicationDirPath() + "/test_tmp.stc";\n')
+        entries, _ = self.fixture.collect()
+        self.assertIn("TI014", self.codes(vti.check_shared_scratch_files(entries)))
+
+    def test_private_scratch_directory_passes(self) -> None:
+        self.write_source(
+            "QTemporaryDir dir;\n"
+            'QString f = dir.filePath("roundtrip.fif");\n'
+            'QTemporaryFile t(QDir::tempPath() + "/tst_XXXXXX.mne");\n'
+            'QString data = QCoreApplication::applicationDirPath() + "/../resources/data";\n'
+            'QString tool = QCoreApplication::applicationDirPath() + "/mne_anonymize";\n'
+        )
+        entries, _ = self.fixture.collect()
+        self.assertEqual([], vti.check_shared_scratch_files(entries))
+
+
 class TestNames(ValidatorTestCase):
     def test_project_name_must_match_directory(self) -> None:
         directory = self.fixture.testframes / "test_alpha"

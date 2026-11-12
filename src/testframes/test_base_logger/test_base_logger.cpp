@@ -22,8 +22,8 @@
 //=============================================================================================================
 
 #include <QtTest>
-#include <QDir>
 #include <QFile>
+#include <QTemporaryDir>
 #include <QTextStream>
 
 //=============================================================================================================
@@ -85,6 +85,7 @@ private slots:
     void cleanupTestCase();
 
 private:
+    QTemporaryDir m_scratch;
     QString m_sLogFile;
     QString readLog() const;
 };
@@ -92,7 +93,7 @@ private:
 //=============================================================================================================
 
 TestUtilsLogger::TestUtilsLogger()
-: m_sLogFile(QDir::tempPath() + "/mne_test_utils_logger.log")
+: m_sLogFile(m_scratch.filePath("mne_test_utils_logger.log"))
 {
 }
 

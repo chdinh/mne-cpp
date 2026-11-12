@@ -30,7 +30,7 @@
 //=============================================================================================================
 
 #include <QtTest>
-#include <QDir>
+#include <QTemporaryDir>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -155,7 +155,8 @@ void TestScSharedManagement::pluginManager_loadingFromMissingDirectoryIsSafe()
 
     // A missing plugin directory is what a partial install looks like. Loading
     // has to cope and leave the manager empty rather than faulting on the way.
-    manager.loadPlugins(QDir::tempPath() + "/no-such-mne-scan-plugin-dir");
+    const QTemporaryDir scratch;
+    manager.loadPlugins(scratch.filePath("no-such-mne-scan-plugin-dir"));
 
     QCOMPARE(manager.getPlugins().size(), 0);
 }

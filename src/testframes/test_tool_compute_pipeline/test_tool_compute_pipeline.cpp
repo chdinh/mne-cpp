@@ -18,7 +18,7 @@
 #include <QtTest>
 #include <QProcess>
 #include <QCoreApplication>
-#include <QDir>
+#include <QTemporaryDir>
 
 //=============================================================================================================
 // TEST CLASS
@@ -32,6 +32,7 @@ private:
     QString m_sBinDir;
     QString m_sResourcePath;
     QString m_sInvFile;
+    QTemporaryDir m_scratch;
 
     QString runTool(const QString& toolName, const QStringList& args, int timeoutMs = 60000)
     {
@@ -82,7 +83,7 @@ private slots:
             QSKIP("Required test data not available");
         }
 
-        m_sInvFile = QDir::tempPath() + "/test_pipeline_inv.fif";
+        m_sInvFile = m_scratch.filePath("test_pipeline_inv.fif");
 
         QString output = runTool("mne_inverse_operator", {"--fwd", fwdFile, "--noisecov", covFile, "--meg", "--inv", m_sInvFile}, 120000);
 
@@ -109,7 +110,7 @@ private slots:
         if (!QFile::exists(aveFile))
             QSKIP("Evoked file not available");
 
-        QString stcPrefix = QDir::tempPath() + "/test_pipeline_mne";
+        QString stcPrefix = m_scratch.filePath("test_pipeline_mne");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--method", "MNE", "--snr", "3", "--out", stcPrefix, "--nomatch"}, 120000);
 
@@ -135,7 +136,7 @@ private slots:
         if (!QFile::exists(aveFile))
             QSKIP("Evoked file not available");
 
-        QString stcPrefix = QDir::tempPath() + "/test_pipeline_dspm";
+        QString stcPrefix = m_scratch.filePath("test_pipeline_dspm");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--spm", "--snr", "3", "--out", stcPrefix, "--nomatch"}, 120000);
 
@@ -159,7 +160,7 @@ private slots:
         if (!QFile::exists(aveFile))
             QSKIP("Evoked file not available");
 
-        QString stcPrefix = QDir::tempPath() + "/test_pipeline_sloreta";
+        QString stcPrefix = m_scratch.filePath("test_pipeline_sloreta");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--sLORETA", "--snr", "3", "--out", stcPrefix, "--nomatch"}, 120000);
 
@@ -183,7 +184,7 @@ private slots:
         if (!QFile::exists(fwdFile))
             QSKIP("Forward solution not available");
 
-        QString stcPrefix = QDir::tempPath() + "/test_pipeline_fwdmode";
+        QString stcPrefix = m_scratch.filePath("test_pipeline_fwdmode");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--fwd", fwdFile, "--fwdamp", "50", "--method", "MNE", "--snr", "3", "--out", stcPrefix}, 120000);
 
@@ -207,7 +208,7 @@ private slots:
         if (!QFile::exists(aveFile))
             QSKIP("Evoked file not available");
 
-        QString stcPrefix = QDir::tempPath() + "/test_pipeline_abs";
+        QString stcPrefix = m_scratch.filePath("test_pipeline_abs");
 
         QString output = runTool("mne_compute_mne", {"--inv", m_sInvFile, "--meas", aveFile, "--method", "MNE", "--snr", "3", "--abs", "--pick", "100", "--out", stcPrefix, "--nomatch"}, 120000);
 
@@ -270,17 +271,6 @@ private slots:
 
         QString output = runTool("mne_collect_transforms", {"--meas", rawFile});
         QVERIFY(!output.isEmpty());
-    }
-
-    //=========================================================================================================
-    // Cleanup
-    //=========================================================================================================
-
-    void cleanupTestCase()
-    {
-        if (!m_sInvFile.isEmpty()) {
-            QFile::remove(m_sInvFile);
-        }
     }
 };
 

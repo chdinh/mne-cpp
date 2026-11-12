@@ -518,7 +518,8 @@ void TestMneLibrary::sourceEstimate_writeReadFile()
     InvSourceEstimate stc(data, vertices, 0.0f, 0.01f);
     QVERIFY(!stc.empty());
 
-    QString tmpPath = QCoreApplication::applicationDirPath() + "/test_stc_tmp.stc";
+    QTemporaryDir scratch;
+    QString tmpPath = scratch.filePath("test_stc_tmp.stc");
     QVERIFY(stc.write(tmpPath.toStdU16String()));
     const InvSourceEstimate stcRead(tmpPath.toStdU16String());
     QFile::remove(tmpPath);

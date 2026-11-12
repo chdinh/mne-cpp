@@ -14,6 +14,7 @@
  */
 
 #include <QtTest/QtTest>
+#include <QTemporaryDir>
 #include <base/string_utils.h>
 
 #include <fiff/fiff.h>
@@ -131,7 +132,8 @@ private slots:
         // Read without baseline correction for clean round-trip
         FiffEvokedSet evokedSet(m_sEvokedFile.toStdU16String());
 
-        QString tmpFile = QDir::tempPath() + "/test_evoked_roundtrip.fif";
+        QTemporaryDir scratch;
+        QString tmpFile = scratch.filePath("test_evoked_roundtrip.fif");
         QVERIFY2(evokedSet.save(tmpFile.toStdU16String()), "FiffEvokedSet::save() returned false");
 
         QFileInfo fi(tmpFile);
@@ -398,7 +400,8 @@ private slots:
             raw.info, fwd, cov, 0.2f, 0.8f, false, true);
 
         // Write
-        QString tmpFile = QDir::tempPath() + "/test_inv_op_roundtrip.fif";
+        QTemporaryDir scratch;
+        QString tmpFile = scratch.filePath("test_inv_op_roundtrip.fif");
         QVERIFY(invOp.write(tmpFile.toStdU16String()));
 
         // Read back
