@@ -65,10 +65,10 @@ template<typename T, typename Fix>
 int fixSamples(FiffTag& tag, int channel, int nchan, Fix fix)
 {
     int changed = 0;
-    char* data = tag.data();
+    std::byte* data = tag.data();
     const int frames = static_cast<int>(tag.size() / (sizeof(T) * nchan));
     for (int frame = 0; frame < frames; ++frame) {
-        char* at = data + (static_cast<std::size_t>(frame) * nchan + channel) * sizeof(T);
+        std::byte* at = data + (static_cast<std::size_t>(frame) * nchan + channel) * sizeof(T);
         T value;
         std::memcpy(&value, at, sizeof(T));
         const T fixed = fix(value);

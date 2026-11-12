@@ -611,7 +611,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_COMMENT: {
                 if (m_pBlockTypeList->first() == FIFFB_MEAS_INFO) {
                     QString defaultComment("mne_anonymize");
-                    QString anonFiffInfoComment(pTag.data());
+                    QString anonFiffInfoComment = QString::fromStdString(pTag.toString());
                     QVERIFY(anonFiffInfoComment == defaultComment);
                 }
 
@@ -619,7 +619,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             }
             case FIFF_EXPERIMENTER: {
                 QString defaultComment("mne_anonymize");
-                QString anonFiffExperimenter(pTag.data());
+                QString anonFiffExperimenter = QString::fromStdString(pTag.toString());
                 QVERIFY(anonFiffExperimenter == defaultComment);
 
                 break;
@@ -632,21 +632,21 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             }
             case FIFF_SUBJ_FIRST_NAME: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjFirstName(pTag.data());
+                QString anonSubjFirstName = QString::fromStdString(pTag.toString());
                 QVERIFY(anonSubjFirstName == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_MIDDLE_NAME: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjMiddleName(pTag.data());
+                QString anonSubjMiddleName = QString::fromStdString(pTag.toString());
                 QVERIFY(anonSubjMiddleName == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_LAST_NAME: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjLastName(pTag.data());
+                QString anonSubjLastName = QString::fromStdString(pTag.toString());
                 QVERIFY(anonSubjLastName == defaultComment);
 
                 break;
@@ -692,14 +692,14 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             }
             case FIFF_SUBJ_COMMENT: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjComment(pTag.data());
+                QString anonSubjComment = QString::fromStdString(pTag.toString());
                 QVERIFY(anonSubjComment == defaultComment);
 
                 break;
             }
             case FIFF_SUBJ_HIS_ID: {
                 QString defaultComment("mne_anonymize");
-                QString anonSubjHis(pTag.data());
+                QString anonSubjHis = QString::fromStdString(pTag.toString());
                 QVERIFY(anonSubjHis == defaultComment);
                 break;
             }
@@ -713,7 +713,7 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_PROJ_NAME: {
                 if (testArg == "BruteMode") {
                     QString defaultComment("mne_anonymize");
-                    QString intAnonProjName(pTag.data());
+                    QString intAnonProjName = QString::fromStdString(pTag.toString());
                     QVERIFY(intAnonProjName == defaultComment);
                 }
                 break;
@@ -721,14 +721,14 @@ void TestMneAnonymize::verifyTags(FIFFLIB::FiffStream& stream,
             case FIFF_PROJ_AIM: {
                 if (testArg == "BruteMode") {
                     QString defaultComment("mne_anonymize");
-                    QString intAnonProjAim(pTag.data());
+                    QString intAnonProjAim = QString::fromStdString(pTag.toString());
                     QVERIFY(intAnonProjAim == defaultComment);
                 }
                 break;
             }
             case FIFF_PROJ_PERSONS: {
                 QString defaultComment("mne_anonymize");
-                QString intAnonProjPersons(pTag.data());
+                QString intAnonProjPersons = QString::fromStdString(pTag.toString());
                 QVERIFY(intAnonProjPersons == defaultComment);
 
                 break;

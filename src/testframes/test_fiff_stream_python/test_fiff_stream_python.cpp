@@ -263,7 +263,7 @@ void TestFiffStreamPython::coordTrans()
 
     // A truncated struct payload must yield the default value, not read past the tag data.
     FiffTag truncated;
-    truncated.append(tag->left(8));
+    truncated.assign(tag->bytes().first(8));
     truncated.type = FIFFT_COORD_TRANS_STRUCT;
     QCOMPARE(truncated.toCoordTrans().from, FiffCoordTrans().from);
     truncated.type = FIFFT_DIG_POINT_STRUCT;

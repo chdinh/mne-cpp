@@ -331,7 +331,7 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
                 break;
             case FIFF_EPOCH:
                 t_pTag = m_stream.read_tag(pos);
-                epoch.push_back(FiffTag(*t_pTag));
+                epoch.push_back(std::move(*t_pTag));
                 break;
         }
     }
@@ -359,9 +359,9 @@ Expected<FiffEvoked> FiffEvokedFile::read(int set, const FiffEvoked::Baseline& b
         //
         //   Put the old style epochs together: one channel per tag
         //
-        all_data.resize(nepoch, epoch[0].size() / static_cast<int>(sizeof(float)));
+        all_data.resize(nepoch, static_cast<int>(epoch[0].size() / sizeof(float)));
         for (k = 0; k < nepoch; ++k) {
-            const int n = epoch[k].size() / static_cast<int>(sizeof(float));
+            const int n = static_cast<int>(epoch[k].size() / sizeof(float));
             if (n != all_data.cols()) {
                 return fail(ErrorCode::Format, "Old style epochs of lengths {} and {} in {}", n, all_data.cols(), file);
             }

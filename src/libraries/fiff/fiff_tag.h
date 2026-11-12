@@ -98,13 +98,10 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QByteArray>
-
+#include <algorithm>
+#include <cstddef>
 #include <optional>
+#include <span>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -137,18 +134,12 @@ inline constexpr auto MATRIX_CODING_CCS = 0x00004010;   /**< MATRIX_CODING_CCS e
 inline constexpr auto MATRIX_CODING_RCS = 0x00004020;   /**< MATRIX_CODING_RCS encoding. 4020. */
 inline constexpr auto DATA_TYPE = 0x0000FFFF;           /**< DATA_TYPE encoding 0000ffff. */
 
-//const fiff_int_t IS_MATRIX           = 4294901760; /**< Is Matrix encoding. ffff0000. */
-//const fiff_int_t MATRIX_CODING_DENSE = 16384;       /**< MATRIX_CODING_DENSE encoding. 4000. */
-//const fiff_int_t MATRIX_CODING_CCS   = 16400;       /**< MATRIX_CODING_CCS encoding. 4010. */
-//const fiff_int_t MATRIX_CODING_RCS   = 16416;       /**< MATRIX_CODING_RCS encoding. 4020. */
-//const fiff_int_t DATA_TYPE           = 65535;       /**< DATA_TYPE encoding. ffff. */
-
 //=============================================================================================================
 /**
  * @brief FIFF tag: 16-byte header (kind, type, size, next) plus payload, with typed decoders for every FIFFT_* type.
  *
- * Holds the four header fields exactly as stored on disk and a
- * @c QByteArray with the raw payload. Decoders convert the payload to the
+ * Holds the four header fields exactly as stored on disk and the raw
+ * payload bytes. Decoders convert the payload to the
  * appropriate C++ representation: scalars via @c toInt / @c toFloat /
  * @c toDouble, dense and sparse matrices via @c toFloatMatrix /
  * @c toSparseFloatMatrix, and the structured FIFF records into their
@@ -158,7 +149,7 @@ inline constexpr auto DATA_TYPE = 0x0000FFFF;           /**< DATA_TYPE encoding 
  *
  * @snippet ex_fiff_api/main.cpp fiff_stream_usage
  */
-class FIFFSHARED_EXPORT FiffTag : public QByteArray
+class FIFFSHARED_EXPORT FiffTag
 {
 public:
     //=========================================================================================================
@@ -380,12 +371,6 @@ public:
      */
     inline FiffChInfo toChInfo() const;
 
-    //    //=========================================================================================================
-    //    /**
-    //    * to fiff OLD PACK
-    //    */
-    //    inline fiff_coord_trans_t toCoordTrans() const;
-
     //=========================================================================================================
     /**
      * to fiff DIR ENTRY
@@ -522,6 +507,61 @@ public:
      */
     inline static std::int32_t storageSize();
 
+    //
+    // Payload
+    //
+    /** @return The payload bytes. */
+    std::byte* data() noexcept
+    {
+        return m_data.data();
+    }
+    const std::byte* data() const noexcept
+    {
+        return m_data.data();
+    }
+
+    /** @return The payload size in bytes, the tag's on-disk @c size field. */
+    std::size_t size() const noexcept
+    {
+        return m_data.size();
+    }
+
+    /** @return Whether the payload is empty. */
+    bool empty() const noexcept
+    {
+        return m_data.empty();
+    }
+
+    /**
+     * Resizes the payload; new bytes are zero.
+     *
+     * @param[in] bytes   The new payload size in bytes.
+     */
+    void resize(std::size_t bytes)
+    {
+        m_data.resize(bytes);
+    }
+
+    /** @return The payload as a span. */
+    std::span<std::byte> bytes() noexcept
+    {
+        return m_data;
+    }
+    std::span<const std::byte> bytes() const noexcept
+    {
+        return m_data;
+    }
+
+    /**
+     * Replaces the payload with a copy of @p bytes.
+     *
+     * @param[in] bytes   The new payload.
+     */
+    void assign(std::span<const std::byte> bytes)
+    {
+        m_data.assign(bytes.begin(), bytes.end());
+    }
+
 public:
     fiff_int_t kind; /**< Tag number.
                              *   This defines the meaning of the item */
@@ -531,6 +571,9 @@ public:
                              *   Zero if the object follows
                              *   sequentially in file.
                              *   Negative at the end of file */
+
+private:
+    std::vector<std::byte> m_data; /**< The payload. */
 };
 
 //=============================================================================================================
@@ -540,8 +583,7 @@ public:
 inline std::int32_t FiffTag::storageSize()
 {
     // On-disk layout: kind, type, size, next (4 x fiff_int_t)
-    // Note: 'size' is not a class member (QByteArray::size() is used at runtime),
-    //       but it is part of the on-disk wire format.
+    // The on-disk size field is the payload size, size()
     return sizeof(FiffTag::kind) + sizeof(FiffTag::type) + sizeof(fiff_int_t) /* size field on disk */
         + sizeof(FiffTag::next);
 }
@@ -614,7 +656,7 @@ inline std::string FiffTag::toString() const
 {
     if (this->isMatrix() || this->getType() != FIFFT_STRING)
         return {};
-    return std::string(this->constData(), static_cast<std::size_t>(this->size()));
+    return std::string(reinterpret_cast<const char*>(data()), size());
 }
 
 //=============================================================================================================
@@ -634,7 +676,7 @@ inline const std::int16_t* FiffTag::toDauPack16() const
 inline FiffId FiffTag::toFiffID() const
 {
     FiffId p_fiffID;
-    if (this->isMatrix() || this->getType() != FIFFT_ID_STRUCT || this->isNull() || this->size() < FiffId::storageSize())
+    if (this->isMatrix() || this->getType() != FIFFT_ID_STRUCT || this->size() < static_cast<std::size_t>(FiffId::storageSize()))
         return p_fiffID;
     else {
         const auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -654,7 +696,7 @@ inline FiffId FiffTag::toFiffID() const
 inline FiffDigPoint FiffTag::toDigPoint() const
 {
     FiffDigPoint t_fiffDigPoint;
-    if (this->isMatrix() || this->getType() != FIFFT_DIG_POINT_STRUCT || this->isNull() || this->size() < FiffDigPoint::storageSize())
+    if (this->isMatrix() || this->getType() != FIFFT_DIG_POINT_STRUCT || this->size() < static_cast<std::size_t>(FiffDigPoint::storageSize()))
         return t_fiffDigPoint;
     else {
         auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -677,7 +719,7 @@ inline FiffDigPoint FiffTag::toDigPoint() const
 inline FiffCoordTrans FiffTag::toCoordTrans() const
 {
     FiffCoordTrans p_FiffCoordTrans;
-    if (this->isMatrix() || this->getType() != FIFFT_COORD_TRANS_STRUCT || this->isNull() || this->size() < FiffCoordTrans::storage_size())
+    if (this->isMatrix() || this->getType() != FIFFT_COORD_TRANS_STRUCT || this->size() < static_cast<std::size_t>(FiffCoordTrans::storage_size()))
         return p_FiffCoordTrans;
     else {
         auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -718,7 +760,7 @@ inline FiffChInfo FiffTag::toChInfo() const
 {
     FiffChInfo p_FiffChInfo;
 
-    if (this->isMatrix() || this->getType() != FIFFT_CH_INFO_STRUCT || this->isNull() || this->size() < FiffChInfo::storageSize())
+    if (this->isMatrix() || this->getType() != FIFFT_CH_INFO_STRUCT || this->size() < static_cast<std::size_t>(FiffChInfo::storageSize()))
         return p_FiffChInfo;
     else {
         auto* t_pInt32 = reinterpret_cast<const std::int32_t*>(this->data());
@@ -787,32 +829,23 @@ inline FiffChInfo FiffTag::toChInfo() const
         //
         //   Handle the channel name
         //
-        const char* orig = static_cast<const char*>(this->data());
-        p_FiffChInfo.ch_name.assign(orig + 80, qstrnlen(orig + 80, 16));
+        const auto* name = reinterpret_cast<const char*>(data()) + 80;
+        p_FiffChInfo.ch_name.assign(name, std::find(name, name + 16, '\0'));
 
         return p_FiffChInfo;
     }
 }
-
-//    //=========================================================================================================
-//    /**
-//    * to fiff OLD PACK
-//    */
-//    inline fiff_coord_trans_t toCoordTrans() const
-//    {
-
-//    }
 
 //=============================================================================================================
 
 inline std::vector<FiffDirEntry> FiffTag::toDirEntry() const
 {
     std::vector<FiffDirEntry> entries;
-    if (this->isMatrix() || this->getType() != FIFFT_DIR_ENTRY_STRUCT || this->data() == nullptr) {
+    if (this->isMatrix() || this->getType() != FIFFT_DIR_ENTRY_STRUCT) {
         return entries;
     }
     const auto* ints = reinterpret_cast<const std::int32_t*>(this->data());
-    const auto count = static_cast<std::size_t>(this->size() / FiffDirEntry::storageSize());
+    const auto count = size() / static_cast<std::size_t>(FiffDirEntry::storageSize());
     entries.reserve(count);
     for (std::size_t k = 0; k < count; ++k) {
         entries.push_back({ints[k * 4], ints[k * 4 + 1], ints[k * 4 + 2], ints[k * 4 + 3]});

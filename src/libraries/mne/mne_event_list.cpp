@@ -39,6 +39,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ranges>
+#include <span>
+#include <string_view>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -75,9 +78,13 @@ std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& p
     }
     // The comments are one NUL-separated string, one entry per event.
     if (const auto commentTag = blocks.front()->find_tag(stream, FIFF_MNE_EVENT_COMMENTS)) {
-        const QList<QByteArray> comments = commentTag->split('\0');
-        for (int k = 0; k < nevent && k < std::ssize(comments); ++k) {
-            list.events[k].comment = QString::fromLatin1(comments[k]).toStdString();
+        const std::string_view comments(reinterpret_cast<const char*>(commentTag->data()), commentTag->size());
+        int k = 0;
+        for (auto&& comment : comments | std::views::split('\0')) {
+            if (k >= nevent) {
+                break;
+            }
+            list.events[k++].comment = QString::fromLatin1(std::string_view(comment.begin(), comment.end())).toStdString();
         }
     }
     return list;
@@ -147,13 +154,14 @@ bool MNEEventList::writeFif(const std::filesystem::path& path, int offset) const
     }
     std::vector<qint32> values;
     values.reserve(3 * events.size());
-    QByteArray comments;
+    std::string comments;
     bool anyComment = false;
     for (const MNEEvent& event : events) {
         values.push_back(event.sample + offset);
         values.push_back(static_cast<qint32>(event.from));
         values.push_back(static_cast<qint32>(event.to));
-        comments += QString::fromStdString(event.comment).toLatin1() + '\0';
+        comments += QString::fromStdString(event.comment).toLatin1().toStdString();
+        comments += '\0';
         anyComment = anyComment || !event.comment.empty();
     }
     stream->start_block(FIFFB_MNE_EVENTS);
@@ -162,8 +170,7 @@ bool MNEEventList::writeFif(const std::filesystem::path& path, int offset) const
     list.kind = FIFF_MNE_EVENT_LIST;
     list.type = FIFFT_UINT;
     list.next = FIFFV_NEXT_SEQ;
-    const auto nbytes = static_cast<qsizetype>(values.size()) * static_cast<qsizetype>(sizeof(qint32));
-    list.append(reinterpret_cast<const char*>(values.data()), nbytes);
+    list.assign(std::as_bytes(std::span(values)));
     stream->write_tag(list);
     if (anyComment) {
         // Latin-1 bytes, one NUL-terminated comment per event, as MNE-C writes and mne-python reads them.
@@ -171,7 +178,7 @@ bool MNEEventList::writeFif(const std::filesystem::path& path, int offset) const
         tag.kind = FIFF_MNE_EVENT_COMMENTS;
         tag.type = FIFFT_BYTE;
         tag.next = FIFFV_NEXT_SEQ;
-        tag.append(comments);
+        tag.assign(std::as_bytes(std::span(comments)));
         stream->write_tag(tag);
     }
     stream->end_block(FIFFB_MNE_EVENTS);

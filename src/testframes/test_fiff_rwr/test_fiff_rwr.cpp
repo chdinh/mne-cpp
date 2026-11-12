@@ -18,6 +18,8 @@
 
 #include <base/log.h>
 
+#include <algorithm>
+
 #include <fiff/fiff.h>
 #include <fiff/fiff_dig_point_set.h>
 #include <mne/mne_forward_solution.h>
@@ -470,7 +472,7 @@ void TestFiffRWR::readsFromAByteStream()
         const std::optional<FiffTag> pathTag = byPath.read_tag(entry.pos);
         QVERIFY(pathTag);
         QCOMPARE(tag->kind, pathTag->kind);
-        QCOMPARE(QByteArray(tag->data(), tag->size()), QByteArray(pathTag->data(), pathTag->size()));
+        QVERIFY(std::ranges::equal(tag->bytes(), pathTag->bytes()));
     }
 
     FiffCov cov;
@@ -515,7 +517,7 @@ void TestFiffRWR::opensAndStartsFilesByPath()
     const std::optional<FiffTag> again = in->read_tag(in->dir()[1].pos);
     QVERIFY(again);
     QCOMPARE(again->kind, firstTag->kind);
-    QCOMPARE(static_cast<const QByteArray&>(*again), static_cast<const QByteArray&>(*firstTag));
+    QVERIFY(std::ranges::equal(again->bytes(), firstTag->bytes()));
     QVERIFY(in->reopen());
 
     // A file started by path is complete on disk once the stream is closed, before the stream goes away

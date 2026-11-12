@@ -63,7 +63,7 @@ std::vector<int> fiff_get_matrix_dims(const FiffTag& tag)
 {
     int ndim;
     int* dims;
-    unsigned int tsize = tag.size();
+    const std::size_t tsize = tag.size();
     /*
    * Initial checks
    */
@@ -147,7 +147,8 @@ std::vector<int> FiffSparseMatrix::fiff_get_matrix_sparse_dims(const FiffTag& ta
 std::unique_ptr<FiffSparseMatrix> FiffSparseMatrix::fiff_get_float_sparse_matrix(const FiffTag& tag)
 {
     int m, n, nz;
-    int cod, correct_size;
+    int cod;
+    std::size_t correct_size;
 
     if (fiff_type_fundamental(tag.type) != FIFFT_MATRIX ||
         fiff_type_base(tag.type) != FIFFT_FLOAT ||

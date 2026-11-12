@@ -132,7 +132,7 @@ void FiffStreamThread::parseCommand(const FiffTag& p_pTag)
             //
             // Set Client Alias
             //
-            m_sDataClientAlias = QString(p_pTag.mid(4, p_pTag.size() - 4));
+            m_sDataClientAlias = QString::fromUtf8(reinterpret_cast<const char*>(p_pTag.data()) + 4, static_cast<qsizetype>(p_pTag.size() - 4));
             qInfo("FiffStreamClient (ID %d): new alias = '%s'\r\n", m_iDataClientId, m_sDataClientAlias.toUtf8().constData());
         } else if (t_iCmd == MNE_RT_GET_CLIENT_ID) {
             //

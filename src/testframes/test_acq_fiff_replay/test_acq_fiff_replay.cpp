@@ -130,7 +130,7 @@ bool writeFixture(const QString& path, fiff_int_t type, fiff_int_t lastType = -1
         if (b == 4 && lastType != -1) {
             type = lastType;
         }
-        const int size = type == FIFFT_DAU_PACK16 || type == FIFFT_SHORT ? 2 : (type == FIFFT_DOUBLE ? 8 : 4);
+        const std::size_t size = type == FIFFT_DAU_PACK16 || type == FIFFT_SHORT ? 2U : (type == FIFFT_DOUBLE ? 8U : 4U);
         if (b == 2) {
             const fiff_int_t one = 1;
             out->write_int(FIFF_DATA_SKIP, &one);
@@ -140,8 +140,8 @@ bool writeFixture(const QString& path, fiff_int_t type, fiff_int_t lastType = -1
         tag.kind = FIFF_DATA_BUFFER;
         tag.type = type;
         tag.next = FIFFV_NEXT_SEQ;
-        tag.resize(kBuffer * kChannels * size);
-        char* at = tag.data();
+        tag.resize(std::size_t{kBuffer} * std::size_t{kChannels} * size);
+        std::byte* at = tag.data();
         for (int s = b * kBuffer; s < (b + 1) * kBuffer; ++s) {
             for (int c = 0; c < kChannels; ++c, at += size) {
                 const double v = storedValue(type, s, c);

@@ -138,8 +138,8 @@ private:
             tag.kind = FIFF_DATA_BUFFER;
             tag.type = type;
             tag.next = FIFFV_NEXT_SEQ;
-            tag.resize(static_cast<int>(buffer.size()) * size);
-            char* at = tag.data();
+            tag.resize(static_cast<std::size_t>(buffer.size() * size));
+            std::byte* at = tag.data();
             for (Eigen::Index s = 0; s < buffer.cols(); ++s) {
                 for (Eigen::Index c = 0; c < buffer.rows(); ++c, at += size) {
                     if (size == 2) {

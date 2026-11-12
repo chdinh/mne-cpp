@@ -20,6 +20,8 @@
 #include <fiff/fiff_constants.h>
 #include <base/log.h>
 
+#include <algorithm>
+
 //=============================================================================================================
 // QT INCLUDES
 //=============================================================================================================
@@ -157,7 +159,7 @@ int main(int argc, char* argv[])
 
         bool dataMatch = false;
         if (sizeMatch && tag1 && tag2) {
-            dataMatch = (*tag1 == *tag2);
+            dataMatch = std::ranges::equal(tag1->bytes(), tag2->bytes());
         }
 
         bool isMatch = kindMatch && typeMatch && sizeMatch && dataMatch;

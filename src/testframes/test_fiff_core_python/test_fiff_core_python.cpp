@@ -79,6 +79,7 @@
 #include <Eigen/Geometry>
 #include <Eigen/SparseCore>
 
+#include <cstring>
 #include <fstream>
 #include <map>
 
@@ -1272,10 +1273,10 @@ void TestFiffCorePython::sparse_createAndConvert()
     const auto sparseTag = [](fiff_int_t type, const QList<float>& v, const QList<int>& inds, const QList<int>& ptrs, int ndim = 2) {
         FiffTag tag;
         tag.type = type;
-        QByteArray bytes(reinterpret_cast<const char*>(v.constData()), v.size() * sizeof(float));
         const QList<int> tail = QList<int>(inds) << ptrs << static_cast<int>(v.size()) << 2 << 3 << ndim;
-        bytes.append(reinterpret_cast<const char*>(tail.constData()), tail.size() * sizeof(int));
-        static_cast<QByteArray&>(tag) = bytes;
+        tag.resize(v.size() * sizeof(float) + tail.size() * sizeof(int));
+        std::memcpy(tag.data(), v.constData(), v.size() * sizeof(float));
+        std::memcpy(tag.data() + v.size() * sizeof(float), tail.constData(), tail.size() * sizeof(int));
         return tag;
     };
     const QList<float> values{1.5f, -2.0f, 4.0f};
@@ -1298,9 +1299,8 @@ void TestFiffCorePython::sparse_createAndConvert()
     const auto denseTag = [](fiff_int_t type, int nValues, const QList<int>& tail) {
         FiffTag tag;
         tag.type = type;
-        QByteArray bytes(nValues * 4, '\0');
-        bytes.append(reinterpret_cast<const char*>(tail.constData()), tail.size() * sizeof(int));
-        static_cast<QByteArray&>(tag) = bytes;
+        tag.resize(nValues * 4 + tail.size() * sizeof(int));
+        std::memcpy(tag.data() + nValues * 4, tail.constData(), tail.size() * sizeof(int));
         return tag;
     };
     qint32 ndim = -1;

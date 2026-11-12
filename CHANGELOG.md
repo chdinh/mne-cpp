@@ -296,6 +296,15 @@ aliases; replace the old spelling as below.
   `newFileAtPath` signal with `clear()`, a `QFileSystemWatcher` on
   `directory()`, and `new_files()` in its `directoryChanged` handler.
   The fiff library no longer runs moc.
+- `FiffTag` is no longer a `QByteArray`: it holds its payload in a
+  `std::vector<std::byte>`, with `data()` (now `std::byte*`), `size()`
+  (`std::size_t`), `empty()`, `resize()`, `bytes()` (a `std::span`) and
+  `assign(span)`. `fiff_tag.h` no longer includes Qt. Migration:
+  `tag.append(ptr, n)` becomes `tag.assign(std::as_bytes(std::span(values)))`,
+  `tag.left(n)` becomes `tag.bytes().first(n)`, `*a == *b` becomes
+  `std::ranges::equal(a->bytes(), b->bytes())`, `QString(tag.data())` becomes
+  `QString::fromStdString(tag.toString())`, and `char* p = tag.data()` becomes
+  `std::byte* p = tag.data()`.
 - `FiffStream::read_rt_tag` is gone: nothing called it, and the real-time
   server reads its socket with `read_tag_info(false)` and `read_tag_data`.
 - `fiff/fiff.h`, `connectivity/connectivity.h` and `mne/mne.h` are umbrella
