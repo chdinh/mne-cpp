@@ -39,11 +39,10 @@ for (int c = 0; c < sel.nchan; ++c) {
 }
 
 const int ns = 25;
-Matrix<float, Dynamic, Dynamic, RowMajor> segment(sel.nchan, ns);
-std::vector<float*> rows{segment.row(0).data(), segment.row(1).data(), segment.row(2).data()};
-mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, ns, rows.data()); // calibrated, across a buffer boundary
+MNERawData::RowMajorMatrixXf segment(sel.nchan, ns);
+mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, segment); // calibrated, across a buffer boundary
 const double eegRaw = segment(1, 0);
-mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, ns, rows.data());
+mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
 const double eegFilt = segment(1, 0);
 
 // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
@@ -53,7 +52,7 @@ proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
-mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, ns, rows.data());
+mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);
 const double eegProj = segment(1, 0);
 ```
 

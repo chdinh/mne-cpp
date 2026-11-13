@@ -41,11 +41,10 @@ for (int c = 0; c < sel.nchan; ++c) {
 }
 
 const int ns = 25;
-Matrix<float, Dynamic, Dynamic, RowMajor> segment(sel.nchan, ns);
-std::vector<float*> rows{segment.row(0).data(), segment.row(1).data(), segment.row(2).data()};
-mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, ns, rows.data()); // calibrated, across a buffer boundary
+MNERawData::RowMajorMatrixXf segment(sel.nchan, ns);
+mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, segment); // calibrated, across a buffer boundary
 const double eegRaw = segment(1, 0);
-mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, ns, rows.data());
+mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
 const double eegFilt = segment(1, 0);
 
 // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
@@ -55,7 +54,7 @@ proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
-mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, ns, rows.data());
+mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);
 const double eegProj = segment(1, 0);
 ```
 
@@ -139,7 +138,7 @@ Apply CTF compensation to a loaded raw data buffer if its compensation status di
 
 ---
 
-### pick_data(sel, firsts, ns, picked)
+### pick_data(sel, firsts, picked)
 
 Extract raw data samples for selected channels (including derived channels) with compensation applied, zero-padding or edge-extending as needed at boundaries.
 
@@ -151,11 +150,8 @@ Extract raw data samples for selected channels (including derived channels) with
 - **firsts** : *int*
   First sample index (absolute).
 
-- **ns** : *int*
-  Number of samples to extract.
-
-- **picked** : *float ***
-  Array of per-channel data vectors (pre-allocated).
+- **picked** : *Eigen::Ref&lt; RowMajorMatrixXf &gt;*
+  One row per selected channel (or per channel without a selection) and one column per sample; a buffer with the wrong number of rows is refused.
 
 **Returns:**
 
@@ -163,7 +159,7 @@ Extract raw data samples for selected channels (including derived channels) with
 
 ---
 
-### pick_data_proj(sel, firsts, ns, picked)
+### pick_data_proj(sel, firsts, picked)
 
 Extract raw data with SSP projection applied to each time sample before channel selection.
 
@@ -175,11 +171,8 @@ Extract raw data with SSP projection applied to each time sample before channel 
 - **firsts** : *int*
   First sample index (absolute).
 
-- **ns** : *int*
-  Number of samples to extract.
-
-- **picked** : *float ***
-  Array of per-channel data vectors (pre-allocated).
+- **picked** : *Eigen::Ref&lt; RowMajorMatrixXf &gt;*
+  One row per selected channel (or per channel without a selection) and one column per sample; a buffer with the wrong number of rows is refused.
 
 **Returns:**
 
@@ -202,7 +195,7 @@ Load a single filter-sized buffer by picking projected unfiltered data with tape
 
 ---
 
-### pick_data_filt(sel, firsts, ns, picked)
+### pick_data_filt(sel, firsts, picked)
 
 Pick filtered data for a channel selection by loading filter buffers, applying the frequency-domain filter per channel (skipping stimulus channels), and accumulating overlapping results.
 
@@ -214,11 +207,8 @@ Pick filtered data for a channel selection by loading filter buffers, applying t
 - **firsts** : *int*
   First sample index (absolute).
 
-- **ns** : *int*
-  Number of samples to extract.
-
-- **picked** : *float ***
-  Array of per-channel data vectors (pre-allocated).
+- **picked** : *Eigen::Ref&lt; RowMajorMatrixXf &gt;*
+  One row per selected channel (or per channel without a selection) and one column per sample; a buffer with the wrong number of rows is refused.
 
 **Returns:**
 
