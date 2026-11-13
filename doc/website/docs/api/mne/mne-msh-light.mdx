@@ -25,18 +25,7 @@ Single light source with position, color, and state for 3-D surface rendering.
 
 ### MNEMshLight()
 
-Constructs the [`MNEMshLight`](/docs/api/mne/mne-msh-light).
-
----
-
-### MNEMshLight(p_mneMshLight)
-
-Copy Constructs of the [`MNEMshLight`](/docs/api/mne/mne-msh-light).
-
-**Parameters:**
-
-- **p_mneMshLight** : *const MNEMshLight &*
-  Light to copy.
+Constructs a switched-off light at the origin.
 
 ---
 
@@ -46,8 +35,8 @@ Constructs the [`MNEMshLight`](/docs/api/mne/mne-msh-light).
 
 **Parameters:**
 
-- **state** : *int*
-  Non-zero to switch the light on.
+- **state** : *bool*
+  Whether the light is switched on.
 
 - **posX** : *float*
   Light position x coordinate.
@@ -66,12 +55,6 @@ Constructs the [`MNEMshLight`](/docs/api/mne/mne-msh-light).
 
 - **diffZ** : *float*
   Diffuse intensity, blue component.
-
----
-
-### ~MNEMshLight()
-
-Destroys the [`MNEMshLight`](/docs/api/mne/mne-msh-light).
 
 ---
 
