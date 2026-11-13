@@ -29,27 +29,24 @@ Named vector - vector specification with a channel list.
 
 ---
 
-### pick(names, nnames, require_all, res)
+### pick(pick_names, require_all, res)
 
 Pick elements from this named vector by name matching, writing them into a result vector ordered according to the supplied name list.
 
 **Parameters:**
 
-- **names** : *const StringList &*
-  List of names to pick.
-
-- **nnames** : *int*
-  Number of names in the list.
+- **pick_names** : *std::span&lt; const std::string &gt;*
+  Names to pick; a name that is not present picks zero.
 
 - **require_all** : *bool*
   If true, fail when any name is not found.
 
 - **res** : *Eigen::Ref&lt; Eigen::VectorXf &gt;*
-  Output vector (must have at least nnames elements).
+  One value per name in `pick_names`.
 
 **Returns:**
 
-- *int* — OK on success, FAIL on error.
+- *bool* — false if this vector has no names, `res` has the wrong size, or a required name is missing.
 
 ---
 
