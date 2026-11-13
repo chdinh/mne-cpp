@@ -351,6 +351,8 @@ aliases; replace the old spelling as below.
   bad channels through `FiffStream::read_bad_channels` on the already open
   stream instead of reopening the file, and the bad-channel names are logged
   on the same line as the count instead of one log message per name.
+- `MNERawInfo::ndir` is gone; it always equalled `rawDir.size()`. Migration:
+  use `rawDir.size()`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

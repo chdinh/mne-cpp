@@ -52,7 +52,6 @@ MNERawInfo::MNERawInfo()
 , highpass(0.0f)
 , buf_size(0)
 , maxshield_data(0)
-, ndir(0)
 {
 }
 
@@ -310,10 +309,9 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
     FiffStream stream(name);
 
     int res = FIFF_FAIL;
-    std::vector<FiffChInfo> chs;      /* Channel info */
-    FiffCoordTrans trans;             /* The coordinate transformation */
-    std::unique_ptr<FiffId> id;       /* Measurement id */
-    std::vector<FiffDirEntry> rawDir; /* Directory of raw data tags */
+    std::vector<FiffChInfo> chs; /* Channel info */
+    FiffCoordTrans trans;        /* The coordinate transformation */
+    std::unique_ptr<FiffId> id;  /* Measurement id */
     std::unique_ptr<MNERawInfo> info;
     int nchan = 0;     /* Number of channels */
     float sfreq = 0.0; /* Sampling frequency */
@@ -363,10 +361,6 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
         return FIFF_FAIL;
     }
     /*
-        * Get the raw directory
-        */
-    rawDir = raw->dir;
-    /*
        * Ready to put everything together
        */
     info = std::make_unique<MNERawInfo>();
@@ -410,8 +404,7 @@ int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std
         stream.close();
         return FIFF_FAIL;
     }
-    info->rawDir = rawDir;
-    info->ndir = raw->nent();
+    info->rawDir = raw->dir;
     infop = std::move(info);
     res = FIFF_OK;
 

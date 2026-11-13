@@ -1217,16 +1217,11 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     std::unique_ptr<MNERawData> data;
 
     auto stream = std::make_unique<FiffStream>(name);
-    //    fiffFile           in    = NULL;
 
-    FiffDirEntry dir;
-    std::vector<FiffDirEntry> dir0;
-    //    fiffTagRec   tag;
     std::optional<FiffTag> t_pTag;
-    int k, nbuf, ndir;
+    int k, nbuf;
     int current_dir0 = 0;
 
-    //    tag.data = NULL;
 
     if (MNERawInfo::load(name, allow_maxshield, info) == FAIL)
         return nullptr;
@@ -1248,8 +1243,6 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
             ch.unit_mul = 0;
         }
     }
-    //    if ((in = fiff_open(name)) == NULL)
-    //        goto bad;
     if (!stream->open())
         return nullptr;
 
@@ -1313,38 +1306,28 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     /*
        * Buffers
        */
-    dir0 = data->info->rawDir;
-    ndir = data->info->ndir;
+    const std::vector<FiffDirEntry>& dir0 = data->info->rawDir;
     /*
        * Take into account the first sample
        */
     if (dir0[current_dir0].kind == FIFF_FIRST_SAMPLE) {
-        //        if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
-        //            goto bad;
         if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
             return nullptr;
         data->first_samp = *t_pTag->to_int();
         current_dir0++;
-        ndir--;
     }
     if (dir0[current_dir0].kind == FIFF_DATA_SKIP) {
         int nsamp_skip;
-        //        if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
-        //            goto bad;
         if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
             return nullptr;
         nsamp_skip = data->info->buf_size * (*t_pTag->to_int());
         BASELIB::Log::info("Data skip of {} samples in the beginning\n", nsamp_skip);
         current_dir0++;
-        ndir--;
         if (dir0[current_dir0].kind == FIFF_FIRST_SAMPLE) {
-            //            if (fiff_read_this_tag(in->fd,dir0->pos,&tag) == FIFF_FAIL)
-            //                goto bad;
             if (t_pTag = data->stream->read_tag(dir0[current_dir0].pos); !t_pTag)
                 return nullptr;
             data->first_samp += *t_pTag->to_int();
             current_dir0++;
-            ndir--;
         }
         if (omit_skip) {
             data->omit_samp = data->first_samp + nsamp_skip;
@@ -1363,14 +1346,13 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     /*
        * Figure out the buffers
        */
-    // ndir counts the entries after the consumed leading ones (MNE-C advances dir0 instead).
-    for (k = current_dir0, nbuf = 0; k < current_dir0 + ndir; k++)
+    for (k = current_dir0, nbuf = 0; k < static_cast<int>(dir0.size()); k++)
         if (dir0[k].kind == FIFF_DATA_BUFFER ||
             dir0[k].kind == FIFF_DATA_SKIP)
             nbuf++;
     data->bufs.resize(nbuf);
 
-    for (k = current_dir0, nbuf = 0; k < current_dir0 + ndir; k++)
+    for (k = current_dir0, nbuf = 0; k < static_cast<int>(dir0.size()); k++)
         if (dir0[k].kind == FIFF_DATA_BUFFER ||
             dir0[k].kind == FIFF_DATA_SKIP) {
             data->bufs[nbuf].ns = 0;
@@ -1383,7 +1365,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         }
     data->nsamp = 0;
     for (k = 0; k < nbuf; k++) {
-        dir = data->bufs[k].ent;
+        const FiffDirEntry& dir = data->bufs[k].ent;
         if (dir.kind == FIFF_DATA_BUFFER) {
             if (dir.type == FIFFT_DAU_PACK16 || dir.type == FIFFT_SHORT)
                 data->bufs[k].ns = dir.size / (data->info->nchan * sizeof(fiff_dau_pack16_t));
@@ -1398,8 +1380,6 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
                 return nullptr;
             }
         } else if (dir.kind == FIFF_DATA_SKIP) {
-            //            if (fiff_read_this_tag(in->fd,dir->pos,&tag) == FIFF_FAIL)
-            //                goto bad;
             if (t_pTag = data->stream->read_tag(dir.pos); !t_pTag)
                 return nullptr;
             data->bufs[k].ns = data->info->buf_size * (*t_pTag->to_int());
@@ -1408,7 +1388,6 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
         data->bufs[k].lasts = data->bufs[k].firsts + data->bufs[k].ns - 1;
         data->nsamp += data->bufs[k].ns;
     }
-    //    FREE_36(tag.data);
     /*
        * Set up the first sample values
        */
