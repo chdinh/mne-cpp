@@ -30,6 +30,7 @@
 #include "mne_global.h"
 
 #include <filesystem>
+#include <ostream>
 #include <string>
 #include <vector>
 #include "mne_surface_or_volume.h"
@@ -213,7 +214,7 @@ public:
                                     float limit,
                                     const FIFFLIB::FiffCoordTrans& mri_head_t,
                                     std::vector<std::unique_ptr<MNESourceSpace>>& spaces,
-                                    QTextStream* filtered);
+                                    std::ostream* filtered);
 
     static void filter_source_space(FilterThreadArg* arg);
 
@@ -221,7 +222,7 @@ public:
                                     const std::filesystem::path& bemfile,
                                     const FIFFLIB::FiffCoordTrans& mri_head_t,
                                     std::vector<std::unique_ptr<MNESourceSpace>>& spaces,
-                                    QTextStream* filtered,
+                                    std::ostream* filtered,
                                     bool use_threads);
 
     static int read_source_spaces(const std::filesystem::path& name,

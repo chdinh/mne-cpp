@@ -40,7 +40,7 @@
 
 #include <QSharedPointer>
 #include <memory>
-#include <QTextStream>
+#include <ostream>
 
 #include <memory>
 
@@ -84,7 +84,7 @@ public:
     std::unique_ptr<FIFFLIB::FiffCoordTrans> mri_head_t; /**< MRI-to-head coordinate transformation. */
     std::weak_ptr<MNESurface> surf;                      /**< Non-owning reference to the inner skull BEM surface (owned by the caller). */
     float limit;                                         /**< Distance limit for filtering (meters). */
-    QTextStream* filtered;                               /**< Optional stream to log omitted point locations (may be NULL). */
+    std::ostream* filtered;                              /**< Optional stream to log omitted point locations (may be NULL). */
     int stat;                                            /**< Status code indicating whether filtering succeeded. */
 
     // ### OLD STRUCT ###

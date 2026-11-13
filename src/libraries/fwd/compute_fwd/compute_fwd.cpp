@@ -15,6 +15,7 @@
 //=============================================================================================================
 
 #include "compute_fwd.h"
+#include <fstream>
 #include <memory>
 
 #include <vector>
@@ -31,7 +32,6 @@
 
 #include <QCoreApplication>
 #include <QFile>
-#include <QTextStream>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -101,8 +101,7 @@ void ComputeFwd::initFwd()
     m_mri_id = FiffId();
     m_meas_id.clear();
 
-    QFile filteredFile;
-    std::unique_ptr<QTextStream> filteredStream;
+    std::ofstream filteredFile;
 
     m_eegModel.reset();
     m_bemModel.reset();
@@ -408,19 +407,18 @@ void ComputeFwd::initFwd()
 
     if (m_pSettings->filter_spaces) {
         if (!m_pSettings->mindistoutname.empty()) {
-            filteredFile.setFileName(QString::fromStdString(m_pSettings->mindistoutname));
-            if (!filteredFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            filteredFile.open(BASELIB::pathFromUtf8(m_pSettings->mindistoutname));
+            if (!filteredFile) {
                 BASELIB::Log::critical("{}", m_pSettings->mindistoutname);
                 return;
             }
-            filteredStream = std::make_unique<QTextStream>(&filteredFile);
             BASELIB::Log::info("Omitted source space points will be output to : {}", m_pSettings->mindistoutname);
         }
         MNESourceSpace::filter_source_spaces(m_pSettings->mindist,
                                              BASELIB::pathFromUtf8(m_pSettings->bemname),
                                              m_mri_head_t,
                                              m_spaces,
-                                             filteredStream.get(), m_pSettings->use_threads);
+                                             filteredFile.is_open() ? &filteredFile : nullptr, m_pSettings->use_threads);
     }
     m_bInitialized = true;
 }

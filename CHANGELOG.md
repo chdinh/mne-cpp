@@ -329,6 +329,12 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `MNESourceSpace::filter_source_spaces` writes the omitted points to a
+  `std::ostream`, one `%10.3f %10.3f %10.3f` line per point like MNE-C (the
+  `--mindistout` file of the forward solution padded its separators too). With
+  threads, both source spaces wrote to the stream at once and their lines could
+  interleave; each now logs into its own buffer, so the file matches a serial
+  run.
 - `MNEProjOp::report`, `MNEProjOp::report_data` and `MNESssData::print` write
   to a `std::ostream` instead of a `QTextStream` and print exactly what MNE-C
   prints (`%-10s` channel names, `%10.5g` weights). The library logs these

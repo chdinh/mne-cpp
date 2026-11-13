@@ -3,7 +3,10 @@
 //   Christoph Dinh <christoph.dinh@mne-cpp.org>
 
 #include <QtTest/QtTest>
+#include <charconv>
+#include <format>
 #include <memory>
+#include <sstream>
 #include <QBuffer>
 #include <QTemporaryDir>
 #include <QDir>
@@ -61,12 +64,49 @@ class TestMneDataTypes : public QObject
 private:
     QString dataPath;
 
+private slots:
     void initTestCase()
     {
         dataPath = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data";
     }
 
-private slots:
+    void sourceSpace_filterLogsOmittedPoints()
+    {
+        const QString src = dataPath + "/subjects/sample/bem/sample-oct-6-src.fif";
+        const QString bem = dataPath + "/subjects/sample/bem/sample-5120-bem.fif";
+        const QString trans = dataPath + "/MEG/sample/all-trans.fif";
+        if (!QFile::exists(src) || !QFile::exists(bem) || !QFile::exists(trans))
+            QSKIP("Sample source space, BEM or transformation not found");
+        const FiffCoordTrans mriHeadT(trans.toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+
+        // The threaded filter must log the same points in the same order as the serial one.
+        std::string logs[2];
+        for (const bool threads : {false, true}) {
+            std::vector<std::unique_ptr<MNESourceSpace>> spaces;
+            QCOMPARE(MNESourceSpace::read_source_spaces(src.toStdU16String(), spaces), 0);
+            std::ostringstream log;
+            QCOMPARE(MNESourceSpace::filter_source_spaces(0.005f, bem.toStdU16String(), mriHeadT, spaces, &log, threads), 0);
+            QCOMPARE(spaces[0]->nuse + spaces[1]->nuse, 3732 + 3766);
+            logs[threads] = log.str();
+        }
+        QCOMPARE(logs[1], logs[0]);
+
+        // MNE-C mne_filter_source_spaces: one "%10.3f %10.3f %10.3f\n" line per omitted point, in mm
+        std::istringstream lines(logs[0]);
+        int count = 0;
+        for (std::string line; std::getline(lines, line); ++count) {
+            QCOMPARE(line.size(), std::size_t{32});
+            float xyz[3] = {};
+            for (std::size_t c = 0; c < 3; ++c) {
+                const std::string_view field = std::string_view(line).substr(11 * c, 10);
+                const char* first = field.data() + field.find_first_not_of(' ');
+                QVERIFY2(std::from_chars(first, field.data() + field.size(), xyz[c]).ec == std::errc(), line.c_str());
+            }
+            QCOMPARE(std::format("{:10.3f} {:10.3f} {:10.3f}", xyz[0], xyz[1], xyz[2]), line);
+        }
+        QCOMPARE(count, 2 * 4098 - 3732 - 3766);
+    }
+
     //=========================================================================
     // MNESourceSpaces
     //=========================================================================

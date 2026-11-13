@@ -47,6 +47,8 @@
 #include <QDebug>
 
 #include <cstring>
+#include <format>
+#include <sstream>
 #include <memory>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
@@ -1415,7 +1417,7 @@ std::unique_ptr<MNESourceSpace> MNESourceSpace::make_volume_source_space(const M
 
 //=============================================================================================================
 
-int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, const FiffCoordTrans& mri_head_t, std::vector<std::unique_ptr<MNESourceSpace>>& spaces, QTextStream* filtered) /* Provide a list of filtered points here */
+int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, const FiffCoordTrans& mri_head_t, std::vector<std::unique_ptr<MNESourceSpace>>& spaces, std::ostream* filtered)
 /*
      * Remove all source space points closer to the surface than a given limit
      */
@@ -1464,9 +1466,7 @@ int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, co
                     s->inuse[p1] = 0;
                     s->nuse--;
                     if (filtered)
-                        *filtered << qSetFieldWidth(10) << qSetRealNumberPrecision(3) << Qt::fixed
-                                  << 1000 * r1[X] << " " << 1000 * r1[Y] << " " << 1000 * r1[Z] << "\n"
-                                  << qSetFieldWidth(0);
+                        *filtered << std::format("{:10.3f} {:10.3f} {:10.3f}\n", 1000 * r1[X], 1000 * r1[Y], 1000 * r1[Z]);
                 } else if (limit > 0.0) {
                     /*
                         * Check the distance limit
@@ -1482,9 +1482,7 @@ int MNESourceSpace::filter_source_spaces(const MNESurface& surf, float limit, co
                         s->inuse[p1] = 0;
                         s->nuse--;
                         if (filtered)
-                            *filtered << qSetFieldWidth(10) << qSetRealNumberPrecision(3) << Qt::fixed
-                                      << 1000 * r1[X] << " " << 1000 * r1[Y] << " " << 1000 * r1[Z] << "\n"
-                                      << qSetFieldWidth(0);
+                            *filtered << std::format("{:10.3f} {:10.3f} {:10.3f}\n", 1000 * r1[X], 1000 * r1[Y], 1000 * r1[Z]);
                     }
                 }
             }
@@ -1533,9 +1531,7 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
                 a->s->inuse[p1] = 0;
                 a->s->nuse--;
                 if (a->filtered)
-                    *a->filtered << qSetFieldWidth(10) << qSetRealNumberPrecision(3) << Qt::fixed
-                                 << 1000 * r1[X] << " " << 1000 * r1[Y] << " " << 1000 * r1[Z] << "\n"
-                                 << qSetFieldWidth(0);
+                    *a->filtered << std::format("{:10.3f} {:10.3f} {:10.3f}\n", 1000 * r1[X], 1000 * r1[Y], 1000 * r1[Z]);
             } else if (a->limit > 0.0) {
                 /*
          * Check the distance limit
@@ -1551,9 +1547,7 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
                     a->s->inuse[p1] = 0;
                     a->s->nuse--;
                     if (a->filtered)
-                        *a->filtered << qSetFieldWidth(10) << qSetRealNumberPrecision(3) << Qt::fixed
-                                     << 1000 * r1[X] << " " << 1000 * r1[Y] << " " << 1000 * r1[Z] << "\n"
-                                     << qSetFieldWidth(0);
+                        *a->filtered << std::format("{:10.3f} {:10.3f} {:10.3f}\n", 1000 * r1[X], 1000 * r1[Y], 1000 * r1[Z]);
                 }
             }
         }
@@ -1568,7 +1562,7 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
 
 //=============================================================================================================
 
-int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::path& bemfile, const FiffCoordTrans& mri_head_t, std::vector<std::unique_ptr<MNESourceSpace>>& spaces, QTextStream* filtered, bool use_threads)
+int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::path& bemfile, const FiffCoordTrans& mri_head_t, std::vector<std::unique_ptr<MNESourceSpace>>& spaces, std::ostream* filtered, bool use_threads)
 /*
           * Remove all source space points closer to the surface than a given limit
           */
@@ -1622,6 +1616,8 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
         * Calculate all (both) source spaces simultaneously
         */
         std::vector<FilterThreadArg*> args;
+        // Each thread logs into its own buffer; they are joined in space order like the serial path.
+        std::vector<std::ostringstream> logs(spaces.size());
 
         std::vector<std::unique_ptr<FilterThreadArg>> arg_owners;
         for (k = 0; k < nspace; k++) {
@@ -1630,7 +1626,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
             a_ptr->mri_head_t = std::make_unique<FiffCoordTrans>(mri_head_t);
             a_ptr->surf = surf;
             a_ptr->limit = limit;
-            a_ptr->filtered = filtered;
+            a_ptr->filtered = filtered ? &logs[static_cast<std::size_t>(k)] : nullptr;
             args.push_back(a_ptr.get());
             arg_owners.push_back(std::move(a_ptr));
         }
@@ -1638,6 +1634,10 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
         * Ready to start the threads & Wait for them to complete
         */
         QtConcurrent::blockingMap(args, filter_source_space);
+        if (filtered) {
+            for (const std::ostringstream& log : logs)
+                *filtered << log.view();
+        }
 
         for (k = 0; k < nspace; k++) {
             spaces[k]->rearrange_source_space();
