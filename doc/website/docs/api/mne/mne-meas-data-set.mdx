@@ -82,11 +82,11 @@ Refactored: mne_get_values_from_data (mne_get_values.c)
 
 ## Static Methods
 
-### getValuesFromChannelData(time, integ, data, nsamp, nch, tmin, sfreq, use_abs, value)
+### getValuesFromChannelData(time, integ, data, tmin, sfreq, use_abs, value)
 
 Pick signal values at a specified time point using linear interpolation (channel-major layout).
 
-Reads from a channel-by-time data matrix (data[channel][sample]).
+Reads from a channel-by-time data matrix (one row per channel, one column per sample).
 
 Refactored: mne_get_values_from_data_ch (mne_get_values.c)
 
@@ -98,14 +98,8 @@ Refactored: mne_get_values_from_data_ch (mne_get_values.c)
 - **integ** : *float*
   Integration window width (seconds).
 
-- **data** : *float ***
-  Data matrix (channel-by-time layout).
-
-- **nsamp** : *int*
-  Number of time samples.
-
-- **nch** : *int*
-  Number of channels.
+- **data** : *const Eigen::Ref&lt; const Eigen::Matrix&lt; float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor &gt; &gt; &*
+  Data matrix (channels x samples).
 
 - **tmin** : *float*
   Time of first sample (seconds).
@@ -116,8 +110,8 @@ Refactored: mne_get_values_from_data_ch (mne_get_values.c)
 - **use_abs** : *bool*
   If true, take absolute values before averaging.
 
-- **value** : *float **
-  Output array of picked values (nch elements).
+- **value** : *Eigen::Ref&lt; Eigen::VectorXf &gt;*
+  Picked values, one per channel; must have data.rows() elements.
 
 **Returns:**
 
