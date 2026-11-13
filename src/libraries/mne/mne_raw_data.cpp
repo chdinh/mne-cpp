@@ -27,7 +27,7 @@
 #include <base/string_utils.h>
 #include <fiff/fiff_ch_name.h>
 
-#include <QTextStream>
+#include <sstream>
 
 #include <Eigen/Core>
 #include <unsupported/Eigen/FFT>
@@ -1337,8 +1337,9 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     data->sss = MNESssData::read(name);
     if (data->sss && data->sss->job != FIFFV_SSS_JOB_NOTHING && data->sss->comp_info.size() > 0) {
         BASELIB::Log::info("SSS data read from {} :\n", data->filename);
-        QTextStream errStream(stderr);
-        data->sss->print(errStream);
+        std::ostringstream report;
+        data->sss->print(report);
+        BASELIB::Log::info("{}", report.str());
     } else {
         BASELIB::Log::info("No SSS data in {}\n", data->filename);
         data->sss.reset();

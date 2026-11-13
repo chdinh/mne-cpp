@@ -26,6 +26,7 @@
 #include "mne_global.h"
 
 #include <filesystem>
+#include <ostream>
 #include <string>
 #include <vector>
 #include "mne_named_matrix.h"
@@ -45,7 +46,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QTextStream>
 
 #include <memory>
 
@@ -247,7 +247,7 @@ public:
      * @param[in]      list_data  If true, print full vector data.
      * @param[in]      exclude    Channel names to exclude from the display.
      */
-    void report_data(QTextStream& out, const std::string& tag, bool list_data, const StringList& exclude);
+    void report_data(std::ostream& out, const std::string& tag, bool list_data, const StringList& exclude) const;
 
     /**
      * Write a one-line-per-item summary of all projection items to a text
@@ -256,7 +256,7 @@ public:
      * @param[in, out] out   The text stream to write to.
      * @param[in]      tag   Prefix string printed before each line.
      */
-    void report(QTextStream& out, const std::string& tag);
+    void report(std::ostream& out, const std::string& tag) const;
 
     //=========================================================================================================
     /**

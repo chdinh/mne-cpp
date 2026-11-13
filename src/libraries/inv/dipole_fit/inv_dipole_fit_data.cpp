@@ -53,6 +53,8 @@
 
 #include <QFile>
 #include <QTextStream>
+
+#include <sstream>
 #include <QCoreApplication>
 
 #include <cmath>
@@ -709,8 +711,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     if (res->proj && res->proj->nitems > 0) {
         BASELIB::Log::info("Final projection operator is:");
         {
-            QTextStream errStream(stderr);
-            res->proj->report(errStream, QStringLiteral("\t").toStdString());
+            std::ostringstream report;
+            res->proj->report(report, "\t");
+            BASELIB::Log::info("{}", report.str());
         }
 
         if (res->proj->assign_channels(res->ch_names, res->nmeg + res->neeg) == FAIL)

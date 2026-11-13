@@ -1135,11 +1135,10 @@ private slots:
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
         projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "ReportTest");
 
-        // Report to a string via QTextStream
-        QString output;
-        QTextStream stream(&output);
-        projOp.report(stream, QStringLiteral("test_proj").toStdString());
-        QVERIFY(!output.isEmpty());
+        std::ostringstream out;
+        projOp.report(out, "test_proj");
+        // MNE-C mne_proj_op_add_item: items are active, and one naming no EEG/MEG channel counts as MEG
+        QCOMPARE(out.str(), std::string("test_proj# 1 : ReportTest : 1 vecs : 2 chs MEG active\n"));
     }
 
     //=========================================================================

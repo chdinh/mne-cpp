@@ -19,7 +19,9 @@
 //=============================================================================================================
 
 #include "mne_sss_data.h"
+#include <format>
 #include <memory>
+#include <ostream>
 #include <base/log.h>
 #include <fiff/fiff_file.h>
 #include <fiff/fiff_constants.h>
@@ -33,7 +35,6 @@
 //=============================================================================================================
 
 #include <QFile>
-#include <QTextStream>
 #include <QDebug>
 
 //=============================================================================================================
@@ -224,14 +225,13 @@ const char* mne_coord_frame_name_1(int frame)
 
 //=============================================================================================================
 
-void MNESssData::print(QTextStream& out) const
+void MNESssData::print(std::ostream& out) const
 {
     int j, p, q, n;
 
     out << "job         : " << this->job << "\n";
     out << "coord frame : " << mne_coord_frame_name_1(this->coord_frame) << "\n";
-    out << "origin      : " << qSetFieldWidth(6) << qSetRealNumberPrecision(1) << Qt::fixed
-        << 1000 * this->origin[0] << " " << 1000 * this->origin[1] << " " << 1000 * this->origin[2] << qSetFieldWidth(0) << " mm\n";
+    out << std::format("origin      : {:6.1f} {:6.1f} {:6.1f} mm\n", 1000 * this->origin[0], 1000 * this->origin[1], 1000 * this->origin[2]);
     out << "in order    : " << this->in_order << "\n";
     out << "out order   : " << this->out_order << "\n";
     out << "nchan       : " << this->nchan << "\n";

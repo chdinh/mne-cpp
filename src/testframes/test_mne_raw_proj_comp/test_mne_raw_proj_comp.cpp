@@ -354,12 +354,25 @@ void TestMneRawProjComp::sssData_printOutput()
     sss.out_order = 1;
     // comp_info must match total expansion components: in_order=2 → 3+5=8, out_order=1 → 3
     sss.comp_info = VectorXi::Ones(11);
+    sss.origin[0] = 0.0123f;
+    sss.origin[1] = -0.0045f;
+    sss.origin[2] = 0.04f;
+    sss.in_nuse = 8;
+    sss.out_nuse = 3;
 
-    QString output;
-    QTextStream stream(&output);
-    sss.print(stream);
-    // Should produce some non-empty output
-    QVERIFY(!output.isEmpty());
+    std::ostringstream out;
+    sss.print(out);
+    // MNE-C mne_print_sss_data
+    QCOMPARE(out.str(), std::string("job         : 1\n"
+                                    "coord frame : head\n"
+                                    "origin      :   12.3   -4.5   40.0 mm\n"
+                                    "in order    : 2\n"
+                                    "out order   : 1\n"
+                                    "nchan       : 306\n"
+                                    "ncomp       : 11\n"
+                                    "in nuse     : 8\n"
+                                    "out nuse    : 3\n"
+                                    "comps       : 111;11111//111\n"));
 }
 
 //=============================================================================================================
@@ -666,10 +679,9 @@ void TestMneRawProjComp::projOp_report()
     auto proj = MNEProjOp::read(rawPath().toStdU16String());
     QVERIFY(proj != nullptr);
 
-    QString output;
-    QTextStream stream(&output);
-    proj->report(stream, "Test");
-    QVERIFY(!output.isEmpty());
+    std::ostringstream out;
+    proj->report(out, "Test");
+    QVERIFY(out.str().starts_with("Test# 1 : "));
 }
 
 void TestMneRawProjComp::projOp_combine()

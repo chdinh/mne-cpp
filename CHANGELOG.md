@@ -329,6 +329,12 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `MNEProjOp::report`, `MNEProjOp::report_data` and `MNESssData::print` write
+  to a `std::ostream` instead of a `QTextStream` and print exactly what MNE-C
+  prints (`%-10s` channel names, `%10.5g` weights). The library logs these
+  reports through `BASELIB::Log` instead of writing to `stderr`. Migration:
+  `QTextStream s(&str); op.report(s, tag);` becomes
+  `std::ostringstream s; op.report(s, tag);`.
 - `mne_doc_shots` no longer captures a window before its pending timers have
   run: when grabbing a frame was slower than the settle time, a repaint that
   fell due during the grab was skipped, so screenshots on a loaded machine

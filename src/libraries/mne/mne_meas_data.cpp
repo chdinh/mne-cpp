@@ -35,7 +35,7 @@
 #include <string_view>
 #include <vector>
 
-#include <QTextStream>
+#include <sstream>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -291,15 +291,17 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
                 BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
-                QTextStream errStream(stderr);
-                target.proj->report(errStream, "\t\t");
+                std::ostringstream report;
+                target.proj->report(report, "\t\t");
+                BASELIB::Log::info("{}", report.str());
             }
         } else {
             target.proj = MNEProjOp::read(name);
             if (target.proj && target.proj->nitems > 0) {
                 BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
-                QTextStream errStream(stderr);
-                target.proj->report(errStream, "\t\t");
+                std::ostringstream report;
+                target.proj->report(report, "\t\t");
+                BASELIB::Log::info("{}", report.str());
             }
             target.comp = MNECTFCompDataSet::read(name);
             if (!target.comp) {

@@ -32,7 +32,7 @@
 #include "mne_named_matrix.h"
 
 #include <QFile>
-#include <QTextStream>
+#include <sstream>
 #include <QDebug>
 
 #include <Eigen/Core>
@@ -416,13 +416,13 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read(const std::filesystem::path& name)
 
 //=============================================================================================================
 
-void MNEProjOp::report_data(QTextStream& out, const std::string& tag, bool list_data, const StringList& exclude)
+void MNEProjOp::report_data(std::ostream& out, const std::string& tag, bool list_data, const StringList& exclude) const
 /*
      * Output info about the projection operator
      */
 {
     int p, q;
-    MNENamedMatrix* vecs;
+    const MNENamedMatrix* vecs;
     bool found;
 
     if (nitems <= 0) {
@@ -433,30 +433,29 @@ void MNEProjOp::report_data(QTextStream& out, const std::string& tag, bool list_
     for (int k = 0; k < nitems; k++) {
         const auto& it = items[k];
         if (list_data && !tag.empty())
-            out << tag.c_str() << "\n";
+            out << tag << "\n";
         if (!tag.empty())
-            out << tag.c_str();
-        out << "# " << (k + 1) << " : " << it.desc.c_str() << " : " << it.nvec << " vecs : " << it.vecs->ncol << " chs "
+            out << tag;
+        out << "# " << (k + 1) << " : " << it.desc << " : " << it.nvec << " vecs : " << it.vecs->ncol << " chs "
             << (it.has_meg ? "MEG" : "EEG") << " "
             << (it.active ? "active" : "idle") << "\n";
         if (list_data && !tag.empty())
-            out << tag.c_str() << "\n";
+            out << tag << "\n";
         if (list_data) {
             vecs = items[k].vecs.get();
 
             for (q = 0; q < vecs->ncol; q++) {
-                out << qSetFieldWidth(10) << Qt::left << QString::fromStdString(vecs->collist[q]) << qSetFieldWidth(0);
+                out << std::format("{:<10}", vecs->collist[q]);
                 out << (q < vecs->ncol - 1 ? " " : "\n");
             }
             for (p = 0; p < vecs->nrow; p++)
                 for (q = 0; q < vecs->ncol; q++) {
                     found = FIFFLIB::has_channel(exclude, vecs->collist[q]);
-                    out << qSetFieldWidth(10) << qSetRealNumberPrecision(5) << Qt::forcepoint
-                        << (found ? 0.0 : vecs->data(p, q)) << qSetFieldWidth(0) << " ";
+                    out << std::format("{:10.5g} ", found ? 0.0 : static_cast<double>(vecs->data(p, q)));
                     out << (q < vecs->ncol - 1 ? " " : "\n");
                 }
             if (list_data && !tag.empty())
-                out << tag.c_str() << "\n";
+                out << tag << "\n";
         }
     }
     return;
@@ -464,7 +463,7 @@ void MNEProjOp::report_data(QTextStream& out, const std::string& tag, bool list_
 
 //=============================================================================================================
 
-void MNEProjOp::report(QTextStream& out, const std::string& tag)
+void MNEProjOp::report(std::ostream& out, const std::string& tag) const
 {
     report_data(out, tag, false, StringList());
 }
@@ -713,8 +712,9 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
         } else {
             BASELIB::Log::info("Loaded projection from {}:", BASELIB::utf8FromPath(projname));
             {
-                QTextStream errStream(stderr);
-                one->report(errStream, QStringLiteral("\t").toStdString());
+                std::ostringstream report;
+                one->report(report, "\t");
+                BASELIB::Log::info("{}", report.str());
             }
             if (!all)
                 all = std::make_unique<MNEProjOp>();
@@ -736,8 +736,9 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
             if (one) {
                 BASELIB::Log::info("Average EEG reference projection added:");
                 {
-                    QTextStream errStream(stderr);
-                    one->report(errStream, QStringLiteral("\t").toStdString());
+                    std::ostringstream report;
+                    one->report(report, "\t");
+                    BASELIB::Log::info("{}", report.str());
                 }
                 if (!all)
                     all = std::make_unique<MNEProjOp>();

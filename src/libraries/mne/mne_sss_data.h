@@ -32,6 +32,7 @@
 
 #include <filesystem>
 #include <memory>
+#include <ostream>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -43,7 +44,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QTextStream>
 #include <QDebug>
 
 //=============================================================================================================
@@ -123,9 +123,9 @@ public:
      * Output the SSS information for debugging purposes.
      * Refactored: mne_print_sss_data (mne_sss_data.c)
      *
-     * @param[in] out      The text stream to write the SSS diagnostics to (e.g. a QTextStream wrapping stderr).
+     * @param[in] out      The stream to write the SSS diagnostics to.
      */
-    void print(QTextStream& out) const;
+    void print(std::ostream& out) const;
 
 public:
     int job;                   /**< Value of FIFF_SSS_JOB tag. */

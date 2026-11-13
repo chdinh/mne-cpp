@@ -318,13 +318,14 @@ void TestMneRawDataPython::projectsSegment()
     QCOMPARE(proj->items[0].kind, FIFFV_MNE_PROJ_ITEM_EEG_AVREF);
     QCOMPARE(proj->items[0].vecs->ncol, static_cast<int>(eeg.size()));
     QVERIFY(std::fabs(proj->items[0].vecs->data(0, 0) - 1.0 / std::sqrt(static_cast<double>(eeg.size()))) < 1e-7);
-    QString listing;
-    QTextStream out(&listing);
-    proj->report_data(out, QStringLiteral("#").toStdString(), true, {eeg[1].ch_name});
+    std::ostringstream out;
+    proj->report_data(out, "#", true, {eeg[1].ch_name});
+    const QString listing = QString::fromStdString(out.str());
     QVERIFY2(listing.startsWith(QStringLiteral("#\n## 1 : Average EEG reference : 1 vecs : %1 chs EEG active\n#\n").arg(eeg.size())), qPrintable(listing));
-    QVERIFY(listing.contains(QString::fromStdString(eeg[0].ch_name)));
-    // The excluded channel's weight is listed as zero
-    QCOMPARE(listing.count(QStringLiteral(" 0.0000 ")), 1);
+    // MNE-C mne_proj_op_report_data: names "%-10s", weights "%10.5g "; the excluded channel's weight is zero
+    QVERIFY(listing.contains(QString::fromStdString(std::format("{:<10} {:<10} ", eeg[0].ch_name, eeg[1].ch_name))));
+    const std::string weight = std::format("{:10.5g}  ", 1.0 / std::sqrt(static_cast<double>(eeg.size())));
+    QVERIFY2(listing.contains(QString::fromStdString(weight + "         0  " + weight)), qPrintable(listing));
     QVERIFY(MNEProjOp::makeProjection({}, meg, static_cast<int>(meg.size()), proj));
     QVERIFY(!proj);
     // Projectors that touch none of the channels are dropped, and an unreadable file fails
