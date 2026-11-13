@@ -367,6 +367,10 @@ aliases; replace the old spelling as below.
   is zero-initialised (light off at the origin, vertex 0, empty scale); their
   members used to hold whatever was in memory. The `MNEMshLight` constructor
   takes `state` as a `bool`.
+- `MNEProjOp` tells MEG, EEG and stimulus channels apart by the name prefix
+  (`MEG...`, `EEG...`, `STI...`) like MNE-C. It used to match the text anywhere
+  in the name, so a projector zeroed its weights on channels such as `REF_EEG`
+  or `TRIG_STI` and could classify an item as EEG.
 - `InvDipoleFitData::print_fields` writes to a `std::ostream` instead of a
   `QTextStream`; `inv_dipole_fit_data.h` no longer includes Qt's text stream.
 - `MNESourceSpace::filter_source_spaces` writes the omitted points to a

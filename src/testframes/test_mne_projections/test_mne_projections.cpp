@@ -256,6 +256,30 @@ private slots:
         QVERIFY(rc >= 0);
     }
 
+    void testProjOpChannelGroupsMatchNamePrefixes()
+    {
+        // Like MNE-C, only names starting with MEG / EEG / STI select a channel group
+        const StringList names = {"MEG 0111", "MEG 0112", "REF_EEG", "TRIG_STI"};
+        Eigen::MatrixXf data(1, 4);
+        data << 0.5f, 0.5f, 0.5f, 0.5f;
+        MNENamedMatrix meg(*MNENamedMatrix::build(1, 4, {"v1"}, names, data));
+        MNEProjOp op;
+        op.add_item(&meg, FIFFV_PROJ_ITEM_FIELD, "SSP");
+        QVERIFY(op.items[0].has_meg);
+        QVERIFY(!op.items[0].has_eeg);
+        op.assign_channels(names, static_cast<int>(names.size()));
+        QCOMPARE(op.make_proj(), 0);
+        QCOMPARE(op.nvec, 1);
+        QVERIFY((op.proj_data.row(0).array().abs() > 0.4f).all());
+
+        const StringList others = {"REF_EEG 1", "REF_EEG 2"};
+        MNENamedMatrix ref(*MNENamedMatrix::build(1, 2, {"v1"}, others, Eigen::MatrixXf::Ones(1, 2)));
+        MNEProjOp unnamed;
+        unnamed.add_item(&ref, FIFFV_PROJ_ITEM_FIELD, "SSP");
+        QVERIFY(unnamed.items[0].has_meg);
+        QVERIFY(!unnamed.items[0].has_eeg);
+    }
+
     void testProjOpProjectVector()
     {
         MNEProjOp op;

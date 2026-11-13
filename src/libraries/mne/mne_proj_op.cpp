@@ -31,13 +31,12 @@
 #include "mne_named_vector.h"
 #include "mne_named_matrix.h"
 
-#include <QFile>
 #include <sstream>
-#include <QDebug>
 
 #include <Eigen/Core>
 #include <Eigen/SVD>
 
+#include <string_view>
 #include <vector>
 
 constexpr int FAIL = -1;
@@ -117,9 +116,9 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const std:
         new_item.has_eeg = true;
     } else {
         for (int k = 0; k < vecs->ncol; k++) {
-            if ((vecs->collist[k].find("EEG") != std::string::npos)) //strstr(vecs->collist[k],"EEG") == vecs->collist[k])
+            if (vecs->collist[k].starts_with("EEG"))
                 new_item.has_eeg = true;
-            if ((vecs->collist[k].find("MEG") != std::string::npos)) //strstr(vecs->collist[k],"MEG") == vecs->collist[k])
+            if (vecs->collist[k].starts_with("MEG"))
                 new_item.has_meg = true;
         }
         if (!new_item.has_meg && !new_item.has_eeg) {
@@ -488,10 +487,10 @@ int MNEProjOp::assign_channels(const StringList& list, int nlist)
 namespace
 {
 
-void clear_channel_group(Eigen::Ref<Eigen::VectorXf> data, const StringList& ch_names, int nnames, const QString& prefix)
+void clear_channel_group(Eigen::Ref<Eigen::VectorXf> data, const StringList& ch_names, int nnames, std::string_view prefix)
 {
     for (int k = 0; k < nnames; k++)
-        if (QString::fromStdString(ch_names[static_cast<std::size_t>(k)]).contains(prefix))
+        if (ch_names[static_cast<std::size_t>(k)].starts_with(prefix))
             data[k] = 0.0;
 }
 
@@ -622,8 +621,8 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
                 proj_data(nvec, k) = 0.0;
             else
                 proj_data(nvec, k) = vv_meg_mat(p, k);
-            clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, nch, "EEG");
         }
+        clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, nch, "EEG");
     }
     for (p = 0; p < nvec_eeg; p++, nvec++) {
         if (sing_eeg_vec[p] / sing_eeg_vec[0] < USE_LIMIT)
@@ -633,14 +632,14 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
                 proj_data(nvec, k) = 0.0;
             else
                 proj_data(nvec, k) = vv_eeg_mat(p, k);
-            clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, nch, "MEG");
         }
+        clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, nch, "MEG");
     }
     /*
      * Make sure that the stimulus channels are not modified
      */
     for (k = 0; k < nch; k++)
-        if ((names[k].find("STI") != std::string::npos)) {
+        if (names[k].starts_with("STI")) {
             for (p = 0; p < nvec; p++)
                 proj_data(p, k) = 0.0;
         }
