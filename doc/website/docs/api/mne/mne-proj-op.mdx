@@ -47,10 +47,9 @@ const double eegRaw = segment(1, 0);
 mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
 const double eegFilt = segment(1, 0);
 
-// The file stores its 4 SSP projectors as inactive; makeProjection switches them on
-std::unique_ptr<MNEProjOp> proj;
-MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
-proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
+// The file stores its 4 SSP projectors as inactive; make_projection switches them on
+std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
+proj->assign_channels(mneRaw->ch_names);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
@@ -80,7 +79,7 @@ Destructor.
 
 Release the compiled projector data.
 
-Clears `proj_data`, `names`, `nch`, and `nvec` without touching the underlying projection items.
+Clears `proj_data`, `names` and `nvec` without touching the underlying projection items.
 
 ---
 
@@ -154,17 +153,14 @@ Copies all items, their vectors, descriptions, and active states.
 
 ---
 
-### affect(list, nlist)
+### affect(list)
 
 Count how many active projection vectors affect a given list of channel names.
 
 **Parameters:**
 
-- **list** : *const StringList &*
-  List of channel names to test.
-
-- **nlist** : *int*
-  Number of channel names.
+- **list** : *std::span&lt; const std::string &gt;*
+  Channel names to test.
 
 **Returns:**
 
@@ -172,23 +168,18 @@ Count how many active projection vectors affect a given list of channel names.
 
 ---
 
-### affect_chs(chs, nChan)
+### affect_chs(chs)
 
 Count how many active projection vectors affect the given channels.
 
-Convenience wrapper that extracts channel names and delegates to `affect()`.
-
 **Parameters:**
 
-- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
-  Channel information list.
-
-- **nChan** : *int*
-  Number of channels.
+- **chs** : *std::span&lt; const [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+  Channels to test.
 
 **Returns:**
 
-- *int* — Number of affecting projection vectors (0 if none or nch == 0).
+- *int* — Number of affecting projection vectors (0 if none).
 
 ---
 
@@ -248,21 +239,14 @@ Convenience wrapper around `report_data()`.
 
 ---
 
-### assign_channels(list, nlist)
+### assign_channels(list)
 
 Assign a channel name list to this projection operator, invalidating any previously compiled projector.
 
 **Parameters:**
 
-- **list** : *const StringList &*
-  Channel name list.
-
-- **nlist** : *int*
-  Number of channels.
-
-**Returns:**
-
-- *int* — OK on success.
+- **list** : *std::span&lt; const std::string &gt;*
+  Channel names, in data order.
 
 ---
 
@@ -330,7 +314,7 @@ Apply this projection operator to a covariance matrix from both sides: C' = (I -
 
 ## Static Methods
 
-### create_average_eeg_ref(chs, nch)
+### create_average_eeg_ref(chs)
 
 Create an average EEG reference projector.
 
@@ -338,15 +322,12 @@ Builds a uniform-weight vector ( $1/\sqrt\{N_\{\text\{EEG\}\}\}$) across all EEG
 
 **Parameters:**
 
-- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
-  Channel information list.
-
-- **nch** : *int*
-  Number of channels.
+- **chs** : *std::span&lt; const [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+  Channels to search for EEG channels.
 
 **Returns:**
 
-- *std::unique_ptr&lt; [MNEProjOp](/docs/api/mne/mne-proj-op) &gt;* — A new projection operator, or NULL if no EEG channels are found. Caller takes ownership.
+- *std::unique_ptr&lt; [MNEProjOp](/docs/api/mne/mne-proj-op) &gt;* — A new projection operator, or nullptr if no EEG channels are found.
 
 ---
 
@@ -385,31 +366,25 @@ Convenience wrapper that opens the file and delegates to `read_from_node()`.
 
 ---
 
-### makeProjection(projnames, chs, nch, result)
+### make_projection(projnames, chs)
 
 Load and combine SSP projection operators from files for the selected channels.
 
-Reads projection items from each file in `projnames`, and if EEG channels are present adds an average EEG reference projector when none is found. Returns nullptr if the resulting projector does not affect any of the given channels.
+Reads projection items from each file in `projnames`, and if EEG channels are present adds an average EEG reference projector when none is found.
 
 Refactored: make_projection (dipole_fit_setup.c)
 
 **Parameters:**
 
 - **projnames** : *const std::vector&lt; std::filesystem::path &gt; &*
-  List of FIFF file paths containing projection data.
+  FIFF files containing projection data.
 
-- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
-  Channel information list.
-
-- **nch** : *int*
-  Number of channels.
-
-- **result** : *std::unique_ptr&lt; [MNEProjOp](/docs/api/mne/mne-proj-op) &gt; &*
-  The combined projection operator (nullptr when no projection is needed).
+- **chs** : *std::span&lt; const [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+  The selected channels.
 
 **Returns:**
 
-- *bool* — true on success, false on read error.
+- *[Expected](/docs/api/base/expected)&lt; std::unique_ptr&lt; [MNEProjOp](/docs/api/mne/mne-proj-op) &gt; &gt;* — The combined projection operator, nullptr when it would not affect any of `chs`, or the error of a file that cannot be read.
 
 ---
 
@@ -427,10 +402,9 @@ Refactored: make_projection (dipole_fit_setup.c)
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 290"
-// The file stores its 4 SSP projectors as inactive; makeProjection switches them on
-std::unique_ptr<MNEProjOp> proj;
-MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
-proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
+// The file stores its 4 SSP projectors as inactive; make_projection switches them on
+std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
+proj->assign_channels(mneRaw->ch_names);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
@@ -440,6 +414,7 @@ const double eegProj = segment(1, 0);
 // numpy port of MNE-C's overlap-add 40 Hz lowpass: -1.06402e-09; apply_proj(): -4.10778e-10
 ok &= expect(mneRaw->first_samp == 12900 && mneRaw->nsamp == 6007 && rawInfo.nchan == 376 && mneRaw->badlist.size() == 2 && firstBuffer.firsts == 12900 && mneRaw->bufs.size() > 1,
              "MNERawData/MNERawInfo/MNERawBufDef: buffer directory of the sample recording like mne.io.read_raw_fif");
+ok &= expect(sel.pick.minCoeff() >= 0 && near(eegRaw, -1.0122332562412516e-09, 1e-5) && near(eegProj, -4.107782047805238e-10, 1e-4) && near(eegFilt, -1.064022285676407e-09, 1e-3),
 ````
 
 ## Authors of this file

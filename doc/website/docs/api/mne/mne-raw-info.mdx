@@ -45,10 +45,9 @@ const double eegRaw = segment(1, 0);
 mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
 const double eegFilt = segment(1, 0);
 
-// The file stores its 4 SSP projectors as inactive; makeProjection switches them on
-std::unique_ptr<MNEProjOp> proj;
-MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
-proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
+// The file stores its 4 SSP projectors as inactive; make_projection switches them on
+std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
+proj->assign_channels(mneRaw->ch_names);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);

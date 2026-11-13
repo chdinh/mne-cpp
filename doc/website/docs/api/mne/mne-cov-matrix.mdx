@@ -31,9 +31,8 @@ for (const std::string& name : ave.info.ch_names) {
 }
 ave = ave.pick_channels(megNames);
 const int nMeg = static_cast<int>(megNames.size());
-std::unique_ptr<MNEProjOp> aveProj;
-MNEProjOp::makeProjection({aveFile.fileName().toStdU16String()}, ave.info.chs, nMeg, aveProj);
-aveProj->assign_channels(megNames, nMeg);
+std::unique_ptr<MNEProjOp> aveProj = MNEProjOp::make_projection({aveFile.fileName().toStdU16String()}, ave.info.chs).value();
+aveProj->assign_channels(megNames);
 aveProj->make_proj();
 VectorXf x = ave.data.col(200).cast<float>(); // t = 133 ms
 aveProj->project_vector(x, true);
@@ -390,7 +389,7 @@ Compute the linear index into a symmetric lower-triangular packed storage array 
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 328"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 326"
 auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
 auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);

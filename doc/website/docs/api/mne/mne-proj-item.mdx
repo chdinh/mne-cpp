@@ -49,10 +49,9 @@ const double eegRaw = segment(1, 0);
 mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
 const double eegFilt = segment(1, 0);
 
-// The file stores its 4 SSP projectors as inactive; makeProjection switches them on
-std::unique_ptr<MNEProjOp> proj;
-MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
-proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
+// The file stores its 4 SSP projectors as inactive; make_projection switches them on
+std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
+proj->assign_channels(mneRaw->ch_names);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
@@ -124,7 +123,7 @@ Destructor.
 
 ---
 
-### affect(list, nlist)
+### affect(list)
 
 Test whether this projection item affects any of the listed channels.
 
@@ -132,15 +131,12 @@ Iterates over `list` and checks if any channel name matches a column in the proj
 
 **Parameters:**
 
-- **list** : *const StringList &*
+- **list** : *std::span&lt; const std::string &gt;*
   Channel names to test against.
-
-- **nlist** : *int*
-  Number of channel names in `list`.
 
 **Returns:**
 
-- *int* — `true` (non-zero) if this item affects at least one channel, `false` (0) otherwise.
+- *bool* — Whether this item affects at least one channel.
 
 ---
 
@@ -157,9 +153,9 @@ Iterates over `list` and checks if any channel name matches a column in the proj
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 292"
-MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
-proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
+````cpp title="src/examples/ex_mne_api/main.cpp, line 291"
+std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
+proj->assign_channels(mneRaw->ch_names);
 proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
