@@ -337,6 +337,14 @@ aliases; replace the old spelling as below.
   written past its end. Migration: `std::vector<float*> rows{...};
   raw.pick_data(sel, first, ns, rows.data())` becomes
   `MNERawData::RowMajorMatrixXf values(nchan, ns); raw.pick_data(sel, first, values)`.
+- `MNEMeasDataSet::getValuesFromChannelData` reads a row-major channels x
+  samples Eigen matrix and writes an `Eigen::Ref<Eigen::VectorXf>` instead of
+  taking `float** data, int nsamp, int nch` and a `float*` output. An output
+  vector without one element per channel is refused with -1 and a warning.
+  Migration: `getValuesFromChannelData(t, integ, rows, ns, nch, tmin, sfreq,
+  abs, out)` becomes `getValuesFromChannelData(t, integ, values, tmin, sfreq,
+  abs, out)`, with `values` a `MNERawData::RowMajorMatrixXf` and `out` an
+  `Eigen::VectorXf(nch)`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

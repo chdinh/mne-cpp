@@ -355,10 +355,6 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
     Eigen::VectorXf one(nchan);
 
     MNERawData::RowMajorMatrixXf segment(nchan, length);
-    std::vector<float*> rows(nchan);
-    for (int i = 0; i < nchan; ++i)
-        rows[i] = segment.row(i).data();
-    float** data = rows.data();
 
     InvEcd dip;
     InvEcdSet set;
@@ -382,7 +378,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
             picks = time * sfreq - start;
             stime = start / sfreq;
         }
-        if (MNEMeasDataSet::getValuesFromChannelData(time, integ, data, length, nchan, stime, sfreq, false, one.data()) < 0) {
+        if (MNEMeasDataSet::getValuesFromChannelData(time, integ, segment, stime, sfreq, false, one) < 0) {
             BASELIB::Log::warning("Cannot pick time: {:8.3f} s", time);
             continue;
         }

@@ -13,6 +13,7 @@
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 
+#include <base/log.h>
 #include <math/linalg.h>
 #include <mne/mne_source_spaces.h>
 #include <mne/mne_hemisphere.h>
@@ -1601,16 +1602,24 @@ private slots:
         float tmin = 0.0f;
         float sfreq = 10.0f; // tstep = 0.1
 
-        float ch0[5] = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f};
-        float ch1[5] = {10.0f, 20.0f, 30.0f, 40.0f, 50.0f};
-        float* data2d[2] = {ch0, ch1};
+        Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> data(nch, nsamp);
+        data << 1.0f, 2.0f, 3.0f, 4.0f, 5.0f,
+            10.0f, 20.0f, 30.0f, 40.0f, 50.0f;
 
-        std::vector<float> values(nch);
-        int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.2f, 0.0f, data2d, nsamp, nch, tmin, sfreq, false, values.data());
+        Eigen::VectorXf values(nch);
+        int ok = MNEMeasDataSet::getValuesFromChannelData(0.2f, 0.0f, data, tmin, sfreq, false, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(values[0] - 3.0f) < 1e-5f);
         QVERIFY(qAbs(values[1] - 30.0f) < 1e-5f);
+
+        // An output vector that does not hold one value per channel is refused, not overrun
+        for (const int size : {nch - 1, nch + 1}) {
+            Eigen::VectorXf wrong = Eigen::VectorXf::Constant(size, -7.0f);
+            BASELIB::LogCapture log;
+            QCOMPARE(MNEMeasDataSet::getValuesFromChannelData(0.2f, 0.0f, data, tmin, sfreq, false, wrong), -1);
+            QCOMPARE(log.count(BASELIB::Log::Level::Warning, "values"), 1);
+            QVERIFY((wrong.array() == -7.0f).all());
+        }
     }
 
     //=========================================================================
@@ -1947,14 +1956,14 @@ private slots:
         float ch0[10];
         for (int i = 0; i < nsamp; ++i)
             ch0[i] = static_cast<float>(i * 10); // 0,10,...,90
-        float* data2d[1] = {ch0};
+        const Eigen::Map<const Eigen::RowVectorXf> data(ch0, nsamp);
 
-        float value;
+        Eigen::VectorXf value(nch);
         // time=0.15, sfreq=10 → s1=1.5, n1=1, f1=0.5 → interp sample 1 and 2
         int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.15f, 0.0f, data2d, nsamp, nch, 0.0f, 10.0f, false, &value);
+            0.15f, 0.0f, data, 0.0f, 10.0f, false, value);
         QCOMPARE(ok, 0);
-        QVERIFY(qAbs(value - 15.0f) < 1e-4f);
+        QVERIFY(qAbs(value[0] - 15.0f) < 1e-4f);
     }
 
     void measDataSet_channelDataInterpUseAbs()
@@ -1963,14 +1972,14 @@ private slots:
         float ch0[10];
         for (int i = 0; i < nsamp; ++i)
             ch0[i] = static_cast<float>((i % 2 == 0) ? -10 : 10);
-        float* data2d[1] = {ch0};
+        const Eigen::Map<const Eigen::RowVectorXf> data(ch0, nsamp);
 
-        float value;
+        Eigen::VectorXf value(nch);
         // time=0.05, sfreq=10 → interp between sample 0 and 1
         int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.05f, 0.0f, data2d, nsamp, nch, 0.0f, 10.0f, true, &value);
+            0.05f, 0.0f, data, 0.0f, 10.0f, true, value);
         QCOMPARE(ok, 0);
-        QVERIFY(qAbs(value - 10.0f) < 1e-4f);
+        QVERIFY(qAbs(value[0] - 10.0f) < 1e-4f);
     }
 
     //=========================================================================
@@ -1983,14 +1992,14 @@ private slots:
         float ch0[10];
         for (int i = 0; i < nsamp; ++i)
             ch0[i] = static_cast<float>(i);
-        float* data2d[1] = {ch0};
+        const Eigen::Map<const Eigen::RowVectorXf> data(ch0, nsamp);
 
-        float value;
+        Eigen::VectorXf value(nch);
         // sfreq=100, time=0.055, integ=0.005 → within one sample interval
         int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.055f, 0.005f, data2d, nsamp, nch, 0.0f, 100.0f, false, &value);
+            0.055f, 0.005f, data, 0.0f, 100.0f, false, value);
         QCOMPARE(ok, 0);
-        QVERIFY(qAbs(value - 5.5f) < 1e-3f);
+        QVERIFY(qAbs(value[0] - 5.5f) < 1e-3f);
     }
 
     void measDataSet_channelDataIntegWithinSampleUseAbs()
@@ -1999,13 +2008,13 @@ private slots:
         float ch0[10];
         for (int i = 0; i < nsamp; ++i)
             ch0[i] = static_cast<float>((i % 2 == 0) ? -i : i);
-        float* data2d[1] = {ch0};
+        const Eigen::Map<const Eigen::RowVectorXf> data(ch0, nsamp);
 
-        float value;
+        Eigen::VectorXf value(nch);
         int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.055f, 0.005f, data2d, nsamp, nch, 0.0f, 100.0f, true, &value);
+            0.055f, 0.005f, data, 0.0f, 100.0f, true, value);
         QCOMPARE(ok, 0);
-        QVERIFY(value >= 0.0f);
+        QVERIFY(value[0] >= 0.0f);
     }
 
     //=========================================================================
@@ -2018,14 +2027,14 @@ private slots:
         float ch0[10];
         for (int i = 0; i < nsamp; ++i)
             ch0[i] = static_cast<float>(i);
-        float* data2d[1] = {ch0};
+        const Eigen::Map<const Eigen::RowVectorXf> data(ch0, nsamp);
 
-        float value;
+        Eigen::VectorXf value(nch);
         // sfreq=100, time=0.05, integ=0.05 → multi-sample trapezoid
         int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.05f, 0.05f, data2d, nsamp, nch, 0.0f, 100.0f, false, &value);
+            0.05f, 0.05f, data, 0.0f, 100.0f, false, value);
         QCOMPARE(ok, 0);
-        QVERIFY(qAbs(value - 5.0f) < 1e-3f);
+        QVERIFY(qAbs(value[0] - 5.0f) < 1e-3f);
     }
 
     void measDataSet_channelDataIntegMultiSampleUseAbs()
@@ -2034,13 +2043,13 @@ private slots:
         float ch0[10];
         for (int i = 0; i < nsamp; ++i)
             ch0[i] = static_cast<float>((i % 2 == 0) ? -i : i);
-        float* data2d[1] = {ch0};
+        const Eigen::Map<const Eigen::RowVectorXf> data(ch0, nsamp);
 
-        float value;
+        Eigen::VectorXf value(nch);
         int ok = MNEMeasDataSet::getValuesFromChannelData(
-            0.05f, 0.05f, data2d, nsamp, nch, 0.0f, 100.0f, true, &value);
+            0.05f, 0.05f, data, 0.0f, 100.0f, true, value);
         QCOMPARE(ok, 0);
-        QVERIFY(value > 0.0f);
+        QVERIFY(value[0] > 0.0f);
     }
 
     //=========================================================================

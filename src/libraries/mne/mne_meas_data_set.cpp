@@ -155,10 +155,18 @@ int MNEMeasDataSet::getValuesAtTime(float time, float integ, int nch, bool use_a
 
 //=============================================================================================================
 
-int MNEMeasDataSet::getValuesFromChannelData(float time, float integ, float** data, int nsamp, int nch,
-                                             float tmin, float sfreq, bool use_abs, float* value)
+int MNEMeasDataSet::getValuesFromChannelData(float time, float integ,
+                                             const Eigen::Ref<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>& data,
+                                             float tmin, float sfreq, bool use_abs, Eigen::Ref<Eigen::VectorXf> value)
 {
     constexpr float EPS = 0.05f;
+    const auto nch = static_cast<int>(data.rows());
+    const auto nsamp = static_cast<int>(data.cols());
+
+    if (value.size() != data.rows()) {
+        BASELIB::Log::warning("Cannot pick channel values: the output holds {} values for {} channels", value.size(), nch);
+        return -1;
+    }
 
     for (int ch = 0; ch < nch; ch++) {
         float sum;
@@ -172,11 +180,11 @@ int MNEMeasDataSet::getValuesFromChannelData(float time, float integ, float** da
                 return -1;
             if (f1 < 1.0f) {
                 if (use_abs)
-                    sum = f1 * std::fabs(data[ch][n1]) + (1.0f - f1) * std::fabs(data[ch][n1 + 1]);
+                    sum = f1 * std::fabs(data(ch, n1)) + (1.0f - f1) * std::fabs(data(ch, n1 + 1));
                 else
-                    sum = f1 * data[ch][n1] + (1.0f - f1) * data[ch][n1 + 1];
+                    sum = f1 * data(ch, n1) + (1.0f - f1) * data(ch, n1 + 1);
             } else {
-                sum = use_abs ? std::fabs(data[ch][n1]) : data[ch][n1];
+                sum = use_abs ? std::fabs(data(ch, n1)) : data(ch, n1);
             }
         } else {
             float s1 = sfreq * (time - 0.5f * integ - tmin);
@@ -190,9 +198,9 @@ int MNEMeasDataSet::getValuesFromChannelData(float time, float integ, float** da
                 float f1 = s1 - n1;
                 float f2 = s2 - n1;
                 if (use_abs)
-                    sum = 0.5f * ((f1 + f2) * std::fabs(data[ch][n1 + 1]) + (2.0f - f1 - f2) * std::fabs(data[ch][n1]));
+                    sum = 0.5f * ((f1 + f2) * std::fabs(data(ch, n1 + 1)) + (2.0f - f1 - f2) * std::fabs(data(ch, n1)));
                 else
-                    sum = 0.5f * ((f1 + f2) * data[ch][n1 + 1] + (2.0f - f1 - f2) * data[ch][n1]);
+                    sum = 0.5f * ((f1 + f2) * data(ch, n1 + 1) + (2.0f - f1 - f2) * data(ch, n1));
             } else {
                 float f1 = n1 - s1;
                 float f2 = s2 - n2;
@@ -206,28 +214,28 @@ int MNEMeasDataSet::getValuesFromChannelData(float time, float integ, float** da
                 float width = 0.0f;
                 if (n2 > n1) {
                     if (use_abs) {
-                        sum = 0.5f * std::fabs(data[ch][n1]);
+                        sum = 0.5f * std::fabs(data(ch, n1));
                         for (int k = n1 + 1; k < n2; k++)
-                            sum += std::fabs(data[ch][k]);
-                        sum += 0.5f * std::fabs(data[ch][n2]);
+                            sum += std::fabs(data(ch, k));
+                        sum += 0.5f * std::fabs(data(ch, n2));
                     } else {
-                        sum = 0.5f * data[ch][n1];
+                        sum = 0.5f * data(ch, n1);
                         for (int k = n1 + 1; k < n2; k++)
-                            sum += data[ch][k];
-                        sum += 0.5f * data[ch][n2];
+                            sum += data(ch, k);
+                        sum += 0.5f * data(ch, n2);
                     }
                     width = static_cast<float>(n2 - n1);
                 }
                 if (use_abs) {
                     if (f1 != 0.0f)
-                        sum += 0.5f * f1 * (f1 * std::fabs(data[ch][n1 - 1]) + (2.0f - f1) * std::fabs(data[ch][n1]));
+                        sum += 0.5f * f1 * (f1 * std::fabs(data(ch, n1 - 1)) + (2.0f - f1) * std::fabs(data(ch, n1)));
                     if (f2 != 0.0f)
-                        sum += 0.5f * f2 * (f2 * std::fabs(data[ch][n2 + 1]) + (2.0f - f2) * std::fabs(data[ch][n2]));
+                        sum += 0.5f * f2 * (f2 * std::fabs(data(ch, n2 + 1)) + (2.0f - f2) * std::fabs(data(ch, n2)));
                 } else {
                     if (f1 != 0.0f)
-                        sum += 0.5f * f1 * (f1 * data[ch][n1 - 1] + (2.0f - f1) * data[ch][n1]);
+                        sum += 0.5f * f1 * (f1 * data(ch, n1 - 1) + (2.0f - f1) * data(ch, n1));
                     if (f2 != 0.0f)
-                        sum += 0.5f * f2 * (f2 * data[ch][n2 + 1] + (2.0f - f2) * data[ch][n2]);
+                        sum += 0.5f * f2 * (f2 * data(ch, n2 + 1) + (2.0f - f2) * data(ch, n2));
                 }
                 width += f1 + f2;
                 sum /= width;

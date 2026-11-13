@@ -1058,25 +1058,15 @@ void TestMneRawProjComp::measDataSet_getValuesFromChannelData()
     float tmin = -0.1f;
     float sfreq = 1000.0f;
 
-    // Allocate channel-major data
-    float** data = new float*[nch];
-    for (int c = 0; c < nch; c++) {
-        data[c] = new float[nsamp];
-        for (int s = 0; s < nsamp; s++) {
-            data[c][s] = static_cast<float>(c + 1) * 100.0f; // constant per channel
-        }
-    }
+    // Constant per channel
+    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> data(nch, nsamp);
+    data.row(0).setConstant(100.0f);
+    data.row(1).setConstant(200.0f);
 
-    float values[2];
-    int result = MNEMeasDataSet::getValuesFromChannelData(
-        0.0f, 0.0f, data, nsamp, nch, tmin, sfreq, false, values);
-    QCOMPARE(result, 0);
+    Eigen::VectorXf values(nch);
+    QCOMPARE(MNEMeasDataSet::getValuesFromChannelData(0.0f, 0.0f, data, tmin, sfreq, false, values), 0);
     QVERIFY(qAbs(values[0] - 100.0f) < 1.0f);
     QVERIFY(qAbs(values[1] - 200.0f) < 1.0f);
-
-    for (int c = 0; c < nch; c++)
-        delete[] data[c];
-    delete[] data;
 }
 
 //=============================================================================================================

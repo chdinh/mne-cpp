@@ -94,23 +94,22 @@ public:
     /**
      * Pick signal values at a specified time point using linear interpolation (channel-major layout).
      *
-     * Reads from a channel-by-time data matrix (data[channel][sample]).
+     * Reads from a channel-by-time data matrix (one row per channel, one column per sample).
      *
      * Refactored: mne_get_values_from_data_ch (mne_get_values.c)
      *
      * @param[in]  time     Target time point (seconds).
      * @param[in]  integ    Integration window width (seconds).
-     * @param[in]  data     Data matrix (channel-by-time layout).
-     * @param[in]  nsamp    Number of time samples.
-     * @param[in]  nch      Number of channels.
+     * @param[in]  data     Data matrix (channels x samples).
      * @param[in]  tmin     Time of first sample (seconds).
      * @param[in]  sfreq    Sampling frequency (Hz).
      * @param[in]  use_abs  If true, take absolute values before averaging.
-     * @param[out] value    Output array of picked values (nch elements).
+     * @param[out] value    Picked values, one per channel; must have data.rows() elements.
      * @return 0 on success, -1 on error.
      */
-    static int getValuesFromChannelData(float time, float integ, float** data, int nsamp, int nch,
-                                        float tmin, float sfreq, bool use_abs, float* value);
+    static int getValuesFromChannelData(float time, float integ,
+                                        const Eigen::Ref<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>& data,
+                                        float tmin, float sfreq, bool use_abs, Eigen::Ref<Eigen::VectorXf> value);
 
 public:
     std::string comment;        /**< Comment / description associated with this data set. */
