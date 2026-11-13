@@ -38,7 +38,7 @@ const bool projected = aveProj->make_proj() && aveProj->project_vector(x, true);
 
 auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
-auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
+auto noiseMeg = noise->pick_chs_omit(megNames, false, ave.info.chs);
 const bool covProjected = aveProj->apply_cov(*noiseMeg);
 noiseMeg->classify_channels(ave.info.chs, nMeg);
 noiseMeg->decompose_eigen(); // the 3 projected directions become zero eigenvalues
@@ -214,23 +214,20 @@ Revert a full (lower-triangle packed) covariance matrix to its diagonal elements
 
 ---
 
-### pick_chs_omit(new_names, new_ncov, omit_meg_eeg, chs)
+### pick_chs_omit(new_names, omit_meg_eeg, chs)
 
 Pick designated channels from this covariance matrix, optionally omitting MEG-EEG cross-correlations.
 
 **Parameters:**
 
-- **new_names** : *const StringList &*
+- **new_names** : *std::span&lt; const std::string &gt;*
   Names of channels to pick.
 
-- **new_ncov** : *int*
-  Number of channels to pick.
+- **omit_meg_eeg** : *bool*
+  If true, zero out MEG-EEG cross entries.
 
-- **omit_meg_eeg** : *int*
-  If non-zero, zero out MEG-EEG cross entries.
-
-- **chs** : *const std::vector&lt; [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt; &*
-  Channel information list (for MEG/EEG classification).
+- **chs** : *std::span&lt; const [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+  One channel info per name in `new_names` (for MEG/EEG classification); when empty, names starting with "MEG" are MEG channels.
 
 **Returns:**
 
@@ -391,7 +388,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 325"
 auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
-auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
+auto noiseMeg = noise->pick_chs_omit(megNames, false, ave.info.chs);
 const bool covProjected = aveProj->apply_cov(*noiseMeg);
 noiseMeg->classify_channels(ave.info.chs, nMeg);
 noiseMeg->decompose_eigen(); // the 3 projected directions become zero eigenvalues
