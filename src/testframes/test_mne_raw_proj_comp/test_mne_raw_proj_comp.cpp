@@ -219,7 +219,6 @@ void TestMneRawProjComp::filterDef_setAndReadFields()
 void TestMneRawProjComp::namedVector_defaultConstruction()
 {
     MNENamedVector nv;
-    QCOMPARE(nv.nvec, 0);
     QVERIFY(nv.names.empty());
     QCOMPARE(nv.data.size(), (Index)0);
 }
@@ -227,58 +226,40 @@ void TestMneRawProjComp::namedVector_defaultConstruction()
 void TestMneRawProjComp::namedVector_pickByName()
 {
     MNENamedVector nv;
-    nv.nvec = 4;
-    nv.names.push_back("MEG 001");
-    nv.names.push_back("MEG 002");
-    nv.names.push_back("EEG 001");
-    nv.names.push_back("EEG 002");
+    nv.names = {"MEG 001", "MEG 002", "EEG 001", "EEG 002"};
     nv.data.resize(4);
     nv.data << 1.0f, 2.0f, 3.0f, 4.0f;
 
-    StringList pickNames;
-    pickNames.push_back("MEG 001");
-    pickNames.push_back("EEG 002");
     VectorXf result(2);
-    int status = nv.pick(pickNames, 2, false, result);
-    QCOMPARE(status, 0);
-    QVERIFY(qAbs(result(0) - 1.0f) < 1e-6);
-    QVERIFY(qAbs(result(1) - 4.0f) < 1e-6);
+    QVERIFY(nv.pick(StringList{"MEG 001", "EEG 002"}, false, result));
+    QCOMPARE(result, Eigen::Vector2f(1.0f, 4.0f));
 }
 
 void TestMneRawProjComp::namedVector_pickSubset()
 {
     MNENamedVector nv;
-    nv.nvec = 3;
-    nv.names.push_back("ch1");
-    nv.names.push_back("ch2");
-    nv.names.push_back("ch3");
-    nv.data.resize(3);
-    nv.data << 10.0f, 20.0f, 30.0f;
+    nv.names = {"ch1", "ch2", "ch3"};
+    nv.data = Eigen::Vector3f(10.0f, 20.0f, 30.0f);
 
-    StringList pickNames;
-    pickNames.push_back("ch2");
-    VectorXf result(1);
-    int status = nv.pick(pickNames, 1, false, result);
-    QCOMPARE(status, 0);
-    QVERIFY(qAbs(result(0) - 20.0f) < 1e-6);
+    VectorXf result(2);
+    // A name that is not in the vector picks zero unless every name is required
+    QVERIFY(nv.pick(StringList{"ch2", "ch9"}, false, result));
+    QCOMPARE(result, Eigen::Vector2f(20.0f, 0.0f));
+
+    // A result that does not hold one value per picked name is refused, not overrun
+    VectorXf shorter = VectorXf::Constant(1, -7.0f);
+    QVERIFY(!nv.pick(StringList{"ch2", "ch3"}, false, shorter));
+    QCOMPARE(shorter(0), -7.0f);
 }
 
 void TestMneRawProjComp::namedVector_pickRequireAllFails()
 {
     MNENamedVector nv;
-    nv.nvec = 2;
-    nv.names.push_back("ch1");
-    nv.names.push_back("ch2");
-    nv.data.resize(2);
-    nv.data << 1.0f, 2.0f;
+    nv.names = {"ch1", "ch2"};
+    nv.data = Eigen::Vector2f(1.0f, 2.0f);
 
-    StringList pickNames;
-    pickNames.push_back("ch1");
-    pickNames.push_back("MISSING");
     VectorXf result(2);
-    // require_all=true should fail when a name is missing
-    int status = nv.pick(pickNames, 2, true, result);
-    QVERIFY(status != 0);
+    QVERIFY(!nv.pick(StringList{"ch1", "MISSING"}, true, result));
 }
 
 //=============================================================================================================

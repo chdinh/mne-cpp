@@ -379,6 +379,13 @@ aliases; replace the old spelling as below.
   `MNEProjItem` no longer declare their own copy constructors and destructors,
   so both are cheap to move. Migration: `item.vecs->data` becomes
   `item.vecs.data`, `item.nvec` becomes `item.nvec()`.
+- `MNENamedVector::pick(names, require_all, res)` takes the names as a
+  `std::span` instead of a list plus a count and returns `[[nodiscard]] bool`
+  instead of `OK`/`FAIL`. A result vector that does not hold one value per
+  name is refused; it used to be written past its end. `MNENamedVector::nvec`
+  is gone (use `names.size()`), and the header no longer includes
+  `QStringList`. Migration: `vec.pick(names, n, all, res) == FAIL` becomes
+  `!vec.pick(names, all, res)`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

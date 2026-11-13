@@ -40,9 +40,6 @@
 #include <string_view>
 #include <vector>
 
-constexpr int FAIL = -1;
-
-
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -466,20 +463,19 @@ bool MNEProjOp::make_proj(const StringList& bad)
 
     for (k = 0, nvec_meg = nvec_eeg = 0; k < static_cast<int>(items.size()); k++) {
         if (items[k].active && items[k].affect(names)) {
-            vec.nvec = items[k].vecs.ncol;
             vec.names = items[k].vecs.collist;
             if (items[k].has_meg) {
                 for (p = 0; p < items[k].nvec(); p++, nvec_meg++) {
                     vec.data = items[k].vecs.data.row(p);
                     Eigen::Map<Eigen::VectorXf> res_meg(mat_meg_mat.row(nvec_meg).data(), nch);
-                    if (vec.pick(names, nch, false, res_meg) == FAIL)
+                    if (!vec.pick(names, false, res_meg))
                         return false;
                 }
             } else if (items[k].has_eeg) {
                 for (p = 0; p < items[k].nvec(); p++, nvec_eeg++) {
                     vec.data = items[k].vecs.data.row(p);
                     Eigen::Map<Eigen::VectorXf> res_eeg(mat_eeg_mat.row(nvec_eeg).data(), nch);
-                    if (vec.pick(names, nch, false, res_eeg) == FAIL)
+                    if (!vec.pick(names, false, res_eeg))
                         return false;
                 }
             }

@@ -21,6 +21,9 @@
 #include "mne_named_vector.h"
 #include <base/log.h>
 
+#include <algorithm>
+#include <iterator>
+
 //=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
@@ -28,39 +31,30 @@
 using namespace Eigen;
 using namespace MNELIB;
 
-constexpr int FAIL = -1;
-constexpr int OK = 0;
-
 //=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-int MNENamedVector::pick(const StringList& pick_names, int nnames, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const
+bool MNENamedVector::pick(std::span<const std::string> pick_names, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const
 {
-    int found;
-    int k, p;
-
-    if (names.size() == 0) {
+    if (names.empty()) {
         BASELIB::Log::critical("No names present in vector. Cannot pick.");
-        return FAIL;
+        return false;
+    }
+    if (static_cast<std::size_t>(res.size()) != pick_names.size()) {
+        BASELIB::Log::critical("Cannot pick {} names into a vector of {} values.", pick_names.size(), res.size());
+        return false;
     }
 
-    for (k = 0; k < nnames; k++)
-        res[k] = 0.0;
-
-    for (k = 0; k < nnames; k++) {
-        found = 0;
-        for (p = 0; p < nvec; p++) {
-            if ((names[p] == pick_names[k])) {
-                res[k] = data[p];
-                found = true;
-                break;
-            }
-        }
-        if (!found && require_all) {
+    res.setZero();
+    for (std::size_t k = 0; k < pick_names.size(); ++k) {
+        const auto it = std::ranges::find(names, pick_names[k]);
+        if (it != names.end())
+            res[static_cast<Eigen::Index>(k)] = data[std::distance(names.begin(), it)];
+        else if (require_all) {
             BASELIB::Log::critical("All required elements not found in named vector.");
-            return FAIL;
+            return false;
         }
     }
-    return OK;
+    return true;
 }

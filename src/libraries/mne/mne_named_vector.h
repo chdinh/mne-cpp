@@ -9,7 +9,7 @@
  * @date     March 2026
  * @brief    Named one-dimensional counterpart of @ref MNELIB::MNENamedMatrix.
  *
- * Stores a vector whose entries are tagged with a @c QStringList of
+ * Stores a vector whose entries are tagged with a @c StringList of
  * labels, used for example for SSP weights or for one-sensor mappings.
  * Provides the same name-indexed access as the matrix flavour so callers
  * can robustly select sensors irrespective of their position in the
@@ -25,12 +25,11 @@
 
 #include "mne_global.h"
 
+#include <span>
 #include <string>
 #include <vector>
 
 #include <Eigen/Core>
-
-#include <QStringList>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -53,16 +52,14 @@ public:
      * Pick elements from this named vector by name matching, writing them
      * into a result vector ordered according to the supplied name list.
      *
-     * @param[in]  names        List of names to pick.
-     * @param[in]  nnames       Number of names in the list.
+     * @param[in]  pick_names   Names to pick; a name that is not present picks zero.
      * @param[in]  require_all  If true, fail when any name is not found.
-     * @param[out] res          Output vector (must have at least nnames elements).
+     * @param[out] res          One value per name in @p pick_names.
      *
-     * @return OK on success, FAIL on error.
+     * @return false if this vector has no names, @p res has the wrong size, or a required name is missing.
      */
-    int pick(const StringList& names, int nnames, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const;
+    [[nodiscard]] bool pick(std::span<const std::string> pick_names, bool require_all, Eigen::Ref<Eigen::VectorXf> res) const;
 
-    int nvec = 0;         /**< Number of elements. */
     StringList names;     /**< Name list for the elements. */
     Eigen::VectorXf data; /**< The data itself. */
 };
