@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
                  "MNERawData/MNERawInfo/MNERawBufDef: buffer directory of the sample recording like mne.io.read_raw_fif");
     ok &= expect(sel.pick.minCoeff() >= 0 && near(eegRaw, -1.0122332562412516e-09, 1e-5) && near(eegProj, -4.107782047805238e-10, 1e-4) && near(eegFilt, -1.064022285676407e-09, 1e-3),
                  "MNEChSelection/MNEFilterDef: plain, projected and filtered reads match mne");
-    ok &= expect(compiled && mneRaw->proj->items.size() == 4 && mneRaw->proj->nvec == 4 && firstItem.active && firstItem.nvec == 1,
+    ok &= expect(compiled && mneRaw->proj->items.size() == 4 && mneRaw->proj->nvec == 4 && firstItem.active && firstItem.nvec() == 1,
                  "MNEProjOp/MNEProjItem: 4 active SSP vectors like raw.info['projs']");
 
     //! [mne_cov_matrix_usage]

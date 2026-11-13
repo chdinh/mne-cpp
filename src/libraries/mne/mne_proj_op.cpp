@@ -81,7 +81,7 @@ void MNEProjOp::free_proj()
 void MNEProjOp::combine(const MNEProjOp& from)
 {
     for (const auto& it : from.items) {
-        add_item(*it.vecs, it.kind, it.desc);
+        add_item(it.vecs, it.kind, it.desc);
         items.back().active_file = it.active_file;
     }
 }
@@ -94,7 +94,7 @@ void MNEProjOp::add_item(const MNENamedMatrix& vecs, int kind, const std::string
     auto& new_item = items.back();
 
     new_item.active = is_active;
-    new_item.vecs = std::make_unique<MNENamedMatrix>(vecs);
+    new_item.vecs = vecs;
 
     if (kind == FIFFV_MNE_PROJ_ITEM_EEG_AVREF) {
         new_item.has_meg = false;
@@ -117,7 +117,6 @@ void MNEProjOp::add_item(const MNENamedMatrix& vecs, int kind, const std::string
     if (!desc.empty())
         new_item.desc = desc;
     new_item.kind = kind;
-    new_item.nvec = new_item.vecs->nrow;
 
     free_proj(); /* These data are not valid any more */
 }
@@ -132,7 +131,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::dup() const
     auto res = std::make_unique<MNEProjOp>();
 
     for (const auto& it : items) {
-        res->add_item(*it.vecs, it.kind, it.desc, it.active);
+        res->add_item(it.vecs, it.kind, it.desc, it.active);
         res->items.back().active_file = it.active_file;
     }
     return res;
@@ -170,7 +169,7 @@ int MNEProjOp::affect(std::span<const std::string> list) const
     int naff = 0;
     for (const auto& item : items)
         if (item.active && item.affect(list))
-            naff += item.nvec;
+            naff += item.nvec();
     return naff;
 }
 
@@ -383,13 +382,13 @@ void MNEProjOp::report_data(std::ostream& out, const std::string& tag, bool list
             out << tag << "\n";
         if (!tag.empty())
             out << tag;
-        out << "# " << (k + 1) << " : " << it.desc << " : " << it.nvec << " vecs : " << it.vecs->ncol << " chs "
+        out << "# " << (k + 1) << " : " << it.desc << " : " << it.nvec() << " vecs : " << it.vecs.ncol << " chs "
             << (it.has_meg ? "MEG" : "EEG") << " "
             << (it.active ? "active" : "idle") << "\n";
         if (list_data && !tag.empty())
             out << tag << "\n";
         if (list_data) {
-            vecs = items[k].vecs.get();
+            vecs = &items[k].vecs;
 
             for (q = 0; q < vecs->ncol; q++) {
                 out << std::format("{:<10}", vecs->collist[q]);
@@ -471,18 +470,18 @@ bool MNEProjOp::make_proj(const StringList& bad)
 
     for (k = 0, nvec_meg = nvec_eeg = 0; k < static_cast<int>(items.size()); k++) {
         if (items[k].active && items[k].affect(names)) {
-            vec.nvec = items[k].vecs->ncol;
-            vec.names = items[k].vecs->collist;
+            vec.nvec = items[k].vecs.ncol;
+            vec.names = items[k].vecs.collist;
             if (items[k].has_meg) {
-                for (p = 0; p < items[k].nvec; p++, nvec_meg++) {
-                    vec.data = items[k].vecs->data.row(p);
+                for (p = 0; p < items[k].nvec(); p++, nvec_meg++) {
+                    vec.data = items[k].vecs.data.row(p);
                     Eigen::Map<Eigen::VectorXf> res_meg(mat_meg_mat.row(nvec_meg).data(), nch);
                     if (vec.pick(names, nch, false, res_meg) == FAIL)
                         return false;
                 }
             } else if (items[k].has_eeg) {
-                for (p = 0; p < items[k].nvec; p++, nvec_eeg++) {
-                    vec.data = items[k].vecs->data.row(p);
+                for (p = 0; p < items[k].nvec(); p++, nvec_eeg++) {
+                    vec.data = items[k].vecs.data.row(p);
                     Eigen::Map<Eigen::VectorXf> res_eeg(mat_eeg_mat.row(nvec_eeg).data(), nch);
                     if (vec.pick(names, nch, false, res_eeg) == FAIL)
                         return false;

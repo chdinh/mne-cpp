@@ -58,7 +58,7 @@ private slots:
     void testProjItemDefault()
     {
         MNEProjItem item;
-        QCOMPARE(item.nvec, 0);
+        QCOMPARE(item.nvec(), 0);
         QVERIFY(item.desc.empty());
         QCOMPARE(item.kind, 0);
         // active is a bool defaulting to true; the previous `>= 0` check was
@@ -71,43 +71,40 @@ private slots:
         MNEProjItem item;
         item.desc = "test projection";
         item.kind = 10;
-        item.active = 1;
-        item.nvec = 1;
+        item.active = true;
 
         // Construct named matrix
         StringList colNames = {"ch1", "ch2", "ch3"};
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 2.0f, 3.0f;
-        item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        item.vecs = *MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         MNEProjItem copy(item);
         QCOMPARE(copy.desc, item.desc);
         QCOMPARE(copy.kind, item.kind);
         QCOMPARE(copy.active, item.active);
-        QCOMPARE(copy.nvec, item.nvec);
-        QVERIFY(copy.vecs != nullptr);
+        QCOMPARE(copy.nvec(), 1);
+        QCOMPARE(copy.vecs.collist, colNames);
+        QCOMPARE(copy.vecs.data, data);
     }
 
     void testProjItemAffect()
     {
         MNEProjItem item;
-        item.active = 1;
-        item.nvec = 1;
+        item.active = true;
 
         StringList colNames = {"MEG 0111", "MEG 0112", "MEG 0113"};
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 1.0f, 1.0f;
-        item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        item.vecs = *MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         StringList testList = {"MEG 0111", "MEG 0112", "MEG 0113"};
-        int affected = item.affect(testList);
-        QVERIFY(affected > 0);
+        QVERIFY(item.affect(testList));
 
         StringList noMatch = {"EEG 001", "EEG 002"};
-        int notAffected = item.affect(noMatch);
-        QCOMPARE(notAffected, 0);
+        QVERIFY(!item.affect(noMatch));
     }
 
     // ── MNEProjOp ───────────────────────────────────────────────────────────

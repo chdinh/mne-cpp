@@ -373,6 +373,12 @@ aliases; replace the old spelling as below.
   `op.add_item_active(&m, kind, desc, a)` becomes `op.add_item(m, kind, desc, a)`,
   `op.combine(&other)` becomes `op.combine(other)`,
   `op.make_proj_bad(bad) == FAIL` becomes `!op.make_proj(bad)`.
+- `MNEProjItem::vecs` is an `MNENamedMatrix` value instead of a
+  `std::unique_ptr`, and `MNEProjItem::nvec` is the function `nvec()`
+  (`vecs.nrow`) instead of a second copy of the count. `MNENamedMatrix` and
+  `MNEProjItem` no longer declare their own copy constructors and destructors,
+  so both are cheap to move. Migration: `item.vecs->data` becomes
+  `item.vecs.data`, `item.nvec` becomes `item.nvec()`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

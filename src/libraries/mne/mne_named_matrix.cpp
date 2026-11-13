@@ -44,31 +44,6 @@ using namespace FIFFLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-MNENamedMatrix::MNENamedMatrix()
-: nrow(0)
-, ncol(0)
-{
-}
-
-//=============================================================================================================
-
-MNENamedMatrix::MNENamedMatrix(const MNENamedMatrix& p_MneNamedMatrix)
-: nrow(p_MneNamedMatrix.nrow)
-, ncol(p_MneNamedMatrix.ncol)
-, rowlist(p_MneNamedMatrix.rowlist)
-, collist(p_MneNamedMatrix.collist)
-, data(p_MneNamedMatrix.data)
-{
-}
-
-//=============================================================================================================
-
-MNENamedMatrix::~MNENamedMatrix()
-{
-}
-
-//=============================================================================================================
-
 std::unique_ptr<MNENamedMatrix> MNENamedMatrix::build(int nrow,
                                                       int ncol,
                                                       const StringList& rowlist,

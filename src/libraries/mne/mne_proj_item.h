@@ -71,54 +71,12 @@ class MNESHARED_EXPORT MNEProjItem
 public:
     //=========================================================================================================
     /**
-     * @brief Default constructor.
-     *
-     * Initialises all flags to their default values (active = true,
-     * kind = FIFFV_PROJ_ITEM_NONE, no MEG/EEG channels).
+     * @return The number of projection vectors (rows of @ref vecs).
      */
-    MNEProjItem();
-
-    //=========================================================================================================
-    /**
-     * @brief Copy constructor.
-     *
-     * Deep-copies the projection vectors (unique_ptr member).
-     *
-     * @param[in] other  Projection item to copy.
-     */
-    MNEProjItem(const MNEProjItem& other);
-
-    //=========================================================================================================
-    /**
-     * @brief Copy assignment operator.
-     *
-     * Deep-copies the projection vectors (unique_ptr member).
-     *
-     * @param[in] other  Projection item to copy.
-     *
-     * @return Reference to this object.
-     */
-    MNEProjItem& operator=(const MNEProjItem& other);
-
-    //=========================================================================================================
-    /**
-     * @brief Move constructor (defaulted).
-     */
-    MNEProjItem(MNEProjItem&&) noexcept = default;
-
-    //=========================================================================================================
-    /**
-     * @brief Move assignment operator (defaulted).
-     *
-     * @return Reference to this object.
-     */
-    MNEProjItem& operator=(MNEProjItem&&) noexcept = default;
-
-    //=========================================================================================================
-    /**
-     * @brief Destructor.
-     */
-    ~MNEProjItem();
+    int nvec() const
+    {
+        return vecs.nrow;
+    }
 
     //=========================================================================================================
     /**
@@ -134,14 +92,13 @@ public:
     bool affect(std::span<const std::string> list) const;
 
 public:
-    std::unique_ptr<MNENamedMatrix> vecs; /**< Projection vectors (nrow = nvec, ncol = nch); may be nullptr when nvec == 0. */
-    int nvec;                             /**< Number of projection vectors (== vecs->nrow when vecs is set). */
-    std::string desc;                     /**< Human-readable description (e.g. "PCA-v1"). */
-    int kind;                             /**< FIFF projection item kind (FIFFV_PROJ_ITEM_*). */
-    bool active;                          /**< Whether this item is currently active. */
-    bool active_file;                     /**< Whether this item was active when loaded from file. */
-    bool has_meg;                         /**< Whether the projection covers MEG channels. */
-    bool has_eeg;                         /**< Whether the projection covers EEG channels. */
+    MNENamedMatrix vecs;      /**< Projection vectors, one row per vector and one column per channel. */
+    std::string desc;         /**< Human-readable description (e.g. "PCA-v1"). */
+    int kind = 0;             /**< FIFF projection item kind (FIFFV_PROJ_ITEM_*). */
+    bool active = true;       /**< Whether this item is currently active. */
+    bool active_file = false; /**< Whether this item was active when loaded from file. */
+    bool has_meg = false;     /**< Whether the projection covers MEG channels. */
+    bool has_eeg = false;     /**< Whether the projection covers EEG channels. */
 };
 
 } // NAMESPACE MNELIB

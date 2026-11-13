@@ -330,8 +330,8 @@ void TestMneRawDataPython::projectsSegment()
     proj = std::move(*made);
     QCOMPARE(proj->items.size(), std::size_t{1});
     QCOMPARE(proj->items[0].kind, FIFFV_MNE_PROJ_ITEM_EEG_AVREF);
-    QCOMPARE(proj->items[0].vecs->ncol, static_cast<int>(eeg.size()));
-    QVERIFY(std::fabs(proj->items[0].vecs->data(0, 0) - 1.0 / std::sqrt(static_cast<double>(eeg.size()))) < 1e-7);
+    QCOMPARE(proj->items[0].vecs.ncol, static_cast<int>(eeg.size()));
+    QVERIFY(std::fabs(proj->items[0].vecs.data(0, 0) - 1.0 / std::sqrt(static_cast<double>(eeg.size()))) < 1e-7);
     std::ostringstream out;
     proj->report_data(out, "#", true, {eeg[1].ch_name});
     const QString listing = QString::fromStdString(out.str());
