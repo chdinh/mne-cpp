@@ -78,16 +78,6 @@ public:
     float x_ras[3], y_ras[3], z_ras[3]; /**< Direction cosines of the three voxel axes in RAS coordinates. */
     float c_ras[3];                     /**< Center of the volume in RAS coordinates (m; the file stores mm). */
     std::string filename;               /**< Path to the MRI data file this geometry was read from. */
-
-    // ### OLD STRUCT ###
-    //typedef struct {
-    //    int            valid;                       /* Is the information below valid */
-    //    int            width,height,depth;          /* Size of the stack */
-    //    float          xsize,ysize,zsize;           /* Increments in the three voxel directions */
-    //    float          x_ras[3],y_ras[3],z_ras[3];  /* Directions of the coordinate axes */
-    //    float          c_ras[3];                    /* Center of the RAS coordinates */
-    //    char           *filename;                   /* Name of the MRI data file */
-    //} *mneVolGeom,mneVolGeomRec;                    /* MRI data volume geometry information like FreeSurfer keeps it */
 };
 
 //=============================================================================================================

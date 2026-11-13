@@ -329,6 +329,10 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `MNEMshDisplaySurface` loses `user_data` and `user_data_free`, and
+  `mne_types.h` loses `mneUserFreeFunc`: MNE-C's `mne_analyze` cached a contour
+  map there, nothing in mne-cpp set them. Migration: keep per-surface state in
+  your own map keyed by the surface.
 - A default-constructed `MNEMshLight`, `MNEMshPicked` or `MNEMshColorScaleDef`
   is zero-initialised (light off at the origin, vertex 0, empty scale); their
   members used to hold whatever was in memory. The `MNEMshLight` constructor

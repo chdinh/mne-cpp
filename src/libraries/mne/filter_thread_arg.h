@@ -86,16 +86,6 @@ public:
     float limit;                                         /**< Distance limit for filtering (meters). */
     std::ostream* filtered;                              /**< Optional stream to log omitted point locations (may be NULL). */
     int stat;                                            /**< Status code indicating whether filtering succeeded. */
-
-    // ### OLD STRUCT ###
-    //typedef struct {
-    //    MNESourceSpace* s;           /* The source space to process */
-    //    FiffCoordTransOld* mri_head_t;  /* Coordinate transformation */
-    //    MNESurface*   surf;          /* The inner skull surface */
-    //    float          limit;           /* Distance limit */
-    //    FILE           *filtered;       /* Log omitted point locations here */
-    //    int            stat;            /* How was it? */
-    //} *filterThreadArg,filterThreadArgRec;
 };
 
 //=============================================================================================================

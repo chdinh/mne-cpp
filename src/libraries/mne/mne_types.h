@@ -59,15 +59,6 @@ namespace MNELIB
 // TYPEDEFS
 //=============================================================================================================
 
-/**
- * @brief Generic destructor callback for user-attached data.
- *
- * Several legacy structures carry a @c void* user_data slot together
- * with a matching @c mneUserFreeFunc that is called when the owning
- * object is destroyed.
- */
-typedef void (*mneUserFreeFunc)(void*);
-
 //=============================================================================================================
 // SOURCE-SPACE TYPE CONSTANTS
 //=============================================================================================================

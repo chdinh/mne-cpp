@@ -73,13 +73,7 @@ constexpr float EVEN_CURV_COLOR = 0.375f;
 
 MNEMshDisplaySurface::MNEMshDisplaySurface() = default;
 
-//=============================================================================================================
-
-MNEMshDisplaySurface::~MNEMshDisplaySurface()
-{
-    if (user_data_free)
-        user_data_free(user_data);
-}
+MNEMshDisplaySurface::~MNEMshDisplaySurface() = default;
 
 //=============================================================================================================
 // Alignment functions (moved from MNESurfaceOrVolume)
