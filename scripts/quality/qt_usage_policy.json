@@ -190,7 +190,7 @@
     },
     "mne": {
       "tokens": 358,
-      "public_header_includes": 29,
+      "public_header_includes": 28,
       "modules": [
         "Concurrent",
         "Core"

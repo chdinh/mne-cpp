@@ -386,6 +386,12 @@ aliases; replace the old spelling as below.
   is gone (use `names.size()`), and the header no longer includes
   `QStringList`. Migration: `vec.pick(names, n, all, res) == FAIL` becomes
   `!vec.pick(names, all, res)`.
+- `MNECovMatrix::pick_chs_omit(names, omit_meg_eeg, chs = {})` takes the names
+  and channel infos as `std::span` instead of a list plus a count, and
+  `omit_meg_eeg` as `bool`. Fewer channel infos than names are refused; they
+  used to be read past their end. `mne_cov_matrix.h` no longer includes
+  `QStringList`. Migration: `cov.pick_chs_omit(names, n, omit, chs)` becomes
+  `cov.pick_chs_omit(names, omit, chs)` (or `std::span(names).first(n)`).
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

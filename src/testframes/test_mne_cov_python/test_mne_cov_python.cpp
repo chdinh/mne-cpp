@@ -147,7 +147,7 @@ std::unique_ptr<MNECovMatrix> TestMneCovPython::projectedNoise() const
     auto cov = MNECovMatrix::read(m_covPath.toStdU16String(), FIFFV_MNE_NOISE_COV);
     if (!cov)
         return nullptr;
-    auto picked = cov->pick_chs_omit(m_names, static_cast<int>(m_names.size()), false, m_evoked.info.chs);
+    auto picked = cov->pick_chs_omit(m_names, false, m_evoked.info.chs);
     if (!picked || !m_proj->apply_cov(*picked) || picked->classify_channels(m_evoked.info.chs, static_cast<int>(m_names.size())) != 0)
         return nullptr;
     return picked;
@@ -288,8 +288,14 @@ void TestMneCovPython::rejectsBadInput()
 {
     auto cov = MNECovMatrix::read(m_covPath.toStdU16String(), FIFFV_MNE_NOISE_COV);
     QVERIFY(cov);
-    QVERIFY(!cov->pick_chs_omit(StringList{"NOT A CHANNEL"}, 1, false, {}));
-    QVERIFY(!cov->pick_chs_omit({}, 0, false, {}));
+    QVERIFY(!cov->pick_chs_omit(StringList{"NOT A CHANNEL"}, false));
+    QVERIFY(!cov->pick_chs_omit(StringList{}, false));
+    // The channel infos describe the picked names one by one; fewer of them are refused, not overrun
+    const StringList two{m_names[0], m_names[1]};
+    QVERIFY(!cov->pick_chs_omit(two, true, std::span(m_evoked.info.chs).first(1)));
+    const auto picked = cov->pick_chs_omit(two, true, std::span(m_evoked.info.chs).first(2));
+    QVERIFY(picked);
+    QCOMPARE(picked->names, two);
 
     VectorXf data = VectorXf::Zero(10);
     VectorXf out(10);

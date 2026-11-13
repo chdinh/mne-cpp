@@ -707,11 +707,11 @@ void MNECovMatrix::revert_to_diag()
 
 //=============================================================================================================
 
-std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_names,
-                                                          int new_ncov,
-                                                          int omit_meg_eeg,
-                                                          const std::vector<FiffChInfo>& chs) const
+std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(std::span<const std::string> new_names,
+                                                          bool omit_meg_eeg,
+                                                          std::span<const FiffChInfo> chs) const
 {
+    const auto new_ncov = static_cast<int>(new_names.size());
     int j, k;
     Eigen::VectorXd cov_local;
     Eigen::VectorXd cov_diag_local;
@@ -725,6 +725,10 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_
     }
     if (names.empty()) {
         BASELIB::Log::critical("No names in covariance matrix. Cannot do picking.");
+        return nullptr;
+    }
+    if (!chs.empty() && chs.size() < new_names.size()) {
+        BASELIB::Log::critical("pick_chs_omit got {} channel infos for {} channels", chs.size(), new_names.size());
         return nullptr;
     }
     Eigen::VectorXi pickVec = Eigen::VectorXi::Constant(new_ncov, -1);

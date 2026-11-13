@@ -733,10 +733,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         if ((cov = ad_hoc_noise(res->meg_coils.get(), res->eeg_els.get(), grad_std, mag_std, eeg_std)) == nullptr)
             return nullptr;
     }
-    res->noise = cov->pick_chs_omit(res->ch_names,
-                                    res->nmeg + res->neeg,
-                                    true,
-                                    res->chs);
+    res->noise = cov->pick_chs_omit(res->ch_names, true, res->chs);
     if (!res->noise) {
         return nullptr;
     }

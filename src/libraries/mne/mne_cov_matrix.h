@@ -41,12 +41,7 @@
 //=============================================================================================================
 
 #include <memory>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QStringList>
+#include <span>
 
 /**
  * Channel-type classification constants for the ch_class field in MNECovMatrix.
@@ -320,16 +315,15 @@ public:
      * omitting MEG-EEG cross-correlations.
      *
      * @param[in] new_names      Names of channels to pick.
-     * @param[in] new_ncov       Number of channels to pick.
-     * @param[in] omit_meg_eeg   If non-zero, zero out MEG-EEG cross entries.
-     * @param[in] chs            Channel information list (for MEG/EEG classification).
+     * @param[in] omit_meg_eeg   If true, zero out MEG-EEG cross entries.
+     * @param[in] chs            One channel info per name in @p new_names (for MEG/EEG classification);
+     *                           when empty, names starting with "MEG" are MEG channels.
      *
      * @return A new covariance matrix with only the selected channels, or nullptr on error.
      */
-    std::unique_ptr<MNECovMatrix> pick_chs_omit(const StringList& new_names,
-                                                int new_ncov,
-                                                int omit_meg_eeg,
-                                                const std::vector<FIFFLIB::FiffChInfo>& chs) const;
+    std::unique_ptr<MNECovMatrix> pick_chs_omit(std::span<const std::string> new_names,
+                                                bool omit_meg_eeg,
+                                                std::span<const FIFFLIB::FiffChInfo> chs = {}) const;
 
     int kind;                                                                    /**< Covariance kind: sensor or source. */
     int ncov;                                                                    /**< Dimension (number of channels). */

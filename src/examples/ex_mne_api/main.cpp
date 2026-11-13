@@ -324,7 +324,7 @@ int main(int argc, char* argv[])
 
     auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
     const int ncovFile = noise->ncov;
-    auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
+    auto noiseMeg = noise->pick_chs_omit(megNames, false, ave.info.chs);
     const bool covProjected = aveProj->apply_cov(*noiseMeg);
     noiseMeg->classify_channels(ave.info.chs, nMeg);
     noiseMeg->decompose_eigen(); // the 3 projected directions become zero eigenvalues
