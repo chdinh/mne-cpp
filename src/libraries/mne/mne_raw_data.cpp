@@ -909,7 +909,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
                 for (p = start; p < this_buf->ns && ns > 0; p++, ns--, s++) {
                     for (c = 0; c < info->nchan; c++)
                         pvalues[c] = (*values)(c, p);
-                    if (proj->project_vector(pvalues, true) != OK)
+                    if (!proj->project_vector(pvalues, true))
                         BASELIB::Log::warning("Error");
                     if (sel) {
                         if (sel->nderiv > 0 && deriv_matched) {
@@ -1046,7 +1046,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
             if (comp->apply(true, dc) != OK)
                 return FAIL;
         if (proj)
-            if (proj->project_vector(dc, true) != OK)
+            if (!proj->project_vector(dc, true))
                 return FAIL;
     }
     filter_was = filter->filter_on;

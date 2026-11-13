@@ -364,6 +364,15 @@ aliases; replace the old spelling as below.
   `op.affect(std::span(list).first(n))` for a prefix);
   `MNEProjOp::makeProjection(files, chs, nch, proj)` becomes
   `auto proj = MNEProjOp::make_projection(files, chs)`.
+- `MNEProjOp::add_item` takes the vectors by reference and an optional
+  `is_active` (was `add_item_active`); `combine` takes a `const MNEProjOp&` and
+  returns nothing; `make_proj(bad = {})` replaces `make_proj_bad`;
+  `make_proj`, `project_vector`, `project_dvector` and `apply_cov` return
+  `bool` instead of `OK`/`FAIL` and are `[[nodiscard]]`; the projections are
+  `const`, and `apply_cov` takes the covariance by reference. Migration:
+  `op.add_item_active(&m, kind, desc, a)` becomes `op.add_item(m, kind, desc, a)`,
+  `op.combine(&other)` becomes `op.combine(other)`,
+  `op.make_proj_bad(bad) == FAIL` becomes `!op.make_proj(bad)`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

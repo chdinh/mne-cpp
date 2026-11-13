@@ -256,7 +256,7 @@ void TestMneRawDataPython::padsOutsideData()
     QVERIFY(made && *made);
     std::unique_ptr<MNEProjOp> proj = std::move(*made);
     proj->assign_channels(m_raw->ch_names);
-    QCOMPARE(proj->make_proj(), 0);
+    QVERIFY(proj->make_proj());
     m_raw->proj = std::move(proj);
     for (MNEChSelection* picks : {&sel, static_cast<MNEChSelection*>(nullptr)}) {
         const int nchan = picks ? sel.nchan : m_raw->info->nchan;
@@ -300,7 +300,7 @@ void TestMneRawDataPython::projectsSegment()
     std::unique_ptr<MNEProjOp> proj = std::move(*made);
     QCOMPARE(proj->items.size(), std::size_t{4});
     proj->assign_channels(m_raw->ch_names);
-    QCOMPARE(proj->make_proj(), 0);
+    QVERIFY(proj->make_proj());
     QCOMPARE(proj->nvec, 4);
     m_raw->proj = std::move(proj);
 
@@ -354,8 +354,7 @@ void TestMneRawDataPython::projectsSegment()
     const auto projector = [&](const StringList& bads, int& nvec) {
         std::unique_ptr<MNEProjOp> op = std::move(MNEProjOp::make_projection({m_rawPath.toStdU16String()}, m_raw->info->chInfo).value());
         op->assign_channels(m_raw->ch_names);
-        op->make_proj_bad(bads);
-        nvec = op->nvec;
+        nvec = op->make_proj(bads) ? op->nvec : -1;
         const Eigen::MatrixXd u = op->proj_data.cast<double>();
         return Eigen::MatrixXd(Eigen::MatrixXd::Identity(u.cols(), u.cols()) - u.transpose() * u);
     };
@@ -532,7 +531,7 @@ void TestMneRawDataPython::picksDerivedChannel()
     QVERIFY(made && *made);
     std::unique_ptr<MNEProjOp> proj = std::move(*made);
     proj->assign_channels(raw->ch_names);
-    QCOMPARE(proj->make_proj(), 0);
+    QVERIFY(proj->make_proj());
 
     const int first = raw->first_samp + 2990;
     PickBuffer unprojected(3, 25);

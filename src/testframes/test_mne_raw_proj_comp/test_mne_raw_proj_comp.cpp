@@ -531,7 +531,7 @@ void TestMneRawProjComp::projOp_addItemAndDuplicate()
     vecs->data = MatrixXf(1, 3);
     vecs->data << 1.0f / std::sqrt(3.0f), 1.0f / std::sqrt(3.0f), 1.0f / std::sqrt(3.0f);
 
-    proj.add_item(vecs.get(), FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "Test EEG avg ref");
+    proj.add_item(*vecs, FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "Test EEG avg ref");
     QCOMPARE(proj.items.size(), std::size_t{1});
 
     // Duplicate
@@ -613,8 +613,7 @@ void TestMneRawProjComp::projOp_assignChannelsAndMake()
     proj->assign_channels(chNames);
     QCOMPARE(proj->names, chNames);
 
-    int makeResult = proj->make_proj();
-    QVERIFY(makeResult >= 0);
+    QVERIFY(proj->make_proj());
 }
 
 void TestMneRawProjComp::projOp_affectChannels()
@@ -654,20 +653,19 @@ void TestMneRawProjComp::projOp_projectVector()
     float val = 1.0f / std::sqrt(3.0f);
     vecs->data << val, val, val;
 
-    proj.add_item(vecs.get(), FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "avg ref");
+    proj.add_item(*vecs, FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "avg ref");
 
     StringList names;
     names.push_back("ch0");
     names.push_back("ch1");
     names.push_back("ch2");
     proj.assign_channels(names);
-    proj.make_proj();
+    QVERIFY(proj.make_proj());
 
     // Apply projection to a test vector [3, 6, 9] -> removes mean
     VectorXd testVec(3);
     testVec << 3.0, 6.0, 9.0;
-    int result = proj.project_dvector(testVec, true);
-    QVERIFY(result >= 0);
+    QVERIFY(proj.project_dvector(testVec, true));
 
     // After average reference projection the mean should be ~0
     double mean = testVec.mean();
@@ -695,7 +693,7 @@ void TestMneRawProjComp::projOp_combine()
     vecs1->collist.push_back("ch0");
     vecs1->collist.push_back("ch1");
     vecs1->data = MatrixXf::Ones(1, 2) / std::sqrt(2.0f);
-    proj1.add_item(vecs1.get(), 1, "proj1");
+    proj1.add_item(*vecs1, 1, "proj1");
 
     auto vecs2 = std::make_unique<MNENamedMatrix>();
     vecs2->nrow = 1;
@@ -705,11 +703,11 @@ void TestMneRawProjComp::projOp_combine()
     vecs2->collist.push_back("ch1");
     vecs2->data = MatrixXf(1, 2);
     vecs2->data << 1.0f / std::sqrt(2.0f), -1.0f / std::sqrt(2.0f);
-    proj2.add_item(vecs2.get(), 2, "proj2");
+    proj2.add_item(*vecs2, 2, "proj2");
 
-    MNEProjOp* combined = proj1.combine(&proj2);
-    QVERIFY(combined != nullptr);
-    QCOMPARE(combined->items.size(), std::size_t{2});
+    proj1.combine(proj2);
+    QCOMPARE(proj1.items.size(), std::size_t{2});
+    QCOMPARE(proj1.items[1].desc, std::string("proj2"));
 }
 
 //=============================================================================================================

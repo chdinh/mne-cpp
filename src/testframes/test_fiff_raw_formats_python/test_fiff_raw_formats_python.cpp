@@ -277,7 +277,7 @@ void TestFiffRawFormatsPython::projectsAcrossSkip()
     mne->proj = MNEProjOp::create_average_eeg_ref(mne->info->chInfo);
     QVERIFY(mne->proj);
     mne->proj->assign_channels(mne->ch_names);
-    QCOMPARE(mne->proj->make_proj(), 0);
+    QVERIFY(mne->proj->make_proj());
 
     // From 2 samples before the data to 3 past its end, across the skip.
     const int first = mne->first_samp - 2;

@@ -41,7 +41,6 @@
 #include <vector>
 
 constexpr int FAIL = -1;
-constexpr int OK = 0;
 
 
 //=============================================================================================================
@@ -79,41 +78,32 @@ void MNEProjOp::free_proj()
 
 //=============================================================================================================
 
-MNEProjOp* MNEProjOp::combine(MNEProjOp* from)
-/*
-     * Copy items from 'from' operator to this operator
-     */
+void MNEProjOp::combine(const MNEProjOp& from)
 {
-    if (from) {
-        for (const auto& it : from->items) {
-            add_item(it.vecs.get(), it.kind, it.desc);
-            items.back().active_file = it.active_file;
-        }
+    for (const auto& it : from.items) {
+        add_item(*it.vecs, it.kind, it.desc);
+        items.back().active_file = it.active_file;
     }
-    return this;
 }
 
 //=============================================================================================================
 
-void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const std::string& desc, bool is_active)
-/*
- * Add a new item to an existing projection operator
- */
+void MNEProjOp::add_item(const MNENamedMatrix& vecs, int kind, const std::string& desc, bool is_active)
 {
     items.push_back(MNEProjItem());
     auto& new_item = items.back();
 
     new_item.active = is_active;
-    new_item.vecs = std::make_unique<MNENamedMatrix>(*vecs);
+    new_item.vecs = std::make_unique<MNENamedMatrix>(vecs);
 
     if (kind == FIFFV_MNE_PROJ_ITEM_EEG_AVREF) {
         new_item.has_meg = false;
         new_item.has_eeg = true;
     } else {
-        for (int k = 0; k < vecs->ncol; k++) {
-            if (vecs->collist[k].starts_with("EEG"))
+        for (const auto& name : vecs.collist) {
+            if (name.starts_with("EEG"))
                 new_item.has_eeg = true;
-            if (vecs->collist[k].starts_with("MEG"))
+            if (name.starts_with("MEG"))
                 new_item.has_meg = true;
         }
         if (!new_item.has_meg && !new_item.has_eeg) {
@@ -134,13 +124,6 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const std:
 
 //=============================================================================================================
 
-void MNEProjOp::add_item(const MNENamedMatrix* vecs, int kind, const std::string& desc)
-{
-    add_item_active(vecs, kind, desc, true);
-}
-
-//=============================================================================================================
-
 std::unique_ptr<MNEProjOp> MNEProjOp::dup() const
 /*
  * Provide a duplicate (item data only)
@@ -149,7 +132,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::dup() const
     auto res = std::make_unique<MNEProjOp>();
 
     for (const auto& it : items) {
-        res->add_item_active(it.vecs.get(), it.kind, it.desc, it.active);
+        res->add_item(*it.vecs, it.kind, it.desc, it.active);
         res->items.back().active_file = it.active_file;
     }
     return res;
@@ -175,7 +158,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(std::span<const Fif
     auto vecs = MNENamedMatrix::build(1, eegcount, emptyList, names, vec_data);
 
     auto op = std::make_unique<MNEProjOp>();
-    op->add_item(vecs.get(), FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "Average EEG reference");
+    op->add_item(*vecs, FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "Average EEG reference");
 
     return op;
 }
@@ -204,35 +187,22 @@ int MNEProjOp::affect_chs(std::span<const FiffChInfo> chs) const
 
 //=============================================================================================================
 
-int MNEProjOp::project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complement)
-/*
-     * Apply projection operator to a vector (floats)
-     * Assume that all dimension checking etc. has been done before
-     */
+bool MNEProjOp::project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complement) const
 {
-    if (items.empty() || this->nvec <= 0)
-        return OK;
+    if (items.empty() || nvec <= 0)
+        return true;
 
-    const auto nch = static_cast<int>(names.size());
-    if (nch != static_cast<int>(vec.size())) {
+    if (names.size() != static_cast<std::size_t>(vec.size())) {
         BASELIB::Log::critical("Data vector size does not match projection operator");
-        return FAIL;
+        return false;
     }
 
-    Eigen::VectorXf proj = Eigen::VectorXf::Zero(nch);
-
-    for (int p = 0; p < this->nvec; p++) {
-        auto row = proj_data.row(p);
-        float w = row.dot(vec);
-        proj += w * row.transpose();
-    }
-
+    const Eigen::VectorXf proj = proj_data.transpose() * (proj_data * vec);
     if (do_complement)
         vec -= proj;
     else
         vec = proj;
-
-    return OK;
+    return true;
 }
 
 //=============================================================================================================
@@ -367,7 +337,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         */
         StringList emptyList;
         auto item = MNENamedMatrix::build(item_nvec, item_nchan, emptyList, item_names, item_vectors);
-        op->add_item_active(item.get(), item_kind, item_desc.toStdString(), item_active);
+        op->add_item(*item, item_kind, item_desc.toStdString(), item_active);
         op->items.back().active_file = item_active;
     }
 
@@ -470,7 +440,7 @@ constexpr float SMALL_VALUE = 1e-4f;
 
 } // anonymous namespace
 
-int MNEProjOp::make_proj_bad(const StringList& bad)
+bool MNEProjOp::make_proj(const StringList& bad)
 {
     using RowMatrixXf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
@@ -490,11 +460,11 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
 
     const auto nch = static_cast<int>(names.size());
     if (nch == 0 || items.empty())
-        return OK;
+        return true;
 
     nvec_total = affect(names);
     if (nvec_total == 0)
-        return OK;
+        return true;
 
     RowMatrixXf mat_meg_mat = RowMatrixXf::Zero(nvec_total, nch);
     RowMatrixXf mat_eeg_mat = RowMatrixXf::Zero(nvec_total, nch);
@@ -508,14 +478,14 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
                     vec.data = items[k].vecs->data.row(p);
                     Eigen::Map<Eigen::VectorXf> res_meg(mat_meg_mat.row(nvec_meg).data(), nch);
                     if (vec.pick(names, nch, false, res_meg) == FAIL)
-                        return FAIL;
+                        return false;
                 }
             } else if (items[k].has_eeg) {
                 for (p = 0; p < items[k].nvec; p++, nvec_eeg++) {
                     vec.data = items[k].vecs->data.row(p);
                     Eigen::Map<Eigen::VectorXf> res_eeg(mat_eeg_mat.row(nvec_eeg).data(), nch);
                     if (vec.pick(names, nch, false, res_eeg) == FAIL)
-                        return FAIL;
+                        return false;
                 }
             }
         }
@@ -558,7 +528,7 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
     }
     if (nvec_meg + nvec_eeg == 0) {
         BASELIB::Log::warning("No projection remains after excluding bad channels. Omitting projection.");
-        return OK;
+        return true;
     }
     /*
      * Proceed to SVD
@@ -614,41 +584,28 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
                 proj_data(p, k) = 0.0;
         }
 
-    return OK;
+    return true;
 }
 
 //=============================================================================================================
 
-int MNEProjOp::make_proj()
-{
-    return make_proj_bad(StringList());
-}
-
-//=============================================================================================================
-
-int MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_complement)
+bool MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_complement) const
 {
     if (nvec <= 0)
-        return OK;
+        return true;
 
     if (names.size() != static_cast<std::size_t>(vec.size())) {
         BASELIB::Log::critical("Data vector size does not match projection operator");
-        return FAIL;
+        return false;
     }
 
-    Eigen::VectorXd proj = Eigen::VectorXd::Zero(vec.size());
-
-    for (int p = 0; p < nvec; p++) {
-        double w = vec.dot(proj_data.row(p).cast<double>());
-        proj += w * proj_data.row(p).cast<double>().transpose();
-    }
-
+    const Eigen::MatrixXd u = proj_data.cast<double>();
+    const Eigen::VectorXd proj = u.transpose() * (u * vec);
     if (do_complement)
         vec -= proj;
     else
         vec = proj;
-
-    return OK;
+    return true;
 }
 
 //=============================================================================================================
@@ -678,7 +635,7 @@ BASELIB::Expected<std::unique_ptr<MNEProjOp>> MNEProjOp::make_projection(const s
             }
             if (!all)
                 all = std::make_unique<MNEProjOp>();
-            all->combine(one.get());
+            all->combine(*one);
         }
     }
 
@@ -695,7 +652,7 @@ BASELIB::Expected<std::unique_ptr<MNEProjOp>> MNEProjOp::make_projection(const s
                 }
                 if (!all)
                     all = std::make_unique<MNEProjOp>();
-                all->combine(one.get());
+                all->combine(*one);
             }
         }
     }
@@ -708,7 +665,7 @@ BASELIB::Expected<std::unique_ptr<MNEProjOp>> MNEProjOp::make_projection(const s
 
 //=============================================================================================================
 
-int MNEProjOp::apply_cov(MNECovMatrix* c)
+bool MNEProjOp::apply_cov(MNECovMatrix& c) const
 {
     using RowMatrixXd = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
@@ -716,53 +673,53 @@ int MNEProjOp::apply_cov(MNECovMatrix* c)
     bool do_complement = true;
 
     if (items.empty())
-        return OK;
+        return true;
 
-    if (static_cast<int>(names.size()) != c->ncov || names != c->names) {
+    if (static_cast<int>(names.size()) != c.ncov || names != c.names) {
         BASELIB::Log::critical("Incompatible data in apply_cov");
-        return FAIL;
+        return false;
     }
 
-    RowMatrixXd dcovMat = RowMatrixXd::Zero(c->ncov, c->ncov);
+    RowMatrixXd dcovMat = RowMatrixXd::Zero(c.ncov, c.ncov);
 
-    if (c->cov_diag.size() > 0) {
-        for (j = 0, p = 0; j < c->ncov; j++)
-            for (k = 0; k < c->ncov; k++)
-                dcovMat(j, k) = (j == k) ? c->cov_diag[j] : 0;
+    if (c.cov_diag.size() > 0) {
+        for (j = 0, p = 0; j < c.ncov; j++)
+            for (k = 0; k < c.ncov; k++)
+                dcovMat(j, k) = (j == k) ? c.cov_diag[j] : 0;
     } else {
-        for (j = 0, p = 0; j < c->ncov; j++)
+        for (j = 0, p = 0; j < c.ncov; j++)
             for (k = 0; k <= j; k++)
-                dcovMat(j, k) = c->cov[p++];
-        for (j = 0; j < c->ncov; j++)
-            for (k = j + 1; k < c->ncov; k++)
+                dcovMat(j, k) = c.cov[p++];
+        for (j = 0; j < c.ncov; j++)
+            for (k = j + 1; k < c.ncov; k++)
                 dcovMat(j, k) = dcovMat(k, j);
     }
 
-    for (k = 0; k < c->ncov; k++) {
-        Eigen::Map<Eigen::VectorXd> row_k(dcovMat.row(k).data(), c->ncov);
-        if (project_dvector(row_k, do_complement) != OK)
-            return FAIL;
+    for (k = 0; k < c.ncov; k++) {
+        Eigen::Map<Eigen::VectorXd> row_k(dcovMat.row(k).data(), c.ncov);
+        if (!project_dvector(row_k, do_complement))
+            return false;
     }
 
     dcovMat.transposeInPlace();
 
-    for (k = 0; k < c->ncov; k++) {
-        Eigen::Map<Eigen::VectorXd> row_k(dcovMat.row(k).data(), c->ncov);
-        if (project_dvector(row_k, do_complement) != OK)
-            return FAIL;
+    for (k = 0; k < c.ncov; k++) {
+        Eigen::Map<Eigen::VectorXd> row_k(dcovMat.row(k).data(), c.ncov);
+        if (!project_dvector(row_k, do_complement))
+            return false;
     }
 
-    if (c->cov_diag.size() > 0) {
-        for (j = 0; j < c->ncov; j++) {
-            c->cov_diag[j] = dcovMat(j, j);
+    if (c.cov_diag.size() > 0) {
+        for (j = 0; j < c.ncov; j++) {
+            c.cov_diag[j] = dcovMat(j, j);
         }
-        c->cov.resize(0);
+        c.cov.resize(0);
     } else {
-        for (j = 0, p = 0; j < c->ncov; j++)
+        for (j = 0, p = 0; j < c.ncov; j++)
             for (k = 0; k <= j; k++)
-                c->cov[p++] = dcovMat(j, k);
+                c.cov[p++] = dcovMat(j, k);
     }
 
-    c->nproj = affect(c->names);
-    return OK;
+    c.nproj = affect(c.names);
+    return true;
 }

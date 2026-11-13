@@ -133,10 +133,10 @@ void TestMneCovPython::initTestCase()
     m_proj = std::move(*made);
     QVERIFY(m_proj);
     m_proj->assign_channels(m_names);
-    QCOMPARE(m_proj->make_proj(), 0);
+    QVERIFY(m_proj->make_proj());
     QCOMPARE(m_proj->nvec, 3);
     m_projected = m_raw;
-    QCOMPARE(m_proj->project_vector(m_projected, true), 0);
+    QVERIFY(m_proj->project_vector(m_projected, true));
     QVERIFY(std::abs(m_projected.cast<double>().norm() - 8.34902414341237e-11) < 1e-6 * 8.34902414341237e-11);
 }
 
@@ -148,7 +148,7 @@ std::unique_ptr<MNECovMatrix> TestMneCovPython::projectedNoise() const
     if (!cov)
         return nullptr;
     auto picked = cov->pick_chs_omit(m_names, static_cast<int>(m_names.size()), false, m_evoked.info.chs);
-    if (!picked || m_proj->apply_cov(picked.get()) != 0 || picked->classify_channels(m_evoked.info.chs, static_cast<int>(m_names.size())) != 0)
+    if (!picked || !m_proj->apply_cov(*picked) || picked->classify_channels(m_evoked.info.chs, static_cast<int>(m_names.size())) != 0)
         return nullptr;
     return picked;
 }

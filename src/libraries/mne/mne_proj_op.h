@@ -104,33 +104,20 @@ public:
      * Each item's active_file flag is preserved.
      *
      * @param[in] from   Source operator whose items are copied.
-     *
-     * @return Pointer to this operator.
      */
-    MNEProjOp* combine(MNEProjOp* from);
+    void combine(const MNEProjOp& from);
 
     /**
-     * @brief Add a projection item with an explicit active/inactive state.
+     * @brief Add a projection item.
      *
      * The projection kind (MEG/EEG) is auto-detected from channel names.
      *
      * @param[in] vecs       Named matrix holding the projection vectors.
      * @param[in] kind       Projection kind constant.
      * @param[in] desc       Human-readable description of the projection.
-     * @param[in] is_active  Whether the item is active on load.
+     * @param[in] is_active  Whether the item is active.
      */
-    void add_item_active(const MNENamedMatrix* vecs, int kind, const std::string& desc, bool is_active);
-
-    /**
-     * @brief Add a projection item that is active by default.
-     *
-     * Convenience wrapper around add_item_active() with @c is_active = TRUE.
-     *
-     * @param[in] vecs   Named matrix holding the projection vectors.
-     * @param[in] kind   Projection kind constant.
-     * @param[in] desc   Human-readable description of the projection.
-     */
-    void add_item(const MNENamedMatrix* vecs, int kind, const std::string& desc);
+    void add_item(const MNENamedMatrix& vecs, int kind, const std::string& desc, bool is_active = true);
 
     /**
      * @brief Create a deep copy of this projection operator.
@@ -183,9 +170,9 @@ public:
      * @param[in, out] vec            Data vector of length nch.
      * @param[in]      do_complement If true, compute the complement (I - P) * vec.
      *
-     * @return OK on success, FAIL on dimension mismatch.
+     * @return false if @p vec does not have one value per assigned channel.
      */
-    int project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complement);
+    [[nodiscard]] bool project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complement) const;
 
     /**
      * @brief Read all linear projection items from a FIFF tree node.
@@ -265,20 +252,11 @@ public:
      * bad channels are zeroed, and SVD is performed to produce an orthogonal
      * projector matrix stored in proj_data.
      *
-     * @param[in] bad    List of bad channel names.
+     * @param[in] bad    Bad channel names.
      *
-     * @return OK on success, FAIL on error.
+     * @return false if a projection vector cannot be expanded to the assigned channels.
      */
-    int make_proj_bad(const StringList& bad);
-
-    //=========================================================================================================
-    /**
-     * Compile the projection operator via SVD (no bad channels).
-     * Convenience wrapper around make_proj_bad().
-     *
-     * @return OK on success, FAIL on error.
-     */
-    int make_proj();
+    [[nodiscard]] bool make_proj(const StringList& bad = {});
 
     //=========================================================================================================
     /**
@@ -287,9 +265,9 @@ public:
      * @param[in,out] vec             Data vector.
      * @param[in]     do_complement   If true, compute (I - P) * vec.
      *
-     * @return OK on success, FAIL on dimension mismatch.
+     * @return false if @p vec does not have one value per assigned channel.
      */
-    int project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_complement);
+    [[nodiscard]] bool project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_complement) const;
 
     //=========================================================================================================
     /**
@@ -298,9 +276,9 @@ public:
      *
      * @param[in,out] c   The covariance matrix to project.
      *
-     * @return OK on success, FAIL on error.
+     * @return false if @p c is not over the assigned channels.
      */
-    int apply_cov(MNECovMatrix* c);
+    [[nodiscard]] bool apply_cov(MNECovMatrix& c) const;
 
 public:
     std::vector<MNELIB::MNEProjItem> items;                                          /**< The projection items. */

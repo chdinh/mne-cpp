@@ -717,7 +717,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         }
 
         res->proj->assign_channels(res->ch_names);
-        if (res->proj->make_proj() == FAIL)
+        if (!res->proj->make_proj())
             return nullptr;
     } else
         BASELIB::Log::info("No projection will be applied to the data.");
@@ -748,7 +748,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        * Apply the projection operator to the noise-covariance matrix
        */
     if (res->proj && !res->proj->items.empty() && res->proj->nvec > 0) {
-        if (res->proj->apply_cov(res->noise.get()) == FAIL)
+        if (!res->proj->apply_cov(*res->noise))
             return nullptr;
         BASELIB::Log::info("Projection applied to the covariance matrix.");
     }
@@ -837,7 +837,7 @@ bool InvDipoleFitData::print_fields(const Eigen::Vector3f& rd,
         BASELIB::Log::warning("Cannot pick time: {:7.1f} ms", 1000 * time);
         return false;
     }
-    if (fit.proj && fit.proj->project_vector(measured, true) == FAIL)
+    if (fit.proj && !fit.proj->project_vector(measured, true))
         return false;
 
     Eigen::MatrixXf fwd(nch, 3);
@@ -1143,7 +1143,7 @@ bool InvDipoleFitData::fit_one(InvDipoleFitData* fit,
     nchan = fit->nmeg + fit->neeg;
     user.fwd = nullptr;
 
-    if (fit->proj && fit->proj->project_vector(B, true) == FAIL)
+    if (fit->proj && !fit->proj->project_vector(B, true))
         return false;
 
     if (fit->noise->whiten_vector(B, B, nchan) == FAIL)
@@ -1306,7 +1306,7 @@ int InvDipoleFitData::compute_dipole_field(InvDipoleFitData& d, const Eigen::Vec
    * Apply projection
    */
     for (k = 0; k < 3; k++)
-        if (d.proj && d.proj->project_vector(fwd.col(k), true) == FAIL)
+        if (d.proj && !d.proj->project_vector(fwd.col(k), true))
             return FAIL;
 
     /*

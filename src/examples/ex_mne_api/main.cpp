@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
     // The file stores its 4 SSP projectors as inactive; make_projection switches them on
     std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
     proj->assign_channels(mneRaw->ch_names);
-    proj->make_proj();
+    const bool compiled = proj->make_proj();
     const MNEProjItem& firstItem = proj->items[0];
     mneRaw->proj = std::move(proj);
     mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);
@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
                  "MNERawData/MNERawInfo/MNERawBufDef: buffer directory of the sample recording like mne.io.read_raw_fif");
     ok &= expect(sel.pick.minCoeff() >= 0 && near(eegRaw, -1.0122332562412516e-09, 1e-5) && near(eegProj, -4.107782047805238e-10, 1e-4) && near(eegFilt, -1.064022285676407e-09, 1e-3),
                  "MNEChSelection/MNEFilterDef: plain, projected and filtered reads match mne");
-    ok &= expect(mneRaw->proj->items.size() == 4 && mneRaw->proj->nvec == 4 && firstItem.active && firstItem.nvec == 1,
+    ok &= expect(compiled && mneRaw->proj->items.size() == 4 && mneRaw->proj->nvec == 4 && firstItem.active && firstItem.nvec == 1,
                  "MNEProjOp/MNEProjItem: 4 active SSP vectors like raw.info['projs']");
 
     //! [mne_cov_matrix_usage]
@@ -319,21 +319,20 @@ int main(int argc, char* argv[])
     const int nMeg = static_cast<int>(megNames.size());
     std::unique_ptr<MNEProjOp> aveProj = MNEProjOp::make_projection({aveFile.fileName().toStdU16String()}, ave.info.chs).value();
     aveProj->assign_channels(megNames);
-    aveProj->make_proj();
     VectorXf x = ave.data.col(200).cast<float>(); // t = 133 ms
-    aveProj->project_vector(x, true);
+    const bool projected = aveProj->make_proj() && aveProj->project_vector(x, true);
 
     auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
     const int ncovFile = noise->ncov;
     auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
-    aveProj->apply_cov(noiseMeg.get());
+    const bool covProjected = aveProj->apply_cov(*noiseMeg);
     noiseMeg->classify_channels(ave.info.chs, nMeg);
     noiseMeg->decompose_eigen(); // the 3 projected directions become zero eigenvalues
     VectorXf whitened(nMeg);
     noiseMeg->whiten_vector(x, whitened, nMeg);
     //! [mne_cov_matrix_usage]
     // mne.read_cov: 366 channels, nfree 15972; x^T pinv(P C P) x with P the 3 SSP vectors: 1462.05
-    ok &= expect(ncovFile == 366 && noise->nfree == 15972 && !noise->is_diag() && noiseMeg->nzero == 3 && near(whitened.cast<double>().squaredNorm(), 1462.0502702959539, 1e-4),
+    ok &= expect(projected && covProjected && ncovFile == 366 && noise->nfree == 15972 && !noise->is_diag() && noiseMeg->nzero == 3 && near(whitened.cast<double>().squaredNorm(), 1462.0502702959539, 1e-4),
                  "MNECovMatrix: projected noise covariance whitens like mne's pseudo-inverse");
 
     //! [mne_ctf_comp_data_set_usage]

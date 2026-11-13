@@ -132,7 +132,7 @@ private slots:
 
         MNENamedMatrix nm(*nm_ptr);
 
-        op.add_item(&nm, 1, "Test SSP vector");
+        op.add_item(nm, 1, "Test SSP vector");
         QCOMPARE(op.items.size(), std::size_t{1});
         QVERIFY(!op.items.empty());
         QCOMPARE(op.items[0].desc, QString("Test SSP vector"));
@@ -150,11 +150,11 @@ private slots:
 
         MNENamedMatrix nm(*nm_ptr);
 
-        op.add_item_active(&nm, 1, "Active SSP", 1);
+        op.add_item(nm, 1, "Active SSP", 1);
         QCOMPARE(op.items.size(), std::size_t{1});
         QCOMPARE(op.items[0].active, 1);
 
-        op.add_item_active(&nm, 1, "Inactive SSP", 0);
+        op.add_item(nm, 1, "Inactive SSP", 0);
         QCOMPARE(op.items.size(), std::size_t{2});
         QCOMPARE(op.items[1].active, 0);
     }
@@ -170,7 +170,7 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(2, 3, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "Vec set");
+        op.add_item(nm, 1, "Vec set");
 
         auto dup = op.dup();
         QVERIFY(dup != nullptr);
@@ -188,7 +188,7 @@ private slots:
         auto nm1_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
 
         MNENamedMatrix nm1(*nm1_ptr);
-        op1.add_item(&nm1, 1, "First");
+        op1.add_item(nm1, 1, "First");
 
         MNEProjOp op2;
         Eigen::MatrixXf data2(1, 2);
@@ -196,9 +196,9 @@ private slots:
         auto nm2_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data2);
 
         MNENamedMatrix nm2(*nm2_ptr);
-        op2.add_item(&nm2, 1, "Second");
+        op2.add_item(nm2, 1, "Second");
 
-        op1.combine(&op2);
+        op1.combine(op2);
         QCOMPARE(op1.items.size(), std::size_t{2});
     }
 
@@ -212,7 +212,7 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "Test");
+        op.add_item(nm, 1, "Test");
 
         op.free_proj();
         QVERIFY(op.names.empty());
@@ -231,7 +231,7 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "SSP");
+        op.add_item(nm, 1, "SSP");
 
         StringList chList = {"MEG 0111", "MEG 0112", "MEG 0113", "MEG 0121"};
         op.assign_channels(chList);
@@ -248,12 +248,12 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "SSP");
+        op.add_item(nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
         op.assign_channels(chList);
-        int rc = op.make_proj();
-        QVERIFY(rc >= 0);
+        QVERIFY(op.make_proj());
+        QCOMPARE(op.nvec, 1);
     }
 
     void testProjOpChannelGroupsMatchNamePrefixes()
@@ -264,18 +264,18 @@ private slots:
         data << 0.5f, 0.5f, 0.5f, 0.5f;
         MNENamedMatrix meg(*MNENamedMatrix::build(1, 4, {"v1"}, names, data));
         MNEProjOp op;
-        op.add_item(&meg, FIFFV_PROJ_ITEM_FIELD, "SSP");
+        op.add_item(meg, FIFFV_PROJ_ITEM_FIELD, "SSP");
         QVERIFY(op.items[0].has_meg);
         QVERIFY(!op.items[0].has_eeg);
         op.assign_channels(names);
-        QCOMPARE(op.make_proj(), 0);
+        QVERIFY(op.make_proj());
         QCOMPARE(op.nvec, 1);
         QVERIFY((op.proj_data.row(0).array().abs() > 0.4f).all());
 
         const StringList others = {"REF_EEG 1", "REF_EEG 2"};
         MNENamedMatrix ref(*MNENamedMatrix::build(1, 2, {"v1"}, others, Eigen::MatrixXf::Ones(1, 2)));
         MNEProjOp unnamed;
-        unnamed.add_item(&ref, FIFFV_PROJ_ITEM_FIELD, "SSP");
+        unnamed.add_item(ref, FIFFV_PROJ_ITEM_FIELD, "SSP");
         QVERIFY(unnamed.items[0].has_meg);
         QVERIFY(!unnamed.items[0].has_eeg);
     }
@@ -293,21 +293,22 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "SSP");
+        op.add_item(nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
         op.assign_channels(chList);
-        op.make_proj();
+        QVERIFY(op.make_proj());
 
         // Project a vector
         Eigen::VectorXf vec(3);
         vec << 1.0f, 2.0f, 3.0f;
         float origNorm2 = vec.squaredNorm();
-        int rc = op.project_vector(vec, false);
-        QVERIFY(rc >= 0);
-        // Verify projection modified the vector
-        float newNorm2 = vec.squaredNorm();
-        QVERIFY(newNorm2 <= origNorm2 + 1e-5f);
+        QVERIFY(op.project_vector(vec, false));
+        // Projecting (1, 2, 3) onto (1, 1, 1) / sqrt(3) gives its mean in every channel
+        QVERIFY((vec.array() - 2.0f).abs().maxCoeff() < 1e-5f);
+        QVERIFY(vec.squaredNorm() <= origNorm2);
+        Eigen::VectorXf shorter(2);
+        QVERIFY(!op.project_vector(shorter, false));
     }
 
     void testProjOpProjectDvector()
@@ -322,17 +323,16 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "SSP");
+        op.add_item(nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2"};
         op.assign_channels(chList);
-        op.make_proj();
+        QVERIFY(op.make_proj());
 
         Eigen::VectorXd dvec(2);
         dvec << 1.0, 2.0;
         double origNorm = dvec.norm();
-        int rc = op.project_dvector(dvec, false);
-        QVERIFY(rc >= 0);
+        QVERIFY(op.project_dvector(dvec, false));
         QVERIFY(dvec.norm() <= origNorm + 1e-5);
     }
 
@@ -346,7 +346,7 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "SSP");
+        op.add_item(nm, 1, "SSP");
 
         StringList testChs = {"MEG 0111", "MEG 0112"};
         int n = op.affect(testChs);
@@ -397,20 +397,24 @@ private slots:
         auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
-        op.add_item(&nm, 1, "SSP");
+        op.add_item(nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
         op.assign_channels(chList);
-        op.make_proj();
+        QVERIFY(op.make_proj());
 
         // Create a covariance matrix
         StringList covNames = colNames;
         Eigen::VectorXd covDiag = Eigen::VectorXd::Ones(3);
         MNECovMatrix cov(FIFFV_MNE_NOISE_COV, 3, covNames, covDiag, covDiag, nullptr);
 
-        int rc = op.apply_cov(&cov);
-        // apply_cov exercises projection on covariance
-        QVERIFY(rc >= 0 || rc == -1); // -1 if dimensions mismatch, still exercises the code
+        // (I - u u^T) I (I - u u^T) with u = (1, 1, 1) / sqrt(3) keeps 2/3 on the diagonal
+        QVERIFY(op.apply_cov(cov));
+        QVERIFY((cov.cov_diag.array() - 2.0 / 3.0).abs().maxCoeff() < 1e-6);
+        QCOMPARE(cov.nproj, 1);
+
+        MNECovMatrix other(FIFFV_MNE_NOISE_COV, 3, {"ch1", "ch2", "ch4"}, covDiag, covDiag, nullptr);
+        QVERIFY(!op.apply_cov(other));
     }
 
     // ── MNECtfCompDataSet ───────────────────────────────────────────────────

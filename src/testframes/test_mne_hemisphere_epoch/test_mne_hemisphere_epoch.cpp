@@ -514,7 +514,7 @@ private slots:
         data << 1.0f, 0.0f, 0.0f;
 
         auto nm = MNENamedMatrix::build(1, 3, rows, cols, data);
-        op.add_item(nm.get(), 1, "test proj");
+        op.add_item(*nm, 1, "test proj");
         QCOMPARE(op.items.size(), std::size_t{1});
     }
 
@@ -527,7 +527,7 @@ private slots:
         data << 1.0f, 0.0f;
 
         auto nm = MNENamedMatrix::build(1, 2, rows, cols, data);
-        op.add_item(nm.get(), 1, "test");
+        op.add_item(*nm, 1, "test");
 
         auto dup = op.dup();
         QVERIFY(dup != nullptr);

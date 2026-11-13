@@ -1089,7 +1089,7 @@ private slots:
         auto vecs = MNENamedMatrix::build(1, 3, rowlist, collist, data);
         QVERIFY(vecs != nullptr);
 
-        projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test projection");
+        projOp.add_item(*vecs, FIFFV_PROJ_ITEM_FIELD, "Test projection");
         QCOMPARE(projOp.items.size(), std::size_t{1});
 
         // dup creates a deep copy
@@ -1107,7 +1107,7 @@ private slots:
         data << 0.707f, 0.707f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
 
-        projOp.add_item_active(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Active proj", 0);
+        projOp.add_item(*vecs, FIFFV_PROJ_ITEM_FIELD, "Active proj", 0);
         QCOMPARE(projOp.items.size(), std::size_t{1});
     }
 
@@ -1119,15 +1119,15 @@ private slots:
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
-        projOp1.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Proj1");
+        projOp1.add_item(*vecs, FIFFV_PROJ_ITEM_FIELD, "Proj1");
 
         MNEProjOp projOp2;
         MatrixXf data2(1, 2);
         data2 << 0.0f, 1.0f;
         auto vecs2 = MNENamedMatrix::build(1, 2, rowlist, collist, data2);
-        projOp2.add_item(vecs2.get(), FIFFV_PROJ_ITEM_FIELD, "Proj2");
+        projOp2.add_item(*vecs2, FIFFV_PROJ_ITEM_FIELD, "Proj2");
 
-        projOp1.combine(&projOp2);
+        projOp1.combine(projOp2);
         QCOMPARE(projOp1.items.size(), std::size_t{2});
     }
 
@@ -1139,7 +1139,7 @@ private slots:
         MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
         auto vecs = MNENamedMatrix::build(1, 3, rowlist, collist, data);
-        projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test proj");
+        projOp.add_item(*vecs, FIFFV_PROJ_ITEM_FIELD, "Test proj");
 
         // assign_channels
         StringList chanNames{"ch1", "ch2", "ch3"};
@@ -1147,7 +1147,7 @@ private slots:
         QCOMPARE(projOp.names, chanNames);
 
         // make_proj builds the projection data
-        QCOMPARE(projOp.make_proj(), 0);
+        QVERIFY(projOp.make_proj());
     }
 
     void projOp_affect()
@@ -1158,7 +1158,7 @@ private slots:
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
-        projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test");
+        projOp.add_item(*vecs, FIFFV_PROJ_ITEM_FIELD, "Test");
 
         QCOMPARE(projOp.affect(StringList{"ch1", "ch2", "ch3"}), 1);
         // A channel whose weights are all zero is not affected
@@ -1173,7 +1173,7 @@ private slots:
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
-        projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "ReportTest");
+        projOp.add_item(*vecs, FIFFV_PROJ_ITEM_FIELD, "ReportTest");
 
         std::ostringstream out;
         projOp.report(out, "test_proj");

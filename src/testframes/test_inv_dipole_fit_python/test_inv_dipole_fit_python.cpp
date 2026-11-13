@@ -362,7 +362,7 @@ void TestInvDipoleFitPython::bemForwardMatches()
         QCOMPARE(lines.size(), 364);
         VectorXf projected = g * truthMoment(0);
         QVERIFY(fitData->proj);
-        QCOMPARE(fitData->proj->project_vector(projected, true), 0);
+        QVERIFY(fitData->proj->project_vector(projected, true));
         for (const int k : {0, 304, 305, 363}) {
             const QStringList cols = lines[k].split('\t');
             QCOMPARE(cols[0], fitData->ch_names[k]);
