@@ -855,7 +855,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
     RowMajorMatrixXf* values;
     Eigen::VectorXf deriv_pvalues_vec;
 
-    if (!proj || (sel && !proj->affect(sel->chspick, sel->nchan) && !proj->affect(sel->chspick_nospace, sel->nchan)))
+    if (!proj || (sel && !proj->affect(std::span(sel->chspick).first(static_cast<std::size_t>(sel->nchan))) && !proj->affect(std::span(sel->chspick_nospace).first(static_cast<std::size_t>(sel->nchan)))))
         return pick_data(sel, firsts, picked);
 
     if (firsts < first_samp) {

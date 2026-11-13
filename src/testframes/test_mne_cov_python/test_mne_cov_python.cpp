@@ -128,9 +128,11 @@ void TestMneCovPython::initTestCase()
     QVERIFY(std::abs(m_evoked.times[200] - 0.1331968087722586) < 1e-6);
     m_raw = m_evoked.data.col(200).cast<float>();
 
-    QVERIFY(MNEProjOp::makeProjection({aveFile.fileName().toStdU16String()}, m_evoked.info.chs, static_cast<int>(m_names.size()), m_proj));
+    auto made = MNEProjOp::make_projection({aveFile.fileName().toStdU16String()}, std::span(m_evoked.info.chs).first(m_names.size()));
+    QVERIFY(made && *made);
+    m_proj = std::move(*made);
     QVERIFY(m_proj);
-    QCOMPARE(m_proj->assign_channels(m_names, static_cast<int>(m_names.size())), 0);
+    m_proj->assign_channels(m_names);
     QCOMPARE(m_proj->make_proj(), 0);
     QCOMPARE(m_proj->nvec, 3);
     m_projected = m_raw;
@@ -172,7 +174,7 @@ void TestMneCovPython::readsHeader()
     QCOMPARE(cov->bads, StringList({"MEG 2443", "EEG 053"}));
     QVERIFY(!cov->is_diag());
     QVERIFY(cov->proj);
-    QCOMPARE(cov->proj->nitems, 4);
+    QCOMPARE(cov->proj->items.size(), std::size_t{4});
 
     // np.tril(cov.data).sum(): the packed lower triangle.
     QVERIFY(std::abs(cov->cov.sum() - 5.77960081287843e-10) < 1e-9 * 5.77960081287843e-10);

@@ -252,9 +252,10 @@ void TestMneRawDataPython::padsOutsideData()
     }
 
     // Projected reads pad the same way
-    std::unique_ptr<MNEProjOp> proj;
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, m_raw->info->chInfo, m_raw->info->nchan, proj));
-    QCOMPARE(proj->assign_channels(m_raw->ch_names, m_raw->info->nchan), 0);
+    auto made = MNEProjOp::make_projection({m_rawPath.toStdU16String()}, m_raw->info->chInfo);
+    QVERIFY(made && *made);
+    std::unique_ptr<MNEProjOp> proj = std::move(*made);
+    proj->assign_channels(m_raw->ch_names);
     QCOMPARE(proj->make_proj(), 0);
     m_raw->proj = std::move(proj);
     for (MNEChSelection* picks : {&sel, static_cast<MNEChSelection*>(nullptr)}) {
@@ -289,16 +290,16 @@ void TestMneRawDataPython::projectsSegment()
     QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, plain.values), 0);
     QVERIFY(closeTo(plain.values.cast<double>().cwiseAbs().sum(), 1.8063671136130195e-07, 1e-5));
 
-    // The file stores its projectors as inactive; makeProjection switches them on, as MNE-C does.
+    // The file stores its projectors as inactive; make_projection switches them on, as MNE-C does.
     std::unique_ptr<MNEProjOp> idle = MNEProjOp::read(m_rawPath.toStdU16String());
     QVERIFY(idle);
-    QCOMPARE(idle->nitems, 4);
+    QCOMPARE(idle->items.size(), std::size_t{4});
     QCOMPARE(idle->items[0].active, false);
-    std::unique_ptr<MNEProjOp> proj;
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, m_raw->info->chInfo, m_raw->info->nchan, proj));
-    QVERIFY(proj);
-    QCOMPARE(proj->nitems, 4);
-    QCOMPARE(proj->assign_channels(m_raw->ch_names, m_raw->info->nchan), 0);
+    auto made = MNEProjOp::make_projection({m_rawPath.toStdU16String()}, m_raw->info->chInfo);
+    QVERIFY(made && *made);
+    std::unique_ptr<MNEProjOp> proj = std::move(*made);
+    QCOMPARE(proj->items.size(), std::size_t{4});
+    proj->assign_channels(m_raw->ch_names);
     QCOMPARE(proj->make_proj(), 0);
     QCOMPARE(proj->nvec, 4);
     m_raw->proj = std::move(proj);
@@ -324,9 +325,10 @@ void TestMneRawDataPython::projectsSegment()
                                                                  : stim)
             .push_back(ch);
     }
-    QVERIFY(MNEProjOp::makeProjection({}, eeg, static_cast<int>(eeg.size()), proj));
-    QVERIFY(proj);
-    QCOMPARE(proj->nitems, 1);
+    made = MNEProjOp::make_projection({}, eeg);
+    QVERIFY(made && *made);
+    proj = std::move(*made);
+    QCOMPARE(proj->items.size(), std::size_t{1});
     QCOMPARE(proj->items[0].kind, FIFFV_MNE_PROJ_ITEM_EEG_AVREF);
     QCOMPARE(proj->items[0].vecs->ncol, static_cast<int>(eeg.size()));
     QVERIFY(std::fabs(proj->items[0].vecs->data(0, 0) - 1.0 / std::sqrt(static_cast<double>(eeg.size()))) < 1e-7);
@@ -338,19 +340,20 @@ void TestMneRawDataPython::projectsSegment()
     QVERIFY(listing.contains(QString::fromStdString(std::format("{:<10} {:<10} ", eeg[0].ch_name, eeg[1].ch_name))));
     const std::string weight = std::format("{:10.5g}  ", 1.0 / std::sqrt(static_cast<double>(eeg.size())));
     QVERIFY2(listing.contains(QString::fromStdString(weight + "         0  " + weight)), qPrintable(listing));
-    QVERIFY(MNEProjOp::makeProjection({}, meg, static_cast<int>(meg.size()), proj));
-    QVERIFY(!proj);
+    made = MNEProjOp::make_projection({}, meg);
+    QVERIFY(made && !*made);
     // Projectors that touch none of the channels are dropped, and an unreadable file fails
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, stim, static_cast<int>(stim.size()), proj));
-    QVERIFY(!proj);
-    QVERIFY(!MNEProjOp::makeProjection({(m_rawPath + QStringLiteral(".missing")).toStdU16String()}, meg, static_cast<int>(meg.size()), proj));
+    made = MNEProjOp::make_projection({m_rawPath.toStdU16String()}, stim);
+    QVERIFY(made && !*made);
+    made = MNEProjOp::make_projection({(m_rawPath + QStringLiteral(".missing")).toStdU16String()}, meg);
+    QVERIFY(!made);
+    QCOMPARE(made.error().code, BASELIB::ErrorCode::Io);
 
     // Bad channels are left out of the vectors before orthogonalisation (mne make_projector(projs, ch_names, bads)):
     // the average EEG reference then spans 59 channels, and with every EEG channel bad it disappears
     const auto projector = [&](const StringList& bads, int& nvec) {
-        std::unique_ptr<MNEProjOp> op;
-        MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, m_raw->info->chInfo, m_raw->info->nchan, op);
-        op->assign_channels(m_raw->ch_names, m_raw->info->nchan);
+        std::unique_ptr<MNEProjOp> op = std::move(MNEProjOp::make_projection({m_rawPath.toStdU16String()}, m_raw->info->chInfo).value());
+        op->assign_channels(m_raw->ch_names);
         op->make_proj_bad(bads);
         nvec = op->nvec;
         const Eigen::MatrixXd u = op->proj_data.cast<double>();
@@ -525,9 +528,10 @@ void TestMneRawDataPython::picksDerivedChannel()
     sel.chspick = sel.chspick_nospace = {"BIP", "MEG 0111", "MEG 0121"};
 
     // The projected path derives from projected inputs; the read starts before the data to cover the zero padding
-    std::unique_ptr<MNEProjOp> proj;
-    QVERIFY(MNEProjOp::makeProjection({m_rawPath.toStdU16String()}, raw->info->chInfo, raw->info->nchan, proj));
-    QCOMPARE(proj->assign_channels(raw->ch_names, raw->info->nchan), 0);
+    auto made = MNEProjOp::make_projection({m_rawPath.toStdU16String()}, raw->info->chInfo);
+    QVERIFY(made && *made);
+    std::unique_ptr<MNEProjOp> proj = std::move(*made);
+    proj->assign_channels(raw->ch_names);
     QCOMPARE(proj->make_proj(), 0);
 
     const int first = raw->first_samp + 2990;

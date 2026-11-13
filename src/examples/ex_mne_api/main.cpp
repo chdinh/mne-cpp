@@ -287,10 +287,9 @@ int main(int argc, char* argv[])
     mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
     const double eegFilt = segment(1, 0);
 
-    // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
-    std::unique_ptr<MNEProjOp> proj;
-    MNEProjOp::makeProjection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo, rawInfo.nchan, proj);
-    proj->assign_channels(mneRaw->ch_names, rawInfo.nchan);
+    // The file stores its 4 SSP projectors as inactive; make_projection switches them on
+    std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
+    proj->assign_channels(mneRaw->ch_names);
     proj->make_proj();
     const MNEProjItem& firstItem = proj->items[0];
     mneRaw->proj = std::move(proj);
@@ -303,7 +302,7 @@ int main(int argc, char* argv[])
                  "MNERawData/MNERawInfo/MNERawBufDef: buffer directory of the sample recording like mne.io.read_raw_fif");
     ok &= expect(sel.pick.minCoeff() >= 0 && near(eegRaw, -1.0122332562412516e-09, 1e-5) && near(eegProj, -4.107782047805238e-10, 1e-4) && near(eegFilt, -1.064022285676407e-09, 1e-3),
                  "MNEChSelection/MNEFilterDef: plain, projected and filtered reads match mne");
-    ok &= expect(mneRaw->proj->nitems == 4 && mneRaw->proj->nvec == 4 && firstItem.active && firstItem.nvec == 1,
+    ok &= expect(mneRaw->proj->items.size() == 4 && mneRaw->proj->nvec == 4 && firstItem.active && firstItem.nvec == 1,
                  "MNEProjOp/MNEProjItem: 4 active SSP vectors like raw.info['projs']");
 
     //! [mne_cov_matrix_usage]
@@ -318,9 +317,8 @@ int main(int argc, char* argv[])
     }
     ave = ave.pick_channels(megNames);
     const int nMeg = static_cast<int>(megNames.size());
-    std::unique_ptr<MNEProjOp> aveProj;
-    MNEProjOp::makeProjection({aveFile.fileName().toStdU16String()}, ave.info.chs, nMeg, aveProj);
-    aveProj->assign_channels(megNames, nMeg);
+    std::unique_ptr<MNEProjOp> aveProj = MNEProjOp::make_projection({aveFile.fileName().toStdU16String()}, ave.info.chs).value();
+    aveProj->assign_channels(megNames);
     aveProj->make_proj();
     VectorXf x = ave.data.col(200).cast<float>(); // t = 133 ms
     aveProj->project_vector(x, true);

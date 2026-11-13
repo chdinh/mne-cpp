@@ -353,6 +353,17 @@ aliases; replace the old spelling as below.
   on the same line as the count instead of one log message per name.
 - `MNERawInfo::ndir` is gone; it always equalled `rawDir.size()`. Migration:
   use `rawDir.size()`.
+- `MNEProjOp` and `MNEProjItem` take channel lists as `std::span` instead of a
+  list plus a count, `MNEProjItem::affect` returns `bool`, and `MNEProjOp`
+  loses `nitems` and `nch` (use `items.size()` and `names.size()`).
+  `assign_channels` returns nothing. `makeProjection(files, chs, nch, result)`
+  is `make_projection(files, chs)` and returns
+  `BASELIB::Expected<std::unique_ptr<MNEProjOp>>`: nullptr when the projection
+  would not affect the channels, an `Io` error for an unreadable file.
+  Migration: `op.affect(list, n)` becomes `op.affect(list)` (or
+  `op.affect(std::span(list).first(n))` for a prefix);
+  `MNEProjOp::makeProjection(files, chs, nch, proj)` becomes
+  `auto proj = MNEProjOp::make_projection(files, chs)`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

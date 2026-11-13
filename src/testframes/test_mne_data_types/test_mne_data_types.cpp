@@ -1072,9 +1072,9 @@ private slots:
     {
         MNEProjOp projOp;
         // Initially empty
-        QCOMPARE(projOp.nitems, 0);
+        QVERIFY(projOp.items.empty());
         projOp.free_proj();
-        QCOMPARE(projOp.nitems, 0);
+        QVERIFY(projOp.items.empty());
     }
 
     void projOp_addItemAndDup()
@@ -1090,12 +1090,12 @@ private slots:
         QVERIFY(vecs != nullptr);
 
         projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test projection");
-        QCOMPARE(projOp.nitems, 1);
+        QCOMPARE(projOp.items.size(), std::size_t{1});
 
         // dup creates a deep copy
         auto dup = projOp.dup();
         QVERIFY(dup != nullptr);
-        QCOMPARE(dup->nitems, 1);
+        QCOMPARE(dup->items.size(), std::size_t{1});
     }
 
     void projOp_addItemActive()
@@ -1108,7 +1108,7 @@ private slots:
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
 
         projOp.add_item_active(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Active proj", 0);
-        QCOMPARE(projOp.nitems, 1);
+        QCOMPARE(projOp.items.size(), std::size_t{1});
     }
 
     void projOp_combine()
@@ -1128,7 +1128,7 @@ private slots:
         projOp2.add_item(vecs2.get(), FIFFV_PROJ_ITEM_FIELD, "Proj2");
 
         projOp1.combine(&projOp2);
-        QCOMPARE(projOp1.nitems, 2);
+        QCOMPARE(projOp1.items.size(), std::size_t{2});
     }
 
     void projOp_assignAndMakeProj()
@@ -1143,12 +1143,11 @@ private slots:
 
         // assign_channels
         StringList chanNames{"ch1", "ch2", "ch3"};
-        int ret = projOp.assign_channels(chanNames, 3);
-        QCOMPARE(ret, 0);
+        projOp.assign_channels(chanNames);
+        QCOMPARE(projOp.names, chanNames);
 
         // make_proj builds the projection data
-        ret = projOp.make_proj();
-        QCOMPARE(ret, 0);
+        QCOMPARE(projOp.make_proj(), 0);
     }
 
     void projOp_affect()
@@ -1161,9 +1160,9 @@ private slots:
         auto vecs = MNENamedMatrix::build(1, 2, rowlist, collist, data);
         projOp.add_item(vecs.get(), FIFFV_PROJ_ITEM_FIELD, "Test");
 
-        StringList chList{"ch1", "ch2", "ch3"};
-        int nAffect = projOp.affect(chList, 3);
-        QVERIFY(nAffect >= 0);
+        QCOMPARE(projOp.affect(StringList{"ch1", "ch2", "ch3"}), 1);
+        // A channel whose weights are all zero is not affected
+        QCOMPARE(projOp.affect(StringList{"ch2", "ch3"}), 0);
     }
 
     void projOp_report()

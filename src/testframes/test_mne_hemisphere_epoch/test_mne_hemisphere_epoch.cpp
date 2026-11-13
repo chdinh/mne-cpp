@@ -502,7 +502,7 @@ private slots:
     void projOp_defaultCtor()
     {
         MNEProjOp op;
-        QCOMPARE(op.nitems, 0);
+        QVERIFY(op.items.empty());
     }
 
     void projOp_addItem()
@@ -515,7 +515,7 @@ private slots:
 
         auto nm = MNENamedMatrix::build(1, 3, rows, cols, data);
         op.add_item(nm.get(), 1, "test proj");
-        QCOMPARE(op.nitems, 1);
+        QCOMPARE(op.items.size(), std::size_t{1});
     }
 
     void projOp_dup()
@@ -531,14 +531,14 @@ private slots:
 
         auto dup = op.dup();
         QVERIFY(dup != nullptr);
-        QCOMPARE(dup->nitems, 1);
+        QCOMPARE(dup->items.size(), std::size_t{1});
     }
 
     void projOp_freeProj()
     {
         MNEProjOp op;
         op.free_proj();
-        QCOMPARE(op.nitems, 0);
+        QVERIFY(op.items.empty());
     }
 
     //=========================================================================

@@ -27,11 +27,13 @@
 
 #include <filesystem>
 #include <ostream>
+#include <span>
 #include <string>
 #include <vector>
 #include "mne_named_matrix.h"
 #include "mne_proj_item.h"
 
+#include <base/error.h>
 #include <fiff/fiff_types.h>
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_dir_node.h>
@@ -91,7 +93,7 @@ public:
     /**
      * @brief Release the compiled projector data.
      *
-     * Clears @ref proj_data, @ref names, @ref nch, and @ref nvec without
+     * Clears @ref proj_data, @ref names and @ref nvec without
      * touching the underlying projection items.
      */
     void free_proj();
@@ -145,37 +147,31 @@ public:
      * Builds a uniform-weight vector (\f$1/\sqrt{N_{\text{EEG}}}\f$)
      * across all EEG channels.
      *
-     * @param[in] chs   Channel information list.
-     * @param[in] nch   Number of channels.
+     * @param[in] chs   Channels to search for EEG channels.
      *
-     * @return A new projection operator, or NULL if no EEG channels are found.
-     *         Caller takes ownership.
+     * @return A new projection operator, or nullptr if no EEG channels are found.
      */
-    static std::unique_ptr<MNEProjOp> create_average_eeg_ref(const std::vector<FIFFLIB::FiffChInfo>& chs, int nch);
+    static std::unique_ptr<MNEProjOp> create_average_eeg_ref(std::span<const FIFFLIB::FiffChInfo> chs);
 
     /**
      * Count how many active projection vectors affect a given list of
      * channel names.
      *
-     * @param[in] list    List of channel names to test.
-     * @param[in] nlist   Number of channel names.
+     * @param[in] list    Channel names to test.
      *
      * @return Number of projection vectors that affect at least one channel
      *         in the list (0 if none).
      */
-    int affect(const StringList& list, int nlist);
+    int affect(std::span<const std::string> list) const;
 
     /**
      * Count how many active projection vectors affect the given channels.
-     * Convenience wrapper that extracts channel names and delegates to
-     * affect().
      *
-     * @param[in] chs   Channel information list.
-     * @param[in] nChan   Number of channels.
+     * @param[in] chs   Channels to test.
      *
-     * @return Number of affecting projection vectors (0 if none or nch == 0).
+     * @return Number of affecting projection vectors (0 if none).
      */
-    int affect_chs(const std::vector<FIFFLIB::FiffChInfo>& chs, int nChan);
+    int affect_chs(std::span<const FIFFLIB::FiffChInfo> chs) const;
 
     /**
      * Apply the compiled projection operator to a data vector in-place.
@@ -219,23 +215,18 @@ public:
      *
      * Reads projection items from each file in @p projnames, and if EEG
      * channels are present adds an average EEG reference projector when none
-     * is found. Returns nullptr if the resulting projector does not affect
-     * any of the given channels.
+     * is found.
      *
      * Refactored: make_projection (dipole_fit_setup.c)
      *
-     * @param[in]  projnames  List of FIFF file paths containing projection data.
-     * @param[in]  chs        Channel information list.
-     * @param[in]  nch        Number of channels.
-     * @param[out] result     The combined projection operator (nullptr when
-     *                        no projection is needed).
+     * @param[in] projnames  FIFF files containing projection data.
+     * @param[in] chs        The selected channels.
      *
-     * @return true on success, false on read error.
+     * @return The combined projection operator, nullptr when it would not affect
+     *         any of @p chs, or the error of a file that cannot be read.
      */
-    static bool makeProjection(const std::vector<std::filesystem::path>& projnames,
-                               const std::vector<FIFFLIB::FiffChInfo>& chs,
-                               int nch,
-                               std::unique_ptr<MNEProjOp>& result);
+    [[nodiscard]] static BASELIB::Expected<std::unique_ptr<MNEProjOp>> make_projection(const std::vector<std::filesystem::path>& projnames,
+                                                                                       std::span<const FIFFLIB::FiffChInfo> chs);
 
     /**
      * Write a formatted summary of all projection items to a text stream,
@@ -263,12 +254,9 @@ public:
      * Assign a channel name list to this projection operator, invalidating
      * any previously compiled projector.
      *
-     * @param[in] list    Channel name list.
-     * @param[in] nlist   Number of channels.
-     *
-     * @return OK on success.
+     * @param[in] list    Channel names, in data order.
      */
-    int assign_channels(const StringList& list, int nlist);
+    void assign_channels(std::span<const std::string> list);
 
     //=========================================================================================================
     /**
@@ -316,11 +304,9 @@ public:
 
 public:
     std::vector<MNELIB::MNEProjItem> items;                                          /**< The projection items. */
-    int nitems;                                                                      /**< Number of items. */
     StringList names;                                                                /**< Names of the channels in the final compiled projector. */
-    int nch;                                                                         /**< Number of channels in the final projector. */
     int nvec;                                                                        /**< Number of orthogonalized vectors in the final projector. */
-    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> proj_data; /**< The compiled projector: orthogonalized projection vectors (nvec x nch). */
+    Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> proj_data; /**< The compiled projector: orthogonalized projection vectors (nvec x names.size()). */
 };
 
 } // NAMESPACE MNELIB

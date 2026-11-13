@@ -102,11 +102,11 @@ private slots:
         item.vecs = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
 
         StringList testList = {"MEG 0111", "MEG 0112", "MEG 0113"};
-        int affected = item.affect(testList, static_cast<int>(testList.size()));
+        int affected = item.affect(testList);
         QVERIFY(affected > 0);
 
         StringList noMatch = {"EEG 001", "EEG 002"};
-        int notAffected = item.affect(noMatch, static_cast<int>(noMatch.size()));
+        int notAffected = item.affect(noMatch);
         QCOMPARE(notAffected, 0);
     }
 
@@ -115,8 +115,8 @@ private slots:
     void testProjOpDefault()
     {
         MNEProjOp op;
-        QCOMPARE(op.nitems, 0);
-        QCOMPARE(op.nch, 0);
+        QVERIFY(op.items.empty());
+        QVERIFY(op.names.empty());
         QCOMPARE(op.nvec, 0);
     }
 
@@ -133,7 +133,7 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
 
         op.add_item(&nm, 1, "Test SSP vector");
-        QCOMPARE(op.nitems, 1);
+        QCOMPARE(op.items.size(), std::size_t{1});
         QVERIFY(!op.items.empty());
         QCOMPARE(op.items[0].desc, QString("Test SSP vector"));
     }
@@ -151,11 +151,11 @@ private slots:
         MNENamedMatrix nm(*nm_ptr);
 
         op.add_item_active(&nm, 1, "Active SSP", 1);
-        QCOMPARE(op.nitems, 1);
+        QCOMPARE(op.items.size(), std::size_t{1});
         QCOMPARE(op.items[0].active, 1);
 
         op.add_item_active(&nm, 1, "Inactive SSP", 0);
-        QCOMPARE(op.nitems, 2);
+        QCOMPARE(op.items.size(), std::size_t{2});
         QCOMPARE(op.items[1].active, 0);
     }
 
@@ -174,7 +174,7 @@ private slots:
 
         auto dup = op.dup();
         QVERIFY(dup != nullptr);
-        QCOMPARE(dup->nitems, 1);
+        QCOMPARE(dup->items.size(), std::size_t{1});
         QCOMPARE(dup->items[0].desc, QString("Vec set"));
     }
 
@@ -199,7 +199,7 @@ private slots:
         op2.add_item(&nm2, 1, "Second");
 
         op1.combine(&op2);
-        QCOMPARE(op1.nitems, 2);
+        QCOMPARE(op1.items.size(), std::size_t{2});
     }
 
     void testProjOpFreeProj()
@@ -215,10 +215,10 @@ private slots:
         op.add_item(&nm, 1, "Test");
 
         op.free_proj();
-        QCOMPARE(op.nch, 0);
+        QVERIFY(op.names.empty());
         QCOMPARE(op.nvec, 0);
         // Items should still be there
-        QCOMPARE(op.nitems, 1);
+        QCOMPARE(op.items.size(), std::size_t{1});
     }
 
     void testProjOpAssignChannels()
@@ -234,8 +234,8 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"MEG 0111", "MEG 0112", "MEG 0113", "MEG 0121"};
-        int rc = op.assign_channels(chList, static_cast<int>(chList.size()));
-        QVERIFY(rc >= 0);
+        op.assign_channels(chList);
+        QCOMPARE(op.names, chList);
     }
 
     void testProjOpMakeProj()
@@ -251,7 +251,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
-        op.assign_channels(chList, static_cast<int>(chList.size()));
+        op.assign_channels(chList);
         int rc = op.make_proj();
         QVERIFY(rc >= 0);
     }
@@ -267,7 +267,7 @@ private slots:
         op.add_item(&meg, FIFFV_PROJ_ITEM_FIELD, "SSP");
         QVERIFY(op.items[0].has_meg);
         QVERIFY(!op.items[0].has_eeg);
-        op.assign_channels(names, static_cast<int>(names.size()));
+        op.assign_channels(names);
         QCOMPARE(op.make_proj(), 0);
         QCOMPARE(op.nvec, 1);
         QVERIFY((op.proj_data.row(0).array().abs() > 0.4f).all());
@@ -296,7 +296,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
-        op.assign_channels(chList, static_cast<int>(chList.size()));
+        op.assign_channels(chList);
         op.make_proj();
 
         // Project a vector
@@ -325,7 +325,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2"};
-        op.assign_channels(chList, static_cast<int>(chList.size()));
+        op.assign_channels(chList);
         op.make_proj();
 
         Eigen::VectorXd dvec(2);
@@ -349,11 +349,11 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList testChs = {"MEG 0111", "MEG 0112"};
-        int n = op.affect(testChs, static_cast<int>(testChs.size()));
+        int n = op.affect(testChs);
         QVERIFY(n >= 0);
 
         StringList noMatch = {"EEG 001"};
-        int n2 = op.affect(noMatch, static_cast<int>(noMatch.size()));
+        int n2 = op.affect(noMatch);
         QCOMPARE(n2, 0);
     }
 
@@ -369,9 +369,9 @@ private slots:
             chs.push_back(ch);
         }
 
-        auto projOp = MNEProjOp::create_average_eeg_ref(chs, static_cast<int>(chs.size()));
+        auto projOp = MNEProjOp::create_average_eeg_ref(chs);
         QVERIFY(projOp != nullptr);
-        QVERIFY(projOp->nitems > 0);
+        QVERIFY(!projOp->items.empty());
     }
 
     void testProjOpReadFromFiff()
@@ -400,7 +400,7 @@ private slots:
         op.add_item(&nm, 1, "SSP");
 
         StringList chList = {"ch1", "ch2", "ch3"};
-        op.assign_channels(chList, static_cast<int>(chList.size()));
+        op.assign_channels(chList);
         op.make_proj();
 
         // Create a covariance matrix

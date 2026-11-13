@@ -288,7 +288,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
         target.fwd = fwd; /* ...or a fwd operator */
         if (op) {         /* Attach the projection operator and CTF compensation info to the data, too */
             target.proj = MNEProjOp::read(name);
-            if (target.proj && target.proj->nitems > 0) {
+            if (target.proj && !target.proj->items.empty()) {
                 BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
                 std::ostringstream report;
                 target.proj->report(report, "\t\t");
@@ -296,7 +296,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
             }
         } else {
             target.proj = MNEProjOp::read(name);
-            if (target.proj && target.proj->nitems > 0) {
+            if (target.proj && !target.proj->items.empty()) {
                 BASELIB::Log::info("\tLoaded projection from {}:\n", BASELIB::utf8FromPath(name));
                 std::ostringstream report;
                 target.proj->report(report, "\t\t");

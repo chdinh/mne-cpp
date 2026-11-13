@@ -82,19 +82,15 @@ MNEProjItem::~MNEProjItem()
 
 //=============================================================================================================
 
-int MNEProjItem::affect(const StringList& list, int nlist) const
+bool MNEProjItem::affect(std::span<const std::string> list) const
 {
     if (nvec == 0 || !vecs)
         return false;
 
-    for (int k = 0; k < nlist; ++k) {
+    for (const auto& name : list) {
         for (int p = 0; p < vecs->ncol; ++p) {
-            if ((vecs->collist[p] == list[k])) {
-                for (int q = 0; q < vecs->nrow; ++q) {
-                    if (vecs->data(q, p) != 0.0f)
-                        return true;
-                }
-            }
+            if (vecs->collist[p] == name && (vecs->data.col(p).array() != 0.0f).any())
+                return true;
         }
     }
     return false;

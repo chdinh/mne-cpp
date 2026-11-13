@@ -511,8 +511,8 @@ void TestMneRawProjComp::derivSet_textFifAndValidation()
 void TestMneRawProjComp::projOp_defaultConstruction()
 {
     MNEProjOp proj;
-    QCOMPARE(proj.nitems, 0);
-    QCOMPARE(proj.nch, 0);
+    QVERIFY(proj.items.empty());
+    QVERIFY(proj.names.empty());
     QCOMPARE(proj.nvec, 0);
 }
 
@@ -532,19 +532,19 @@ void TestMneRawProjComp::projOp_addItemAndDuplicate()
     vecs->data << 1.0f / std::sqrt(3.0f), 1.0f / std::sqrt(3.0f), 1.0f / std::sqrt(3.0f);
 
     proj.add_item(vecs.get(), FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "Test EEG avg ref");
-    QCOMPARE(proj.nitems, 1);
+    QCOMPARE(proj.items.size(), std::size_t{1});
 
     // Duplicate
     auto dup = proj.dup();
     QVERIFY(dup != nullptr);
-    QCOMPARE(dup->nitems, 1);
+    QCOMPARE(dup->items.size(), std::size_t{1});
 }
 
 void TestMneRawProjComp::projOp_readFromFile()
 {
     auto proj = MNEProjOp::read(rawPath().toStdU16String());
     QVERIFY(proj != nullptr);
-    QVERIFY(proj->nitems > 0); // Neuromag data should have SSP projectors
+    QVERIFY(!proj->items.empty()); // Neuromag data should have SSP projectors
 
     // Hand-written projection blocks, read as MNE-C mne_read_proj_op: an item takes the global channel
     // count unless it has its own, its description is the name plus the first description line, and
@@ -582,9 +582,9 @@ void TestMneRawProjComp::projOp_readFromFile()
         return file.fileName();
     };
     const auto empty = MNEProjOp::read(projFile("none.fif", 0, -1, false).toStdU16String());
-    QVERIFY(empty && empty->nitems == 0);
+    QVERIFY(empty && empty->items.empty());
     const auto item = MNEProjOp::read(projFile("item.fif", 0, -1).toStdU16String());
-    QVERIFY(item && item->nitems == 1);
+    QVERIFY(item && item->items.size() == 1);
     QCOMPARE(item->items[0].desc, QStringLiteral("PCA v1"));
     QVERIFY(item->items[0].active);
     const auto described = MNEProjOp::read(projFile("described.fif", FIFF_NAME, 2).toStdU16String());
@@ -610,8 +610,8 @@ void TestMneRawProjComp::projOp_assignChannelsAndMake()
         chNames.push_back(ch.ch_name);
     }
 
-    int assignResult = proj->assign_channels(chNames, static_cast<int>(chNames.size()));
-    QVERIFY(assignResult >= 0);
+    proj->assign_channels(chNames);
+    QCOMPARE(proj->names, chNames);
 
     int makeResult = proj->make_proj();
     QVERIFY(makeResult >= 0);
@@ -624,7 +624,7 @@ void TestMneRawProjComp::projOp_affectChannels()
 
     FiffRawData rawData(rawPath().toStdString());
 
-    int affecting = proj->affect_chs(rawData.info.chs, rawData.info.nchan);
+    int affecting = proj->affect_chs(rawData.info.chs);
     QVERIFY(affecting >= 0);
 }
 
@@ -633,9 +633,9 @@ void TestMneRawProjComp::projOp_createAvgEegRef()
     FiffRawData rawData(rawPath().toStdString());
 
     auto eegRef =
-        MNEProjOp::create_average_eeg_ref(rawData.info.chs, rawData.info.nchan);
+        MNEProjOp::create_average_eeg_ref(rawData.info.chs);
     QVERIFY(eegRef != nullptr);
-    QVERIFY(eegRef->nitems > 0);
+    QVERIFY(!eegRef->items.empty());
 }
 
 void TestMneRawProjComp::projOp_projectVector()
@@ -660,7 +660,7 @@ void TestMneRawProjComp::projOp_projectVector()
     names.push_back("ch0");
     names.push_back("ch1");
     names.push_back("ch2");
-    proj.assign_channels(names, 3);
+    proj.assign_channels(names);
     proj.make_proj();
 
     // Apply projection to a test vector [3, 6, 9] -> removes mean
@@ -709,7 +709,7 @@ void TestMneRawProjComp::projOp_combine()
 
     MNEProjOp* combined = proj1.combine(&proj2);
     QVERIFY(combined != nullptr);
-    QCOMPARE(combined->nitems, 2);
+    QCOMPARE(combined->items.size(), std::size_t{2});
 }
 
 //=============================================================================================================

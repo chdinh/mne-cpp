@@ -318,7 +318,7 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
                 break;
     }
 
-    if (op && op->nitems > 0) {
+    if (op && !op->items.empty()) {
         res->proj = std::move(op);
     }
     if (sss && sss->comp_info.size() > 0 && sss->job != FIFFV_SSS_JOB_NOTHING) {

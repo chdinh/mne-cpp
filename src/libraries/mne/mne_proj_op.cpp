@@ -31,6 +31,7 @@
 #include "mne_named_vector.h"
 #include "mne_named_matrix.h"
 
+#include <algorithm>
 #include <sstream>
 
 #include <Eigen/Core>
@@ -56,9 +57,7 @@ using namespace MNELIB;
 //=============================================================================================================
 
 MNEProjOp::MNEProjOp()
-: nitems(0)
-, nch(0)
-, nvec(0)
+: nvec(0)
 {
 }
 
@@ -75,10 +74,7 @@ void MNEProjOp::free_proj()
     proj_data.resize(0, 0);
 
     names.clear();
-    nch = 0;
     nvec = 0;
-
-    return;
 }
 
 //=============================================================================================================
@@ -89,10 +85,9 @@ MNEProjOp* MNEProjOp::combine(MNEProjOp* from)
      */
 {
     if (from) {
-        for (int k = 0; k < from->nitems; k++) {
-            const auto& it = from->items[k];
+        for (const auto& it : from->items) {
             add_item(it.vecs.get(), it.kind, it.desc);
-            items[nitems - 1].active_file = it.active_file;
+            items.back().active_file = it.active_file;
         }
     }
     return this;
@@ -134,10 +129,7 @@ void MNEProjOp::add_item_active(const MNENamedMatrix* vecs, int kind, const std:
     new_item.kind = kind;
     new_item.nvec = new_item.vecs->nrow;
 
-    nitems++;
-
     free_proj(); /* These data are not valid any more */
-    return;
 }
 
 //=============================================================================================================
@@ -156,36 +148,26 @@ std::unique_ptr<MNEProjOp> MNEProjOp::dup() const
 {
     auto res = std::make_unique<MNEProjOp>();
 
-    for (int k = 0; k < nitems; k++) {
-        const auto& it = items[k];
+    for (const auto& it : items) {
         res->add_item_active(it.vecs.get(), it.kind, it.desc, it.active);
-        res->items[k].active_file = it.active_file;
+        res->items.back().active_file = it.active_file;
     }
     return res;
 }
 
 //=============================================================================================================
 
-std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const std::vector<FiffChInfo>& chs, int nch)
-/*
-     * Make the projection operator for average electrode reference
-     */
+std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(std::span<const FiffChInfo> chs)
 {
-    int eegcount = 0;
-    int k;
     StringList names;
-
-    for (k = 0; k < nch; k++)
-        if (chs.at(k).kind == FIFFV_EEG_CH)
-            eegcount++;
+    for (const auto& ch : chs)
+        if (ch.kind == FIFFV_EEG_CH)
+            names.push_back(ch.ch_name);
+    const auto eegcount = static_cast<int>(names.size());
     if (eegcount == 0) {
         BASELIB::Log::critical("No EEG channels specified for average reference.");
         return nullptr;
     }
-
-    for (k = 0; k < nch; k++)
-        if (chs.at(k).kind == FIFFV_EEG_CH)
-            names.push_back(chs.at(k).ch_name);
 
     Eigen::MatrixXf vec_data = Eigen::MatrixXf::Constant(1, eegcount, 1.0f / sqrt(static_cast<double>(eegcount)));
 
@@ -200,29 +182,24 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(const std::vector<F
 
 //=============================================================================================================
 
-int MNEProjOp::affect(const StringList& list, int nlist)
+int MNEProjOp::affect(std::span<const std::string> list) const
 {
-    int k;
-    int naff;
-
-    for (k = 0, naff = 0; k < nitems; k++)
-        if (items[k].active && items[k].affect(list, nlist))
-            naff += items[k].nvec;
-
+    int naff = 0;
+    for (const auto& item : items)
+        if (item.active && item.affect(list))
+            naff += item.nvec;
     return naff;
 }
 
 //=============================================================================================================
 
-int MNEProjOp::affect_chs(const std::vector<FiffChInfo>& chs, int nChan)
+int MNEProjOp::affect_chs(std::span<const FiffChInfo> chs) const
 {
-    if (nChan == 0)
-        return false;
     StringList list;
-    list.reserve(nChan);
-    for (int k = 0; k < nChan; k++)
-        list.push_back(chs.at(k).ch_name);
-    return affect(list, nChan);
+    list.reserve(chs.size());
+    for (const auto& ch : chs)
+        list.push_back(ch.ch_name);
+    return affect(list);
 }
 
 //=============================================================================================================
@@ -233,9 +210,10 @@ int MNEProjOp::project_vector(Eigen::Ref<Eigen::VectorXf> vec, bool do_complemen
      * Assume that all dimension checking etc. has been done before
      */
 {
-    if (nitems <= 0 || this->nvec <= 0)
+    if (items.empty() || this->nvec <= 0)
         return OK;
 
+    const auto nch = static_cast<int>(names.size());
     if (nch != static_cast<int>(vec.size())) {
         BASELIB::Log::critical("Data vector size does not match projection operator");
         return FAIL;
@@ -390,7 +368,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         StringList emptyList;
         auto item = MNENamedMatrix::build(item_nvec, item_nchan, emptyList, item_names, item_vectors);
         op->add_item_active(item.get(), item_kind, item_desc.toStdString(), item_active);
-        op->items[op->nitems - 1].active_file = item_active;
+        op->items.back().active_file = item_active;
     }
 
     return op;
@@ -424,12 +402,12 @@ void MNEProjOp::report_data(std::ostream& out, const std::string& tag, bool list
     const MNENamedMatrix* vecs;
     bool found;
 
-    if (nitems <= 0) {
+    if (items.empty()) {
         out << "Empty operator\n";
         return;
     }
 
-    for (int k = 0; k < nitems; k++) {
+    for (std::size_t k = 0; k < items.size(); k++) {
         const auto& it = items[k];
         if (list_data && !tag.empty())
             out << tag << "\n";
@@ -469,17 +447,10 @@ void MNEProjOp::report(std::ostream& out, const std::string& tag) const
 
 //=============================================================================================================
 
-int MNEProjOp::assign_channels(const StringList& list, int nlist)
+void MNEProjOp::assign_channels(std::span<const std::string> list)
 {
     free_proj(); /* Compiled data is no longer valid */
-
-    if (nlist == 0)
-        return OK;
-
-    names = list;
-    nch = nlist;
-
-    return OK;
+    names.assign(list.begin(), list.end());
 }
 
 //=============================================================================================================
@@ -487,11 +458,11 @@ int MNEProjOp::assign_channels(const StringList& list, int nlist)
 namespace
 {
 
-void clear_channel_group(Eigen::Ref<Eigen::VectorXf> data, const StringList& ch_names, int nnames, std::string_view prefix)
+void clear_channel_group(Eigen::Ref<Eigen::VectorXf> data, const StringList& ch_names, std::string_view prefix)
 {
-    for (int k = 0; k < nnames; k++)
-        if (ch_names[static_cast<std::size_t>(k)].starts_with(prefix))
-            data[k] = 0.0;
+    for (std::size_t k = 0; k < ch_names.size(); k++)
+        if (ch_names[k].starts_with(prefix))
+            data[static_cast<Eigen::Index>(k)] = 0.0;
 }
 
 constexpr float USE_LIMIT = 1e-5f;
@@ -517,20 +488,19 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
     proj_data.resize(0, 0);
     nvec = 0;
 
-    if (nch <= 0)
-        return OK;
-    if (nitems <= 0)
+    const auto nch = static_cast<int>(names.size());
+    if (nch == 0 || items.empty())
         return OK;
 
-    nvec_total = affect(names, nch);
+    nvec_total = affect(names);
     if (nvec_total == 0)
         return OK;
 
     RowMatrixXf mat_meg_mat = RowMatrixXf::Zero(nvec_total, nch);
     RowMatrixXf mat_eeg_mat = RowMatrixXf::Zero(nvec_total, nch);
 
-    for (k = 0, nvec_meg = nvec_eeg = 0; k < nitems; k++) {
-        if (items[k].active && items[k].affect(names, nch)) {
+    for (k = 0, nvec_meg = nvec_eeg = 0; k < static_cast<int>(items.size()); k++) {
+        if (items[k].active && items[k].affect(names)) {
             vec.nvec = items[k].vecs->ncol;
             vec.names = items[k].vecs->collist;
             if (items[k].has_meg) {
@@ -622,7 +592,7 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
             else
                 proj_data(nvec, k) = vv_meg_mat(p, k);
         }
-        clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, nch, "EEG");
+        clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, "EEG");
     }
     for (p = 0; p < nvec_eeg; p++, nvec++) {
         if (sing_eeg_vec[p] / sing_eeg_vec[0] < USE_LIMIT)
@@ -633,7 +603,7 @@ int MNEProjOp::make_proj_bad(const StringList& bad)
             else
                 proj_data(nvec, k) = vv_eeg_mat(p, k);
         }
-        clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, nch, "MEG");
+        clear_channel_group(Eigen::Map<Eigen::VectorXf>(proj_data.row(nvec).data(), nch), names, "MEG");
     }
     /*
      * Make sure that the stimulus channels are not modified
@@ -661,7 +631,7 @@ int MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_compleme
     if (nvec <= 0)
         return OK;
 
-    if (nch != static_cast<int>(vec.size())) {
+    if (names.size() != static_cast<std::size_t>(vec.size())) {
         BASELIB::Log::critical("Data vector size does not match projection operator");
         return FAIL;
     }
@@ -683,30 +653,21 @@ int MNEProjOp::project_dvector(Eigen::Ref<Eigen::VectorXd> vec, bool do_compleme
 
 //=============================================================================================================
 
-bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnames,
-                               const std::vector<FiffChInfo>& chs,
-                               int nch,
-                               std::unique_ptr<MNEProjOp>& result)
+BASELIB::Expected<std::unique_ptr<MNEProjOp>> MNEProjOp::make_projection(const std::vector<std::filesystem::path>& projnames,
+                                                                         std::span<const FiffChInfo> chs)
 {
-    result.reset();
-    int neeg = 0;
+    const bool has_eeg = std::ranges::any_of(chs, [](const FiffChInfo& ch) { return ch.kind == FIFFV_EEG_CH; });
 
-    for (int k = 0; k < nch; k++)
-        if (chs[k].kind == FIFFV_EEG_CH)
-            neeg++;
-
-    if (projnames.size() == 0 && neeg == 0)
-        return true;
+    if (projnames.empty() && !has_eeg)
+        return nullptr;
 
     std::unique_ptr<MNEProjOp> all;
 
     for (const auto& projname : projnames) {
         std::unique_ptr<MNEProjOp> one(MNEProjOp::read(projname));
-        if (!one) {
-            BASELIB::Log::critical("Failed to read projection from {}.", BASELIB::utf8FromPath(projname));
-            return false;
-        }
-        if (one->nitems == 0) {
+        if (!one)
+            return BASELIB::fail(BASELIB::ErrorCode::Io, "cannot read the projection in {}", BASELIB::utf8FromPath(projname));
+        if (one->items.empty()) {
             BASELIB::Log::info("No linear projection information in {}.", BASELIB::utf8FromPath(projname));
         } else {
             BASELIB::Log::info("Loaded projection from {}:", BASELIB::utf8FromPath(projname));
@@ -721,17 +682,10 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
         }
     }
 
-    if (neeg > 0) {
-        bool found = false;
-        if (all) {
-            for (int k = 0; k < all->nitems; k++)
-                if (all->items[k].kind == FIFFV_MNE_PROJ_ITEM_EEG_AVREF) {
-                    found = true;
-                    break;
-                }
-        }
+    if (has_eeg) {
+        const bool found = all && std::ranges::any_of(all->items, [](const MNEProjItem& it) { return it.kind == FIFFV_MNE_PROJ_ITEM_EEG_AVREF; });
         if (!found) {
-            std::unique_ptr<MNEProjOp> one(MNEProjOp::create_average_eeg_ref(chs, nch));
+            std::unique_ptr<MNEProjOp> one(MNEProjOp::create_average_eeg_ref(chs));
             if (one) {
                 BASELIB::Log::info("Average EEG reference projection added:");
                 {
@@ -745,12 +699,11 @@ bool MNEProjOp::makeProjection(const std::vector<std::filesystem::path>& projnam
             }
         }
     }
-    if (all && all->affect_chs(chs, nch) == 0) {
+    if (all && all->affect_chs(chs) == 0) {
         BASELIB::Log::info("Projection will not have any effect on selected channels. Projection omitted.");
         all.reset();
     }
-    result = std::move(all);
-    return true;
+    return all;
 }
 
 //=============================================================================================================
@@ -762,10 +715,10 @@ int MNEProjOp::apply_cov(MNECovMatrix* c)
     int j, k, p;
     bool do_complement = true;
 
-    if (nitems == 0)
+    if (items.empty())
         return OK;
 
-    if (nch != c->ncov || names != c->names) {
+    if (static_cast<int>(names.size()) != c->ncov || names != c->names) {
         BASELIB::Log::critical("Incompatible data in apply_cov");
         return FAIL;
     }
@@ -810,6 +763,6 @@ int MNEProjOp::apply_cov(MNECovMatrix* c)
                 c->cov[p++] = dcovMat(j, k);
     }
 
-    c->nproj = affect(c->names, c->ncov);
+    c->nproj = affect(c->names);
     return OK;
 }

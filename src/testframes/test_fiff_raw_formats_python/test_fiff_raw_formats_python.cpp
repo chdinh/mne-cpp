@@ -274,9 +274,9 @@ void TestFiffRawFormatsPython::projectsAcrossSkip()
     // The average reference over the two EEG channels leaves them unchanged (their mean is 0).
     std::unique_ptr<MNERawData> mne(MNERawData::open_file(fixture("skip").toStdU16String(), false, false, MNEFilterDef()));
     QVERIFY(mne);
-    mne->proj = MNEProjOp::create_average_eeg_ref(mne->info->chInfo, mne->info->nchan);
+    mne->proj = MNEProjOp::create_average_eeg_ref(mne->info->chInfo);
     QVERIFY(mne->proj);
-    QCOMPARE(mne->proj->assign_channels(mne->ch_names, mne->info->nchan), 0);
+    mne->proj->assign_channels(mne->ch_names);
     QCOMPARE(mne->proj->make_proj(), 0);
 
     // From 2 samples before the data to 3 past its end, across the skip.

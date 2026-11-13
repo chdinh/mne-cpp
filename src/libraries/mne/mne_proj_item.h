@@ -29,8 +29,9 @@
 // STL INCLUDES
 //=============================================================================================================
 
-#include <string>
 #include <memory>
+#include <span>
+#include <string>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -127,12 +128,10 @@ public:
      * in the projection vectors that contains at least one non-zero entry.
      *
      * @param[in] list    Channel names to test against.
-     * @param[in] nlist   Number of channel names in @p list.
      *
-     * @return @c true (non-zero) if this item affects at least one channel,
-     *         @c false (0) otherwise.
+     * @return Whether this item affects at least one channel.
      */
-    int affect(const StringList& list, int nlist) const;
+    bool affect(std::span<const std::string> list) const;
 
 public:
     std::unique_ptr<MNENamedMatrix> vecs; /**< Projection vectors (nrow = nvec, ncol = nch); may be nullptr when nvec == 0. */

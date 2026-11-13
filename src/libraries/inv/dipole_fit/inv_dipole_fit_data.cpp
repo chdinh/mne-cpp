@@ -702,12 +702,13 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     projPaths.reserve(projnames.size());
     for (const QString& projname : projnames)
         projPaths.emplace_back(projname.toStdU16String());
-    if (!MNEProjOp::makeProjection(projPaths,
-                                   res->chs,
-                                   res->nmeg + res->neeg,
-                                   res->proj))
+    auto projection = MNEProjOp::make_projection(projPaths, std::span(res->chs).first(static_cast<std::size_t>(res->nmeg) + static_cast<std::size_t>(res->neeg)));
+    if (!projection) {
+        BASELIB::Log::critical("{}", projection.error().what());
         return nullptr;
-    if (res->proj && res->proj->nitems > 0) {
+    }
+    res->proj = std::move(*projection);
+    if (res->proj && !res->proj->items.empty()) {
         BASELIB::Log::info("Final projection operator is:");
         {
             std::ostringstream report;
@@ -715,8 +716,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
             BASELIB::Log::info("{}", report.str());
         }
 
-        if (res->proj->assign_channels(res->ch_names, res->nmeg + res->neeg) == FAIL)
-            return nullptr;
+        res->proj->assign_channels(res->ch_names);
         if (res->proj->make_proj() == FAIL)
             return nullptr;
     } else
@@ -747,7 +747,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Apply the projection operator to the noise-covariance matrix
        */
-    if (res->proj && res->proj->nitems > 0 && res->proj->nvec > 0) {
+    if (res->proj && !res->proj->items.empty() && res->proj->nvec > 0) {
         if (res->proj->apply_cov(res->noise.get()) == FAIL)
             return nullptr;
         BASELIB::Log::info("Projection applied to the covariance matrix.");
