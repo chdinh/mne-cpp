@@ -67,6 +67,46 @@ const double eegProj = segment(1, 0);
 
 ---
 
+### assign_channels(chs, deriv)
+
+Match the defined channels against the channels of a recording (MNE-C `mne_ch_selection_assign_chs` and `mne_ch_selection_assign_chs_info`).
+
+A definition matches a channel name ignoring case, with or without the definition's own spaces, and also the part of a channel name before a dash. Definitions without such a channel are looked up among the valid derived channels.
+
+**Parameters:**
+
+- **chs** : *std::span&lt; const [FiffChInfo](/docs/api/fiff/fiff-ch-info) &gt;*
+  Channels of the recording.
+
+- **deriv** : *const [MNEDeriv](/docs/api/mne/mne-deriv) **
+  Derivations matched to the recording, or nullptr.
+
+**Returns:**
+
+- *int* — The number of definitions matched to a recorded channel (derivations excluded).
+
+---
+
+## Static Methods
+
+### these(selname, names)
+
+Create a user selection of the given channel names (MNE-C `mne_ch_selection_these`).
+
+**Parameters:**
+
+- **selname** : *std::string*
+  Name of the selection.
+
+- **names** : *std::span&lt; const std::string &gt;*
+  Channel names.
+
+**Returns:**
+
+- *MNEChSelection* — The selection; call `assign_channels()` before picking with it.
+
+---
+
 ## Example
 
 - Start here: [ex_mne_api](../../examples/fs/ex_mne_api.mdx) — MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.

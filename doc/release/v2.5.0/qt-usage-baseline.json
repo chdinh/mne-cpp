@@ -32,7 +32,7 @@
       "ml",
       "report"
     ],
-    "tokens": 13322,
+    "tokens": 13318,
     "gui_outside_design": []
   },
   "libraries": {
@@ -302,7 +302,7 @@
       ]
     },
     "inv": {
-      "tokens": 282,
+      "tokens": 278,
       "by_category": {
         "containers": 86,
         "files": 24,
@@ -310,7 +310,7 @@
         "json": 2,
         "objects_signals": 7,
         "regex": 1,
-        "strings": 125,
+        "strings": 121,
         "threads": 2
       },
       "public_header_includes": 30,
@@ -387,9 +387,9 @@
         "strings": 32,
         "threads": 10
       },
-      "public_header_includes": 28,
+      "public_header_includes": 27,
       "q_object": 0,
-      "files": 111,
+      "files": 112,
       "modules": [
         "Concurrent",
         "Core"
