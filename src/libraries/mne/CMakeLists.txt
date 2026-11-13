@@ -37,6 +37,7 @@ set(SOURCES
     mne_event_list.cpp
     mne_named_matrix.cpp
     mne_named_vector.cpp
+    mne_ch_selection.cpp
     mne_proj_item.cpp
     mne_proj_op.cpp
     mne_raw_buf_def.cpp

@@ -45,126 +45,6 @@ using namespace FWDLIB;
 static constexpr float SEG_LEN = 10.0f;
 
 //=============================================================================================================
-// STATIC DEFINITIONS
-//=============================================================================================================
-
-/**
- * @brief Create a channel selection containing exactly the named channels.
- *
- * Refactored: mne_ch_selection_these (mne_ch_selection.c)
- *
- * @param[in] selname  Name for the selection.
- * @param[in] names    Channel names to include.
- * @param[in] nch      Number of channels.
- *
- * @return The new channel selection.
- */
-static std::unique_ptr<MNEChSelection> mne_ch_selection_these(const QString& selname, const StringList& names, int nch)
-{
-    auto sel = std::make_unique<MNEChSelection>();
-    sel->name = selname.toStdString();
-    sel->ndef = nch;
-    sel->kind = MNE_CH_SELECTION_USER;
-
-    for (int c = 0; c < nch; c++)
-        sel->chdef.push_back(names[c]);
-
-    return sel;
-}
-
-/**
- * @brief Assign raw data channels to a channel selection.
- *
- * Matches the selection's channel names against the raw data's channel
- * info (including derived channels), filling the pick indices and
- * channel-kind fields.
- *
- * Refactored: mne_ch_selection_assign_chs (mne_ch_selection.c)
- *
- * @param[in,out] sel   The channel selection to populate.
- * @param[in]     data  The raw data whose channels are matched.
- *
- * @return Number of directly matched channels (excluding derivations).
- */
-static int mne_ch_selection_assign_chs(MNEChSelection* sel,
-                                       MNERawData* data)
-{
-    if (!sel || !data)
-        return 0;
-
-    auto info = data->info.get();
-    sel->chspick = sel->chdef;
-    sel->chspick_nospace = sel->chdef;
-    for (auto& name : sel->chspick_nospace)
-        std::erase(name, ' ');
-    sel->nchan = sel->ndef;
-
-    sel->pick.setConstant(sel->nchan, -1);
-    sel->pick_deriv.setConstant(sel->nchan, -1);
-    sel->ch_kind.setConstant(sel->nchan, -1);
-
-    for (int c = 0; c < sel->nchan; c++) {
-        for (int rc = 0; rc < info->nchan; rc++) {
-            if (BASELIB::equalsIgnoreCase(sel->chspick[c], info->chInfo[rc].ch_name) ||
-                BASELIB::equalsIgnoreCase(sel->chspick_nospace[c], info->chInfo[rc].ch_name)) {
-                sel->pick[c] = rc;
-                sel->ch_kind[c] = info->chInfo[rc].kind;
-                break;
-            }
-        }
-    }
-    /*
-     * Maybe the derivations will help
-     */
-    sel->nderiv = 0;
-    if (data->deriv_matched) {
-        const StringList& deriv_names = data->deriv_matched->deriv_data->rowlist;
-        int nderiv = data->deriv_matched->deriv_data->nrow;
-
-        for (int c = 0; c < sel->nchan; c++) {
-            if (sel->pick[c] == -1) {
-                for (int d = 0; d < nderiv; d++) {
-                    if (BASELIB::equalsIgnoreCase(sel->chspick[c], deriv_names[d]) &&
-                        data->deriv_matched->valid.size() > 0 && data->deriv_matched->valid[d]) {
-                        sel->pick_deriv[c] = d;
-                        sel->ch_kind[c] = data->deriv_matched->chs[d].kind;
-                        sel->nderiv++;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    /*
-     * Try simple channels again without the part after dashes
-     */
-    for (int c = 0; c < sel->nchan; c++) {
-        if (sel->pick[c] == -1 && sel->pick_deriv[c] == -1) {
-            for (int rc = 0; rc < info->nchan; rc++) {
-                const QString chName = QString::fromStdString(info->chInfo[rc].ch_name);
-                QString dash = chName.mid(chName.indexOf("-") + 1);
-                if (!dash.isNull()) {
-                    if (BASELIB::equalsIgnoreCase(sel->chspick[c], info->chInfo[rc].ch_name) ||
-                        BASELIB::equalsIgnoreCase(sel->chspick_nospace[c], info->chInfo[rc].ch_name)) {
-                        sel->pick[c] = rc;
-                        sel->ch_kind[c] = info->chInfo[rc].kind;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    int nch = 0;
-    for (int c = 0; c < sel->nchan; c++) {
-        if (sel->pick[c] >= 0)
-            nch++;
-    }
-    if (sel->nderiv > 0)
-        BASELIB::Log::info("Selection \"{}\" has {} matched derived channels.", sel->name, sel->nderiv);
-    return nch;
-}
-
-//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
@@ -224,8 +104,9 @@ InvEcdSet InvDipoleFit::calculateFit() const
         /*
      * Set up a channel selection to pick data from the raw file
      */
-        sel = mne_ch_selection_these("fit", fit_data->ch_names, fit_data->nmeg + fit_data->neeg);
-        mne_ch_selection_assign_chs(sel.get(), raw.get());
+        sel = std::make_unique<MNEChSelection>(MNEChSelection::these(
+            "fit", std::span(fit_data->ch_names).first(static_cast<std::size_t>(fit_data->nmeg) + static_cast<std::size_t>(fit_data->neeg))));
+        sel->assign_channels(raw->info->chInfo, raw->deriv_matched.get());
         for (int c = 0; c < sel->nchan; c++)
             if (sel->pick[c] < 0) {
                 BASELIB::Log::critical("All desired channels were not available");

@@ -26,9 +26,14 @@
 
 #include <Eigen/Core>
 
-#include <QString>
+#include <span>
 #include <string>
 #include <vector>
+
+namespace FIFFLIB
+{
+class FiffChInfo;
+}
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -36,6 +41,8 @@
 
 namespace MNELIB
 {
+
+class MNEDeriv;
 
 /**
  * Channel selection.
@@ -47,6 +54,33 @@ class MNESHARED_EXPORT MNEChSelection
 public:
     MNEChSelection() = default;
     ~MNEChSelection() = default;
+
+    //=========================================================================================================
+    /**
+     * Create a user selection of the given channel names (MNE-C @c mne_ch_selection_these).
+     *
+     * @param[in] selname  Name of the selection.
+     * @param[in] names    Channel names.
+     *
+     * @return The selection; call assign_channels() before picking with it.
+     */
+    static MNEChSelection these(std::string selname, std::span<const std::string> names);
+
+    //=========================================================================================================
+    /**
+     * Match the defined channels against the channels of a recording
+     * (MNE-C @c mne_ch_selection_assign_chs and @c mne_ch_selection_assign_chs_info).
+     *
+     * A definition matches a channel name ignoring case, with or without the
+     * definition's own spaces, and also the part of a channel name before a dash.
+     * Definitions without such a channel are looked up among the valid derived channels.
+     *
+     * @param[in] chs     Channels of the recording.
+     * @param[in] deriv   Derivations matched to the recording, or nullptr.
+     *
+     * @return The number of definitions matched to a recorded channel (derivations excluded).
+     */
+    int assign_channels(std::span<const FIFFLIB::FiffChInfo> chs, const MNEDeriv* deriv = nullptr);
 
     std::string name;           /**< Name of this selection. */
     StringList chdef;           /**< Channel definitions (may contain regular expressions). */

@@ -1,0 +1,117 @@
+//=============================================================================================================
+/**
+ * SPDX-License-Identifier: BSD-3-Clause
+ * Copyright (c) 2026 MNE-CPP Authors
+ *
+ * @file     mne_ch_selection.cpp
+ * @author   Christoph Dinh <christoph.dinh@mne-cpp.org>
+ * @since    2.5.0
+ * @date     November 2026
+ * @brief    Implementation of @ref MNELIB::MNEChSelection.
+ */
+
+//=============================================================================================================
+// INCLUDES
+//=============================================================================================================
+
+#include "mne_ch_selection.h"
+#include "mne_deriv.h"
+#include "mne_sparse_named_matrix.h"
+#include "mne_types.h"
+
+#include <base/log.h>
+#include <base/string_utils.h>
+#include <fiff/fiff_ch_info.h>
+
+#include <algorithm>
+#include <string_view>
+
+//=============================================================================================================
+// USED NAMESPACES
+//=============================================================================================================
+
+using namespace MNELIB;
+using namespace FIFFLIB;
+
+//=============================================================================================================
+// DEFINE MEMBER METHODS
+//=============================================================================================================
+
+MNEChSelection MNEChSelection::these(std::string selname, std::span<const std::string> names)
+{
+    MNEChSelection sel;
+    sel.name = std::move(selname);
+    sel.chdef.assign(names.begin(), names.end());
+    sel.ndef = static_cast<int>(sel.chdef.size());
+    sel.kind = MNE_CH_SELECTION_USER;
+    return sel;
+}
+
+//=============================================================================================================
+
+int MNEChSelection::assign_channels(std::span<const FiffChInfo> chs, const MNEDeriv* deriv)
+{
+    chspick = chdef;
+    chspick_nospace = chdef;
+    for (auto& name : chspick_nospace)
+        std::erase(name, ' ');
+    nchan = ndef;
+
+    pick.setConstant(nchan, -1);
+    pick_deriv.setConstant(nchan, -1);
+    ch_kind.setConstant(nchan, -1);
+
+    const auto matches = [this](int c, std::string_view ch_name) {
+        return BASELIB::equalsIgnoreCase(chspick[c], ch_name) || BASELIB::equalsIgnoreCase(chspick_nospace[c], ch_name);
+    };
+    const auto assign = [this, &chs](int c, std::size_t rc) {
+        pick[c] = static_cast<int>(rc);
+        ch_kind[c] = chs[rc].kind;
+    };
+
+    for (int c = 0; c < nchan; c++) {
+        for (std::size_t rc = 0; rc < chs.size(); rc++) {
+            if (matches(c, chs[rc].ch_name)) {
+                assign(c, rc);
+                break;
+            }
+        }
+    }
+    /*
+     * Maybe the derivations will help
+     */
+    nderiv = 0;
+    if (deriv && deriv->deriv_data) {
+        const StringList& deriv_names = deriv->deriv_data->rowlist;
+        for (int c = 0; c < nchan; c++) {
+            if (pick[c] != -1)
+                continue;
+            for (std::size_t d = 0; d < deriv_names.size(); d++) {
+                if (BASELIB::equalsIgnoreCase(chspick[c], deriv_names[d]) && d < static_cast<std::size_t>(deriv->valid.size()) && deriv->valid[static_cast<Eigen::Index>(d)]) {
+                    pick_deriv[c] = static_cast<int>(d);
+                    ch_kind[c] = deriv->chs[d].kind;
+                    nderiv++;
+                    break;
+                }
+            }
+        }
+    }
+    /*
+     * Try simple channels again without the part after dashes
+     */
+    for (int c = 0; c < nchan; c++) {
+        if (pick[c] != -1 || pick_deriv[c] != -1)
+            continue;
+        for (std::size_t rc = 0; rc < chs.size(); rc++) {
+            const std::string_view ch_name = chs[rc].ch_name;
+            const auto dash = ch_name.find('-');
+            if (dash != std::string_view::npos && matches(c, ch_name.substr(0, dash))) {
+                assign(c, rc);
+                break;
+            }
+        }
+    }
+    if (nderiv > 0)
+        BASELIB::Log::info("Selection \"{}\" has {} matched derived channels.", name, nderiv);
+    return static_cast<int>(std::ranges::count_if(pick, [](int p) { return p >= 0; }));
+}

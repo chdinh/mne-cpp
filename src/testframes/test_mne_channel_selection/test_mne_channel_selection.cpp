@@ -16,7 +16,10 @@
 
 #include <QtTest>
 
+#include <fiff/fiff_ch_info.h>
+#include <fiff/fiff_constants.h>
 #include <mne/mne_ch_selection.h>
+#include <mne/mne_types.h>
 #include <mne/mne_filter_def.h>
 #include <mne/mne_process_description.h>
 
@@ -103,6 +106,33 @@ private slots:
         // Modify copy, verify original unchanged
         copy.name = "Modified";
         QCOMPARE(orig.name, QString("TestSelection"));
+    }
+
+    void testChSelectionAssignChannels()
+    {
+        std::vector<FIFFLIB::FiffChInfo> chs(4);
+        chs[0].ch_name = "MEG0113";
+        chs[0].kind = FIFFV_MEG_CH;
+        chs[1].ch_name = "EEG 001-REF";
+        chs[1].kind = FIFFV_EEG_CH;
+        chs[2].ch_name = "eog";
+        chs[2].kind = FIFFV_EOG_CH;
+        chs[3].ch_name = "STI 014";
+        chs[3].kind = FIFFV_STIM_CH;
+
+        // Like MNE-C, a definition matches ignoring case and its own spaces, and by the part of a name before a dash
+        auto sel = MNEChSelection::these("fit", StringList{"MEG 0113", "EEG 001", "EOG", "MISSING"});
+        QCOMPARE(sel.kind, MNE_CH_SELECTION_USER);
+        QCOMPARE(sel.assign_channels(chs), 3);
+        QCOMPARE(sel.pick, Eigen::Vector4i(0, 1, 2, -1));
+        QCOMPARE(sel.ch_kind, Eigen::Vector4i(FIFFV_MEG_CH, FIFFV_EEG_CH, FIFFV_EOG_CH, -1));
+        QCOMPARE(sel.pick_deriv, Eigen::Vector4i::Constant(-1));
+        QCOMPARE(sel.chspick_nospace[0], std::string("MEG0113"));
+
+        // The spaces of the recorded name are kept, as in MNE-C
+        chs[0].ch_name = "MEG 0113";
+        auto spaceless = MNEChSelection::these("fit", StringList{"MEG0113"});
+        QCOMPARE(spaceless.assign_channels(chs), 0);
     }
 
     //=========================================================================================================

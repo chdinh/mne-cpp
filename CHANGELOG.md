@@ -402,6 +402,14 @@ aliases; replace the old spelling as below.
   `m.nrow()`, `MNENamedMatrix::build(r, c, rows, cols, data)` becomes
   `MNENamedMatrix::build(rows, cols, data)`, `m.pick(rows, nr, cols, nc)`
   becomes `m.pick(rows, cols)`.
+- New `MNEChSelection::these(name, channels)` and
+  `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
+  `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and
+  `mne_ch_selection_assign_chs_info`) build a channel selection and match it
+  to a recording; they were private helpers of the dipole fit. The retry
+  that matches a channel by the part of its name before a dash (`EEG 001`
+  for `EEG 001-REF`) compared the whole name again and never matched; it now
+  matches like MNE-C. `mne_ch_selection.h` no longer includes `QString`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`
