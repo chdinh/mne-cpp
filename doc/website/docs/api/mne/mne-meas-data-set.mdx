@@ -143,7 +143,7 @@ left.getValuesAtTime(0.1f, 0.0f, meas->nchan, false, at100ms.data()); // linear 
 // mne.read_evokeds(condition=0, baseline=None, proj=False): 366 MEG/EEG channels, 421 samples from -199.8 ms, nave 55;
 // MEG 0113 at sample 180 -4.74022e-12. MNE-C's baseline window stops before the sample at 0 s (120 samples, not mne's 121):
 // EEG 001 baseline -9.38499e-06, at 100 ms (interpolated) -1.45063e-06
-ok &= expect(meas->nchan == 366 && meas->nbad == 2 && left.np == 421 && left.nave == 55 && left.comment == "Left Auditory" && near(left.tmin, -0.19979521315838786, 1e-6) && near(meg0113, -4.740224134628893e-12, 1e-5) && near(at100ms(306), -1.4506279631761285e-06, 1e-4) && near(left.baselines(306), -9.384992481327106e-06, 1e-5),
+ok &= expect(meas->nchan == 366 && meas->badlist.size() == 2 && left.np == 421 && left.nave == 55 && left.comment == "Left Auditory" && near(left.tmin, -0.19979521315838786, 1e-6) && near(meg0113, -4.740224134628893e-12, 1e-5) && near(at100ms(306), -1.4506279631761285e-06, 1e-4) && near(left.baselines(306), -9.384992481327106e-06, 1e-5),
              "MNEMeasData/MNEMeasDataSet: evoked set, baseline and interpolated values match mne");
 ````
 

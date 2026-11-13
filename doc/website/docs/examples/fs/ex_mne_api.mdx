@@ -486,7 +486,7 @@ int main(int argc, char* argv[])
     //! [mne_raw_data_usage]
     // mne.io.read_raw_fif: first_samp 12900, 6007 samples, 376 channels, 2 bads; EEG 001 at offset 2990 -1.01223e-09
     // numpy port of MNE-C's overlap-add 40 Hz lowpass: -1.06402e-09; apply_proj(): -4.10778e-10
-    ok &= expect(mneRaw->first_samp == 12900 && mneRaw->nsamp == 6007 && rawInfo.nchan == 376 && mneRaw->nbad == 2 && firstBuffer.firsts == 12900 && mneRaw->bufs.size() > 1,
+    ok &= expect(mneRaw->first_samp == 12900 && mneRaw->nsamp == 6007 && rawInfo.nchan == 376 && mneRaw->badlist.size() == 2 && firstBuffer.firsts == 12900 && mneRaw->bufs.size() > 1,
                  "MNERawData/MNERawInfo/MNERawBufDef: buffer directory of the sample recording like mne.io.read_raw_fif");
     ok &= expect(sel.pick.minCoeff() >= 0 && near(eegRaw, -1.0122332562412516e-09, 1e-5) && near(eegProj, -4.107782047805238e-10, 1e-4) && near(eegFilt, -1.064022285676407e-09, 1e-3),
                  "MNEChSelection/MNEFilterDef: plain, projected and filtered reads match mne");
@@ -611,7 +611,7 @@ int main(int argc, char* argv[])
     // mne.read_evokeds(condition=0, baseline=None, proj=False): 366 MEG/EEG channels, 421 samples from -199.8 ms, nave 55;
     // MEG 0113 at sample 180 -4.74022e-12. MNE-C's baseline window stops before the sample at 0 s (120 samples, not mne's 121):
     // EEG 001 baseline -9.38499e-06, at 100 ms (interpolated) -1.45063e-06
-    ok &= expect(meas->nchan == 366 && meas->nbad == 2 && left.np == 421 && left.nave == 55 && left.comment == "Left Auditory" && near(left.tmin, -0.19979521315838786, 1e-6) && near(meg0113, -4.740224134628893e-12, 1e-5) && near(at100ms(306), -1.4506279631761285e-06, 1e-4) && near(left.baselines(306), -9.384992481327106e-06, 1e-5),
+    ok &= expect(meas->nchan == 366 && meas->badlist.size() == 2 && left.np == 421 && left.nave == 55 && left.comment == "Left Auditory" && near(left.tmin, -0.19979521315838786, 1e-6) && near(meg0113, -4.740224134628893e-12, 1e-5) && near(at100ms(306), -1.4506279631761285e-06, 1e-4) && near(left.baselines(306), -9.384992481327106e-06, 1e-5),
                  "MNEMeasData/MNEMeasDataSet: evoked set, baseline and interpolated values match mne");
 
     //! [mne_sss_data_usage]

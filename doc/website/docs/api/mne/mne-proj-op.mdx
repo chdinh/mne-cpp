@@ -438,7 +438,7 @@ mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);
 const double eegProj = segment(1, 0);
 // mne.io.read_raw_fif: first_samp 12900, 6007 samples, 376 channels, 2 bads; EEG 001 at offset 2990 -1.01223e-09
 // numpy port of MNE-C's overlap-add 40 Hz lowpass: -1.06402e-09; apply_proj(): -4.10778e-10
-ok &= expect(mneRaw->first_samp == 12900 && mneRaw->nsamp == 6007 && rawInfo.nchan == 376 && mneRaw->nbad == 2 && firstBuffer.firsts == 12900 && mneRaw->bufs.size() > 1,
+ok &= expect(mneRaw->first_samp == 12900 && mneRaw->nsamp == 6007 && rawInfo.nchan == 376 && mneRaw->badlist.size() == 2 && firstBuffer.firsts == 12900 && mneRaw->bufs.size() > 1,
              "MNERawData/MNERawInfo/MNERawBufDef: buffer directory of the sample recording like mne.io.read_raw_fif");
 ````
 
