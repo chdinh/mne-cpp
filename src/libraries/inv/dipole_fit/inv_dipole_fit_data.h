@@ -33,6 +33,8 @@
 #include <vector>
 
 #include <fiff/fiff_types.h>
+#include <mne/mne_cov_matrix.h>
+#include <mne/mne_proj_op.h>
 #include <fwd/fwd_types.h>
 #include <fwd/fwd_eeg_sphere_model.h>
 #include <fwd/fwd_bem_model.h>

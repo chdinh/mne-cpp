@@ -30,7 +30,7 @@
 #include "../inv_global.h"
 #include "inv_ecd_set.h"
 
-#include <mne/mne_types.h>
+#include <mne/mne_filter_def.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES

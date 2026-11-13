@@ -20,7 +20,8 @@
 
 #include "mne_proj_item.h"
 #include "mne_named_matrix.h"
-#include "mne_types.h"
+#include <fiff/fiff_file.h>
+#include <fiff/fiff_constants.h>
 
 //=============================================================================================================
 // USED NAMESPACES

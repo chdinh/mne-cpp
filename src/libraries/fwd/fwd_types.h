@@ -31,7 +31,6 @@
 #define FWD_TYPES_H
 
 #include <fiff/fiff_types.h>
-#include <mne/mne_types.h>
 
 #include "fwd_coil_set.h"
 

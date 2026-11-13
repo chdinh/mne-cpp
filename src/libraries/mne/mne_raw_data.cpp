@@ -20,12 +20,15 @@
 //=============================================================================================================
 
 #include "mne_raw_data.h"
+#include "mne_types.h"
 #include <memory>
 #include <base/log.h>
 
 #include <vector>
 #include <base/string_utils.h>
 #include <fiff/fiff_ch_name.h>
+#include "mne_ch_selection.h"
+#include "mne_filter_def.h"
 
 #include <sstream>
 

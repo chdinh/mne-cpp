@@ -329,6 +329,12 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `mne/mne_types.h` holds only the MNE-C constants and no longer includes
+  20 other headers (fiff stream, projection, covariance, CTF compensation,
+  layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`
+  is a `std::string_view` and `MNE_ENV_TRIGGER_CH` a `const char*` constant
+  instead of macros; the unused `MNE_ENV_ROOT` is gone. Migration: include
+  the headers you use (for example `mne/mne_proj_op.h`) yourself.
 - `MNEMshDisplaySurface` loses `user_data` and `user_data_free`, and
   `mne_types.h` loses `mneUserFreeFunc`: MNE-C's `mne_analyze` cached a contour
   map there, nothing in mne-cpp set them. Migration: keep per-surface state in

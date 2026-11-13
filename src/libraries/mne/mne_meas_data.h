@@ -30,7 +30,6 @@
 #include <string>
 #include <fiff/fiff_types.h>
 
-#include "mne_types.h"
 #include "mne_raw_data.h"
 
 //=============================================================================================================

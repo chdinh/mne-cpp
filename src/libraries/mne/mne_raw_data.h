@@ -38,7 +38,9 @@
 #include "mne_ctf_comp_data_set.h"
 #include "mne_deriv.h"
 #include "mne_deriv_set.h"
-#include "mne_types.h"
+#include "mne_ch_selection.h"
+#include "mne_event_list.h"
+#include "mne_filter_def.h"
 
 //=============================================================================================================
 // STL INCLUDES
