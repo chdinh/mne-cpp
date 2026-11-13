@@ -39,7 +39,6 @@
 #include <QMap>
 #include <QVector>
 #include <QReadWriteLock>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES

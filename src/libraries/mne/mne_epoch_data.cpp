@@ -100,7 +100,7 @@ void MNEEpochData::pick_channels(const RowVectorXi& sel)
         selBlock.resize(sel.cols(), epoch.cols());
     }
 
-    for (qint32 l = 0; l < sel.cols(); ++l) {
+    for (Eigen::Index l = 0; l < sel.cols(); ++l) {
         if (sel(l) <= epoch.rows()) {
             selBlock.row(l) = epoch.row(sel(0, l));
         } else {

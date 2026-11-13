@@ -45,7 +45,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <QTextStream>
 
 #include <memory>

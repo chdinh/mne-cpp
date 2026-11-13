@@ -45,7 +45,6 @@
 #include <QColor>
 #include <QRectF>
 #include <QWidget>
-#include <QSharedPointer>
 #include <QVector>
 
 //=============================================================================================================

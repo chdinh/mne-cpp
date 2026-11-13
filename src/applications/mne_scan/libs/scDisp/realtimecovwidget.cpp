@@ -40,7 +40,6 @@
 #include <QFont>
 #include <QDebug>
 #include <QVBoxLayout>
-#include <QSharedPointer>
 #include <QAction>
 
 //=============================================================================================================

@@ -36,7 +36,6 @@
 
 #include <QMap>
 #include <QRect>
-#include <QSharedPointer>
 #include <QStringList>
 #include <QVector>
 

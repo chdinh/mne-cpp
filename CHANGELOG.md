@@ -320,6 +320,15 @@ aliases; replace the old spelling as below.
   `FiffId`, `FiffTime`, `FiffChInfo`, `FiffChPos`, `FiffDigPoint`,
   `FiffDirEntry` and `FiffDataRef` is `storage_size()`, and `FiffId::toString`
   is `to_string`.
+- The average colour and activation maps of `AverageSelectionView`,
+  `AverageLayoutView`, `ButterflyView`, `EvokedSetModel` and `AverageScene`
+  (`getAverageColor`, `setAverageColor`, `newAverageColorMap`, ...) are
+  `std::shared_ptr<QMap<...>>` instead of `QSharedPointer<QMap<...>>`.
+  Migration: `QSharedPointer<QMap<QString, QColor>>::create()` becomes
+  `std::make_shared<QMap<QString, QColor>>()`. The `mne` and `inv` headers
+  no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
+  surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
+  `std::int32_t` instead of `qint32`.
 - `MNEMeasData` and `MNERawData` find the trigger channel (`STI 014` or
   `MNE_TRIGGER_CH_NAME`) with `FIFFLIB::same_channel`, like every other
   channel lookup: spaces and case are ignored.

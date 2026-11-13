@@ -56,8 +56,8 @@ AverageLayoutView::AverageLayoutView(const QString& sSettingsPath,
                                      QWidget* parent,
                                      Qt::WindowFlags f)
 : AbstractView(parent, f)
-, m_qMapAverageColor(QSharedPointer<QMap<QString, QColor>>::create())
-, m_qMapAverageActivation(QSharedPointer<QMap<QString, bool>>::create())
+, m_qMapAverageColor(std::make_shared<QMap<QString, QColor>>())
+, m_qMapAverageActivation(std::make_shared<QMap<QString, bool>>())
 {
     m_sSettingsPath = sSettingsPath;
     this->setWindowTitle("Average Layout");
@@ -188,21 +188,21 @@ void AverageLayoutView::setScaleMap(const QMap<qint32, float>& scaleMap)
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, QColor>> AverageLayoutView::getAverageColor() const
+std::shared_ptr<QMap<QString, QColor>> AverageLayoutView::getAverageColor() const
 {
     return m_qMapAverageColor;
 }
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, bool>> AverageLayoutView::getAverageActivation() const
+std::shared_ptr<QMap<QString, bool>> AverageLayoutView::getAverageActivation() const
 {
     return m_qMapAverageActivation;
 }
 
 //=============================================================================================================
 
-void AverageLayoutView::setAverageColor(const QSharedPointer<QMap<QString, QColor>> qMapAverageColor)
+void AverageLayoutView::setAverageColor(const std::shared_ptr<QMap<QString, QColor>>& qMapAverageColor)
 {
     if (!m_pAverageScene) {
         qDebug() << "AverageLayoutView::setAverageColor - m_pAverageScene is NULL. Returning. ";
@@ -227,7 +227,7 @@ void AverageLayoutView::setSingleAverageColor(const QColor& avgColor)
 
 //=============================================================================================================
 
-void AverageLayoutView::setAverageActivation(const QSharedPointer<QMap<QString, bool>> qMapAverageActivation)
+void AverageLayoutView::setAverageActivation(const std::shared_ptr<QMap<QString, bool>>& qMapAverageActivation)
 {
     if (!m_pAverageScene) {
         qDebug() << "AverageLayoutView::setAverageActivation - m_pAverageScene is NULL. Returning. ";

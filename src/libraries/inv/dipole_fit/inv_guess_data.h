@@ -40,8 +40,8 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
+#include <filesystem>
 #include <vector>
 
 //=============================================================================================================
@@ -93,7 +93,7 @@ public:
      * @param[in] guessrad Radius of the spherical guess volume when no surface bounds it (m).
      *
      */
-    InvGuessData(const QString& guessname, const QString& guess_surfname, float mindist, float exclude, float grid, InvDipoleFitData* f, float guessrad = 0.080f);
+    InvGuessData(const std::filesystem::path& guessname, const std::filesystem::path& guess_surfname, float mindist, float exclude, float grid, InvDipoleFitData* f, float guessrad = 0.080f);
 
     //=========================================================================================================
     /**

@@ -56,10 +56,10 @@ using namespace Eigen;
 
 EvokedSetModel::EvokedSetModel(QObject* parent)
 : QAbstractTableModel(parent)
-, m_qMapAverageColor(QSharedPointer<QMap<QString, QColor>>::create())
-, m_qMapAverageActivation(QSharedPointer<QMap<QString, bool>>::create())
-, m_qMapAverageColorOld(QSharedPointer<QMap<QString, QColor>>::create())
-, m_qMapAverageActivationOld(QSharedPointer<QMap<QString, bool>>::create())
+, m_qMapAverageColor(std::make_shared<QMap<QString, QColor>>())
+, m_qMapAverageActivation(std::make_shared<QMap<QString, bool>>())
+, m_qMapAverageColorOld(std::make_shared<QMap<QString, QColor>>())
+, m_qMapAverageActivationOld(std::make_shared<QMap<QString, bool>>())
 , m_bIsInit(false)
 , m_bIsFreezed(false)
 , m_bProjActivated(false)
@@ -393,28 +393,28 @@ void EvokedSetModel::updateData()
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, QColor>> EvokedSetModel::getAverageColor() const
+std::shared_ptr<QMap<QString, QColor>> EvokedSetModel::getAverageColor() const
 {
     return m_qMapAverageColor;
 }
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, bool>> EvokedSetModel::getAverageActivation() const
+std::shared_ptr<QMap<QString, bool>> EvokedSetModel::getAverageActivation() const
 {
     return m_qMapAverageActivation;
 }
 
 //=============================================================================================================
 
-void EvokedSetModel::setAverageColor(const QSharedPointer<QMap<QString, QColor>> qMapAverageColor)
+void EvokedSetModel::setAverageColor(const std::shared_ptr<QMap<QString, QColor>>& qMapAverageColor)
 {
     m_qMapAverageColor = qMapAverageColor;
 }
 
 //=============================================================================================================
 
-void EvokedSetModel::setAverageActivation(const QSharedPointer<QMap<QString, bool>> qMapAverageActivation)
+void EvokedSetModel::setAverageActivation(const std::shared_ptr<QMap<QString, bool>>& qMapAverageActivation)
 {
     m_qMapAverageActivation = qMapAverageActivation;
 }

@@ -39,7 +39,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 #include <QString>
 #include <QStringList>
 #include <QList>

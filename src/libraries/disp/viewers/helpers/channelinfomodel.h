@@ -35,7 +35,6 @@
 //=============================================================================================================
 
 #include <QAbstractTableModel>
-#include <QSharedPointer>
 #include <QPointF>
 #include <QMultiMap>
 

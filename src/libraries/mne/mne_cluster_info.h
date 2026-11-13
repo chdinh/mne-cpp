@@ -29,6 +29,7 @@
 
 #include "mne_global.h"
 
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -43,7 +44,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QSharedPointer>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -90,7 +90,7 @@ public:
      *
      * @return number of clusters.
      */
-    inline qint32 numClust() const;
+    inline std::int32_t numClust() const;
 
     //=========================================================================================================
     /**
@@ -113,8 +113,8 @@ public:
 
 public:
     std::vector<std::string> clusterLabelNames;     /**< FsLabel name of the cluster. Entries can be non unique, since some FsLabel consist of more than one cluster.*/
-    std::vector<qint32> clusterLabelIds;            /**< Id (FsLabel/ROI id) of the cluster. Entries can be non unique, since some FsLabel/ROI consist of more than one cluster.*/
-    std::vector<qint32> centroidVertno;             /**< Id (FsLabel/ROI id) of the centroid. */
+    std::vector<std::int32_t> clusterLabelIds;      /**< Id (FsLabel/ROI id) of the cluster. Entries can be non unique, since some FsLabel/ROI consist of more than one cluster.*/
+    std::vector<std::int32_t> centroidVertno;       /**< Id (FsLabel/ROI id) of the centroid. */
     std::vector<Eigen::Vector3f> centroidSource_rr; /**< Centroid location. */
     std::vector<Eigen::VectorXi> clusterVertnos;    /**< Vertnos which belong to corresponding cluster. */
     std::vector<Eigen::MatrixX3f> clusterSource_rr; /**< Cluster source locations. */
@@ -132,7 +132,7 @@ inline bool MNEClusterInfo::empty() const
 
 //=============================================================================================================
 
-inline qint32 MNEClusterInfo::numClust() const
+inline std::int32_t MNEClusterInfo::numClust() const
 {
     return static_cast<int>(this->clusterVertnos.size());
 }

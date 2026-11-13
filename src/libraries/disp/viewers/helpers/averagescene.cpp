@@ -109,7 +109,7 @@ void AverageScene::repaintSelectionItems(const DISPLIB::SelectionItem& selectedC
 
 //=============================================================================================================
 
-void AverageScene::setActivationPerAverage(const QSharedPointer<QMap<QString, bool>> qMapActivationPerAverage)
+void AverageScene::setActivationPerAverage(const std::shared_ptr<QMap<QString, bool>>& qMapActivationPerAverage)
 {
     QList<QGraphicsItem*> items = this->items();
     QListIterator<QGraphicsItem*> i(items);
@@ -124,7 +124,7 @@ void AverageScene::setActivationPerAverage(const QSharedPointer<QMap<QString, bo
 
 //=============================================================================================================
 
-void AverageScene::setColorPerAverage(const QSharedPointer<QMap<QString, QColor>> qMapAverageColor)
+void AverageScene::setColorPerAverage(const std::shared_ptr<QMap<QString, QColor>>& qMapAverageColor)
 {
     QList<QGraphicsItem*> items = this->items();
     QListIterator<QGraphicsItem*> i(items);

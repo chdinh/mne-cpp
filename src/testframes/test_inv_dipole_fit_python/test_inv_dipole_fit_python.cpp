@@ -614,7 +614,7 @@ void TestInvDipoleFitPython::sphereGuessGrid()
     QFETCH(int, nguess);
     QFETCH(double, rrSum);
 
-    InvGuessData guess(QString(), QString(), 0.0f, 0.02f, static_cast<float>(grid), m_fitData.get(), static_cast<float>(radius));
+    InvGuessData guess({}, {}, 0.0f, 0.02f, static_cast<float>(grid), m_fitData.get(), static_cast<float>(radius));
     QCOMPARE(guess.nguess, nguess);
     QVERIFY(std::abs(guess.rr.cast<double>().sum() - rrSum) < 1e-3);
 }
@@ -639,7 +639,7 @@ void TestInvDipoleFitPython::fitsMagneticDipole()
 
     dipoleFitFuncs funcs = m_fitData->funcs;
     m_fitData->fit_mag_dipoles = true;
-    InvGuessData guess(QString(), QString(), 0.0f, 0.02f, 0.015f, m_fitData.get(), 0.08f);
+    InvGuessData guess({}, {}, 0.0f, 0.02f, 0.015f, m_fitData.get(), 0.08f);
     InvEcd dip;
     const bool fitted = InvDipoleFitData::fit_one(m_fitData.get(), &guess, 0.0f, B, false, dip);
     m_fitData->fit_mag_dipoles = false;
@@ -654,7 +654,7 @@ void TestInvDipoleFitPython::fitsMagneticDipole()
 
 void TestInvDipoleFitPython::fitsOneTimePoint()
 {
-    InvGuessData guess(QString(), QString(), 0.0f, 0.02f, 0.015f, m_fitData.get(), 0.08f);
+    InvGuessData guess({}, {}, 0.0f, 0.02f, 0.015f, m_fitData.get(), 0.08f);
     QCOMPARE(guess.nguess, 627);
 
     VectorXf B = m_fields.col(0);
@@ -727,7 +727,7 @@ void TestInvDipoleFitPython::guessesFromFile()
     QVERIFY(fitData);
     fitData->funcs = fitData->sphere_funcs.get();
 
-    InvGuessData guess(guessFile, QString(), 0.0f, 0.0f, 0.01f, fitData.get());
+    InvGuessData guess(guessFile.toStdU16String(), {}, 0.0f, 0.0f, 0.01f, fitData.get());
     // mne-python: apply_trans(mri_head_t, src[0]['rr'][src[0]['vertno']])
     QCOMPARE(guess.nguess, 87);
     QVERIFY2(std::abs(guess.rr.cast<double>().sum() - 6.483795735946459) < 1e-5, qPrintable(QString::number(guess.rr.cast<double>().sum(), 'g', 12)));
@@ -741,7 +741,7 @@ void TestInvDipoleFitPython::guessesFromFile()
 
     // A file that is not a source space gives no guesses.
     QTest::ignoreMessage(QtCriticalMsg, "No source spaces available here");
-    InvGuessData none(m_sampleAve, QString(), 0.0f, 0.0f, 0.01f, fitData.get());
+    InvGuessData none(m_sampleAve.toStdU16String(), {}, 0.0f, 0.0f, 0.01f, fitData.get());
     QCOMPARE(none.nguess, 0);
 
     // Fields need the noise covariance that whitens them.

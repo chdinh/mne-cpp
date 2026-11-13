@@ -277,8 +277,8 @@ InvEcdSet InvDipoleFit::calculateFit() const
      * Proceed to computing the fits
      */
     BASELIB::Log::info("\n---- Computing the forward solution for the guesses...\n");
-    auto guess = std::make_unique<InvGuessData>(settings->guessname,
-                                                settings->guess_surfname,
+    auto guess = std::make_unique<InvGuessData>(settings->guessname.toStdU16String(),
+                                                settings->guess_surfname.toStdU16String(),
                                                 settings->guess_mindist, settings->guess_exclude, settings->guess_grid, fit_data.get(), settings->guess_rad);
     if (guess->nguess == 0) {
         BASELIB::Log::critical("Could not create the initial guesses.");

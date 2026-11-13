@@ -71,19 +71,19 @@ void MNEClusterInfo::write(const std::filesystem::path& p_sFileName) const
     QTextStream out(&file);
     out << "MNE Cluster Info\n";
 
-    for (qint32 i = 0; i < std::ssize(clusterLabelIds); ++i) {
+    for (std::int32_t i = 0; i < std::ssize(clusterLabelIds); ++i) {
         out << "\nLabel : " << clusterLabelNames[i].c_str() << "\n";
         out << "FsLabel ID : " << clusterLabelIds[i] << "\n";
         out << "Centroid Vertno : " << centroidVertno[i] << "\n";
         out << "Centroid rr : " << centroidSource_rr[i](0) << ", " << centroidSource_rr[i](1) << ", " << centroidSource_rr[i](2) << "\n";
         out << "Vertnos :\n";
-        for (qint32 j = 0; j < clusterVertnos[i].size(); ++j)
+        for (std::int32_t j = 0; j < clusterVertnos[i].size(); ++j)
             out << clusterVertnos[i][j] << ", ";
         out << "\nDistances :\n";
-        for (qint32 j = 0; j < clusterDistances[i].size(); ++j)
+        for (std::int32_t j = 0; j < clusterDistances[i].size(); ++j)
             out << clusterDistances[i][j] << ", ";
         out << "\nrr :\n";
-        for (qint32 j = 0; j < clusterSource_rr[i].rows(); ++j)
+        for (std::int32_t j = 0; j < clusterSource_rr[i].rows(); ++j)
             out << clusterSource_rr[i](j, 0) << ", " << clusterSource_rr[i](j, 1) << ", " << clusterSource_rr[i](j, 2) << "\n";
 
         out << "\n";
@@ -99,7 +99,7 @@ void MNEClusterInfo::write(const std::filesystem::path& p_sFileName) const
     if (file_centroids.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out_centroids(&file_centroids);
 
-        for (qint32 i = 0; i < std::ssize(clusterLabelIds); ++i)
+        for (std::int32_t i = 0; i < std::ssize(clusterLabelIds); ++i)
             out_centroids << centroidVertno[i] << ", ";
 
         // optional, as QFile destructor will already do it:

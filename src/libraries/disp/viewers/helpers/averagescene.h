@@ -35,6 +35,8 @@
 
 #include <QMap>
 
+#include <memory>
+
 //=============================================================================================================
 // DEFINE NAMESPACE DISPLIB
 //=============================================================================================================
@@ -107,7 +109,7 @@ public:
      *
      * @param[in] qMapActivationPerAverage     The average activation information.
      */
-    void setActivationPerAverage(const QSharedPointer<QMap<QString, bool>> qMapActivationPerAverage);
+    void setActivationPerAverage(const std::shared_ptr<QMap<QString, bool>>& qMapActivationPerAverage);
 
     //=========================================================================================================
     /**
@@ -115,7 +117,7 @@ public:
      *
      * @param[in] qMapAverageColor     The average color information.
      */
-    void setColorPerAverage(const QSharedPointer<QMap<QString, QColor>> qMapAverageColor);
+    void setColorPerAverage(const std::shared_ptr<QMap<QString, QColor>>& qMapAverageColor);
 
     //=========================================================================================================
     /**

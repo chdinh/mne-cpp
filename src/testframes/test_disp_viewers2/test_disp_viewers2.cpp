@@ -75,7 +75,6 @@
 #include <QApplication>
 #include <QFile>
 #include <QLayout>
-#include <QSharedPointer>
 #include <QScrollBar>
 #include <QSignalSpy>
 #include <QStringList>
@@ -1750,8 +1749,8 @@ void TestDispViewers2::averageSelectionView_lifecycle()
     view->clearView();
 
     // One checkbox and one colour button per average
-    auto colors = QSharedPointer<QMap<QString, QColor>>::create();
-    auto activation = QSharedPointer<QMap<QString, bool>>::create();
+    auto colors = std::make_shared<QMap<QString, QColor>>();
+    auto activation = std::make_shared<QMap<QString, bool>>();
     colors->insert(QStringLiteral("aud"), Qt::red);
     colors->insert(QStringLiteral("vis"), Qt::blue);
     activation->insert(QStringLiteral("aud"), true);
@@ -1866,8 +1865,8 @@ void TestDispViewers2::butterflyView_drawsAveragesAcrossTheFullWidth()
     view.setModalityMap({{QStringLiteral("MAG"), true}});
     view.setSelectedChannels({0});
     view.setBackgroundColor(Qt::white);
-    view.setAverageActivation(QSharedPointer<QMap<QString, bool>>::create(QMap<QString, bool>{{QStringLiteral("aud"), true}}));
-    view.setAverageActivation(QSharedPointer<QMap<QString, bool>>::create(QMap<QString, bool>{{QStringLiteral("aud"), true}}));
+    view.setAverageActivation(std::make_shared<QMap<QString, bool>>(QMap<QString, bool>{{QStringLiteral("aud"), true}}));
+    view.setAverageActivation(std::make_shared<QMap<QString, bool>>(QMap<QString, bool>{{QStringLiteral("aud"), true}}));
     view.setSingleAverageColor(Qt::black);
     view.show();
     view.dataUpdate();
@@ -2291,8 +2290,8 @@ void TestDispViewers2::averageLayoutView_drawsEachChannelsAverage()
     selection.m_bShowAll = false;
     view.channelSelectionChanged(QVariant::fromValue(&selection));
     view.setScaleMap({{FIFF_UNIT_T, 1e-12f}});
-    view.setAverageColor(QSharedPointer<QMap<QString, QColor>>::create(QMap<QString, QColor>{{QStringLiteral("aud"), Qt::red}}));
-    view.setAverageActivation(QSharedPointer<QMap<QString, bool>>::create(QMap<QString, bool>{{QStringLiteral("aud"), true}}));
+    view.setAverageColor(std::make_shared<QMap<QString, QColor>>(QMap<QString, QColor>{{QStringLiteral("aud"), Qt::red}}));
+    view.setAverageActivation(std::make_shared<QMap<QString, bool>>(QMap<QString, bool>{{QStringLiteral("aud"), true}}));
     view.setSingleAverageColor(Qt::black);
     QCOMPARE(view.getAverageColor()->value(QStringLiteral("aud")), QColor(Qt::black));
     QVERIFY(view.getAverageActivation()->value(QStringLiteral("aud")));
@@ -2474,8 +2473,8 @@ void TestDispViewers2::evokedSetModel_projectionRolesAndAverageMaps()
     QCOMPARE(model.getAverageColor()->value(QStringLiteral("vis")), QColor(Qt::cyan));
     QCOMPARE(model.getEvokedSet(), set);
 
-    model.setAverageColor(QSharedPointer<QMap<QString, QColor>>::create());
-    model.setAverageActivation(QSharedPointer<QMap<QString, bool>>::create());
+    model.setAverageColor(std::make_shared<QMap<QString, QColor>>());
+    model.setAverageActivation(std::make_shared<QMap<QString, bool>>());
     QVERIFY(model.getAverageColor()->isEmpty());
     QVERIFY(model.getAverageActivation()->isEmpty());
 }
@@ -4492,11 +4491,11 @@ void TestDispViewers2::evokedSetModel_extended()
     auto activations = model.getAverageActivation();
     Q_UNUSED(activations);
 
-    auto pColors = QSharedPointer<QMap<QString, QColor>>::create();
+    auto pColors = std::make_shared<QMap<QString, QColor>>();
     (*pColors)["avg"] = Qt::red;
     model.setAverageColor(pColors);
 
-    auto pActivations = QSharedPointer<QMap<QString, bool>>::create();
+    auto pActivations = std::make_shared<QMap<QString, bool>>();
     (*pActivations)["avg"] = true;
     model.setAverageActivation(pActivations);
 

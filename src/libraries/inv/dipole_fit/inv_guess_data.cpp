@@ -23,6 +23,7 @@
 
 #include "inv_guess_data.h"
 #include <base/log.h>
+#include <base/string_utils.h>
 #include "inv_dipole_fit_data.h"
 #include "inv_dipole_forward.h"
 #include <mne/mne_surface.h>
@@ -32,7 +33,6 @@
 #include <fiff/fiff_tag.h>
 
 #include <memory>
-#include <QFile>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -57,23 +57,23 @@ InvGuessData::InvGuessData()
 
 //=============================================================================================================
 
-InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfname, float mindist, float exclude, float grid, InvDipoleFitData* f, float guessrad)
+InvGuessData::InvGuessData(const std::filesystem::path& guessname, const std::filesystem::path& guess_surfname, float mindist, float exclude, float grid, InvDipoleFitData* f, float guessrad)
 {
     int k, p;
     std::unique_ptr<MNESourceSpace> guesses;
 
-    if (!guessname.isEmpty()) {
+    if (!guessname.empty()) {
         /*
          * Read the guesses and transform to the appropriate coordinate frame
          */
         std::vector<std::unique_ptr<MNESourceSpace>> sp;
-        if (MNESourceSpace::read_source_spaces(guessname.toStdU16String(), sp) == FIFF_FAIL)
+        if (MNESourceSpace::read_source_spaces(guessname, sp) == FIFF_FAIL)
             return;
         if (static_cast<int>(sp.size()) != 1) {
             BASELIB::Log::critical("Incorrect number of source spaces in guess file");
             return;
         }
-        BASELIB::Log::info("Read guesses from {}\n", guessname.toStdString());
+        BASELIB::Log::info("Read guesses from {}\n", BASELIB::utf8FromPath(guessname));
         guesses = std::move(sp[0]);
     } else {
         MNESurface* inner_skull = nullptr;
@@ -86,9 +86,9 @@ InvGuessData::InvGuessData(const QString& guessname, const QString& guess_surfna
             BASELIB::Log::info("Using inner skull surface from the BEM ({})...\n", f->bemname.toStdString());
             if ((inner_skull = f->bem_model->fwd_bem_find_surface(FIFFV_BEM_SURF_ID_BRAIN)) == nullptr)
                 return;
-        } else if (!guess_surfname.isEmpty()) {
-            BASELIB::Log::info("Reading inner skull surface from {}...\n", guess_surfname.toStdString());
-            inner_skull_owned = MNESurface::read_bem_surface(guess_surfname.toStdU16String(), FIFFV_BEM_SURF_ID_BRAIN, true);
+        } else if (!guess_surfname.empty()) {
+            BASELIB::Log::info("Reading inner skull surface from {}...\n", BASELIB::utf8FromPath(guess_surfname));
+            inner_skull_owned = MNESurface::read_bem_surface(guess_surfname, FIFFV_BEM_SURF_ID_BRAIN, true);
             if (!inner_skull_owned)
                 return;
             inner_skull = inner_skull_owned.get();

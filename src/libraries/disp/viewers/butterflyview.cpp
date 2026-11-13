@@ -59,8 +59,8 @@ ButterflyView::ButterflyView(const QString& sSettingsPath,
 , m_sSettingsPath(sSettingsPath)
 , m_colCurrentBackgroundColor(Qt::white)
 , m_pEvokedSetModel(nullptr)
-, m_qMapAverageActivation(QSharedPointer<QMap<QString, bool>>::create())
-, m_qMapAverageColor(QSharedPointer<QMap<QString, QColor>>::create())
+, m_qMapAverageActivation(std::make_shared<QMap<QString, bool>>())
+, m_qMapAverageColor(std::make_shared<QMap<QString, QColor>>())
 {
     m_sSettingsPath = sSettingsPath;
 
@@ -180,21 +180,21 @@ void ButterflyView::takeScreenshot(const QString& fileName)
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, QColor>> ButterflyView::getAverageColor() const
+std::shared_ptr<QMap<QString, QColor>> ButterflyView::getAverageColor() const
 {
     return m_qMapAverageColor;
 }
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, bool>> ButterflyView::getAverageActivation() const
+std::shared_ptr<QMap<QString, bool>> ButterflyView::getAverageActivation() const
 {
     return m_qMapAverageActivation;
 }
 
 //=============================================================================================================
 
-void ButterflyView::setAverageColor(const QSharedPointer<QMap<QString, QColor>> qMapAverageColor)
+void ButterflyView::setAverageColor(const std::shared_ptr<QMap<QString, QColor>>& qMapAverageColor)
 {
     m_qMapAverageColor = qMapAverageColor;
     update();
@@ -210,7 +210,7 @@ void ButterflyView::setSingleAverageColor(const QColor& avgColor)
 
 //=============================================================================================================
 
-void ButterflyView::setAverageActivation(const QSharedPointer<QMap<QString, bool>> qMapAverageActivation)
+void ButterflyView::setAverageActivation(const std::shared_ptr<QMap<QString, bool>>& qMapAverageActivation)
 {
     m_qMapAverageActivation = qMapAverageActivation;
     update();

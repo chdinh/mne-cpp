@@ -55,8 +55,8 @@ AverageSelectionView::AverageSelectionView(const QString& sSettingsPath,
                                            Qt::WindowFlags f)
 : AbstractView(parent, f)
 , m_iMaxNumAverages(10)
-, m_qMapAverageColor(QSharedPointer<QMap<QString, QColor>>::create())
-, m_qMapAverageActivation(QSharedPointer<QMap<QString, bool>>::create())
+, m_qMapAverageColor(std::make_shared<QMap<QString, QColor>>())
+, m_qMapAverageActivation(std::make_shared<QMap<QString, bool>>())
 {
     m_sSettingsPath = sSettingsPath;
     this->setWindowTitle("Average Selection");
@@ -76,21 +76,21 @@ AverageSelectionView::~AverageSelectionView()
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, QColor>> AverageSelectionView::getAverageColor() const
+std::shared_ptr<QMap<QString, QColor>> AverageSelectionView::getAverageColor() const
 {
     return m_qMapAverageColor;
 }
 
 //=============================================================================================================
 
-QSharedPointer<QMap<QString, bool>> AverageSelectionView::getAverageActivation() const
+std::shared_ptr<QMap<QString, bool>> AverageSelectionView::getAverageActivation() const
 {
     return m_qMapAverageActivation;
 }
 
 //=============================================================================================================
 
-void AverageSelectionView::setAverageColor(const QSharedPointer<QMap<QString, QColor>> qMapAverageColor)
+void AverageSelectionView::setAverageColor(const std::shared_ptr<QMap<QString, QColor>>& qMapAverageColor)
 {
     m_qMapAverageColor = qMapAverageColor;
     redrawGUI();
@@ -98,7 +98,7 @@ void AverageSelectionView::setAverageColor(const QSharedPointer<QMap<QString, QC
 
 //=============================================================================================================
 
-void AverageSelectionView::setAverageActivation(const QSharedPointer<QMap<QString, bool>> qMapAverageActivation)
+void AverageSelectionView::setAverageActivation(const std::shared_ptr<QMap<QString, bool>>& qMapAverageActivation)
 {
     m_qMapAverageActivation = qMapAverageActivation;
     redrawGUI();

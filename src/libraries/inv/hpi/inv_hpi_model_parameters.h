@@ -34,7 +34,6 @@
 
 #include <QObject>
 #include <QVector>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS

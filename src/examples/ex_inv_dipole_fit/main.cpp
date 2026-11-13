@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     const bool fieldOk = InvDipoleFitData::compute_dipole_field(*fitData, truePos, false, gain) == 0; // projected, not whitened
     VectorXf field = gain * trueMoment;
 
-    InvGuessData guesses(QString(), QString(), 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
+    InvGuessData guesses({}, {}, 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
     std::unique_ptr<InvDipoleForward> atTruth(InvDipoleFitData::dipole_forward_one(fitData.get(), truePos, nullptr));
     InvEcd dipole;
     VectorXf b = field; // fit_one projects and whitens in place

@@ -82,7 +82,7 @@ public:
 public:
     MNESourceSpace* s;                                   /**< The source space to process. */
     std::unique_ptr<FIFFLIB::FiffCoordTrans> mri_head_t; /**< MRI-to-head coordinate transformation. */
-    std::weak_ptr<MNESurface> surf;                      /**< Non-owning reference to the inner skull BEM surface (caller holds QSharedPointer). */
+    std::weak_ptr<MNESurface> surf;                      /**< Non-owning reference to the inner skull BEM surface (owned by the caller). */
     float limit;                                         /**< Distance limit for filtering (meters). */
     QTextStream* filtered;                               /**< Optional stream to log omitted point locations (may be NULL). */
     int stat;                                            /**< Status code indicating whether filtering succeeded. */
