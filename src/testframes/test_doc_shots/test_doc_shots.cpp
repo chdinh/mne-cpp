@@ -60,6 +60,17 @@ private:
     QColor m_colour = Qt::red;
 };
 
+/** Paints slowly, like a heavy view on a loaded machine. */
+class SlowWidget : public ColourWidget
+{
+protected:
+    void paintEvent(QPaintEvent* event) override
+    {
+        QThread::msleep(150);
+        ColourWidget::paintEvent(event);
+    }
+};
+
 struct ToolRun
 {
     int exitCode = -1;
@@ -110,6 +121,7 @@ class TestDocShots : public QObject
 private slots:
     void waitsForTimerDrivenRepaints();
     void waitsForThreadPoolWork();
+    void waitsForTimersThatFallDueDuringASlowGrab();
     void reportsWindowsThatNeverSettle();
     void savesOpaquePngAtomically();
     void producesDeclaredSizeDeterministically();
@@ -150,6 +162,20 @@ void TestDocShots::waitsForThreadPoolWork()
     QString err;
     QVERIFY2(DOCSHOTS::waitUntilSettled(widget, err, 200), qPrintable(err));
     QCOMPARE(widget.grab().toImage().pixelColor(10, 10), QColor(Qt::blue));
+}
+
+void TestDocShots::waitsForTimersThatFallDueDuringASlowGrab()
+{
+    SlowWidget widget;
+    widget.resize(64, 48);
+    widget.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&widget));
+    // Falls due while the second 150 ms grab runs, after the frame has already looked unchanged for 100 ms.
+    QTimer::singleShot(230, &widget, [&widget]() { widget.setColour(Qt::green); });
+
+    QString err;
+    QVERIFY2(DOCSHOTS::waitUntilSettled(widget, err, 100), qPrintable(err));
+    QCOMPARE(widget.grab().toImage().pixelColor(10, 10), QColor(Qt::green));
 }
 
 void TestDocShots::reportsWindowsThatNeverSettle()

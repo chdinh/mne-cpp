@@ -329,6 +329,10 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `mne_doc_shots` no longer captures a window before its pending timers have
+  run: when grabbing a frame was slower than the settle time, a repaint that
+  fell due during the grab was skipped, so screenshots on a loaded machine
+  could show an earlier state and differ between runs.
 - `MNEMeasData` and `MNERawData` find the trigger channel (`STI 014` or
   `MNE_TRIGGER_CH_NAME`) with `FIFFLIB::same_channel`, like every other
   channel lookup: spaces and case are ignored.

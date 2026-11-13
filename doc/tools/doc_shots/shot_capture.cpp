@@ -186,12 +186,14 @@ bool waitUntilSettled(QWidget& window, QString& err, int settleMs, int timeoutMs
     while (true) {
         QCoreApplication::sendPostedEvents();
         QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+        // Measured before the grab: timers falling due during a slow grab have not run yet.
+        const qint64 quietWhenEventsRan = unchanged.elapsed();
         const QImage frame = window.grab().toImage();
         ++frames;
         if (frame != last || QThreadPool::globalInstance()->activeThreadCount() > 0) {
             last = frame;
             unchanged.restart();
-        } else if (unchanged.elapsed() >= settleMs) {
+        } else if (quietWhenEventsRan >= settleMs) {
             return true;
         }
         if (total.elapsed() > timeoutMs) {
