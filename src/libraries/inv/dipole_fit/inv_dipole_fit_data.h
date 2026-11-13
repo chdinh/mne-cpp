@@ -49,7 +49,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QTextStream>
+#include <ostream>
 
 #include <memory>
 
@@ -351,7 +351,7 @@ public:
                              float integ,
                              InvDipoleFitData& fit,
                              const MNELIB::MNEMeasData& data,
-                             QTextStream& out);
+                             std::ostream& out);
 
     //=========================================================================================================
     /**

@@ -329,6 +329,8 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `InvDipoleFitData::print_fields` writes to a `std::ostream` instead of a
+  `QTextStream`; `inv_dipole_fit_data.h` no longer includes Qt's text stream.
 - `MNESourceSpace::filter_source_spaces` writes the omitted points to a
   `std::ostream`, one `%10.3f %10.3f %10.3f` line per point like MNE-C (the
   `--mindistout` file of the forward solution padded its separators too). With

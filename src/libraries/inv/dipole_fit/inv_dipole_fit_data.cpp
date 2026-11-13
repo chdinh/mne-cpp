@@ -52,7 +52,6 @@
 #include <Eigen/Dense>
 
 #include <QFile>
-#include <QTextStream>
 
 #include <sstream>
 #include <QCoreApplication>
@@ -826,7 +825,7 @@ bool InvDipoleFitData::print_fields(const Eigen::Vector3f& rd,
                                     float integ,
                                     InvDipoleFitData& fit,
                                     const MNEMeasData& data,
-                                    QTextStream& out)
+                                    std::ostream& out)
 {
     const int nch = fit.nmeg + fit.neeg;
     if (data.nchan != nch || !data.current) {
@@ -848,7 +847,7 @@ bool InvDipoleFitData::print_fields(const Eigen::Vector3f& rd,
 
     for (int k = 0; k < nch; ++k) {
         const double scale = k < fit.nmeg ? 1e15 : 1e6;
-        out << QString::fromStdString(fit.ch_names[k]) << '\t' << scale * measured[k] << '\t' << scale * predicted[k] << '\n';
+        out << fit.ch_names[k] << '\t' << scale * measured[k] << '\t' << scale * predicted[k] << '\n';
     }
     return true;
 }
