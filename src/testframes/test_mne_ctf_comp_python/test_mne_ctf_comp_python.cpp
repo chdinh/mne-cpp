@@ -117,11 +117,8 @@ MatrixXd readMne(int fileGrade, int destGrade)
     std::unique_ptr<MNERawData> raw(MNERawData::open_file_comp(fixture(fileGrade).toStdU16String(), false, false, MNEFilterDef(), destGrade));
     if (!raw)
         return MatrixXd();
-    Matrix<float, Dynamic, Dynamic, RowMajor> values(raw->info->nchan, kNSamp);
-    std::vector<float*> rows(raw->info->nchan);
-    for (int c = 0; c < raw->info->nchan; ++c)
-        rows[c] = values.row(c).data();
-    if (raw->pick_data(nullptr, raw->first_samp, kNSamp, rows.data()) != 0)
+    MNERawData::RowMajorMatrixXf values(raw->info->nchan, kNSamp);
+    if (raw->pick_data(nullptr, raw->first_samp, values) != 0)
         return MatrixXd();
     return values.cast<double>();
 }

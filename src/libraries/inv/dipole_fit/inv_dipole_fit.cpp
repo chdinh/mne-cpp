@@ -354,11 +354,10 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
 
     Eigen::VectorXf one(nchan);
 
-    // Row-major storage compatible with float** interface
-    std::vector<float> storage(static_cast<std::size_t>(nchan) * length);
+    MNERawData::RowMajorMatrixXf segment(nchan, length);
     std::vector<float*> rows(nchan);
     for (int i = 0; i < nchan; ++i)
-        rows[i] = storage.data() + i * length;
+        rows[i] = segment.row(i).data();
     float** data = rows.data();
 
     InvEcd dip;
@@ -369,7 +368,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
      * Load the initial data segment
      */
     float stime = start / sfreq;
-    if (raw->pick_data_filt(sel, start, length, data) < 0)
+    if (raw->pick_data_filt(sel, start, segment) < 0)
         return false;
     if (verbose)
         BASELIB::Log::info("Fitting...");
@@ -378,7 +377,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
         int picks = time * sfreq - start;
         if (picks > stepo) {
             start = start + step;
-            if (raw->pick_data_filt(sel, start, length, data) < 0)
+            if (raw->pick_data_filt(sel, start, segment) < 0)
                 return false;
             picks = time * sfreq - start;
             stime = start / sfreq;

@@ -881,29 +881,10 @@ void TestMneRawProjComp::rawData_pickData()
     sel.pick_deriv << -1, -1, -1;
     sel.nderiv = 0;
 
-    int ns = 100;
-    // Allocate output arrays
-    float** picked = new float*[sel.nchan];
-    for (int i = 0; i < sel.nchan; i++) {
-        picked[i] = new float[ns];
-    }
-
-    int result = raw->pick_data(&sel, raw->first_samp, ns, picked);
-    QCOMPARE(result, 0);
-
-    // Verify we got actual data (not all zeros)
-    bool hasNonZero = false;
-    for (int ch = 0; ch < sel.nchan && !hasNonZero; ch++) {
-        for (int s = 0; s < ns && !hasNonZero; s++) {
-            if (picked[ch][s] != 0.0f)
-                hasNonZero = true;
-        }
-    }
-    QVERIFY(hasNonZero);
-
-    for (int i = 0; i < sel.nchan; i++)
-        delete[] picked[i];
-    delete[] picked;
+    MNERawData::RowMajorMatrixXf picked(sel.nchan, 100);
+    QCOMPARE(raw->pick_data(&sel, raw->first_samp, picked), 0);
+    // Real data, not all zeros
+    QVERIFY((picked.array() != 0.0f).any());
 }
 
 void TestMneRawProjComp::rawData_setupFilterBufs()

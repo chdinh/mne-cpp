@@ -329,6 +329,14 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- `MNERawData::pick_data`, `pick_data_proj` and `pick_data_filt` fill an
+  `Eigen::Ref<MNERawData::RowMajorMatrixXf>` (channels x samples) instead of a
+  `float**` of caller-built row pointers plus a sample count; the number of
+  samples is the number of columns. A buffer whose row count does not match
+  the channel selection is refused with `FAIL` and a warning; it used to be
+  written past its end. Migration: `std::vector<float*> rows{...};
+  raw.pick_data(sel, first, ns, rows.data())` becomes
+  `MNERawData::RowMajorMatrixXf values(nchan, ns); raw.pick_data(sel, first, values)`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

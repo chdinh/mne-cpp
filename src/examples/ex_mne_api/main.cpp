@@ -281,11 +281,10 @@ int main(int argc, char* argv[])
     }
 
     const int ns = 25;
-    Matrix<float, Dynamic, Dynamic, RowMajor> segment(sel.nchan, ns);
-    std::vector<float*> rows{segment.row(0).data(), segment.row(1).data(), segment.row(2).data()};
-    mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, ns, rows.data()); // calibrated, across a buffer boundary
+    MNERawData::RowMajorMatrixXf segment(sel.nchan, ns);
+    mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, segment); // calibrated, across a buffer boundary
     const double eegRaw = segment(1, 0);
-    mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, ns, rows.data());
+    mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
     const double eegFilt = segment(1, 0);
 
     // The file stores its 4 SSP projectors as inactive; makeProjection switches them on
@@ -295,7 +294,7 @@ int main(int argc, char* argv[])
     proj->make_proj();
     const MNEProjItem& firstItem = proj->items[0];
     mneRaw->proj = std::move(proj);
-    mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, ns, rows.data());
+    mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);
     const double eegProj = segment(1, 0);
     //! [mne_raw_data_usage]
     // mne.io.read_raw_fif: first_samp 12900, 6007 samples, 376 channels, 2 bads; EEG 001 at offset 2990 -1.01223e-09
@@ -350,12 +349,8 @@ int main(int argc, char* argv[])
         }
     }
     const int grade = MNECTFCompDataSet::get_comp(ctfRaw->info->chInfo, ctfRaw->info->nchan);
-    Matrix<float, Dynamic, Dynamic, RowMajor> ctf(ctfRaw->info->nchan, 21);
-    std::vector<float*> ctfRows(ctf.rows());
-    for (int c = 0; c < ctf.rows(); ++c) {
-        ctfRows[c] = ctf.row(c).data();
-    }
-    ctfRaw->pick_data(nullptr, ctfRaw->first_samp, 21, ctfRows.data());
+    MNERawData::RowMajorMatrixXf ctf(ctfRaw->info->nchan, 21);
+    ctfRaw->pick_data(nullptr, ctfRaw->first_samp, ctf);
     //! [mne_ctf_comp_data_set_usage]
     // raw.apply_gradient_compensation(0): sum |MEG| over the 7 MEG channels 2.45885e-10 (1.47942e-11 as stored)
     ok &= expect(comp.ncomp == 5 && grade == 0 && third && MNECTFCompDataSet::explain_comp(third->kind) == "third order gradiometer" && third->data->nrow == 7 && near(ctf.topRows(7).cast<double>().cwiseAbs().sum(), 2.4588499274586883e-10, 1e-5),
@@ -503,7 +498,7 @@ int main(int argc, char* argv[])
     bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
     bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
     mneRaw->proj.reset();
-    mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, ns, rows.data());
+    mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, segment);
     //! [mne_deriv_set_usage]
     // The derived channel is the difference of its inputs, read in one pass
     ok &= expect(derivations->count() == 2 && fromFif->count() == 2 && usable == 1 && mneRaw->deriv_matched->deriv_data->nrow == 1 && segment.row(0).isApprox(segment.row(1) - segment.row(2), 1e-6f),

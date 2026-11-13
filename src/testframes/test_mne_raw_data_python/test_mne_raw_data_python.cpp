@@ -26,6 +26,7 @@
 // INCLUDES
 //=============================================================================================================
 
+#include <base/log.h>
 #include <mne/mne_raw_data.h>
 #include <base/string_utils.h>
 #include <mne/mne_raw_info.h>
@@ -69,21 +70,17 @@ namespace
 
 //=============================================================================================================
 /**
- * Owns a channels x samples buffer and the row pointers MNERawData writes through.
+ * A channels x samples buffer prefilled with a sentinel, so samples MNERawData leaves untouched stand out.
  */
 struct PickBuffer
 {
     PickBuffer(int nchan, int ns)
     : values(nchan, ns)
-    , rows(nchan)
     {
         values.setConstant(12345.0f);
-        for (int c = 0; c < nchan; ++c)
-            rows[c] = values.row(c).data();
     }
 
-    Matrix<float, Dynamic, Dynamic, RowMajor> values;
-    std::vector<float*> rows;
+    MNERawData::RowMajorMatrixXf values;
 };
 
 bool closeTo(double actual, double expected, double rel)
@@ -200,7 +197,7 @@ void TestMneRawDataPython::picksSegments()
 
     MNEChSelection sel = makeSelection();
     PickBuffer buf(sel.nchan, ns);
-    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + offset, ns, buf.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + offset, buf.values), 0);
 
     QVERIFY2(closeTo(buf.values.cast<double>().cwiseAbs().sum(), absSum, 1e-5),
              qPrintable(QStringLiteral("abs sum %1").arg(buf.values.cast<double>().cwiseAbs().sum(), 0, 'g', 12)));
@@ -209,7 +206,7 @@ void TestMneRawDataPython::picksSegments()
 
     // The same data without a selection, every channel in file order.
     PickBuffer all(m_raw->info->nchan, ns);
-    QCOMPARE(m_raw->pick_data(nullptr, m_raw->first_samp + offset, ns, all.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(nullptr, m_raw->first_samp + offset, all.values), 0);
     for (int c = 0; c < sel.nchan; ++c)
         QCOMPARE(all.values.row(sel.pick[c]), buf.values.row(c));
 }
@@ -221,23 +218,32 @@ void TestMneRawDataPython::padsOutsideData()
     // Before the first sample the data are zero; past the end the last sample repeats.
     MNEChSelection sel = makeSelection();
     PickBuffer before(sel.nchan, 8);
-    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp - 3, 8, before.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp - 3, before.values), 0);
     QVERIFY((before.values.leftCols(3).array() == 0.0f).all());
     QVERIFY(closeTo(before.values(3, 3), 4.491140926785156e-10, 1e-5));
 
     PickBuffer after(sel.nchan, 10);
-    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 6000, 10, after.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 6000, after.values), 0);
     for (int s = 7; s < 10; ++s)
         QCOMPARE(after.values.col(s), after.values.col(6));
     PickBuffer allAfter(m_raw->info->nchan, 10);
-    QCOMPARE(m_raw->pick_data(nullptr, m_raw->first_samp + 6000, 10, allAfter.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(nullptr, m_raw->first_samp + 6000, allAfter.values), 0);
     for (int s = 7; s < 10; ++s)
         QCOMPARE(allAfter.values.col(s), allAfter.values.col(6));
     // A request that starts past the end has no sample to repeat
     PickBuffer beyond(sel.nchan, 4);
     beyond.values.setConstant(1.0f);
-    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 7000, 4, beyond.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 7000, beyond.values), 0);
     QVERIFY((beyond.values.array() == 0.0f).all());
+
+    // A buffer whose row count does not match the selection is refused, not overrun
+    for (const int nrow : {sel.nchan - 1, sel.nchan + 1}) {
+        PickBuffer wrong(nrow, 4);
+        BASELIB::LogCapture log;
+        QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp, wrong.values), -1);
+        QCOMPARE(log.count(BASELIB::Log::Level::Warning, "rows"), 1);
+        QVERIFY((wrong.values.array() == 12345.0f).all());
+    }
 
     // Projected reads pad the same way
     std::unique_ptr<MNEProjOp> proj;
@@ -248,19 +254,19 @@ void TestMneRawDataPython::padsOutsideData()
     for (MNEChSelection* picks : {&sel, static_cast<MNEChSelection*>(nullptr)}) {
         const int nchan = picks ? sel.nchan : m_raw->info->nchan;
         PickBuffer projected(nchan, 10);
-        QCOMPARE(m_raw->pick_data_proj(picks, m_raw->first_samp + 6000, 10, projected.rows.data()), 0);
+        QCOMPARE(m_raw->pick_data_proj(picks, m_raw->first_samp + 6000, projected.values), 0);
         for (int s = 7; s < 10; ++s)
             QCOMPARE(projected.values.col(s), projected.values.col(6));
         PickBuffer projectedBeyond(nchan, 4);
         projectedBeyond.values.setConstant(1.0f);
-        QCOMPARE(m_raw->pick_data_proj(picks, m_raw->first_samp + 7000, 4, projectedBeyond.rows.data()), 0);
+        QCOMPARE(m_raw->pick_data_proj(picks, m_raw->first_samp + 7000, projectedBeyond.values), 0);
         QVERIFY((projectedBeyond.values.array() == 0.0f).all());
     }
     m_raw->proj.reset();
 
     // A trigger channel is read uncalibrated: the first event (sample 13988) has code 2.
     PickBuffer stim(sel.nchan, 3);
-    QCOMPARE(m_raw->pick_data(&sel, 13987, 3, stim.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(&sel, 13987, stim.values), 0);
     QCOMPARE(stim.values(4, 0), 0.0f);
     QCOMPARE(stim.values(4, 1), 2.0f);
     QCOMPARE(stim.values(4, 2), 2.0f);
@@ -274,7 +280,7 @@ void TestMneRawDataPython::projectsSegment()
 
     // Without an operator the projected read is the plain read.
     PickBuffer plain(sel.nchan, 25);
-    QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, 25, plain.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, plain.values), 0);
     QVERIFY(closeTo(plain.values.cast<double>().cwiseAbs().sum(), 1.8063671136130195e-07, 1e-5));
 
     // The file stores its projectors as inactive; makeProjection switches them on, as MNE-C does.
@@ -292,7 +298,7 @@ void TestMneRawDataPython::projectsSegment()
     m_raw->proj = std::move(proj);
 
     PickBuffer buf(sel.nchan, 25);
-    QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, 25, buf.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, buf.values), 0);
     QVERIFY2(closeTo(buf.values.cast<double>().cwiseAbs().sum(), 1.8631954154371812e-07, 1e-4),
              qPrintable(QStringLiteral("projected abs sum %1").arg(buf.values.cast<double>().cwiseAbs().sum(), 0, 'g', 12)));
     QVERIFY(closeTo(buf.values(2, 0), -1.4097316494010995e-16, 1e-3));
@@ -300,7 +306,7 @@ void TestMneRawDataPython::projectsSegment()
     QCOMPARE(buf.values(4, 0), 0.0f);
 
     PickBuffer all(m_raw->info->nchan, 25);
-    QCOMPARE(m_raw->pick_data_proj(nullptr, m_raw->first_samp + 2990, 25, all.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data_proj(nullptr, m_raw->first_samp + 2990, all.values), 0);
     QVERIFY2(closeTo(all.values.cast<double>().cwiseAbs().sum(), 4.027555929286992e-06, 1e-4),
              qPrintable(QStringLiteral("all projected %1").arg(all.values.cast<double>().cwiseAbs().sum(), 0, 'g', 12)));
     m_raw->proj.reset();
@@ -376,10 +382,10 @@ void TestMneRawDataPython::filterIsTransparentWhenOff()
     MNEChSelection sel = makeSelection();
     PickBuffer raw(sel.nchan, 25);
     PickBuffer filt(sel.nchan, 25);
-    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 2990, 25, raw.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 2990, raw.values), 0);
     QVERIFY(m_raw->filter);
     QVERIFY(!m_raw->filter->filter_on);
-    QCOMPARE(m_raw->pick_data_filt(&sel, m_raw->first_samp + 2990, 25, filt.rows.data()), 0);
+    QCOMPARE(m_raw->pick_data_filt(&sel, m_raw->first_samp + 2990, filt.values), 0);
     QCOMPARE(filt.values, raw.values);
 }
 
@@ -427,7 +433,7 @@ void TestMneRawDataPython::filtersSegments()
 
     MNEChSelection sel = makeSelection();
     PickBuffer buf(sel.nchan, ns);
-    QCOMPARE(raw->pick_data_filt(&sel, raw->first_samp + offset, ns, buf.rows.data()), 0);
+    QCOMPARE(raw->pick_data_filt(&sel, raw->first_samp + offset, buf.values), 0);
 
     double sum = 0.0;
     for (int c = 0; c < sel.nchan; ++c)
@@ -439,13 +445,13 @@ void TestMneRawDataPython::filtersSegments()
 
     // The stimulus channel passes through unfiltered.
     PickBuffer plain(sel.nchan, ns);
-    QCOMPARE(raw->pick_data(&sel, raw->first_samp + offset, ns, plain.rows.data()), 0);
+    QCOMPARE(raw->pick_data(&sel, raw->first_samp + offset, plain.values), 0);
     QCOMPARE(buf.values.row(4), plain.values.row(4));
 
     // Without a selection every channel is filtered, in file order; a fresh reader has no cached buffers.
     std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     PickBuffer all(fresh->info->nchan, ns);
-    QCOMPARE(fresh->pick_data_filt(nullptr, fresh->first_samp + offset, ns, all.rows.data()), 0);
+    QCOMPARE(fresh->pick_data_filt(nullptr, fresh->first_samp + offset, all.values), 0);
     for (int c = 0; c < sel.nchan; ++c)
         QCOMPARE(all.values.row(sel.pick[c]), buf.values.row(c));
 
@@ -454,12 +460,12 @@ void TestMneRawDataPython::filtersSegments()
     other.highpass = other.eog_highpass = static_cast<float>(1.0 - highpass);
     std::unique_ptr<MNERawData> switched(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, other));
     PickBuffer before(sel.nchan, ns);
-    QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, ns, before.rows.data()), 0);
+    QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, before.values), 0);
     QVERIFY(before.values != buf.values);
     QVERIFY(switched->setFilter(filter));
     QVERIFY(!switched->setFilter(filter));
     PickBuffer after(sel.nchan, ns);
-    QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, ns, after.rows.data()), 0);
+    QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, after.values), 0);
     QCOMPARE(after.values, buf.values);
 }
 
@@ -523,19 +529,19 @@ void TestMneRawDataPython::picksDerivedChannel()
     for (int path = 0; path < 3; ++path) {
         PickBuffer buf(3, 25);
         if (path == 0) {
-            QCOMPARE(raw->pick_data(&sel, first, 25, buf.rows.data()), 0);
+            QCOMPARE(raw->pick_data(&sel, first, buf.values), 0);
             unprojected.values = buf.values;
         } else if (path == 1) {
             raw->proj = std::move(proj);
             PickBuffer padded(3, 28);
-            QCOMPARE(raw->pick_data_proj(&sel, first - 3 - 2990, 28, padded.rows.data()), 0);
+            QCOMPARE(raw->pick_data_proj(&sel, first - 3 - 2990, padded.values), 0);
             QVERIFY((padded.values.leftCols(3).array() == 0.0f).all());
             QVERIFY(padded.values.col(3).cwiseAbs().minCoeff() > 0.0f);
-            QCOMPARE(raw->pick_data_proj(&sel, first, 25, buf.rows.data()), 0);
+            QCOMPARE(raw->pick_data_proj(&sel, first, buf.values), 0);
             raw->proj.reset();
             QVERIFY(!buf.values.isApprox(unprojected.values));
         } else {
-            QCOMPARE(raw->pick_data_filt(&sel, first, 25, buf.rows.data()), 0);
+            QCOMPARE(raw->pick_data_filt(&sel, first, buf.values), 0);
         }
         const RowVectorXf expected = buf.values.row(1) - buf.values.row(2);
         QVERIFY2((buf.values.row(0) - expected).cwiseAbs().maxCoeff() <= 1e-5f * expected.cwiseAbs().maxCoeff(),
@@ -549,9 +555,9 @@ void TestMneRawDataPython::picksDerivedChannel()
     MNEChSelection only = sel;
     only.nchan = 1;
     PickBuffer alone(1, 25);
-    QCOMPARE(fresh->pick_data_filt(&only, first, 25, alone.rows.data()), 0);
+    QCOMPARE(fresh->pick_data_filt(&only, first, alone.values), 0);
     PickBuffer inputs(3, 25);
-    QCOMPARE(raw->pick_data_filt(&sel, first, 25, inputs.rows.data()), 0);
+    QCOMPARE(raw->pick_data_filt(&sel, first, inputs.values), 0);
     QVERIFY((alone.values.row(0) - (inputs.values.row(1) - inputs.values.row(2))).cwiseAbs().maxCoeff() <= 1e-5f * inputs.values.row(1).cwiseAbs().maxCoeff());
 }
 

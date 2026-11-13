@@ -261,10 +261,7 @@ void TestFiffRawFormatsPython::readsLeadingSkip()
         QCOMPARE(mne->first_samp, omit ? 0 : 70);
         QCOMPARE(mne->omit_samp, omit ? 70 : 0);
         Matrix<float, Dynamic, Dynamic, RowMajor> values(mne->info->nchan, 80);
-        std::vector<float*> rows(mne->info->nchan);
-        for (int c = 0; c < mne->info->nchan; ++c)
-            rows[c] = values.row(c).data();
-        QCOMPARE(mne->pick_data(nullptr, mne->first_samp, 80, rows.data()), 0);
+        QCOMPARE(mne->pick_data(nullptr, mne->first_samp, values), 0);
         QVERIFY((values.cast<double>() - ref).cwiseAbs().maxCoeff() <= 1e-6 * ref.cwiseAbs().maxCoeff());
     }
 }
@@ -287,8 +284,7 @@ void TestFiffRawFormatsPython::projectsAcrossSkip()
     const int ns = 105;
     for (bool project : {false, true}) {
         Matrix<float, Dynamic, Dynamic, RowMajor> values(3, ns);
-        std::vector<float*> rows{values.row(0).data(), values.row(1).data(), values.row(2).data()};
-        QCOMPARE(project ? mne->pick_data_proj(nullptr, first, ns, rows.data()) : mne->pick_data(nullptr, first, ns, rows.data()), 0);
+        QCOMPARE(project ? mne->pick_data_proj(nullptr, first, values) : mne->pick_data(nullptr, first, values), 0);
         for (int k = 0; k < ns; ++k) {
             const int s = std::clamp(k - 2, 0, 99);
             const float expected = (k < 2 || (s >= 70 && s < 90)) ? 0.0f : s * 1e-6f;
@@ -349,10 +345,7 @@ void TestFiffRawFormatsPython::mneRawDataMatches()
     const int nchan = mne->info->nchan;
     const int ns = static_cast<int>(ref.cols());
     Matrix<float, Dynamic, Dynamic, RowMajor> values(nchan, ns);
-    std::vector<float*> rows(nchan);
-    for (int c = 0; c < nchan; ++c)
-        rows[c] = values.row(c).data();
-    QCOMPARE(mne->pick_data(nullptr, mne->first_samp, ns, rows.data()), 0);
+    QCOMPARE(mne->pick_data(nullptr, mne->first_samp, values), 0);
     const double scale = ref.cwiseAbs().maxCoeff();
     QVERIFY2((values.cast<double>() - ref).cwiseAbs().maxCoeff() <= 1e-6 * scale,
              qPrintable(QString::number((values.cast<double>() - ref).cwiseAbs().maxCoeff() / scale)));
@@ -373,8 +366,7 @@ void TestFiffRawFormatsPython::mneRawDataNormalisesChannels()
     QCOMPARE(mne->info->chInfo[1].unit_mul, 0);
     QCOMPARE(mne->info->chInfo[2].range, 1.0f);
     Matrix<float, Dynamic, Dynamic, RowMajor> values(3, 20);
-    std::vector<float*> rows = {values.row(0).data(), values.row(1).data(), values.row(2).data()};
-    QCOMPARE(mne->pick_data(nullptr, mne->first_samp, 20, rows.data()), 0);
+    QCOMPARE(mne->pick_data(nullptr, mne->first_samp, values), 0);
     QVERIFY((values.row(0).cast<double>() - ref.row(0)).cwiseAbs().maxCoeff() < 1e-12);
     QVERIFY((values.row(1).cast<double>() - 1e-6 * ref.row(1)).cwiseAbs().maxCoeff() < 1e-6 * 1e-6 * ref.row(1).cwiseAbs().maxCoeff());
     QVERIFY((values.row(2).cast<double>() - 0.5 * ref.row(2)).cwiseAbs().maxCoeff() < 1e-6);

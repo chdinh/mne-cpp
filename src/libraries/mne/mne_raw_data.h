@@ -85,6 +85,9 @@ struct FilterData;
 class MNESHARED_EXPORT MNERawData
 {
 public:
+    /** Channels x samples buffer the pick functions fill; each channel's samples are contiguous. */
+    using RowMajorMatrixXf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
     //=========================================================================================================
     /**
      * Constructs the MNE Raw Data
@@ -152,15 +155,12 @@ public:
      *
      * @param[in]  sel      Channel selection descriptor.
      * @param[in]  firsts   First sample index (absolute).
-     * @param[in]  ns       Number of samples to extract.
-     * @param[out] picked   Array of per-channel data vectors (pre-allocated).
+     * @param[out] picked   One row per selected channel (or per channel without a selection) and one
+     *                      column per sample; a buffer with the wrong number of rows is refused.
      *
      * @return OK on success, FAIL on error.
      */
-    int pick_data(MNEChSelection* sel,
-                  int firsts,
-                  int ns,
-                  float** picked);
+    int pick_data(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMatrixXf> picked);
 
     /**
      * Extract raw data with SSP projection applied to each time sample
@@ -168,15 +168,12 @@ public:
      *
      * @param[in]  sel      Channel selection descriptor.
      * @param[in]  firsts   First sample index (absolute).
-     * @param[in]  ns       Number of samples to extract.
-     * @param[out] picked   Array of per-channel data vectors (pre-allocated).
+     * @param[out] picked   One row per selected channel (or per channel without a selection) and one
+     *                      column per sample; a buffer with the wrong number of rows is refused.
      *
      * @return OK on success, FAIL on error.
      */
-    int pick_data_proj(MNEChSelection* sel,
-                       int firsts,
-                       int ns,
-                       float** picked);
+    int pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMatrixXf> picked);
 
     /**
      * Load a single filter-sized buffer by picking projected unfiltered data
@@ -195,15 +192,12 @@ public:
      *
      * @param[in]  sel      Channel selection descriptor.
      * @param[in]  firsts   First sample index (absolute).
-     * @param[in]  ns       Number of samples to extract.
-     * @param[out] picked   Array of per-channel data vectors (pre-allocated).
+     * @param[out] picked   One row per selected channel (or per channel without a selection) and one
+     *                      column per sample; a buffer with the wrong number of rows is refused.
      *
      * @return OK on success, FAIL on error.
      */
-    int pick_data_filt(MNEChSelection* sel,
-                       int firsts,
-                       int ns,
-                       float** picked);
+    int pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMatrixXf> picked);
 
     /**
      * Open a raw FIFF file with explicit compensation grade.

@@ -70,7 +70,7 @@ namespace MNELIB
 {
 
 /** Row-major float matrix (file-local convenience alias). */
-using RowMajorMatrixXf = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+using RowMajorMatrixXf = MNERawData::RowMajorMatrixXf;
 
 /**
  * @brief Circular ring buffer for managing raw-data matrix allocations.
@@ -742,11 +742,17 @@ int MNERawData::compensate_buffer(MNERawBufDef* buf)
 
 //=============================================================================================================
 
-int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picked)
+int MNERawData::pick_data(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMatrixXf> picked)
 /*
      * Data from a selection of channels
      */
 {
+    const int nrow = sel ? sel->nchan : info->nchan;
+    if (picked.rows() != nrow) {
+        BASELIB::Log::warning("{}: the buffer has {} rows for {} channels", __func__, picked.rows(), nrow);
+        return FAIL;
+    }
+    int ns = static_cast<int>(picked.cols());
     int k, s, p, start, c, fills;
     int ns2, s2;
     MNERawBufDef* this_buf;
@@ -760,10 +766,10 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picke
         for (s = 0, p = firsts; p < first_samp; s++, p++) {
             if (sel)
                 for (c = 0; c < sel->nchan; c++)
-                    picked[c][s] = 0.0;
+                    picked(c, s) = 0.0;
             else
                 for (c = 0; c < info->nchan; c++)
-                    picked[c][s] = 0.0;
+                    picked(c, s) = 0.0;
         }
         ns = ns - s;
         firsts = first_samp;
@@ -796,10 +802,10 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picke
                     if (sel) {
                         for (c = 0; c < sel->nchan; c++)
                             if (sel->pick[c] >= 0)
-                                picked[c][s] = 0.0;
+                                picked(c, s) = 0.0;
                     } else {
                         for (c = 0; c < info->nchan; c++)
-                            picked[c][s] = 0.0;
+                            picked(c, s) = 0.0;
                     }
                 }
             } else {
@@ -834,20 +840,20 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picke
                  */
                         if (sel->pick[c] >= 0) {
                             for (p = start, s2 = s, ns2 = ns; p < this_buf->ns && ns2 > 0; p++, ns2--, s2++)
-                                picked[c][s2] = this_buf->vals(sel->pick[c], p);
+                                picked(c, s2) = this_buf->vals(sel->pick[c], p);
                         }
                         /*
                  * ...then the derived ones
                  */
                         else if (sel->pick_deriv[c] >= 0 && deriv_matched) {
                             for (p = start, s2 = s, ns2 = ns; p < this_buf->ns && ns2 > 0; p++, ns2--, s2++)
-                                picked[c][s2] = deriv_vals(sel->pick_deriv[c], p);
+                                picked(c, s2) = deriv_vals(sel->pick_deriv[c], p);
                         }
                     }
                 } else {
                     for (c = 0; c < info->nchan; c++)
                         for (p = start, s2 = s, ns2 = ns; p < this_buf->ns && ns2 > 0; p++, ns2--, s2++)
-                            picked[c][s2] = this_buf->vals(c, p);
+                            picked(c, s2) = this_buf->vals(c, p);
                 }
                 s = s2;
                 ns = ns2;
@@ -864,19 +870,19 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picke
         for (; ns > 0; ns--, s++) {
             if (sel)
                 for (c = 0; c < sel->nchan; c++)
-                    picked[c][s] = picked[c][fills];
+                    picked(c, s) = picked(c, fills);
             else
                 for (c = 0; c < info->nchan; c++)
-                    picked[c][s] = picked[c][fills];
+                    picked(c, s) = picked(c, fills);
         }
     } else {
         for (; ns > 0; ns--, s++) {
             if (sel)
                 for (c = 0; c < sel->nchan; c++)
-                    picked[c][s] = 0;
+                    picked(c, s) = 0;
             else
                 for (c = 0; c < info->nchan; c++)
-                    picked[c][s] = 0;
+                    picked(c, s) = 0;
         }
     }
     return OK;
@@ -884,27 +890,33 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, int ns, float** picke
 
 //=============================================================================================================
 
-int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** picked)
+int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMatrixXf> picked)
 /*
      * Data from a set of channels, apply projection
      */
 {
+    const int nrow = sel ? sel->nchan : info->nchan;
+    if (picked.rows() != nrow) {
+        BASELIB::Log::warning("{}: the buffer has {} rows for {} channels", __func__, picked.rows(), nrow);
+        return FAIL;
+    }
+    int ns = static_cast<int>(picked.cols());
     int k, s, p, start, c, fills;
     MNERawBufDef* this_buf;
     RowMajorMatrixXf* values;
     Eigen::VectorXf deriv_pvalues_vec;
 
     if (!proj || (sel && !proj->affect(sel->chspick, sel->nchan) && !proj->affect(sel->chspick_nospace, sel->nchan)))
-        return pick_data(sel, firsts, ns, picked);
+        return pick_data(sel, firsts, picked);
 
     if (firsts < first_samp) {
         for (s = 0, p = firsts; p < first_samp; s++, p++) {
             if (sel)
                 for (c = 0; c < sel->nchan; c++)
-                    picked[c][s] = 0.0;
+                    picked(c, s) = 0.0;
             else
                 for (c = 0; c < info->nchan; c++)
-                    picked[c][s] = 0.0;
+                    picked(c, s) = 0.0;
         }
         ns = ns - s;
         firsts = first_samp;
@@ -921,10 +933,10 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** 
                     if (sel) {
                         for (c = 0; c < sel->nchan; c++)
                             if (sel->pick[c] >= 0)
-                                picked[c][s] = 0.0;
+                                picked(c, s) = 0.0;
                     } else {
                         for (c = 0; c < info->nchan; c++)
-                            picked[c][s] = 0.0;
+                            picked(c, s) = 0.0;
                     }
                 }
             } else {
@@ -960,16 +972,16 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** 
                    * First try the ordinary channels...
                    */
                             if (sel->pick[c] >= 0)
-                                picked[c][s] = pvalues[sel->pick[c]];
+                                picked(c, s) = pvalues[sel->pick[c]];
                             /*
                    * ...then the derived ones
                    */
                             else if (sel->pick_deriv[c] >= 0 && deriv_matched)
-                                picked[c][s] = deriv_pvalues_vec[sel->pick_deriv[c]];
+                                picked(c, s) = deriv_pvalues_vec[sel->pick_deriv[c]];
                         }
                     } else {
                         for (c = 0; c < info->nchan; c++) {
-                            picked[c][s] = pvalues[c];
+                            picked(c, s) = pvalues[c];
                         }
                     }
                 }
@@ -987,19 +999,19 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, int ns, float** 
         for (; ns > 0; ns--, s++) {
             if (sel)
                 for (c = 0; c < sel->nchan; c++)
-                    picked[c][s] = picked[c][fills];
+                    picked(c, s) = picked(c, fills);
             else
                 for (c = 0; c < info->nchan; c++)
-                    picked[c][s] = picked[c][fills];
+                    picked(c, s) = picked(c, fills);
         }
     } else {
         for (; ns > 0; ns--, s++) {
             if (sel)
                 for (c = 0; c < sel->nchan; c++)
-                    picked[c][s] = 0;
+                    picked(c, s) = 0;
             else
                 for (c = 0; c < info->nchan; c++)
-                    picked[c][s] = 0;
+                    picked(c, s) = 0;
         }
     }
     return OK;
@@ -1022,14 +1034,10 @@ int MNERawData::load_one_filt_buf(MNERawBufDef* buf)
     if (buf->valid)
         return OK;
 
-    std::vector<float*> vals_storage(buf->nchan);
-    float** vals = vals_storage.data();
-    for (k = 0; k < buf->nchan; k++) {
+    for (k = 0; k < buf->nchan; k++)
         buf->ch_filtered[k] = false;
-        vals[k] = buf->vals.row(k).data() + filter->taper_size;
-    }
 
-    res = pick_data_proj(nullptr, buf->firsts + filter->taper_size, buf->ns - 2 * filter->taper_size, vals);
+    res = pick_data_proj(nullptr, buf->firsts + filter->taper_size, buf->vals.middleCols(filter->taper_size, buf->ns - 2 * filter->taper_size));
 
 #ifdef DEBUG
     if (res == OK)
@@ -1041,11 +1049,17 @@ int MNERawData::load_one_filt_buf(MNERawBufDef* buf)
 
 //=============================================================================================================
 
-int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** picked)
+int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMatrixXf> picked)
 /*
      * Data for a selection (filtered and picked)
      */
 {
+    const int nrow = sel ? sel->nchan : info->nchan;
+    if (picked.rows() != nrow) {
+        BASELIB::Log::warning("{}: the buffer has {} rows for {} channels", __func__, picked.rows(), nrow);
+        return FAIL;
+    }
+    int ns = static_cast<int>(picked.cols());
     int k, s, bs, c;
     int bs1, s1, s2, lasts;
     [[maybe_unused]] int bs2; // only reported in DEBUG builds
@@ -1059,16 +1073,16 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
     int filter_was;
 
     if (!filter->filter_on)
-        return pick_data_proj(sel, firsts, ns, picked);
+        return pick_data_proj(sel, firsts, picked);
 
     if (sel) {
         for (s = 0; s < ns; s++)
             for (c = 0; c < sel->nchan; c++)
-                picked[c][s] = 0.0;
+                picked(c, s) = 0.0;
     } else {
         for (s = 0; s < ns; s++)
             for (c = 0; c < info->nchan; c++)
-                picked[c][s] = 0.0;
+                picked(c, s) = 0.0;
     }
     lasts = firsts + ns - 1;
     /*
@@ -1222,17 +1236,17 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, int ns, float** 
                 if (sel->pick[c] >= 0) {
                     values = this_buf->vals.row(sel->pick[c]).data();
                     for (s = s1, bs = bs1; s < s2; s++, bs++)
-                        picked[c][s] += values[bs];
+                        picked(c, s) += values[bs];
                 } else if (sel->pick_deriv[c] >= 0 && deriv_matched) {
                     for (s = s1, bs = bs1; s < s2; s++, bs++)
-                        picked[c][s] += deriv_vals(sel->pick_deriv[c], bs);
+                        picked(c, s) += deriv_vals(sel->pick_deriv[c], bs);
                 }
             }
         } else {
             for (c = 0; c < info->nchan; c++) {
                 values = this_buf->vals.row(c).data();
                 for (s = s1, bs = bs1; s < s2; s++, bs++)
-                    picked[c][s] += values[bs];
+                    picked(c, s) += values[bs];
             }
         }
     }
@@ -1484,17 +1498,10 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     data->setup_filter_bufs();
 
     {
-        std::vector<float> vals_storage(data->info->nchan, 0.0f);
-        std::vector<float*> vals_rows(data->info->nchan);
-        for (int i = 0; i < data->info->nchan; i++)
-            vals_rows[i] = &vals_storage[i];
-        float** vals = vals_rows.data();
-
-        if (data->pick_data(nullptr, data->first_samp, 1, vals) == FAIL)
+        RowMajorMatrixXf first(data->info->nchan, 1);
+        if (data->pick_data(nullptr, data->first_samp, first) == FAIL)
             return nullptr;
-        data->first_sample_val.resize(data->info->nchan);
-        for (k = 0; k < data->info->nchan; k++)
-            data->first_sample_val[k] = vals[k][0];
+        data->first_sample_val = first.col(0);
         BASELIB::Log::info("Initial dc offsets determined\n");
     }
     BASELIB::Log::info("Raw data file {}:\n", BASELIB::utf8FromPath(name));
