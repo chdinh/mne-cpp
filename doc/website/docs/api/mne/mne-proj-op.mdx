@@ -50,7 +50,7 @@ const double eegFilt = segment(1, 0);
 // The file stores its 4 SSP projectors as inactive; make_projection switches them on
 std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
 proj->assign_channels(mneRaw->ch_names);
-proj->make_proj();
+const bool compiled = proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
 mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);
@@ -91,24 +91,20 @@ Each item's active_file flag is preserved.
 
 **Parameters:**
 
-- **from** : *[MNEProjOp](/docs/api/mne/mne-proj-op) **
+- **from** : *const [MNEProjOp](/docs/api/mne/mne-proj-op) &*
   Source operator whose items are copied.
-
-**Returns:**
-
-- *[MNEProjOp](/docs/api/mne/mne-proj-op) ** — Pointer to this operator.
 
 ---
 
-### add_item_active(vecs, kind, desc, is_active)
+### add_item(vecs, kind, desc, is_active)
 
-Add a projection item with an explicit active/inactive state.
+Add a projection item.
 
 The projection kind (MEG/EEG) is auto-detected from channel names.
 
 **Parameters:**
 
-- **vecs** : *const [MNENamedMatrix](/docs/api/mne/mne-named-matrix) **
+- **vecs** : *const [MNENamedMatrix](/docs/api/mne/mne-named-matrix) &*
   Named matrix holding the projection vectors.
 
 - **kind** : *int*
@@ -118,26 +114,7 @@ The projection kind (MEG/EEG) is auto-detected from channel names.
   Human-readable description of the projection.
 
 - **is_active** : *bool*
-  Whether the item is active on load.
-
----
-
-### add_item(vecs, kind, desc)
-
-Add a projection item that is active by default.
-
-Convenience wrapper around `add_item_active()` with `is_active` = TRUE.
-
-**Parameters:**
-
-- **vecs** : *const [MNENamedMatrix](/docs/api/mne/mne-named-matrix) **
-  Named matrix holding the projection vectors.
-
-- **kind** : *int*
-  Projection kind constant.
-
-- **desc** : *const std::string &*
-  Human-readable description of the projection.
+  Whether the item is active.
 
 ---
 
@@ -199,7 +176,7 @@ If `do_complement` is true, the projected components are subtracted from `vec` (
 
 **Returns:**
 
-- *int* — OK on success, FAIL on dimension mismatch.
+- *bool* — false if `vec` does not have one value per assigned channel.
 
 ---
 
@@ -250,7 +227,7 @@ Assign a channel name list to this projection operator, invalidating any previou
 
 ---
 
-### make_proj_bad(bad)
+### make_proj(bad)
 
 Compile the projection operator via SVD, excluding bad channels.
 
@@ -259,23 +236,11 @@ Active projection items are picked, expanded to the assigned channel list, bad c
 **Parameters:**
 
 - **bad** : *const StringList &*
-  List of bad channel names.
+  Bad channel names.
 
 **Returns:**
 
-- *int* — OK on success, FAIL on error.
-
----
-
-### make_proj()
-
-Compile the projection operator via SVD (no bad channels).
-
-Convenience wrapper around `make_proj_bad()`.
-
-**Returns:**
-
-- *int* — OK on success, FAIL on error.
+- *bool* — false if a projection vector cannot be expanded to the assigned channels.
 
 ---
 
@@ -293,7 +258,7 @@ Apply the compiled projection operator to a double-precision data vector.
 
 **Returns:**
 
-- *int* — OK on success, FAIL on dimension mismatch.
+- *bool* — false if `vec` does not have one value per assigned channel.
 
 ---
 
@@ -303,12 +268,12 @@ Apply this projection operator to a covariance matrix from both sides: C' = (I -
 
 **Parameters:**
 
-- **c** : *[MNECovMatrix](/docs/api/mne/mne-cov-matrix) **
+- **c** : *[MNECovMatrix](/docs/api/mne/mne-cov-matrix) &*
   The covariance matrix to project.
 
 **Returns:**
 
-- *int* — OK on success, FAIL on error.
+- *bool* — false if `c` is not over the assigned channels.
 
 ---
 
@@ -405,7 +370,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 // The file stores its 4 SSP projectors as inactive; make_projection switches them on
 std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
 proj->assign_channels(mneRaw->ch_names);
-proj->make_proj();
+const bool compiled = proj->make_proj();
 const MNEProjItem& firstItem = proj->items[0];
 mneRaw->proj = std::move(proj);
 mneRaw->pick_data_proj(&sel, mneRaw->first_samp + 2990, segment);

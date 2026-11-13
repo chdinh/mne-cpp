@@ -33,14 +33,13 @@ ave = ave.pick_channels(megNames);
 const int nMeg = static_cast<int>(megNames.size());
 std::unique_ptr<MNEProjOp> aveProj = MNEProjOp::make_projection({aveFile.fileName().toStdU16String()}, ave.info.chs).value();
 aveProj->assign_channels(megNames);
-aveProj->make_proj();
 VectorXf x = ave.data.col(200).cast<float>(); // t = 133 ms
-aveProj->project_vector(x, true);
+const bool projected = aveProj->make_proj() && aveProj->project_vector(x, true);
 
 auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
 auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
-aveProj->apply_cov(noiseMeg.get());
+const bool covProjected = aveProj->apply_cov(*noiseMeg);
 noiseMeg->classify_channels(ave.info.chs, nMeg);
 noiseMeg->decompose_eigen(); // the 3 projected directions become zero eigenvalues
 VectorXf whitened(nMeg);
@@ -389,17 +388,17 @@ Compute the linear index into a symmetric lower-triangular packed storage array 
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 326"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 325"
 auto noise = MNECovMatrix::read((data + "/MEG/sample/sample_audvis-cov.fif").toStdU16String(), FIFFV_MNE_NOISE_COV);
 const int ncovFile = noise->ncov;
 auto noiseMeg = noise->pick_chs_omit(megNames, nMeg, false, ave.info.chs);
-aveProj->apply_cov(noiseMeg.get());
+const bool covProjected = aveProj->apply_cov(*noiseMeg);
 noiseMeg->classify_channels(ave.info.chs, nMeg);
 noiseMeg->decompose_eigen(); // the 3 projected directions become zero eigenvalues
 VectorXf whitened(nMeg);
 noiseMeg->whiten_vector(x, whitened, nMeg);
 // mne.read_cov: 366 channels, nfree 15972; x^T pinv(P C P) x with P the 3 SSP vectors: 1462.05
-ok &= expect(ncovFile == 366 && noise->nfree == 15972 && !noise->is_diag() && noiseMeg->nzero == 3 && near(whitened.cast<double>().squaredNorm(), 1462.0502702959539, 1e-4),
+ok &= expect(projected && covProjected && ncovFile == 366 && noise->nfree == 15972 && !noise->is_diag() && noiseMeg->nzero == 3 && near(whitened.cast<double>().squaredNorm(), 1462.0502702959539, 1e-4),
              "MNECovMatrix: projected noise covariance whitens like mne's pseudo-inverse");
 ````
 
