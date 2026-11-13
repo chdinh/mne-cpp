@@ -190,7 +190,6 @@ public:
     MNENamedMatrix* fwd;                                 /**< Forward operator for dipole fitting (not owned). */
     std::unique_ptr<MNERawData> raw;                     /**< Raw-data handle when data originates from a raw file. */
     StringList badlist;                                  /**< List of bad channel names. */
-    int nbad;                                            /**< Number of bad channels. */
     Eigen::VectorXi bad;                                 /**< Per-channel bad flag array (0 = good, 1 = bad). */
 
     bool ch_major;                                     /**< If true, data rows are channels (not times). */

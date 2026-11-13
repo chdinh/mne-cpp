@@ -58,7 +58,6 @@ MNEMeasData::MNEMeasData()
 , lowpass(0.0f)
 , op(nullptr)
 , fwd(nullptr)
-, nbad(0)
 , ch_major(false)
 , nset(0)
 , current(nullptr)
@@ -315,23 +314,18 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
          */
         {
             target.badlist = evoked.info.bads;
-            target.nbad = static_cast<int>(target.badlist.size());
             target.bad = Eigen::VectorXi::Zero(target.nchan);
 
-            for (int b = 0; b < target.nbad; b++) {
+            for (const auto& bad_name : target.badlist) {
                 for (k = 0; k < target.nchan; k++) {
-                    if (BASELIB::equalsIgnoreCase(target.chs[k].ch_name, target.badlist[b])) {
+                    if (BASELIB::equalsIgnoreCase(target.chs[k].ch_name, bad_name)) {
                         target.bad[k] = 1;
                         break;
                     }
                 }
             }
-            BASELIB::Log::info("\t{} bad channels read from {}{}", target.nbad, BASELIB::utf8FromPath(name), target.nbad > 0 ? ":\n" : "\n");
-            if (target.nbad > 0) {
-                BASELIB::Log::info("\t\t");
-                for (k = 0; k < target.nbad; k++)
-                    BASELIB::Log::info("{}{:c}", target.badlist[k], k < target.nbad - 1 ? ' ' : '\n');
-            }
+            BASELIB::Log::info("\t{} bad channels read from {}{}{}", target.badlist.size(), BASELIB::utf8FromPath(name),
+                               target.badlist.empty() ? "" : ": ", BASELIB::join(target.badlist, " "));
         }
     }
     /*

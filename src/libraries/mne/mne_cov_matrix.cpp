@@ -118,7 +118,6 @@ MNECovMatrix::MNECovMatrix(int p_kind,
 , cov_sparse(p_cov_sparse)
 , proj(nullptr)
 , sss(nullptr)
-, nbad(0)
 {
 }
 
@@ -147,7 +146,6 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> eigen;
     MatrixXf tmp_eigen;
     StringList bads;
-    int nbad = 0;
     int ncov = 0;
     int nfree = 1;
     std::unique_ptr<MNECovMatrix> res;
@@ -294,7 +292,6 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
          * Read the optional bad channel list
          */
         bads = stream.read_bad_channels(nodes[k]);
-        nbad = static_cast<int>(bads.size());
     }
     if (cov_sparse_owner)
         res = create_sparse(kind, ncov, names, cov_sparse_owner.release());
@@ -311,7 +308,6 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::read(const std::filesystem::path& na
     res->lambda = std::move(lambda);
     res->nfree = nfree;
     res->bads = bads;
-    res->nbad = nbad;
     /*
      * Count the non-zero eigenvalues
      */
@@ -347,7 +343,6 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::dup() const
         res->ch_class = ch_class;
     }
     res->bads = bads;
-    res->nbad = nbad;
     res->proj = proj ? proj->dup() : nullptr;
     if (sss)
         res->sss = std::make_unique<MNESssData>(*sss);
@@ -794,7 +789,6 @@ std::unique_ptr<MNECovMatrix> MNECovMatrix::pick_chs_omit(const StringList& new_
     res = MNECovMatrix::create(kind, new_ncov, picked_names, cov_local, cov_diag_local);
 
     res->bads = bads;
-    res->nbad = nbad;
     res->proj = proj ? proj->dup() : nullptr;
     res->sss = sss ? std::make_unique<MNESssData>(*sss) : nullptr;
 

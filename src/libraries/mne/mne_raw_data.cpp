@@ -444,56 +444,6 @@ int mne_read_raw_buffer_t( //fiffFile     in,        /* Input file */
     return OK;
 }
 
-//============================= mne_process_bads.c =============================
-
-int mne_read_bad_channel_list_from_node(FiffStream& stream,
-                                        const std::shared_ptr<FiffDirNode>& pNode, StringList& listp, int& nlistp)
-{
-    std::shared_ptr<FiffDirNode> node, bad;
-    std::vector<std::shared_ptr<FiffDirNode>> temp;
-    StringList list;
-    int nlist = 0;
-    std::optional<FiffTag> t_pTag;
-    QString names;
-
-    if (pNode->empty())
-        node = stream.dirtree();
-    else
-        node = pNode;
-
-    temp = node->dir_tree_find(FIFFB_MNE_BAD_CHANNELS);
-    if (temp.size() > 0) {
-        bad = temp[0];
-
-        t_pTag = bad->find_tag(stream, FIFF_MNE_CH_NAME_LIST);
-        if (t_pTag) {
-            names = QString::fromStdString(t_pTag->to_string());
-            list = FiffStream::split_name_list(t_pTag->to_string());
-            nlist = static_cast<int>(list.size());
-        }
-    }
-    listp = list;
-    nlistp = nlist;
-    return OK;
-}
-
-int mne_read_bad_channel_list(const std::filesystem::path& name, StringList& listp, int& nlistp)
-
-{
-    FiffStream stream(name);
-
-    int res;
-
-    if (!stream.open())
-        return FAIL;
-
-    res = mne_read_bad_channel_list_from_node(stream, stream.dirtree(), listp, nlistp);
-
-    stream.close();
-
-    return res;
-}
-
 int mne_sparse_vec_mult2(FiffSparseMatrix* mat, /* The sparse matrix */
                          float* vector,         /* Vector to be multiplied */
                          float* res)            /* Result of the multiplication */
@@ -532,7 +482,6 @@ static int approx_ring_buf_size = APPROX_RING_BUF_SIZE;
 
 MNERawData::MNERawData()
 : info(nullptr)
-, nbad(0)
 , first_samp(0)
 , omit_samp(0)
 , first_samp_old(0)
@@ -1274,7 +1223,7 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     std::vector<FiffDirEntry> dir0;
     //    fiffTagRec   tag;
     std::optional<FiffTag> t_pTag;
-    int k, b, nbuf, ndir;
+    int k, nbuf, ndir;
     int current_dir0 = 0;
 
     //    tag.data = NULL;
@@ -1468,24 +1417,17 @@ MNERawData* MNERawData::open_file_comp(const std::filesystem::path& name,
     /*
         * Th bad channel stuff
         */
-    {
-        if (mne_read_bad_channel_list(name, data->badlist, data->nbad) == OK) {
-            for (b = 0; b < data->nbad; b++) {
-                for (k = 0; k < data->info->nchan; k++) {
-                    if (BASELIB::equalsIgnoreCase(data->info->chInfo[k].ch_name, data->badlist[b])) {
-                        data->bad[k] = 1;
-                        break;
-                    }
-                }
-            }
-            BASELIB::Log::info("{} bad channels read from {}{}", data->nbad, BASELIB::utf8FromPath(name), data->nbad > 0 ? ":\n" : "\n");
-            if (data->nbad > 0) {
-                BASELIB::Log::info("\t");
-                for (k = 0; k < data->nbad; k++)
-                    BASELIB::Log::info("{}{:c}", data->badlist[k], k < data->nbad - 1 ? ' ' : '\n');
+    data->badlist = data->stream->read_bad_channels(data->stream->dirtree());
+    for (const auto& bad_name : data->badlist) {
+        for (k = 0; k < data->info->nchan; k++) {
+            if (BASELIB::equalsIgnoreCase(data->info->chInfo[k].ch_name, bad_name)) {
+                data->bad[k] = 1;
+                break;
             }
         }
     }
+    BASELIB::Log::info("{} bad channels read from {}{}{}", data->badlist.size(), BASELIB::utf8FromPath(name),
+                       data->badlist.empty() ? "" : ": ", BASELIB::join(data->badlist, " "));
     /*
        * Initialize the raw data buffers
        */

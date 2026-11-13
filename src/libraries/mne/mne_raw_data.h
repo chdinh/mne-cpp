@@ -247,7 +247,6 @@ public:
     std::unique_ptr<MNELIB::MNERawInfo> info;        /**< Raw data information loaded using MNE routines. */
     StringList ch_names;                             /**< Channel names as a flat list. */
     StringList badlist;                              /**< Bad channel names. */
-    int nbad;                                        /**< Number of bad channels. */
     Eigen::VectorXi bad;                             /**< Boolean array marking bad channels (0 = good, 1 = bad). */
     std::vector<MNELIB::MNERawBufDef> bufs;          /**< Raw data buffer definitions. */
     std::vector<MNELIB::MNERawBufDef> filt_bufs;     /**< Filtered data buffer definitions. */

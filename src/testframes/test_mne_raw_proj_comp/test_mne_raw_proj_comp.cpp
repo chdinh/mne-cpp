@@ -792,7 +792,7 @@ void TestMneRawProjComp::rawData_defaultConstruction()
 {
     MNERawData raw;
     QCOMPARE(raw.nsamp, 0);
-    QCOMPARE(raw.nbad, 0);
+    QVERIFY(raw.badlist.empty());
     QVERIFY(raw.filename.empty());
     QVERIFY(!raw.info);
     QVERIFY(!raw.proj);

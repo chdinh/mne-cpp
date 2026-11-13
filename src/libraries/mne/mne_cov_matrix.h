@@ -347,7 +347,6 @@ public:
     std::unique_ptr<MNESssData> sss;                                             /**< SSS data from the associated raw data file. */
     Eigen::VectorXi ch_class;                                                    /**< Per-channel type classification for regularization (MEG grad, MEG mag, EEG). */
     StringList bads;                                                             /**< Channel names designated bad during computation. */
-    int nbad;                                                                    /**< Number of bad channels. */
 };
 
 //=============================================================================================================

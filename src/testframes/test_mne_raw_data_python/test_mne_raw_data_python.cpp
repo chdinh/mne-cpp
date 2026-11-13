@@ -156,8 +156,14 @@ void TestMneRawDataPython::readsLayout()
     QCOMPARE(m_raw->nsamp, 6007);
     QCOMPARE(m_raw->info->nchan, 376);
     QVERIFY(std::abs(m_raw->info->sfreq - 300.3074951171875) < 1e-4);
-    QCOMPARE(m_raw->nbad, 2);
+    QCOMPARE(m_raw->badlist, (StringList{"MEG 2443", "EEG 053"}));
     QCOMPARE(m_raw->bad.sum(), 2);
+    {
+        BASELIB::LogCapture log;
+        std::unique_ptr<MNERawData> again(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, MNEFilterDef()));
+        QVERIFY(again);
+        QCOMPARE(log.count(BASELIB::Log::Level::Info, ": MEG 2443 EEG 053"), 1);
+    }
     QCOMPARE(makeSelection().pick.minCoeff() >= 0, true);
 
     // Buffers tile the recording without gaps.

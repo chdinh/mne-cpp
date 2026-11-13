@@ -345,6 +345,12 @@ aliases; replace the old spelling as below.
   abs, out)` becomes `getValuesFromChannelData(t, integ, values, tmin, sfreq,
   abs, out)`, with `values` a `MNERawData::RowMajorMatrixXf` and `out` an
   `Eigen::VectorXf(nch)`.
+- `MNERawData::nbad`, `MNEMeasData::nbad` and `MNECovMatrix::nbad` are gone;
+  they duplicated the size of `badlist` / `bads`. Migration: use
+  `badlist.size()` (`bads.size()` for the covariance). Raw files read their
+  bad channels through `FiffStream::read_bad_channels` on the already open
+  stream instead of reopening the file, and the bad-channel names are logged
+  on the same line as the count instead of one log message per name.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`
