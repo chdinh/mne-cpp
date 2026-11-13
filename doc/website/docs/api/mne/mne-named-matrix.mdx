@@ -46,7 +46,7 @@ ctfRaw->pick_data(nullptr, ctfRaw->first_samp, ctf);
 
 ## Public Methods
 
-### pick(pickrowlist, picknrow, pickcollist, pickncol)
+### pick(pickrowlist, pickcollist)
 
 Create a sub-matrix by picking named rows and columns.
 
@@ -54,52 +54,54 @@ Selects a subset of this matrix's rows and columns by matching their names again
 
 **Parameters:**
 
-- **pickrowlist** : *const StringList &*
+- **pickrowlist** : *std::span&lt; const std::string &gt;*
   Row names to select (empty = keep all rows).
 
-- **picknrow** : *int*
-  Expected number of picked rows (used when `pickrowlist` is empty).
-
-- **pickcollist** : *const StringList &*
+- **pickcollist** : *std::span&lt; const std::string &gt;*
   Column names to select (empty = keep all columns).
-
-- **pickncol** : *int*
-  Expected number of picked columns (used when `pickcollist` is empty).
 
 **Returns:**
 
-- *std::unique_ptr&lt; [MNENamedMatrix](/docs/api/mne/mne-named-matrix) &gt;* — A unique pointer to the picked sub-matrix, or `nullptr` if a requested name was not found.
+- *std::unique_ptr&lt; [MNENamedMatrix](/docs/api/mne/mne-named-matrix) &gt;* — The picked sub-matrix, or `nullptr` if a requested name was not found.
+
+---
+
+### nrow()
+
+**Returns:**
+
+- *int* — The number of rows of `data`.
+
+---
+
+### ncol()
+
+**Returns:**
+
+- *int* — The number of columns of `data`.
 
 ---
 
 ## Static Methods
 
-### build(nrow, ncol, rowlist, collist, data)
+### build(rowlist, collist, data)
 
 Factory: build a named matrix from its constituent parts.
 
-Assembles an [`MNENamedMatrix`](/docs/api/mne/mne-named-matrix) from dimension counts, optional row/column name lists, and a dense data matrix.
-
 **Parameters:**
 
-- **nrow** : *int*
-  Number of rows (must match `data.rows()`).
-
-- **ncol** : *int*
-  Number of columns (must match `data.cols()`).
-
 - **rowlist** : *const StringList &*
-  Name list for the rows (may be empty).
+  Row names: empty, or one per row of `data`.
 
 - **collist** : *const StringList &*
-  Name list for the columns (may be empty).
+  Column names: empty, or one per column of `data`.
 
 - **data** : *const Eigen::MatrixXf &*
   Dense float matrix to store.
 
 **Returns:**
 
-- *std::unique_ptr&lt; [MNENamedMatrix](/docs/api/mne/mne-named-matrix) &gt;* — A unique pointer to the newly created named matrix.
+- *std::unique_ptr&lt; [MNENamedMatrix](/docs/api/mne/mne-named-matrix) &gt;* — The named matrix, or `nullptr` if a name list does not fit `data`.
 
 ---
 
@@ -141,7 +143,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 352"
 // raw.apply_gradient_compensation(0): sum |MEG| over the 7 MEG channels 2.45885e-10 (1.47942e-11 as stored)
-ok &= expect(comp.ncomp == 5 && grade == 0 && third && MNECTFCompDataSet::explain_comp(third->kind) == "third order gradiometer" && third->data->nrow == 7 && near(ctf.topRows(7).cast<double>().cwiseAbs().sum(), 2.4588499274586883e-10, 1e-5),
+ok &= expect(comp.ncomp == 5 && grade == 0 && third && MNECTFCompDataSet::explain_comp(third->kind) == "third order gradiometer" && third->data->nrow() == 7 && near(ctf.topRows(7).cast<double>().cwiseAbs().sum(), 2.4588499274586883e-10, 1e-5),
              "MNECTFCompDataSet/MNECTFCompData/MNENamedMatrix: grade 3 -> 0 like raw.apply_gradient_compensation");
 ````
 
