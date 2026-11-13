@@ -32,7 +32,7 @@
       "ml",
       "report"
     ],
-    "tokens": 13331,
+    "tokens": 13328,
     "gui_outside_design": []
   },
   "libraries": {
@@ -302,18 +302,18 @@
       ]
     },
     "inv": {
-      "tokens": 285,
+      "tokens": 282,
       "by_category": {
         "containers": 86,
-        "files": 26,
+        "files": 24,
         "global": 35,
         "json": 2,
         "objects_signals": 7,
         "regex": 1,
-        "strings": 126,
+        "strings": 125,
         "threads": 2
       },
-      "public_header_includes": 31,
+      "public_header_includes": 30,
       "q_object": 0,
       "files": 81,
       "modules": [
