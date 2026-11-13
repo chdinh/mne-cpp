@@ -503,8 +503,6 @@ void TestMneRawProjComp::projOp_addItemAndDuplicate()
 
     // Create a simple projection vector
     auto vecs = std::make_unique<MNENamedMatrix>();
-    vecs->nrow = 1;
-    vecs->ncol = 3;
     vecs->rowlist.push_back("proj1");
     vecs->collist.push_back("ch1");
     vecs->collist.push_back("ch2");
@@ -531,7 +529,7 @@ void TestMneRawProjComp::projOp_readFromFile()
     // count unless it has its own, its description is the name plus the first description line, and
     // a missing or inconsistent tag rejects the whole operator
     QTemporaryDir dir;
-    const auto projFile = [&dir](const QString& name, fiff_int_t skip, fiff_int_t itemNchan, bool block = true) {
+    const auto projFile = [&dir](const QString& name, fiff_int_t skip, fiff_int_t itemNchan, bool block = true, fiff_int_t nvec = 1) {
         QFile file(dir.filePath(name));
         if (!file.open(QIODevice::WriteOnly))
             return QString();
@@ -549,7 +547,7 @@ void TestMneRawProjComp::projOp_readFromFile()
                 {FIFF_NCHAN, [&] { if (itemNchan >= 0) stream->write_int(FIFF_NCHAN, &itemNchan); }},
                 {FIFF_PROJ_ITEM_CH_NAME_LIST, [&] { stream->write_name_list(FIFF_PROJ_ITEM_CH_NAME_LIST, {"A", "B"}); }},
                 {FIFF_PROJ_ITEM_KIND, [&] { stream->write_int(FIFF_PROJ_ITEM_KIND, &kind); }},
-                {FIFF_PROJ_ITEM_NVEC, [&] { stream->write_int(FIFF_PROJ_ITEM_NVEC, &one); }},
+                {FIFF_PROJ_ITEM_NVEC, [&] { stream->write_int(FIFF_PROJ_ITEM_NVEC, &nvec); }},
                 {FIFF_PROJ_ITEM_VECTORS, [&] { stream->write_float_matrix(FIFF_PROJ_ITEM_VECTORS, Eigen::RowVector2f(0.6f, 0.8f)); }},
                 {FIFF_MNE_PROJ_ITEM_ACTIVE, [&] { stream->write_int(FIFF_MNE_PROJ_ITEM_ACTIVE, &one); }}};
             for (const auto& [tag, write] : tags) {
@@ -574,6 +572,8 @@ void TestMneRawProjComp::projOp_readFromFile()
     QVERIFY(inactive && !inactive->items[0].active);
     QVERIFY(!MNEProjOp::read(projFile("nchan0.fif", 0, 0).toStdU16String()));
     QVERIFY(!MNEProjOp::read(projFile("nchan3.fif", 0, 3).toStdU16String()));
+    // A vector count that disagrees with the stored vectors marks a damaged file
+    QVERIFY(!MNEProjOp::read(projFile("nvec2.fif", 0, -1, true, 2).toStdU16String()));
     for (const fiff_int_t tag : {FIFF_PROJ_ITEM_CH_NAME_LIST, FIFF_PROJ_ITEM_KIND, FIFF_PROJ_ITEM_NVEC, FIFF_PROJ_ITEM_VECTORS})
         QVERIFY2(!MNEProjOp::read(projFile(QStringLiteral("skip%1.fif").arg(tag), tag, -1).toStdU16String()), qPrintable(QString::number(tag)));
 }
@@ -624,8 +624,6 @@ void TestMneRawProjComp::projOp_projectVector()
 
     // Create a simple avg reference projector for 3 channels
     auto vecs = std::make_unique<MNENamedMatrix>();
-    vecs->nrow = 1;
-    vecs->ncol = 3;
     vecs->rowlist.push_back("avg");
     vecs->collist.push_back("ch0");
     vecs->collist.push_back("ch1");
@@ -668,8 +666,6 @@ void TestMneRawProjComp::projOp_combine()
     MNEProjOp proj1, proj2;
 
     auto vecs1 = std::make_unique<MNENamedMatrix>();
-    vecs1->nrow = 1;
-    vecs1->ncol = 2;
     vecs1->rowlist.push_back("p1");
     vecs1->collist.push_back("ch0");
     vecs1->collist.push_back("ch1");
@@ -677,8 +673,6 @@ void TestMneRawProjComp::projOp_combine()
     proj1.add_item(*vecs1, 1, "proj1");
 
     auto vecs2 = std::make_unique<MNENamedMatrix>();
-    vecs2->nrow = 1;
-    vecs2->ncol = 2;
     vecs2->rowlist.push_back("p2");
     vecs2->collist.push_back("ch0");
     vecs2->collist.push_back("ch1");

@@ -186,7 +186,7 @@ bool MNEMeasData::read_evoked_set(const std::filesystem::path& name,
             nchan = op->nchan;
         } else if (fwd) {
             names = fwd->collist;
-            nchan = fwd->ncol;
+            nchan = fwd->ncol();
         } else {
             names = namesp;
             nchan = nnamesp;

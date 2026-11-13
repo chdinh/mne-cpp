@@ -80,15 +80,15 @@ MNECTFCompData::~MNECTFCompData()
 
 int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int nch, bool do_it)
 {
-    Eigen::VectorXf col_cals(this->data->ncol);
-    Eigen::VectorXf row_cals(this->data->nrow);
+    Eigen::VectorXf col_cals(this->data->ncol());
+    Eigen::VectorXf row_cals(this->data->nrow());
     int j, k, p, found;
     QString name;
 
     if (calibrated)
         return OK;
 
-    for (j = 0; j < this->data->nrow; j++) {
+    for (j = 0; j < this->data->nrow(); j++) {
         name = QString::fromStdString(this->data->rowlist[j]);
         found = false;
         for (p = 0; p < nch; p++)
@@ -102,7 +102,7 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
             return FAIL;
         }
     }
-    for (k = 0; k < this->data->ncol; k++) {
+    for (k = 0; k < this->data->ncol(); k++) {
         name = QString::fromStdString(this->data->collist[k]);
         found = false;
         for (p = 0; p < nch; p++)
@@ -117,12 +117,12 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
         }
     }
     if (do_it) {
-        for (j = 0; j < this->data->nrow; j++)
-            for (k = 0; k < this->data->ncol; k++)
+        for (j = 0; j < this->data->nrow(); j++)
+            for (k = 0; k < this->data->ncol(); k++)
                 this->data->data(j, k) = row_cals[j] * this->data->data(j, k) / col_cals[k];
     } else {
-        for (j = 0; j < this->data->nrow; j++)
-            for (k = 0; k < this->data->ncol; k++)
+        for (j = 0; j < this->data->nrow(); j++)
+            for (k = 0; k < this->data->ncol(); k++)
                 this->data->data(j, k) = col_cals[k] * this->data->data(j, k) / row_cals[j];
     }
     return OK;

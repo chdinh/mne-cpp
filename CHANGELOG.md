@@ -392,6 +392,16 @@ aliases; replace the old spelling as below.
   used to be read past their end. `mne_cov_matrix.h` no longer includes
   `QStringList`. Migration: `cov.pick_chs_omit(names, n, omit, chs)` becomes
   `cov.pick_chs_omit(names, omit, chs)` (or `std::span(names).first(n)`).
+- `MNENamedMatrix::nrow` and `ncol` are the functions `nrow()` and `ncol()`
+  (the dimensions of `data`) instead of separately stored counts that could
+  disagree with it. `build(rowlist, collist, data)` drops the count
+  arguments and refuses name lists that do not fit the data, and
+  `pick(rows, cols)` takes the names as `std::span` without counts.
+  `MNEProjOp::read` refuses a projection item whose stored vectors do not
+  match its vector and channel counts. Migration: `m.nrow` becomes
+  `m.nrow()`, `MNENamedMatrix::build(r, c, rows, cols, data)` becomes
+  `MNENamedMatrix::build(rows, cols, data)`, `m.pick(rows, nr, cols, nc)`
+  becomes `m.pick(rows, cols)`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

@@ -1289,18 +1289,16 @@ void TestMneLibrary::forwardSolution_pickRegions()
 void TestMneLibrary::namedMatrix_lifecycle()
 {
     MNENamedMatrix nm;
-    QCOMPARE(nm.nrow, 0);
-    QCOMPARE(nm.ncol, 0);
+    QCOMPARE(nm.nrow(), 0);
+    QCOMPARE(nm.ncol(), 0);
 
     MNENamedMatrix nm2;
-    nm2.nrow = 3;
-    nm2.ncol = 4;
     nm2.data = MatrixXf::Random(3, 4).eval();
     nm2.rowlist = {"r0", "r1", "r2"};
     nm2.collist = {"c0", "c1", "c2", "c3"};
 
     MNENamedMatrix nm3(nm2);
-    QCOMPARE(nm3.nrow, 3);
+    QCOMPARE(nm3.nrow(), 3);
 }
 
 void TestMneLibrary::namedMatrix_readFromStream()
@@ -1322,7 +1320,7 @@ void TestMneLibrary::namedMatrix_readFromStream()
 void TestMneLibrary::namedMatrix_methods()
 {
     MNENamedMatrix m;
-    QCOMPARE(m.nrow, 0);
+    QCOMPARE(m.nrow(), 0);
 
     StringList rows, cols;
     rows.push_back("r1");
@@ -1332,12 +1330,12 @@ void TestMneLibrary::namedMatrix_methods()
     cols.push_back("c3");
     MatrixXf matData = MatrixXf::Identity(2, 3);
 
-    auto m2 = MNENamedMatrix::build(2, 3, rows, cols, matData);
+    auto m2 = MNENamedMatrix::build(rows, cols, matData);
     QVERIFY(m2 != nullptr);
-    QCOMPARE(m2->nrow, 2);
+    QCOMPARE(m2->nrow(), 2);
 
     MNENamedMatrix m3(*m2);
-    QCOMPARE(m3.nrow, 2);
+    QCOMPARE(m3.nrow(), 2);
 }
 
 //=============================================================================================================

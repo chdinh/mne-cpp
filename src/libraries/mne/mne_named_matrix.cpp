@@ -30,6 +30,12 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <algorithm>
+#include <iterator>
+#include <numeric>
+#include <optional>
+#include <span>
+#include <string_view>
 #include <vector>
 
 //=============================================================================================================
@@ -44,15 +50,16 @@ using namespace FIFFLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-std::unique_ptr<MNENamedMatrix> MNENamedMatrix::build(int nrow,
-                                                      int ncol,
-                                                      const StringList& rowlist,
+std::unique_ptr<MNENamedMatrix> MNENamedMatrix::build(const StringList& rowlist,
                                                       const StringList& collist,
                                                       const Eigen::MatrixXf& data)
 {
+    if ((!rowlist.empty() && std::ssize(rowlist) != data.rows()) || (!collist.empty() && std::ssize(collist) != data.cols())) {
+        BASELIB::Log::critical("MNENamedMatrix::build - {} row and {} column names do not fit a {} x {} matrix.",
+                               rowlist.size(), collist.size(), data.rows(), data.cols());
+        return nullptr;
+    }
     auto mat = std::make_unique<MNENamedMatrix>();
-    mat->nrow = nrow;
-    mat->ncol = ncol;
     mat->rowlist = rowlist;
     mat->collist = collist;
     mat->data = data;
@@ -61,98 +68,52 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::build(int nrow,
 
 //=============================================================================================================
 
-std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(const StringList& pickrowlist,
-                                                     int picknrow,
-                                                     const StringList& pickcollist,
-                                                     int pickncol) const
+namespace
 {
-    /*
-     * Validate: picking by name requires names in the original matrix.
-     */
-    if (!pickrowlist.empty() && this->rowlist.empty()) {
-        BASELIB::Log::critical("MNENamedMatrix::pick - Cannot pick rows: no row names in original matrix.");
-        return nullptr;
+
+// Indices of the picked names in the original list; all of them when nothing is picked.
+std::optional<std::vector<Eigen::Index>> pick_indices(std::span<const std::string> picks,
+                                                      const StringList& names,
+                                                      Eigen::Index count,
+                                                      std::string_view what)
+{
+    std::vector<Eigen::Index> indices;
+    if (picks.empty()) {
+        indices.resize(static_cast<std::size_t>(count));
+        std::iota(indices.begin(), indices.end(), Eigen::Index{0});
+        return indices;
     }
-    if (!pickcollist.empty() && this->collist.empty()) {
-        BASELIB::Log::critical("MNENamedMatrix::pick - Cannot pick columns: no column names in original matrix.");
-        return nullptr;
+    if (names.empty()) {
+        BASELIB::Log::critical("MNENamedMatrix::pick - Cannot pick {}s: no {} names in original matrix.", what, what);
+        return std::nullopt;
     }
-
-    /*
-     * When no pick-list is given, keep all rows / columns.
-     */
-    if (pickrowlist.empty())
-        picknrow = this->nrow;
-    if (pickcollist.empty())
-        pickncol = this->ncol;
-
-    /*
-     * Build row index mapping: for each picked row find its index in the original.
-     */
-    Eigen::VectorXi pick_row = Eigen::VectorXi::Zero(picknrow);
-    StringList my_pickrowlist;
-
-    if (!pickrowlist.empty()) {
-        for (int j = 0; j < picknrow; ++j) {
-            const std::string& name = pickrowlist[j];
-            pick_row[j] = -1;
-            for (int k = 0; k < this->nrow; ++k) {
-                if ((name == this->rowlist[k])) {
-                    pick_row[j] = k;
-                    break;
-                }
-            }
-            if (pick_row[j] == -1) {
-                BASELIB::Log::critical("MNENamedMatrix::pick - Row '{}' not found in original matrix.", name);
-                return nullptr;
-            }
+    indices.reserve(picks.size());
+    for (const auto& name : picks) {
+        const auto it = std::ranges::find(names, name);
+        if (it == names.end()) {
+            BASELIB::Log::critical("MNENamedMatrix::pick - {} '{}' not found in original matrix.", what, name);
+            return std::nullopt;
         }
-        my_pickrowlist = pickrowlist;
-    } else {
-        for (int k = 0; k < picknrow; ++k)
-            pick_row[k] = k;
-        my_pickrowlist = this->rowlist;
+        indices.push_back(std::distance(names.begin(), it));
     }
+    return indices;
+}
 
-    /*
-     * Build column index mapping analogously.
-     */
-    Eigen::VectorXi pick_col = Eigen::VectorXi::Zero(pickncol);
-    StringList my_pickcollist;
+} // anonymous namespace
 
-    if (!pickcollist.empty()) {
-        for (int j = 0; j < pickncol; ++j) {
-            const std::string& name = pickcollist[j];
-            pick_col[j] = -1;
-            for (int k = 0; k < this->ncol; ++k) {
-                if ((name == this->collist[k])) {
-                    pick_col[j] = k;
-                    break;
-                }
-            }
-            if (pick_col[j] == -1) {
-                BASELIB::Log::critical("MNENamedMatrix::pick - Column '{}' not found in original matrix.", name);
-                return nullptr;
-            }
-        }
-        my_pickcollist = pickcollist;
-    } else {
-        for (int k = 0; k < pickncol; ++k)
-            pick_col[k] = k;
-        my_pickcollist = this->collist;
-    }
+std::unique_ptr<MNENamedMatrix> MNENamedMatrix::pick(std::span<const std::string> pickrowlist,
+                                                     std::span<const std::string> pickcollist) const
+{
+    const auto rows = pick_indices(pickrowlist, rowlist, data.rows(), "row");
+    const auto cols = pick_indices(pickcollist, collist, data.cols(), "column");
+    if (!rows || !cols)
+        return nullptr;
 
-    /*
-     * Assemble the picked data matrix.
-     */
-    Eigen::MatrixXf pickdata(picknrow, pickncol);
-    for (int j = 0; j < picknrow; ++j) {
-        const int row = pick_row[j];
-        for (int k = 0; k < pickncol; ++k)
-            pickdata(j, k) = this->data(row, pick_col[k]);
-    }
-
-    return build(picknrow, pickncol, my_pickrowlist, my_pickcollist, pickdata);
+    auto mat = std::make_unique<MNENamedMatrix>();
+    mat->rowlist = pickrowlist.empty() ? rowlist : StringList(pickrowlist.begin(), pickrowlist.end());
+    mat->collist = pickcollist.empty() ? collist : StringList(pickcollist.begin(), pickcollist.end());
+    mat->data = data(*rows, *cols);
+    return mat;
 }
 
 //=============================================================================================================
@@ -255,5 +216,5 @@ std::unique_ptr<MNENamedMatrix> MNENamedMatrix::read(FiffStream& stream,
         }
     }
 
-    return build(nrow, ncol, rownames, colnames, data);
+    return build(rownames, colnames, data);
 }

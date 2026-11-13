@@ -78,7 +78,7 @@ private slots:
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 2.0f, 3.0f;
-        item.vecs = *MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        item.vecs = *MNENamedMatrix::build(rowNames, colNames, data);
 
         MNEProjItem copy(item);
         QCOMPARE(copy.desc, item.desc);
@@ -98,7 +98,7 @@ private slots:
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 1.0f, 1.0f, 1.0f;
-        item.vecs = *MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        item.vecs = *MNENamedMatrix::build(rowNames, colNames, data);
 
         StringList testList = {"MEG 0111", "MEG 0112", "MEG 0113"};
         QVERIFY(item.affect(testList));
@@ -125,7 +125,7 @@ private slots:
         StringList rowNames = {"vec1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
-        auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
 
@@ -143,7 +143,7 @@ private slots:
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 0.707f, 0.707f;
-        auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
 
@@ -164,7 +164,7 @@ private slots:
         Eigen::MatrixXf data(2, 3);
         data << 1, 0, 0,
             0, 1, 0;
-        auto nm_ptr = MNENamedMatrix::build(2, 3, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "Vec set");
@@ -182,7 +182,7 @@ private slots:
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
-        auto nm1_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
+        auto nm1_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm1(*nm1_ptr);
         op1.add_item(nm1, 1, "First");
@@ -190,7 +190,7 @@ private slots:
         MNEProjOp op2;
         Eigen::MatrixXf data2(1, 2);
         data2 << 0, 1;
-        auto nm2_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data2);
+        auto nm2_ptr = MNENamedMatrix::build(rowNames, colNames, data2);
 
         MNENamedMatrix nm2(*nm2_ptr);
         op2.add_item(nm2, 1, "Second");
@@ -206,7 +206,7 @@ private slots:
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
-        auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "Test");
@@ -225,7 +225,7 @@ private slots:
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
-        auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "SSP");
@@ -242,7 +242,7 @@ private slots:
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 3);
         data << 0.577f, 0.577f, 0.577f;
-        auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "SSP");
@@ -259,7 +259,7 @@ private slots:
         const StringList names = {"MEG 0111", "MEG 0112", "REF_EEG", "TRIG_STI"};
         Eigen::MatrixXf data(1, 4);
         data << 0.5f, 0.5f, 0.5f, 0.5f;
-        MNENamedMatrix meg(*MNENamedMatrix::build(1, 4, {"v1"}, names, data));
+        MNENamedMatrix meg(*MNENamedMatrix::build({"v1"}, names, data));
         MNEProjOp op;
         op.add_item(meg, FIFFV_PROJ_ITEM_FIELD, "SSP");
         QVERIFY(op.items[0].has_meg);
@@ -270,7 +270,7 @@ private slots:
         QVERIFY((op.proj_data.row(0).array().abs() > 0.4f).all());
 
         const StringList others = {"REF_EEG 1", "REF_EEG 2"};
-        MNENamedMatrix ref(*MNENamedMatrix::build(1, 2, {"v1"}, others, Eigen::MatrixXf::Ones(1, 2)));
+        MNENamedMatrix ref(*MNENamedMatrix::build({"v1"}, others, Eigen::MatrixXf::Ones(1, 2)));
         MNEProjOp unnamed;
         unnamed.add_item(ref, FIFFV_PROJ_ITEM_FIELD, "SSP");
         QVERIFY(unnamed.items[0].has_meg);
@@ -287,7 +287,7 @@ private slots:
         float invSqrt3 = 1.0f / std::sqrt(3.0f);
         Eigen::MatrixXf data(1, 3);
         data << invSqrt3, invSqrt3, invSqrt3;
-        auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "SSP");
@@ -317,7 +317,7 @@ private slots:
         float invSqrt2 = 1.0f / std::sqrt(2.0f);
         Eigen::MatrixXf data(1, 2);
         data << invSqrt2, invSqrt2;
-        auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "SSP");
@@ -340,7 +340,7 @@ private slots:
         StringList rowNames = {"v1"};
         Eigen::MatrixXf data(1, 2);
         data << 1, 0;
-        auto nm_ptr = MNENamedMatrix::build(1, 2, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "SSP");
@@ -391,7 +391,7 @@ private slots:
         float invSqrt3 = 1.0f / std::sqrt(3.0f);
         Eigen::MatrixXf data(1, 3);
         data << invSqrt3, invSqrt3, invSqrt3;
-        auto nm_ptr = MNENamedMatrix::build(1, 3, rowNames, colNames, data);
+        auto nm_ptr = MNENamedMatrix::build(rowNames, colNames, data);
 
         MNENamedMatrix nm(*nm_ptr);
         op.add_item(nm, 1, "SSP");

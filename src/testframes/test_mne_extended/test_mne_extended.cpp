@@ -48,8 +48,8 @@ private slots:
     void mneNamedMatrix_defaultCtor()
     {
         MNENamedMatrix m;
-        QCOMPARE(m.nrow, 0);
-        QCOMPARE(m.ncol, 0);
+        QCOMPARE(m.nrow(), 0);
+        QCOMPARE(m.ncol(), 0);
         QVERIFY(m.rowlist.empty());
         QVERIFY(m.collist.empty());
         QCOMPARE(m.data.rows(), 0);
@@ -63,10 +63,10 @@ private slots:
         MatrixXf data(2, 3);
         data << 1, 2, 3, 4, 5, 6;
 
-        auto mat = MNENamedMatrix::build(2, 3, rows, cols, data);
+        auto mat = MNENamedMatrix::build(rows, cols, data);
         QVERIFY(mat != nullptr);
-        QCOMPARE(mat->nrow, 2);
-        QCOMPARE(mat->ncol, 3);
+        QCOMPARE(mat->nrow(), 2);
+        QCOMPARE(mat->ncol(), 3);
         QCOMPARE(mat->rowlist.size(), 2);
         QCOMPARE(mat->collist.size(), 3);
         QVERIFY(mat->data.isApprox(data));
@@ -79,11 +79,11 @@ private slots:
         MatrixXf data(2, 2);
         data << 1, 2, 3, 4;
 
-        auto orig = MNENamedMatrix::build(2, 2, rows, cols, data);
+        auto orig = MNENamedMatrix::build(rows, cols, data);
         MNENamedMatrix copy(*orig);
 
-        QCOMPARE(copy.nrow, orig->nrow);
-        QCOMPARE(copy.ncol, orig->ncol);
+        QCOMPARE(copy.nrow(), orig->nrow());
+        QCOMPARE(copy.ncol(), orig->ncol());
         QCOMPARE(copy.rowlist, orig->rowlist);
         QCOMPARE(copy.collist, orig->collist);
         QVERIFY(copy.data.isApprox(orig->data));
@@ -98,15 +98,15 @@ private slots:
             5, 6, 7, 8,
             9, 10, 11, 12;
 
-        auto mat = MNENamedMatrix::build(3, 4, rows, cols, data);
+        auto mat = MNENamedMatrix::build(rows, cols, data);
 
         // Pick row "r1" and cols "c1", "c3"
         StringList pickRows = {"r1"};
         StringList pickCols = {"c1", "c3"};
-        auto sub = mat->pick(pickRows, 1, pickCols, 2);
+        auto sub = mat->pick(pickRows, pickCols);
         QVERIFY(sub != nullptr);
-        QCOMPARE(sub->nrow, 1);
-        QCOMPARE(sub->ncol, 2);
+        QCOMPARE(sub->nrow(), 1);
+        QCOMPARE(sub->ncol(), 2);
         QCOMPARE(sub->rowlist.size(), 1);
         QCOMPARE(sub->rowlist[0], QString("r1"));
         // row "r1" = [5,6,7,8], cols c1=6, c3=8
@@ -121,15 +121,15 @@ private slots:
         MatrixXf data(2, 2);
         data << 1, 2, 3, 4;
 
-        auto mat = MNENamedMatrix::build(2, 2, rows, cols, data);
+        auto mat = MNENamedMatrix::build(rows, cols, data);
 
         // Empty pick list = keep all
         StringList emptyPick;
         StringList pickCols = {"c0"};
-        auto sub = mat->pick(emptyPick, 2, pickCols, 1);
+        auto sub = mat->pick(emptyPick, pickCols);
         QVERIFY(sub != nullptr);
-        QCOMPARE(sub->nrow, 2);
-        QCOMPARE(sub->ncol, 1);
+        QCOMPARE(sub->nrow(), 2);
+        QCOMPARE(sub->ncol(), 1);
     }
 
     void mneNamedMatrix_pickInvalidName()
@@ -139,9 +139,9 @@ private slots:
         MatrixXf data(1, 1);
         data << 42;
 
-        auto mat = MNENamedMatrix::build(1, 1, rows, cols, data);
+        auto mat = MNENamedMatrix::build(rows, cols, data);
         StringList pickRows = {"nonexistent"};
-        auto sub = mat->pick(pickRows, 1, {}, 1);
+        auto sub = mat->pick(pickRows, {});
         // Should return nullptr when name not found
         QVERIFY(sub == nullptr);
     }

@@ -517,10 +517,10 @@ private slots:
         Eigen::MatrixXf data(3, 2);
         data << 1, 2, 3, 4, 5, 6;
 
-        auto nm = MNENamedMatrix::build(3, 2, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
         QVERIFY(nm != nullptr);
-        QCOMPARE(nm->nrow, 3);
-        QCOMPARE(nm->ncol, 2);
+        QCOMPARE(nm->nrow(), 3);
+        QCOMPARE(nm->ncol(), 2);
     }
 
     void testNamedMatrixPick()
@@ -530,14 +530,14 @@ private slots:
         Eigen::MatrixXf data(3, 3);
         data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
 
-        auto nm = MNENamedMatrix::build(3, 3, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
 
         StringList pickRows = {"r1", "r3"};
         StringList pickCols = {"c2"};
-        auto picked = nm->pick(pickRows, 2, pickCols, 1);
+        auto picked = nm->pick(pickRows, pickCols);
         QVERIFY(picked != nullptr);
-        QCOMPARE(picked->nrow, 2);
-        QCOMPARE(picked->ncol, 1);
+        QCOMPARE(picked->nrow(), 2);
+        QCOMPARE(picked->ncol(), 1);
     }
 
     // ── MNECovMatrix additional ─────────────────────────────────────────────

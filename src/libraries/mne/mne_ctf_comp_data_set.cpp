@@ -443,7 +443,6 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
     std::unique_ptr<FiffSparseMatrix> postsel;
     std::unique_ptr<MNENamedMatrix> data;
 
-    StringList emptyList;
 
     if (compchs.empty()) {
         compchs = chList;
@@ -493,8 +492,8 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
     /*
         * Find the compensation channels
         */
-    comp_sel.resize(this_comp->data->ncol);
-    for (k = 0; k < this_comp->data->ncol; k++) {
+    comp_sel.resize(this_comp->data->ncol());
+    for (k = 0; k < this_comp->data->ncol(); k++) {
         comp_sel[k] = -1;
         name = QString::fromStdString(this_comp->data->collist[k]);
         for (p = 0; p < nCompChan; p++)
@@ -512,8 +511,8 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
         * Create the preselector
         */
     {
-        Eigen::MatrixXf sel = Eigen::MatrixXf::Zero(this_comp->data->ncol, nCompChan);
-        for (j = 0; j < this_comp->data->ncol; j++)
+        Eigen::MatrixXf sel = Eigen::MatrixXf::Zero(this_comp->data->ncol(), nCompChan);
+        for (j = 0; j < this_comp->data->ncol(); j++)
             sel(j, comp_sel[j]) = 1.0f;
         presel = mne_convert_to_sparse(sel, FIFFTS_MC_RCS, 1e-30f);
         if (!presel)
@@ -529,7 +528,7 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
     }
 
     {
-        auto d = this_comp->data->pick(names, need_comp, emptyList, 0);
+        auto d = this_comp->data->pick(names, {});
         if (!d)
             return FAIL;
         data = std::move(d);
@@ -539,7 +538,7 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
         * Create the postselector
         */
     {
-        Eigen::MatrixXf sel = Eigen::MatrixXf::Zero(nChan, data->nrow);
+        Eigen::MatrixXf sel = Eigen::MatrixXf::Zero(nChan, data->nrow());
         for (j = 0, p = 0; j < nChan; j++) {
             if (compGrades[j] != MNE_CTFV_COMP_NONE)
                 sel(j, p++) = 1.0f;
@@ -610,8 +609,8 @@ int MNECTFCompDataSet::apply(bool do_it, Eigen::Ref<Eigen::VectorXf> data, Eigen
             BASELIB::Log::critical("Compensation data dimension mismatch. Expected {}, got {} channels.", this_comp->presel->cols(), ncompdata);
             return FAIL;
         }
-    } else if (this_comp->data->ncol != ncompdata) {
-        BASELIB::Log::critical("Compensation data dimension mismatch. Expected {}, got {} channels.", this_comp->data->ncol, ncompdata);
+    } else if (this_comp->data->ncol() != ncompdata) {
+        BASELIB::Log::critical("Compensation data dimension mismatch. Expected {}, got {} channels.", this_comp->data->ncol(), ncompdata);
         return FAIL;
     }
     if (this_comp->postsel) {
@@ -619,8 +618,8 @@ int MNECTFCompDataSet::apply(bool do_it, Eigen::Ref<Eigen::VectorXf> data, Eigen
             BASELIB::Log::critical("Data dimension mismatch. Expected {}, got {} channels.", this_comp->postsel->rows(), ndata);
             return FAIL;
         }
-    } else if (this_comp->data->nrow != ndata) {
-        BASELIB::Log::critical("Data dimension mismatch. Expected {}, got {} channels.", this_comp->data->nrow, ndata);
+    } else if (this_comp->data->nrow() != ndata) {
+        BASELIB::Log::critical("Data dimension mismatch. Expected {}, got {} channels.", this_comp->data->nrow(), ndata);
         return FAIL;
     }
     /*
@@ -639,10 +638,10 @@ int MNECTFCompDataSet::apply(bool do_it, Eigen::Ref<Eigen::VectorXf> data, Eigen
         * This always happens
         */
     if (this_comp->comp_data.size() == 0)
-        this_comp->comp_data.resize(this_comp->data->nrow);
+        this_comp->comp_data.resize(this_comp->data->nrow());
     {
-        Eigen::Map<const Eigen::VectorXf> preselVec(presel, this_comp->data->ncol);
-        Eigen::Map<Eigen::VectorXf> compVec(this_comp->comp_data.data(), this_comp->data->nrow);
+        Eigen::Map<const Eigen::VectorXf> preselVec(presel, this_comp->data->ncol());
+        Eigen::Map<Eigen::VectorXf> compVec(this_comp->comp_data.data(), this_comp->data->nrow());
         compVec = this_comp->data->data * preselVec;
     }
     /*
@@ -691,8 +690,8 @@ int MNECTFCompDataSet::apply_transpose(bool do_it, Eigen::MatrixXf& data)
             BASELIB::Log::critical("Compensation data dimension mismatch. Expected {}, got {} channels.", this_comp->presel->cols(), ncompdata);
             return FAIL;
         }
-    } else if (this_comp->data->ncol != ncompdata) {
-        BASELIB::Log::critical("Compensation data dimension mismatch. Expected {}, got {} channels.", this_comp->data->ncol, ncompdata);
+    } else if (this_comp->data->ncol() != ncompdata) {
+        BASELIB::Log::critical("Compensation data dimension mismatch. Expected {}, got {} channels.", this_comp->data->ncol(), ncompdata);
         return FAIL;
     }
     if (this_comp->postsel) {
@@ -700,8 +699,8 @@ int MNECTFCompDataSet::apply_transpose(bool do_it, Eigen::MatrixXf& data)
             BASELIB::Log::critical("Data dimension mismatch. Expected {}, got {} channels.", this_comp->postsel->rows(), ndata);
             return FAIL;
         }
-    } else if (this_comp->data->nrow != ndata) {
-        BASELIB::Log::critical("Data dimension mismatch. Expected {}, got {} channels.", this_comp->data->nrow, ndata);
+    } else if (this_comp->data->nrow() != ndata) {
+        BASELIB::Log::critical("Data dimension mismatch. Expected {}, got {} channels.", this_comp->data->nrow(), ndata);
         return FAIL;
     }
     /*

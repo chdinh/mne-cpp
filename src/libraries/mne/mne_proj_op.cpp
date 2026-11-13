@@ -151,7 +151,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::create_average_eeg_ref(std::span<const Fif
     Eigen::MatrixXf vec_data = Eigen::MatrixXf::Constant(1, eegcount, 1.0f / sqrt(static_cast<double>(eegcount)));
 
     StringList emptyList;
-    auto vecs = MNENamedMatrix::build(1, eegcount, emptyList, names, vec_data);
+    auto vecs = MNENamedMatrix::build(emptyList, names, vec_data);
 
     auto op = std::make_unique<MNEProjOp>();
     op->add_item(*vecs, FIFFV_MNE_PROJ_ITEM_EEG_AVREF, "Average EEG reference");
@@ -316,6 +316,11 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         }
 
         MatrixXf item_vectors = t_pTag->to_float_matrix().transpose();
+        if (item_vectors.rows() != item_nvec || item_vectors.cols() != item_nchan) {
+            BASELIB::Log::critical("Projection item # {} stores a {} x {} matrix for {} vectors of {} channels",
+                                   k + 1, item_vectors.rows(), item_vectors.cols(), item_nvec, item_nchan);
+            return nullptr;
+        }
 
         /*
             * Is this item active?
@@ -328,7 +333,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         * Ready to add
         */
         StringList emptyList;
-        auto item = MNENamedMatrix::build(item_nvec, item_nchan, emptyList, item_names, item_vectors);
+        auto item = MNENamedMatrix::build(emptyList, item_names, item_vectors);
         op->add_item(*item, item_kind, item_desc, item_active);
         op->items.back().active_file = item_active;
     }
@@ -375,7 +380,7 @@ void MNEProjOp::report_data(std::ostream& out, const std::string& tag, bool list
             out << tag << "\n";
         if (!tag.empty())
             out << tag;
-        out << "# " << (k + 1) << " : " << it.desc << " : " << it.nvec() << " vecs : " << it.vecs.ncol << " chs "
+        out << "# " << (k + 1) << " : " << it.desc << " : " << it.nvec() << " vecs : " << it.vecs.ncol() << " chs "
             << (it.has_meg ? "MEG" : "EEG") << " "
             << (it.active ? "active" : "idle") << "\n";
         if (list_data && !tag.empty())
@@ -383,15 +388,15 @@ void MNEProjOp::report_data(std::ostream& out, const std::string& tag, bool list
         if (list_data) {
             vecs = &items[k].vecs;
 
-            for (q = 0; q < vecs->ncol; q++) {
+            for (q = 0; q < vecs->ncol(); q++) {
                 out << std::format("{:<10}", vecs->collist[q]);
-                out << (q < vecs->ncol - 1 ? " " : "\n");
+                out << (q < vecs->ncol() - 1 ? " " : "\n");
             }
-            for (p = 0; p < vecs->nrow; p++)
-                for (q = 0; q < vecs->ncol; q++) {
+            for (p = 0; p < vecs->nrow(); p++)
+                for (q = 0; q < vecs->ncol(); q++) {
                     found = FIFFLIB::has_channel(exclude, vecs->collist[q]);
                     out << std::format("{:10.5g} ", found ? 0.0 : static_cast<double>(vecs->data(p, q)));
-                    out << (q < vecs->ncol - 1 ? " " : "\n");
+                    out << (q < vecs->ncol() - 1 ? " " : "\n");
                 }
             if (list_data && !tag.empty())
                 out << tag << "\n";

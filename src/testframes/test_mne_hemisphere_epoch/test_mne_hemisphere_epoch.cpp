@@ -405,8 +405,8 @@ private slots:
     void namedMatrix_defaultCtor()
     {
         MNENamedMatrix nm;
-        QCOMPARE(nm.nrow, 0);
-        QCOMPARE(nm.ncol, 0);
+        QCOMPARE(nm.nrow(), 0);
+        QCOMPARE(nm.ncol(), 0);
     }
 
     void namedMatrix_build()
@@ -416,10 +416,10 @@ private slots:
         MatrixXf data(2, 3);
         data << 1, 2, 3, 4, 5, 6;
 
-        auto nm = MNENamedMatrix::build(2, 3, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
         QVERIFY(nm != nullptr);
-        QCOMPARE(nm->nrow, 2);
-        QCOMPARE(nm->ncol, 3);
+        QCOMPARE(nm->nrow(), 2);
+        QCOMPARE(nm->ncol(), 3);
         QCOMPARE(nm->rowlist.size(), 2);
         QCOMPARE(nm->collist.size(), 3);
     }
@@ -431,10 +431,10 @@ private slots:
         MatrixXf data(2, 2);
         data << 1, 2, 3, 4;
 
-        auto nm = MNENamedMatrix::build(2, 2, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
         MNENamedMatrix copy(*nm);
-        QCOMPARE(copy.nrow, 2);
-        QCOMPARE(copy.ncol, 2);
+        QCOMPARE(copy.nrow(), 2);
+        QCOMPARE(copy.ncol(), 2);
         QVERIFY(copy.data.isApprox(nm->data));
     }
 
@@ -445,14 +445,14 @@ private slots:
         MatrixXf data(3, 3);
         data << 1, 2, 3, 4, 5, 6, 7, 8, 9;
 
-        auto nm = MNENamedMatrix::build(3, 3, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
 
         StringList pickRows{"R1", "R3"};
         StringList pickCols{"C2"};
-        auto picked = nm->pick(pickRows, 2, pickCols, 1);
+        auto picked = nm->pick(pickRows, pickCols);
         QVERIFY(picked != nullptr);
-        QCOMPARE(picked->nrow, 2);
-        QCOMPARE(picked->ncol, 1);
+        QCOMPARE(picked->nrow(), 2);
+        QCOMPARE(picked->ncol(), 1);
     }
 
     //=========================================================================
@@ -513,7 +513,7 @@ private slots:
         MatrixXf data(1, 3);
         data << 1.0f, 0.0f, 0.0f;
 
-        auto nm = MNENamedMatrix::build(1, 3, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
         op.add_item(*nm, 1, "test proj");
         QCOMPARE(op.items.size(), std::size_t{1});
     }
@@ -526,7 +526,7 @@ private slots:
         MatrixXf data(1, 2);
         data << 1.0f, 0.0f;
 
-        auto nm = MNENamedMatrix::build(1, 2, rows, cols, data);
+        auto nm = MNENamedMatrix::build(rows, cols, data);
         op.add_item(*nm, 1, "test");
 
         auto dup = op.dup();
@@ -556,15 +556,14 @@ private slots:
         cd.kind = 1;
         cd.calibrated = true;
         cd.data = std::make_unique<MNENamedMatrix>();
-        cd.data->nrow = 2;
-        cd.data->ncol = 3;
+        cd.data->data = Eigen::MatrixXf::Ones(2, 3);
 
         MNECTFCompData cd2(cd);
         QCOMPARE(cd2.kind, 1);
         QVERIFY(cd2.calibrated);
         QVERIFY(cd2.data != nullptr);
-        QCOMPARE(cd2.data->nrow, 2);
-        QCOMPARE(cd2.data->ncol, 3);
+        QCOMPARE(cd2.data->nrow(), 2);
+        QCOMPARE(cd2.data->ncol(), 3);
     }
 
     //=========================================================================

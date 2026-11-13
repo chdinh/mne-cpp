@@ -39,6 +39,7 @@
 //=============================================================================================================
 
 #include <memory>
+#include <span>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -90,20 +91,13 @@ public:
     /**
      * @brief Factory: build a named matrix from its constituent parts.
      *
-     * Assembles an MNENamedMatrix from dimension counts, optional row/column
-     * name lists, and a dense data matrix.
-     *
-     * @param[in] nrow       Number of rows (must match @p data.rows()).
-     * @param[in] ncol       Number of columns (must match @p data.cols()).
-     * @param[in] rowlist    Name list for the rows (may be empty).
-     * @param[in] collist    Name list for the columns (may be empty).
+     * @param[in] rowlist    Row names: empty, or one per row of @p data.
+     * @param[in] collist    Column names: empty, or one per column of @p data.
      * @param[in] data       Dense float matrix to store.
      *
-     * @return A unique pointer to the newly created named matrix.
+     * @return The named matrix, or @c nullptr if a name list does not fit @p data.
      */
-    static std::unique_ptr<MNENamedMatrix> build(int nrow,
-                                                 int ncol,
-                                                 const StringList& rowlist,
+    static std::unique_ptr<MNENamedMatrix> build(const StringList& rowlist,
                                                  const StringList& collist,
                                                  const Eigen::MatrixXf& data);
 
@@ -135,24 +129,35 @@ public:
      * rows (or columns) of the original are retained.
      *
      * @param[in] pickrowlist    Row names to select (empty = keep all rows).
-     * @param[in] picknrow       Expected number of picked rows (used when @p pickrowlist is empty).
      * @param[in] pickcollist    Column names to select (empty = keep all columns).
-     * @param[in] pickncol       Expected number of picked columns (used when @p pickcollist is empty).
      *
-     * @return A unique pointer to the picked sub-matrix, or @c nullptr if a
-     *         requested name was not found.
+     * @return The picked sub-matrix, or @c nullptr if a requested name was not found.
      */
-    std::unique_ptr<MNENamedMatrix> pick(const StringList& pickrowlist,
-                                         int picknrow,
-                                         const StringList& pickcollist,
-                                         int pickncol) const;
+    std::unique_ptr<MNENamedMatrix> pick(std::span<const std::string> pickrowlist,
+                                         std::span<const std::string> pickcollist) const;
+
+    //=========================================================================================================
+    /**
+     * @return The number of rows of @ref data.
+     */
+    int nrow() const
+    {
+        return static_cast<int>(data.rows());
+    }
+
+    //=========================================================================================================
+    /**
+     * @return The number of columns of @ref data.
+     */
+    int ncol() const
+    {
+        return static_cast<int>(data.cols());
+    }
 
 public:
-    int nrow = 0;         /**< Number of rows in @ref data. */
-    int ncol = 0;         /**< Number of columns in @ref data. */
     StringList rowlist;   /**< Name list for the rows (may be empty if unnamed). */
     StringList collist;   /**< Name list for the columns (may be empty if unnamed). */
-    Eigen::MatrixXf data; /**< Dense data matrix of dimension @ref nrow x @ref ncol. */
+    Eigen::MatrixXf data; /**< Dense data matrix. */
 };
 
 } // NAMESPACE MNELIB

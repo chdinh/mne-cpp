@@ -39,7 +39,7 @@ bool MNEProjItem::affect(std::span<const std::string> list) const
         return false;
 
     for (const auto& name : list) {
-        for (int p = 0; p < vecs.ncol; ++p) {
+        for (int p = 0; p < vecs.ncol(); ++p) {
             if (vecs.collist[p] == name && (vecs.data.col(p).array() != 0.0f).any())
                 return true;
         }
