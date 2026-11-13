@@ -216,7 +216,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
     std::vector<std::shared_ptr<FiffDirNode>> items;
     std::shared_ptr<FiffDirNode> node;
     int k;
-    QString item_desc, desc_tag;
+    std::string item_desc;
     int global_nchan, item_nchan;
     StringList item_names;
     int item_kind;
@@ -247,7 +247,6 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         global_nchan = 0;
     else {
         global_nchan = *t_pTag->to_int();
-        //        TAG_FREE(tag);
     }
     /*
        * Proceess each item
@@ -267,13 +266,10 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
             * Take the first line of description if it exists
             */
         if (t_pTag = node->find_tag(stream, FIFF_DESCRIPTION); t_pTag) {
-            desc_tag = QString::fromStdString(t_pTag->to_string());
-            int pos;
-            if ((pos = desc_tag.indexOf("\n")) >= 0)
-                desc_tag.truncate(pos);
-            if (!item_desc.isEmpty())
-                item_desc += " ";
-            item_desc += desc_tag;
+            const std::string desc_tag = t_pTag->to_string();
+            if (!item_desc.empty())
+                item_desc += ' ';
+            item_desc += desc_tag.substr(0, desc_tag.find('\n'));
         }
         /*
         * Possibility to override number of channels here
@@ -336,7 +332,7 @@ std::unique_ptr<MNEProjOp> MNEProjOp::read_from_node(FiffStream& stream, const s
         */
         StringList emptyList;
         auto item = MNENamedMatrix::build(item_nvec, item_nchan, emptyList, item_names, item_vectors);
-        op->add_item(*item, item_kind, item_desc.toStdString(), item_active);
+        op->add_item(*item, item_kind, item_desc, item_active);
         op->items.back().active_file = item_active;
     }
 
