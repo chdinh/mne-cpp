@@ -30,7 +30,7 @@ MatrixXf gain(fitData->nmeg, 3);
 const bool fieldOk = InvDipoleFitData::compute_dipole_field(*fitData, truePos, false, gain) == 0; // projected, not whitened
 VectorXf field = gain * trueMoment;
 
-InvGuessData guesses(QString(), QString(), 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
+InvGuessData guesses({}, {}, 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
 std::unique_ptr<InvDipoleForward> atTruth(InvDipoleFitData::dipole_forward_one(fitData.get(), truePos, nullptr));
 InvEcd dipole;
 VectorXf b = field; // fit_one projects and whitens in place
@@ -63,10 +63,10 @@ Constructs the Guess Data from given Data Refactored: make_guess_data (dipole_fi
 
 **Parameters:**
 
-- **guessname** : *const QString &*
+- **guessname** : *const std::filesystem::path &*
   File with a predefined guess point set (empty = build a grid).
 
-- **guess_surfname** : *const QString &*
+- **guess_surfname** : *const std::filesystem::path &*
   Surface file bounding the guess grid (empty = inner skull of the BEM, or a sphere).
 
 - **mindist** : *float*
@@ -121,7 +121,7 @@ Once the guess locations have been set up we can compute the fields Refactored: 
 Inverse library: equivalent current dipole fitting in a sphere model.
 
 ````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 107"
-InvGuessData guesses(QString(), QString(), 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
+InvGuessData guesses({}, {}, 0.0f, 0.02f, 0.015f, fitData.get(), 0.08f); // 15 mm grid in an 80 mm sphere
 std::unique_ptr<InvDipoleForward> atTruth(InvDipoleFitData::dipole_forward_one(fitData.get(), truePos, nullptr));
 InvEcd dipole;
 VectorXf b = field; // fit_one projects and whitens in place
