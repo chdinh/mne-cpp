@@ -49,27 +49,8 @@ namespace MNELIB
 class MNESHARED_EXPORT MNEMshPicked
 {
 public:
-    //=========================================================================================================
-    /**
-     * Constructs the MNEMshPicked.
-     */
-    MNEMshPicked();
-
-    //=========================================================================================================
-    /**
-     * Destroys the MNEMshPicked.
-     */
-    ~MNEMshPicked();
-
-public:
-    int vert;    /* Vertex # */
-    bool sparse; /* Is this a isolated point? */
-
-    // ### OLD STRUCT ###
-    //    typedef struct {
-    //      int   vert;			/* Vertex # */
-    //      int   sparse;			/* Is this a isolated point? */
-    //    } *mshPicked,mshPickedRec;
+    int vert = 0;        /**< Index of the picked vertex. */
+    bool sparse = false; /**< Whether this is an isolated point. */
 };
 
 //=============================================================================================================

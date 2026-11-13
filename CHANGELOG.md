@@ -329,6 +329,10 @@ aliases; replace the old spelling as below.
   no longer include `<QSharedPointer>`, `InvGuessData` takes its guess and
   surface files as `std::filesystem::path`, and `MNEClusterInfo` uses
   `std::int32_t` instead of `qint32`.
+- A default-constructed `MNEMshLight`, `MNEMshPicked` or `MNEMshColorScaleDef`
+  is zero-initialised (light off at the origin, vertex 0, empty scale); their
+  members used to hold whatever was in memory. The `MNEMshLight` constructor
+  takes `state` as a `bool`.
 - `InvDipoleFitData::print_fields` writes to a `std::ostream` instead of a
   `QTextStream`; `inv_dipole_fit_data.h` no longer includes Qt's text stream.
 - `MNESourceSpace::filter_source_spaces` writes the omitted points to a

@@ -44,33 +44,20 @@ namespace MNELIB
 
 //=============================================================================================================
 /**
- * Replaces *mshPicked, mshPickedRec struct (analyze_types.c).
+ * Replaces *mshColorScaleDef, mshColorScaleDefRec struct (analyze_types.c).
  *
  * @brief Color scale definition with value range and color mapping for surface visualization.
  */
 class MNESHARED_EXPORT MNEMshColorScaleDef
 {
 public:
-    //=========================================================================================================
-    /**
-     * Constructs the MNEMshColorScaleDef.
-     */
-    MNEMshColorScaleDef();
-
-    //=========================================================================================================
-    /**
-     * Destroys the MNEMshColorScaleDef.
-     */
-    ~MNEMshColorScaleDef();
-
-public:
-    int type;      /* What is this scale setting good for? */
-    float mult;    /* Convenience multiplier from internal units to displayed numbers */
-    float fthresh; /* Threshold */
-    float fmid;    /* This is in the middle */
-    float fslope;  /* We still use the slope internally (sigh) */
-    float tc_mult; /* Multiply the scales by this value for timecourses */
-    bool relative; /* Are fthresh and fmid relative to the maximum value over the surface? */
+    int type = 0;          /**< What this scale setting is used for. */
+    float mult = 0.0f;     /**< Multiplier from internal units to displayed numbers. */
+    float fthresh = 0.0f;  /**< Threshold. */
+    float fmid = 0.0f;     /**< Midpoint. */
+    float fslope = 0.0f;   /**< Slope. */
+    float tc_mult = 0.0f;  /**< Multiplier applied to the scales for time courses. */
+    bool relative = false; /**< Whether fthresh and fmid are relative to the maximum over the surface. */
 };
 
 //=============================================================================================================

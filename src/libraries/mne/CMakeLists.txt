@@ -53,9 +53,7 @@ set(SOURCES
     filter_thread_arg.cpp
     mne_msh_display_surface.cpp
     mne_msh_display_surface_set.cpp
-    mne_msh_picked.cpp
     mne_morph_map.cpp
-    mne_msh_color_scale_def.cpp
     mne_proj_data.cpp
     mne_msh_light.cpp
     mne_msh_light_set.cpp

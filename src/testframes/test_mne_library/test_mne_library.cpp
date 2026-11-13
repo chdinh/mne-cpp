@@ -12,7 +12,10 @@
 //=============================================================================================================
 
 #include <QtTest/QtTest>
+#include <cstddef>
+#include <cstring>
 #include <memory>
+#include <new>
 #include <QFile>
 #include <QBuffer>
 #include <QTemporaryDir>
@@ -60,6 +63,7 @@
 #include <mne/mne_cluster_info.h>
 #include <mne/mne_vol_geom.h>
 #include <mne/mne_msh_color_scale_def.h>
+#include <mne/mne_msh_light.h>
 #include <mne/mne_msh_picked.h>
 
 #include <fwd/fwd_bem_model.h>
@@ -223,6 +227,7 @@ private slots:
     void misc_hemisphere();
     void misc_volGeom();
     void misc_mshPicked();
+    void misc_mshLight();
     void misc_colorScaleDef();
     void misc_ctfCompData();
     void misc_epochDataList();
@@ -1610,13 +1615,49 @@ void TestMneLibrary::misc_volGeom()
 
 void TestMneLibrary::misc_mshPicked()
 {
-    MNEMshPicked p;
-    Q_UNUSED(p);
+    // Construct over 0xFF bytes so a member the constructor skips cannot read as zero by chance.
+    alignas(MNEMshPicked) std::byte storage[sizeof(MNEMshPicked)];
+    std::memset(storage, 0xFF, sizeof storage);
+    const auto* p = new (storage) MNEMshPicked;
+    QCOMPARE(p->vert, 0);
+    QVERIFY(!p->sparse);
+    p->~MNEMshPicked();
 }
+
+void TestMneLibrary::misc_mshLight()
+{
+    alignas(MNEMshLight) std::byte storage[sizeof(MNEMshLight)];
+    std::memset(storage, 0xFF, sizeof storage);
+    const auto* light = new (storage) MNEMshLight;
+    QVERIFY(!light->state);
+    for (int k = 0; k < 3; ++k) {
+        QCOMPARE(light->pos[k], 0.0f);
+        QCOMPARE(light->diff[k], 0.0f);
+    }
+    light->~MNEMshLight();
+
+    const MNEMshLight on(true, 0.6f, -1.0f, -1.0f, 0.6f, 0.5f, 0.4f);
+    QVERIFY(on.state);
+    QCOMPARE(on.pos[1], -1.0f);
+    QCOMPARE(on.diff[2], 0.4f);
+    const MNEMshLight copy(on);
+    QCOMPARE(copy.pos[0], 0.6f);
+    QCOMPARE(copy.diff[1], 0.5f);
+}
+
 void TestMneLibrary::misc_colorScaleDef()
 {
-    MNEMshColorScaleDef c;
-    Q_UNUSED(c);
+    alignas(MNEMshColorScaleDef) std::byte storage[sizeof(MNEMshColorScaleDef)];
+    std::memset(storage, 0xFF, sizeof storage);
+    const auto* c = new (storage) MNEMshColorScaleDef;
+    QCOMPARE(c->type, 0);
+    QCOMPARE(c->mult, 0.0f);
+    QCOMPARE(c->fthresh, 0.0f);
+    QCOMPARE(c->fmid, 0.0f);
+    QCOMPARE(c->fslope, 0.0f);
+    QCOMPARE(c->tc_mult, 0.0f);
+    QVERIFY(!c->relative);
+    c->~MNEMshColorScaleDef();
 }
 
 void TestMneLibrary::misc_ctfCompData()

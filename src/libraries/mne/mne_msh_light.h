@@ -54,23 +54,15 @@ class MNESHARED_EXPORT MNEMshLight
 public:
     //=========================================================================================================
     /**
-     * Constructs the MNEMshLight.
+     * Constructs a switched-off light at the origin.
      */
-    MNEMshLight();
-
-    //=========================================================================================================
-    /**
-     * Copy Constructs of the MNEMshLight.
-     *
-     * @param[in] p_mneMshLight  Light to copy.
-     */
-    MNEMshLight(const MNEMshLight& p_mneMshLight);
+    MNEMshLight() = default;
 
     //=========================================================================================================
     /**
      * Constructs the MNEMshLight.
      *
-     * @param[in] state  Non-zero to switch the light on.
+     * @param[in] state  Whether the light is switched on.
      * @param[in] posX   Light position x coordinate.
      * @param[in] posY   Light position y coordinate.
      * @param[in] posZ   Light position z coordinate.
@@ -78,25 +70,12 @@ public:
      * @param[in] diffY  Diffuse intensity, green component.
      * @param[in] diffZ  Diffuse intensity, blue component.
      */
-    MNEMshLight(int state, float posX, float posY, float posZ, float diffX, float diffY, float diffZ);
-
-    //=========================================================================================================
-    /**
-     * Destroys the MNEMshLight.
-     */
-    ~MNEMshLight();
+    MNEMshLight(bool state, float posX, float posY, float posZ, float diffX, float diffY, float diffZ);
 
 public:
-    bool state;    /* On or off? */
-    float pos[3];  /* Where is the light? */
-    float diff[3]; /* Diffuse intensity */
-
-    // ### OLD STRUCT ###
-    //    typedef struct {		/* Definition of lighting */
-    //      int   state;			/* On or off? */
-    //      float pos[3];			/* Where is the light? */
-    //      float diff[3];		/* Diffuse intensity */
-    //    } *mshLight,mshLightRec;	/* We are only using diffuse lights here */
+    bool state = false; /**< Whether the light is switched on. */
+    float pos[3] = {};  /**< Light position. */
+    float diff[3] = {}; /**< Diffuse intensity (red, green, blue). */
 };
 
 //=============================================================================================================
