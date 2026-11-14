@@ -234,13 +234,13 @@ int main(int argc, char* argv[])
     MNEInverseOperator inverse_operator_eeg(info, t_forwardEeg, noise_cov, 0.2f, 0.8f);
 
     // Compute inverse solution
-    InvMinimumNorm minimumNorm_meeg(inverse_operator_meeg, lambda2, method);
+    InvMinimumNorm minimumNorm_meeg(inverse_operator_meeg, lambda2, method.toStdString());
     InvSourceEstimate sourceEstimate_meeg = minimumNorm_meeg.calculateInverse(evoked);
 
-    InvMinimumNorm minimumNorm_meg(inverse_operator_meg, lambda2, method);
+    InvMinimumNorm minimumNorm_meg(inverse_operator_meg, lambda2, method.toStdString());
     InvSourceEstimate sourceEstimate_meg = minimumNorm_meg.calculateInverse(evoked);
 
-    InvMinimumNorm minimumNorm_eeg(inverse_operator_eeg, lambda2, method);
+    InvMinimumNorm minimumNorm_eeg(inverse_operator_eeg, lambda2, method.toStdString());
     InvSourceEstimate sourceEstimate_eeg = minimumNorm_eeg.calculateInverse(evoked);
 
     if (sourceEstimate_meeg.empty() || sourceEstimate_meg.empty() || sourceEstimate_eeg.empty())

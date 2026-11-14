@@ -236,8 +236,8 @@ int main(int argc, char* argv[])
     // (5e-13 T/m gradiometers, 20 fT magnetometers).
     Vector3f r0(0.0f, 0.0f, 0.04f);
     std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
-        QString(), sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
-        5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve}, true, false));
+        {}, sampleAve.toStdString(), {}, &r0, nullptr, false, {}, {},
+        5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve.toStdString()}, true, false));
     MatrixXf gain(fitData->nmeg, 3);
     const bool fieldOk = InvDipoleFitData::compute_dipole_field(*fitData, truePos, false, gain) == 0; // projected, not whitened
     VectorXf field = gain * trueMoment;
@@ -267,12 +267,12 @@ int main(int argc, char* argv[])
 
     //! [inv_dipole_fit_usage]
     InvDipoleFitSettings settings; // the options of the MNE-C mne_dipole_fit tool
-    settings.measname = tmp.filePath("synthetic-ave.fif");
+    settings.measname = tmp.filePath("synthetic-ave.fif").toStdString();
     settings.include_meg = true;
     settings.include_eeg = false;
     settings.guess_mindist = 0.0f;
     settings.tmin = 0.0f;
-    settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
+    settings.dipname = tmp.filePath("fit.dat").toStdString(); // MNE-C .dat dipole file
     settings.checkIntegrity();
     InvDipoleFit fit(&settings);
     InvEcdSet dipoles = fit.calculateFit();

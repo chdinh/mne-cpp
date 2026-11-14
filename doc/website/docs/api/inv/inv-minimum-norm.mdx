@@ -63,7 +63,7 @@ Constructs minimum norm inverse algorithm.
 - **lambda** : *float*
   The regularization factor.
 
-- **method** : *const QString*
+- **method** : *std::string_view*
   Use mininum norm, dSPM or sLORETA. ("MNE" | "dSPM" | "sLORETA").
 
 ---
@@ -138,7 +138,7 @@ Perform the inverse setup: Prepares this inverse operator and assembles the kern
 
 **Parameters:**
 
-- **nave** : *qint32*
+- **nave** : *int*
   Number of averages to use.
 
 - **pick_normal** : *bool*
@@ -182,7 +182,7 @@ Set minimum norm algorithm method ("MNE" | "dSPM" | "sLORETA" | "eLORETA").
 
 **Parameters:**
 
-- **method** : *QString*
+- **method** : *std::string_view*
   Use minimum norm, dSPM, sLORETA, or eLORETA.
 
 ---
@@ -271,7 +271,7 @@ Assemble MEG+EEG, MEG-only and EEG-only inverse operators from a forward solutio
 
 ````cpp title="src/examples/ex_make_inverse_operator/main.cpp, line 108"
 // Compute inverse solution
-InvMinimumNorm minimumNorm_meeg(inverse_operator_meeg, lambda2, method);
+InvMinimumNorm minimumNorm_meeg(inverse_operator_meeg, lambda2, method.toStdString());
 InvSourceEstimate sourceEstimate_meeg = minimumNorm_meeg.calculateInverse(evoked);
 ````
 
@@ -281,7 +281,7 @@ Sensor- or source-level functional connectivity of averaged MEG/EEG data with a 
 
 ````cpp title="src/examples/ex_connectivity/main.cpp, line 313"
 // Compute inverse solution
-InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
+InvMinimumNorm minimumNorm(inverse_operator, lambda2, method.toStdString());
 minimumNorm.doInverseSetup(1, true);
 ````
 

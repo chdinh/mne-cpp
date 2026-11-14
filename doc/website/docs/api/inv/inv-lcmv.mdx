@@ -148,7 +148,7 @@ Apply LCMV beamformer to a list of epochs.
 
 **Parameters:**
 
-- **epochs** : *const QList&lt; Eigen::MatrixXd &gt; &*
+- **epochs** : *const std::vector&lt; Eigen::MatrixXd &gt; &*
   List of epoch data matrices (n_channels x n_times each).
 
 - **tmin** : *float*
@@ -162,7 +162,7 @@ Apply LCMV beamformer to a list of epochs.
 
 **Returns:**
 
-- *QList&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — List of source estimates, one per epoch.
+- *std::vector&lt; [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &gt;* — List of source estimates, one per epoch.
 
 ---
 

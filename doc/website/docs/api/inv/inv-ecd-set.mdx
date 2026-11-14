@@ -23,12 +23,12 @@ Holds a set of Electric Current Dipoles.
 
 ```cpp title="src/examples/ex_inv_dipole_fit/main.cpp"
 InvDipoleFitSettings settings; // the options of the MNE-C mne_dipole_fit tool
-settings.measname = tmp.filePath("synthetic-ave.fif");
+settings.measname = tmp.filePath("synthetic-ave.fif").toStdString();
 settings.include_meg = true;
 settings.include_eeg = false;
 settings.guess_mindist = 0.0f;
 settings.tmin = 0.0f;
-settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
+settings.dipname = tmp.filePath("fit.dat").toStdString(); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();
@@ -171,7 +171,7 @@ Read dipoles from the dip format compatible with mrilab, as written by save_dipo
 Inverse library: equivalent current dipole fitting in a sphere model.
 
 ````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 137"
-settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
+settings.dipname = tmp.filePath("fit.dat").toStdString(); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();

@@ -7,7 +7,7 @@ sidebar_position: 6
 
 # Namespace Members
 
-Index of 471 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
+Index of 473 namespace-level symbols (functions, typedefs, enums, variables) across all public namespaces.
 
 - **Accuracy** `[enum]` in [INVLIB](/docs/api/inv/)
 - **acqApplyThreadPolicy** `[fn]` in [ACQLIB](/docs/api/acq/) — Applies `policy` to the calling thread: CPUs first, then priority.
@@ -41,9 +41,9 @@ Index of 471 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **annotateAmplitude** `[fn]` in [DSPLIB](/docs/api/dsp/) — Annotate spans where consecutive samples jump or stay flat, as mne.preprocessing.annotate_amplitude.
 - **annotateMusclZscore** `[fn]` in [DSPLIB](/docs/api/dsp/) — Detect muscle artifacts via high-frequency z-score and annotate bad segments.
 - **annotations_from_events** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Converts events to annotations, like mne.annotations_from_events.
-- **applyForward** `[fn]` in [INVLIB](/docs/api/inv/) — Project a source estimate to the sensors, as mne.apply_forward.
-- **applyInverseEpochs** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to each epoch in a list.
-- **applyInverseRaw** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to raw data.
+- **apply_forward** `[fn]` in [INVLIB](/docs/api/inv/) — Project a source estimate to the sensors, as mne.apply_forward.
+- **apply_inverse_epochs** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to each epoch in a list.
+- **apply_inverse_raw** `[fn]` in [INVLIB](/docs/api/inv/) — Apply inverse operator to raw data.
 - **AvrTypeRowVector** `[type]` in [DISPLIB](/docs/api/disp/)
 - **AvrTypeRowVectorPair** `[type]` in [DISPLIB](/docs/api/disp/)
 - **base64_encode** `[fn]` in [REPORTLIB](/docs/api/report/) — Encodes bytes as base64 (RFC 4648, with padding), as used in data URIs.
@@ -145,13 +145,13 @@ Index of 471 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **ColorMaps** `[enum]` in [DISPLIB](/docs/api/disp/)
 - **Compression** `[enum]` in [BASELIB](/docs/api/base/) — How the bytes of a file are stored.
 - **compute_connectivity** `[fn]` in [CONNECTIVITYLIB](/docs/api/connectivity/) — Computes every connectivity method the settings ask for, as mne_connectivity.spectral_connectivity_epochs does for its spectral methods.
+- **compute_source_band_power** `[fn]` in [INVLIB](/docs/api/inv/) — Compute band power for source estimate.
+- **compute_source_psd** `[fn]` in [INVLIB](/docs/api/inv/) — Compute PSD for a source estimate using Welch's method.
+- **compute_whitener** `[fn]` in [INVLIB](/docs/api/inv/) — Compute whitening matrix from a noise covariance.
 - **computeBridgedElectrodes** `[fn]` in [DSPLIB](/docs/api/dsp/) — Detect bridged EEG electrodes.
 - **computeElectricalDistance** `[fn]` in [DSPLIB](/docs/api/dsp/) — Compute electrical distance matrix between EEG channels.
 - **computeFilteredAverage** `[fn]` in [DSPLIB](/docs/api/dsp/) — Computes the filtered average for given fiff raw data.
 - **computeLofScores** `[fn]` in [DSPLIB](/docs/api/dsp/) — Compute LOF scores for a feature matrix.
-- **computeSourceBandPower** `[fn]` in [INVLIB](/docs/api/inv/) — Compute band power for source estimate.
-- **computeSourcePsd** `[fn]` in [INVLIB](/docs/api/inv/) — Compute PSD for a source estimate using Welch's method.
-- **computeWhitener** `[fn]` in [INVLIB](/docs/api/inv/) — Compute whitening matrix from a noise covariance.
 - **contains** `[fn]` in [BASELIB](/docs/api/base/)
 - **COR_HEIGHT** `[var]` in [MRILIB](/docs/api/mri/) — Height of each COR slice in pixels.
 - **COR_NSLICE** `[var]` in [MRILIB](/docs/api/mri/) — Number of COR slices.
@@ -191,8 +191,9 @@ Index of 471 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **encodeBits** `[fn]` in [ACQLIB](/docs/api/acq/) — Writes bit fields into the reserved samples of `view`, leaving the analog bits untouched; call before or after `encode()` of the same view.
 - **equalsIgnoreCase** `[fn]` in [BASELIB](/docs/api/base/)
 - **ErrorCode** `[enum]` in [BASELIB](/docs/api/base/) — What went wrong, so callers can react without parsing the message.
-- **estimateSnr** `[fn]` in [INVLIB](/docs/api/inv/) — Estimate the SNR of evoked data as a function of time.
+- **estimate_snr** `[fn]` in [INVLIB](/docs/api/inv/) — Estimate the SNR of evoked data as a function of time.
 - **events_from_annotations** `[fn]` in [FIFFLIB](/docs/api/fiff/) — Converts annotations to events, like mne.events_from_annotations.
+- **executable_dir** `[fn]` in [BASELIB](/docs/api/base/)
 - **extrasFromJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **extrasToJson** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **fail** `[fn]` in [BASELIB](/docs/api/base/)
@@ -421,6 +422,7 @@ Index of 471 namespace-level symbols (functions, typedefs, enums, variables) acr
 - **registerTmsiScheme** `[fn]` in [ACQLIB](/docs/api/acq/) — Registers the tmsi:// scheme (TMSi Refa and Porti) with `AcqDeviceRegistry::instance()`, as `registerBrainAmpScheme()` does for brainamp://.
 - **resolve_stream** `[fn]` in [LSLLIB](/docs/api/lsl/) — Resolve streams by a specific property value.
 - **resolve_streams** `[fn]` in [LSLLIB](/docs/api/lsl/) — Resolve all streams currently available on the network.
+- **resource_path** `[fn]` in [BASELIB](/docs/api/base/)
 - **RowVectorPair** `[type]` in [DISPLIB](/docs/api/disp/)
 - **same_channel** `[fn]` in [FIFFLIB](/docs/api/fiff/)
 - **sampleFormatName** `[fn]` in [ACQLIB](/docs/api/acq/)

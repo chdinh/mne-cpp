@@ -26,8 +26,8 @@ Extends [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate) with grid shape
 ```cpp title="src/examples/ex_inv_api/main.cpp"
 // A volume estimate keeps the grid shape, so a time slice can be written back into the full grid.
 InvVolumeSourceEstimate volumeStc(stc.data.topRows(4), VectorXi::LinSpaced(4, 0, 6), stc.tmin, stc.tstep);
-volumeStc.setShape({2, 2, 2}); // 8 voxels, 4 of them sources
-const VectorXd grid = volumeStc.toVolume(200);
+volumeStc.set_shape({2, 2, 2}); // 8 voxels, 4 of them sources
+const VectorXd grid = volumeStc.to_volume(200);
 ```
 
 ### Inheritance
@@ -66,13 +66,13 @@ Construct from data and vertices.
 
 ---
 
-### setShape(shape)
+### set_shape(shape)
 
 Set the 3D grid shape (nx, ny, nz) for volume reshaping.
 
 **Parameters:**
 
-- **shape** : *const QVector&lt; int &gt; &*
+- **shape** : *const Eigen::Vector3i &*
   Grid dimensions \{nx, ny, nz\}.
 
 ---
@@ -83,21 +83,21 @@ Get the 3D grid shape.
 
 **Returns:**
 
-- *const QVector&lt; int &gt; &* — Grid dimensions \{nx, ny, nz\}; empty if no shape was set.
+- *const Eigen::Vector3i &* — Grid dimensions \{nx, ny, nz\}; all zero if no shape was set.
 
 ---
 
-### hasShape()
+### has_shape()
 
 Check whether the grid shape has been set.
 
 **Returns:**
 
-- *bool* — True if the shape holds exactly three dimensions.
+- *bool* — True if all three dimensions are positive.
 
 ---
 
-### toVolume(timeIdx)
+### to_volume(timeIdx)
 
 Extract a 3D volume for a given time point, filling the grid with zeros where no source is active.
 
@@ -112,7 +112,7 @@ Extract a 3D volume for a given time point, filling the grid with zeros where no
 
 ---
 
-### centreOfMass(timeIdx)
+### centre_of_mass(timeIdx)
 
 Compute the centre of mass of the activity at a given time point.
 
@@ -143,8 +143,8 @@ Inverse library: minimum-norm estimates, resolution matrices, label time courses
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 203"
 // A volume estimate keeps the grid shape, so a time slice can be written back into the full grid.
 InvVolumeSourceEstimate volumeStc(stc.data.topRows(4), VectorXi::LinSpaced(4, 0, 6), stc.tmin, stc.tstep);
-volumeStc.setShape({2, 2, 2}); // 8 voxels, 4 of them sources
-const VectorXd grid = volumeStc.toVolume(200);
+volumeStc.set_shape({2, 2, 2}); // 8 voxels, 4 of them sources
+const VectorXd grid = volumeStc.to_volume(200);
 ok &= expect(grid.size() == 8 && grid(0) == stc.data(0, 200) && grid(6) == stc.data(3, 200) && grid(1) == 0.0,
              "InvVolumeSourceEstimate: source values land on their voxels, the rest of the grid is zero");
 ````

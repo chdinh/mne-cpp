@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     settings.lambda2 = 1.0 / 9.0;                             // SNR 3
     settings.lookBack = parser.value(lookBackOption).toInt(); // k = 20 samples = 133 ms at 150 Hz
     settings.numSources = fwd.nsource;
-    settings.onnxModelPath = parser.value(onnxOption); // empty: the paper's control estimate
+    settings.onnxModelPath = parser.value(onnxOption).toStdString(); // empty: the paper's control estimate
     //! [inv_cmne_settings_usage]
 
     //! [inv_cmne_usage]
@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
     // The LSTM runs in float32, so compare to single precision.
     ok &= expect((cmne.stcCmne.data.leftCols(k) - cmne.stcSensing.data.leftCols(k)).cwiseAbs().maxCoeff() < 1e-5 && (cmne.stcSensing.data - InvCMNE::zScoreRectify(cmne.stcDspm.data)).norm() == 0.0,
                  std::format("the first k = {} samples have no context: CMNE equals the rectified, z-scored dSPM", k));
-    if (settings.onnxModelPath.isEmpty()) {
+    if (settings.onnxModelPath.empty()) {
         ok &= expect(cmne.stcCmne.data == InvCMNE::controlEstimate(cmne.stcDspm.data, k),
                      "without a model, CMNE is the control estimate");
     }
@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
         courses.setXLabel("Time [ms]");
         courses.setYLabel("z-score");
         courses.addSeries(ms, meanOver(cmne.stcSensing.data, first, count), "dSPM, rectified and z-scored", QColor(150, 150, 150));
-        courses.addSeries(ms, meanOver(cmne.stcCmne.data, first, count), settings.onnxModelPath.isEmpty() ? "CMNE, control estimate" : "CMNE, LSTM context");
+        courses.addSeries(ms, meanOver(cmne.stcCmne.data, first, count), settings.onnxModelPath.empty() ? "CMNE, control estimate" : "CMNE, LSTM context");
         FigureExporter::save(courses, "cmne_" + hemi, QString("'Left Auditory' response in the %1 superior and transverse temporal sources: CMNE weights each sample by its %2-sample context.").arg(hemi).arg(k));
     }
 

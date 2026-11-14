@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
     //! [rt_hpi_usage]
     InvHpiDataUpdater updater(hpiInfo); // MEG picks, sensor geometry and digitised coil positions
     updater.prepareDataAndProjectors(hpiData, projectors);
-    const InvHpiModelParameters model(QVector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
+    const InvHpiModelParameters model(std::vector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
 
     RtHpiWorker hpiWorker(updater.getSensors());
     HpiFitResult workerFit;

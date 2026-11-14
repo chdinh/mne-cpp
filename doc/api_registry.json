@@ -12972,7 +12972,7 @@
       {
         "python": "mne.apply_forward",
         "status": "implemented",
-        "mne_cpp": "INVLIB::applyForward",
+        "mne_cpp": "INVLIB::apply_forward",
         "note": "",
         "test": "test_mne_forward_ops",
         "equivalence": "equivalent"
@@ -12980,7 +12980,7 @@
       {
         "python": "mne.apply_forward_raw",
         "status": "partial",
-        "mne_cpp": "INVLIB::applyForward",
+        "mne_cpp": "INVLIB::apply_forward",
         "note": "returns evoked-shaped data, no Raw object",
         "test": "test_mne_forward_ops"
       },
@@ -13676,7 +13676,7 @@
       {
         "python": "mne.forward.apply_forward",
         "status": "implemented",
-        "mne_cpp": "INVLIB::applyForward",
+        "mne_cpp": "INVLIB::apply_forward",
         "note": "",
         "test": "test_mne_forward_ops",
         "equivalence": "equivalent"
@@ -13684,7 +13684,7 @@
       {
         "python": "mne.forward.apply_forward_raw",
         "status": "partial",
-        "mne_cpp": "INVLIB::applyForward",
+        "mne_cpp": "INVLIB::apply_forward",
         "note": "returns evoked-shaped data, no Raw object",
         "test": "test_mne_forward_ops"
       },
@@ -14288,7 +14288,7 @@
       {
         "python": "mne.minimum_norm.apply_inverse_epochs",
         "status": "implemented",
-        "mne_cpp": "INVLIB::applyInverseEpochs",
+        "mne_cpp": "INVLIB::apply_inverse_epochs",
         "note": "",
         "test": "test_inv_eloreta_python",
         "equivalence": "equivalent"
@@ -14317,7 +14317,7 @@
       {
         "python": "mne.minimum_norm.compute_source_psd",
         "status": "partial",
-        "mne_cpp": "INVLIB::computeSourcePsd",
+        "mne_cpp": "INVLIB::compute_source_psd",
         "note": "takes an STC; no raw→inverse→PSD pipeline",
         "test": "test_inv_convenience"
       },
@@ -14330,7 +14330,7 @@
       {
         "python": "mne.minimum_norm.estimate_snr",
         "status": "implemented",
-        "mne_cpp": "INVLIB::estimateSnr",
+        "mne_cpp": "INVLIB::estimate_snr",
         "note": "",
         "test": "test_inv_eloreta_python",
         "equivalence": "equivalent"
@@ -15630,7 +15630,7 @@
       {
         "python": "mne.whiten_evoked",
         "status": "partial",
-        "mne_cpp": "INVLIB::computeWhitener",
+        "mne_cpp": "INVLIB::compute_whitener",
         "note": "builds whitener; not applied to evoked",
         "test": "test_inv_convenience"
       },

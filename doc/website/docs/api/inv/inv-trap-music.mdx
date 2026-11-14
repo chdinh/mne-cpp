@@ -30,7 +30,7 @@ Reference: Makela et al., NeuroImage 197, 616-626, 2019.
 ```cpp title="src/examples/ex_inv_beamformer/main.cpp"
 MatrixX3d positions = fwd.source_rr.cast<double>();
 InvTrapMusic trap(2, 0.85); // at most 2 dipoles, stop below a subspace correlation of 0.85
-const QList<TrapMusicDipole> dipoles = trap.compute(G, measured, positions, 3);
+const std::vector<TrapMusicDipole> dipoles = trap.compute(G, measured, positions, 3);
 ```
 
 ---
@@ -71,7 +71,7 @@ Compute TRAP-MUSIC source localization.
 
 **Returns:**
 
-- *QList&lt; [TrapMusicDipole](/docs/api/inv/trap-music-dipole) &gt;* — List of found dipoles, ordered by descending correlation.
+- *std::vector&lt; [TrapMusicDipole](/docs/api/inv/trap-music-dipole) &gt;* — List of found dipoles, ordered by descending correlation.
 
 ---
 
@@ -114,12 +114,13 @@ Inverse library: LCMV and DICS beamformers and the RAP-MUSIC family of dipole sc
 ````cpp title="src/examples/ex_inv_beamformer/main.cpp, line 167"
 MatrixX3d positions = fwd.source_rr.cast<double>();
 InvTrapMusic trap(2, 0.85); // at most 2 dipoles, stop below a subspace correlation of 0.85
-const QList<TrapMusicDipole> dipoles = trap.compute(G, measured, positions, 3);
-QVector<int> found;
+const std::vector<TrapMusicDipole> dipoles = trap.compute(G, measured, positions, 3);
+std::vector<int> found;
+found.reserve(dipoles.size());
 for (const TrapMusicDipole& d : dipoles)
-    found << d.sourceIdx;
-std::sort(found.begin(), found.end());
-ok &= expect(found == QVector<int>({10, 50}) && std::abs(dipoles[0].orientation.z()) > 0.999,
+    found.push_back(d.sourceIdx);
+std::ranges::sort(found);
+ok &= expect(found == std::vector<int>{10, 50} && std::abs(dipoles[0].orientation.z()) > 0.999,
              "InvTrapMusic: TRAP-MUSIC finds both sources one at a time, oriented along z");
 ````
 

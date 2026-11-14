@@ -29,12 +29,12 @@ Refactored from fit_dipoles.c / dipole_fit_setup.c (MNE-C).
 
 ```cpp title="src/examples/ex_inv_dipole_fit/main.cpp"
 InvDipoleFitSettings settings; // the options of the MNE-C mne_dipole_fit tool
-settings.measname = tmp.filePath("synthetic-ave.fif");
+settings.measname = tmp.filePath("synthetic-ave.fif").toStdString();
 settings.include_meg = true;
 settings.include_eeg = false;
 settings.guess_mindist = 0.0f;
 settings.tmin = 0.0f;
-settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
+settings.dipname = tmp.filePath("fit.dat").toStdString(); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();
@@ -84,7 +84,7 @@ Refactored: fit_dipoles (fit_dipoles.c)
 
 **Parameters:**
 
-- **dataname** : *const QString &*
+- **dataname** : *const std::string &*
   Data file name.
 
 - **data** : *[MNEMeasData](/docs/api/mne/mne-meas-data) **
@@ -130,7 +130,7 @@ Refactored: fit_dipoles_raw (fit_dipoles.c)
 
 **Parameters:**
 
-- **dataname** : *const QString &*
+- **dataname** : *const std::string &*
   Data file name.
 
 - **raw** : *[MNERawData](/docs/api/mne/mne-raw-data) **
@@ -177,7 +177,7 @@ Refactored: fit_dipoles_raw (fit_dipoles.c)
 
 **Parameters:**
 
-- **dataname** : *const QString &*
+- **dataname** : *const std::string &*
   Data file name.
 
 - **raw** : *[MNERawData](/docs/api/mne/mne-raw-data) **
@@ -228,7 +228,7 @@ Inverse library: equivalent current dipole fitting in a sphere model.
 
 ````cpp title="src/examples/ex_inv_dipole_fit/main.cpp, line 136"
 settings.tmin = 0.0f;
-settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
+settings.dipname = tmp.filePath("fit.dat").toStdString(); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();

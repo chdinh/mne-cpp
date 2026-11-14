@@ -23,7 +23,7 @@ Preprocesses raw HPI coil data (SSP projection, compensation, sinusoidal model f
 InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
-const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
+const InvHpiModelParameters model(std::vector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());
 HpiFitResult fit;
 hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), true, fit);
@@ -116,7 +116,7 @@ Inverse library: continuous head position (HPI) fitting.
 InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
-const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
+const InvHpiModelParameters model(std::vector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());
 HpiFitResult fit;
 hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), true, fit);
@@ -135,7 +135,7 @@ DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI 
 ````cpp title="src/examples/ex_dsp_rt/main.cpp, line 293"
 InvHpiDataUpdater updater(hpiInfo); // MEG picks, sensor geometry and digitised coil positions
 updater.prepareDataAndProjectors(hpiData, projectors);
-const InvHpiModelParameters model(QVector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
+const InvHpiModelParameters model(std::vector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
 ````
 
 ### [ex_hpiFit](../../examples/inv/ex_hpiFit.mdx)

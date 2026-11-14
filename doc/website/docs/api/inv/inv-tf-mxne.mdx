@@ -109,7 +109,7 @@ tfParams.iNFreqs = 4;
 tfParams.dFMin = 5.0;
 tfParams.dFMax = 40.0;
 const InvTfMxneResult tfMxne = InvTfMxne::compute(gain, measured, tfParams);
-ok &= expect(!tfMxne.activeVertices.isEmpty() && tfMxne.activeVertices.size() <= 5 && tfMxne.activeVertices.contains(8),
+ok &= expect(!tfMxne.activeVertices.empty() && tfMxne.activeVertices.size() <= 5 && std::ranges::contains(tfMxne.activeVertices, 8),
              std::format("InvTfMxne: {} V1 sources, including the strongest MxNE source 8", tfMxne.activeVertices.size()));
 ````
 

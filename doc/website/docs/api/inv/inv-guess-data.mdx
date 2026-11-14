@@ -24,8 +24,8 @@ Precomputed guess point grid with forward fields for initial dipole position can
 // (5e-13 T/m gradiometers, 20 fT magnetometers).
 Vector3f r0(0.0f, 0.0f, 0.04f);
 std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
-    QString(), sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
-    5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve}, true, false));
+    {}, sampleAve.toStdString(), {}, &r0, nullptr, false, {}, {},
+    5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve.toStdString()}, true, false));
 MatrixXf gain(fitData->nmeg, 3);
 const bool fieldOk = InvDipoleFitData::compute_dipole_field(*fitData, truePos, false, gain) == 0; // projected, not whitened
 VectorXf field = gain * trueMoment;

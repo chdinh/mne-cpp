@@ -26,8 +26,8 @@ Refactored from dipoleFitDataRec / fit_types.h (MNE-C).
 // (5e-13 T/m gradiometers, 20 fT magnetometers).
 Vector3f r0(0.0f, 0.0f, 0.04f);
 std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
-    QString(), sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
-    5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve}, true, false));
+    {}, sampleAve.toStdString(), {}, &r0, nullptr, false, {}, {},
+    5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve.toStdString()}, true, false));
 MatrixXf gain(fitData->nmeg, 3);
 const bool fieldOk = InvDipoleFitData::compute_dipole_field(*fitData, truePos, false, gain) == 0; // projected, not whitened
 VectorXf field = gain * trueMoment;
@@ -197,13 +197,13 @@ Refactored: setup_dipole_fit_data (dipole_fit_setup.c)
 
 **Parameters:**
 
-- **mriname** : *const QString &*
+- **mriname** : *const std::string &*
   MRI-to-head transform file.
 
-- **measname** : *const QString &*
+- **measname** : *const std::string &*
   Measurement file (provides MEG-to-head transform and channels).
 
-- **bemname** : *const QString &*
+- **bemname** : *const std::string &*
   BEM model file (empty string to use sphere model only).
 
 - **r0** : *Eigen::Vector3f **
@@ -215,10 +215,10 @@ Refactored: setup_dipole_fit_data (dipole_fit_setup.c)
 - **accurate_coils** : *int*
   Use accurate coil definitions.
 
-- **badname** : *const QString &*
+- **badname** : *const std::string &*
   Bad-channel list file (empty to skip).
 
-- **noisename** : *const QString &*
+- **noisename** : *const std::string &*
   Noise-covariance file (empty for ad-hoc noise).
 
 - **grad_std** : *float*
@@ -242,7 +242,7 @@ Refactored: setup_dipole_fit_data (dipole_fit_setup.c)
 - **diagnoise** : *int*
   Use only the diagonal of the noise covariance.
 
-- **projnames** : *const std::vector&lt; QString &gt; &*
+- **projnames** : *const std::vector&lt; std::string &gt; &*
   SSP projection file paths.
 
 - **include_meg** : *int*
@@ -397,8 +397,8 @@ Inverse library: equivalent current dipole fitting in a sphere model.
 // (5e-13 T/m gradiometers, 20 fT magnetometers).
 Vector3f r0(0.0f, 0.0f, 0.04f);
 std::unique_ptr<InvDipoleFitData> fitData(InvDipoleFitData::setup_dipole_fit_data(
-    QString(), sampleAve, QString(), &r0, nullptr, false, QString(), QString(),
-    5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve}, true, false));
+    {}, sampleAve.toStdString(), {}, &r0, nullptr, false, {}, {},
+    5e-13f, 20e-15f, 0.2e-6f, 0.1f, 0.1f, 0.1f, false, {sampleAve.toStdString()}, true, false));
 MatrixXf gain(fitData->nmeg, 3);
 const bool fieldOk = InvDipoleFitData::compute_dipole_field(*fitData, truePos, false, gain) == 0; // projected, not whitened
 VectorXf field = gain * trueMoment;

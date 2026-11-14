@@ -66,7 +66,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.SourceEstimate.save / read` | `InvSourceEstimateIO` | equivalent | `test_source_estimate_io` | 1e-06 to 1e-05 |
 | `mne.VectorSourceEstimate` | `InvVectorSourceEstimate` | equivalent | `test_source_estimate_types` | 1e-15 to 1e-07 |
 | `mne.add_reference_channels` | `DSPLIB::addReferenceChannels` | equivalent | `test_dsp_eeg_reference` | exact |
-| `mne.apply_forward` | `INVLIB::applyForward` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
+| `mne.apply_forward` | `INVLIB::apply_forward` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
 | `mne.beamformer.apply_dics` | `InvDICS::applyDICS` | equivalent | `test_inv_lcmv_python` | 1e-06 |
 | `mne.beamformer.apply_dics_csd` | `InvDICS::applyDICSCsd` | equivalent | `test_inv_lcmv_python` | 1e-06 |
 | `mne.beamformer.apply_lcmv` | `Lcmv` | equivalent | `test_inv_lcmv_python` | 1e-06 |
@@ -97,7 +97,7 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.find_events` | `FiffEvents::find_events` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.find_stim_steps` | `FiffEvents::find_stim_steps` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.fit_dipole` | `InvDipoleFit` | equivalent | `test_inv_dipole_fit_python` | 1e-12 to 0.02 |
-| `mne.forward.apply_forward` | `INVLIB::applyForward` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
+| `mne.forward.apply_forward` | `INVLIB::apply_forward` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
 | `mne.forward.compute_depth_prior` | `MNEForwardSolution::compute_depth_prior` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
 | `mne.forward.compute_orient_prior` | `MNEForwardSolution::compute_orient_prior` | equivalent | `test_mne_forward_ops` | 1e-12 to 0.001 |
 | `mne.forward.convert_forward_solution` | `MNEForwardSolution` | equivalent | `test_fwd_python` | 1e-06 to 0.001 |
@@ -126,10 +126,10 @@ Tolerance is the range of comparison thresholds the test asserts (`exact` when i
 | `mne.merge_events` | `FiffEvents::merge` | equivalent | `test_fiff_core_python` | 1e-12 to 1e-09 |
 | `mne.minimum_norm.apply_inverse` | `InvMinimumNorm` | equivalent | `test_compute_raw_inverse` | exact |
 | `mne.minimum_norm.apply_inverse` | `MinimumNorm` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
-| `mne.minimum_norm.apply_inverse_epochs` | `INVLIB::applyInverseEpochs` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
+| `mne.minimum_norm.apply_inverse_epochs` | `INVLIB::apply_inverse_epochs` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
 | `mne.minimum_norm.apply_inverse_raw` | `mne_compute_raw_inverse (CLI)` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
 | `mne.minimum_norm.estimate_snr` | `MNEMneData` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
-| `mne.minimum_norm.estimate_snr` | `INVLIB::estimateSnr` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
+| `mne.minimum_norm.estimate_snr` | `INVLIB::estimate_snr` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
 | `mne.minimum_norm.make_inverse_operator` | `MNEInverseOperator` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
 | `mne.minimum_norm.prepare_inverse_operator` | `MNEInverseOperator::prepare` | equivalent | `test_inv_eloreta_python` | 1e-12 to 0.0001 |
 | `mne.pick_channels` | `FiffInfoBase::pick_channels` | equivalent | `test_fiff_info` | 1e-10 |

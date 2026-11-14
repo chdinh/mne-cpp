@@ -4,7 +4,7 @@
   "policy": "scripts/quality/api_evidence_policy.json",
   "summary": {
     "exported_classes": 473,
-    "exported_free_functions": 193,
+    "exported_free_functions": 195,
     "registered_classes": 565,
     "exported_not_registered": 2,
     "registered_function_modules": 14,
@@ -530,6 +530,16 @@
       "library": "base"
     },
     {
+      "name": "executable_dir",
+      "header": "base/string_utils.h",
+      "library": "base"
+    },
+    {
+      "name": "resource_path",
+      "header": "base/string_utils.h",
+      "library": "base"
+    },
+    {
       "name": "buildDateTime",
       "header": "bids/bids_global.h",
       "library": "bids"
@@ -955,37 +965,37 @@
       "library": "ieeg"
     },
     {
-      "name": "applyInverseEpochs",
+      "name": "apply_inverse_epochs",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },
     {
-      "name": "applyInverseRaw",
+      "name": "apply_inverse_raw",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },
     {
-      "name": "applyForward",
+      "name": "apply_forward",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },
     {
-      "name": "estimateSnr",
+      "name": "estimate_snr",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },
     {
-      "name": "computeWhitener",
+      "name": "compute_whitener",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },
     {
-      "name": "computeSourcePsd",
+      "name": "compute_source_psd",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },
     {
-      "name": "computeSourceBandPower",
+      "name": "compute_source_band_power",
       "header": "inv/inv_convenience.h",
       "library": "inv"
     },

@@ -33,7 +33,7 @@
       "ml",
       "report"
     ],
-    "tokens": 12998,
+    "tokens": 12772,
     "gui_outside_design": []
   },
   "libraries": {
@@ -191,18 +191,18 @@
       ]
     },
     "disp3D": {
-      "tokens": 2898,
+      "tokens": 2895,
       "by_category": {
         "containers": 261,
         "files": 45,
         "global": 302,
         "gui": 962,
         "logging": 105,
-        "objects_signals": 144,
+        "objects_signals": 142,
         "other": 228,
         "random": 3,
         "smart_pointers": 69,
-        "strings": 688,
+        "strings": 687,
         "threads": 74,
         "time": 17
       },
@@ -268,12 +268,11 @@
       "modules": []
     },
     "fwd": {
-      "tokens": 25,
+      "tokens": 9,
       "by_category": {
-        "files": 3,
+        "files": 1,
         "global": 2,
-        "objects_signals": 6,
-        "strings": 10,
+        "strings": 2,
         "threads": 4
       },
       "public_header_includes": 2,
@@ -297,20 +296,15 @@
       ]
     },
     "inv": {
-      "tokens": 212,
+      "tokens": 6,
       "by_category": {
-        "containers": 82,
-        "files": 1,
-        "global": 30,
         "json": 2,
-        "objects_signals": 5,
-        "strings": 92
+        "strings": 4
       },
-      "public_header_includes": 28,
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 81,
       "modules": [
-        "Concurrent",
         "Core"
       ]
     },
@@ -395,11 +389,10 @@
       ]
     },
     "pybridge": {
-      "tokens": 35,
+      "tokens": 34,
       "by_category": {
         "files": 9,
         "global": 2,
-        "objects_signals": 1,
         "other": 2,
         "strings": 20,
         "time": 1

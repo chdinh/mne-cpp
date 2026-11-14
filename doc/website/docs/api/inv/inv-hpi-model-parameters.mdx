@@ -23,7 +23,7 @@ Configuration parameters for the HPI signal model (line frequency, coil frequenc
 InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
-const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
+const InvHpiModelParameters model(std::vector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());
 HpiFitResult fit;
 hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), true, fit);
@@ -45,7 +45,7 @@ Constructs a [`InvHpiModelParameters`](/docs/api/inv/inv-hpi-model-parameters) o
 
 **Parameters:**
 
-- **vecHpiFreqs** : *const QVector&lt; int &gt;*
+- **vecHpiFreqs** : *std::vector&lt; int &gt;*
   The Hpi frequencies.
 
 - **iSampleFreq** : *const int*
@@ -59,26 +59,16 @@ Constructs a [`InvHpiModelParameters`](/docs/api/inv/inv-hpi-model-parameters) o
 
 ---
 
-### InvHpiModelParameters(hpiModelParameter)
-
-Copy constructor.
+### operator==(other)
 
 **Parameters:**
 
-- **hpiModelParameter** : *const InvHpiModelParameters &*
-  [`InvHpiModelParameters`](/docs/api/inv/inv-hpi-model-parameters) which should be copied.
+- **other** : *const [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters) &*
+  The parameters to compare with.
 
----
+**Returns:**
 
-### operator=(other)
-
----
-
-### operator==(b)
-
----
-
-### operator!=(b)
+- *bool* — Whether all parameters are equal.
 
 ---
 
@@ -88,7 +78,7 @@ Inline functions to get acces to parameters.
 
 **Returns:**
 
-- *QVector&lt; int &gt;* — HPI coil frequencies, in Hz.
+- *const std::vector&lt; int &gt; &* — HPI coil frequencies, in Hz.
 
 ---
 
@@ -125,7 +115,7 @@ Inverse library: continuous head position (HPI) fitting.
 InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
 updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
 // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
-const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
+const InvHpiModelParameters model(std::vector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
 InvHpiFit hpi(updater.getSensors());
 HpiFitResult fit;
 hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), true, fit);
@@ -158,7 +148,7 @@ DSP real-time workers: averaging, covariance, noise spectrum, connectivity, HPI 
 ````cpp title="src/examples/ex_dsp_rt/main.cpp, line 293"
 InvHpiDataUpdater updater(hpiInfo); // MEG picks, sensor geometry and digitised coil positions
 updater.prepareDataAndProjectors(hpiData, projectors);
-const InvHpiModelParameters model(QVector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
+const InvHpiModelParameters model(std::vector<int>({166, 154, 161, 158}), hpiInfo->sfreq, hpiInfo->linefreq, false);
 ````
 
 ## Authors of this file

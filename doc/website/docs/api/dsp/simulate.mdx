@@ -111,7 +111,7 @@ Create a synthetic source time course from custom waveforms.
 
 [Simulate](/docs/api/dsp/simulate) evoked data from a source estimate and forward model.
 
-Projects the source estimate with `INVLIB::applyForward` and optionally adds noise from a noise covariance. As in MNE-Python the noise follows the prepared covariance (SSP applied, MEG and EEG decomposed separately), so MEG and EEG noise are independent.
+Projects the source estimate with `INVLIB::apply_forward` and optionally adds noise from a noise covariance. As in MNE-Python the noise follows the prepared covariance (SSP applied, MEG and EEG decomposed separately), so MEG and EEG noise are independent.
 
 Equivalent to MNE-Python's mne.simulation.simulate_evoked().
 
@@ -149,7 +149,7 @@ Equivalent to MNE-Python's mne.simulation.simulate_evoked().
 
 [Simulate](/docs/api/dsp/simulate) evoked data without noise.
 
-Projects the source estimate through the forward model (no noise added); `INVLIB::applyForward`.
+Projects the source estimate through the forward model (no noise added); `INVLIB::apply_forward`.
 
 **Parameters:**
 

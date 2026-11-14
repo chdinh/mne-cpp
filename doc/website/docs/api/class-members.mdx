@@ -7,7 +7,7 @@ sidebar_position: 5
 
 # Class Members
 
-Index of 6373 public class members (functions, variables, typedefs, enums) across all documented classes.
+Index of 6370 public class members (functions, variables, typedefs, enums) across all documented classes.
 
 **Jump to:** [A](#a) · [B](#b) · [C](#c) · [D](#d) · [E](#e) · [F](#f) · [G](#g) · [H](#h) · [I](#i) · [J](#j) · [K](#k) · [L](#l) · [M](#m) · [N](#n) · [O](#o) · [P](#p) · [Q](#q) · [R](#r) · [S](#s) · [T](#t) · [U](#u) · [V](#v) · [W](#w) · [X](#x) · [Y](#y) · [Z](#z)
 
@@ -522,7 +522,7 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **cent** `[var]` in [MNETriangle](/docs/api/mne/mne-triangle) — Centroid position.
 - **center** `[fn]` in [Sphere](/docs/api/math/sphere) — The center of the sphere.
 - **center** `[fn]` in [Sphere](/docs/api/math/sphere) — The center of the sphere.
-- **centreOfMass** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Compute the centre of mass of the activity at a given time point.
+- **centre_of_mass** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Compute the centre of mass of the activity at a given time point.
 - **centroidSource_rr** `[var]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Centroid location.
 - **centroidVertno** `[var]` in [MNEClusterInfo](/docs/api/mne/mne-cluster-info) — Id (FsLabel/ROI id) of the centroid.
 - **ch_class** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Per-channel type classification for regularization (MEG grad, MEG mag, EEG).
@@ -1275,6 +1275,7 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **digitalBits** `[fn]` in [AcqViewBase](/docs/api/acq/acq-view-base)
 - **digitalMax** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
 - **digitalMin** `[var]` in [EDFChannelInfo](/docs/api/bids/edf-channel-info)
+- **digitizerFile** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **digitizerPoints** `[var]` in `SensorLoadResult`
 - **digitizersChanged** `[signal]` in [HpiSettingsView](/docs/api/disp/hpi-settings-view) — Emit this signal whenever new digitzers were loaded.
 - **DigitizerSetTreeItem** `[fn]` in [DigitizerSetTreeItem](/docs/api/disp3-d/digitizer-set-tree-item) — Constructs a [`DigitizerSetTreeItem`](/docs/api/disp3-d/digitizer-set-tree-item) from a list of FIFF digitizer points.
@@ -2385,6 +2386,7 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **has_orientation** `[var]` in `FastrakRecord` — The record carried Euler angles or a quaternion.
 - **has_package** `[fn]` in [PythonTestHelper](/docs/api/pybridge/python-test-helper)
 - **has_positions** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate)
+- **has_shape** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Check whether the grid shape has been set.
 - **has_tag** `[fn]` in [FiffDirNode](/docs/api/fiff/fiff-dir-node) — Definition of the has_tag function in fiff_read_named_matrix.m.
 - **hasAllFiducials** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points) — True iff all three cardinal fiducials have been captured.
 - **hasAllModelFiducials** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
@@ -2410,7 +2412,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **hasParam** `[fn]` in [MnaParamTree](/docs/api/mna/mna-param-tree)
 - **hasPenVertex** `[fn]` in [PolhemusCoregistration](/docs/api/acq/polhemus-coregistration)
 - **hasRh** `[fn]` in [StcLoadingWorker](/docs/api/disp3-d/stc-loading-worker) — Check if right hemisphere data was loaded.
-- **hasShape** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Check whether the grid shape has been set.
 - **hasTwinFiducial** `[fn]` in [AcquiredPoints](/docs/api/acq/acquired-points)
 - **hasValue** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **have_consumers** `[fn]` in [stream_outlet](/docs/api/lsl/stream_outlet) — Check whether any consumers are currently connected.
@@ -2655,7 +2656,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **InvHpiFitData** `[fn]` in [InvHpiFitData](/docs/api/inv/inv-hpi-fit-data) — Default constructor.
 - **InvHpiModelParameters** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters) — Defaul Constructor.
 - **InvHpiModelParameters** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters) — Constructs a [`InvHpiModelParameters`](/docs/api/inv/inv-hpi-model-parameters) object.
-- **InvHpiModelParameters** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters) — Copy constructor.
 - **InvMinimumNorm** `[fn]` in [InvMinimumNorm](/docs/api/inv/inv-minimum-norm) — Constructs minimum norm inverse algorithm.
 - **InvMinimumNorm** `[fn]` in [InvMinimumNorm](/docs/api/inv/inv-minimum-norm) — Constructs minimum norm inverse algorithm.
 - **invOperatorCalculated** `[signal]` in [RtInvOp](/docs/api/dsp/rt-inv-op) — Signal which is emitted when a inverse operator is calculated.
@@ -3751,7 +3751,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **operate** `[signal]` in [RtNoise](/docs/api/dsp/rt-noise) — Internal signal to forward data to the worker thread.
 - **operator bool** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator const Eigen::SparseMatrix&lt; float &gt; &** `[fn]` in [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) — Implicit conversion to const Eigen::SparseMatrix&lt;float&gt;&.
-- **operator!=** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator!=** `[fn]` in [InvSensorSet](/docs/api/inv/inv-sensor-set)
 - **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
 - **operator*** `[fn]` in [AcqExpected](/docs/api/acq/acq-expected)
@@ -3801,7 +3800,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **operator=** `[fn]` in [FwdEegSphereModelSet](/docs/api/fwd/fwd-eeg-sphere-model-set)
 - **operator=** `[fn]` in [InvEcd](/docs/api/inv/inv-ecd) — Copy assignment.
 - **operator=** `[fn]` in [InvGuessData](/docs/api/inv/inv-guess-data)
-- **operator=** `[fn]` in [InvHpiModelParameters](/docs/api/inv/inv-hpi-model-parameters)
 - **operator=** `[fn]` in [LogCapture](/docs/api/base/log-capture)
 - **operator=** `[fn]` in [MNEBemSurface](/docs/api/mne/mne-bem-surface) — Copy assignment.
 - **operator=** `[fn]` in [MNEDerivSet](/docs/api/mne/mne-deriv-set)
@@ -4886,6 +4884,7 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **set_method** `[fn]` in [Network](/docs/api/connectivity/network)
 - **set_progress_callback** `[fn]` in [PythonRunner](/docs/api/pybridge/python-runner) — Sets the callback invoked for every progress line.
 - **set_sampling_frequency** `[fn]` in [Network](/docs/api/connectivity/network)
+- **set_shape** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Set the 3D grid shape (nx, ny, nz) for volume reshaping.
 - **set_sink** `[fn]` in [Log](/docs/api/base/log) — Replaces the sink.
 - **set_threshold** `[fn]` in [Network](/docs/api/connectivity/network) — Sets the threshold and marks every edge with \|weight\| &gt;= threshold active.
 - **set_used_freq_bins** `[fn]` in [Network](/docs/api/connectivity/network)
@@ -5263,7 +5262,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **setSfreq** `[fn]` in [TimeRulerWidget](/docs/api/disp/time-ruler-widget) — Set the file sampling frequency.
 - **setShaderMode** `[slot]` in [BrainView](/docs/api/disp3-d/brain-view) — Set the shader mode (Standard, Holographic, Atlas).
 - **setShaderMode** `[fn]` in [SurfaceTreeItem](/docs/api/disp3-d/surface-tree-item)
-- **setShape** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Set the 3D grid shape (nx, ny, nz) for volume reshaping.
 - **setSignalColor** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model) — Set the signal line colour for all channels.
 - **setSignalColor** `[fn]` in [ChannelDataView](/docs/api/disp/channel-data-view) — Set the default signal line colour (used for channel types without a type-specific colour).
 - **setSignalColor** `[fn]` in [FiffRawViewSettings](/docs/api/disp/fiff-raw-view-settings) — Set current signal color.
@@ -5402,7 +5400,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **setZScoreMode** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view)
 - **severity** `[var]` in [MnaVerificationCheck](/docs/api/mna/mna-verification-check) — "error" (abort), "warning" (log + continue), "info" (always continue)
 - **severity** `[var]` in [MnaVerificationResult](/docs/api/mna/mna-verification-result) — Echoed from the check definition.
-- **sFilePathDigitzers** `[var]` in [HpiFitResult](/docs/api/inv/hpi-fit-result)
 - **sfreq** `[var]` in [AcqClockModel](/docs/api/acq/acq-clock-model) — Nominal sampling frequency in Hz.
 - **sfreq** `[var]` in [AcqStreamInfo](/docs/api/acq/acq-stream-info) — Nominal rate in Hz; 0 for irregular streams.
 - **sfreq** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
@@ -5856,6 +5853,7 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **to_subj** `[var]` in [MNEMorphMap](/docs/api/mne/mne-morph-map) — Destination subject.
 - **to_unsigned_int** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to Int Fast access; Data are deleted if tag gets deleted, and vice versa
 - **to_unsigned_short** `[fn]` in [FiffTag](/docs/api/fiff/fiff-tag) — to unsigned Short Fast access; Data are deleted if tag gets deleted, and vice versa
+- **to_volume** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Extract a 3D volume for a given time point, filling the grid with zeros where no source is active.
 - **toCbor** `[fn]` in [MnaFileRef](/docs/api/mna/mna-file-ref) — Serialize to QCborMap.
 - **toCbor** `[fn]` in [MnaGraph](/docs/api/mna/mna-graph)
 - **toCbor** `[fn]` in [MnaNode](/docs/api/mna/mna-node)
@@ -5918,7 +5916,6 @@ Index of 6373 public class members (functions, variables, typedefs, enums) acros
 - **totalLogicalChannels** `[fn]` in [ChannelRhiView](/docs/api/disp/channel-rhi-view) — Total number of logical channels available for scrolling (respects active filter).
 - **totalPointCount** `[fn]` in [DigitizerSetTreeItem](/docs/api/disp3-d/digitizer-set-tree-item) — Returns the total number of digitizer points across all categories.
 - **totalSamples** `[fn]` in [ChannelDataModel](/docs/api/disp/channel-data-model)
-- **toVolume** `[fn]` in [InvVolumeSourceEstimate](/docs/api/inv/inv-volume-source-estimate) — Extract a 3D volume for a given time point, filling the grid with zeros where no source is active.
 - **TPassType** `[enum]` in [CosineFilter](/docs/api/dsp/cosine-filter)
 - **TPassType** `[enum]` in [ParksMcClellan](/docs/api/dsp/parks-mc-clellan)
 - **TR** `[var]` in [MriVolData](/docs/api/mri/mri-vol-data) — Repetition time (ms).

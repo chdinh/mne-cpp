@@ -1125,7 +1125,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::applyForward",
+      "mne_cpp": "INVLIB::apply_forward",
       "python": "mne.apply_forward",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1135,7 +1135,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::applyForward",
+      "mne_cpp": "INVLIB::apply_forward",
       "python": "mne.apply_forward_raw",
       "claimed": "partial",
       "equivalence": null,
@@ -1747,7 +1747,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::applyForward",
+      "mne_cpp": "INVLIB::apply_forward",
       "python": "mne.forward.apply_forward",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -1757,7 +1757,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::applyForward",
+      "mne_cpp": "INVLIB::apply_forward",
       "python": "mne.forward.apply_forward_raw",
       "claimed": "partial",
       "equivalence": null,
@@ -2284,7 +2284,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::applyInverseEpochs",
+      "mne_cpp": "INVLIB::apply_inverse_epochs",
       "python": "mne.minimum_norm.apply_inverse_epochs",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -2313,7 +2313,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::computeSourcePsd",
+      "mne_cpp": "INVLIB::compute_source_psd",
       "python": "mne.minimum_norm.compute_source_psd",
       "claimed": "partial",
       "equivalence": null,
@@ -2322,7 +2322,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::estimateSnr",
+      "mne_cpp": "INVLIB::estimate_snr",
       "python": "mne.minimum_norm.estimate_snr",
       "claimed": "implemented",
       "equivalence": "equivalent",
@@ -3437,7 +3437,7 @@
     },
     {
       "source": "parity",
-      "mne_cpp": "INVLIB::computeWhitener",
+      "mne_cpp": "INVLIB::compute_whitener",
       "python": "mne.whiten_evoked",
       "claimed": "partial",
       "equivalence": null,
