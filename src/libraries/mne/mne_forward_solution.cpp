@@ -24,6 +24,7 @@
 #include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
+#include <base/thread_pool.h>
 
 #include <vector>
 
@@ -49,9 +50,6 @@
 #include <math/kmeans.h>
 
 #include <algorithm>
-#include <QtConcurrent>
-#include <QFuture>
-#include <QRegularExpression>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -477,9 +475,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         // Calculate clusters
         //
         Log::info("Clustering...");
-        QFuture<RegionDataOut> res;
-        res = QtConcurrent::mapped(regionDataIn, &RegionData::cluster);
-        res.waitForFinished();
+        const std::vector<RegionDataOut> res = BASELIB::ThreadPool::global().parallelMap(regionDataIn, [](const RegionData& region) { return region.cluster(); });
 
         //
         // Assign results
@@ -489,8 +485,7 @@ MNEForwardSolution MNEForwardSolution::cluster_forward_solution(const FsAnnotati
         qint32 nClusters;
         qint32 nSens;
         auto itIn = regionDataIn.cbegin();
-        QFuture<RegionDataOut>::const_iterator itOut;
-        for (itOut = res.constBegin(); itOut != res.constEnd(); ++itOut) {
+        for (auto itOut = res.cbegin(); itOut != res.cend(); ++itOut) {
             nClusters = itOut->ctrs.rows();
             nSens = itOut->ctrs.cols() / 3;
             t_G_partial = MatrixXd::Zero(nSens, nClusters * 3);
@@ -655,7 +650,7 @@ MNEForwardSolution MNEForwardSolution::reduce_forward_solution(qint32 p_iNumDipo
 
     for (qint32 i = 0; i < p_iNumDipoles; ++i) {
         float t_fCurrent = static_cast<float>(i) * t_fStep;
-        sel[i] = static_cast<quint32>(floor(t_fCurrent));
+        sel[i] = static_cast<int>(std::floor(t_fCurrent));
     }
 
     if (isFixed) {
@@ -842,7 +837,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
     RowVectorXi sel = FiffInfo::pick_channels(fwd.sol.row_names, include, exclude);
 
     // Do we have something?
-    quint32 nuse = sel.size();
+    const int nuse = static_cast<int>(sel.size());
 
     if (nuse == 0) {
         Log::info("Nothing remains after picking. Returning original forward solution.");
@@ -852,7 +847,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
 
     //   Pick the correct rows of the forward operator
     MatrixXd newData(nuse, fwd.sol.data.cols());
-    for (quint32 i = 0; i < nuse; ++i)
+    for (int i = 0; i < nuse; ++i)
         newData.row(i) = fwd.sol.data.row(sel[i]);
 
     fwd.sol.data = newData;
@@ -880,7 +875,7 @@ MNEForwardSolution MNEForwardSolution::pick_channels(const StringList& include,
 
     if (!fwd.sol_grad.empty()) {
         newData.resize(nuse, fwd.sol_grad.data.cols());
-        for (quint32 i = 0; i < nuse; ++i)
+        for (int i = 0; i < nuse; ++i)
             newData.row(i) = fwd.sol_grad.data.row(sel[i]);
         fwd.sol_grad.data = newData;
         fwd.sol_grad.nrow = nuse;
@@ -1115,21 +1110,14 @@ Expected<MNEForwardSolution> MNEForwardSolution::read(const std::filesystem::pat
     }
 
     MNEForwardSolution megfwd;
-    QString ori;
     if (read_one(t_pStream, megnode, megfwd)) {
-        if (megfwd.source_ori == FIFFV_MNE_FIXED_ORI)
-            ori = QString("fixed");
-        else
-            ori = QString("free");
-        Log::info("\tRead MEG forward solution ({} sources, {} channels, {} orientations)", megfwd.nsource, megfwd.nchan, ori.toStdString());
+        Log::info("\tRead MEG forward solution ({} sources, {} channels, {} orientations)", megfwd.nsource, megfwd.nchan,
+                  megfwd.source_ori == FIFFV_MNE_FIXED_ORI ? "fixed" : "free");
     }
     MNEForwardSolution eegfwd;
     if (read_one(t_pStream, eegnode, eegfwd)) {
-        if (eegfwd.source_ori == FIFFV_MNE_FIXED_ORI)
-            ori = QString("fixed");
-        else
-            ori = QString("free");
-        Log::info("\tRead EEG forward solution ({} sources, {} channels, {} orientations)", eegfwd.nsource, eegfwd.nchan, ori.toStdString());
+        Log::info("\tRead EEG forward solution ({} sources, {} channels, {} orientations)", eegfwd.nsource, eegfwd.nchan,
+                  eegfwd.source_ori == FIFFV_MNE_FIXED_ORI ? "fixed" : "free");
     }
 
     //

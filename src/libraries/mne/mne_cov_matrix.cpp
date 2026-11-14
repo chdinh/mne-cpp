@@ -35,8 +35,9 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_tag.h>
 
-#include <QFile>
-#include <QStringList>
+#include <format>
+#include <string>
+
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -417,10 +418,10 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
     }
 #ifdef DEBUG
     {
-        QStringList classes;
+        std::string classes;
         for (k = 0; k < ncov; k++)
-            classes << QString::number(ch_class[k]);
-        BASELIB::Log::debug("{}", classes.join(' ').toStdString());
+            classes += std::format("{} ", ch_class[k]);
+        BASELIB::Log::debug("{}", classes);
     }
 #endif
     if (nmag > 0)
@@ -453,10 +454,10 @@ int MNECovMatrix::condition(float rank_threshold, int use_rank)
             cov_local[lt_packed_index(j, k)] = this->cov[lt_packed_index(j, k)] * scale_vec[j] * scale_vec[k];
     if (mne_decompose_eigen(cov_local, lambda_local, local_eigen, ncov) == 0) {
 #ifdef DEBUG
-        QStringList ratios;
+        std::string ratios;
         for (k = 0; k < ncov; k++)
-            ratios << QString::number(lambda_local[k] / lambda_local[ncov - 1]);
-        BASELIB::Log::debug("{}", ratios.join(' ').toStdString());
+            ratios += std::format("{:g} ", lambda_local[k] / lambda_local[ncov - 1]);
+        BASELIB::Log::debug("{}", ratios);
 #endif
         nok = 0;
         for (k = ncov - 1; k >= 0; k--) {

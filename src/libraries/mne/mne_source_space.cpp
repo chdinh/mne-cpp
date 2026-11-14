@@ -24,6 +24,8 @@
 #include "mne_source_space.h"
 #include <base/log.h>
 
+#include <cassert>
+
 #include <vector>
 #include <utility>
 #include "mne_nearest.h"
@@ -1584,7 +1586,7 @@ void MNESourceSpace::filter_source_space(FilterThreadArg* arg)
         if (a->s->inuse[p1]) {
             r1 = a->s->rr.row(p1).transpose(); /* Transform the point to MRI coordinates */
             if (a->s->coord_frame == FIFFV_COORD_HEAD) {
-                Q_ASSERT(a->mri_head_t);
+                assert(a->mri_head_t);
                 FiffCoordTrans::apply_inverse_trans(r1.data(), *a->mri_head_t, FIFFV_MOVE);
             }
             /*

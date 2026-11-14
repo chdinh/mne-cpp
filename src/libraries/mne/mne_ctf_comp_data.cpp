@@ -26,7 +26,6 @@
 #include <fiff/fiff_constants.h>
 #include <fiff/fiff_tag.h>
 
-#include <QFile>
 
 #include <Eigen/Core>
 
@@ -83,13 +82,12 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
     Eigen::VectorXf col_cals(this->data->ncol());
     Eigen::VectorXf row_cals(this->data->nrow());
     int j, k, p, found;
-    QString name;
 
     if (calibrated)
         return OK;
 
     for (j = 0; j < this->data->nrow(); j++) {
-        name = QString::fromStdString(this->data->rowlist[j]);
+        const std::string& name = this->data->rowlist[j];
         found = false;
         for (p = 0; p < nch; p++)
             if ((name == chs[p].ch_name)) {
@@ -98,12 +96,12 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
                 break;
             }
         if (!found) {
-            BASELIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
+            BASELIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name);
             return FAIL;
         }
     }
     for (k = 0; k < this->data->ncol(); k++) {
-        name = QString::fromStdString(this->data->collist[k]);
+        const std::string& name = this->data->collist[k];
         found = false;
         for (p = 0; p < nch; p++)
             if ((name == chs[p].ch_name)) {
@@ -112,7 +110,7 @@ int MNECTFCompData::calibrate(const std::vector<FIFFLIB::FiffChInfo>& chs, int n
                 break;
             }
         if (!found) {
-            BASELIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name.toStdString());
+            BASELIB::Log::critical("Channel {} not found. Cannot calibrate the compensation matrix.", name);
             return FAIL;
         }
     }

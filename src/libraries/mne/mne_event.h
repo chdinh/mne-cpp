@@ -25,7 +25,6 @@
 #include "mne_global.h"
 
 #include <string>
-#include <QString>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB

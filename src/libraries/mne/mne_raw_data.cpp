@@ -459,13 +459,11 @@ int mne_sparse_vec_mult2(FiffSparseMatrix* mat, /* The sparse matrix */
 
 int mne_sparse_mat_mult2(FiffSparseMatrix* mat,        /* The sparse matrix */
                          const RowMajorMatrixXf& mult, /* Matrix to be multiplied */
-                         int ncol,                     /* How many columns in the above */
                          RowMajorMatrixXf& res)        /* Result of the multiplication */
 /*
       * Multiply a dense matrix by a sparse matrix using Eigen.
       */
 {
-    Q_UNUSED(ncol);
     // mat->eigen() is column-major sparse, mult is row-major dense
     // Result: res = sparse * mult  (rows: mat->rows(), cols: mult.cols())
     res = mat->eigen() * mult;
@@ -780,7 +778,7 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMa
                             nderiv = deriv_matched->deriv_data->nrow();
                             deriv_ns = this_buf->ns;
                         }
-                        if (mne_sparse_mat_mult2(&deriv_matched->deriv_data->data, this_buf->vals, this_buf->ns, deriv_vals) == FAIL) {
+                        if (mne_sparse_mat_mult2(&deriv_matched->deriv_data->data, this_buf->vals, deriv_vals) == FAIL) {
                             return FAIL;
                         }
                     }
@@ -1178,7 +1176,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
                     nderiv = deriv_matched->deriv_data->nrow();
                     deriv_ns = this_buf->ns;
                 }
-                if (mne_sparse_mat_mult2(&deriv_matched->deriv_data->data, this_buf->vals, this_buf->ns, deriv_vals) == FAIL)
+                if (mne_sparse_mat_mult2(&deriv_matched->deriv_data->data, this_buf->vals, deriv_vals) == FAIL)
                     return FAIL;
             }
             for (c = 0; c < sel->nchan(); c++) {

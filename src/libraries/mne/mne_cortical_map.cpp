@@ -42,10 +42,8 @@ using namespace Eigen;
 MatrixXd MNECorticalMap::makeCorticalMap(
     const MNEForwardSolution& fwd,
     const MNEInverseOperator& inv,
-    const FiffInfo& info)
+    [[maybe_unused]] const FiffInfo& info)
 {
-    Q_UNUSED(info);
-
     // Get the inverse kernel (nSources x nChannels)
     const MatrixXd& kernel = const_cast<MNEInverseOperator&>(inv).getKernel();
     if (kernel.rows() == 0 || kernel.cols() == 0) {

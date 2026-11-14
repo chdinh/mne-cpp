@@ -37,15 +37,8 @@
 #include <vector>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QString>
-
-//=============================================================================================================
 // FORWARD DECLARATIONS
 //=============================================================================================================
-
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -99,7 +92,6 @@ public:
      */
     static std::unique_ptr<MNEMshDisplaySurfaceSet> load(const std::string& subject_id, const std::string& surf, const std::filesystem::path& subjects_dir);
 
-
     /**
      * Read a BEM surface from a FIFF file, optionally validate that it is
      * topologically closed (via solid-angle check), and add it to this set.
@@ -129,7 +121,6 @@ public:
     void add_replace_surface(std::unique_ptr<MNEMshDisplaySurface> newSurf,
                              bool replace,
                              bool isDrawable);
-
 
     /**
      * Assign hemisphere-appropriate eye positions and up-vectors to each

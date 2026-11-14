@@ -40,6 +40,8 @@
 #include "../inv_source_estimate.h"
 #include <fs/fs_label.h>
 
+#include <QString>
+
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB

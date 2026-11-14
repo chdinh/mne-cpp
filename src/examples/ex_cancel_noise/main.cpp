@@ -31,6 +31,7 @@
 
 #include <QtCore/QCoreApplication>
 #include <QCommandLineParser>
+#include <QDebug>
 #include <QFile>
 
 //=============================================================================================================

@@ -28,6 +28,7 @@
 #include <fiff/fiff_ch_name.h>
 #include <memory>
 #include <base/log.h>
+#include <base/thread_pool.h>
 
 #include <vector>
 #include <base/string_utils.h>
@@ -35,13 +36,6 @@
 #include <math/linalg.h>
 
 #include <iostream>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QFuture>
-#include <QtConcurrent>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -364,9 +358,7 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
         // Calculate clusters
         //
         Log::info("Clustering... ");
-        QFuture<RegionMTOut> res;
-        res = QtConcurrent::mapped(m_qListRegionMTIn, &RegionMT::cluster);
-        res.waitForFinished();
+        const std::vector<RegionMTOut> res = BASELIB::ThreadPool::global().parallelMap(m_qListRegionMTIn, [](const RegionMT& region) { return region.cluster(); });
 
         //
         // Assign results
@@ -377,8 +369,7 @@ MatrixXd MNEInverseOperator::cluster_kernel(const FsAnnotationSet& p_AnnotationS
         qint32 nSens;
         std::vector<RegionMT>::const_iterator itIn;
         itIn = m_qListRegionMTIn.begin();
-        QFuture<RegionMTOut>::const_iterator itOut;
-        for (itOut = res.constBegin(); itOut != res.constEnd(); ++itOut) {
+        for (auto itOut = res.cbegin(); itOut != res.cend(); ++itOut) {
             nClusters = itOut->ctrs.rows();
             nSens = itOut->ctrs.cols() / 3;
             t_MT_partial = MatrixXd::Zero(nSens, nClusters * 3);

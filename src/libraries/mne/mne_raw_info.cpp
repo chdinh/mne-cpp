@@ -30,7 +30,6 @@
 
 #include <algorithm>
 
-#include <QFile>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -305,7 +304,6 @@ int MNERawInfo::get_meas_info(FiffStream& stream,
 
 int MNERawInfo::load(const std::filesystem::path& name, int allow_maxshield, std::unique_ptr<MNERawInfo>& infop)
 {
-    QFile file(name);
     FiffStream stream(name);
 
     int res = FIFF_FAIL;

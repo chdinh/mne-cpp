@@ -56,8 +56,7 @@
 //=============================================================================================================
 
 #include <QVector>
-#include <QFuture>
-#include <QtConcurrent/QtConcurrent>
+#include <base/thread_pool.h>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -247,7 +246,7 @@ CoilParam InvHpiFit::dipfit(const MatrixXd matCoilsSeed,
 {
     //Do this in conncurrent mode
     //Generate QList structure which can be handled by the QConcurrent framework
-    QList<InvHpiFitData> lCoilData;
+    std::vector<InvHpiFitData> lCoilData;
 
     for (qint32 i = 0; i < iNumCoils; ++i) {
         InvHpiFitData coilData;
@@ -258,28 +257,21 @@ CoilParam InvHpiFit::dipfit(const MatrixXd matCoilsSeed,
         coilData.m_iMaxIterations = iMaxIterations;
         coilData.m_fAbortError = fAbortError;
 
-        lCoilData.append(coilData);
+        lCoilData.push_back(coilData);
     }
     //Do the concurrent filtering
     CoilParam coil(iNumCoils);
 
-    if (!lCoilData.isEmpty()) {
-        //        //Do sequential
-        //        for(int l = 0; l < lCoilData.size(); ++l) {
-        //            doDipfitConcurrent(lCoilData[l]);
-        //        }
-
-        //Do concurrent
-        QFuture<void> future = QtConcurrent::map(lCoilData,
-                                                 &InvHpiFitData::doDipfitConcurrent);
-        future.waitForFinished();
+    if (!lCoilData.empty()) {
+        BASELIB::ThreadPool::global().parallelFor(0, lCoilData.size(), [&lCoilData](std::size_t i) { lCoilData[i].doDipfitConcurrent(); });
 
         //Transform results to final coil information
-        for (qint32 i = 0; i < lCoilData.size(); ++i) {
-            coil.pos.row(i) = lCoilData.at(i).m_coilPos;
-            coil.mom = lCoilData.at(i).m_errorInfo.moment.transpose();
-            coil.dpfiterror(i) = lCoilData.at(i).m_errorInfo.error;
-            coil.dpfitnumitr(i) = lCoilData.at(i).m_errorInfo.numIterations;
+        for (Eigen::Index i = 0; i < std::ssize(lCoilData); ++i) {
+            const InvHpiFitData& fitted = lCoilData[static_cast<std::size_t>(i)];
+            coil.pos.row(i) = fitted.m_coilPos;
+            coil.mom = fitted.m_errorInfo.moment.transpose();
+            coil.dpfiterror(i) = fitted.m_errorInfo.error;
+            coil.dpfitnumitr(i) = fitted.m_errorInfo.numIterations;
         }
     }
     return coil;

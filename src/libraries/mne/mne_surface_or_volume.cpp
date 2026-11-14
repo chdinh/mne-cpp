@@ -41,7 +41,6 @@
 
 #include <math/sphere.h>
 
-#include <QtConcurrent>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
 // so define it here only for the toolchains that do not.

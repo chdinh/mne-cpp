@@ -348,8 +348,6 @@ std::vector<VectorXi> MNESourceSpaces::label_src_vertno_sel(const FsLabel& p_lab
 
 MNESourceSpaces MNESourceSpaces::pick_regions(const std::vector<FsLabel>& p_qListLabels) const
 {
-    Q_UNUSED(p_qListLabels);
-
     MNESourceSpaces selectedSrc(*this);
 
     for (qint32 h = 0; h < 2; ++h) {

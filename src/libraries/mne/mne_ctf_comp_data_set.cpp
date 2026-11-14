@@ -35,12 +35,6 @@
 
 #include <Eigen/Core>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QFile>
-
 constexpr int FAIL = -1;
 constexpr int OK = 0;
 
@@ -227,14 +221,11 @@ int mne_unmap_ctf_comp_kind(int ctf_comp)
 }
 
 std::unique_ptr<FiffSparseMatrix> mne_convert_to_sparse(const Eigen::MatrixXf& dense, /* The dense matrix to be converted */
-                                                        int stor_type,                /* Either FIFFTS_MC_CCS or FIFFTS_MC_RCS */
                                                         float small)                  /* How small elements should be ignored? */
 /*
  * Convert a dense matrix to sparse using Eigen's sparseView.
  */
 {
-    Q_UNUSED(stor_type);
-
     if (small < 0) { /* Automatic scaling */
         float maxval = dense.cwiseAbs().maxCoeff();
         if (maxval > 0)
@@ -436,7 +427,6 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
     MNECTFCompData* this_comp;
     Eigen::VectorXi comp_sel;
     StringList names;
-    QString name;
     int j, k, p;
 
     std::unique_ptr<FiffSparseMatrix> presel;
@@ -495,14 +485,14 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
     comp_sel.resize(this_comp->data->ncol());
     for (k = 0; k < this_comp->data->ncol(); k++) {
         comp_sel[k] = -1;
-        name = QString::fromStdString(this_comp->data->collist[k]);
+        const std::string& name = this_comp->data->collist[k];
         for (p = 0; p < nCompChan; p++)
             if ((name == compchs[p].ch_name)) {
                 comp_sel[k] = p;
                 break;
             }
         if (comp_sel[k] < 0) {
-            BASELIB::Log::critical("Compensation channel {} not found", name.toStdString());
+            BASELIB::Log::critical("Compensation channel {} not found", name);
             return FAIL;
         }
     }
@@ -514,7 +504,7 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
         Eigen::MatrixXf sel = Eigen::MatrixXf::Zero(this_comp->data->ncol(), nCompChan);
         for (j = 0; j < this_comp->data->ncol(); j++)
             sel(j, comp_sel[j]) = 1.0f;
-        presel = mne_convert_to_sparse(sel, FIFFTS_MC_RCS, 1e-30f);
+        presel = mne_convert_to_sparse(sel, 1e-30f);
         if (!presel)
             return FAIL;
         BASELIB::Log::info("\tPreselector created.\n");
@@ -543,7 +533,7 @@ int MNECTFCompDataSet::make_comp(const std::vector<FiffChInfo>& chList,
             if (compGrades[j] != MNE_CTFV_COMP_NONE)
                 sel(j, p++) = 1.0f;
         }
-        postsel = mne_convert_to_sparse(sel, FIFFTS_MC_RCS, 1e-30f);
+        postsel = mne_convert_to_sparse(sel, 1e-30f);
         if (!postsel)
             return FAIL;
         BASELIB::Log::info("\tPostselector created.\n");
@@ -790,8 +780,8 @@ std::string MNECTFCompDataSet::explain_comp(int kind)
 
     for (k = 0; explain[k].kind != MNE_CTFV_COMP_UNKNOWN; k++)
         if (explain[k].kind == kind)
-            return QString::fromLatin1(explain[k].expl).toStdString();
-    return QString::fromLatin1(explain[k].expl).toStdString();
+            return explain[k].expl;
+    return explain[k].expl;
 }
 
 //=============================================================================================================

@@ -494,6 +494,15 @@ aliases; replace the old spelling as below.
   `front()`/`back()`, `append(epoch)` and `list << epoch` become
   `push_back(epoch)`; `size()` is unsigned, so compare it with
   `std::ssize(list)` in signed loops.
+- The mne library no longer uses Qt outside the remaining public headers:
+  forward- and inverse-operator clustering and the HPI coil fit run on
+  `BASELIB::ThreadPool` instead of `QtConcurrent`, the artifact check of
+  `MNEEpochDataList` loops over the channels directly, and the remaining
+  `QString`, `QStringList`, `QFile`, `Q_UNUSED` and `Q_ASSERT` uses in the
+  CTF compensation, covariance, forward-solution and raw-data code are std
+  code. Headers that included `QString`, `QList` or `QDebug` without using
+  them no longer do. Migration: code that relied on those headers for its
+  own `QDebug`/`QString` includes them itself.
 - The remaining `Q_DECLARE_METATYPE` declarations in the connectivity and
   disp libraries, MNE Scan (`scMeas`, LSL adapter), MNE Analyze
   (`anShared`), MNE Browse, the MNE Analyze Studio browser extension and
