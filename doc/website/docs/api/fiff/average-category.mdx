@@ -35,12 +35,11 @@ descFile.write("average {\n"
                "    }\n"
                "}\n");
 descFile.close();
-AverageDescription averaging;
-MNEDescriptionParser::parseAverageFile(aveDesc.toStdU16String(), averaging);
-const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
-const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
+const std::optional<AverageDescription> averaging = MNEDescriptionParser::read_average(aveDesc.toStdU16String());
+const AverageCategory& leftCategory = averaging->categories.front(); // name, events, tmin/tmax, baseline
+const RejectionParams& rejection = averaging->rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
 std::string log;
-const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, averaging, events.events, log);
+const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, *averaging, events.events, log);
 ```
 
 ---
@@ -58,16 +57,16 @@ const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, averaging, ev
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 370"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 369"
+               "}\n");
 descFile.close();
-AverageDescription averaging;
-MNEDescriptionParser::parseAverageFile(aveDesc.toStdU16String(), averaging);
-const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
-const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
+const std::optional<AverageDescription> averaging = MNEDescriptionParser::read_average(aveDesc.toStdU16String());
+const AverageCategory& leftCategory = averaging->categories.front(); // name, events, tmin/tmax, baseline
+const RejectionParams& rejection = averaging->rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
 std::string log;
-const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, averaging, events.events, log);
+const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, *averaging, events.events, log);
 // mne.Epochs(event_id=1, tmin=-0.1, tmax=0.3, baseline=(-0.1, 0)).average(): 6 epochs, |MEG| 2.01258e-13, EEG 001 at 0 s 7.77233e-10
-const bool averaged = averaging.categories.size() == 1 && leftCategory.doBaseline && leftCategory.comment == "Left Auditory" && leftCategory.events == std::vector<unsigned int>{1} && rejection.eegReject == 100e-6f && averages.evoked.size() == 1;
+const bool averaged = averaging->categories.size() == 1 && leftCategory.doBaseline && leftCategory.comment == "Left Auditory" && leftCategory.events == std::vector<unsigned int>{1} && rejection.eegReject == 100e-6f && averages.evoked.size() == 1;
 ok &= expect(averaged && averages.evoked[0].nave == 6 && averages.evoked[0].data.cols() == 121 && near(averages.evoked[0].data.topRows(306).norm(), 2.0125814419559757e-13, 1e-5) && near(averages.evoked[0].data(315, 30), 7.77233498919796e-10, 1e-5),
              "MNEDescriptionParser: an .ave description averages like mne.Epochs with a baseline");
 ````

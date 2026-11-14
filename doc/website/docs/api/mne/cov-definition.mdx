@@ -34,12 +34,11 @@ covDescFile.write("cov {\n"
                   "    }\n"
                   "}\n");
 covDescFile.close();
-CovDescription covariance;
-MNEDescriptionParser::parseCovarianceFile(covDescPath.toStdU16String(), covariance);
-covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
-const CovDefinition& preStim = covariance.defs.front();
+std::optional<CovDescription> covariance = MNEDescriptionParser::read_covariance(covDescPath.toStdU16String());
+covariance->rej.megGradReject = covariance->rej.megMagReject = covariance->rej.eogReject = 0.0f; // EEG limit only
+const CovDefinition& preStim = covariance->defs.front();
 const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,
-                                                      covariance.removeSampleMean, preStim.ignore, preStim.delay, &covariance.rej);
+                                                      covariance->removeSampleMean, preStim.ignore, preStim.delay, &covariance->rej);
 ```
 
 ---
@@ -56,13 +55,13 @@ const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 398"
-CovDescription covariance;
-MNEDescriptionParser::parseCovarianceFile(covDescPath.toStdU16String(), covariance);
-covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
-const CovDefinition& preStim = covariance.defs.front();
+````cpp title="src/examples/ex_mne_api/main.cpp, line 396"
+covDescFile.close();
+std::optional<CovDescription> covariance = MNEDescriptionParser::read_covariance(covDescPath.toStdU16String());
+covariance->rej.megGradReject = covariance->rej.megMagReject = covariance->rej.eogReject = 0.0f; // EEG limit only
+const CovDefinition& preStim = covariance->defs.front();
 const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,
-                                                      covariance.removeSampleMean, preStim.ignore, preStim.delay, &covariance.rej);
+                                                      covariance->removeSampleMean, preStim.ignore, preStim.delay, &covariance->rej);
 // mne.compute_covariance(mne.Epochs(event_id=[1, 2], tmin=-0.2, tmax=0, baseline=None, reject=dict(eeg=14.23e-9)),
 // keep_sample_mean=False, rank="full"): 6 of 12 epochs kept, nfree 365, C[EEG001, EEG001] = 8.784207369943824e-18
 const int eeg001 = BASELIB::indexOf(noiseCov.names, "EEG 001");

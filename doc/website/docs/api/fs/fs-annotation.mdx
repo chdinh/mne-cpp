@@ -61,7 +61,7 @@ Construts the annotation by reading it of the given file.
 - **subject_id** : *const std::string &*
   Name of subject.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **surf** : *const std::string &*
@@ -81,7 +81,7 @@ Construts the annotation by reading it of the given file.
 - **path** : *const std::filesystem::path &*
   path to surface directory.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **surf** : *const std::string &*
@@ -117,7 +117,7 @@ Returns the hemisphere id (0 = lh; 1 = rh).
 
 **Returns:**
 
-- *qint32* — hemisphere id.
+- *std::int32_t* — hemisphere id.
 
 ---
 
@@ -238,7 +238,7 @@ Reads a FreeSurfer annotation file.
 - **subject_id** : *const std::string &*
   Name of subject.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **atlas** : *const std::string &*
@@ -265,7 +265,7 @@ Reads a FreeSurfer annotation file.
 - **path** : *const std::filesystem::path &*
   path to label directory.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **atlas** : *const std::string &*

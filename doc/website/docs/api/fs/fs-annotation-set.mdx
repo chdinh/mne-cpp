@@ -42,7 +42,7 @@ Construts the surface set by reading it of the given files.
 - **subject_id** : *const std::string &*
   Name of subject.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh, 2 -&gt; both\}.
 
 - **atlas** : *const std::string &*
@@ -62,7 +62,7 @@ Construts the surface set by reading it of the given files.
 - **path** : *const std::filesystem::path &*
   path to surface directory.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh, 2 -&gt; both\}.
 
 - **atlas** : *const std::string &*
@@ -173,7 +173,7 @@ Subscript operator [] to access annotation by index.
 
 **Parameters:**
 
-- **idx** : *qint32*
+- **idx** : *std::int32_t*
   the hemisphere index (0 or 1).
 
 **Returns:**
@@ -188,7 +188,7 @@ Subscript operator [] to access annotation by index.
 
 **Parameters:**
 
-- **idx** : *qint32*
+- **idx** : *std::int32_t*
   the hemisphere index (0 or 1).
 
 **Returns:**
@@ -233,7 +233,7 @@ Returns number of loaded hemispheres.
 
 **Returns:**
 
-- *qint32* — number of loaded hemispheres.
+- *std::int32_t* — number of loaded hemispheres.
 
 ---
 

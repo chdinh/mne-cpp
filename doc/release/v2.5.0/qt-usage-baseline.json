@@ -32,7 +32,7 @@
       "ml",
       "report"
     ],
-    "tokens": 13262,
+    "tokens": 13133,
     "gui_outside_design": []
   },
   "libraries": {
@@ -219,12 +219,12 @@
       ]
     },
     "dsp": {
-      "tokens": 432,
+      "tokens": 433,
       "by_category": {
         "containers": 79,
         "files": 24,
         "global": 121,
-        "objects_signals": 84,
+        "objects_signals": 85,
         "other": 3,
         "regex": 3,
         "strings": 97,
@@ -260,12 +260,9 @@
       ]
     },
     "fs": {
-      "tokens": 110,
-      "by_category": {
-        "global": 109,
-        "objects_signals": 1
-      },
-      "public_header_includes": 6,
+      "tokens": 0,
+      "by_category": {},
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 18,
       "modules": [
@@ -281,7 +278,7 @@
         "strings": 10,
         "threads": 4
       },
-      "public_header_includes": 5,
+      "public_header_includes": 2,
       "q_object": 0,
       "files": 28,
       "modules": [
@@ -375,18 +372,16 @@
       ]
     },
     "mne": {
-      "tokens": 358,
+      "tokens": 338,
       "by_category": {
         "containers": 3,
-        "files": 34,
+        "files": 24,
         "global": 251,
-        "objects_signals": 4,
         "other": 23,
-        "regex": 1,
-        "strings": 32,
+        "strings": 27,
         "threads": 10
       },
-      "public_header_includes": 26,
+      "public_header_includes": 20,
       "q_object": 0,
       "files": 112,
       "modules": [

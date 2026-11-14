@@ -19,22 +19,22 @@ Ordered list of trigger events with comments.
 
 ```cpp title="src/examples/ex_mne_api/main.cpp"
 // Annotate the detected onsets, save them with their comments and read them back relative to the first sample
-MNEEventList annotated = MNEEventList::fromMatrix(events.events).selectOnsets();
+MNEEventList annotated = MNEEventList::from_matrix(events.events).select_onsets();
 annotated.sort();
 for (MNEEvent& event : annotated.events) {
-    event.comment = (event.to == 1 ? "left auditory" : QString()).toStdString();
+    event.comment = event.to == 1 ? "left auditory" : "";
 }
-const QString commentedName = tmp.filePath("commented-eve.fif");
-annotated.writeFif(commentedName.toStdU16String());
-const auto relative = MNEEventList::readFif(commentedName.toStdU16String(), raw.first_samp);
-const MNEEventList leftAuditory = relative->selectOnsets(1);
+const std::filesystem::path commentedPath = tmp.filePath("commented-eve.fif").toStdU16String();
+const bool written = annotated.write_fif(commentedPath);
+const auto relative = MNEEventList::read_fif(commentedPath, raw.first_samp);
+const MNEEventList leftAuditory = relative->select_onsets(1);
 ```
 
 ---
 
 ## Public Methods
 
-### writeFif(path, offset)
+### write_fif(path, offset)
 
 Writes the list as an event block with comments, readable by `mne.read_events`.
 
@@ -69,7 +69,7 @@ Appends the events of another list (MNE-C `mne_add_to_event_list`).
 
 ---
 
-### selectOnsets(value)
+### select_onsets(value)
 
 Keeps the onsets of one trigger value (MNE-C `filter_events`): events rising from 0 to `value`, or every onset if `value` is 0.
 
@@ -84,7 +84,7 @@ Keeps the onsets of one trigger value (MNE-C `filter_events`): events rising fro
 
 ---
 
-### maxOnset()
+### max_onset()
 
 Returns the largest trigger value that starts from 0.
 
@@ -94,7 +94,7 @@ Returns the largest trigger value that starts from 0.
 
 ---
 
-### toMatrix()
+### to_matrix()
 
 Returns the events as rows of sample, value before and value after, the layout of `FIFFLIB::FiffEvents::events` and of `mne.read_events`.
 
@@ -116,7 +116,7 @@ Returns the number of events in the list.
 
 ## Static Methods
 
-### readFif(path, offset)
+### read_fif(path, offset)
 
 Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 
@@ -134,11 +134,11 @@ Reads the event block of a FIFF file (MNE-C `mne_load_events_fiff`).
 
 ---
 
-### readText(path, offset, oldOffset, sfreq)
+### read_text(path, offset, old_offset, sfreq)
 
 Reads an MNE-C text event file (MNE-C `mne_load_events`).
 
-Each line holds sample, time, trigger value before and after, and an optional comment; `#` starts a comment line. A negative sample is computed from the time. A first line with both trigger values 0 marks the current format: it gives the first sample of the recording and is not an event. Old files have no such line; their samples are shifted by `oldOffset` instead.
+Each line holds sample, time, trigger value before and after, and an optional comment; `#` starts a comment line. A negative sample is computed from the time. A first line with both trigger values 0 marks the current format: it gives the first sample of the recording and is not an event. Old files have no such line; their samples are shifted by `old_offset` instead.
 
 **Parameters:**
 
@@ -148,7 +148,7 @@ Each line holds sample, time, trigger value before and after, and an optional co
 - **offset** : *int*
   Samples to subtract from every event (the recording's first sample).
 
-- **oldOffset** : *int*
+- **old_offset** : *int*
   Extra offset used by files in the old format.
 
 - **sfreq** : *float*
@@ -160,14 +160,14 @@ Each line holds sample, time, trigger value before and after, and an optional co
 
 ---
 
-### fromMatrix(matrix)
+### from_matrix(matrix)
 
 Builds a list from rows of sample, value before and value after.
 
 **Parameters:**
 
 - **matrix** : *const Eigen::MatrixXi &*
-  nEvents x 3 matrix as returned by `toMatrix()`.
+  nEvents x 3 matrix as returned by `to_matrix()`.
 
 **Returns:**
 
@@ -188,19 +188,19 @@ Builds a list from rows of sample, value before and value after.
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 464"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 462"
 // Annotate the detected onsets, save them with their comments and read them back relative to the first sample
-MNEEventList annotated = MNEEventList::fromMatrix(events.events).selectOnsets();
+MNEEventList annotated = MNEEventList::from_matrix(events.events).select_onsets();
 annotated.sort();
 for (MNEEvent& event : annotated.events) {
-    event.comment = (event.to == 1 ? "left auditory" : QString()).toStdString();
+    event.comment = event.to == 1 ? "left auditory" : "";
 }
-const QString commentedName = tmp.filePath("commented-eve.fif");
-annotated.writeFif(commentedName.toStdU16String());
-const auto relative = MNEEventList::readFif(commentedName.toStdU16String(), raw.first_samp);
-const MNEEventList leftAuditory = relative->selectOnsets(1);
+const std::filesystem::path commentedPath = tmp.filePath("commented-eve.fif").toStdU16String();
+const bool written = annotated.write_fif(commentedPath);
+const auto relative = MNEEventList::read_fif(commentedPath, raw.first_samp);
+const MNEEventList leftAuditory = relative->select_onsets(1);
 // mne.find_events: 25 onsets, codes up to 32, 6 of code 1, the first at 14385 - 12900
-ok &= expect(annotated.nevent() == 25 && annotated.maxOnset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.empty(),
+ok &= expect(written && annotated.nevent() == 25 && annotated.max_onset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.empty(),
              "MNEEventList/MNEEvent: commented event file, onsets selected like mne.find_events");
 ````
 

@@ -60,7 +60,7 @@ Construts the surface by reading it of the given file.
 - **subject_id** : *const std::string &*
   Name of subject.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **surf** : *const std::string &*
@@ -80,7 +80,7 @@ Construts the surface by reading it of the given file.
 - **path** : *const std::filesystem::path &*
   path to surface directory.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **surf** : *const std::string &*
@@ -106,7 +106,7 @@ Returns the hemisphere id (0 = lh; 1 = rh).
 
 **Returns:**
 
-- *qint32* — hemisphere id.
+- *std::int32_t* — hemisphere id.
 
 ---
 
@@ -225,7 +225,7 @@ Reads a FreeSurfer surface file
 - **subject_id** : *const std::string &*
   Name of subject.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **surf** : *const std::string &*
@@ -257,7 +257,7 @@ Reads a FreeSurfer surface file
 - **path** : *const std::filesystem::path &*
   path to surface directory.
 
-- **hemi** : *qint32*
+- **hemi** : *std::int32_t*
   Which hemisphere to load \{0 -&gt; lh, 1 -&gt; rh\}.
 
 - **surf** : *const std::string &*
@@ -357,7 +357,7 @@ Reads a big-endian 3-byte integer (FreeSurfer format).
 
 **Returns:**
 
-- *qint32* — the read 3-byte integer.
+- *std::int32_t* — the read 3-byte integer.
 
 ---
 
@@ -370,7 +370,7 @@ Reads multiple big-endian 3-byte integers (FreeSurfer format).
 - **stream** : *[ByteStream](/docs/api/base/byte-stream) &*
   Stream to read from.
 
-- **count** : *qint32*
+- **count** : *std::int32_t*
   Number of elements to read.
 
 **Returns:**
@@ -392,7 +392,7 @@ Reads multiple big-endian 3-byte integers (FreeSurfer format).
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 513"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 511"
 // Morph map between the registered spheres of two subjects: every vertex of "large" is a
 // barycentric blend of the three corners of the "small" triangle it falls into.
 const QString subjectsDir = QStringLiteral(MNE_MORPH_SUBJECTS_DIR);

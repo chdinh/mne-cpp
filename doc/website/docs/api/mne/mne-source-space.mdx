@@ -271,7 +271,18 @@ Create a volumetric source space by laying out a 3D grid of points within the bo
 
 ---
 
-### read_label(label, sel)
+### read_label(label)
+
+Reads the vertex numbers of a FreeSurfer label file (MNE-C `read_label`).
+
+**Parameters:**
+
+- **label** : *const std::filesystem::path &*
+  The label file.
+
+**Returns:**
+
+- *std::optional&lt; Eigen::VectorXi &gt;* — The vertex numbers, or no value if the file cannot be read.
 
 ---
 
