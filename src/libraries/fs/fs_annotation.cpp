@@ -25,7 +25,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QDebug>
 #include <algorithm>
 #include <numeric>
 
@@ -59,7 +58,7 @@ FsAnnotation::FsAnnotation(const std::filesystem::path& p_sFileName)
 
 //=============================================================================================================
 
-FsAnnotation::FsAnnotation(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir)
+FsAnnotation::FsAnnotation(const std::string& subject_id, std::int32_t hemi, const std::string& atlas, const std::filesystem::path& subjects_dir)
 : m_iHemi(-1)
 {
     FsAnnotation::read(subject_id, hemi, atlas, subjects_dir, *this);
@@ -67,7 +66,7 @@ FsAnnotation::FsAnnotation(const std::string& subject_id, qint32 hemi, const std
 
 //=============================================================================================================
 
-FsAnnotation::FsAnnotation(const std::filesystem::path& path, qint32 hemi, const std::string& atlas)
+FsAnnotation::FsAnnotation(const std::filesystem::path& path, std::int32_t hemi, const std::string& atlas)
 : m_iHemi(-1)
 {
     FsAnnotation::read(path, hemi, atlas, *this);
@@ -93,7 +92,7 @@ void FsAnnotation::clear()
 
 //=============================================================================================================
 
-bool FsAnnotation::read(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir, FsAnnotation& p_Annotation)
+bool FsAnnotation::read(const std::string& subject_id, std::int32_t hemi, const std::string& atlas, const std::filesystem::path& subjects_dir, FsAnnotation& p_Annotation)
 {
     if (hemi != 0 && hemi != 1)
         return false;
@@ -103,7 +102,7 @@ bool FsAnnotation::read(const std::string& subject_id, qint32 hemi, const std::s
 
 //=============================================================================================================
 
-bool FsAnnotation::read(const std::filesystem::path& path, qint32 hemi, const std::string& atlas, FsAnnotation& p_Annotation)
+bool FsAnnotation::read(const std::filesystem::path& path, std::int32_t hemi, const std::string& atlas, FsAnnotation& p_Annotation)
 {
     if (hemi != 0 && hemi != 1)
         return false;
@@ -125,38 +124,38 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
     }
     BASELIB::MemoryByteStream stream(std::move(*bytes));
     const auto readInt = [&stream]() {
-        qint32 value = 0;
+        std::int32_t value = 0;
         stream.readBigEndian(value);
         return value;
     };
     // A length-prefixed string; FreeSurfer counts the terminating NUL
     const auto readString = [&stream, &readInt]() {
-        const qint32 len = readInt();
-        std::string text(static_cast<std::size_t>(std::clamp<qint64>(len, 0, static_cast<qint64>(stream.size() - stream.pos()))), '\0');
+        const std::int32_t len = readInt();
+        std::string text(static_cast<std::size_t>(std::clamp<std::int64_t>(len, 0, static_cast<std::int64_t>(stream.size() - stream.pos()))), '\0');
         stream.read(text.data(), text.size());
         if (!text.empty() && text.back() == '\0')
             text.pop_back();
         return text;
     };
-    const auto readColor = [&stream](FsColortable& ct, qint32 row) {
-        qint32 rgba[4] = {};
+    const auto readColor = [&stream](FsColortable& ct, std::int32_t row) {
+        std::int32_t rgba[4] = {};
         stream.readBigEndian(rgba, 4);
-        for (qint32 j = 0; j < 4; ++j)
+        for (std::int32_t j = 0; j < 4; ++j)
             ct.table(row, j) = rgba[j];
         ct.table(row, 4) = rgba[0] + rgba[1] * 256 + rgba[2] * 65536 + rgba[3] * 16777216;
     };
 
-    const qint32 numEl = readInt();
+    const std::int32_t numEl = readInt();
     if (numEl < 0 || static_cast<std::uint64_t>(numEl) * 8 > stream.size() - stream.pos()) {
         BASELIB::Log::warning("\tError: Truncated annotation file");
         return false;
     }
     // Vertex number and label id interleaved
-    std::vector<qint32> pairs(2 * static_cast<std::size_t>(numEl));
+    std::vector<std::int32_t> pairs(2 * static_cast<std::size_t>(numEl));
     stream.readBigEndian(pairs.data(), pairs.size());
     p_Annotation.m_Vertices.resize(numEl);
     p_Annotation.m_LabelIds.resize(numEl);
-    for (qint32 i = 0; i < numEl; ++i) {
+    for (std::int32_t i = 0; i < numEl; ++i) {
         p_Annotation.m_Vertices[i] = pairs[2 * static_cast<std::size_t>(i)];
         p_Annotation.m_LabelIds[i] = pairs[2 * static_cast<std::size_t>(i) + 1];
     }
@@ -164,19 +163,19 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
     FsColortable& ct = p_Annotation.m_Colortable;
     if (readInt()) {
         ct.clear();
-        qint32 numEntries = readInt();
+        std::int32_t numEntries = readInt();
         if (numEntries > 0) {
             BASELIB::Log::info("\tReading from Original Version\n");
             ct.numEntries = numEntries;
             ct.orig_tab = readString();
             ct.struct_names.assign(static_cast<std::size_t>(numEntries), std::string());
             ct.table = MatrixXi(numEntries, 5);
-            for (qint32 i = 0; i < numEntries; ++i) {
+            for (std::int32_t i = 0; i < numEntries; ++i) {
                 ct.struct_names[static_cast<std::size_t>(i)] = readString();
                 readColor(ct, i);
             }
         } else {
-            const qint32 version = -numEntries;
+            const std::int32_t version = -numEntries;
             if (version != 2)
                 BASELIB::Log::warning("\tError! Does not handle version {}", version);
             else
@@ -192,9 +191,9 @@ bool FsAnnotation::read(const std::filesystem::path& p_sFileName, FsAnnotation& 
             ct.struct_names.assign(static_cast<std::size_t>(numEntries), std::string());
             ct.table = MatrixXi(numEntries, 5);
 
-            const qint32 numEntriesToRead = readInt();
-            for (qint32 i = 0; i < numEntriesToRead; ++i) {
-                const qint32 structure = readInt();
+            const std::int32_t numEntriesToRead = readInt();
+            for (std::int32_t i = 0; i < numEntriesToRead; ++i) {
+                const std::int32_t structure = readInt();
                 if (structure < 0 || structure >= numEntries) {
                     BASELIB::Log::warning("\tError! Read entry, index {}", structure);
                     return false;
@@ -254,19 +253,19 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
     //    std::cout << label_ids;
 
     const std::size_t firstNew = p_qListLabels.size();
-    qint32 label_id, count;
+    std::int32_t label_id, count;
     RowVector4i label_rgba;
     VectorXi vertices;
     VectorXd values;
     MatrixX3f pos;
     std::string name;
-    for (qint32 i = 0; i < label_rgbas.rows(); ++i) {
+    for (std::int32_t i = 0; i < label_rgbas.rows(); ++i) {
         label_id = label_ids[i];
         label_rgba = label_rgbas.row(i);
         count = 0;
         vertices.resize(m_LabelIds.size());
         //Where
-        for (qint32 j = 0; j < m_LabelIds.size(); ++j) {
+        for (std::int32_t j = 0; j < m_LabelIds.size(); ++j) {
             if (m_LabelIds[j] == label_id) {
                 vertices[count] = j;
                 ++count;
@@ -278,7 +277,7 @@ bool FsAnnotation::toLabels(const FsSurface& p_surf,
         vertices.conservativeResize(count);
 
         pos.resize(count, 3);
-        for (qint32 j = 0; j < count; ++j)
+        for (std::int32_t j = 0; j < count; ++j)
             pos.row(j) = vert_pos.row(vertices[j]);
 
         values = VectorXd::Ones(count);

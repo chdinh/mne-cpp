@@ -36,14 +36,10 @@
 
 #include "fs_global.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
 #include <base/string_utils.h>
 
-#include <QSharedPointer>
 
+#include <cstdint>
 #include <string>
 
 //=============================================================================================================
@@ -113,7 +109,7 @@ public:
 
 public:
     std::string orig_tab;             /**< FsColortable raw data. */
-    qint32 numEntries;                /**< Number of entries. */
+    std::int32_t numEntries;          /**< Number of entries. */
     BASELIB::StringList struct_names; /**< Anatomical ROI description. */
     Eigen::MatrixXi table;            /**< labels and corresponing colorcode. */
 };

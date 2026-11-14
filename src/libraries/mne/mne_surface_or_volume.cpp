@@ -41,9 +41,6 @@
 
 #include <math/sphere.h>
 
-#include <QFile>
-#include <QTextStream>
-#include <QCoreApplication>
 #include <QtConcurrent>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),

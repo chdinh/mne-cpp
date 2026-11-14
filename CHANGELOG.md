@@ -453,6 +453,18 @@ aliases; replace the old spelling as below.
   `QString`/`QTextStream`. Migration: `AverageDescription d;
   parseAverageFile(path, d)` becomes
   `const auto d = MNEDescriptionParser::read_average(path); if (d) ...`.
+- `mne_bem.h` no longer declares Qt metatypes for `MNEBem` and
+  `std::shared_ptr<MNEBem>`, and `mne_surface_or_volume.h` no longer
+  includes `QStringList` and `QDebug` (both unused). Migration: code that
+  stores an `MNEBem` in a `QVariant` declares the metatype itself.
+- The fs library headers are Qt-free: `qint16`/`qint32`/`qint64` are
+  `std::int16_t`/`std::int32_t`/`std::int64_t`, and `fs_label.h` no longer
+  declares a Qt metatype for `FsLabel`. `mne_inverse_operator.h` no longer
+  declares metatypes for `MNEInverseOperator` and its `std::shared_ptr`;
+  `rt_inv_op.h`, whose queued signals carry it, declares the by-value one.
+  Unused `QSharedPointer` includes are gone from the fs, fwd and
+  `filter_thread_arg.h` headers. Migration: code that put these types in a
+  `QVariant` declares the metatype itself.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

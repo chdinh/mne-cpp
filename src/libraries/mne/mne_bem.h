@@ -43,11 +43,6 @@
 #include <vector>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-
-//=============================================================================================================
 // DEFINE NAMESPACE MNELIB
 //=============================================================================================================
 
@@ -227,15 +222,5 @@ private:
 };
 
 } // NAMESPACE
-
-#ifndef metatype_bem
-#define metatype_bem
-Q_DECLARE_METATYPE(MNELIB::MNEBem); /**< Provides QT META type declaration of the MNELIB::MNEBem type. For signal/slot usage.*/
-#endif
-
-#ifndef metatype_bem_sptr
-#define metatype_bem_sptr
-Q_DECLARE_METATYPE(std::shared_ptr<MNELIB::MNEBem>); /**< Provides QT META type declaration of the std::shared_ptr<MNELIB::MNEBem> type. For signal/slot usage.*/
-#endif
 
 #endif // MNE_BEM_H

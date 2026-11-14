@@ -50,9 +50,9 @@ FsLabel::FsLabel()
 FsLabel::FsLabel(const VectorXi& p_vertices,
                  const MatrixX3f& p_pos,
                  const VectorXd& p_values,
-                 qint32 p_hemi,
+                 std::int32_t p_hemi,
                  const std::string& p_name,
-                 qint32 p_id)
+                 std::int32_t p_id)
 : vertices(p_vertices)
 , pos(p_pos)
 , values(p_values)
@@ -104,8 +104,8 @@ MatrixX3i FsLabel::selectTris(const MatrixX3i& p_matTris)
     //
     // Search for all the tris where is at least one corner part of the label
     //
-    qint32 t_size = 0;
-    for (qint32 i = 0; i < p_matTris.rows(); ++i) {
+    std::int32_t t_size = 0;
+    for (std::int32_t i = 0; i < p_matTris.rows(); ++i) {
         if (verts.contains(p_matTris(i, 0)) || verts.contains(p_matTris(i, 1)) || verts.contains(p_matTris(i, 2))) {
             tris.row(t_size) = p_matTris.row(i);
             ++t_size;
@@ -144,9 +144,9 @@ bool FsLabel::read(const std::filesystem::path& p_sFileName, FsLabel& p_Label)
 
     // One row per vertex: vertex number, x, y, z (mm) and value
     MatrixXd data = MatrixXd::Zero(nv, 5);
-    for (qint32 i = 0; i < nv && std::getline(file, line); ++i) {
+    for (std::int32_t i = 0; i < nv && std::getline(file, line); ++i) {
         std::istringstream fields(line);
-        for (qint32 j = 0; j < 5 && fields >> data(i, j); ++j) {
+        for (std::int32_t j = 0; j < 5 && fields >> data(i, j); ++j) {
         }
     }
 

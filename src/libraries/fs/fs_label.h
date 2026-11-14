@@ -35,13 +35,9 @@
 
 #include "fs_global.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
+#include <cstdint>
 #include <filesystem>
 #include <string>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -101,8 +97,8 @@ public:
     FsLabel(const Eigen::VectorXi& p_vertices,
             const Eigen::MatrixX3f& p_pos,
             const Eigen::VectorXd& p_values,
-            qint32 p_hemi, const std::string& p_name,
-            qint32 p_id = -1);
+            std::int32_t p_hemi, const std::string& p_name,
+            std::int32_t p_id = -1);
 
     //=========================================================================================================
     /**
@@ -164,9 +160,9 @@ public:
     Eigen::VectorXi vertices; /**< Vertex indices (0 based). */
     Eigen::MatrixX3f pos;     /**< Locations in meters. */
     Eigen::VectorXd values;   /**< Values at the vertices. */
-    qint32 hemi;              /**< Hemisphere (lh = 0; rh = 1). */
+    std::int32_t hemi;        /**< Hemisphere (lh = 0; rh = 1). */
     std::string name;         /**< Name of the label. */
-    qint32 label_id;          /**< FsLabel id (optional). */
+    std::int32_t label_id;    /**< FsLabel id (optional). */
 };
 
 //=============================================================================================================
@@ -178,10 +174,5 @@ inline bool FsLabel::empty() const
     return this->hemi == -1;
 }
 } // NAMESPACE
-
-#ifndef metatype_label
-#define metatype_label
-Q_DECLARE_METATYPE(FSLIB::FsLabel);
-#endif
 
 #endif // FS_LABEL_H

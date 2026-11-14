@@ -42,14 +42,10 @@
 #include "fs_global.h"
 #include "fs_colortable.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
 #include <base/string_utils.h>
 
-#include <QSharedPointer>
 
+#include <cstdint>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -112,7 +108,7 @@ public:
      * @param[in] surf              Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsAnnotation(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
+    explicit FsAnnotation(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -122,7 +118,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh}.
      * @param[in] surf              Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
      */
-    explicit FsAnnotation(const std::filesystem::path& path, qint32 hemi, const std::string& surf);
+    explicit FsAnnotation(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf);
 
     //=========================================================================================================
     /**
@@ -150,7 +146,7 @@ public:
      *
      * @return hemisphere id.
      */
-    inline qint32 hemi() const;
+    inline std::int32_t hemi() const;
 
     //=========================================================================================================
     /**
@@ -212,7 +208,7 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir, FsAnnotation& p_Annotation);
+    static bool read(const std::string& subject_id, std::int32_t hemi, const std::string& atlas, const std::filesystem::path& subjects_dir, FsAnnotation& p_Annotation);
 
     //=========================================================================================================
     /**
@@ -225,7 +221,7 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const std::filesystem::path& path, qint32 hemi, const std::string& atlas, FsAnnotation& p_Annotation);
+    static bool read(const std::filesystem::path& path, std::int32_t hemi, const std::string& atlas, FsAnnotation& p_Annotation);
 
     //=========================================================================================================
     /**
@@ -277,7 +273,7 @@ private:
     std::string m_sFileName; /**< FsAnnotation file name. */
     std::string m_sFilePath; /**< FsAnnotation file path. */
 
-    qint32 m_iHemi;             /**< Hemisphere (lh = 0; rh = 1). */
+    std::int32_t m_iHemi;       /**< Hemisphere (lh = 0; rh = 1). */
     Eigen::VectorXi m_Vertices; /**< Vertice indeces. */
     Eigen::VectorXi m_LabelIds; /**< Vertice label ids. */
 
@@ -288,7 +284,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FsAnnotation::hemi() const
+inline std::int32_t FsAnnotation::hemi() const
 {
     return m_iHemi;
 }

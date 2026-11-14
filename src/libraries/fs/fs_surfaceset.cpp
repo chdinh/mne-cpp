@@ -35,7 +35,7 @@ FsSurfaceSet::FsSurfaceSet()
 
 //=============================================================================================================
 
-FsSurfaceSet::FsSurfaceSet(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir)
+FsSurfaceSet::FsSurfaceSet(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir)
 {
     FsSurface t_Surface;
     if (hemi == 0 || hemi == 1) {
@@ -53,7 +53,7 @@ FsSurfaceSet::FsSurfaceSet(const std::string& subject_id, qint32 hemi, const std
 
 //=============================================================================================================
 
-FsSurfaceSet::FsSurfaceSet(const std::filesystem::path& path, qint32 hemi, const std::string& surf)
+FsSurfaceSet::FsSurfaceSet(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf)
 {
     FsSurface t_Surface;
     if (hemi == 0 || hemi == 1) {
@@ -143,7 +143,7 @@ bool FsSurfaceSet::read(const std::filesystem::path& p_sLHFileName, const std::f
 namespace
 {
 
-qint32 hemiIndex(qint32 idx)
+std::int32_t hemiIndex(std::int32_t idx)
 {
     if (idx != 0 && idx != 1) {
         BASELIB::Log::warning("Warning: Index is not '0' or '1'! Returning '0'.");
@@ -152,7 +152,7 @@ qint32 hemiIndex(qint32 idx)
     return idx;
 }
 
-qint32 hemiIndex(std::string_view idt)
+std::int32_t hemiIndex(std::string_view idt)
 {
     if (idt == "rh")
         return 1;
@@ -161,7 +161,7 @@ qint32 hemiIndex(std::string_view idt)
     return 0;
 }
 
-const FsSurface& surfaceOrEmpty(const std::map<int, FsSurface>& surfs, qint32 hemi)
+const FsSurface& surfaceOrEmpty(const std::map<int, FsSurface>& surfs, std::int32_t hemi)
 {
     static const FsSurface empty;
     const auto it = surfs.find(hemi);
@@ -172,14 +172,14 @@ const FsSurface& surfaceOrEmpty(const std::map<int, FsSurface>& surfs, qint32 he
 
 //=============================================================================================================
 
-const FsSurface& FsSurfaceSet::operator[](qint32 idx) const
+const FsSurface& FsSurfaceSet::operator[](std::int32_t idx) const
 {
     return surfaceOrEmpty(m_surfs, hemiIndex(idx));
 }
 
 //=============================================================================================================
 
-FsSurface& FsSurfaceSet::operator[](qint32 idx)
+FsSurface& FsSurfaceSet::operator[](std::int32_t idx)
 {
     return m_surfs[hemiIndex(idx)];
 }

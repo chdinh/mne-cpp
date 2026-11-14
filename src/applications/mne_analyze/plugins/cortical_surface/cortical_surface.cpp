@@ -25,6 +25,9 @@
 #include <fs/fs_annotation.h>
 #include <fs/fs_label.h>
 #include <fs/fs_label_utils.h>
+
+// The label tree caches each label in its items' QVariant data.
+Q_DECLARE_METATYPE(FSLIB::FsLabel)
 #include <fs/fs_surface.h>
 
 #include <fiff/fiff_cov.h>

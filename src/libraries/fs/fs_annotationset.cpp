@@ -36,7 +36,7 @@ FsAnnotationSet::FsAnnotationSet()
 
 //=============================================================================================================
 
-FsAnnotationSet::FsAnnotationSet(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir)
+FsAnnotationSet::FsAnnotationSet(const std::string& subject_id, std::int32_t hemi, const std::string& atlas, const std::filesystem::path& subjects_dir)
 {
     FsAnnotation t_Annotation;
     if (hemi == 0 || hemi == 1) {
@@ -52,7 +52,7 @@ FsAnnotationSet::FsAnnotationSet(const std::string& subject_id, qint32 hemi, con
 
 //=============================================================================================================
 
-FsAnnotationSet::FsAnnotationSet(const std::filesystem::path& path, qint32 hemi, const std::string& atlas)
+FsAnnotationSet::FsAnnotationSet(const std::filesystem::path& path, std::int32_t hemi, const std::string& atlas)
 {
     FsAnnotation t_Annotation;
     if (hemi == 0 || hemi == 1) {
@@ -145,7 +145,7 @@ bool FsAnnotationSet::toLabels(const FsSurfaceSet& p_surfSet,
 namespace
 {
 
-int hemiIndex(qint32 idx)
+int hemiIndex(std::int32_t idx)
 {
     if (idx != 0 && idx != 1) {
         BASELIB::Log::warning("Warning: Index is not '0' or '1'! Returning '0'.");
@@ -174,14 +174,14 @@ const FsAnnotation& annotationOrEmpty(const std::map<int, FsAnnotation>& annots,
 
 //=============================================================================================================
 
-FsAnnotation& FsAnnotationSet::operator[](qint32 idx)
+FsAnnotation& FsAnnotationSet::operator[](std::int32_t idx)
 {
     return m_annots[hemiIndex(idx)];
 }
 
 //=============================================================================================================
 
-const FsAnnotation& FsAnnotationSet::operator[](qint32 idx) const
+const FsAnnotation& FsAnnotationSet::operator[](std::int32_t idx) const
 {
     return annotationOrEmpty(m_annots, hemiIndex(idx));
 }

@@ -41,17 +41,9 @@
 
 #include <Eigen/Core>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-
 #include <memory>
 #include <optional>
 #include <vector>
-
-#include <QStringList>
-#include <QDebug>
 
 
 inline constexpr auto FIFF_MNE_SOURCE_SPACE_NNEIGHBORS = 3594; /* Number of neighbors for each source space point (used for volume source spaces) */

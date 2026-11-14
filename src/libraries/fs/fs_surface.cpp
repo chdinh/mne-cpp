@@ -56,7 +56,7 @@ FsSurface::FsSurface(const std::filesystem::path& p_sFile)
 
 //=============================================================================================================
 
-FsSurface::FsSurface(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir)
+FsSurface::FsSurface(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir)
 : m_iHemi(-1)
 , m_vecOffset(Vector3f::Zero(3))
 {
@@ -65,7 +65,7 @@ FsSurface::FsSurface(const std::string& subject_id, qint32 hemi, const std::stri
 
 //=============================================================================================================
 
-FsSurface::FsSurface(const std::filesystem::path& path, qint32 hemi, const std::string& surf)
+FsSurface::FsSurface(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf)
 : m_iHemi(-1)
 , m_vecOffset(Vector3f::Zero(3))
 {
@@ -102,7 +102,7 @@ MatrixX3f FsSurface::compute_normals(const MatrixX3f& rr, const MatrixX3i& tris)
     MatrixX3f r2(tris.rows(), 3);
     MatrixX3f r3(tris.rows(), 3);
 
-    for (qint32 i = 0; i < tris.rows(); ++i) {
+    for (std::int32_t i = 0; i < tris.rows(); ++i) {
         r1.row(i) = rr.row(tris(i, 0));
         r2.row(i) = rr.row(tris(i, 1));
         r3.row(i) = rr.row(tris(i, 2));
@@ -120,15 +120,15 @@ MatrixX3f FsSurface::compute_normals(const MatrixX3f& rr, const MatrixX3i& tris)
     VectorXf normSize = tmp.rowwise().sum();
     normSize = normSize.cwiseSqrt();
 
-    for (qint32 i = 0; i < normSize.size(); ++i)
+    for (std::int32_t i = 0; i < normSize.size(); ++i)
         if (normSize(i) != 0)
             tri_nn.row(i) /= normSize(i);
 
     MatrixX3f nn = MatrixX3f::Zero(rr.rows(), 3);
 
-    for (qint32 p = 0; p < tris.rows(); ++p) {
+    for (std::int32_t p = 0; p < tris.rows(); ++p) {
         Vector3i verts = tris.row(p);
-        for (qint32 j = 0; j < verts.size(); ++j)
+        for (std::int32_t j = 0; j < verts.size(); ++j)
             nn.row(verts(j)) += tri_nn.row(p);
     }
 
@@ -136,7 +136,7 @@ MatrixX3f FsSurface::compute_normals(const MatrixX3f& rr, const MatrixX3i& tris)
     normSize = tmp.rowwise().sum();
     normSize = normSize.cwiseSqrt();
 
-    for (qint32 i = 0; i < normSize.size(); ++i)
+    for (std::int32_t i = 0; i < normSize.size(); ++i)
         if (normSize(i) != 0)
             nn.row(i) /= normSize(i);
 
@@ -145,7 +145,7 @@ MatrixX3f FsSurface::compute_normals(const MatrixX3f& rr, const MatrixX3i& tris)
 
 //=============================================================================================================
 
-bool FsSurface::read(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature)
+bool FsSurface::read(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature)
 {
     if (hemi != 0 && hemi != 1)
         return false;
@@ -155,7 +155,7 @@ bool FsSurface::read(const std::string& subject_id, qint32 hemi, const std::stri
 
 //=============================================================================================================
 
-bool FsSurface::read(const std::filesystem::path& path, qint32 hemi, const std::string& surf, FsSurface& p_Surface, bool p_bLoadCurvature)
+bool FsSurface::read(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf, FsSurface& p_Surface, bool p_bLoadCurvature)
 {
     if (hemi != 0 && hemi != 1)
         return false;
@@ -172,33 +172,33 @@ Expected<FsSurface::Geometry> FsSurface::read_geometry(const std::filesystem::pa
         return std::unexpected(bytes.error());
     MemoryByteStream stream(std::move(*bytes));
     const auto remaining = [&stream]() {
-        return static_cast<qint64>(stream.size() - stream.pos());
+        return static_cast<std::int64_t>(stream.size() - stream.pos());
     };
     const auto invalid = [&file](std::string_view what) {
         return std::unexpected(Error(ErrorCode::Format, std::format("{} surface file {}", what, utf8FromPath(file))));
     };
 
     //   Magic numbers to identify QUAD and TRIANGLE files
-    constexpr qint32 NEW_QUAD_FILE_MAGIC_NUMBER = 16777213;
-    constexpr qint32 TRIANGLE_FILE_MAGIC_NUMBER = 16777214;
-    constexpr qint32 QUAD_FILE_MAGIC_NUMBER = 16777215;
+    constexpr std::int32_t NEW_QUAD_FILE_MAGIC_NUMBER = 16777213;
+    constexpr std::int32_t TRIANGLE_FILE_MAGIC_NUMBER = 16777214;
+    constexpr std::int32_t QUAD_FILE_MAGIC_NUMBER = 16777215;
 
-    const qint32 magic = FsSurface::fread3(stream);
-    qint32 nvert = 0;
+    const std::int32_t magic = FsSurface::fread3(stream);
+    std::int32_t nvert = 0;
     MatrixXf verts;
     MatrixXi faces;
 
     if (magic == QUAD_FILE_MAGIC_NUMBER || magic == NEW_QUAD_FILE_MAGIC_NUMBER) {
         nvert = FsSurface::fread3(stream);
-        const qint32 nquad = FsSurface::fread3(stream);
+        const std::int32_t nquad = FsSurface::fread3(stream);
         // New-format curvature files start with the same magic number
-        if (nvert <= 0 || qint64(nvert) * (magic == QUAD_FILE_MAGIC_NUMBER ? 6 : 12) + qint64(nquad) * 12 > remaining())
+        if (nvert <= 0 || std::int64_t(nvert) * (magic == QUAD_FILE_MAGIC_NUMBER ? 6 : 12) + std::int64_t(nquad) * 12 > remaining())
             return invalid("Invalid or truncated");
 
         // vertices, one column per vertex
         verts.resize(3, nvert);
         if (magic == QUAD_FILE_MAGIC_NUMBER) {
-            std::vector<qint16> coords(3 * static_cast<std::size_t>(nvert));
+            std::vector<std::int16_t> coords(3 * static_cast<std::size_t>(nvert));
             stream.readBigEndian(coords.data(), coords.size());
             for (std::size_t i = 0; i < coords.size(); ++i)
                 verts.data()[i] = static_cast<float>(coords[i]) / 100;
@@ -209,7 +209,7 @@ Expected<FsSurface::Geometry> FsSurface::read_geometry(const std::filesystem::pa
         //  Each quad is split into two triangles
         const VectorXi quadIdx = FsSurface::fread3_many(stream, nquad * 4);
         faces.resize(2 * nquad, 3);
-        for (qint32 k = 0; k < nquad; ++k) {
+        for (std::int32_t k = 0; k < nquad; ++k) {
             const int* quad = quadIdx.data() + 4 * k;
             if ((quad[0] % 2) == 0) {
                 faces.row(2 * k) << quad[0], quad[1], quad[3];
@@ -226,10 +226,10 @@ Expected<FsSurface::Geometry> FsSurface::read_geometry(const std::filesystem::pa
             stream.read(&c, 1);
             newlines += c == '\n' ? 1 : 0;
         }
-        qint32 nface = 0;
+        std::int32_t nface = 0;
         stream.readBigEndian(nvert);
         stream.readBigEndian(nface);
-        if (nvert <= 0 || nface < 0 || (qint64(nvert) + nface) * 12 > remaining())
+        if (nvert <= 0 || nface < 0 || (std::int64_t(nvert) + nface) * 12 > remaining())
             return invalid("Invalid or truncated");
 
         verts.resize(3, nvert);
@@ -302,12 +302,12 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
     }
     MemoryByteStream stream(std::move(*bytes));
 
-    qint32 vnum = FsSurface::fread3(stream);
-    constexpr qint32 NEW_VERSION_MAGIC_NUMBER = 16777215;
+    std::int32_t vnum = FsSurface::fread3(stream);
+    constexpr std::int32_t NEW_VERSION_MAGIC_NUMBER = 16777215;
 
     if (vnum == NEW_VERSION_MAGIC_NUMBER) {
-        qint32 fnum = 0;
-        qint32 valsPerVertex = 0;
+        std::int32_t fnum = 0;
+        std::int32_t valsPerVertex = 0;
         stream.readBigEndian(vnum);
         stream.readBigEndian(fnum);
         stream.readBigEndian(valsPerVertex);
@@ -323,10 +323,10 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
             Log::warning("\tError: Truncated curvature file");
             return VectorXf();
         }
-        std::vector<qint16> values(static_cast<std::size_t>(vnum));
+        std::vector<std::int16_t> values(static_cast<std::size_t>(vnum));
         stream.readBigEndian(values.data(), values.size());
         curv.resize(vnum);
-        for (qint32 i = 0; i < vnum; ++i)
+        for (std::int32_t i = 0; i < vnum; ++i)
             curv(i) = static_cast<float>(values[static_cast<std::size_t>(i)]) / 100;
     }
 
@@ -337,7 +337,7 @@ VectorXf FsSurface::read_curv(const std::filesystem::path& p_sFileName)
 
 //=============================================================================================================
 
-qint32 FsSurface::fread3(ByteStream& stream)
+std::int32_t FsSurface::fread3(ByteStream& stream)
 {
     unsigned char bytes[3] = {};
     stream.read(bytes, 3);
@@ -346,10 +346,10 @@ qint32 FsSurface::fread3(ByteStream& stream)
 
 //=============================================================================================================
 
-VectorXi FsSurface::fread3_many(ByteStream& stream, qint32 count)
+VectorXi FsSurface::fread3_many(ByteStream& stream, std::int32_t count)
 {
     VectorXi res(count);
-    for (qint32 i = 0; i < count; ++i)
+    for (std::int32_t i = 0; i < count; ++i)
         res[i] = FsSurface::fread3(stream);
     return res;
 }

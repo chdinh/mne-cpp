@@ -33,6 +33,7 @@
 #include <memory>
 
 #include <fiff/fiff_cov.h>
+#include <mne/mne_inverse_operator.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -52,7 +53,6 @@ class FiffInfo;
 namespace MNELIB
 {
 class MNEForwardSolution;
-class MNEInverseOperator;
 }
 
 //=============================================================================================================
@@ -202,5 +202,8 @@ signals:
 // INLINE DEFINITIONS
 //=============================================================================================================
 } // NAMESPACE
+
+// Carried by queued resultReady/invOperatorCalculated connections.
+Q_DECLARE_METATYPE(MNELIB::MNEInverseOperator)
 
 #endif // RT_INV_OP_RTPROCESSING_H

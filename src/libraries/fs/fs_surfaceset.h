@@ -34,15 +34,11 @@
 #include "fs_global.h"
 #include "fs_surface.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
+#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <string>
 #include <string_view>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // DEFINE NAMESPACE FSLIB
@@ -85,7 +81,7 @@ public:
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsSurfaceSet(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
+    explicit FsSurfaceSet(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -95,7 +91,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh, 2 -> both}.
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      */
-    explicit FsSurfaceSet(const std::filesystem::path& path, qint32 hemi, const std::string& surf);
+    explicit FsSurfaceSet(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf);
 
     //=========================================================================================================
     /**
@@ -179,7 +175,7 @@ public:
      *
      * @return FsSurface related to the parameter index.
      */
-    const FsSurface& operator[](qint32 idx) const;
+    const FsSurface& operator[](std::int32_t idx) const;
 
     //=========================================================================================================
     /**
@@ -189,7 +185,7 @@ public:
      *
      * @return FsSurface related to the parameter index.
      */
-    FsSurface& operator[](qint32 idx);
+    FsSurface& operator[](std::int32_t idx);
 
     //=========================================================================================================
     /**
@@ -217,7 +213,7 @@ public:
      *
      * @return number of loaded hemispheres.
      */
-    inline qint32 size() const;
+    inline std::int32_t size() const;
 
 private:
     //=========================================================================================================
@@ -254,9 +250,9 @@ inline std::string FsSurfaceSet::surf() const
 
 //=============================================================================================================
 
-inline qint32 FsSurfaceSet::size() const
+inline std::int32_t FsSurfaceSet::size() const
 {
-    return static_cast<qint32>(m_surfs.size());
+    return static_cast<std::int32_t>(m_surfs.size());
 }
 } // NAMESPACE
 

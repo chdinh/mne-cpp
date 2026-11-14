@@ -46,17 +46,12 @@
 #include "fs_global.h"
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QSharedPointer>
-
-//=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
 #include <base/byte_stream.h>
 
+#include <cstdint>
 #include <filesystem>
 #include <string>
 
@@ -118,7 +113,7 @@ public:
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsSurface(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
+    explicit FsSurface(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -128,7 +123,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh}.
      * @param[in] surf               Name of the surface to load (eg. inflated, orig ...).
      */
-    explicit FsSurface(const std::filesystem::path& path, qint32 hemi, const std::string& surf);
+    explicit FsSurface(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf);
 
     //=========================================================================================================
     /**
@@ -148,7 +143,7 @@ public:
      *
      * @return hemisphere id.
      */
-    inline qint32 hemi() const;
+    inline std::int32_t hemi() const;
 
     //=========================================================================================================
     /**
@@ -181,7 +176,7 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const std::string& subject_id, qint32 hemi, const std::string& surf, const std::filesystem::path& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature = true);
+    static bool read(const std::string& subject_id, std::int32_t hemi, const std::string& surf, const std::filesystem::path& subjects_dir, FsSurface& p_Surface, bool p_bLoadCurvature = true);
 
     //=========================================================================================================
     /**
@@ -197,7 +192,7 @@ public:
      *
      * @return true if read sucessful, false otherwise.
      */
-    static bool read(const std::filesystem::path& path, qint32 hemi, const std::string& surf, FsSurface& p_Surface, bool p_bLoadCurvature = true);
+    static bool read(const std::filesystem::path& path, std::int32_t hemi, const std::string& surf, FsSurface& p_Surface, bool p_bLoadCurvature = true);
 
     //=========================================================================================================
     /**
@@ -324,7 +319,7 @@ public:
      * @param[in] stream  Stream to read from.
      * @return the read 3-byte integer.
      */
-    static qint32 fread3(BASELIB::ByteStream& stream);
+    static std::int32_t fread3(BASELIB::ByteStream& stream);
 
     //=========================================================================================================
     /**
@@ -334,12 +329,12 @@ public:
      * @param[in] count   Number of elements to read.
      * @return the read 3-byte integers.
      */
-    static Eigen::VectorXi fread3_many(BASELIB::ByteStream& stream, qint32 count);
+    static Eigen::VectorXi fread3_many(BASELIB::ByteStream& stream, std::int32_t count);
 
 private:
     std::string m_sFilePath;    /**< Path to surf directory. */
     std::string m_sFileName;    /**< FsSurface file name. */
-    qint32 m_iHemi;             /**< Hemisphere (lh = 0; rh = 1). */
+    std::int32_t m_iHemi;       /**< Hemisphere (lh = 0; rh = 1). */
     std::string m_sSurf;        /**< Loaded surface (eg. inflated, orig ...). */
     Eigen::MatrixX3f m_matRR;   /**< alias verts. Vertex coordinates in meters. */
     Eigen::MatrixX3i m_matTris; /**< alias faces. The triangle descriptions. */
@@ -353,7 +348,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline qint32 FsSurface::hemi() const
+inline std::int32_t FsSurface::hemi() const
 {
     return m_iHemi;
 }

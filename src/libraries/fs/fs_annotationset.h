@@ -34,16 +34,12 @@
 #include "fs_global.h"
 #include "fs_annotation.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
+#include <cstdint>
 #include <filesystem>
 #include <map>
 #include <vector>
 #include <string>
 #include <string_view>
-#include <QSharedPointer>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -94,7 +90,7 @@ public:
      * @param[in] atlas              Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
      * @param[in] subjects_dir       Subjects directory.
      */
-    explicit FsAnnotationSet(const std::string& subject_id, qint32 hemi, const std::string& atlas, const std::filesystem::path& subjects_dir);
+    explicit FsAnnotationSet(const std::string& subject_id, std::int32_t hemi, const std::string& atlas, const std::filesystem::path& subjects_dir);
 
     //=========================================================================================================
     /**
@@ -104,7 +100,7 @@ public:
      * @param[in] hemi               Which hemisphere to load {0 -> lh, 1 -> rh, 2 -> both}.
      * @param[in] atlas              Name of the atlas to load (eg. aparc.a2009s, aparc, aparc.DKTatlas40, BA, BA.thresh, ...).
      */
-    explicit FsAnnotationSet(const std::filesystem::path& path, qint32 hemi, const std::string& atlas);
+    explicit FsAnnotationSet(const std::filesystem::path& path, std::int32_t hemi, const std::string& atlas);
 
     //=========================================================================================================
     /**
@@ -200,7 +196,7 @@ public:
      *
      * @return FsAnnotation related to the parameter index.
      */
-    FsAnnotation& operator[](qint32 idx);
+    FsAnnotation& operator[](std::int32_t idx);
 
     //=========================================================================================================
     /**
@@ -210,7 +206,7 @@ public:
      *
      * @return FsAnnotation related to the parameter index.
      */
-    const FsAnnotation& operator[](qint32 idx) const;
+    const FsAnnotation& operator[](std::int32_t idx) const;
 
     //=========================================================================================================
     /**
@@ -238,7 +234,7 @@ public:
      *
      * @return number of loaded hemispheres.
      */
-    inline qint32 size() const;
+    inline std::int32_t size() const;
 
 private:
     std::map<int, FsAnnotation> m_annots; /**< Hemisphere annotations (lh = 0; rh = 1). */
@@ -262,9 +258,9 @@ inline bool FsAnnotationSet::empty() const
 
 //=============================================================================================================
 
-inline qint32 FsAnnotationSet::size() const
+inline std::int32_t FsAnnotationSet::size() const
 {
-    return static_cast<qint32>(m_annots.size());
+    return static_cast<std::int32_t>(m_annots.size());
 }
 } // NAMESPACE
 
