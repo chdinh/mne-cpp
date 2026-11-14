@@ -30,7 +30,6 @@ const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU1
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
-bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
 bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
@@ -210,7 +209,7 @@ Builds one derivation from definitions such as those of dsp::[ChannelDerivation]
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 484"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 483"
 ok &= montageFile.open(QIODevice::WriteOnly | QIODevice::Text);
 montageFile.write("\"EEG 001-EEG 002\" = \"EEG 001\" - \"EEG 002\"\n\"FRONT\" = 0.5 * \"EEG 001\" + 0.5 * \"EEG 002\" - \"EEG 999\"\n");
 montageFile.close();
@@ -220,11 +219,11 @@ const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU1
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
-bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
 bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
 mneRaw->proj.reset();
+mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, segment);
 ````
 
 ## Authors of this file

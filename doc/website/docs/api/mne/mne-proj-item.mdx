@@ -35,15 +35,14 @@ const MNERawBufDef& firstBuffer = mneRaw->bufs.front();
 
 MNEChSelection sel; // channel names are stored without spaces
 sel.chspick = sel.chspick_nospace = {"MEG 0113", "EEG 001", "EOG 061"};
-sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
-sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
-sel.pick.resize(sel.nchan);
-for (int c = 0; c < sel.nchan; ++c) {
+sel.pick_deriv = VectorXi::Constant(sel.nchan(), -1);
+sel.pick.resize(sel.nchan());
+for (int c = 0; c < sel.nchan(); ++c) {
     sel.pick[c] = static_cast<int>(BASELIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
 }
 
 const int ns = 25;
-MNERawData::RowMajorMatrixXf segment(sel.nchan, ns);
+MNERawData::RowMajorMatrixXf segment(sel.nchan(), ns);
 mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, segment); // calibrated, across a buffer boundary
 const double eegRaw = segment(1, 0);
 mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
@@ -101,7 +100,7 @@ Iterates over `list` and checks if any channel name matches a column in the proj
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 291"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 290"
 std::unique_ptr<MNEProjOp> proj = MNEProjOp::make_projection({rawFile.fileName().toStdU16String()}, rawInfo.chInfo).value();
 proj->assign_channels(mneRaw->ch_names);
 const bool compiled = proj->make_proj();

@@ -32,7 +32,6 @@ const auto fromFif = MNEDerivSet::read(tmp.filePath("montage-deriv.fif").toStdU1
 const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
 MNEChSelection bipolar;
 bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
-bipolar.nchan = bipolar.ndef = 3;
 bipolar.nderiv = 1;
 bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
 bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();
@@ -97,7 +96,7 @@ A derived channel is valid if all its inputs are present and of the same kind an
 
 MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
-````cpp title="src/examples/ex_mne_api/main.cpp, line 500"
+````cpp title="src/examples/ex_mne_api/main.cpp, line 498"
 // The derived channel is the difference of its inputs, read in one pass
 ok &= expect(derivations->count() == 2 && fromFif->count() == 2 && usable == 1 && mneRaw->deriv_matched->deriv_data->nrow == 1 && segment.row(0).isApprox(segment.row(1) - segment.row(2), 1e-6f),
              "MNEDerivSet/MNEDeriv/MNESparseNamedMatrix: MNE-C montage file, matched to the recording and read by MNERawData");
