@@ -42,8 +42,9 @@ const InvSourceEstimate stc = dspm.calculateInverse(evoked); // one row per sour
 ```
 
 ```cpp title="src/examples/ex_inv_api/main.cpp"
-InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
-const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
+const std::filesystem::path csvPath = tmp.filePath("v1-dspm.csv").toStdU16String();
+const bool csvWritten = InvSourceEstimateIO::write_csv(stc, csvPath);
+const InvSourceEstimate fromCsv = InvSourceEstimateIO::read_csv(csvPath);
 const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
 const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
 const InvSourceEstimate fromStc(stcPath);

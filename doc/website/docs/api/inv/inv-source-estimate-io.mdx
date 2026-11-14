@@ -22,8 +22,9 @@ class INVLIB::InvSourceEstimateIO
 Extended I/O methods for [`InvSourceEstimate`](/docs/api/inv/inv-source-estimate).
 
 ```cpp title="src/examples/ex_inv_api/main.cpp"
-InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
-const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
+const std::filesystem::path csvPath = tmp.filePath("v1-dspm.csv").toStdU16String();
+const bool csvWritten = InvSourceEstimateIO::write_csv(stc, csvPath);
+const InvSourceEstimate fromCsv = InvSourceEstimateIO::read_csv(csvPath);
 const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
 const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
 const InvSourceEstimate fromStc(stcPath);
@@ -33,21 +34,21 @@ const InvSourceEstimate fromStc(stcPath);
 
 ## Static Methods
 
-### writeCsv(stc, sPath, cDelim)
+### write_csv(stc, path, delim)
 
 Export source estimate to CSV format.
 
-Writes a header line with vertex indices, then one row per time point. First column is time (seconds).
+Writes a header line with vertex indices, then one row per time point. First column is time (seconds). Numbers are written in the shortest form that reads back to the same value.
 
 **Parameters:**
 
 - **stc** : *const [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &*
   Source estimate to export.
 
-- **sPath** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Output file path.
 
-- **cDelim** : *char*
+- **delim** : *char*
   Delimiter character (default comma).
 
 **Returns:**
@@ -56,25 +57,25 @@ Writes a header line with vertex indices, then one row per time point. First col
 
 ---
 
-### readCsv(sPath, cDelim)
+### read_csv(path, delim)
 
 Read source estimate from CSV format.
 
 **Parameters:**
 
-- **sPath** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Input file path.
 
-- **cDelim** : *char*
+- **delim** : *char*
   Delimiter character (default comma).
 
 **Returns:**
 
-- *[InvSourceEstimate](/docs/api/inv/inv-source-estimate)* — Source estimate (empty if failed).
+- *[InvSourceEstimate](/docs/api/inv/inv-source-estimate)* — Source estimate; empty if the file cannot be read, a field is not a number or a row does not hold one value per vertex.
 
 ---
 
-### writeMatrix(stc, sPath)
+### write_matrix(stc, path)
 
 Export source estimate as a tab-separated matrix for easy import.
 
@@ -85,7 +86,7 @@ No header; pure numeric matrix (n_vertices × n_times).
 - **stc** : *const [InvSourceEstimate](/docs/api/inv/inv-source-estimate) &*
   Source estimate to export.
 
-- **sPath** : *const QString &*
+- **path** : *const std::filesystem::path &*
   Output file path.
 
 **Returns:**
@@ -108,12 +109,13 @@ No header; pure numeric matrix (n_vertices × n_times).
 Inverse library: minimum-norm estimates, resolution matrices, label time courses, sparse solvers and source-estimate I/O.
 
 ````cpp title="src/examples/ex_inv_api/main.cpp, line 296"
-InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
-const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
+const std::filesystem::path csvPath = tmp.filePath("v1-dspm.csv").toStdU16String();
+const bool csvWritten = InvSourceEstimateIO::write_csv(stc, csvPath);
+const InvSourceEstimate fromCsv = InvSourceEstimateIO::read_csv(csvPath);
 const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
 const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
 const InvSourceEstimate fromStc(stcPath);
-ok &= expect(stcWritten && fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
+ok &= expect(csvWritten && stcWritten && fromCsv.data == stc.data && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
              "InvSourceEstimateIO/InvSourceEstimate: CSV and .stc round trips");
 ````
 

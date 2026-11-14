@@ -453,13 +453,14 @@ int main(int argc, char* argv[])
                  std::format("tokenize/fromTokens: {} tokens carry 5 x 10 samples and the dipole, coupling and connectivity layers", tokens.size()));
 
     //! [inv_source_estimate_io_usage]
-    InvSourceEstimateIO::writeCsv(stc, tmp.filePath("v1-dspm.csv"));
-    const InvSourceEstimate fromCsv = InvSourceEstimateIO::readCsv(tmp.filePath("v1-dspm.csv"));
+    const std::filesystem::path csvPath = tmp.filePath("v1-dspm.csv").toStdU16String();
+    const bool csvWritten = InvSourceEstimateIO::write_csv(stc, csvPath);
+    const InvSourceEstimate fromCsv = InvSourceEstimateIO::read_csv(csvPath);
     const std::filesystem::path stcPath = tmp.filePath("v1-dspm-lh.stc").toStdU16String();
     const bool stcWritten = stc.write(stcPath).has_value(); // MNE .stc format, readable by mne.read_source_estimate
     const InvSourceEstimate fromStc(stcPath);
     //! [inv_source_estimate_io_usage]
-    ok &= expect(stcWritten && fromCsv.data.rows() == 70 && (fromCsv.data - stc.data).norm() <= 1e-6 * stc.data.norm() && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
+    ok &= expect(csvWritten && stcWritten && fromCsv.data == stc.data && fromStc.vertices == stc.vertices && (fromStc.data - stc.data).norm() <= 1e-6 * stc.data.norm(),
                  "InvSourceEstimateIO/InvSourceEstimate: CSV and .stc round trips");
 
     std::println("{}", ok ? "All inv checks passed." : "inv checks FAILED.");

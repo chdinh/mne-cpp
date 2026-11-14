@@ -4353,6 +4353,7 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **read_coil_defs** `[fn]` in [FwdCoilSet](/docs/api/fwd/fwd-coil-set) — Read a coil definitions from file.
 - **read_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — mne_read_cov - also for mne_read_noise_cov
 - **read_csv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Reads annotations from a CSV file ("onset,duration,description" after a header row); rows whose onset or duration is not a number are skipped.
+- **read_csv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Read source estimate from CSV format.
 - **read_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_read_ctf_comp
 - **read_curv** `[fn]` in [FsSurface](/docs/api/fs/fs-surface) — reads a binary curvature file into a vector
 - **read_digitizer_data** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Reads the digitizer data below a node, as MNE-C's load_digitizer_data (digitizer.c): the points of its isotrak block in head coordinates, or of its MRI set in MRI coordinates.
@@ -4388,7 +4389,6 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **readBids** `[fn]` in [IeegImplantation](/docs/api/ieeg/ieeg-implantation) — Read a BIDS iEEG `*_electrodes.tsv`.
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream) — Reads `count` big-endian values and converts them to host byte order.
 - **readBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
-- **readCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Read source estimate from CSV format.
 - **readDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/dsp/channel-derivation) — Read derivation rules from an MNE-C derivation text file (`MNELIB::MNEDerivSet::readText`).
 - **readEpochs** `[fn]` in [MNEEpochDataList](/docs/api/mne/mne-epoch-data-list) — Read the epochs from a raw file based on provided events.
 - **reader** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Attaches a reader (control path; before or after start()).
@@ -6349,6 +6349,7 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **write_coord_trans** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a coordinate transformation structure.
 - **write_cov** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Write a noise covariance matrix.
 - **write_csv** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes onset, duration and description of the annotations to a CSV file.
+- **write_csv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate to CSV format.
 - **write_ctf_comp** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_ctf_comp
 - **write_device_info** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — Writes a FIFFB_DEVICE block; nothing for an empty `device`.
 - **write_dig_point** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_dig_point
@@ -6368,6 +6369,7 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **write_int_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_int_matrix
 - **write_json** `[fn]` in [FiffAnnotations](/docs/api/fiff/fiff-annotations) — Writes the annotations to a JSON file.
 - **write_lout** `[fn]` in [LayoutMaker](/docs/api/channels/layout-maker) — Writes channel boxes as an MNE-C .lout file.
+- **write_matrix** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate as a tab-separated matrix for easy import.
 - **write_mon** `[fn]` in [SelectionIO](/docs/api/channels/selection-io) — Writes each group to its own Brainstorm .mon file, named after the group.
 - **write_name_list** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_name_list
 - **write_named_matrix** `[fn]` in [FiffStream](/docs/api/fiff/fiff-stream) — fiff_write_named_matrix
@@ -6389,13 +6391,11 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **write_w** `[fn]` in [InvSourceEstimate](/docs/api/inv/inv-source-estimate) — Writes the first time point as a .w file, as mne.write_w does.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream) — Writes `count` values in big-endian byte order.
 - **writeBigEndian** `[fn]` in [ByteStream](/docs/api/base/byte-stream)
-- **writeCsv** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate to CSV format.
 - **writeDefinitionFile** `[fn]` in [ChannelDerivation](/docs/api/dsp/channel-derivation) — Write derivation rules in MNE-C derivation text syntax, readable by readDefinitionFile and mne_make_derivations.
 - **writeFif** `[fn]` in [MNEEventList](/docs/api/mne/mne-event-list) — Writes the list as an event block with comments, readable by `mne.read_events`.
 - **writeFilter** `[fn]` in [FilterIO](/docs/api/dsp/filter-io) — Writes a given filter to txt file .
 - **writeHeadPos** `[fn]` in [MaxwellMovementComp](/docs/api/dsp/maxwell-movement-comp) — Write head positions to a file.
 - **writeJson** `[fn]` in [BidsCoordinateSystem](/docs/api/bids/bids-coordinate-system) — Write a BIDS *_coordsystem.json file.
-- **writeMatrix** `[fn]` in [InvSourceEstimateIO](/docs/api/inv/inv-source-estimate-io) — Export source estimate as a tab-separated matrix for easy import.
 - **writePosition** `[fn]` in [AcqWriter](/docs/api/acq/acq-writer)
 - **writer** `[fn]` in [AcqStream](/docs/api/acq/acq-stream) — Takes the writer of an output stream (control path).
 - **writerWaits** `[var]` in [AcqStreamStats](/docs/api/acq/acq-stream-stats) — Output: beginWrite() calls that had to wait for space.
