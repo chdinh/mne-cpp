@@ -28,8 +28,6 @@ SurfaceTreeItem::SurfaceTreeItem(const QString& text)
 
 void SurfaceTreeItem::setSurfaceData(const FSLIB::FsSurface& surface)
 {
-    // Store as QVariant. We might need Q_DECLARE_METATYPE for FSLIB::FsSurface if not already done.
-    // For now assuming FSLIB types are registered or we can register them.
     QVariant v;
     v.setValue(surface);
     setData(v, SurfaceDataRole);

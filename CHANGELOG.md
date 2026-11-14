@@ -470,6 +470,11 @@ aliases; replace the old spelling as below.
   `"cluster"` start draws its seed from the object's engine instead of its
   own random device. `test_math_kmeans` failed in about 1 of 200 runs
   because every replicate landed in a local minimum.
+- `filterkernel.h`, `inv_ecd_set.h`, `inv_hpi_fit.h` and `rt_inv_op.h` no
+  longer declare Qt metatypes for `FilterKernel`, `FilterParameter`,
+  `InvEcdSet`, `HpiFitResult` and `MNEInverseOperator`: Qt 6 registers a
+  type on its first use in a `QVariant`, `qRegisterMetaType<T>()` or a
+  signal, so the declarations were redundant. Migration: none.
 - `mne_fs` no longer links Qt Core. Migration: targets that used Qt only
   through `mne_fs` link `Qt::Core` themselves.
 - `MNEMghTag` is a plain struct whose `data` is a `std::vector<std::byte>`

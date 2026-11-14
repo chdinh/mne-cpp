@@ -203,7 +203,4 @@ signals:
 //=============================================================================================================
 } // NAMESPACE
 
-// Carried by queued resultReady/invOperatorCalculated connections.
-Q_DECLARE_METATYPE(MNELIB::MNEInverseOperator)
-
 #endif // RT_INV_OP_RTPROCESSING_H

@@ -194,9 +194,4 @@ inline qint32 InvEcdSet::size() const
 }
 } // NAMESPACE INVLIB
 
-#ifndef metatype_ecdset
-#define metatype_ecdset
-Q_DECLARE_METATYPE(INVLIB::InvEcdSet);
-#endif
-
 #endif // INV_ECD_SET_H

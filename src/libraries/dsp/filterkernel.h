@@ -282,14 +282,4 @@ private:
 
 } // NAMESPACE DSPLIB
 
-#ifndef metatype_filterkernel
-#define metatype_filterkernel
-Q_DECLARE_METATYPE(DSPLIB::FilterKernel)
-#endif
-
-#ifndef metatype_filterparameter
-#define metatype_filterkernel
-Q_DECLARE_METATYPE(DSPLIB::FilterParameter)
-#endif
-
 #endif // FILTERKERNEL_H

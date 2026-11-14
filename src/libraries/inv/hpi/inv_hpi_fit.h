@@ -376,9 +376,4 @@ private:
 
 } //NAMESPACE
 
-#ifndef metatype_HpiFitResult
-#define metatype_HpiFitResult
-Q_DECLARE_METATYPE(INVLIB::HpiFitResult)
-#endif
-
 #endif // INV_HPI_FIT_H
