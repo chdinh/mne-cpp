@@ -121,6 +121,16 @@ long long remaining(std::istream& in)
     return left;
 }
 
+// Refuses negative counts and counts whose data would extend past the end of the file.
+bool counts_fit(std::istream& in, long long n1, long long size1, long long n2 = 0, long long size2 = 0)
+{
+    if (n1 < 0 || n2 < 0 || n1 * size1 + n2 * size2 > remaining(in)) {
+        BASELIB::Log::critical("Invalid or truncated FreeSurfer file: the item counts do not fit the file.");
+        return false;
+    }
+    return true;
+}
+
 int read_int3(std::istream& in, int& ival)
 /*
  * Read the strange 3-byte integer
@@ -525,6 +535,10 @@ int read_curvature_file(const std::filesystem::path& fname,
             curv.resize(0);
             return FAIL;
         }
+        if (!counts_fit(fp, ncurv, sizeof(float))) {
+            curv.resize(0);
+            return FAIL;
+        }
         /*
  * Read the curvature values
  */
@@ -547,6 +561,10 @@ int read_curvature_file(const std::filesystem::path& fname,
  * How many vertices
  */
         if (read_int3(fp, nface) != 0) {
+            curv.resize(0);
+            return FAIL;
+        }
+        if (!counts_fit(fp, ncurv, sizeof(short))) {
             curv.resize(0);
             return FAIL;
         }
@@ -639,6 +657,8 @@ int read_triangle_file(const std::filesystem::path& fname,
             return FAIL;
         if (read_int(fp, ntri) != 0)
             return FAIL;
+        if (!counts_fit(fp, nvert, 3 * sizeof(float), ntri, 3 * sizeof(std::int32_t)))
+            return FAIL;
         BASELIB::Log::info(" nvert = {} ntri = {}\n", nvert, ntri);
         vert.resize(nvert, 3);
         tri.resize(ntri, 3);
@@ -675,6 +695,8 @@ int read_triangle_file(const std::filesystem::path& fname,
         if (read_int3(fp, nvert) != 0)
             return FAIL;
         if (read_int3(fp, nquad) != 0)
+            return FAIL;
+        if (!counts_fit(fp, nvert, magic == QUAD_FILE_MAGIC_NUMBER ? 3 * sizeof(short) : 3 * sizeof(float), nquad, 4 * 3))
             return FAIL;
         BASELIB::Log::info("{} file : nvert = {} nquad = {}\n", magic == QUAD_FILE_MAGIC_NUMBER ? "Quad" : "New quad", nvert, nquad);
         vert.resize(nvert, 3);

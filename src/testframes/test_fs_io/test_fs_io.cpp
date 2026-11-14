@@ -328,6 +328,43 @@ private slots:
             FsSurface notASurface;
             QVERIFY(!FsSurface::read(file.fileName().toStdU16String(), notASurface, false));
         }
+
+        // The MNE-C reader refuses counts that are negative or exceed the file instead of allocating them
+        const auto mneRejects = [&tmpDir](const char* name, const QByteArray& data, const char* curvName = nullptr, const QByteArray& curvData = {}) {
+            const auto write = [&tmpDir](const char* fileName, const QByteArray& bytes) {
+                QFile file(tmpDir.filePath(QLatin1String(fileName)));
+                return file.open(QIODevice::WriteOnly) && file.write(bytes) == bytes.size();
+            };
+            if (!write(name, data) || (curvName && !write(curvName, curvData))) {
+                return false;
+            }
+            return !MNELIB::MNESourceSpace::load_surface(tmpDir.filePath(QLatin1String(name)).toStdU16String(),
+                                                         curvName ? tmpDir.filePath(QLatin1String(curvName)).toStdU16String() : std::u16string());
+        };
+        for (const qint32 nvert : {-1, 0x7fffffff}) {
+            QByteArray tri;
+            QDataStream triOut(&tri, QIODevice::WriteOnly);
+            put3(triOut, 16777214);
+            triOut.writeRawData("created by test\n\n", 17);
+            triOut << nvert << qint32(1);
+            QVERIFY(mneRejects("lh.badcount", tri));
+        }
+        QByteArray oneTriangle;
+        QDataStream oneTriangleOut(&oneTriangle, QIODevice::WriteOnly);
+        oneTriangleOut.setFloatingPointPrecision(QDataStream::SinglePrecision);
+        put3(oneTriangleOut, 16777214);
+        oneTriangleOut.writeRawData("created by test\n\n", 17);
+        oneTriangleOut << qint32(3) << qint32(1);
+        for (const float c : {0.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 10.0f, 0.0f}) {
+            oneTriangleOut << c;
+        }
+        oneTriangleOut << qint32(0) << qint32(1) << qint32(2);
+        QVERIFY(!mneRejects("lh.one", oneTriangle));
+        QByteArray hugeCurv;
+        QDataStream hugeCurvOut(&hugeCurv, QIODevice::WriteOnly);
+        put3(hugeCurvOut, 16777215);
+        hugeCurvOut << qint32(-3) << qint32(1) << qint32(1);
+        QVERIFY(mneRejects("lh.one", oneTriangle, "lh.badcurv", hugeCurv));
     }
 
     //=========================================================================

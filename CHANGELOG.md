@@ -480,6 +480,10 @@ aliases; replace the old spelling as below.
   and `filter_source_spaces` runs its per-hemisphere work on `std::jthread`
   instead of `QtConcurrent`. `find_source_space_hemi()` returns `int`.
   Migration: `tag->data.constData()` becomes `tag.data.data()`.
+- `MNESourceSpace::load_surface` refuses surface and curvature files whose
+  vertex, triangle, quad or value counts are negative or exceed the file;
+  a negative count used to throw `std::bad_alloc` out of the reader, and a
+  huge one allocated memory for data the file did not hold.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and
