@@ -76,19 +76,17 @@ public:
     /**
      * Pick signal values at a specified time point using linear interpolation.
      *
-     * Reads from the data matrix (time-by-time layout: data[sample][channel])
-     * and writes interpolated values into the output array.
+     * Reads from the data matrix (one row per sample, one column per channel).
      *
      * Refactored: mne_get_values_from_data (mne_get_values.c)
      *
      * @param[in]  time     Target time point (seconds).
      * @param[in]  integ    Integration window width (seconds).
-     * @param[in]  nch      Number of channels to pick.
      * @param[in]  use_abs  If true, take absolute values before averaging.
-     * @param[out] value    Output array of picked values (nch elements).
+     * @param[out] value    Picked values of the first value.size() channels; at most one per data column.
      * @return 0 on success, -1 on error.
      */
-    int getValuesAtTime(float time, float integ, int nch, bool use_abs, float* value) const;
+    int getValuesAtTime(float time, float integ, bool use_abs, Eigen::Ref<Eigen::VectorXf> value) const;
 
     //=========================================================================================================
     /**

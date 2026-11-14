@@ -1012,9 +1012,9 @@ void TestMneRawProjComp::measDataSet_getValuesAtTime()
         }
     }
 
-    float values[3];
+    Eigen::VectorXf values(nch);
     // Get values at time = 0.5s (sample index 50)
-    int result = ds.getValuesAtTime(0.5f, 0.0f, nch, false, values);
+    int result = ds.getValuesAtTime(0.5f, 0.0f, false, values);
     QCOMPARE(result, 0);
 
     // At t=0.5: ch0=0, ch1=0.5, ch2=1.0

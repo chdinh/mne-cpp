@@ -830,7 +830,7 @@ bool InvDipoleFitData::print_fields(const Eigen::Vector3f& rd,
         return false;
     }
     Eigen::VectorXf measured(nch);
-    if (data.current->getValuesAtTime(time, integ, nch, false, measured.data()) == FAIL) {
+    if (data.current->getValuesAtTime(time, integ, false, measured) == FAIL) {
         BASELIB::Log::warning("Cannot pick time: {:7.1f} ms", 1000 * time);
         return false;
     }

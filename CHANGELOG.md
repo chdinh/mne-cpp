@@ -345,6 +345,13 @@ aliases; replace the old spelling as below.
   abs, out)` becomes `getValuesFromChannelData(t, integ, values, tmin, sfreq,
   abs, out)`, with `values` a `MNERawData::RowMajorMatrixXf` and `out` an
   `Eigen::VectorXf(nch)`.
+- `MNEMeasDataSet::getValuesAtTime(time, integ, use_abs, value)` writes an
+  `Eigen::Ref<Eigen::VectorXf>` instead of taking a channel count and a
+  `float*`; it picks the first `value.size()` channels and refuses a vector
+  longer than the data has channels, which used to be read past its end.
+  Migration: `ds.getValuesAtTime(t, integ, nch, abs, out.data())` becomes
+  `ds.getValuesAtTime(t, integ, abs, out)` with `out` an
+  `Eigen::VectorXf(nch)`.
 - `MNERawData::nbad`, `MNEMeasData::nbad` and `MNECovMatrix::nbad` are gone;
   they duplicated the size of `badlist` / `bads`. Migration: use
   `badlist.size()` (`bads.size()` for the covariance). Raw files read their

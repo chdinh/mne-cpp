@@ -53,10 +53,16 @@ MNEMeasDataSet::~MNEMeasDataSet()
 
 //=============================================================================================================
 
-int MNEMeasDataSet::getValuesAtTime(float time, float integ, int nch, bool use_abs, float* value) const
+int MNEMeasDataSet::getValuesAtTime(float time, float integ, bool use_abs, Eigen::Ref<Eigen::VectorXf> value) const
 {
     constexpr float EPS = 0.05f;
     const float sfreq = 1.0f / tstep;
+    const auto nch = static_cast<int>(value.size());
+
+    if (value.size() > data.cols()) {
+        BASELIB::Log::warning("Cannot pick {} values from data with {} channels", value.size(), data.cols());
+        return -1;
+    }
 
     for (int ch = 0; ch < nch; ch++) {
         float sum;

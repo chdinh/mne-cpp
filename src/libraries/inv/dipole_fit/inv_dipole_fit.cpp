@@ -196,7 +196,7 @@ bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDi
         BASELIB::Log::info("Fitting...");
     for (int s = 0; tmin + s * tstep < tmax; s++) {
         float time = tmin + s * tstep;
-        if (data->current->getValuesAtTime(time, integ, data->nchan, false, one.data()) < 0) {
+        if (data->current->getValuesAtTime(time, integ, false, one) < 0) {
             BASELIB::Log::warning("Cannot pick time: {:7.1f} ms", 1000.0f * time);
             continue;
         }

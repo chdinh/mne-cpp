@@ -1563,15 +1563,24 @@ private slots:
             4, 40, 400,
             5, 50, 500;
 
-        int nch = 3;
-        std::vector<float> values(nch);
+        VectorXf values(3);
 
         // Point query at time=0.2, integ=0 → single sample at index 2
-        int ok = ds.getValuesAtTime(0.2f, 0.0f, nch, false, values.data());
+        int ok = ds.getValuesAtTime(0.2f, 0.0f, false, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(values[0] - 3.0f) < 1e-5f);
         QVERIFY(qAbs(values[1] - 30.0f) < 1e-5f);
         QVERIFY(qAbs(values[2] - 300.0f) < 1e-5f);
+
+        // Like MNE-C, a shorter output picks the first channels; a longer one is refused, not overrun
+        VectorXf first(2);
+        QCOMPARE(ds.getValuesAtTime(0.2f, 0.0f, false, first), 0);
+        QCOMPARE(first, Eigen::Vector2f(3.0f, 30.0f));
+        VectorXf longer = VectorXf::Constant(4, -7.0f);
+        BASELIB::LogCapture log;
+        QCOMPARE(ds.getValuesAtTime(0.2f, 0.0f, false, longer), -1);
+        QCOMPARE(log.count(BASELIB::Log::Level::Warning, "values"), 1);
+        QVERIFY((longer.array() == -7.0f).all());
     }
 
     void measDataSet_getValuesAtTimeAbsInteg()
@@ -1588,11 +1597,10 @@ private slots:
             -3, -30,
             4, 40;
 
-        int nch = 2;
-        std::vector<float> values(nch);
+        VectorXf values(2);
 
         // Query with use_abs=true, integ=0.3 → integration over multiple samples
-        int ok = ds.getValuesAtTime(0.15f, 0.3f, nch, true, values.data());
+        int ok = ds.getValuesAtTime(0.15f, 0.3f, true, values);
         QCOMPARE(ok, 0);
         QVERIFY(values[0] > 0.0f);
         QVERIFY(values[1] > 0.0f);
@@ -1790,9 +1798,10 @@ private slots:
         for (int i = 0; i < 10; ++i)
             ds.data(i, 0) = static_cast<float>(i * 10); // 0,10,20,...,90
 
-        float value;
+        VectorXf values(1);
+        float& value = values[0];
         // time=0.15 → s1=1.5, n1=1, f1=0.5 — interpolates between sample 1 (10) and 2 (20)
-        int ok = ds.getValuesAtTime(0.15f, 0.0f, 1, false, &value);
+        int ok = ds.getValuesAtTime(0.15f, 0.0f, false, values);
         QCOMPARE(ok, 0);
         // expected: 0.5 * 10 + 0.5 * 20 = 15
         QVERIFY(qAbs(value - 15.0f) < 1e-4f);
@@ -1809,16 +1818,17 @@ private slots:
         for (int i = 0; i < 10; ++i)
             ds.data(i, 0) = static_cast<float>((i % 2 == 0) ? -10 : 10);
 
-        float value;
+        VectorXf values(1);
+        float& value = values[0];
         // time = 0.05 → s1=0.5, n1=0, f1=0.5
         // data[0] = -10, data[1] = 10
         // use_abs: 0.5 * abs(-10) + 0.5 * abs(10) = 10
-        int ok = ds.getValuesAtTime(0.05f, 0.0f, 1, true, &value);
+        int ok = ds.getValuesAtTime(0.05f, 0.0f, true, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(value - 10.0f) < 1e-4f);
 
         // without use_abs: 0.5 * (-10) + 0.5 * 10 = 0
-        ok = ds.getValuesAtTime(0.05f, 0.0f, 1, false, &value);
+        ok = ds.getValuesAtTime(0.05f, 0.0f, false, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(value - 0.0f) < 1e-4f);
     }
@@ -1837,9 +1847,10 @@ private slots:
         ds.data = MatrixXf(5, 1);
         ds.data << 1.0f, 2.0f, 3.0f, 4.0f, 5.0f;
 
-        float value;
+        VectorXf values(1);
+        float& value = values[0];
         // time=0.4 → s1=4.0, n1=4=np-1, f1=1.0 → snaps to sample 4
-        int ok = ds.getValuesAtTime(0.4f, 0.0f, 1, false, &value);
+        int ok = ds.getValuesAtTime(0.4f, 0.0f, false, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(value - 5.0f) < 1e-4f);
     }
@@ -1857,9 +1868,9 @@ private slots:
         ds.data = MatrixXf(5, 1);
         ds.data << 1, 2, 3, 4, 5;
 
-        float value;
+        VectorXf values(1);
         // time = -0.5 → n1 = -5 → out of range
-        int ok = ds.getValuesAtTime(-0.5f, 0.0f, 1, false, &value);
+        int ok = ds.getValuesAtTime(-0.5f, 0.0f, false, values);
         QVERIFY(ok != 0);
     }
 
@@ -1878,7 +1889,8 @@ private slots:
         for (int i = 0; i < 10; ++i)
             ds.data(i, 0) = static_cast<float>(i);
 
-        float value;
+        VectorXf values(1);
+        float& value = values[0];
         // time = 0.055, integ = 0.005
         // sfreq*integ = 100*0.005 = 0.5, |0.5| >= 0.05, so multi-sample path
         // s1 = 100*(0.055 - 0.0025) = 5.25
@@ -1888,7 +1900,7 @@ private slots:
         // floored n1 = 5, f1 = 5.25-5 = 0.25, f2 = 5.75-5 = 0.75
         // sum = 0.5 * ((0.25+0.75)*data[6] + (2-0.25-0.75)*data[5])
         //     = 0.5 * (1.0*6 + 1.0*5) = 5.5
-        int ok = ds.getValuesAtTime(0.055f, 0.005f, 1, false, &value);
+        int ok = ds.getValuesAtTime(0.055f, 0.005f, false, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(value - 5.5f) < 1e-3f);
     }
@@ -1908,7 +1920,8 @@ private slots:
         for (int i = 0; i < 10; ++i)
             ds.data(i, 0) = static_cast<float>(i);
 
-        float value;
+        VectorXf values(1);
+        float& value = values[0];
         // time = 0.05, integ = 0.05
         // sfreq*integ = 100*0.05 = 5.0, |5.0| >= 0.05
         // s1 = 100*(0.05 - 0.025) = 2.5
@@ -1925,7 +1938,7 @@ private slots:
         // total sum = 20 + 1.375 + 3.625 = 25
         // total width = 4 + 0.5 + 0.5 = 5
         // result = 25/5 = 5.0
-        int ok = ds.getValuesAtTime(0.05f, 0.05f, 1, false, &value);
+        int ok = ds.getValuesAtTime(0.05f, 0.05f, false, values);
         QCOMPARE(ok, 0);
         QVERIFY(qAbs(value - 5.0f) < 1e-3f);
     }
@@ -1942,10 +1955,11 @@ private slots:
             ds.data(i, 0) = static_cast<float>((i % 2 == 0) ? -i : i);
         // data: 0, 1, -2, 3, -4, 5, -6, 7, -8, 9
 
-        float value;
+        VectorXf values(1);
+        float& value = values[0];
         // Same integration window but with use_abs=true
         // This exercises the use_abs branches in the multi-sample path
-        int ok = ds.getValuesAtTime(0.05f, 0.05f, 1, true, &value);
+        int ok = ds.getValuesAtTime(0.05f, 0.05f, true, values);
         QCOMPARE(ok, 0);
         QVERIFY(value > 0.0f); // Should be positive since we take abs
     }
