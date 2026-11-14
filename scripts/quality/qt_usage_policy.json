@@ -136,9 +136,7 @@
     "fs": {
       "tokens": 0,
       "public_header_includes": 0,
-      "modules": [
-        "Core"
-      ]
+      "modules": []
     },
     "fwd": {
       "tokens": 25,
@@ -189,8 +187,8 @@
       ]
     },
     "mne": {
-      "tokens": 338,
-      "public_header_includes": 20,
+      "tokens": 296,
+      "public_header_includes": 19,
       "modules": [
         "Concurrent",
         "Core"

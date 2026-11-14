@@ -118,7 +118,7 @@ public:
      *
      * @return the deduced hemisphere id.
      */
-    qint32 find_source_space_hemi() const;
+    int find_source_space_hemi() const;
 
     //=========================================================================================================
     /**

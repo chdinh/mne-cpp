@@ -60,8 +60,6 @@ set(SOURCES
     mne_msh_light_set.cpp
     mne_surface_patch.cpp
     mne_msh_eyes.cpp
-    mne_mgh_tag.cpp
-    mne_mgh_tag_group.cpp
     mne_description_parser.cpp
     mne_forward_solution.cpp
     mne_inverse_operator.cpp

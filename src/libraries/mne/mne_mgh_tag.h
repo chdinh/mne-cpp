@@ -25,10 +25,11 @@
 #include "mne_global.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QByteArray>
+#include <cstddef>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -44,25 +45,11 @@ namespace MNELIB
  * MGH files can carry optional typed metadata tags in the file footer.
  * Each tag has an integer identifier, a byte length, and a raw payload.
  */
-class MNESHARED_EXPORT MNEMghTag
+struct MNEMghTag
 {
-public:
-    //=========================================================================================================
-    /**
-     * Constructs an empty MNEMghTag.
-     */
-    MNEMghTag() = default;
-
-    //=========================================================================================================
-    /**
-     * Destructor.
-     */
-    ~MNEMghTag() = default;
-
-public:
-    int tag = 0;       /**< Tag identifier code. */
-    long long len = 0; /**< Byte length of the tag data payload. */
-    QByteArray data;   /**< Raw tag data payload. */
+    int tag = 0;                 /**< Tag identifier code. */
+    long long len = 0;           /**< Byte length of the tag data payload. */
+    std::vector<std::byte> data; /**< Raw tag data payload. */
 };
 
 //=============================================================================================================

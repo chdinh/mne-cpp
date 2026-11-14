@@ -41,10 +41,9 @@
 
 #include <fiff/fiff_byte_swap.h>
 
-#include <QFile>
-#include <QtConcurrent>
-#include <QDebug>
-
+#include <charconv>
+#include <cstddef>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <limits>
@@ -52,6 +51,9 @@
 #include <format>
 #include <sstream>
 #include <memory>
+#include <string>
+#include <string_view>
+#include <thread>
 
 // MSVC builds already define _USE_MATH_DEFINES globally (see src/CMakeLists.txt),
 // so define it here only for the toolchains that do not.
@@ -100,14 +102,33 @@ using TrianglesT = MNESurfaceOrVolume::TrianglesT;
 // Leaf I/O functions
 //=========================================================================
 
-int read_int3(QFile& in, int& ival)
+bool read_raw(std::istream& in, void* dest, std::streamsize n)
+{
+    return in.read(static_cast<char*>(dest), n).gcount() == n;
+}
+
+bool at_end(std::istream& in)
+{
+    return in.peek() == std::char_traits<char>::eof();
+}
+
+long long remaining(std::istream& in)
+{
+    const std::streampos here = in.tellg();
+    in.seekg(0, std::ios::end);
+    const std::streamoff left = in.tellg() - here;
+    in.seekg(here);
+    return left;
+}
+
+int read_int3(std::istream& in, int& ival)
 /*
  * Read the strange 3-byte integer
  */
 {
     unsigned int s = 0;
 
-    if (in.read(reinterpret_cast<char*>(&s), 3) != 3) {
+    if (!read_raw(in, &s, 3)) {
         BASELIB::Log::critical("read_int3 could not read data");
         return FAIL;
     }
@@ -116,13 +137,13 @@ int read_int3(QFile& in, int& ival)
     return OK;
 }
 
-int read_int(QFile& in, qint32& ival)
+int read_int(std::istream& in, std::int32_t& ival)
 /*
  * Read a 32-bit integer
  */
 {
-    qint32 s;
-    if (in.read(reinterpret_cast<char*>(&s), sizeof(qint32)) != static_cast<qint64>(sizeof(qint32))) {
+    std::int32_t s = 0;
+    if (!read_raw(in, &s, sizeof(s))) {
         BASELIB::Log::critical("read_int could not read data");
         return FAIL;
     }
@@ -130,13 +151,13 @@ int read_int(QFile& in, qint32& ival)
     return OK;
 }
 
-int read_int2(QFile& in, int& ival)
+int read_int2(std::istream& in, int& ival)
 /*
       * Read int from short
       */
 {
-    short s;
-    if (in.read(reinterpret_cast<char*>(&s), sizeof(short)) != static_cast<qint64>(sizeof(short))) {
+    short s = 0;
+    if (!read_raw(in, &s, sizeof(s))) {
         BASELIB::Log::critical("read_int2 could not read data");
         return FAIL;
     }
@@ -144,13 +165,13 @@ int read_int2(QFile& in, int& ival)
     return OK;
 }
 
-int read_float(QFile& in, float& fval)
+int read_float(std::istream& in, float& fval)
 /*
       * Read float
       */
 {
-    float f;
-    if (in.read(reinterpret_cast<char*>(&f), sizeof(float)) != static_cast<qint64>(sizeof(float))) {
+    float f = 0.0f;
+    if (!read_raw(in, &f, sizeof(f))) {
         BASELIB::Log::critical("read_float could not read data");
         return FAIL;
     }
@@ -158,13 +179,13 @@ int read_float(QFile& in, float& fval)
     return OK;
 }
 
-int read_long(QFile& in, long long& lval)
+int read_long(std::istream& in, long long& lval)
 /*
  * Read a 64-bit integer
  */
 {
-    long long s;
-    if (in.read(reinterpret_cast<char*>(&s), sizeof(long long)) != static_cast<qint64>(sizeof(long long))) {
+    long long s = 0;
+    if (!read_raw(in, &s, sizeof(s))) {
         BASELIB::Log::critical("read_long could not read data");
         return FAIL;
     }
@@ -198,59 +219,71 @@ int check_vertex(int no, int maxno)
 // read_vol_geom
 //=========================================================================
 
-std::unique_ptr<MNEVolGeom> read_vol_geom(QFile& fp)
+std::unique_ptr<MNEVolGeom> read_vol_geom(std::istream& fp)
 /*
  * This the volume geometry reading code from FreeSurfer
  */
 {
     int vgRead = 0;
     int counter = 0;
-    qint64 pos = 0;
+    std::streampos pos = 0;
 
     auto vg = std::make_unique<MNEVolGeom>();
 
-    /*
-     * Every line has the shape "<key> = <value>...". Read the values through
-     * QByteArray tokens rather than sscanf("%s"): the widths are unbounded
-     * there, so a long token in an untrusted file overflows the destination
-     * buffer.
-     */
-    const auto readFloats = [](const QList<QByteArray>& tok, float* dest, int n) {
+    // Every line has the shape "<key> = <value>..."; unparsable numbers keep their defaults.
+    const auto toInt = [](std::string_view word) {
+        int value = 0;
+        std::from_chars(word.data(), word.data() + word.size(), value);
+        return value;
+    };
+    const auto readFloats = [](const std::vector<std::string_view>& tok, float* dest, int n) {
         for (int i = 0; i < n; ++i) {
-            if (tok.size() <= 2 + i)
+            const std::size_t k = 2 + static_cast<std::size_t>(i);
+            if (tok.size() <= k)
                 return;
-            bool ok = false;
-            const float v = tok.at(2 + i).toFloat(&ok);
-            if (!ok)
+            const std::string_view word = tok[k];
+            float v = 0.0f;
+            const auto [ptr, ec] = std::from_chars(word.data(), word.data() + word.size(), v);
+            if (ec != std::errc{})
                 return;
             dest[i] = v;
         }
     };
 
-    while (!fp.atEnd() && counter < 8) {
-        const QByteArray lineData = fp.readLine(256);
-        if (lineData.isEmpty())
+    std::string lineData;
+    while (!at_end(fp) && counter < 8) {
+        if (!std::getline(fp, lineData))
             break;
 
-        const QList<QByteArray> tok = lineData.simplified().split(' ');
-        if (tok.empty() || tok.front().isEmpty())
+        std::vector<std::string_view> tok;
+        std::string_view rest(lineData);
+        while (true) {
+            const std::size_t begin = rest.find_first_not_of(" \t\r\v\f");
+            if (begin == std::string_view::npos)
+                break;
+            rest.remove_prefix(begin);
+            const std::size_t end = rest.find_first_of(" \t\r\v\f");
+            tok.push_back(rest.substr(0, end));
+            rest = end == std::string_view::npos ? std::string_view{} : rest.substr(end);
+        }
+        if (tok.empty())
             break;
 
-        const QByteArray& param = tok.front();
+        const std::string_view param = tok.front();
         if (param == "valid") {
             if (tok.size() > 2)
-                vg->valid = tok.at(2).toInt();
+                vg->valid = toInt(tok[2]);
             vgRead = 1;
             counter++;
         } else if (param == "filename") {
             if (tok.size() > 2)
-                vg->filename = tok.at(2).toStdString();
+                vg->filename = std::string(tok[2]);
             counter++;
         } else if (param == "volume") {
             if (tok.size() > 4) {
-                vg->width = tok.at(2).toInt();
-                vg->height = tok.at(3).toInt();
-                vg->depth = tok.at(4).toInt();
+                vg->width = toInt(tok[2]);
+                vg->height = toInt(tok[3]);
+                vg->depth = toInt(tok[4]);
             }
             counter++;
         } else if (param == "voxelsize") {
@@ -280,12 +313,11 @@ std::unique_ptr<MNEVolGeom> read_vol_geom(QFile& fp)
             counter++;
         }
         /* remember the current position */
-        pos = fp.pos();
+        pos = fp.tellg();
     };
-    if (!fp.atEnd()) {    /* we read one more line */
-        if (pos > 0)      /* if success in getting pos, then */
-            fp.seek(pos); /* restore the position */
-        /* note that this won't allow compression using pipe */
+    if (!at_end(fp) && pos > 0) { /* we read one more line: go back to its start */
+        fp.clear();
+        fp.seekg(pos);
     }
     if (!vgRead) {
         vg = std::make_unique<MNEVolGeom>();
@@ -297,15 +329,19 @@ std::unique_ptr<MNEVolGeom> read_vol_geom(QFile& fp)
 // read_tag_data
 //=========================================================================
 
-int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long long& nbytesp)
+int read_tag_data(std::istream& fp, int tag, long long nbytes, std::vector<std::byte>& val, long long& nbytesp)
 /*
  * Read the data of one tag
  */
 {
     val.clear();
     if (nbytes > 0) {
-        val = fp.read(nbytes);
-        if (val.size() != nbytes) {
+        if (nbytes > remaining(fp)) {
+            BASELIB::Log::critical("Failed to read {} bytes of tag data", static_cast<int>(nbytes));
+            return FAIL;
+        }
+        val.resize(static_cast<std::size_t>(nbytes));
+        if (!read_raw(fp, val.data(), static_cast<std::streamsize>(nbytes))) {
             BASELIB::Log::critical("Failed to read {} bytes of tag data", static_cast<int>(nbytes));
             return FAIL;
         }
@@ -318,7 +354,7 @@ int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long lo
             /*
              * Serialize MNEVolGeom as POD fields followed by a
              * null-terminated UTF-8 filename.  We must NOT memcpy the
-             * entire MNEVolGeom because it contains a QString member.
+             * entire MNEVolGeom because it contains a std::string member.
              */
             struct VolGeomPOD
             {
@@ -340,15 +376,17 @@ int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long lo
             std::memcpy(pod.y_ras, g->y_ras, 3 * sizeof(float));
             std::memcpy(pod.z_ras, g->z_ras, 3 * sizeof(float));
             std::memcpy(pod.c_ras, g->c_ras, 3 * sizeof(float));
-            val = QByteArray(reinterpret_cast<const char*>(&pod), sizeof(VolGeomPOD));
-            val.append(g->filename.data(), static_cast<qsizetype>(g->filename.size()));
-            val.append('\0');
-            nbytesp = val.size();
+            val.resize(sizeof(VolGeomPOD) + g->filename.size() + 1);
+            std::memcpy(val.data(), &pod, sizeof(VolGeomPOD));
+            std::memcpy(val.data() + sizeof(VolGeomPOD), g->filename.data(), g->filename.size());
+            val.back() = std::byte{0};
+            nbytesp = static_cast<long long>(val.size());
         } else if (tag == TAG_OLD_USEREALRAS || tag == TAG_USEREALRAS) {
             int useRealRas = 0;
             if (read_int(fp, useRealRas) == FAIL)
                 return FAIL;
-            val = QByteArray(reinterpret_cast<const char*>(&useRealRas), sizeof(int));
+            val.resize(sizeof(int));
+            std::memcpy(val.data(), &useRealRas, sizeof(int));
             nbytesp = sizeof(int);
         } else {
             BASELIB::Log::warning("Encountered an unknown tag with no length specification : {}", tag);
@@ -362,22 +400,18 @@ int read_tag_data(QFile& fp, int tag, long long nbytes, QByteArray& val, long lo
 // add_mgh_tag_to_group
 //=========================================================================
 
-void add_mgh_tag_to_group(std::optional<MNEMghTagGroup>& g, int tag, long long len, const QByteArray& data)
+void add_mgh_tag_to_group(std::optional<MNEMghTagGroup>& g, int tag, long long len, std::vector<std::byte> data)
 {
     if (!g)
         g = MNEMghTagGroup();
-    auto new_tag = std::make_unique<MNEMghTag>();
-    new_tag->tag = tag;
-    new_tag->len = len;
-    new_tag->data = data;
-    g->tags.push_back(std::move(new_tag));
+    g->tags.push_back(MNEMghTag{tag, len, std::move(data)});
 }
 
 //=========================================================================
 // read_next_tag
 //=========================================================================
 
-int read_next_tag(QFile& fp, int& tagp, long long& lenp, QByteArray& datap)
+int read_next_tag(std::istream& fp, int& tagp, long long& lenp, std::vector<std::byte>& datap)
 /*
  * Read the next tag in the file
  */
@@ -386,11 +420,11 @@ int read_next_tag(QFile& fp, int& tagp, long long& lenp, QByteArray& datap)
     long long len;
 
     // Tags are optional; the end of the file ends the list.
-    if (fp.atEnd() || read_int(fp, tag) == FAIL) {
+    if (at_end(fp) || read_int(fp, tag) == FAIL) {
         tagp = 0;
         return OK;
     }
-    if (fp.atEnd()) {
+    if (at_end(fp)) {
         tagp = 0;
         return OK;
     }
@@ -421,21 +455,21 @@ int read_next_tag(QFile& fp, int& tagp, long long& lenp, QByteArray& datap)
 // read_mgh_tags
 //=========================================================================
 
-int read_mgh_tags(QFile& fp, std::optional<MNEMghTagGroup>& tagsp)
+int read_mgh_tags(std::istream& fp, std::optional<MNEMghTagGroup>& tagsp)
 /*
  * Read all the tags from the file
  */
 {
-    long long len;
-    int tag;
-    QByteArray tag_data;
+    long long len = 0;
+    int tag = 0;
 
     while (1) {
+        std::vector<std::byte> tag_data;
         if (read_next_tag(fp, tag, len, tag_data) == FAIL)
             return FAIL;
         if (tag == 0)
             break;
-        add_mgh_tag_to_group(tagsp, tag, len, tag_data);
+        add_mgh_tag_to_group(tagsp, tag, len, std::move(tag_data));
     }
     return OK;
 }
@@ -448,7 +482,7 @@ int read_curvature_file(const std::filesystem::path& fname,
                         Eigen::VectorXf& curv)
 
 {
-    QFile fp(fname);
+    std::ifstream fp(fname, std::ios::binary);
     int magic = 0;
 
     float curvmin, curvmax;
@@ -457,7 +491,7 @@ int read_curvature_file(const std::filesystem::path& fname,
     int val = 0, k;
     float fval = 0.0f;
 
-    if (!fp.open(QIODevice::ReadOnly)) {
+    if (!fp) {
         BASELIB::Log::critical("{}", BASELIB::utf8FromPath(fname));
         curv.resize(0);
         return FAIL;
@@ -554,11 +588,11 @@ int read_triangle_file(const std::filesystem::path& fname,
       * Read the FS triangulated surface
       */
 {
-    QFile fp(fname);
+    std::ifstream fp(fname, std::ios::binary);
     int magic = 0;
-    char c;
+    char c = 0;
 
-    qint32 nvert = 0, ntri = 0, nquad = 0;
+    std::int32_t nvert = 0, ntri = 0, nquad = 0;
     PointsT vert;
     TrianglesT tri;
     int k, p;
@@ -566,7 +600,7 @@ int read_triangle_file(const std::filesystem::path& fname,
     int val = 0;
     int which;
 
-    if (!fp.open(QIODevice::ReadOnly)) {
+    if (!fp) {
         BASELIB::Log::critical("{}", BASELIB::utf8FromPath(fname));
         return FAIL;
     }
@@ -584,15 +618,20 @@ int read_triangle_file(const std::filesystem::path& fname,
         /*
      * Get the comment
      */
-        BASELIB::Log::info("Triangle file : ");
-        for (fp.getChar(&c); c != '\n'; fp.getChar(&c)) {
-            if (fp.atEnd()) {
+        std::string comment;
+        while (fp.get(c) && c != '\n') {
+            if (at_end(fp)) {
                 BASELIB::Log::critical("Bad triangle file.");
                 return FAIL;
             }
-            putc(c, stderr);
+            comment += c;
         }
-        fp.getChar(&c);
+        if (!fp) {
+            BASELIB::Log::critical("Bad triangle file.");
+            return FAIL;
+        }
+        BASELIB::Log::info("Triangle file : {}", comment);
+        fp.get(c);
         /*
      * How many vertices and triangles?
      */
@@ -743,11 +782,11 @@ std::optional<MNEVolGeom> get_volume_geom_from_tag(const MNEMghTagGroup* tagsp)
     };
 
     for (const auto& t : tagsp->tags) {
-        if (t->tag == TAG_OLD_SURF_GEOM) {
-            if (t->len < static_cast<long long>(sizeof(VolGeomPOD)))
+        if (t.tag == TAG_OLD_SURF_GEOM) {
+            if (t.data.size() < sizeof(VolGeomPOD))
                 return std::nullopt;
 
-            const unsigned char* d = reinterpret_cast<const unsigned char*>(t->data.constData());
+            const std::byte* d = t.data.data();
             VolGeomPOD pod;
             std::memcpy(&pod, d, sizeof(VolGeomPOD));
 
@@ -764,8 +803,10 @@ std::optional<MNEVolGeom> get_volume_geom_from_tag(const MNEMghTagGroup* tagsp)
             std::memcpy(result.z_ras, pod.z_ras, 3 * sizeof(float));
             std::memcpy(result.c_ras, pod.c_ras, 3 * sizeof(float));
 
-            if (t->len > static_cast<long long>(sizeof(VolGeomPOD)))
-                result.filename = reinterpret_cast<const char*>(d + sizeof(VolGeomPOD));
+            if (t.data.size() > sizeof(VolGeomPOD)) {
+                const auto* name = reinterpret_cast<const char*>(d + sizeof(VolGeomPOD));
+                result.filename.assign(name, strnlen(name, t.data.size() - sizeof(VolGeomPOD)));
+            }
 
             return result;
         }
@@ -891,7 +932,7 @@ bool MNESourceSpace::is_left_hemi() const
 
 //=============================================================================================================
 
-qint32 MNESourceSpace::find_source_space_hemi() const
+int MNESourceSpace::find_source_space_hemi() const
 {
     double xave = rr.col(0).sum();
     if (xave < 0)
@@ -1571,7 +1612,7 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
 {
     std::shared_ptr<MNESurface> surf;
     int k;
-    int nproc = QThread::idealThreadCount();
+    const unsigned int nproc = std::thread::hardware_concurrency();
     int nspace = static_cast<int>(spaces.size());
 
     if (bemfile.empty())
@@ -1635,7 +1676,12 @@ int MNESourceSpace::filter_source_spaces(float limit, const std::filesystem::pat
         /*
         * Ready to start the threads & Wait for them to complete
         */
-        QtConcurrent::blockingMap(args, filter_source_space);
+        {
+            std::vector<std::jthread> threads;
+            threads.reserve(args.size());
+            for (FilterThreadArg* arg : args)
+                threads.emplace_back(filter_source_space, arg);
+        }
         if (filtered) {
             for (const std::ostringstream& log : logs)
                 *filtered << log.view();
@@ -1657,7 +1703,6 @@ int MNESourceSpace::read_source_spaces(const std::filesystem::path& name, std::v
  * Read source spaces from a FIFF file
  */
 {
-    QFile file(name);
     FiffStream stream(name);
 
     std::vector<std::unique_ptr<MNESourceSpace>> local_spaces;

@@ -30,13 +30,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
-#include <memory>
 #include <vector>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -49,7 +43,7 @@ namespace MNELIB
 /**
  * @brief Collection of MNEMghTag entries from a FreeSurfer MGH/MGZ file footer.
  *
- * Owns its tags via unique_ptr.
+ * Holds its tags by value.
  */
 class MNESHARED_EXPORT MNEMghTagGroup
 {
@@ -60,35 +54,8 @@ public:
      */
     MNEMghTagGroup() = default;
 
-    MNEMghTagGroup(const MNEMghTagGroup& other)
-    {
-        tags.reserve(other.tags.size());
-        for (const auto& t : other.tags)
-            tags.push_back(std::make_unique<MNEMghTag>(*t));
-    }
-
-    MNEMghTagGroup& operator=(const MNEMghTagGroup& other)
-    {
-        if (this != &other) {
-            tags.clear();
-            tags.reserve(other.tags.size());
-            for (const auto& t : other.tags)
-                tags.push_back(std::make_unique<MNEMghTag>(*t));
-        }
-        return *this;
-    }
-
-    MNEMghTagGroup(MNEMghTagGroup&&) = default;
-    MNEMghTagGroup& operator=(MNEMghTagGroup&&) = default;
-
-    //=========================================================================================================
-    /**
-     * Destructor.
-     */
-    ~MNEMghTagGroup() = default;
-
 public:
-    std::vector<std::unique_ptr<MNEMghTag>> tags; /**< Owned tag entries. */
+    std::vector<MNEMghTag> tags; /**< The tags in file order. */
 
     /**
      * @brief Returns the number of tags in the group.

@@ -472,6 +472,14 @@ aliases; replace the old spelling as below.
   because every replicate landed in a local minimum.
 - `mne_fs` no longer links Qt Core. Migration: targets that used Qt only
   through `mne_fs` link `Qt::Core` themselves.
+- `MNEMghTag` is a plain struct whose `data` is a `std::vector<std::byte>`
+  instead of a `QByteArray`, and `MNEMghTagGroup::tags` holds the tags by
+  value (`std::vector<MNEMghTag>`) instead of through `std::unique_ptr`.
+  The FreeSurfer surface, curvature and tag readers behind
+  `MNESourceSpace::load_surface` use `std::ifstream` instead of `QFile`,
+  and `filter_source_spaces` runs its per-hemisphere work on `std::jthread`
+  instead of `QtConcurrent`. `find_source_space_hemi()` returns `int`.
+  Migration: `tag->data.constData()` becomes `tag.data.data()`.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and
