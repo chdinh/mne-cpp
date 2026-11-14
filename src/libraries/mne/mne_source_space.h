@@ -30,6 +30,7 @@
 #include "mne_global.h"
 
 #include <filesystem>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
@@ -236,8 +237,15 @@ public:
                                           const std::vector<std::filesystem::path>& labels,
                                           int nlabel);
 
-    static int read_label(const std::filesystem::path& label,
-                          Eigen::VectorXi& sel);
+    //=========================================================================================================
+    /**
+     * Reads the vertex numbers of a FreeSurfer label file (MNE-C @c read_label).
+     *
+     * @param[in] label   The label file.
+     *
+     * @return The vertex numbers, or no value if the file cannot be read.
+     */
+    static std::optional<Eigen::VectorXi> read_label(const std::filesystem::path& label);
 
     //=========================================================================================================
     /**

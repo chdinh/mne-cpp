@@ -42,11 +42,13 @@
 #include <fiff/fiff_byte_swap.h>
 
 #include <QFile>
-#include <QTextStream>
 #include <QtConcurrent>
 #include <QDebug>
 
 #include <cstring>
+#include <fstream>
+#include <limits>
+#include <optional>
 #include <format>
 #include <sstream>
 #include <memory>
@@ -1976,9 +1978,8 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
     MNESourceSpace* sp;
     Eigen::VectorXi lh_inuse;
     Eigen::VectorXi rh_inuse;
-    Eigen::VectorXi sel;
     Eigen::VectorXi* inuse = nullptr;
-    int k, p;
+    int k;
     int nspace = static_cast<int>(spaces.size());
 
     if (nlabel == 0)
@@ -2012,13 +2013,15 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
             continue;
         }
         if (sp) {
-            if (read_label(labels[k], sel) == FAIL)
+            const std::optional<Eigen::VectorXi> sel = read_label(labels[k]);
+            if (!sel) {
                 return FAIL;
-            for (p = 0; p < sel.size(); p++) {
-                if (sel[p] >= 0 && sel[p] < sp->np)
-                    (*inuse)[sel[p]] = sp->inuse[sel[p]];
+            }
+            for (const int vertex : *sel) {
+                if (vertex >= 0 && vertex < sp->np)
+                    (*inuse)[vertex] = sp->inuse[vertex];
                 else
-                    BASELIB::Log::warning("vertex number out of range in {} ({} vs {})\n", BASELIB::utf8FromPath(labels[k]), sel[p], sp->np);
+                    BASELIB::Log::warning("vertex number out of range in {} ({} vs {})\n", BASELIB::utf8FromPath(labels[k]), vertex, sp->np);
             }
             BASELIB::Log::info("Processed label file {}\n", BASELIB::utf8FromPath(labels[k]));
         }
@@ -2032,55 +2035,32 @@ int MNESourceSpace::restrict_sources_to_labels(std::vector<std::unique_ptr<MNESo
 
 //=============================================================================================================
 
-int MNESourceSpace::read_label(const std::filesystem::path& label, Eigen::VectorXi& sel)
-/*
-          * Find the source points within a label
-          */
+std::optional<Eigen::VectorXi> MNESourceSpace::read_label(const std::filesystem::path& label)
 {
-    int k, p, nlabel;
-    char c;
-    float fdum;
-    /*
-       * Read the label file
-       */
-    QFile inFile(label);
-    if (!inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        BASELIB::Log::critical("{}", BASELIB::utf8FromPath(label)); //err_set_sys_error(label);
-        sel.resize(0);
-        return FAIL;
+    std::ifstream in(label);
+    if (!in) {
+        BASELIB::Log::critical("Cannot open label file {}", BASELIB::utf8FromPath(label));
+        return std::nullopt;
     }
-    inFile.getChar(&c);
-    if (c != '#') {
-        BASELIB::Log::critical("FsLabel file does not start correctly.");
-        sel.resize(0);
-        return FAIL;
+    if (in.get() != '#') {
+        BASELIB::Log::critical("Label file {} does not start correctly.", BASELIB::utf8FromPath(label));
+        return std::nullopt;
     }
-    /*
-       * Skip the comment line
-       */
-    while (inFile.getChar(&c) && c != '\n')
-        ;
-    {
-        QTextStream in(&inFile);
-        in >> nlabel;
-        if (in.status() != QTextStream::Ok) {
-            BASELIB::Log::critical("Could not read the number of labelled points.");
-            sel.resize(0);
-            return FAIL;
-        }
-        sel.resize(nlabel);
-        for (k = 0; k < nlabel; k++) {
-            in >> p >> fdum >> fdum >> fdum >> fdum;
-            if (in.status() != QTextStream::Ok) {
-                BASELIB::Log::critical("Could not read label point # {}", k + 1);
-                sel.resize(0);
-                return FAIL;
-            }
-            sel[k] = p;
+    in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    int nlabel = 0;
+    if (!(in >> nlabel) || nlabel < 0) {
+        BASELIB::Log::critical("Could not read the number of labelled points.");
+        return std::nullopt;
+    }
+    Eigen::VectorXi sel(nlabel);
+    float coordinate = 0.0f;
+    for (int k = 0; k < nlabel; k++) {
+        if (!(in >> sel[k] >> coordinate >> coordinate >> coordinate >> coordinate)) {
+            BASELIB::Log::critical("Could not read label point # {}", k + 1);
+            return std::nullopt;
         }
     }
-
-    return OK;
+    return sel;
 }
 
 //=============================================================================================================

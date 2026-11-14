@@ -439,6 +439,13 @@ aliases; replace the old spelling as below.
   instead of `QFile`/`QTextStream`, and the header no longer includes
   `QString`. Migration: rename the calls, for example
   `MNEEventList::readFif(path)` becomes `MNEEventList::read_fif(path)`.
+- `MNESourceSpace::read_label(path)` returns
+  `std::optional<Eigen::VectorXi>` instead of filling an out-parameter and
+  returning a status code, and reads with `std::ifstream` instead of
+  `QFile`/`QTextStream`. A label file with a negative point count is
+  refused; it used to resize the vertex vector to a negative size.
+  Migration: `read_label(path, sel) == 0` becomes
+  `const auto sel = read_label(path); if (sel) ...`.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

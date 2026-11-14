@@ -148,11 +148,12 @@ int main(int argc, char* argv[])
         //
         // Read label vertices
         //
-        VectorXi labelVerts;
-        if (MNESourceSpace::read_label(labelFile.toStdU16String(), labelVerts) != 0) {
+        const std::optional<VectorXi> read = MNESourceSpace::read_label(labelFile.toStdU16String());
+        if (!read) {
             qCritical("Failed to read label file %s.", labelFile.toUtf8().constData());
             return 1;
         }
+        const VectorXi& labelVerts = *read;
 
         if (labelVerts.size() == 0) {
             qCritical("Label %s contains no vertices.", labelFile.toUtf8().constData());

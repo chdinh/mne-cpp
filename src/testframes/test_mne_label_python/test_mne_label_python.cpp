@@ -36,6 +36,7 @@
 #include <base/string_utils.h>
 #include <mne/mne_inverse_operator.h>
 #include <mne/mne_source_spaces.h>
+#include <mne/mne_source_space.h>
 #include <mne/mne_cortical_map.h>
 #include <fiff/fiff_cov.h>
 #include <fiff/fiff_ch_name.h>
@@ -45,6 +46,9 @@
 #include <fs/fs_surfaceset.h>
 
 #include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <optional>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -53,6 +57,7 @@
 #include <QtTest>
 #include <QCoreApplication>
 #include <QFile>
+#include <QTemporaryDir>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -99,6 +104,7 @@ private slots:
     void pickRegions_matchesPython_data();
     void pickRegions_matchesPython();
     void sourcePositionsByLabel();
+    void sourceSpaceReadsLabelVertices();
 
     void clusterForward_invariants();
     void assembleKernel_label_data();
@@ -192,6 +198,27 @@ void TestMneLabelPython::labelSourceSelection()
     QCOMPARE(static_cast<int>(vertno[l.hemi].size()), count);
     QCOMPARE(vertno[l.hemi](0), firstVertno);
     QCOMPARE(static_cast<int>(vertno[1 - l.hemi].size()), 0);
+}
+
+//=============================================================================================================
+
+void TestMneLabelPython::sourceSpaceReadsLabelVertices()
+{
+    const std::optional<VectorXi> v1 = MNESourceSpace::read_label(dataPath("subjects/sample/label/lh.V1.label").toStdU16String());
+    QVERIFY(v1);
+    QCOMPARE(*v1, m_v1.vertices);
+
+    QTemporaryDir dir;
+    const auto rejects = [&dir](const char* name, const char* text) {
+        const std::filesystem::path path = dir.filePath(name).toStdU16String();
+        std::ofstream(path) << text;
+        return !MNESourceSpace::read_label(path);
+    };
+    QVERIFY(rejects("no-hash.label", "label\n1\n3 0 0 0 0\n"));
+    QVERIFY(rejects("short.label", "#!ascii\n2\n3 0 0 0 0\n"));
+    QVERIFY(rejects("negative.label", "#!ascii\n-2\n"));
+    QVERIFY(rejects("letters.label", "#!ascii\n1\nx 0 0 0 0\n"));
+    QVERIFY(!MNESourceSpace::read_label(dir.filePath("missing.label").toStdU16String()));
 }
 
 //=============================================================================================================
