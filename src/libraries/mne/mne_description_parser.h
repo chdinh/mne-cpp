@@ -25,8 +25,11 @@
 #include "mne_global.h"
 #include "mne_process_description.h"
 
-#include <QString>
-#include <QTextStream>
+#include <filesystem>
+#include <istream>
+#include <optional>
+#include <string>
+#include <string_view>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -51,51 +54,55 @@ class MNESHARED_EXPORT MNEDescriptionParser
 {
 public:
     /**
-     * Parse an averaging description file.
+     * Reads an averaging description file.
      *
-     * @param[in] fileName  Path to the .ave file.
-     * @param[out] desc     Parsed description.
-     * @return true if successful, false on error.
+     * @param[in] path   The .ave file.
+     *
+     * @return The description, or no value if the file cannot be read or is malformed.
      */
-    static bool parseAverageFile(const std::filesystem::path& fileName, FIFFLIB::AverageDescription& desc);
+    static std::optional<FIFFLIB::AverageDescription> read_average(const std::filesystem::path& path);
 
     /**
-     * Parse a covariance description file.
+     * Reads a covariance description file.
      *
-     * @param[in] fileName  Path to the .cov file.
-     * @param[out] desc     Parsed description.
-     * @return true if successful, false on error.
+     * @param[in] path   The .cov file.
+     *
+     * @return The description, or no value if the file cannot be read or is malformed.
      */
-    static bool parseCovarianceFile(const std::filesystem::path& fileName, CovDescription& desc);
+    static std::optional<CovDescription> read_covariance(const std::filesystem::path& path);
 
 private:
+    static bool parse_average(std::istream& in, const std::filesystem::path& path, FIFFLIB::AverageDescription& desc);
+
+    static bool parse_covariance(std::istream& in, const std::filesystem::path& path, CovDescription& desc);
+
     /**
      * Skip comment lines (starting with '#') and whitespace.
      */
-    static void skipComments(std::istream& in);
+    static void skip_comments(std::istream& in);
 
     /**
      * Read the next whitespace-delimited word, handling quoted strings.
      * Returns empty string on EOF.
      */
-    static std::string nextWord(std::istream& in);
+    static std::string next_word(std::istream& in);
 
     /**
      * Read and parse an integer value.
      */
-    static bool getInt(std::istream& in, int& val);
+    static bool get_int(std::istream& in, int& val);
 
     /**
      * Read and parse a float value.
      */
-    static bool getFloat(std::istream& in, float& val);
+    static bool get_float(std::istream& in, float& val);
 
     /**
      * Parse rejection parameters common to both .ave and .cov files.
      * Returns true if the keyword was handled, false otherwise (unrecognized keyword).
      */
-    static bool parseRejectionParam(std::string_view keyword, std::istream& in,
-                                    FIFFLIB::RejectionParams& rej, bool& ok);
+    static bool parse_rejection_param(std::string_view keyword, std::istream& in,
+                                      FIFFLIB::RejectionParams& rej, bool& ok);
 };
 
 } // namespace MNELIB

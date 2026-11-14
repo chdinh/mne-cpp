@@ -446,6 +446,13 @@ aliases; replace the old spelling as below.
   refused; it used to resize the vertex vector to a negative size.
   Migration: `read_label(path, sel) == 0` becomes
   `const auto sel = read_label(path); if (sel) ...`.
+- `MNEDescriptionParser::parseAverageFile(path, desc)` and
+  `parseCovarianceFile(path, desc)` are `read_average(path)` and
+  `read_covariance(path)` and return the description as a
+  `std::optional`; `mne_description_parser.h` no longer includes
+  `QString`/`QTextStream`. Migration: `AverageDescription d;
+  parseAverageFile(path, d)` becomes
+  `const auto d = MNEDescriptionParser::read_average(path); if (d) ...`.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

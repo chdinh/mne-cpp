@@ -293,11 +293,12 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         if (!aveDescFile.empty()) {
             qInfo() << "\n--- Averaging according to" << aveDescFile.c_str() << "---\n";
 
-            AverageDescription aveDesc;
-            if (!MNEDescriptionParser::parseAverageFile(pathFromUtf8(aveDescFile), aveDesc) || aveDesc.categories.empty()) {
+            const std::optional<AverageDescription> parsedAve = MNEDescriptionParser::read_average(pathFromUtf8(aveDescFile));
+            if (!parsedAve || parsedAve->categories.empty()) {
                 qCritical() << "Failed to parse averaging description file:" << aveDescFile.c_str();
                 return 1;
             }
+            const AverageDescription& aveDesc = *parsedAve;
 
             std::string aveLog;
             FiffEvokedSet evokedSet = FiffEvokedSet::computeAverages(raw, aveDesc, fiffEvents.events, aveLog);
@@ -335,11 +336,12 @@ int BatchProcessor::run(const ProcessingSettings& settings)
         if (!covDescFile.empty()) {
             qInfo() << "\n--- Computing covariance matrix according to" << covDescFile.c_str() << "---\n";
 
-            CovDescription covDesc;
-            if (!MNEDescriptionParser::parseCovarianceFile(pathFromUtf8(covDescFile), covDesc) || covDesc.defs.empty()) {
+            const std::optional<CovDescription> parsedCov = MNEDescriptionParser::read_covariance(pathFromUtf8(covDescFile));
+            if (!parsedCov || parsedCov->defs.empty()) {
                 qCritical() << "Failed to parse covariance description file:" << covDescFile.c_str();
                 return 1;
             }
+            const CovDescription& covDesc = *parsedCov;
 
             // Compute covariance per definition, then combine
             std::vector<FiffCov> defCovs;

@@ -648,23 +648,22 @@ private slots:
         if (!QFile::exists(avePath))
             QSKIP("audvis.ave not found");
 
-        AverageDescription desc;
-        bool ok = MNEDescriptionParser::parseAverageFile(avePath.toStdU16String(), desc);
-        QVERIFY(ok);
+        const std::optional<AverageDescription> desc = MNEDescriptionParser::read_average(avePath.toStdU16String());
+        QVERIFY(desc);
 
         // audvis.ave has 4 categories: Left Auditory, Right Auditory, Left Visual, Right Visual
-        QVERIFY(desc.categories.size() >= 4);
+        QVERIFY(desc->categories.size() >= 4);
 
         // Check first category
-        QVERIFY(!desc.categories[0].comment.empty());
-        QVERIFY(desc.categories[0].events.size() > 0);
-        QVERIFY(desc.categories[0].tmin < 0.0f);
-        QVERIFY(desc.categories[0].tmax > 0.0f);
+        QVERIFY(!desc->categories[0].comment.empty());
+        QVERIFY(desc->categories[0].events.size() > 0);
+        QVERIFY(desc->categories[0].tmin < 0.0f);
+        QVERIFY(desc->categories[0].tmax > 0.0f);
 
         // Check rejection params were parsed
-        QVERIFY(desc.rej.megGradReject > 0.0f);
-        QVERIFY(desc.rej.megMagReject > 0.0f);
-        QVERIFY(desc.rej.eogReject > 0.0f);
+        QVERIFY(desc->rej.megGradReject > 0.0f);
+        QVERIFY(desc->rej.megMagReject > 0.0f);
+        QVERIFY(desc->rej.eogReject > 0.0f);
     }
 
     //=========================================================================
@@ -676,25 +675,24 @@ private slots:
         if (!QFile::exists(covPath))
             QSKIP("audvis.cov not found");
 
-        CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile(covPath.toStdU16String(), desc);
-        QVERIFY(ok);
+        const std::optional<CovDescription> desc = MNEDescriptionParser::read_covariance(covPath.toStdU16String());
+        QVERIFY(desc);
 
         // audvis.cov has def sections for each category
-        QVERIFY(desc.defs.size() >= 4);
+        QVERIFY(desc->defs.size() >= 4);
 
         // Check first def
-        QVERIFY(desc.defs[0].events.size() > 0);
-        QVERIFY(desc.defs[0].tmin < 0.0f);
+        QVERIFY(desc->defs[0].events.size() > 0);
+        QVERIFY(desc->defs[0].tmin < 0.0f);
 
         // Check output filename was parsed
-        QVERIFY(!desc.filename.empty());
+        QVERIFY(!desc->filename.empty());
 
         // Check rejection params
-        QVERIFY(desc.rej.megGradReject > 0.0f);
-        QVERIFY(desc.rej.megMagReject > 0.0f);
-        QVERIFY(desc.rej.eegReject > 0.0f);
-        QVERIFY(desc.rej.eogReject > 0.0f);
+        QVERIFY(desc->rej.megGradReject > 0.0f);
+        QVERIFY(desc->rej.megMagReject > 0.0f);
+        QVERIFY(desc->rej.eegReject > 0.0f);
+        QVERIFY(desc->rej.eogReject > 0.0f);
     }
 
     void descriptionParser_parseCovarianceFile_ernoise()
@@ -703,24 +701,21 @@ private slots:
         if (!QFile::exists(covPath))
             QSKIP("ernoise.cov not found");
 
-        CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile(covPath.toStdU16String(), desc);
-        QVERIFY(ok);
-        QVERIFY(desc.defs.size() > 0);
+        const std::optional<CovDescription> desc = MNEDescriptionParser::read_covariance(covPath.toStdU16String());
+        QVERIFY(desc);
+        QVERIFY(desc->defs.size() > 0);
     }
 
     void descriptionParser_parseAverageFile_invalid()
     {
-        AverageDescription desc;
-        bool ok = MNEDescriptionParser::parseAverageFile("/nonexistent/file.ave", desc);
-        QVERIFY(!ok);
+        const std::optional<AverageDescription> desc = MNEDescriptionParser::read_average("/nonexistent/file.ave");
+        QVERIFY(!desc);
     }
 
     void descriptionParser_parseCovarianceFile_invalid()
     {
-        CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile("/nonexistent/file.cov", desc);
-        QVERIFY(!ok);
+        const std::optional<CovDescription> desc = MNEDescriptionParser::read_covariance("/nonexistent/file.cov");
+        QVERIFY(!desc);
     }
 
     //=========================================================================

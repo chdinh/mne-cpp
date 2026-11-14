@@ -948,16 +948,15 @@ void TestMneRawProjComp::descParser_parseAverageFile()
            << "}\n";
     }
 
-    AverageDescription desc;
-    bool ok = MNEDescriptionParser::parseAverageFile(aveFile.toStdU16String(), desc);
-    QVERIFY(ok);
-    QCOMPARE(desc.categories.size(), 2);
-    QCOMPARE(desc.categories[0].comment, QString("Auditory Left"));
-    QCOMPARE(desc.categories[0].events[0], 1u);
-    QVERIFY(qAbs(desc.categories[0].tmin - (-0.2f)) < 1e-5);
-    QVERIFY(qAbs(desc.categories[0].tmax - 0.5f) < 1e-5);
-    QCOMPARE(desc.categories[1].comment, QString("Auditory Right"));
-    QCOMPARE(desc.categories[1].events[0], 2u);
+    const std::optional<AverageDescription> desc = MNEDescriptionParser::read_average(aveFile.toStdU16String());
+    QVERIFY(desc);
+    QCOMPARE(desc->categories.size(), 2);
+    QCOMPARE(desc->categories[0].comment, QString("Auditory Left"));
+    QCOMPARE(desc->categories[0].events[0], 1u);
+    QVERIFY(qAbs(desc->categories[0].tmin - (-0.2f)) < 1e-5);
+    QVERIFY(qAbs(desc->categories[0].tmax - 0.5f) < 1e-5);
+    QCOMPARE(desc->categories[1].comment, QString("Auditory Right"));
+    QCOMPARE(desc->categories[1].events[0], 2u);
 }
 
 void TestMneRawProjComp::descParser_parseCovarianceFile()
@@ -981,21 +980,18 @@ void TestMneRawProjComp::descParser_parseCovarianceFile()
            << "}\n";
     }
 
-    CovDescription desc;
-    bool ok = MNEDescriptionParser::parseCovarianceFile(covFile.toStdU16String(), desc);
-    QVERIFY(ok);
-    QVERIFY(desc.defs.size() >= 1);
+    const std::optional<CovDescription> desc = MNEDescriptionParser::read_covariance(covFile.toStdU16String());
+    QVERIFY(desc);
+    QVERIFY(desc->defs.size() >= 1);
 }
 
 void TestMneRawProjComp::descParser_invalidFileReturnsError()
 {
-    AverageDescription desc;
-    bool ok = MNEDescriptionParser::parseAverageFile("/nonexistent/path.ave", desc);
-    QVERIFY(!ok);
+    const std::optional<AverageDescription> desc = MNEDescriptionParser::read_average("/nonexistent/path.ave");
+    QVERIFY(!desc);
 
-    CovDescription covDesc;
-    ok = MNEDescriptionParser::parseCovarianceFile("/nonexistent/path.cov", covDesc);
-    QVERIFY(!ok);
+    const std::optional<CovDescription> covDesc = MNEDescriptionParser::read_covariance("/nonexistent/path.cov");
+    QVERIFY(!covDesc);
 }
 
 //=============================================================================================================

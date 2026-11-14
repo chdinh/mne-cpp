@@ -368,15 +368,14 @@ int main(int argc, char* argv[])
                    "    }\n"
                    "}\n");
     descFile.close();
-    AverageDescription averaging;
-    MNEDescriptionParser::parseAverageFile(aveDesc.toStdU16String(), averaging);
-    const AverageCategory& leftCategory = averaging.categories.front(); // name, events, tmin/tmax, baseline
-    const RejectionParams& rejection = averaging.rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
+    const std::optional<AverageDescription> averaging = MNEDescriptionParser::read_average(aveDesc.toStdU16String());
+    const AverageCategory& leftCategory = averaging->categories.front(); // name, events, tmin/tmax, baseline
+    const RejectionParams& rejection = averaging->rej;                   // MNE-C defaults unless the file sets them (EEG 100 uV, ...)
     std::string log;
-    const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, averaging, events.events, log);
+    const FiffEvokedSet averages = FiffEvokedSet::computeAverages(raw, *averaging, events.events, log);
     //! [mne_description_parser_usage]
     // mne.Epochs(event_id=1, tmin=-0.1, tmax=0.3, baseline=(-0.1, 0)).average(): 6 epochs, |MEG| 2.01258e-13, EEG 001 at 0 s 7.77233e-10
-    const bool averaged = averaging.categories.size() == 1 && leftCategory.doBaseline && leftCategory.comment == "Left Auditory" && leftCategory.events == std::vector<unsigned int>{1} && rejection.eegReject == 100e-6f && averages.evoked.size() == 1;
+    const bool averaged = averaging->categories.size() == 1 && leftCategory.doBaseline && leftCategory.comment == "Left Auditory" && leftCategory.events == std::vector<unsigned int>{1} && rejection.eegReject == 100e-6f && averages.evoked.size() == 1;
     ok &= expect(averaged && averages.evoked[0].nave == 6 && averages.evoked[0].data.cols() == 121 && near(averages.evoked[0].data.topRows(306).norm(), 2.0125814419559757e-13, 1e-5) && near(averages.evoked[0].data(315, 30), 7.77233498919796e-10, 1e-5),
                  "MNEDescriptionParser: an .ave description averages like mne.Epochs with a baseline");
 
@@ -395,12 +394,11 @@ int main(int argc, char* argv[])
                       "    }\n"
                       "}\n");
     covDescFile.close();
-    CovDescription covariance;
-    MNEDescriptionParser::parseCovarianceFile(covDescPath.toStdU16String(), covariance);
-    covariance.rej.megGradReject = covariance.rej.megMagReject = covariance.rej.eogReject = 0.0f; // EEG limit only
-    const CovDefinition& preStim = covariance.defs.front();
+    std::optional<CovDescription> covariance = MNEDescriptionParser::read_covariance(covDescPath.toStdU16String());
+    covariance->rej.megGradReject = covariance->rej.megMagReject = covariance->rej.eogReject = 0.0f; // EEG limit only
+    const CovDefinition& preStim = covariance->defs.front();
     const FiffCov noiseCov = FiffCov::compute_from_epochs(raw, events.events, {1, 2}, preStim.tmin, preStim.tmax, preStim.bmin, preStim.bmax, preStim.doBaseline,
-                                                          covariance.removeSampleMean, preStim.ignore, preStim.delay, &covariance.rej);
+                                                          covariance->removeSampleMean, preStim.ignore, preStim.delay, &covariance->rej);
     //! [mne_cov_description_usage]
     // mne.compute_covariance(mne.Epochs(event_id=[1, 2], tmin=-0.2, tmax=0, baseline=None, reject=dict(eeg=14.23e-9)),
     // keep_sample_mean=False, rank="full"): 6 of 12 epochs kept, nfree 365, C[EEG001, EEG001] = 8.784207369943824e-18

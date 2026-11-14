@@ -523,10 +523,9 @@ private slots:
         out << "}\n";
         f.close();
 
-        AverageDescription desc;
-        bool ok = MNEDescriptionParser::parseAverageFile(aveFile.toStdU16String(), desc);
-        if (ok) {
-            QVERIFY(desc.categories.size() > 0);
+        const std::optional<AverageDescription> desc = MNEDescriptionParser::read_average(aveFile.toStdU16String());
+        if (desc) {
+            QVERIFY(desc->categories.size() > 0);
         } else {
             qWarning("parseAverageFile failed — code path exercised");
         }
@@ -556,10 +555,9 @@ private slots:
         out << "}\n";
         f.close();
 
-        CovDescription desc;
-        bool ok = MNEDescriptionParser::parseCovarianceFile(covFile.toStdU16String(), desc);
-        if (ok) {
-            QVERIFY(desc.defs.size() > 0);
+        const std::optional<CovDescription> desc = MNEDescriptionParser::read_covariance(covFile.toStdU16String());
+        if (desc) {
+            QVERIFY(desc->defs.size() > 0);
         } else {
             qWarning("parseCovarianceFile failed — code path exercised");
         }
@@ -567,9 +565,8 @@ private slots:
 
     void testDescriptionParserNonExistentFile()
     {
-        AverageDescription desc;
-        bool ok = MNEDescriptionParser::parseAverageFile("/nonexistent/file.ave", desc);
-        QVERIFY(!ok);
+        const std::optional<AverageDescription> desc = MNEDescriptionParser::read_average("/nonexistent/file.ave");
+        QVERIFY(!desc);
     }
 
     void cleanupTestCase()
