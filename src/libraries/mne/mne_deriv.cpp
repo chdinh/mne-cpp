@@ -38,20 +38,11 @@ MNEDeriv::MNEDeriv() = default;
 MNEDeriv::MNEDeriv(const MNEDeriv& other)
 : filename(other.filename)
 , shortname(other.shortname)
-, deriv_data(other.deriv_data ? std::make_unique<MNESparseNamedMatrix>() : nullptr)
+, deriv_data(other.deriv_data ? std::make_unique<MNESparseNamedMatrix>(*other.deriv_data) : nullptr)
 , in_use(other.in_use)
 , valid(other.valid)
 , chs(other.chs)
 {
-    if (deriv_data) {
-        deriv_data->nrow = other.deriv_data->nrow;
-        deriv_data->ncol = other.deriv_data->ncol;
-        deriv_data->rowlist = other.deriv_data->rowlist;
-        deriv_data->collist = other.deriv_data->collist;
-        if (other.deriv_data->data) {
-            deriv_data->data = std::make_unique<FiffSparseMatrix>(*other.deriv_data->data);
-        }
-    }
 }
 
 //=============================================================================================================
@@ -62,7 +53,7 @@ MNEDeriv::~MNEDeriv() = default;
 
 int MNEDeriv::validate(const std::vector<FiffChInfo>& chInfo)
 {
-    const int nrow = deriv_data ? deriv_data->nrow : 0;
+    const int nrow = deriv_data ? deriv_data->nrow() : 0;
     valid = Eigen::VectorXi::Zero(nrow);
     chs.clear();
     for (int j = 0; j < nrow; ++j) {
@@ -76,7 +67,7 @@ int MNEDeriv::validate(const std::vector<FiffChInfo>& chInfo)
         names.push_back(ch.ch_name);
     }
     // Row-major view: the inputs of derived channel j are the non-zeros of row j.
-    const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = deriv_data->data->eigen();
+    const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = deriv_data->data.eigen();
     int nvalid = 0;
     for (int j = 0; j < nrow; ++j) {
         const FiffChInfo* first = nullptr;

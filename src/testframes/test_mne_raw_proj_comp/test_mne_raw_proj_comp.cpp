@@ -46,6 +46,8 @@
 #include <mne/mne_filter_def.h>
 #include <mne/mne_named_vector.h>
 #include <mne/mne_deriv.h>
+#include <mne/mne_sparse_named_matrix.h>
+#include <fiff/fiff_sparse_matrix.h>
 #include <mne/mne_deriv_set.h>
 #include <mne/mne_description_parser.h>
 #include <mne/mne_meas_data.h>
@@ -425,6 +427,21 @@ void TestMneRawProjComp::deriv_defaultConstruction()
     QVERIFY(deriv.filename.empty());
     QVERIFY(deriv.shortname.empty());
     QVERIFY(!deriv.deriv_data);
+
+    // The sparse named matrix takes its dimensions from its data, and a copy owns its own data
+    Eigen::SparseMatrix<float> bipolar(1, 3);
+    bipolar.insert(0, 0) = 1.0f;
+    bipolar.insert(0, 1) = -1.0f;
+    MNESparseNamedMatrix named;
+    QCOMPARE(named.nrow(), 0);
+    named.data = FiffSparseMatrix(std::move(bipolar));
+    QCOMPARE(named.nrow(), 1);
+    QCOMPARE(named.ncol(), 3);
+    deriv.deriv_data = std::make_unique<MNESparseNamedMatrix>(named);
+    const MNEDeriv copy(deriv);
+    deriv.deriv_data->data.eigen().coeffRef(0, 0) = 2.0f;
+    QCOMPARE(copy.deriv_data->ncol(), 3);
+    QCOMPARE(copy.deriv_data->data.eigen().coeff(0, 0), 1.0f);
 }
 
 void TestMneRawProjComp::derivSet_textFifAndValidation()

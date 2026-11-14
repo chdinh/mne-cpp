@@ -775,12 +775,12 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMa
                * Do we need the derived channels?
                */
                     if (use_deriv) {
-                        if (deriv_ns < this_buf->ns || nderiv != deriv_matched->deriv_data->nrow) {
-                            deriv_vals.resize(deriv_matched->deriv_data->nrow, this_buf->ns);
-                            nderiv = deriv_matched->deriv_data->nrow;
+                        if (deriv_ns < this_buf->ns || nderiv != deriv_matched->deriv_data->nrow()) {
+                            deriv_vals.resize(deriv_matched->deriv_data->nrow(), this_buf->ns);
+                            nderiv = deriv_matched->deriv_data->nrow();
                             deriv_ns = this_buf->ns;
                         }
-                        if (mne_sparse_mat_mult2(deriv_matched->deriv_data->data.get(), this_buf->vals, this_buf->ns, deriv_vals) == FAIL) {
+                        if (mne_sparse_mat_mult2(&deriv_matched->deriv_data->data, this_buf->vals, this_buf->ns, deriv_vals) == FAIL) {
                             return FAIL;
                         }
                     }
@@ -906,7 +906,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
              */
                 values = &this_buf->vals;
                 if (use_deriv) {
-                    deriv_pvalues_vec.resize(deriv_matched->deriv_data->nrow);
+                    deriv_pvalues_vec.resize(deriv_matched->deriv_data->nrow());
                 }
                 for (p = start; p < this_buf->ns && ns > 0; p++, ns--, s++) {
                     for (c = 0; c < info->nchan; c++)
@@ -915,7 +915,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
                         BASELIB::Log::warning("Error");
                     if (sel) {
                         if (use_deriv) {
-                            if (mne_sparse_vec_mult2(deriv_matched->deriv_data->data.get(), pvalues.data(), deriv_pvalues_vec.data()) == FAIL)
+                            if (mne_sparse_vec_mult2(&deriv_matched->deriv_data->data, pvalues.data(), deriv_pvalues_vec.data()) == FAIL)
                                 return FAIL;
                         }
                         for (c = 0; c < sel->nchan(); c++) {
@@ -1099,7 +1099,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
            */
             if (use_deriv) {
                 MNEDeriv* der = deriv_matched.get();
-                for (c = 0; c < der->deriv_data->ncol; c++) {
+                for (c = 0; c < der->deriv_data->ncol(); c++) {
                     if (der->in_use[c] > 0 &&
                         !this_buf->ch_filtered[c]) {
                         /*
@@ -1173,12 +1173,12 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
                 /*
              * Compute derived data if we need it
              */
-                if (deriv_ns < this_buf->ns || nderiv != deriv_matched->deriv_data->nrow) {
-                    deriv_vals.resize(deriv_matched->deriv_data->nrow, this_buf->ns);
-                    nderiv = deriv_matched->deriv_data->nrow;
+                if (deriv_ns < this_buf->ns || nderiv != deriv_matched->deriv_data->nrow()) {
+                    deriv_vals.resize(deriv_matched->deriv_data->nrow(), this_buf->ns);
+                    nderiv = deriv_matched->deriv_data->nrow();
                     deriv_ns = this_buf->ns;
                 }
-                if (mne_sparse_mat_mult2(deriv_matched->deriv_data->data.get(), this_buf->vals, this_buf->ns, deriv_vals) == FAIL)
+                if (mne_sparse_mat_mult2(&deriv_matched->deriv_data->data, this_buf->vals, this_buf->ns, deriv_vals) == FAIL)
                     return FAIL;
             }
             for (c = 0; c < sel->nchan(); c++) {
@@ -1461,6 +1461,6 @@ int MNERawData::attachDerivations(const MNEDerivSet& derivations, bool keepPrevi
         return 0;
     }
     const int nvalid = deriv_matched->validate(info->chInfo);
-    BASELIB::Log::info("{} of {} of the matched derivations are valid for these raw data.", nvalid, deriv_matched->deriv_data->nrow);
+    BASELIB::Log::info("{} of {} of the matched derivations are valid for these raw data.", nvalid, deriv_matched->deriv_data->nrow());
     return nvalid;
 }

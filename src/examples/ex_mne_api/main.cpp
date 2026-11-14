@@ -495,7 +495,7 @@ int main(int argc, char* argv[])
     mneRaw->pick_data(&bipolar, mneRaw->first_samp + 2990, segment);
     //! [mne_deriv_set_usage]
     // The derived channel is the difference of its inputs, read in one pass
-    ok &= expect(derivations->count() == 2 && fromFif->count() == 2 && usable == 1 && mneRaw->deriv_matched->deriv_data->nrow == 1 && segment.row(0).isApprox(segment.row(1) - segment.row(2), 1e-6f),
+    ok &= expect(derivations->count() == 2 && fromFif->count() == 2 && usable == 1 && mneRaw->deriv_matched->deriv_data->nrow() == 1 && segment.row(0).isApprox(segment.row(1) - segment.row(2), 1e-6f),
                  "MNEDerivSet/MNEDeriv/MNESparseNamedMatrix: MNE-C montage file, matched to the recording and read by MNERawData");
 
     //! [mne_layout_usage]

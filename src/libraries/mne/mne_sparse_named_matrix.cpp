@@ -61,31 +61,29 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
         return nullptr;
     }
     auto matrix = std::make_unique<MNESparseNamedMatrix>();
-    matrix->nrow = data->rows();
-    matrix->ncol = data->cols();
-    if (const auto nrow = block->find_tag(stream, FIFF_MNE_NROW); nrow && *nrow->to_int() != matrix->nrow) {
+    matrix->data = std::move(*data);
+    if (const auto nrow = block->find_tag(stream, FIFF_MNE_NROW); nrow && *nrow->to_int() != matrix->nrow()) {
         BASELIB::Log::critical("MNESparseNamedMatrix::read - FIFF_MNE_NROW conflicts with the matrix data.");
         return nullptr;
     }
-    if (const auto ncol = block->find_tag(stream, FIFF_MNE_NCOL); ncol && *ncol->to_int() != matrix->ncol) {
+    if (const auto ncol = block->find_tag(stream, FIFF_MNE_NCOL); ncol && *ncol->to_int() != matrix->ncol()) {
         BASELIB::Log::critical("MNESparseNamedMatrix::read - FIFF_MNE_NCOL conflicts with the matrix data.");
         return nullptr;
     }
     if (tag = block->find_tag(stream, FIFF_MNE_ROW_NAMES); tag) {
         matrix->rowlist = FiffStream::split_name_list(tag->to_string());
-        if (static_cast<int>(matrix->rowlist.size()) != matrix->nrow) {
+        if (static_cast<int>(matrix->rowlist.size()) != matrix->nrow()) {
             BASELIB::Log::critical("MNESparseNamedMatrix::read - Incorrect number of entries in the row name list.");
             return nullptr;
         }
     }
     if (tag = block->find_tag(stream, FIFF_MNE_COL_NAMES); tag) {
         matrix->collist = FiffStream::split_name_list(tag->to_string());
-        if (static_cast<int>(matrix->collist.size()) != matrix->ncol) {
+        if (static_cast<int>(matrix->collist.size()) != matrix->ncol()) {
             BASELIB::Log::critical("MNESparseNamedMatrix::read - Incorrect number of entries in the column name list.");
             return nullptr;
         }
     }
-    matrix->data = std::move(data);
     return matrix;
 }
 
@@ -94,14 +92,16 @@ std::unique_ptr<MNESparseNamedMatrix> MNESparseNamedMatrix::read(FiffStream& str
 void MNESparseNamedMatrix::write(FiffStream& stream, int kind) const
 {
     stream.start_block(FIFFB_MNE_NAMED_MATRIX);
-    stream.write_int(FIFF_MNE_NROW, &nrow);
-    stream.write_int(FIFF_MNE_NCOL, &ncol);
+    const fiff_int_t rows = nrow();
+    const fiff_int_t cols = ncol();
+    stream.write_int(FIFF_MNE_NROW, &rows);
+    stream.write_int(FIFF_MNE_NCOL, &cols);
     if (!rowlist.empty()) {
         stream.write_name_list(FIFF_MNE_ROW_NAMES, rowlist);
     }
     if (!collist.empty()) {
         stream.write_name_list(FIFF_MNE_COL_NAMES, collist);
     }
-    stream.write_float_sparse_rcs(kind, data->eigen());
+    stream.write_float_sparse_rcs(kind, data.eigen());
     stream.end_block(FIFFB_MNE_NAMED_MATRIX);
 }

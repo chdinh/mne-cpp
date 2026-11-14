@@ -409,6 +409,12 @@ aliases; replace the old spelling as below.
   `m.nrow()`, `MNENamedMatrix::build(r, c, rows, cols, data)` becomes
   `MNENamedMatrix::build(rows, cols, data)`, `m.pick(rows, nr, cols, nc)`
   becomes `m.pick(rows, cols)`.
+- `MNESparseNamedMatrix::nrow` and `ncol` are the functions `nrow()` and
+  `ncol()` (the dimensions of `data`), and `data` is a `FiffSparseMatrix`
+  value instead of a `std::unique_ptr`, so copying an `MNEDeriv` copies its
+  derivation matrix without hand-written cloning. `mne_sparse_named_matrix.h`
+  no longer includes `QStringList`. Migration: `m.nrow` becomes `m.nrow()`,
+  `m.data->eigen()` becomes `m.data.eigen()`; drop assignments to the counts.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

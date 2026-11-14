@@ -29,8 +29,6 @@
 #include <fiff/fiff_sparse_matrix.h>
 #include <fiff/fiff_stream.h>
 
-#include <QStringList>
-
 #include <memory>
 
 //=============================================================================================================
@@ -74,11 +72,27 @@ public:
      */
     void write(FIFFLIB::FiffStream& stream, int kind) const;
 
-    int nrow = 0;                                    /**< Number of rows (same as in data). */
-    int ncol = 0;                                    /**< Number of columns (same as in data). */
-    StringList rowlist;                              /**< Name list for the rows. */
-    StringList collist;                              /**< Name list for the columns. */
-    std::unique_ptr<FIFFLIB::FiffSparseMatrix> data; /**< The data itself (sparse). */
+    //=========================================================================================================
+    /**
+     * @return The number of rows of @ref data.
+     */
+    int nrow() const
+    {
+        return data.rows();
+    }
+
+    //=========================================================================================================
+    /**
+     * @return The number of columns of @ref data.
+     */
+    int ncol() const
+    {
+        return data.cols();
+    }
+
+    StringList rowlist;             /**< Name list for the rows. */
+    StringList collist;             /**< Name list for the columns. */
+    FIFFLIB::FiffSparseMatrix data; /**< The data itself (sparse). */
 };
 
 } // namespace MNELIB

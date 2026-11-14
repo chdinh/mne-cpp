@@ -132,11 +132,9 @@ std::unique_ptr<MNEDeriv> makeDeriv(const std::vector<MNEDerivSet::Definition>& 
     deriv->filename = std::move(filename);
     deriv->shortname = std::move(shortname);
     deriv->deriv_data = std::make_unique<MNESparseNamedMatrix>();
-    deriv->deriv_data->nrow = static_cast<int>(outputs.size());
-    deriv->deriv_data->ncol = static_cast<int>(inputs.size());
     deriv->deriv_data->rowlist = outputs;
     deriv->deriv_data->collist = inputs;
-    deriv->deriv_data->data = std::make_unique<FiffSparseMatrix>(std::move(data));
+    deriv->deriv_data->data = FiffSparseMatrix(std::move(data));
     return deriv;
 }
 
@@ -234,7 +232,7 @@ std::optional<MNEDerivSet> MNEDerivSet::readText(const std::filesystem::path& pa
     }
     MNEDerivSet set;
     set.derivs.push_back(makeDeriv(definitions, BASELIB::utf8FromPath(path), {}));
-    if (set.derivs.front()->deriv_data->nrow == 0) {
+    if (set.derivs.front()->deriv_data->nrow() == 0) {
         return std::nullopt;
     }
     return set;
@@ -277,8 +275,8 @@ std::vector<MNEDerivSet::Definition> MNEDerivSet::definitions() const
     std::vector<Definition> result;
     for (const auto& deriv : derivs) {
         const MNESparseNamedMatrix& m = *deriv->deriv_data;
-        const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = m.data->eigen();
-        for (int j = 0; j < m.nrow; ++j) {
+        const Eigen::SparseMatrix<float, Eigen::RowMajor> rows = m.data.eigen();
+        for (int j = 0; j < m.nrow(); ++j) {
             Definition definition{m.rowlist[j], {}};
             for (Eigen::SparseMatrix<float, Eigen::RowMajor>::InnerIterator it(rows, j); it; ++it) {
                 definition.second.emplace(m.collist[static_cast<std::size_t>(it.col())], it.value());
@@ -338,11 +336,9 @@ std::unique_ptr<MNEDeriv> MNEDerivSet::match(const StringList& chNames) const
         }
     }
     matched->deriv_data = std::make_unique<MNESparseNamedMatrix>();
-    matched->deriv_data->nrow = static_cast<int>(outputs.size());
-    matched->deriv_data->ncol = static_cast<int>(chNames.size());
     matched->deriv_data->rowlist = outputs;
     matched->deriv_data->collist = chNames;
-    matched->deriv_data->data = std::make_unique<FiffSparseMatrix>(std::move(data));
+    matched->deriv_data->data = FiffSparseMatrix(std::move(data));
     return matched;
 }
 
@@ -352,7 +348,7 @@ int MNEDerivSet::count() const
 {
     int total = 0;
     for (const auto& deriv : derivs) {
-        total += deriv->deriv_data ? deriv->deriv_data->nrow : 0;
+        total += deriv->deriv_data ? deriv->deriv_data->nrow() : 0;
     }
     return total;
 }
