@@ -62,6 +62,22 @@ Writes the matrix as a `FIFFB_MNE_NAMED_MATRIX` block (MNE-C `mne_write_sparse_n
 
 ---
 
+### nrow()
+
+**Returns:**
+
+- *int* — The number of rows of `data`.
+
+---
+
+### ncol()
+
+**Returns:**
+
+- *int* — The number of columns of `data`.
+
+---
+
 ## Static Methods
 
 ### read(stream, node, kind)
@@ -100,7 +116,7 @@ MNE library: BEM surfaces, surface projection, ICP, source spaces and epochs.
 
 ````cpp title="src/examples/ex_mne_api/main.cpp, line 497"
 // The derived channel is the difference of its inputs, read in one pass
-ok &= expect(derivations->count() == 2 && fromFif->count() == 2 && usable == 1 && mneRaw->deriv_matched->deriv_data->nrow == 1 && segment.row(0).isApprox(segment.row(1) - segment.row(2), 1e-6f),
+ok &= expect(derivations->count() == 2 && fromFif->count() == 2 && usable == 1 && mneRaw->deriv_matched->deriv_data->nrow() == 1 && segment.row(0).isApprox(segment.row(1) - segment.row(2), 1e-6f),
              "MNEDerivSet/MNEDeriv/MNESparseNamedMatrix: MNE-C montage file, matched to the recording and read by MNERawData");
 ````
 

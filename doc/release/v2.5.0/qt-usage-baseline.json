@@ -387,7 +387,7 @@
         "strings": 32,
         "threads": 10
       },
-      "public_header_includes": 27,
+      "public_header_includes": 26,
       "q_object": 0,
       "files": 112,
       "modules": [
