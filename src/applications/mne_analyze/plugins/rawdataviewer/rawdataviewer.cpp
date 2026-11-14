@@ -24,8 +24,8 @@
 #include "../dataloader/dataloader.h"
 
 #include <anShared/Management/analyzedata.h>
-#include <anShared/Utils/metatypes.h>
 #include <anShared/Management/communicator.h>
+#include <anShared/Model/fiffrawviewmodel.h>
 #include <anShared/Model/eventmodel.h>
 
 #include <disp/viewers/fiffrawviewsettings.h>

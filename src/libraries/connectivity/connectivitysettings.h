@@ -211,10 +211,4 @@ protected:
 //=============================================================================================================
 } // namespace CONNECTIVITYLIB
 
-#ifndef metatype_connectivitysettings
-#define metatype_connectivitysettings
-Q_DECLARE_METATYPE(CONNECTIVITYLIB::ConnectivitySettings)
-Q_DECLARE_METATYPE(std::shared_ptr<CONNECTIVITYLIB::ConnectivitySettings>)
-#endif
-
 #endif // CONNECTIVITYSETTINGS_H

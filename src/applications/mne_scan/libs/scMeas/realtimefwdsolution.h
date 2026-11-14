@@ -161,6 +161,4 @@ inline bool RealTimeFwdSolution::isClustered()
 
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeFwdSolution::SPtr)
-
 #endif // REALTIMEFWDRESULT_H

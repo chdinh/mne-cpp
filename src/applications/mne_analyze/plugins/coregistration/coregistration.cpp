@@ -22,7 +22,6 @@
 
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/communicator.h>
-#include <anShared/Utils/metatypes.h>
 #include <anShared/Model/bemdatamodel.h>
 
 #include <disp/viewers/coregsettingsview.h>

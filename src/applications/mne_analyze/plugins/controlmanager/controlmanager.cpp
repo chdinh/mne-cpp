@@ -19,7 +19,6 @@
 
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/communicator.h>
-#include <anShared/Utils/metatypes.h>
 
 #include <disp/viewers/scalingview.h>
 #include <disp/viewers/applytoview.h>

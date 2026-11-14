@@ -22,7 +22,6 @@
 #include "statusbar.h"
 #include "communicator.h"
 #include "event.h"
-#include "../Utils/metatypes.h"
 
 #include <disp/viewers/progressview.h>
 

@@ -23,7 +23,6 @@
 
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/communicator.h>
-#include <anShared/Utils/metatypes.h>
 
 //=============================================================================================================
 // QT INCLUDES

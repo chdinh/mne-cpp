@@ -198,6 +198,4 @@ inline std::shared_ptr<FIFFLIB::FiffDigitizerData> RealTimeHpiResult::digitizerD
 
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeHpiResult::SPtr)
-
 #endif // REALTIMEHPIRESULT_H

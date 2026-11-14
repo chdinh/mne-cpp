@@ -439,14 +439,4 @@ signals:
 //=============================================================================================================
 } // NAMESPACE
 
-#ifndef metatype_listrowvectorxd
-#define metatype_listrowvectorxd
-Q_DECLARE_METATYPE(DISPLIB::AvrTypeRowVector); /**< Provides QT META type declaration of the Eigen::RowVectorXd type. For signal/slot usage.*/
-#endif
-
-#ifndef metatype_listrowvectorpair
-#define metatype_listrowvectorpair
-Q_DECLARE_METATYPE(DISPLIB::AvrTypeRowVectorPair);
-#endif
-
 #endif // EVOKEDSETMODEL_H

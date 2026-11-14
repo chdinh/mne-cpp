@@ -24,8 +24,8 @@
 #include <disp/viewers/applytoview.h>
 
 #include <anShared/Management/communicator.h>
+#include <anShared/Model/fiffrawviewmodel.h>
 #include <anShared/Management/analyzedata.h>
-#include <anShared/Utils/metatypes.h>
 
 
 //=============================================================================================================

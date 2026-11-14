@@ -184,25 +184,5 @@ struct View3DParameters
 } //NAMESPACE
 
 //Declare structs to be used in QVariant
-#ifndef metatype_ANSHAREDLIB_scalingparam
-#define metatype_ANSHAREDLIB_scalingparam
-Q_DECLARE_METATYPE(ANSHAREDLIB::ScalingParameters);
-Q_DECLARE_METATYPE(ANSHAREDLIB::ScalingParameters*);
-#endif
-
-#ifndef metatype_ANSHAREDLIB_viewparam
-#define metatype_ANSHAREDLIB_viewparam
-Q_DECLARE_METATYPE(ANSHAREDLIB::ViewParameters);
-Q_DECLARE_METATYPE(ANSHAREDLIB::ViewParameters*);
-#endif
-
-#ifndef metatype_ANSHAREDLIB_view3Dparam
-#define metatype_ANSHAREDLIB_view3Dparam
-Q_DECLARE_METATYPE(ANSHAREDLIB::View3DParameters);
-Q_DECLARE_METATYPE(ANSHAREDLIB::View3DParameters*);
-#endif
-
-//Q_DECLARE_METATYPE(ANSHAREDLIB::SelectionParameters);
-//Q_DECLARE_METATYPE(ANSHAREDLIB::SelectionParameters*);
 
 #endif // TYPES_H

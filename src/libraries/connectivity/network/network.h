@@ -409,7 +409,4 @@ private:
 
 } // namespace CONNECTIVITYLIB
 
-Q_DECLARE_METATYPE(CONNECTIVITYLIB::Network);
-Q_DECLARE_METATYPE(std::vector<CONNECTIVITYLIB::Network>);
-
 #endif // NETWORK_H

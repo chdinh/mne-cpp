@@ -297,6 +297,4 @@ inline std::shared_ptr<FIFFLIB::FiffInfo> RealTimeConnectivityEstimate::getFiffI
 }
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeConnectivityEstimate::SPtr)
-
 #endif // REALTIMECONNECTIVITYESTIMATE_H

@@ -123,6 +123,4 @@ inline const QString& Numeric::getUnit() const
 }
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::Numeric::SPtr)
-
 #endif // NUMERIC_H

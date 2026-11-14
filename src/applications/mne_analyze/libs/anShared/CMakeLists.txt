@@ -45,7 +45,6 @@ set(HEADERS
     Management/communicator.h
     Management/eventmanager.h
     Management/statusbar.h
-    Utils/metatypes.h
     Utils/types.h
     Model/bemdatamodel.h
     Model/fiffrawviewmodel.h

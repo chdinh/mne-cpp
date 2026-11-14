@@ -475,6 +475,14 @@ aliases; replace the old spelling as below.
   `InvEcdSet`, `HpiFitResult` and `MNEInverseOperator`: Qt 6 registers a
   type on its first use in a `QVariant`, `qRegisterMetaType<T>()` or a
   signal, so the declarations were redundant. Migration: none.
+- The remaining `Q_DECLARE_METATYPE` declarations in the connectivity and
+  disp libraries, MNE Scan (`scMeas`, LSL adapter), MNE Analyze
+  (`anShared`), MNE Browse, the MNE Analyze Studio browser extension and
+  `mne_rt_server` are gone, and so is `anShared/Utils/metatypes.h`, which held
+  only such declarations. Qt 6 registers a type on first use; the named
+  `qRegisterMetaType` calls that `QMetaType::fromName` relies on stay.
+  Migration: code that included `anShared/Utils/metatypes.h` for its
+  transitive includes includes the headers it uses.
 - `InvEcdSet` is a `std::vector`-backed container: `addEcd(ecd)` and
   `set << ecd` become `push_back(ecd)`, `empty()`, `begin()` and `end()`
   are new, `size()` returns `int`, and `dataname` is a `std::string`. The

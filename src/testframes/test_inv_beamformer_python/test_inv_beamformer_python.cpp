@@ -51,10 +51,6 @@
 using namespace INVLIB;
 using namespace Eigen;
 
-Q_DECLARE_METATYPE(INVLIB::BeamformerPickOri)
-Q_DECLARE_METATYPE(INVLIB::BeamformerWeightNorm)
-Q_DECLARE_METATYPE(INVLIB::BeamformerInversion)
-
 namespace
 {
 

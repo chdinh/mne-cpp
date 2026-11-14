@@ -175,6 +175,4 @@ inline bool RealTimeSpectrum::containsValues() const
 }
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeSpectrum::SPtr)
-
 #endif // REALTIMESPECTRUM_H

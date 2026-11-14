@@ -172,6 +172,4 @@ inline int Measurement::type() const
 
 } //NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::Measurement::SPtr)
-
 #endif // MEASUREMENT_H

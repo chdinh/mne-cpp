@@ -23,7 +23,6 @@
 #include <memory>
 #include <base/string_utils.h>
 
-#include "../Utils/metatypes.h"
 
 #include "eventmodel.h"
 

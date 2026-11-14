@@ -326,6 +326,4 @@ qint32 RealTimeSourceEstimate::getSourceEstimateSize() const
 }
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeSourceEstimate::SPtr)
-
 #endif // REALTIMESOURCEESTIMATE_H

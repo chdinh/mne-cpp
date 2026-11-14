@@ -22,7 +22,6 @@
 
 #include <anShared/Model/fiffrawviewmodel.h>
 #include <anShared/Model/eventmodel.h>
-#include <anShared/Utils/metatypes.h>
 
 #include <disp/viewers/scalingview.h>
 
@@ -296,7 +295,7 @@ void FiffRawViewDelegate::createEventsPath(const QModelIndex& index,
     float fBottom = option.rect.bottomRight().y();
     float fInitX = path.currentPosition().x();
 
-    auto events = t_pEventModel->getEventsToDisplay(iStart, iStart + data.size());
+    auto events = t_pEventModel->getEventsToDisplay(iStart, iStart + static_cast<int>(data.size()));
     if (!t_pEventModel->getShowSelected()) {
         // Paint all events
         for (const auto& event : *events) {

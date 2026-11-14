@@ -131,6 +131,4 @@ inline bool RealTimeCov::isInitialized() const
 }
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeCov::SPtr)
-
 #endif // REALTIMECOV_H

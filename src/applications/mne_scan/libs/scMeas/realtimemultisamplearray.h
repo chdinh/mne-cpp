@@ -334,6 +334,4 @@ inline const QList<Eigen::MatrixXd>& RealTimeMultiSampleArray::getMultiSampleArr
 }
 } // NAMESPACE
 
-Q_DECLARE_METATYPE(SCMEASLIB::RealTimeMultiSampleArray::SPtr)
-
 #endif // REALTIMEMULTISAMPLEARRAY_H
