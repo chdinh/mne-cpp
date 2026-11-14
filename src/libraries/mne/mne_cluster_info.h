@@ -41,11 +41,6 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-
-//=============================================================================================================
 // DEFINE NAMESPACE MNELIB
 //=============================================================================================================
 
@@ -98,8 +93,10 @@ public:
      * @c centroids_<name> in the same directory.
      *
      * @param[in] p_sFileName    FileName to write to.
+     *
+     * @return True if both files were written.
      */
-    void write(const std::filesystem::path& p_sFileName) const;
+    [[nodiscard]] bool write(const std::filesystem::path& p_sFileName) const;
 
     /**
      * Overloaded == operator to compare an object to this instance.

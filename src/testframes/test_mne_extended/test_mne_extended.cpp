@@ -248,7 +248,7 @@ private slots:
             ep->tmax = 0.9f;
             ep->event = 1;
             ep->bReject = false;
-            list.append(ep);
+            list.push_back(ep);
         }
 
         QPair<float, float> baseline(0.0f, 0.4f);
@@ -274,7 +274,7 @@ private slots:
             ep->tmin = 0.0f;
             ep->tmax = 0.5f;
             ep->bReject = (i % 2 == 0); // reject even indices
-            list.append(ep);
+            list.push_back(ep);
         }
 
         QCOMPARE(list.size(), 5);
@@ -292,7 +292,7 @@ private slots:
             ep->tmin = 0.0f;
             ep->tmax = 0.5f;
             ep->bReject = false;
-            list.append(ep);
+            list.push_back(ep);
         }
 
         RowVectorXi sel(2);
@@ -359,7 +359,7 @@ private slots:
             ep->tmin = 0.0f;
             ep->tmax = 0.49f;
             ep->bReject = false;
-            list.append(ep);
+            list.push_back(ep);
         }
 
         FiffEvoked avg = list.average(info, 0, 49);
@@ -447,11 +447,19 @@ private slots:
         QTemporaryDir tmpDir;
         QVERIFY(tmpDir.isValid());
         QString filePath = tmpDir.path() + "/cluster_info.txt";
-        ci.write(filePath.toStdU16String());
+        QVERIFY(ci.write(filePath.toStdU16String()));
 
         QFile f(filePath);
-        QVERIFY(f.exists());
-        QVERIFY(f.size() > 0);
+        QVERIFY(f.open(QIODevice::ReadOnly));
+        QCOMPARE(f.readAll(), QByteArray("MNE Cluster Info\n"
+                                         "\nLabel : TestLabel\nFsLabel ID : 42\nCentroid Vertno : 7\n"
+                                         "Centroid rr : 0.01, 0.02, 0.03\nVertnos :\n7, 8, \n"
+                                         "Distances :\n0.001, 0.002, \nrr :\n0.01, 0.02, 0.03\n0.04, 0.05, 0.06\n\n"));
+        QFile centroids(tmpDir.path() + "/centroids_cluster_info.txt");
+        QVERIFY(centroids.open(QIODevice::ReadOnly));
+        QCOMPARE(centroids.readAll(), QByteArray("7, "));
+
+        QVERIFY(!ci.write((tmpDir.path() + "/missing/cluster_info.txt").toStdU16String()));
     }
 
     //=========================================================================

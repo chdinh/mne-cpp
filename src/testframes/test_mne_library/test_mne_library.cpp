@@ -1114,7 +1114,7 @@ void TestMneLibrary::forwardSolution_clusterInfo()
 
     // The centroid line holds the centroid, and the centroid list lands next to the file.
     QTemporaryDir dir;
-    ci.write(dir.filePath("clusters.txt").toStdU16String());
+    QVERIFY(ci.write(dir.filePath("clusters.txt").toStdU16String()));
     QFile text(dir.filePath("clusters.txt"));
     QVERIFY(text.open(QIODevice::ReadOnly | QIODevice::Text));
     QVERIFY(QString(text.readAll()).contains("Centroid rr : 0.5, 0.25, 0.125\n"));

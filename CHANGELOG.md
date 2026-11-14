@@ -475,6 +475,10 @@ aliases; replace the old spelling as below.
   `InvEcdSet`, `HpiFitResult` and `MNEInverseOperator`: Qt 6 registers a
   type on its first use in a `QVariant`, `qRegisterMetaType<T>()` or a
   signal, so the declarations were redundant. Migration: none.
+- `MNEClusterInfo::write(path)` returns `[[nodiscard]] bool` (it returned
+  nothing, so a file that could not be written went unnoticed) and writes with
+  `std::ofstream` instead of `QFile`/`QTextStream`. Migration: check the
+  result, e.g. `if (!info.write(path)) ...`.
 - The remaining `Q_DECLARE_METATYPE` declarations in the connectivity and
   disp libraries, MNE Scan (`scMeas`, LSL adapter), MNE Analyze
   (`anShared`), MNE Browse, the MNE Analyze Studio browser extension and

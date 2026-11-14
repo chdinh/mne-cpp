@@ -24,13 +24,12 @@
 #include <base/log.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QDir>
-#include <QFile>
-#include <QFileInfo>
-#include <QTextStream>
+#include <cstddef>
+#include <cstdint>
+#include <fstream>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -61,48 +60,41 @@ void MNEClusterInfo::clear()
 
 //=============================================================================================================
 
-void MNEClusterInfo::write(const std::filesystem::path& p_sFileName) const
+bool MNEClusterInfo::write(const std::filesystem::path& p_sFileName) const
 {
-    QFile file(p_sFileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        BASELIB::Log::debug("Unable to open file.");
-        return;
+    std::ofstream out(p_sFileName);
+    if (!out) {
+        BASELIB::Log::warning("MNEClusterInfo::write - Cannot open {}", BASELIB::utf8FromPath(p_sFileName));
+        return false;
     }
-    QTextStream out(&file);
     out << "MNE Cluster Info\n";
 
-    for (std::int32_t i = 0; i < std::ssize(clusterLabelIds); ++i) {
-        out << "\nLabel : " << clusterLabelNames[i].c_str() << "\n";
+    for (std::size_t i = 0; i < clusterLabelIds.size(); ++i) {
+        out << "\nLabel : " << clusterLabelNames[i] << "\n";
         out << "FsLabel ID : " << clusterLabelIds[i] << "\n";
         out << "Centroid Vertno : " << centroidVertno[i] << "\n";
         out << "Centroid rr : " << centroidSource_rr[i](0) << ", " << centroidSource_rr[i](1) << ", " << centroidSource_rr[i](2) << "\n";
         out << "Vertnos :\n";
-        for (std::int32_t j = 0; j < clusterVertnos[i].size(); ++j)
-            out << clusterVertnos[i][j] << ", ";
+        for (const int vertno : clusterVertnos[i])
+            out << vertno << ", ";
         out << "\nDistances :\n";
-        for (std::int32_t j = 0; j < clusterDistances[i].size(); ++j)
-            out << clusterDistances[i][j] << ", ";
+        for (const double distance : clusterDistances[i])
+            out << distance << ", ";
         out << "\nrr :\n";
-        for (std::int32_t j = 0; j < clusterSource_rr[i].rows(); ++j)
+        for (Eigen::Index j = 0; j < clusterSource_rr[i].rows(); ++j)
             out << clusterSource_rr[i](j, 0) << ", " << clusterSource_rr[i](j, 1) << ", " << clusterSource_rr[i](j, 2) << "\n";
 
         out << "\n";
     }
-
-    // optional, as QFile destructor will already do it:
-    file.close();
+    if (!out.flush()) {
+        return false;
+    }
 
     // Next to the main file: <dir>/centroids_<name>
-    const QFileInfo info(p_sFileName);
-    QFile file_centroids(info.dir().filePath("centroids_" + info.fileName()));
-
-    if (file_centroids.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out_centroids(&file_centroids);
-
-        for (std::int32_t i = 0; i < std::ssize(clusterLabelIds); ++i)
-            out_centroids << centroidVertno[i] << ", ";
-
-        // optional, as QFile destructor will already do it:
-        file_centroids.close();
-    }
+    std::filesystem::path centroidsPath = p_sFileName;
+    centroidsPath.replace_filename("centroids_" + p_sFileName.filename().string());
+    std::ofstream centroids(centroidsPath);
+    for (const std::int32_t vertno : centroidVertno)
+        centroids << vertno << ", ";
+    return static_cast<bool>(centroids.flush());
 }

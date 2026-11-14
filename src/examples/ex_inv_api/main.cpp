@@ -173,9 +173,9 @@ int main(int argc, char* argv[])
     for (const VectorXi& members : clusters.clusterVertnos) {
         assigned += static_cast<int>(members.size());
     }
-    clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
+    const bool written = clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
     //! [mne_cluster_info_usage]
-    ok &= expect(clustered.isClustered() && clusters.numClust() == clustered.nsource && assigned == 70 && clusters.numClust() >= 4 && (clustered.sol.data - fwd.sol.data * clusterMean).norm() <= 1e-9 * fwd.sol.data.norm() && QFile::exists(tmp.filePath("centroids_v1-clusters.txt")),
+    ok &= expect(written && clustered.isClustered() && clusters.numClust() == clustered.nsource && assigned == 70 && clusters.numClust() >= 4 && (clustered.sol.data - fwd.sol.data * clusterMean).norm() <= 1e-9 * fwd.sol.data.norm() && QFile::exists(tmp.filePath("centroids_v1-clusters.txt")),
                  "MNEClusterInfo: every V1 source in one cluster, clustered gain is the cluster mean");
 
     //! [mne_inverse_cluster_kernel]
