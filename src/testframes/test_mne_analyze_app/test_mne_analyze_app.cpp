@@ -222,7 +222,7 @@ void TestMneAnalyzeApp::showsEachDipoleFitOnceAndRemovesIt()
     const int rows = tree->rowCount();
 
     INVLIB::InvEcdSet set;
-    set << INVLIB::InvEcd();
+    set.push_back(INVLIB::InvEcd());
     const QVariant fit = QVariant::fromValue(QSharedPointer<ANSHAREDLIB::DipoleFitModel>::create(set).staticCast<ANSHAREDLIB::AbstractModel>());
     // Selecting the same fit again must not draw a second copy
     for (int i = 0; i < 2; ++i)

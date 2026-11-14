@@ -119,33 +119,6 @@ bool parse_floats(std::string_view line, std::vector<float>& values)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-InvEcdSet::InvEcdSet()
-{
-}
-
-//=============================================================================================================
-
-InvEcdSet::InvEcdSet(const InvEcdSet& p_ECDSet)
-: dataname(p_ECDSet.dataname)
-, m_qListDips(p_ECDSet.m_qListDips)
-{
-}
-
-//=============================================================================================================
-
-InvEcdSet::~InvEcdSet()
-{
-}
-
-//=============================================================================================================
-
-void InvEcdSet::addEcd(const InvEcd& p_ecd)
-{
-    m_qListDips.append(p_ecd);
-}
-
-//=============================================================================================================
-
 InvEcdSet InvEcdSet::read_dipoles_dip(const std::filesystem::path& path)
 {
     std::ifstream in(path);
@@ -200,7 +173,7 @@ InvEcdSet InvEcdSet::read_dipoles_dip(const std::filesystem::path& path)
         if (free_column >= 0 && free_column < n_values) {
             one.nfree = static_cast<int>(values[static_cast<std::size_t>(free_column)]);
         }
-        set << one;
+        set.push_back(one);
     }
 
     BASELIB::Log::info("Read {} dipoles in dip format from {}", set.size(), path.string());
@@ -222,7 +195,7 @@ bool InvEcdSet::save_dipoles_bdip(const std::filesystem::path& path) const
     }
 
     int nsave = 0;
-    for (const InvEcd& one : m_qListDips) {
+    for (const InvEcd& one : m_dipoles) {
         if (!one.valid) {
             continue;
         }
@@ -270,7 +243,7 @@ bool InvEcdSet::save_dipoles_dip(const std::filesystem::path& path) const
     out << std::format("# {:>7} {:>7} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8} {:>6}\n",
                        "begin", "end", "X (mm)", "Y (mm)", "Z (mm)", "Q(nAm)", "Qx(nAm)", "Qy(nAm)", "Qz(nAm)", "g/%");
     int nsave = 0;
-    for (const InvEcd& one : m_qListDips) {
+    for (const InvEcd& one : m_dipoles) {
         if (one.valid) {
             const double time = 1000.0 * one.time;
             out << std::format("  {:7.1f} {:7.1f} {:8.2f} {:8.2f} {:8.2f} {:8.3f} {:8.3f} {:8.3f} {:8.3f} {:6.1f}\n",
@@ -287,34 +260,4 @@ bool InvEcdSet::save_dipoles_dip(const std::filesystem::path& path) const
     }
     BASELIB::Log::info("Save {} dipoles in dip format to {}", nsave, path.string());
     return true;
-}
-
-//=============================================================================================================
-
-const InvEcd& InvEcdSet::operator[](int idx) const
-{
-    if (idx >= m_qListDips.length()) {
-        BASELIB::Log::warning("Warning: Required InvEcd doesn't exist! Returning InvEcd '0'.");
-        idx = 0;
-    }
-    return m_qListDips[idx];
-}
-
-//=============================================================================================================
-
-InvEcd& InvEcdSet::operator[](int idx)
-{
-    if (idx >= m_qListDips.length()) {
-        BASELIB::Log::warning("Warning: Required InvEcd doesn't exist! Returning InvEcd '0'.");
-        idx = 0;
-    }
-    return m_qListDips[idx];
-}
-
-//=============================================================================================================
-
-InvEcdSet& InvEcdSet::operator<<(const InvEcd& p_ecd)
-{
-    this->m_qListDips.append(p_ecd);
-    return *this;
 }

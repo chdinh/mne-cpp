@@ -190,7 +190,7 @@ bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDi
     InvEcd dip;
     constexpr int report_interval = 10;
 
-    set.dataname = dataname;
+    set.dataname = dataname.toStdString();
 
     if (verbose)
         BASELIB::Log::info("Fitting...");
@@ -204,7 +204,7 @@ bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDi
         if (!InvDipoleFitData::fit_one(fit, guess, time, one, verbose, dip))
             BASELIB::Log::warning("t = {:7.1f} ms : fit error", 1000.0f * time);
         else {
-            set.addEcd(dip);
+            set.push_back(dip);
             if (verbose)
                 dip.print();
             else {
@@ -239,7 +239,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
 
     InvEcd dip;
     InvEcdSet set;
-    set.dataname = dataname;
+    set.dataname = dataname.toStdString();
 
     /*
      * Load the initial data segment
@@ -266,7 +266,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
         if (!InvDipoleFitData::fit_one(fit, guess, time, one, verbose, dip))
             BASELIB::Log::warning("t = {:8.3f} s : fit error", time);
         else {
-            set.addEcd(dip);
+            set.push_back(dip);
             if (verbose)
                 dip.print();
             else {

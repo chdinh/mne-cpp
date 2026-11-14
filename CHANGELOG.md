@@ -475,6 +475,14 @@ aliases; replace the old spelling as below.
   `InvEcdSet`, `HpiFitResult` and `MNEInverseOperator`: Qt 6 registers a
   type on its first use in a `QVariant`, `qRegisterMetaType<T>()` or a
   signal, so the declarations were redundant. Migration: none.
+- `InvEcdSet` is a `std::vector`-backed container: `addEcd(ecd)` and
+  `set << ecd` become `push_back(ecd)`, `empty()`, `begin()` and `end()`
+  are new, `size()` returns `int`, and `dataname` is a `std::string`. The
+  index operator no longer returns the first dipole with a warning for an
+  index past the end (it could not on an empty set); like `std::vector` it
+  requires a valid index. The header no longer includes `QList`/`QString`.
+  Migration: `set.addEcd(ecd)` becomes `set.push_back(ecd)`,
+  `set.dataname.isEmpty()` becomes `set.dataname.empty()`.
 - `mne_fs` no longer links Qt Core. Migration: targets that used Qt only
   through `mne_fs` link `Qt::Core` themselves.
 - `MNEMghTag` is a plain struct whose `data` is a `std::vector<std::byte>`

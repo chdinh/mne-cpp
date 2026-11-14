@@ -128,9 +128,9 @@ private slots:
         d3.time = 0.3f;
         d3.valid = true;
 
-        set.addEcd(d1);
-        set << d2;
-        set.addEcd(d3);
+        set.push_back(d1);
+        set.push_back(d2);
+        set.push_back(d3);
 
         QCOMPARE(set.size(), (qint32)3);
         QCOMPARE(set[0].time, 0.1f);
@@ -146,7 +146,7 @@ private slots:
         InvEcd d;
         d.time = 1.0f;
         d.valid = true;
-        set.addEcd(d);
+        set.push_back(d);
 
         InvEcdSet copy(set);
         QCOMPARE(copy.size(), (qint32)1);
@@ -166,7 +166,7 @@ private slots:
             d.khi2 = 1.0f;
             d.nfree = 3;
             d.neval = 10;
-            set.addEcd(d);
+            set.push_back(d);
         }
 
         QTemporaryDir scratch;

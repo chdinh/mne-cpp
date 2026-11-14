@@ -28,17 +28,13 @@
 #include "inv_ecd.h"
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QList>
-#include <QString>
-
-//=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <cstddef>
 #include <filesystem>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -67,47 +63,6 @@ namespace INVLIB
 class INVSHARED_EXPORT InvEcdSet
 {
 public:
-    //=========================================================================================================
-    /**
-     * Constructs a Electric Current Dipole Set object.
-     */
-    InvEcdSet();
-
-    //=========================================================================================================
-    /**
-     * Copy constructor.
-     *
-     * @param[in] p_ECDSet       Electric Current Dipole Set which should be copied.
-     */
-    InvEcdSet(const InvEcdSet& p_ECDSet);
-
-    //=========================================================================================================
-    /**
-     * Copy assignment. Every member has value semantics, so the
-     * compiler-generated member-wise assignment is correct. It is declared
-     * explicitly because declaring a copy constructor and/or a destructor
-     * deprecates the implicitly generated one.
-     *
-     * @param[in] other   Object to assign from.
-     *
-     * @return reference to this object.
-     */
-    InvEcdSet& operator=(const InvEcdSet& other) = default;
-
-    //=========================================================================================================
-    /**
-     * Destroys the Electric Current Dipole description
-     */
-    ~InvEcdSet();
-
-    //=========================================================================================================
-    /**
-     * Appends an Electric Current Dipole to the set
-     *
-     * @param[in] p_ecd  Dipole to append (copied).
-     */
-    void addEcd(const InvEcd& p_ecd);
-
     //=========================================================================================================
     /**
      * Read dipoles from the dip format compatible with mrilab, as written by save_dipoles_dip,
@@ -139,59 +94,71 @@ public:
      */
     [[nodiscard]] bool save_dipoles_dip(const std::filesystem::path& path) const;
 
-    //=========================================================================================================
     /**
-     * Returns the number of stored ECDs
+     * Appends a dipole.
      *
-     * @return number of stored ECDs.
+     * @param[in] ecd   The dipole to append.
      */
-    inline qint32 size() const;
+    void push_back(const InvEcd& ecd)
+    {
+        m_dipoles.push_back(ecd);
+    }
 
-    //=========================================================================================================
+    /** @return The number of dipoles. */
+    int size() const
+    {
+        return static_cast<int>(m_dipoles.size());
+    }
+
+    /** @return Whether the set holds no dipoles. */
+    bool empty() const
+    {
+        return m_dipoles.empty();
+    }
+
     /**
-     * Subscript operator [] to access InvEcd by index
+     * @param[in] idx   Index of the dipole, less than size().
      *
-     * @param[in] idx    the InvEcd index.
-     *
-     * @return InvEcd related to the parameter index.
+     * @return The dipole at @p idx.
      */
-    const InvEcd& operator[](int idx) const;
+    const InvEcd& operator[](int idx) const
+    {
+        return m_dipoles[static_cast<std::size_t>(idx)];
+    }
 
-    //=========================================================================================================
     /**
-     * Subscript operator [] to access InvEcd by index
+     * @param[in] idx   Index of the dipole, less than size().
      *
-     * @param[in] idx    the InvEcd index.
-     *
-     * @return InvEcd related to the parameter index.
+     * @return The dipole at @p idx.
      */
-    InvEcd& operator[](int idx);
+    InvEcd& operator[](int idx)
+    {
+        return m_dipoles[static_cast<std::size_t>(idx)];
+    }
 
-    //=========================================================================================================
-    /**
-     * Subscript operator << to add a new InvEcd
-     *
-     * @param[in] p_ecd      InvEcd to be added.
-     *
-     * @return InvEcdSet.
-     */
-    InvEcdSet& operator<<(const InvEcd& p_ecd);
+    auto begin() const
+    {
+        return m_dipoles.begin();
+    }
+    auto end() const
+    {
+        return m_dipoles.end();
+    }
+    auto begin()
+    {
+        return m_dipoles.begin();
+    }
+    auto end()
+    {
+        return m_dipoles.end();
+    }
 
-public:
-    QString dataname; /**< The associated data file. */
+    std::string dataname; /**< The associated data file. */
 
 private:
-    QList<InvEcd> m_qListDips; /**< List of Electric Current Dipoles. */
+    std::vector<InvEcd> m_dipoles; /**< The fitted dipoles. */
 };
 
-//=============================================================================================================
-// INLINE DEFINITIONS
-//=============================================================================================================
-
-inline qint32 InvEcdSet::size() const
-{
-    return m_qListDips.size();
-}
 } // NAMESPACE INVLIB
 
 #endif // INV_ECD_SET_H

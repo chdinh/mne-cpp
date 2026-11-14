@@ -563,8 +563,9 @@ void TestInvDipoleRapMne::ecd_construction()
 void TestInvDipoleRapMne::ecdSet_construction()
 {
     InvEcdSet set;
-    QCOMPARE(set.size(), (qint32)0);
-    QVERIFY(set.dataname.isEmpty());
+    QCOMPARE(set.size(), 0);
+    QVERIFY(set.empty());
+    QVERIFY(set.dataname.empty());
 }
 
 void TestInvDipoleRapMne::ecdSet_addAndAccess()
@@ -584,11 +585,18 @@ void TestInvDipoleRapMne::ecdSet_addAndAccess()
     ecd2.Q = Vector3f(1e-9f, 0.0f, 8e-9f);
     ecd2.good = 0.92f;
 
-    set << ecd1 << ecd2;
-    QCOMPARE(set.size(), (qint32)2);
+    set.push_back(ecd1);
+    set.push_back(ecd2);
+    QCOMPARE(set.size(), 2);
+    QVERIFY(!set.empty());
     QVERIFY(qAbs(set[0].time - 0.050f) < 1e-5);
     QVERIFY(qAbs(set[1].time - 0.100f) < 1e-5);
     QVERIFY(qAbs(set[1].good - 0.92f) < 1e-5);
+    float goodSum = 0.0f;
+    for (const InvEcd& ecd : set) {
+        goodSum += ecd.good;
+    }
+    QVERIFY(qAbs(goodSum - 1.72f) < 1e-5);
 }
 
 void TestInvDipoleRapMne::ecdSet_writeReadDipFile()
@@ -606,7 +614,7 @@ void TestInvDipoleRapMne::ecdSet_writeReadDipFile()
     ecd.good = 0.88f;
     ecd.khi2 = 1.5f;
     ecd.nfree = 100;
-    setOrig << ecd;
+    setOrig.push_back(ecd);
 
     // Write to .dip format
     const std::filesystem::path dipPath = tmpDir.filePath("test_out.dip").toStdU16String();
@@ -636,7 +644,7 @@ void TestInvDipoleRapMne::ecdSet_writeReadDipFile()
 
     const std::filesystem::path brokenPath = tmpDir.filePath("broken.dip").toStdU16String();
     std::ofstream(brokenPath) << "  75.0 75.0 30.00 20.00 70.00 5.000 0.000 5.000 0.000 88.0\n  80.0 80.0 31.00\n";
-    QCOMPARE(InvEcdSet::read_dipoles_dip(brokenPath).size(), (qint32)0);
+    QVERIFY(InvEcdSet::read_dipoles_dip(brokenPath).empty());
 }
 
 void TestInvDipoleRapMne::ecdSet_copyConstruction()
@@ -645,10 +653,15 @@ void TestInvDipoleRapMne::ecdSet_copyConstruction()
     InvEcd ecd;
     ecd.valid = true;
     ecd.time = 0.1f;
-    orig << ecd;
+    orig.push_back(ecd);
+
+    orig.dataname = "sample-ave.fif";
 
     InvEcdSet copy(orig);
     QCOMPARE(copy.size(), orig.size());
+    QCOMPARE(copy.dataname, std::string("sample-ave.fif"));
+    copy[0].time = 0.2f;
+    QCOMPARE(orig[0].time, 0.1f);
 }
 
 //=============================================================================================================

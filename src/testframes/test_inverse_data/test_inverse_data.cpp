@@ -615,7 +615,7 @@ private slots:
             ecd.khi2 = 1.0 + 0.5 * i;
             ecd.nfree = 100;
             ecd.time = -0.1f + 0.01f * i;
-            set.addEcd(ecd);
+            set.push_back(ecd);
         }
 
         QCOMPARE(set.size(), 5);

@@ -219,7 +219,7 @@ void TestAnalyzeDataLoader::loadsDipoleFiles()
         ecd.rd = Eigen::Vector3f(0.01f * k, 0.02f, 0.05f);
         ecd.Q = Eigen::Vector3f(1e-8f, 0.0f, 0.0f);
         ecd.good = 0.9f;
-        written.addEcd(ecd);
+        written.push_back(ecd);
     }
     const QString path = dir.filePath("sample-dipoles.dip");
     QVERIFY(written.save_dipoles_dip(path.toStdU16String()));

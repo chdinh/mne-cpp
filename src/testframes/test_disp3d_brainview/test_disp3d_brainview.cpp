@@ -422,7 +422,7 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
     ecd.Q = Eigen::Vector3f(1e-8f, 0.0f, 0.0f);
     ecd.good = 0.9f;
     INVLIB::InvEcdSet dipoles;
-    dipoles << ecd;
+    dipoles.push_back(ecd);
     const QString dipPath = dir.filePath(QStringLiteral("one.dip"));
     QVERIFY(dipoles.save_dipoles_dip(dipPath.toStdU16String()));
     CONNECTIVITYLIB::Network network("Coherence");
@@ -441,7 +441,7 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
         INVLIB::InvEcd offAxis = ecd;
         offAxis.rd = Eigen::Vector3f(0.08f, 0.06f, 0.05f);
         INVLIB::InvEcdSet offAxisSet;
-        offAxisSet << offAxis;
+        offAxisSet.push_back(offAxis);
         const QString offAxisPath = dir.filePath(QStringLiteral("off-axis.dip"));
         QVERIFY(offAxisSet.save_dipoles_dip(offAxisPath.toStdU16String()));
         BrainTreeModel dipModel;
@@ -1480,7 +1480,7 @@ void TestDisp3dBrainView::brainRenderer_nullRhi()
     ecd.rd = Eigen::Vector3f(0.0f, 0.0f, 0.05f);
     ecd.Q = Eigen::Vector3f(1e-8f, 0.0f, 0.0f);
     INVLIB::InvEcdSet ecds;
-    ecds << ecd;
+    ecds.push_back(ecd);
     DipoleObject dipoles;
     dipoles.load(ecds);
     CONNECTIVITYLIB::Network network("Coherence");
@@ -2342,12 +2342,12 @@ void TestDisp3dBrainView::dipoleObject_extended()
         d1.khi2 = 0.1f;
         d1.nfree = 3;
         d1.neval = 10;
-        ecdSet.addEcd(d1);
+        ecdSet.push_back(d1);
 
         INVLIB::InvEcd d2 = d1;
         d2.rd = Eigen::Vector3f(-0.01f, 0.01f, 0.04f);
         d2.Q = Eigen::Vector3f(0.0f, 1e-9f, 0.0f);
-        ecdSet.addEcd(d2);
+        ecdSet.push_back(d2);
     }
     QCOMPARE(ecdSet.size(), (qint32)2);
 
