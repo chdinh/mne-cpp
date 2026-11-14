@@ -33,7 +33,7 @@
       "ml",
       "report"
     ],
-    "tokens": 13082,
+    "tokens": 12998,
     "gui_outside_design": []
   },
   "libraries": {
@@ -142,10 +142,9 @@
       "modules": []
     },
     "connectivity": {
-      "tokens": 59,
+      "tokens": 55,
       "by_category": {
         "global": 5,
-        "objects_signals": 4,
         "threads": 50
       },
       "public_header_includes": 9,
@@ -165,7 +164,7 @@
       "modules": []
     },
     "disp": {
-      "tokens": 6039,
+      "tokens": 6034,
       "by_category": {
         "containers": 477,
         "files": 108,
@@ -173,8 +172,8 @@
         "gui": 924,
         "json": 5,
         "logging": 49,
-        "objects_signals": 551,
-        "other": 1503,
+        "objects_signals": 545,
+        "other": 1504,
         "regex": 4,
         "strings": 1127,
         "threads": 23,
@@ -298,17 +297,16 @@
       ]
     },
     "inv": {
-      "tokens": 216,
+      "tokens": 212,
       "by_category": {
-        "containers": 83,
+        "containers": 82,
         "files": 1,
-        "global": 31,
+        "global": 30,
         "json": 2,
         "objects_signals": 5,
-        "strings": 92,
-        "threads": 2
+        "strings": 92
       },
-      "public_header_includes": 27,
+      "public_header_includes": 28,
       "q_object": 0,
       "files": 81,
       "modules": [
@@ -371,16 +369,11 @@
       ]
     },
     "mne": {
-      "tokens": 296,
+      "tokens": 225,
       "by_category": {
-        "containers": 1,
-        "files": 10,
-        "global": 238,
-        "other": 23,
-        "strings": 16,
-        "threads": 8
+        "global": 225
       },
-      "public_header_includes": 19,
+      "public_header_includes": 0,
       "q_object": 0,
       "files": 110,
       "modules": [

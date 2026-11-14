@@ -44,7 +44,7 @@ int assigned = 0;
 for (const VectorXi& members : clusters.clusterVertnos) {
     assigned += static_cast<int>(members.size());
 }
-clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
+const bool written = clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
 ````
 
 From [ex_inv_api](../../examples/inv/ex_inv_api.mdx).

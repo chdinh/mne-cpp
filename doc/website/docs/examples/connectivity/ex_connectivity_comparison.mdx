@@ -345,7 +345,7 @@ int main(int argc, char* argv[])
         MatrixXd matData;
         int iNumberRows = picks.cols(); //picks.cols() 32
 
-        for (int i = 0; i < data.size(); ++i) {
+        for (int i = 0; i < std::ssize(data); ++i) {
             matData.resize(iNumberRows, data.at(i)->epoch.cols());
 
             for (qint32 j = 0; j < iNumberRows; ++j) {
@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
 
         picks = raw.info.pick_types("all", true, false, {}, exclude);
         data.pick_channels(picks);
-        for (int i = 0; i < data.size(); i++) {
+        for (int i = 0; i < std::ssize(data); i++) {
             sourceEstimate = minimumNorm.calculateInverse(data.at(i)->epoch,
                                                           0.0f,
                                                           1.0 / raw.info.sfreq,

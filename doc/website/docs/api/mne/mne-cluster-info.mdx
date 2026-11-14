@@ -30,7 +30,7 @@ int assigned = 0;
 for (const VectorXi& members : clusters.clusterVertnos) {
     assigned += static_cast<int>(members.size());
 }
-clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
+const bool written = clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
 ```
 
 ---
@@ -78,6 +78,10 @@ Writes the cluster info as text, and the centroid vertex numbers to `centroids_<
 - **p_sFileName** : *const std::filesystem::path &*
   FileName to write to.
 
+**Returns:**
+
+- *bool* — True if both files were written.
+
 ---
 
 ## Example
@@ -102,8 +106,8 @@ int assigned = 0;
 for (const VectorXi& members : clusters.clusterVertnos) {
     assigned += static_cast<int>(members.size());
 }
-clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
-ok &= expect(clustered.isClustered() && clusters.numClust() == clustered.nsource && assigned == 70 && clusters.numClust() >= 4 && (clustered.sol.data - fwd.sol.data * clusterMean).norm() <= 1e-9 * fwd.sol.data.norm() && QFile::exists(tmp.filePath("centroids_v1-clusters.txt")),
+const bool written = clusters.write(tmp.filePath("v1-clusters.txt").toStdU16String()); // plus centroids_v1-clusters.txt
+ok &= expect(written && clustered.isClustered() && clusters.numClust() == clustered.nsource && assigned == 70 && clusters.numClust() >= 4 && (clustered.sol.data - fwd.sol.data * clusterMean).norm() <= 1e-9 * fwd.sol.data.norm() && QFile::exists(tmp.filePath("centroids_v1-clusters.txt")),
              "MNEClusterInfo: every V1 source in one cluster, clustered gain is the cluster mean");
 ````
 
