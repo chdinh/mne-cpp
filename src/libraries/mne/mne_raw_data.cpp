@@ -701,6 +701,7 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMa
         BASELIB::Log::warning("{}: the buffer has {} rows for {} channels", __func__, picked.rows(), nrow);
         return FAIL;
     }
+    const bool use_deriv = sel && deriv_matched && sel->nderiv() > 0;
     int ns = static_cast<int>(picked.cols());
     int k, s, p, start, c, fills;
     int ns2, s2;
@@ -773,7 +774,7 @@ int MNERawData::pick_data(MNEChSelection* sel, int firsts, Eigen::Ref<RowMajorMa
                     /*
                * Do we need the derived channels?
                */
-                    if (sel->nderiv > 0 && deriv_matched) {
+                    if (use_deriv) {
                         if (deriv_ns < this_buf->ns || nderiv != deriv_matched->deriv_data->nrow) {
                             deriv_vals.resize(deriv_matched->deriv_data->nrow, this_buf->ns);
                             nderiv = deriv_matched->deriv_data->nrow;
@@ -849,6 +850,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
         BASELIB::Log::warning("{}: the buffer has {} rows for {} channels", __func__, picked.rows(), nrow);
         return FAIL;
     }
+    const bool use_deriv = sel && deriv_matched && sel->nderiv() > 0;
     int ns = static_cast<int>(picked.cols());
     int k, s, p, start, c, fills;
     MNERawBufDef* this_buf;
@@ -903,7 +905,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
              * Apply projection
              */
                 values = &this_buf->vals;
-                if (sel && sel->nderiv > 0 && deriv_matched) {
+                if (use_deriv) {
                     deriv_pvalues_vec.resize(deriv_matched->deriv_data->nrow);
                 }
                 for (p = start; p < this_buf->ns && ns > 0; p++, ns--, s++) {
@@ -912,7 +914,7 @@ int MNERawData::pick_data_proj(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
                     if (!proj->project_vector(pvalues, true))
                         BASELIB::Log::warning("Error");
                     if (sel) {
-                        if (sel->nderiv > 0 && deriv_matched) {
+                        if (use_deriv) {
                             if (mne_sparse_vec_mult2(deriv_matched->deriv_data->data.get(), pvalues.data(), deriv_pvalues_vec.data()) == FAIL)
                                 return FAIL;
                         }
@@ -1008,6 +1010,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
         BASELIB::Log::warning("{}: the buffer has {} rows for {} channels", __func__, picked.rows(), nrow);
         return FAIL;
     }
+    const bool use_deriv = sel && deriv_matched && sel->nderiv() > 0;
     int ns = static_cast<int>(picked.cols());
     int k, s, bs, c;
     int bs1, s1, s2, lasts;
@@ -1094,7 +1097,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
             /*
            * Also check channels included in derivations if they are used
            */
-            if (sel->nderiv > 0 && deriv_matched) {
+            if (use_deriv) {
                 MNEDeriv* der = deriv_matched.get();
                 for (c = 0; c < der->deriv_data->ncol; c++) {
                     if (der->in_use[c] > 0 &&
@@ -1166,7 +1169,7 @@ int MNERawData::pick_data_filt(MNEChSelection* sel, int firsts, Eigen::Ref<RowMa
          * Then pick data from all relevant channels
          */
         if (sel) {
-            if (sel->nderiv > 0 && deriv_matched) {
+            if (use_deriv) {
                 /*
              * Compute derived data if we need it
              */

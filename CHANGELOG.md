@@ -414,6 +414,10 @@ aliases; replace the old spelling as below.
   function `nchan()` returning `chspick.size()` instead of a count kept next
   to the picked names. Migration: `sel.nchan` becomes `sel.nchan()`; a
   selection built by hand sets `chspick` (and `pick`) instead of `nchan`.
+- `MNEChSelection::nderiv` is the function `nderiv()` counting the entries of
+  `pick_deriv` that pick a derivation. A selection built by hand used to read
+  no derived channels unless it also set the count. Migration: `sel.nderiv`
+  becomes `sel.nderiv()`; drop assignments to it.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

@@ -91,13 +91,21 @@ public:
         return static_cast<int>(chspick.size());
     }
 
+    //=========================================================================================================
+    /**
+     * @return The number of channels picked from the derivations (entries of @ref pick_deriv >= 0).
+     */
+    int nderiv() const
+    {
+        return static_cast<int>((pick_deriv.array() >= 0).count());
+    }
+
     std::string name;           /**< Name of this selection. */
     StringList chdef;           /**< Channel definitions (may contain regular expressions). */
     StringList chspick;         /**< Translated into channel names using the present data. */
     StringList chspick_nospace; /**< The same without spaces. */
     Eigen::VectorXi pick;       /**< Corresponding channels in raw data (< 0 indicates missing). */
-    Eigen::VectorXi pick_deriv; /**< Corresponding derivations in raw data. */
-    int nderiv = 0;             /**< How many derivations in the above. */
+    Eigen::VectorXi pick_deriv; /**< Corresponding derivations in raw data (< 0 where not derived). */
     Eigen::VectorXi ch_kind;    /**< Kinds of the channels corresponding to picks. */
     int kind = 0;               /**< Loaded from file or created here? */
 };

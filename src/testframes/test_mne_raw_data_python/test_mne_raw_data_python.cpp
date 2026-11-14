@@ -520,7 +520,6 @@ void TestMneRawDataPython::picksDerivedChannel()
     sel.pick << -1, a, b;
     sel.pick_deriv = VectorXi(3);
     sel.pick_deriv << 0, -1, -1;
-    sel.nderiv = 1;
     sel.chspick = sel.chspick_nospace = {"BIP", "MEG 0111", "MEG 0121"};
 
     // The projected path derives from projected inputs; the read starts before the data to cover the zero padding

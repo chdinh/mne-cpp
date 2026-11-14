@@ -852,7 +852,6 @@ void TestMneRawProjComp::rawData_pickData()
     sel.pick << 0, 1, 2;
     sel.pick_deriv.resize(3);
     sel.pick_deriv << -1, -1, -1;
-    sel.nderiv = 0;
 
     MNERawData::RowMajorMatrixXf picked(sel.nchan(), 100);
     QCOMPARE(raw->pick_data(&sel, raw->first_samp, picked), 0);

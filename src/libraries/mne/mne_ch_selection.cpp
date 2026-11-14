@@ -79,7 +79,6 @@ int MNEChSelection::assign_channels(std::span<const FiffChInfo> chs, const MNEDe
     /*
      * Maybe the derivations will help
      */
-    nderiv = 0;
     if (deriv && deriv->deriv_data) {
         const StringList& deriv_names = deriv->deriv_data->rowlist;
         for (int c = 0; c < nchan; c++) {
@@ -89,7 +88,6 @@ int MNEChSelection::assign_channels(std::span<const FiffChInfo> chs, const MNEDe
                 if (BASELIB::equalsIgnoreCase(chspick[c], deriv_names[d]) && d < static_cast<std::size_t>(deriv->valid.size()) && deriv->valid[static_cast<Eigen::Index>(d)]) {
                     pick_deriv[c] = static_cast<int>(d);
                     ch_kind[c] = deriv->chs[d].kind;
-                    nderiv++;
                     break;
                 }
             }
@@ -110,7 +108,7 @@ int MNEChSelection::assign_channels(std::span<const FiffChInfo> chs, const MNEDe
             }
         }
     }
-    if (nderiv > 0)
-        BASELIB::Log::info("Selection \"{}\" has {} matched derived channels.", name, nderiv);
+    if (const int matched = nderiv(); matched > 0)
+        BASELIB::Log::info("Selection \"{}\" has {} matched derived channels.", name, matched);
     return static_cast<int>(std::ranges::count_if(pick, [](int p) { return p >= 0; }));
 }

@@ -48,7 +48,7 @@ private slots:
         QVERIFY(sel.chspick_nospace.empty());
         QCOMPARE(sel.pick.size(), 0);
         QCOMPARE(sel.pick_deriv.size(), 0);
-        QCOMPARE(sel.nderiv, 0);
+        QCOMPARE(sel.nderiv(), 0);
         QCOMPARE(sel.ch_kind.size(), 0);
         QCOMPARE(sel.nchan(), 0);
         QCOMPARE(sel.kind, 0);
@@ -122,6 +122,11 @@ private slots:
         QCOMPARE(sel.pick, Eigen::Vector4i(0, 1, 2, -1));
         QCOMPARE(sel.ch_kind, Eigen::Vector4i(FIFFV_MEG_CH, FIFFV_EEG_CH, FIFFV_EOG_CH, -1));
         QCOMPARE(sel.pick_deriv, Eigen::Vector4i::Constant(-1));
+        QCOMPARE(sel.nderiv(), 0);
+
+        // The derived channels are those picked from the derivations
+        sel.pick_deriv << -1, -1, 0, 1;
+        QCOMPARE(sel.nderiv(), 2);
         QCOMPARE(sel.chspick_nospace[0], std::string("MEG0113"));
 
         // The spaces of the recorded name are kept, as in MNE-C
