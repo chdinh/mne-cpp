@@ -462,18 +462,18 @@ int main(int argc, char* argv[])
 
     //! [mne_event_list_usage]
     // Annotate the detected onsets, save them with their comments and read them back relative to the first sample
-    MNEEventList annotated = MNEEventList::fromMatrix(events.events).selectOnsets();
+    MNEEventList annotated = MNEEventList::from_matrix(events.events).select_onsets();
     annotated.sort();
     for (MNEEvent& event : annotated.events) {
-        event.comment = (event.to == 1 ? "left auditory" : QString()).toStdString();
+        event.comment = event.to == 1 ? "left auditory" : "";
     }
-    const QString commentedName = tmp.filePath("commented-eve.fif");
-    annotated.writeFif(commentedName.toStdU16String());
-    const auto relative = MNEEventList::readFif(commentedName.toStdU16String(), raw.first_samp);
-    const MNEEventList leftAuditory = relative->selectOnsets(1);
+    const std::filesystem::path commentedPath = tmp.filePath("commented-eve.fif").toStdU16String();
+    const bool written = annotated.write_fif(commentedPath);
+    const auto relative = MNEEventList::read_fif(commentedPath, raw.first_samp);
+    const MNEEventList leftAuditory = relative->select_onsets(1);
     //! [mne_event_list_usage]
     // mne.find_events: 25 onsets, codes up to 32, 6 of code 1, the first at 14385 - 12900
-    ok &= expect(annotated.nevent() == 25 && annotated.maxOnset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.empty(),
+    ok &= expect(written && annotated.nevent() == 25 && annotated.max_onset() == 32 && leftAuditory.nevent() == 6 && leftAuditory.events[0].sample == 14385 - 12900 && leftAuditory.events[0].comment == "left auditory" && relative->events[0].comment.empty(),
                  "MNEEventList/MNEEvent: commented event file, onsets selected like mne.find_events");
 
     //! [mne_deriv_set_usage]

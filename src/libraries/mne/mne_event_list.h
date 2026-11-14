@@ -27,8 +27,6 @@
 #include "mne_event.h"
 
 #include <filesystem>
-#include <QString>
-
 #include <optional>
 #include <vector>
 
@@ -59,7 +57,7 @@ public:
      *
      * @return The events with their comments, or no value if the file has no event block.
      */
-    static std::optional<MNEEventList> readFif(const std::filesystem::path& path, int offset = 0);
+    static std::optional<MNEEventList> read_fif(const std::filesystem::path& path, int offset = 0);
 
     //=========================================================================================================
     /**
@@ -69,16 +67,16 @@ public:
      * comment; @c # starts a comment line. A negative sample is computed from the time.
      * A first line with both trigger values 0 marks the current format: it gives the
      * first sample of the recording and is not an event. Old files have no such line;
-     * their samples are shifted by @p oldOffset instead.
+     * their samples are shifted by @p old_offset instead.
      *
      * @param[in] path        The text file.
      * @param[in] offset      Samples to subtract from every event (the recording's first sample).
-     * @param[in] oldOffset   Extra offset used by files in the old format.
+     * @param[in] old_offset  Extra offset used by files in the old format.
      * @param[in] sfreq       Sampling frequency, to convert times of events without a sample.
      *
      * @return The events, or no value if the file cannot be read or holds no events.
      */
-    static std::optional<MNEEventList> readText(const std::filesystem::path& path, int offset, int oldOffset, float sfreq);
+    static std::optional<MNEEventList> read_text(const std::filesystem::path& path, int offset, int old_offset, float sfreq);
 
     //=========================================================================================================
     /**
@@ -89,7 +87,7 @@ public:
      *
      * @return True if the file was written.
      */
-    bool writeFif(const std::filesystem::path& path, int offset = 0) const;
+    [[nodiscard]] bool write_fif(const std::filesystem::path& path, int offset = 0) const;
 
     //=========================================================================================================
     /**
@@ -114,7 +112,7 @@ public:
      *
      * @return The selected events in their original order.
      */
-    MNEEventList selectOnsets(unsigned int value = 0) const;
+    MNEEventList select_onsets(unsigned int value = 0) const;
 
     //=========================================================================================================
     /**
@@ -122,7 +120,7 @@ public:
      *
      * @return The largest onset value, 0 for a list without onsets.
      */
-    unsigned int maxOnset() const;
+    unsigned int max_onset() const;
 
     //=========================================================================================================
     /**
@@ -131,17 +129,17 @@ public:
      *
      * @return nEvents x 3 matrix.
      */
-    Eigen::MatrixXi toMatrix() const;
+    Eigen::MatrixXi to_matrix() const;
 
     //=========================================================================================================
     /**
      * Builds a list from rows of sample, value before and value after.
      *
-     * @param[in] matrix   nEvents x 3 matrix as returned by toMatrix().
+     * @param[in] matrix   nEvents x 3 matrix as returned by to_matrix().
      *
      * @return The events, without comments.
      */
-    static MNEEventList fromMatrix(const Eigen::MatrixXi& matrix);
+    static MNEEventList from_matrix(const Eigen::MatrixXi& matrix);
 
     //=========================================================================================================
     /**

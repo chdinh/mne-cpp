@@ -433,6 +433,12 @@ aliases; replace the old spelling as below.
   take a `std::filesystem::path` and use the standard library instead of
   `QFile`/`QTextStream`; the save functions are `[[nodiscard]]`.
   Migration: pass `qpath.toStdU16String()`.
+- `MNEEventList` methods are snake_case: `read_fif`, `read_text`,
+  `write_fif` (now `[[nodiscard]]`), `select_onsets`, `max_onset`,
+  `to_matrix` and `from_matrix`. The text reader uses the standard library
+  instead of `QFile`/`QTextStream`, and the header no longer includes
+  `QString`. Migration: rename the calls, for example
+  `MNEEventList::readFif(path)` becomes `MNEEventList::read_fif(path)`.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

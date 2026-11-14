@@ -26,19 +26,13 @@
 #include <fiff/fiff_tag.h>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QFile>
-#include <QRegularExpression>
-#include <QTextStream>
-
-//=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
 #include <algorithm>
+#include <charconv>
 #include <cmath>
+#include <fstream>
 #include <ranges>
 #include <span>
 #include <string_view>
@@ -51,10 +45,91 @@ using namespace MNELIB;
 using namespace FIFFLIB;
 
 //=============================================================================================================
+// DEFINE STATIC FUNCTIONS
+//=============================================================================================================
+
+namespace
+{
+
+constexpr std::string_view whitespace = " \t\r";
+
+std::string_view trimmed(std::string_view text)
+{
+    const std::size_t begin = text.find_first_not_of(whitespace);
+    if (begin == std::string_view::npos) {
+        return {};
+    }
+    return text.substr(begin, text.find_last_not_of(whitespace) - begin + 1);
+}
+
+//=============================================================================================================
+/**
+ * Parses the whitespace-delimited number at the start of @p text and drops it from @p text.
+ */
+template<typename T>
+bool take_number(std::string_view& text, T& value)
+{
+    text = text.substr(std::min(text.find_first_not_of(whitespace), text.size()));
+    const char* first = text.data();
+    const char* end = first + text.size();
+    const auto [ptr, ec] = std::from_chars(first, end, value);
+    if (ec != std::errc{} || (ptr != end && whitespace.find(*ptr) == std::string_view::npos)) {
+        return false;
+    }
+    text.remove_prefix(static_cast<std::size_t>(ptr - first));
+    return true;
+}
+
+//=============================================================================================================
+
+std::string utf8_from_latin1(std::string_view bytes)
+{
+    std::string text;
+    text.reserve(bytes.size());
+    for (const char c : bytes) {
+        const auto u = static_cast<unsigned char>(c);
+        if (u < 0x80) {
+            text += c;
+        } else {
+            text += static_cast<char>(0xC0 | (u >> 6));
+            text += static_cast<char>(0x80 | (u & 0x3F));
+        }
+    }
+    return text;
+}
+
+//=============================================================================================================
+/**
+ * Characters outside Latin-1 become '?'.
+ */
+std::string latin1_from_utf8(std::string_view text)
+{
+    std::string bytes;
+    bytes.reserve(text.size());
+    for (std::size_t i = 0; i < text.size();) {
+        const auto u = static_cast<unsigned char>(text[i]);
+        const std::size_t length = u < 0x80 ? 1 : u >= 0xF0 ? 4
+            : u >= 0xE0                                     ? 3
+                                                            : 2;
+        if (length == 1) {
+            bytes += text[i];
+        } else if (length == 2 && u <= 0xC3 && i + 1 < text.size()) {
+            bytes += static_cast<char>(((u & 0x1F) << 6) | (static_cast<unsigned char>(text[i + 1]) & 0x3F));
+        } else {
+            bytes += '?';
+        }
+        i += length;
+    }
+    return bytes;
+}
+
+} // namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& path, int offset)
+std::optional<MNEEventList> MNEEventList::read_fif(const std::filesystem::path& path, int offset)
 {
     FiffStream stream(path);
     if (!stream.open()) {
@@ -63,7 +138,7 @@ std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& p
     const std::vector<std::shared_ptr<FiffDirNode>> blocks = stream.dirtree()->dir_tree_find(FIFFB_MNE_EVENTS);
     const auto tag = blocks.empty() ? std::nullopt : blocks.front()->find_tag(stream, FIFF_MNE_EVENT_LIST);
     if (!tag) {
-        BASELIB::Log::warning("MNEEventList::readFif - No event data in {}", BASELIB::utf8FromPath(path));
+        BASELIB::Log::warning("MNEEventList::read_fif - No event data in {}", BASELIB::utf8FromPath(path));
         return std::nullopt;
     }
     // Written as signed or unsigned integers; both have the same bit pattern.
@@ -84,7 +159,7 @@ std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& p
             if (k >= nevent) {
                 break;
             }
-            list.events[k++].comment = QString::fromLatin1(std::string_view(comment.begin(), comment.end())).toStdString();
+            list.events[k++].comment = utf8_from_latin1(std::string_view(comment.begin(), comment.end()));
         }
     }
     return list;
@@ -92,29 +167,26 @@ std::optional<MNEEventList> MNEEventList::readFif(const std::filesystem::path& p
 
 //=============================================================================================================
 
-std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& path, int offset, int oldOffset, float sfreq)
+std::optional<MNEEventList> MNEEventList::read_text(const std::filesystem::path& path, int offset, int old_offset, float sfreq)
 {
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        BASELIB::Log::warning("MNEEventList::readText - Cannot open {}", BASELIB::utf8FromPath(path));
+    std::ifstream in(path);
+    if (!in) {
+        BASELIB::Log::warning("MNEEventList::read_text - Cannot open {}", BASELIB::utf8FromPath(path));
         return std::nullopt;
     }
-    static const QRegularExpression whitespace(QStringLiteral("\\s+"));
     MNEEventList list;
     bool first = true;
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        const QString line = in.readLine().trimmed();
-        if (line.isEmpty() || line.startsWith('#')) {
+    std::string line;
+    while (std::getline(in, line)) {
+        std::string_view rest = trimmed(line);
+        if (rest.empty() || rest.front() == '#') {
             continue;
         }
-        const QStringList fields = line.split(whitespace);
-        bool ok[4];
-        int sample = fields.value(0).toInt(&ok[0]);
-        const float time = fields.value(1).toFloat(&ok[1]);
-        const unsigned int from = fields.value(2).toUInt(&ok[2]);
-        const unsigned int to = fields.value(3).toUInt(&ok[3]);
-        if (fields.size() < 4 || !(ok[0] && ok[1] && ok[2] && ok[3])) {
+        int sample = 0;
+        float time = 0.0f;
+        unsigned int from = 0;
+        unsigned int to = 0;
+        if (!take_number(rest, sample) || !take_number(rest, time) || !take_number(rest, from) || !take_number(rest, to)) {
             break;
         }
         if (sample < 0) {
@@ -124,21 +196,16 @@ std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& 
             first = false;
             if (from == 0 && to == 0) {
                 if (offset != sample) {
-                    BASELIB::Log::warning("MNEEventList::readText - First sample of the data ({}) and of {} ({}) differ", offset, BASELIB::utf8FromPath(path), sample);
+                    BASELIB::Log::warning("MNEEventList::read_text - First sample of the data ({}) and of {} ({}) differ", offset, BASELIB::utf8FromPath(path), sample);
                 }
                 continue;
             }
-            offset -= oldOffset;
+            offset -= old_offset;
         }
-        MNEEvent event;
-        event.sample = sample - offset;
-        event.from = from;
-        event.to = to;
-        event.comment = line.section(whitespace, 4).trimmed().toStdString();
-        list.events.push_back(event);
+        list.events.push_back(MNEEvent{sample - offset, from, to, false, false, std::string(trimmed(rest))});
     }
     if (list.events.empty()) {
-        BASELIB::Log::warning("MNEEventList::readText - No events read from {}", BASELIB::utf8FromPath(path));
+        BASELIB::Log::warning("MNEEventList::read_text - No events read from {}", BASELIB::utf8FromPath(path));
         return std::nullopt;
     }
     return list;
@@ -146,7 +213,7 @@ std::optional<MNEEventList> MNEEventList::readText(const std::filesystem::path& 
 
 //=============================================================================================================
 
-bool MNEEventList::writeFif(const std::filesystem::path& path, int offset) const
+bool MNEEventList::write_fif(const std::filesystem::path& path, int offset) const
 {
     auto stream = FiffStream::start_file(path);
     if (!stream) {
@@ -160,7 +227,7 @@ bool MNEEventList::writeFif(const std::filesystem::path& path, int offset) const
         values.push_back(event.sample + offset);
         values.push_back(static_cast<qint32>(event.from));
         values.push_back(static_cast<qint32>(event.to));
-        comments += QString::fromStdString(event.comment).toLatin1().toStdString();
+        comments += latin1_from_utf8(event.comment);
         comments += '\0';
         anyComment = anyComment || !event.comment.empty();
     }
@@ -204,7 +271,7 @@ void MNEEventList::append(const MNEEventList& other)
 
 //=============================================================================================================
 
-MNEEventList MNEEventList::selectOnsets(unsigned int value) const
+MNEEventList MNEEventList::select_onsets(unsigned int value) const
 {
     MNEEventList selected;
     std::copy_if(events.cbegin(), events.cend(), std::back_inserter(selected.events), [value](const MNEEvent& event) {
@@ -215,7 +282,7 @@ MNEEventList MNEEventList::selectOnsets(unsigned int value) const
 
 //=============================================================================================================
 
-unsigned int MNEEventList::maxOnset() const
+unsigned int MNEEventList::max_onset() const
 {
     unsigned int maximum = 0;
     for (const MNEEvent& event : events) {
@@ -228,7 +295,7 @@ unsigned int MNEEventList::maxOnset() const
 
 //=============================================================================================================
 
-Eigen::MatrixXi MNEEventList::toMatrix() const
+Eigen::MatrixXi MNEEventList::to_matrix() const
 {
     Eigen::MatrixXi matrix(nevent(), 3);
     for (int k = 0; k < nevent(); ++k) {
@@ -239,7 +306,7 @@ Eigen::MatrixXi MNEEventList::toMatrix() const
 
 //=============================================================================================================
 
-MNEEventList MNEEventList::fromMatrix(const Eigen::MatrixXi& matrix)
+MNEEventList MNEEventList::from_matrix(const Eigen::MatrixXi& matrix)
 {
     MNEEventList list;
     list.events.resize(matrix.rows());

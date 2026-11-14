@@ -1540,55 +1540,57 @@ void TestMneLibrary::eventList_text()
     QTemporaryDir dir;
     QFile current(dir.filePath("current.eve"));
     QVERIFY(current.open(QIODevice::WriteOnly | QIODevice::Text));
-    current.write("# events\n 1000   3.330 0 0\n 1300   4.329 0 1   left ear\n 1310   4.363 1 0\n   -1   5.000 0 2\n");
+    current.write("# events\n 1000   3.330 0 0\n 1300   4.329 0 1   left ear\n 1310   4.363 1 0\n   -1   5.000 0 2\n"
+                  "1600 5.33 0 4\tright  ear \r\n 1700 x 0 8\n 1800 6.0 0 8\n");
     current.close();
-    const auto list = MNEEventList::readText(current.fileName().toStdU16String(), 1000, 0, 300.0f);
+    const auto list = MNEEventList::read_text(current.fileName().toStdU16String(), 1000, 0, 300.0f);
     QVERIFY(list);
-    QCOMPARE(list->nevent(), 3);
+    QCOMPARE(list->nevent(), 4); // reading stops at the line that is not an event, like MNE-C
     QCOMPARE(list->events[0], (MNEEvent{300, 0, 1, false, false, "left ear"}));
     QCOMPARE(list->events[1].sample, 310);
     QVERIFY(list->events[1].comment.empty());
     QCOMPARE(list->events[2].sample, 500); // from the time: 5 s * 300 Hz - 1000
+    QCOMPARE(list->events[3], (MNEEvent{600, 0, 4, false, false, "right  ear"}));
 
     QFile old(dir.filePath("old.eve"));
     QVERIFY(old.open(QIODevice::WriteOnly | QIODevice::Text));
     old.write(" 300 1.0 0 1\n 400 1.3 0 2\n");
     old.close();
-    const auto oldList = MNEEventList::readText(old.fileName().toStdU16String(), 1000, 950, 300.0f);
+    const auto oldList = MNEEventList::read_text(old.fileName().toStdU16String(), 1000, 950, 300.0f);
     QVERIFY(oldList);
-    QCOMPARE(oldList->toMatrix(), (Eigen::MatrixXi(2, 3) << 250, 0, 1, 350, 0, 2).finished());
+    QCOMPARE(oldList->to_matrix(), (Eigen::MatrixXi(2, 3) << 250, 0, 1, 350, 0, 2).finished());
 
-    QVERIFY(!MNEEventList::readText(dir.filePath("missing.eve").toStdU16String(), 0, 0, 300.0f));
+    QVERIFY(!MNEEventList::read_text(dir.filePath("missing.eve").toStdU16String(), 0, 0, 300.0f));
 }
 
 void TestMneLibrary::eventList_fifRoundTrip()
 {
     // Comments are written as Latin-1 bytes like MNE-C; events without a comment get an empty entry.
     QTemporaryDir dir;
-    MNEEventList list = MNEEventList::fromMatrix((Eigen::MatrixXi(4, 3) << 14385, 0, 1, 13988, 0, 2, 14172, 0, 3, 14180, 3, 0).finished());
+    MNEEventList list = MNEEventList::from_matrix((Eigen::MatrixXi(4, 3) << 14385, 0, 1, 13988, 0, 2, 14172, 0, 3, 14180, 3, 0).finished());
     list.events[0].comment = "first left";
     list.events[2].comment = "réponse";
-    QVERIFY(list.writeFif(dir.filePath("t-eve.fif").toStdU16String(), 12900));
+    QVERIFY(list.write_fif(dir.filePath("t-eve.fif").toStdU16String(), 12900));
 
-    const auto back = MNEEventList::readFif(dir.filePath("t-eve.fif").toStdU16String(), 12900);
+    const auto back = MNEEventList::read_fif(dir.filePath("t-eve.fif").toStdU16String(), 12900);
     QVERIFY(back);
     QCOMPARE(back->events, list.events);
 
     // FiffEvents reads the same block, without comments and without the offset.
     const FiffEvents plain = FiffEvents::read_fif(dir.filePath("t-eve.fif").toStdString()).value();
-    QCOMPARE(plain.events.col(0), (list.toMatrix().col(0).array() + 12900).matrix());
+    QCOMPARE(plain.events.col(0), (list.to_matrix().col(0).array() + 12900).matrix());
 
     MNEEventList sorted = *back;
     sorted.sort();
     QCOMPARE(sorted.events[0].sample, 13988);
     QCOMPARE(sorted.events[3].comment, QString("first left"));
-    QCOMPARE(sorted.selectOnsets(3).nevent(), 1);
-    QCOMPARE(sorted.selectOnsets().nevent(), 3);
-    QCOMPARE(sorted.maxOnset(), 3u);
+    QCOMPARE(sorted.select_onsets(3).nevent(), 1);
+    QCOMPARE(sorted.select_onsets().nevent(), 3);
+    QCOMPARE(sorted.max_onset(), 3u);
     sorted.append(*back);
     QCOMPARE(sorted.nevent(), 8);
 
-    QVERIFY(!MNEEventList::readFif(dir.filePath("missing.fif").toStdU16String()));
+    QVERIFY(!MNEEventList::read_fif(dir.filePath("missing.fif").toStdU16String()));
 }
 
 //=============================================================================================================
