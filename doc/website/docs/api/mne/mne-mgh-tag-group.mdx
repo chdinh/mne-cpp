@@ -17,7 +17,7 @@ class MNELIB::MNEMghTagGroup
 
 Collection of [`MNEMghTag`](/docs/api/mne/mne-mgh-tag) entries from a FreeSurfer MGH/MGZ file footer.
 
-Owns its tags via unique_ptr.
+Holds its tags by value.
 
 ---
 
@@ -26,28 +26,6 @@ Owns its tags via unique_ptr.
 ### MNEMghTagGroup()
 
 Constructs an empty [`MNEMghTagGroup`](/docs/api/mne/mne-mgh-tag-group).
-
----
-
-### MNEMghTagGroup(other)
-
----
-
-### operator=(other)
-
----
-
-### MNEMghTagGroup()
-
----
-
-### operator=()
-
----
-
-### ~MNEMghTagGroup()
-
-Destructor.
 
 ---
 

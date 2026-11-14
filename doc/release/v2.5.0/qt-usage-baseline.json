@@ -28,11 +28,12 @@
       "channels",
       "com",
       "decoding",
+      "fs",
       "math",
       "ml",
       "report"
     ],
-    "tokens": 13133,
+    "tokens": 13091,
     "gui_outside_design": []
   },
   "libraries": {
@@ -265,9 +266,7 @@
       "public_header_includes": 0,
       "q_object": 0,
       "files": 18,
-      "modules": [
-        "Core"
-      ]
+      "modules": []
     },
     "fwd": {
       "tokens": 25,
@@ -372,18 +371,18 @@
       ]
     },
     "mne": {
-      "tokens": 338,
+      "tokens": 296,
       "by_category": {
-        "containers": 3,
-        "files": 24,
-        "global": 251,
+        "containers": 1,
+        "files": 10,
+        "global": 238,
         "other": 23,
-        "strings": 27,
-        "threads": 10
+        "strings": 16,
+        "threads": 8
       },
-      "public_header_includes": 20,
+      "public_header_includes": 19,
       "q_object": 0,
-      "files": 112,
+      "files": 110,
       "modules": [
         "Concurrent",
         "Core"

@@ -85,6 +85,19 @@ Constructs a [`KMeans`](/docs/api/math/k-means) algorithm object using enum para
 
 ---
 
+### seed(value)
+
+Seeds the random choices of the starting centroids, so that equal seeds give equal results (scikit-learn `random_state`, MATLAB `rng`).
+
+Unseeded objects draw a random seed.
+
+**Parameters:**
+
+- **value** : *std::uint32_t*
+  The seed.
+
+---
+
 ### calculate(X, kClusters, idx, C, sumD, D)
 
 Clusters input data X.

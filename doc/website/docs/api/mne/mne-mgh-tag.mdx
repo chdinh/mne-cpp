@@ -12,26 +12,12 @@ sidebar_position: 28
 `#include <mne/mne_mgh_tag.h>`
 
 ```cpp
-class MNELIB::MNEMghTag
+struct MNELIB::MNEMghTag
 ```
 
 Single tag entry in a FreeSurfer MGH/MGZ file header.
 
 MGH files can carry optional typed metadata tags in the file footer. Each tag has an integer identifier, a byte length, and a raw payload.
-
----
-
-## Public Methods
-
-### MNEMghTag()
-
-Constructs an empty [`MNEMghTag`](/docs/api/mne/mne-mgh-tag).
-
----
-
-### ~MNEMghTag()
-
-Destructor.
 
 ---
 
