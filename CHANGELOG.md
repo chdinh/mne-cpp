@@ -479,6 +479,16 @@ aliases; replace the old spelling as below.
   nothing, so a file that could not be written went unnoticed) and writes with
   `std::ofstream` instead of `QFile`/`QTextStream`. Migration: check the
   result, e.g. `if (!info.write(path)) ...`.
+- `MNELayout` and `MNELayoutPort` use Eigen geometry instead of Qt:
+  `channelPositions()` maps to `Eigen::Vector2d`, `portAt` takes an
+  `Eigen::Vector2d`, `confine` takes an `Eigen::AlignedBox2d`, and
+  `extent()`, `visibleArea()` and `MNELayoutPort::rect()` return
+  `Eigen::AlignedBox2d` (min/max corners) instead of `QRectF`. `confine` no
+  longer swaps corners given in the wrong order: pass a box whose `min()` is
+  below its `max()`. Migration: `QPointF(x, y)` becomes
+  `Eigen::Vector2d(x, y)`, `QRectF(x, y, w, h)` becomes
+  `Eigen::AlignedBox2d(Eigen::Vector2d(x, y), Eigen::Vector2d(x + w, y + h))`,
+  `rect.left()`/`top()` become `box.min().x()`/`min().y()`.
 - The remaining `Q_DECLARE_METATYPE` declarations in the connectivity and
   disp libraries, MNE Scan (`scMeas`, LSL adapter), MNE Analyze
   (`anShared`), MNE Browse, the MNE Analyze Studio browser extension and

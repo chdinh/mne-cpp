@@ -499,12 +499,12 @@ int main(int argc, char* argv[])
     //! [mne_layout_usage]
     // The Neuromag Vectorview layout: one viewport per channel
     auto layout = MNELayout::read((layoutDir + "/Vectorview-all.lout").toStdU16String());
-    const std::map<std::string, QPointF> positions = layout->channelPositions();             // lower-left corners, keyed "MEG 0113"
-    const int leftHalf = layout->confine(QRectF(QPointF(-85.0, -83.0), QPointF(0.0, 75.0))); // zoom to the left half
+    const std::map<std::string, Eigen::Vector2d> positions = layout->channelPositions();                                  // lower-left corners, keyed "MEG 0113"
+    const int leftHalf = layout->confine(Eigen::AlignedBox2d(Eigen::Vector2d(-85.0, -83.0), Eigen::Vector2d(0.0, 75.0))); // zoom to the left half
     const int shownTriplet = layout->matchPorts({"MEG 0113", "MEG 0112", "MEG 0111"});
     //! [mne_layout_usage]
     // mne.channels.read_layout("Vectorview-all.lout", scale=False): 306 viewports in -85 ... 90 x -83 ... 75, MEG 0113 at (-73.4162, 33.4167); 138 boxes left of x = 0
-    ok &= expect(layout && layout->ports.size() == 306 && (positions.at("MEG 0113") - QPointF(-73.416206, 33.416687)).manhattanLength() < 1e-4 && leftHalf == 138 && shownTriplet == 3,
+    ok &= expect(layout && layout->ports.size() == 306 && (positions.at("MEG 0113") - Eigen::Vector2d(-73.416206, 33.416687)).lpNorm<1>() < 1e-4 && leftHalf == 138 && shownTriplet == 3,
                  "MNELayout/MNELayoutPort: Vectorview layout like mne.channels.read_layout, zoom and channel matching");
 
     //! [mne_morph_map_usage]

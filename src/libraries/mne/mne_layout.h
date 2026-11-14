@@ -26,8 +26,7 @@
 #include "mne_global.h"
 #include "mne_layout_port.h"
 
-#include <QPointF>
-#include <QRectF>
+#include <Eigen/Geometry>
 
 #include <filesystem>
 #include <map>
@@ -70,7 +69,7 @@ public:
      *
      * @return Channel name -> viewport origin; a port listing several channels contributes each of them.
      */
-    std::map<std::string, QPointF> channelPositions() const;
+    std::map<std::string, Eigen::Vector2d> channelPositions() const;
 
     //=========================================================================================================
     /**
@@ -111,7 +110,7 @@ public:
      *
      * @return The index into ports, or -1.
      */
-    int portAt(const QPointF& point) const;
+    int portAt(const Eigen::Vector2d& point) const;
 
     //=========================================================================================================
     /**
@@ -120,11 +119,11 @@ public:
      * The visible area becomes the bounding box of those ports plus a 1 % margin;
      * without any port inside it stays unchanged.
      *
-     * @param[in] area   The requested area; corners may be given in either order.
+     * @param[in] area   The requested area.
      *
      * @return The number of ports inside the area.
      */
-    int confine(const QRectF& area);
+    int confine(const Eigen::AlignedBox2d& area);
 
     //=========================================================================================================
     /**
@@ -151,7 +150,7 @@ public:
      *
      * @return The extent in layout coordinates.
      */
-    QRectF extent() const
+    const Eigen::AlignedBox2d& extent() const
     {
         return m_extent;
     }
@@ -162,7 +161,7 @@ public:
      *
      * @return The visible area in layout coordinates.
      */
-    QRectF visibleArea() const
+    const Eigen::AlignedBox2d& visibleArea() const
     {
         return m_visible;
     }
@@ -171,9 +170,9 @@ public:
     std::vector<MNELayoutPort> ports; /**< Viewports in file order. */
 
 private:
-    QRectF m_extent;           /**< Drawing area from the first line of the file. */
-    QRectF m_visible;          /**< Currently shown area. */
-    Eigen::MatrixXi m_matches; /**< Ports x channels of the last matchPorts(const BASELIB::StringList&). */
+    Eigen::AlignedBox2d m_extent;  /**< Drawing area from the first line of the file. */
+    Eigen::AlignedBox2d m_visible; /**< Currently shown area. */
+    Eigen::MatrixXi m_matches;     /**< Ports x channels of the last matchPorts(const BASELIB::StringList&). */
 };
 
 } // namespace MNELIB

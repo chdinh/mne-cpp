@@ -472,7 +472,7 @@ bool ChannelSelectionView::loadLayout(const QString& path)
     m_layoutMap.clear();
     if (state) {
         for (const auto& [name, position] : layout->channelPositions())
-            m_layoutMap.insert(QString::fromStdString(name), position);
+            m_layoutMap.insert(QString::fromStdString(name), QPointF(position.x(), position.y()));
     }
 
     //if no layout for EEG is specified generate from digitizer points

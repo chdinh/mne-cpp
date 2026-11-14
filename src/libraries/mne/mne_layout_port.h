@@ -21,7 +21,7 @@
 
 #include <base/string_utils.h>
 
-#include <QRectF>
+#include <Eigen/Geometry>
 
 #include <string>
 #include <string_view>
@@ -70,11 +70,11 @@ public:
     /**
      * Returns the viewport box.
      *
-     * @return The box from (xmin, ymin) with the port's width and height.
+     * @return The box from (xmin, ymin) to (xmax, ymax).
      */
-    QRectF rect() const
+    Eigen::AlignedBox2d rect() const
     {
-        return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
+        return Eigen::AlignedBox2d(Eigen::Vector2d(xmin, ymin), Eigen::Vector2d(xmax, ymax));
     }
 
     int portno = 0;            /**< Running number of this viewport. */

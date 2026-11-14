@@ -42,9 +42,9 @@ using namespace BASELIB;
 namespace
 {
 
-bool isInside(const MNELayoutPort& port, const QRectF& area)
+bool isInside(const MNELayoutPort& port, const Eigen::AlignedBox2d& area)
 {
-    return port.xmin >= area.left() && port.xmax <= area.right() && port.ymin >= area.top() && port.ymax <= area.bottom();
+    return area.contains(port.rect());
 }
 
 } // namespace
@@ -98,7 +98,7 @@ std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
                 Log::warning("MNELayout::read - Illegal extent in {}", utf8FromPath(path));
                 return std::nullopt;
             }
-            layout.m_extent = QRectF(QPointF(v[0], v[2]), QPointF(v[1], v[3]));
+            layout.m_extent = Eigen::AlignedBox2d(Eigen::Vector2d(v[0], v[2]), Eigen::Vector2d(v[1], v[3]));
             haveExtent = true;
             continue;
         }
@@ -135,12 +135,12 @@ std::optional<MNELayout> MNELayout::read(const std::filesystem::path& path)
 
 //=============================================================================================================
 
-std::map<std::string, QPointF> MNELayout::channelPositions() const
+std::map<std::string, Eigen::Vector2d> MNELayout::channelPositions() const
 {
-    std::map<std::string, QPointF> positions;
+    std::map<std::string, Eigen::Vector2d> positions;
     for (const MNELayoutPort& port : ports) {
         for (const std::string& name : split(port.label, ':', true)) {
-            positions.insert_or_assign(std::string(trimmed(name)), QPointF(port.xmin, port.ymin));
+            positions.insert_or_assign(std::string(trimmed(name)), Eigen::Vector2d(port.xmin, port.ymin));
         }
     }
     return positions;
@@ -183,7 +183,7 @@ int MNELayout::matchPorts(const StringList& channels)
 
 //=============================================================================================================
 
-int MNELayout::portAt(const QPointF& point) const
+int MNELayout::portAt(const Eigen::Vector2d& point) const
 {
     const auto it = std::find_if(ports.cbegin(), ports.cend(), [&point](const MNELayoutPort& port) {
         return point.x() > port.xmin && point.x() < port.xmax && point.y() > port.ymin && point.y() < port.ymax;
@@ -193,20 +193,19 @@ int MNELayout::portAt(const QPointF& point) const
 
 //=============================================================================================================
 
-int MNELayout::confine(const QRectF& area)
+int MNELayout::confine(const Eigen::AlignedBox2d& area)
 {
-    const QRectF requested = area.normalized();
-    QRectF covered;
+    Eigen::AlignedBox2d covered;
     int nmatch = 0;
     for (const MNELayoutPort& port : ports) {
-        if (isInside(port, requested)) {
-            covered = nmatch == 0 ? port.rect() : covered.united(port.rect());
+        if (isInside(port, area)) {
+            covered.extend(port.rect());
             ++nmatch;
         }
     }
     if (nmatch > 0) {
-        const double margin = 0.01 * covered.width();
-        m_visible = covered.adjusted(-margin, -margin, margin, margin);
+        const double margin = 0.01 * covered.sizes().x();
+        m_visible = Eigen::AlignedBox2d(covered.min().array() - margin, covered.max().array() + margin);
     }
     return nmatch;
 }

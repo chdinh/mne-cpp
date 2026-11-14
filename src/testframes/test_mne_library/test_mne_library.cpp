@@ -1453,36 +1453,35 @@ void TestMneLibrary::layout_read_data()
 {
     QTest::addColumn<QString>("file");
     QTest::addColumn<int>("nport");
-    QTest::addColumn<QRectF>("extent");
+    QTest::addColumn<Eigen::AlignedBox2d>("extent");
     QTest::addColumn<QString>("channel");
-    QTest::addColumn<QRectF>("box");
+    QTest::addColumn<Eigen::AlignedBox2d>("box");
     QTest::addColumn<int>("portno");
 
     // mne.channels.read_layout(file, scale=False): names, pos (x, y, w, h), box and ids
-    QTest::newRow("Vectorview") << "Vectorview-all" << 306 << QRectF(QPointF(-85.0, -83.0), QPointF(90.0, 75.0)) << "MEG 0113" << QRectF(-73.416206, 33.416687, 6.0, 5.0) << 113;
-    QTest::newRow("CTF") << "CTF-275" << 275 << QRectF(QPointF(-42.27, -39.99), QPointF(42.33, 31.8)) << "MLC11-2622" << QRectF(-4.09, 10.91, 4.0, 3.0) << 1;
+    QTest::newRow("Vectorview") << "Vectorview-all" << 306 << Eigen::AlignedBox2d(Eigen::Vector2d(-85.0, -83.0), Eigen::Vector2d(90.0, 75.0)) << "MEG 0113" << Eigen::AlignedBox2d(Eigen::Vector2d(-73.416206, 33.416687), Eigen::Vector2d(-67.416206, 38.416687)) << 113;
+    QTest::newRow("CTF") << "CTF-275" << 275 << Eigen::AlignedBox2d(Eigen::Vector2d(-42.27, -39.99), Eigen::Vector2d(42.33, 31.8)) << "MLC11-2622" << Eigen::AlignedBox2d(Eigen::Vector2d(-4.09, 10.91), Eigen::Vector2d(-0.09, 13.91)) << 1;
 }
 
 void TestMneLibrary::layout_read()
 {
     QFETCH(QString, file);
     QFETCH(int, nport);
-    QFETCH(QRectF, extent);
+    QFETCH(Eigen::AlignedBox2d, extent);
     QFETCH(QString, channel);
-    QFETCH(QRectF, box);
+    QFETCH(Eigen::AlignedBox2d, box);
     QFETCH(int, portno);
 
     const auto layout = MNELayout::read((QCoreApplication::applicationDirPath() + "/../resources/general/2DLayouts/" + file + ".lout").toStdU16String());
     QVERIFY(layout);
     QCOMPARE(static_cast<int>(layout->ports.size()), nport);
-    QVERIFY((layout->extent().topLeft() - extent.topLeft()).manhattanLength() < 1e-4 && (layout->extent().bottomRight() - extent.bottomRight()).manhattanLength() < 1e-4);
+    QVERIFY(layout->extent().isApprox(extent, 1e-6));
     const auto it = std::find_if(layout->ports.cbegin(), layout->ports.cend(), [&channel](const MNELayoutPort& p) { return p.label == channel.toStdString(); });
     QVERIFY(it != layout->ports.cend());
     QCOMPARE(it->portno, portno);
-    QVERIFY((it->rect().topLeft() - box.topLeft()).manhattanLength() < 1e-4);
-    QVERIFY(std::abs(it->rect().width() - box.width()) < 1e-5 && std::abs(it->rect().height() - box.height()) < 1e-5);
+    QVERIFY((it->rect().min() - box.min()).lpNorm<1>() < 1e-4 && (it->rect().sizes() - box.sizes()).lpNorm<1>() < 1e-5);
     QCOMPARE(static_cast<int>(layout->channelPositions().size()), nport);
-    QVERIFY((layout->channelPositions().at(channel.toStdString()) - box.topLeft()).manhattanLength() < 1e-4);
+    QVERIFY((layout->channelPositions().at(channel.toStdString()) - box.min()).lpNorm<1>() < 1e-4);
 
     QVERIFY(!MNELayout::read("/nonexistent.lout"));
 }
@@ -1499,9 +1498,9 @@ void TestMneLibrary::layout_matchAndConfine()
     QVERIFY(layout);
     QCOMPARE(static_cast<int>(layout->ports.size()), 3);
     QVERIFY(layout->ports[2].invert);
-    QCOMPARE(layout->ports[2].rect(), QRectF(60, 30, 10, 5));
+    QVERIFY(layout->ports[2].rect().isApprox(Eigen::AlignedBox2d(Eigen::Vector2d(60, 30), Eigen::Vector2d(70, 35))));
     QCOMPARE(layout->ports[1].names, (BASELIB::StringList{"meg0112", "meg0111"}));
-    QCOMPARE(layout->channelPositions().at("MEG 0111"), QPointF(30, 10));
+    QCOMPARE(layout->channelPositions().at("MEG 0111"), Eigen::Vector2d(30, 10));
 
     // Names match in any spelling; a CTF suffix after the dash is ignored.
     QCOMPARE(layout->matchPorts("meg0111"), 1);
@@ -1514,20 +1513,19 @@ void TestMneLibrary::layout_matchAndConfine()
     QVERIFY(layout->matches()(0, 0) == 1 && layout->matches()(1, 1) == 1 && layout->matches()(1, 3) == 1 && layout->matches().col(2).sum() == 0);
 
     // The interior of a port, not its border, selects it.
-    QCOMPARE(layout->portAt(QPointF(35, 12)), 1);
-    QCOMPARE(layout->portAt(QPointF(30, 12)), -1);
-    QCOMPARE(layout->portAt(QPointF(90, 45)), -1);
+    QCOMPARE(layout->portAt(Eigen::Vector2d(35, 12)), 1);
+    QCOMPARE(layout->portAt(Eigen::Vector2d(30, 12)), -1);
+    QCOMPARE(layout->portAt(Eigen::Vector2d(90, 45)), -1);
 
-    // Zoom to the ports inside the area (corners in any order) plus 1 % of the width; hidden ports no longer match.
-    QCOMPARE(layout->confine(QRectF(QPointF(45, 0), QPointF(0, 20))), 2);
-    QVERIFY(std::abs(layout->visibleArea().left() - 9.7) < 1e-9 && std::abs(layout->visibleArea().right() - 40.3) < 1e-9);
-    QVERIFY(std::abs(layout->visibleArea().top() - 9.7) < 1e-9 && std::abs(layout->visibleArea().bottom() - 15.3) < 1e-9);
+    // Zoom to the ports inside the area plus 1 % of the width; hidden ports no longer match.
+    QCOMPARE(layout->confine(Eigen::AlignedBox2d(Eigen::Vector2d(0, 0), Eigen::Vector2d(45, 20))), 2);
+    QVERIFY(layout->visibleArea().isApprox(Eigen::AlignedBox2d(Eigen::Vector2d(9.7, 9.7), Eigen::Vector2d(40.3, 15.3)), 1e-12));
     QVERIFY(!layout->isVisible(layout->ports[2]));
     QCOMPARE(layout->matchPorts("MLC11"), 0);
-    QCOMPARE(layout->confine(QRectF(80, 40, 5, 5)), 0);
-    QVERIFY(std::abs(layout->visibleArea().left() - 9.7) < 1e-9);
+    QCOMPARE(layout->confine(Eigen::AlignedBox2d(Eigen::Vector2d(80, 40), Eigen::Vector2d(85, 45))), 0);
+    QVERIFY(std::abs(layout->visibleArea().min().x() - 9.7) < 1e-9);
     layout->resetConfine();
-    QCOMPARE(layout->visibleArea(), layout->extent());
+    QVERIFY(layout->visibleArea().isApprox(layout->extent()));
     QCOMPARE(layout->matchPorts("MLC11"), 1);
 }
 
