@@ -31,7 +31,6 @@
 #include <fs/fs_surface.h>
 #include <disp/plots/helpers/colormap.h>
 
-#include <QCoreApplication>
 #include <QVector3D>
 #include <QMatrix4x4>
 #include <QDebug>
@@ -317,9 +316,7 @@ bool SensorFieldMapper::buildMapping(
         }
 
         if (verts.rows() > 0 && norms.rows() == verts.rows()) {
-            const QString coilPath = QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat";
-            auto templates =
-                FWDLIB::FwdCoilSet::read_coil_defs(coilPath.toStdU16String());
+            auto templates = FWDLIB::FwdCoilSet::read_coil_defs(BASELIB::resource_path("general/coilDefinitions/coil_def.dat"));
 
             if (templates) {
                 FiffCoordTrans devToTarget;
@@ -347,7 +344,7 @@ bool SensorFieldMapper::buildMapping(
                         kIntrad, kMegMiss);
                 }
             } else {
-                qWarning() << "MEG coil definitions not found at" << coilPath;
+                qWarning() << "MEG coil definitions not found at" << QString::fromStdString(BASELIB::utf8FromPath(BASELIB::resource_path("general/coilDefinitions/coil_def.dat")));
             }
         }
     }

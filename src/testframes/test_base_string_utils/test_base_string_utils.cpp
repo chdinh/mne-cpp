@@ -64,6 +64,8 @@ private slots:
     void toIntMatchesQString();
     void toDoubleIgnoresTheLocale();
     void utf8PathsRoundTrip();
+    void executableDirIsTheApplicationDir();
+    void resourcePathPrefersTheInstalledResources();
 };
 
 //=============================================================================================================
@@ -239,6 +241,27 @@ void TestUtilsStringUtils::utf8PathsRoundTrip()
     QVERIFY(QFile::exists(QDir(dir.path()).filePath(name)));
     QCOMPARE(utf8FromPath(path.filename()), name.toStdString());
     QCOMPARE(utf8FromPath(path.extension()), std::string(".fif"));
+}
+
+//=============================================================================================================
+
+void TestUtilsStringUtils::executableDirIsTheApplicationDir()
+{
+    const std::filesystem::path expected = pathFromUtf8(QCoreApplication::applicationDirPath().toStdString());
+    QCOMPARE(executable_dir(), std::filesystem::canonical(expected));
+}
+
+//=============================================================================================================
+
+void TestUtilsStringUtils::resourcePathPrefersTheInstalledResources()
+{
+    const std::filesystem::path installed = executable_dir().parent_path() / "resources" / "general" / "coilDefinitions" / "coil_def.dat";
+    if (!std::filesystem::exists(installed)) {
+        QSKIP("No resources next to the test binary");
+    }
+    QCOMPARE(resource_path("general/coilDefinitions/coil_def.dat"), installed);
+    // Without installed resources the path is relative to the working directory, as before.
+    QCOMPARE(resource_path("general/no_such_file.dat"), std::filesystem::path("../resources/general/no_such_file.dat"));
 }
 
 //=============================================================================================================

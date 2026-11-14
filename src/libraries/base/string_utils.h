@@ -128,6 +128,20 @@ BASESHARED_EXPORT std::filesystem::path pathFromUtf8(std::string_view utf8);
  */
 BASESHARED_EXPORT std::string utf8FromPath(const std::filesystem::path& path);
 
+/**
+ * @return The directory of the running executable with symbolic links resolved, like
+ *         QCoreApplication::applicationDirPath() but without an application object; empty if unknown.
+ */
+BASESHARED_EXPORT std::filesystem::path executable_dir();
+
+/**
+ * @param[in] relative   A path below the resources directory in UTF-8, e.g. "general/coilDefinitions/coil_def.dat".
+ *
+ * @return The file in the resources directory installed next to the executable's directory
+ *         (executable_dir() / ".." / "resources"), or the same path relative to the working directory if that does not exist.
+ */
+BASESHARED_EXPORT std::filesystem::path resource_path(std::string_view relative);
+
 } // namespace BASELIB
 
 #endif // BASE_STRING_UTILS_H

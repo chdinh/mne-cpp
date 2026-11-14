@@ -27,13 +27,6 @@
 #include <base/string_utils.h>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QCoreApplication>
-#include <QFile>
-
-//=============================================================================================================
 // USED NAMESPACES
 //=============================================================================================================
 
@@ -126,7 +119,7 @@ void ComputeFwd::initFwd()
             m_eegModels->fwd_list_eeg_sphere_models();
 
             if (m_pSettings->eeg_model_name.empty()) {
-                m_pSettings->eeg_model_name = QString("Default").toStdString();
+                m_pSettings->eeg_model_name = "Default";
             }
             m_eegModel = m_eegModels->fwd_select_eeg_sphere_model(m_pSettings->eeg_model_name);
             if (!m_eegModel) {
@@ -274,12 +267,7 @@ void ComputeFwd::initFwd()
     // Create coil descriptions with transformation to head or MRI frame
 
     if (m_pSettings->include_meg) {
-        m_qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat").toStdString();
-        if (!QCoreApplication::startingUp()) {
-            m_qPath = (QCoreApplication::applicationDirPath() + QString("/../resources/general/coilDefinitions/coil_def.dat")).toStdString();
-        } else if (!QFile::exists(m_qPath)) {
-            m_qPath = "../resources/general/coilDefinitions/coil_def.dat";
-        }
+        m_qPath = BASELIB::resource_path("general/coilDefinitions/coil_def.dat");
 
         m_templates = FwdCoilSet::read_coil_defs(m_qPath);
         if (!m_templates) {
@@ -367,8 +355,7 @@ void ComputeFwd::initFwd()
     // Prepare the BEM model if necessary
 
     if (!m_pSettings->bemname.empty()) {
-        QString bemsolname = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(m_pSettings->bemname).u16string());
-        m_pSettings->bemname = bemsolname.toStdString();
+        m_pSettings->bemname = BASELIB::utf8FromPath(FwdBemModel::fwd_bem_make_bem_sol_name(BASELIB::pathFromUtf8(m_pSettings->bemname)));
 
         BASELIB::Log::info("Setting up the BEM model using {}...", m_pSettings->bemname);
         BASELIB::Log::info("Loading surfaces...");

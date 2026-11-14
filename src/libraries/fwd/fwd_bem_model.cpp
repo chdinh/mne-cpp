@@ -36,6 +36,8 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_named_matrix.h>
 
+#include <base/string_utils.h>
+
 #include <QFile>
 #include <QList>
 #include <QThread>
@@ -459,7 +461,6 @@ int FwdBemModel::fwd_bem_set_head_mri_t(const FiffCoordTrans& t)
 
 std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf, float guessrad, const Eigen::Vector3f& guess_r0, float grid, float exclude, float mindist)
 {
-    QString bemname;
     std::unique_ptr<MNESurface> sphere_owner;
     std::unique_ptr<MNESourceSpace> res;
     int k;
@@ -468,20 +469,14 @@ std::unique_ptr<MNESourceSpace> FwdBemModel::make_guesses(MNESurface* guess_surf
     if (!guess_surf) {
         BASELIB::Log::info("Making a spherical guess space with radius {:7.1f} mm...", 1000 * guessrad);
 
-        QFile bemFile(QString(QCoreApplication::applicationDirPath() + "/../resources/general/surf2bem/icos.fif"));
-        if (!QCoreApplication::startingUp())
-            bemFile.setFileName(QCoreApplication::applicationDirPath() + QString("/../resources/general/surf2bem/icos.fif"));
-        else if (!bemFile.exists())
-            bemFile.setFileName("../resources/general/surf2bem/icos.fif");
-
-        if (!bemFile.exists()) {
-            BASELIB::Log::debug("{} does not exists.", bemFile.fileName().toStdString());
+        const std::filesystem::path bemFile = BASELIB::resource_path("general/surf2bem/icos.fif");
+        std::error_code error;
+        if (!std::filesystem::exists(bemFile, error)) {
+            BASELIB::Log::debug("{} does not exist.", BASELIB::utf8FromPath(bemFile));
             return res;
         }
 
-        bemname = bemFile.fileName();
-
-        sphere_owner = MNESurface::read_bem_surface(bemname.toStdU16String(), 9003, false);
+        sphere_owner = MNESurface::read_bem_surface(bemFile, 9003, false);
         if (!sphere_owner)
             return res;
 

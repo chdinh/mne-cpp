@@ -27,7 +27,6 @@
 #include <fwd/fwd_coil_set.h>
 #include <fs/fs_surface.h>
 
-#include <QCoreApplication>
 #include <QDebug>
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -250,9 +249,7 @@ void RtSensorInterpolationMatWorker::computeMapping()
         }
 
         if (megVerts.rows() > 0 && norms.rows() == megVerts.rows()) {
-            const QString coilPath = QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat";
-            auto templates =
-                FWDLIB::FwdCoilSet::read_coil_defs(coilPath.toStdU16String());
+            auto templates = FWDLIB::FwdCoilSet::read_coil_defs(BASELIB::resource_path("general/coilDefinitions/coil_def.dat"));
 
             if (templates) {
                 FiffCoordTrans devToTarget;

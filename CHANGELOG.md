@@ -511,6 +511,13 @@ aliases; replace the old spelling as below.
   `qRegisterMetaType` calls that `QMetaType::fromName` relies on stay.
   Migration: code that included `anShared/Utils/metatypes.h` for its
   transitive includes includes the headers it uses.
+- New `BASELIB::executable_dir()` (directory of the running executable,
+  without a `QCoreApplication`) and `BASELIB::resource_path(relative)`
+  (`<executable_dir>/../resources/<relative>`, else relative to the working
+  directory). The forward, inverse, HPI, disp3D and test-helper code finds
+  `coil_def.dat`, `icos.fif` and the test data with them instead of
+  `QCoreApplication::applicationDirPath()`, so these lookups also work in
+  programs without a Qt application object.
 - `InvEcdSet` is a `std::vector`-backed container: `addEcd(ecd)` and
   `set << ecd` become `push_back(ecd)`, `empty()`, `begin()` and `end()`
   are new, `size()` returns `int`, and `dataname` is a `std::string`. The

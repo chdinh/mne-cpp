@@ -155,7 +155,7 @@ PythonRunnerResult PythonTestHelper::run_script(const std::filesystem::path& scr
 
 std::filesystem::path PythonTestHelper::test_data_path()
 {
-    return pathFromUtf8(QCoreApplication::applicationDirPath().toStdString()) / ".." / "resources" / "data" / "mne-cpp-test-data";
+    return executable_dir().parent_path() / "resources" / "data" / "mne-cpp-test-data";
 }
 
 //=============================================================================================================

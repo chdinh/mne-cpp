@@ -28,7 +28,13 @@
 #include <limits>
 
 #ifdef __APPLE__
+#include <mach-o/dyld.h>
 #include <xlocale.h>
+#elif defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
 #endif
 
 //=============================================================================================================
@@ -233,4 +239,49 @@ std::string BASELIB::utf8FromPath(const std::filesystem::path& path)
 {
     const std::u8string utf8 = path.u8string();
     return std::string(utf8.begin(), utf8.end());
+}
+
+//=============================================================================================================
+
+std::filesystem::path BASELIB::executable_dir()
+{
+    static const std::filesystem::path dir = [] {
+        std::error_code error;
+#if defined(__EMSCRIPTEN__)
+        return std::filesystem::path("/");
+#elif defined(__APPLE__)
+        std::uint32_t size = 0;
+        _NSGetExecutablePath(nullptr, &size);
+        std::string buffer(size, '\0');
+        if (_NSGetExecutablePath(buffer.data(), &size) != 0) {
+            return std::filesystem::path();
+        }
+        const std::filesystem::path exe = std::filesystem::canonical(buffer.c_str(), error);
+#elif defined(_WIN32)
+        std::wstring buffer(MAX_PATH, L'\0');
+        DWORD length = 0;
+        while ((length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()))) == buffer.size()) {
+            buffer.resize(buffer.size() * 2);
+        }
+        buffer.resize(length);
+        const std::filesystem::path exe = std::filesystem::canonical(buffer, error);
+#else
+        const std::filesystem::path exe = std::filesystem::read_symlink("/proc/self/exe", error);
+#endif
+        return error ? std::filesystem::path() : exe.parent_path();
+    }();
+    return dir;
+}
+
+//=============================================================================================================
+
+std::filesystem::path BASELIB::resource_path(std::string_view relative)
+{
+    const std::filesystem::path name = pathFromUtf8(relative);
+    std::filesystem::path installed = executable_dir().parent_path() / "resources" / name;
+    std::error_code error;
+    if (std::filesystem::exists(installed, error)) {
+        return installed;
+    }
+    return std::filesystem::path("..") / "resources" / name;
 }
