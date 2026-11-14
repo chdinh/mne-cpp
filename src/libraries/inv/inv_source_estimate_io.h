@@ -30,10 +30,10 @@
 #include "inv_source_estimate.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
+#include <filesystem>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -56,29 +56,31 @@ public:
      * @brief Export source estimate to CSV format.
      *
      * Writes a header line with vertex indices, then one row per time point.
-     * First column is time (seconds).
+     * First column is time (seconds). Numbers are written in the shortest form
+     * that reads back to the same value.
      *
      * @param[in] stc      Source estimate to export.
-     * @param[in] sPath    Output file path.
-     * @param[in] cDelim   Delimiter character (default comma).
+     * @param[in] path     Output file path.
+     * @param[in] delim    Delimiter character (default comma).
      *
      * @return true if successful.
      */
-    static bool writeCsv(const InvSourceEstimate& stc,
-                         const QString& sPath,
-                         char cDelim = ',');
+    [[nodiscard]] static bool write_csv(const InvSourceEstimate& stc,
+                                        const std::filesystem::path& path,
+                                        char delim = ',');
 
     //=========================================================================================================
     /**
      * @brief Read source estimate from CSV format.
      *
-     * @param[in] sPath    Input file path.
-     * @param[in] cDelim   Delimiter character (default comma).
+     * @param[in] path     Input file path.
+     * @param[in] delim    Delimiter character (default comma).
      *
-     * @return Source estimate (empty if failed).
+     * @return Source estimate; empty if the file cannot be read, a field is
+     *         not a number or a row does not hold one value per vertex.
      */
-    static InvSourceEstimate readCsv(const QString& sPath,
-                                     char cDelim = ',');
+    static InvSourceEstimate read_csv(const std::filesystem::path& path,
+                                      char delim = ',');
 
     //=========================================================================================================
     /**
@@ -87,12 +89,12 @@ public:
      * No header; pure numeric matrix (n_vertices × n_times).
      *
      * @param[in] stc      Source estimate to export.
-     * @param[in] sPath    Output file path.
+     * @param[in] path     Output file path.
      *
      * @return true if successful.
      */
-    static bool writeMatrix(const InvSourceEstimate& stc,
-                            const QString& sPath);
+    [[nodiscard]] static bool write_matrix(const InvSourceEstimate& stc,
+                                           const std::filesystem::path& path);
 };
 
 } // namespace INVLIB

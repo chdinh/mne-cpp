@@ -415,6 +415,14 @@ aliases; replace the old spelling as below.
   derivation matrix without hand-written cloning. `mne_sparse_named_matrix.h`
   no longer includes `QStringList`. Migration: `m.nrow` becomes `m.nrow()`,
   `m.data->eigen()` becomes `m.data.eigen()`; drop assignments to the counts.
+- `InvSourceEstimateIO::writeCsv`, `readCsv` and `writeMatrix` are
+  `write_csv`, `read_csv` and `write_matrix`, take a `std::filesystem::path`
+  and use the standard library instead of `QFile`/`QTextStream`. Values are
+  written in the shortest form that reads back exactly (they were rounded to
+  9 digits), and `read_csv` returns an empty estimate for a row that is not
+  a number or lacks values (such rows used to be skipped silently, shifting
+  the time axis). The write functions are `[[nodiscard]]`. Migration:
+  `writeCsv(stc, qpath)` becomes `write_csv(stc, qpath.toStdU16String())`.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

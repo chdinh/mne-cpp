@@ -20,6 +20,10 @@
 #include <QTemporaryFile>
 #include <Eigen/Core>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <string>
 
 using namespace INVLIB;
 using namespace FSLIB;
@@ -30,6 +34,17 @@ class TestSourceEstimateIO : public QObject
     Q_OBJECT
 
 private:
+    static std::string read_text(const std::filesystem::path& path)
+    {
+        std::ifstream in(path);
+        return {std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>()};
+    }
+
+    static void write_text(const std::filesystem::path& path, const std::string& text)
+    {
+        std::ofstream(path) << text;
+    }
+
     InvSourceEstimate makeTestStc(int nVerts = 5, int nTimes = 10)
     {
         VectorXi verts(nVerts);
@@ -47,16 +62,14 @@ private slots:
         QTemporaryFile tmp;
         tmp.setAutoRemove(true);
         QVERIFY(tmp.open());
-        QString path = tmp.fileName();
+        const std::filesystem::path path = tmp.fileName().toStdString();
         tmp.close();
 
-        QVERIFY(InvSourceEstimateIO::writeCsv(stc, path));
+        QVERIFY(InvSourceEstimateIO::write_csv(stc, path));
 
         // File should exist and have content
-        QFile file(path);
-        QVERIFY(file.open(QIODevice::ReadOnly));
-        QByteArray content = file.readAll();
-        QVERIFY(content.size() > 0);
+        const std::string content = read_text(path);
+        QVERIFY(!content.empty());
         QVERIFY(content.contains("time"));
     }
 
@@ -67,12 +80,12 @@ private slots:
         QTemporaryFile tmp;
         tmp.setAutoRemove(true);
         QVERIFY(tmp.open());
-        QString path = tmp.fileName();
+        const std::filesystem::path path = tmp.fileName().toStdString();
         tmp.close();
 
-        QVERIFY(InvSourceEstimateIO::writeCsv(stc, path));
+        QVERIFY(InvSourceEstimateIO::write_csv(stc, path));
 
-        auto loaded = InvSourceEstimateIO::readCsv(path);
+        auto loaded = InvSourceEstimateIO::read_csv(path);
         QVERIFY(!loaded.empty());
         QCOMPARE(loaded.data.rows(), stc.data.rows());
         QCOMPARE(loaded.data.cols(), stc.data.cols());
@@ -86,6 +99,32 @@ private slots:
         QVERIFY((loaded.data - stc.data).norm() < 1e-5);
     }
 
+    void testCsvRoundTripIsExact()
+    {
+        auto stc = makeTestStc(4, 6);
+        stc.data(0, 0) = 1.0 / 3.0;
+        stc.data(1, 2) = -2.5e-13;
+
+        QTemporaryDir tmp;
+        QVERIFY(tmp.isValid());
+        const std::filesystem::path path = tmp.filePath("exact.csv").toStdString();
+
+        QVERIFY(InvSourceEstimateIO::write_csv(stc, path));
+        const auto loaded = InvSourceEstimateIO::read_csv(path);
+        QVERIFY(loaded.data == stc.data);
+        QCOMPARE(loaded.tmin, stc.tmin);
+    }
+
+    void testCsvRefusesShortRow()
+    {
+        QTemporaryDir tmp;
+        QVERIFY(tmp.isValid());
+        const std::filesystem::path path = tmp.filePath("short.csv").toStdString();
+        write_text(path, "time,0,10\n0.1,1.0,2.0\n0.2,3.0\n0.3,5.0,6.0\n");
+
+        QVERIFY(InvSourceEstimateIO::read_csv(path).empty());
+    }
+
     void testCsvWithCustomDelimiter()
     {
         auto stc = makeTestStc(2, 4);
@@ -93,12 +132,12 @@ private slots:
         QTemporaryFile tmp;
         tmp.setAutoRemove(true);
         QVERIFY(tmp.open());
-        QString path = tmp.fileName();
+        const std::filesystem::path path = tmp.fileName().toStdString();
         tmp.close();
 
-        QVERIFY(InvSourceEstimateIO::writeCsv(stc, path, '\t'));
+        QVERIFY(InvSourceEstimateIO::write_csv(stc, path, '\t'));
 
-        auto loaded = InvSourceEstimateIO::readCsv(path, '\t');
+        auto loaded = InvSourceEstimateIO::read_csv(path, '\t');
         QVERIFY(!loaded.empty());
         QCOMPARE(loaded.data.rows(), static_cast<Index>(2));
         QCOMPARE(loaded.data.cols(), static_cast<Index>(4));
@@ -111,15 +150,13 @@ private slots:
         QTemporaryFile tmp;
         tmp.setAutoRemove(true);
         QVERIFY(tmp.open());
-        QString path = tmp.fileName();
+        const std::filesystem::path path = tmp.fileName().toStdString();
         tmp.close();
 
-        QVERIFY(InvSourceEstimateIO::writeMatrix(stc, path));
+        QVERIFY(InvSourceEstimateIO::write_matrix(stc, path));
 
-        QFile file(path);
-        QVERIFY(file.open(QIODevice::ReadOnly));
-        QByteArray content = file.readAll();
-        QVERIFY(content.size() > 0);
+        const std::string content = read_text(path);
+        QVERIFY(!content.empty());
         // Should not contain "time" header
         QVERIFY(!content.contains("time"));
     }
@@ -130,16 +167,16 @@ private slots:
         QTemporaryFile tmp;
         tmp.setAutoRemove(true);
         QVERIFY(tmp.open());
-        QString path = tmp.fileName();
+        const std::filesystem::path path = tmp.fileName().toStdString();
         tmp.close();
 
-        QVERIFY(!InvSourceEstimateIO::writeCsv(empty, path));
-        QVERIFY(!InvSourceEstimateIO::writeMatrix(empty, path));
+        QVERIFY(!InvSourceEstimateIO::write_csv(empty, path));
+        QVERIFY(!InvSourceEstimateIO::write_matrix(empty, path));
     }
 
     void testReadNonexistent()
     {
-        auto stc = InvSourceEstimateIO::readCsv("/nonexistent/path.csv");
+        auto stc = InvSourceEstimateIO::read_csv("/nonexistent/path.csv");
         QVERIFY(stc.empty());
     }
 
@@ -153,11 +190,11 @@ private slots:
         QTemporaryFile tmp;
         tmp.setAutoRemove(true);
         QVERIFY(tmp.open());
-        QString path = tmp.fileName();
+        const std::filesystem::path path = tmp.fileName().toStdString();
         tmp.close();
 
-        InvSourceEstimateIO::writeCsv(stc, path);
-        auto loaded = InvSourceEstimateIO::readCsv(path);
+        QVERIFY(InvSourceEstimateIO::write_csv(stc, path));
+        auto loaded = InvSourceEstimateIO::read_csv(path);
 
         QVERIFY(std::abs(loaded.tmin - 0.05f) < 1e-4f);
         QVERIFY(std::abs(loaded.tstep - 0.002f) < 1e-4f);

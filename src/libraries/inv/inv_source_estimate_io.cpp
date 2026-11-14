@@ -9,11 +9,9 @@
  * @date     May 2026
  * @brief    Implementation of the CSV / matrix exporters and importer in @ref INVLIB::InvSourceEstimateIO.
  *
- * Implements buffered streaming readers and writers that walk the
- * source-estimate row-by-row so very large estimates can be persisted
- * without doubling memory. Handles configurable delimiters, header lines
- * carrying vertex indices and graceful failure modes that return an empty
- * estimate (rather than throwing) when the input file is malformed.
+ * Numbers are written in the shortest form that reads back to the same
+ * value, so a CSV round trip is exact. The reader refuses a file whose rows
+ * do not all carry one value per vertex instead of silently dropping them.
  */
 
 //=============================================================================================================
@@ -24,12 +22,15 @@
 #include <base/log.h>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QTextStream>
-#include <QStringList>
+#include <array>
+#include <charconv>
+#include <fstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -39,144 +40,172 @@ using namespace INVLIB;
 using namespace Eigen;
 
 //=============================================================================================================
+// DEFINE STATIC FUNCTIONS
+//=============================================================================================================
+
+namespace
+{
+
+void put_number(std::ofstream& out, double value)
+{
+    std::array<char, 32> buffer{};
+    const auto [end, ec] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value);
+    out.write(buffer.data(), end - buffer.data());
+}
+
+//=============================================================================================================
+/**
+ * Splits @p line at @p delim, skipping empty fields, and parses every field
+ * as a number. Returns false if a field is not a number.
+ */
+template<typename T>
+bool parse_fields(std::string_view line, char delim, std::vector<T>& values)
+{
+    values.clear();
+    while (!line.empty()) {
+        const std::size_t cut = line.find(delim);
+        std::string_view field = line.substr(0, cut);
+        line = (cut == std::string_view::npos) ? std::string_view{} : line.substr(cut + 1);
+        while (!field.empty() && (field.front() == ' ' || field.front() == '\t' || field.front() == '\r')) {
+            field.remove_prefix(1);
+        }
+        while (!field.empty() && (field.back() == ' ' || field.back() == '\t' || field.back() == '\r')) {
+            field.remove_suffix(1);
+        }
+        if (field.empty()) {
+            continue;
+        }
+        T value{};
+        const auto [ptr, ec] = std::from_chars(field.data(), field.data() + field.size(), value);
+        if (ec != std::errc{} || ptr != field.data() + field.size()) {
+            return false;
+        }
+        values.push_back(value);
+    }
+    return true;
+}
+
+} // namespace
+
+//=============================================================================================================
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-bool InvSourceEstimateIO::writeCsv(const InvSourceEstimate& stc,
-                                   const QString& sPath,
-                                   char cDelim)
+bool InvSourceEstimateIO::write_csv(const InvSourceEstimate& stc,
+                                    const std::filesystem::path& path,
+                                    char delim)
 {
     if (stc.empty()) {
-        BASELIB::Log::warning("[InvSourceEstimateIO::writeCsv] Source estimate is empty.");
+        BASELIB::Log::warning("[InvSourceEstimateIO::write_csv] Source estimate is empty.");
         return false;
     }
 
-    QFile file(sPath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        BASELIB::Log::warning("[InvSourceEstimateIO::writeCsv] Cannot open: {}", sPath.toStdString());
+    std::ofstream out(path);
+    if (!out) {
+        BASELIB::Log::warning("[InvSourceEstimateIO::write_csv] Cannot open: {}", path.string());
         return false;
     }
-
-    QTextStream out(&file);
-    const QString delim(QChar::fromLatin1(cDelim));
 
     // Header: time, vertex_0, vertex_1, ...
     out << "time";
-    for (int v = 0; v < stc.vertices.size(); ++v) {
+    for (Index v = 0; v < stc.vertices.size(); ++v) {
         out << delim << stc.vertices(v);
     }
-    out << "\n";
+    out << '\n';
 
     // Data rows: one per time point
-    for (int t = 0; t < stc.data.cols(); ++t) {
-        double time = stc.tmin + t * stc.tstep;
-        out << QString::number(time, 'f', 6);
-        for (int v = 0; v < stc.data.rows(); ++v) {
-            out << delim << QString::number(stc.data(v, t), 'e', 8);
+    for (Index t = 0; t < stc.data.cols(); ++t) {
+        put_number(out, static_cast<double>(stc.tmin) + static_cast<double>(t) * static_cast<double>(stc.tstep));
+        for (Index v = 0; v < stc.data.rows(); ++v) {
+            out << delim;
+            put_number(out, stc.data(v, t));
         }
-        out << "\n";
+        out << '\n';
     }
 
-    file.close();
-    return true;
+    return static_cast<bool>(out.flush());
 }
 
 //=============================================================================================================
 
-InvSourceEstimate InvSourceEstimateIO::readCsv(const QString& sPath,
-                                               char cDelim)
+InvSourceEstimate InvSourceEstimateIO::read_csv(const std::filesystem::path& path,
+                                                char delim)
 {
-    QFile file(sPath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        BASELIB::Log::warning("[InvSourceEstimateIO::readCsv] Cannot open: {}", sPath.toStdString());
-        return InvSourceEstimate();
+    std::ifstream in(path);
+    if (!in) {
+        BASELIB::Log::warning("[InvSourceEstimateIO::read_csv] Cannot open: {}", path.string());
+        return {};
     }
 
-    QTextStream in(&file);
-    const QString delim(QChar::fromLatin1(cDelim));
-
-    // Read header
-    QString header = in.readLine();
-    QStringList headerParts = header.split(delim, Qt::SkipEmptyParts);
-    if (headerParts.size() < 2) {
-        BASELIB::Log::warning("[InvSourceEstimateIO::readCsv] Invalid header.");
-        return InvSourceEstimate();
+    // Header: "time" followed by the vertex indices
+    std::string line;
+    std::getline(in, line);
+    const std::string_view header(line);
+    const std::size_t first = header.find(delim);
+    std::vector<int> header_vertices;
+    if (first == std::string_view::npos || !parse_fields(header.substr(first + 1), delim, header_vertices) || header_vertices.empty()) {
+        BASELIB::Log::warning("[InvSourceEstimateIO::read_csv] Invalid header.");
+        return {};
     }
+    const auto n_vertices = static_cast<Index>(header_vertices.size());
 
-    // Parse vertex indices from header (skip "time")
-    int nVertices = headerParts.size() - 1;
-    VectorXi vertices(nVertices);
-    for (int v = 0; v < nVertices; ++v) {
-        vertices(v) = headerParts[v + 1].toInt();
-    }
-
-    // Read data rows
-    QList<VectorXd> timePoints;
-    QList<double> times;
-
-    while (!in.atEnd()) {
-        QString line = in.readLine().trimmed();
-        if (line.isEmpty())
-            continue;
-
-        QStringList parts = line.split(delim, Qt::SkipEmptyParts);
-        if (parts.size() < nVertices + 1)
-            continue;
-
-        times.append(parts[0].toDouble());
-        VectorXd row(nVertices);
-        for (int v = 0; v < nVertices; ++v) {
-            row(v) = parts[v + 1].toDouble();
+    // Data rows: time followed by one value per vertex
+    std::vector<double> values;
+    std::vector<double> fields;
+    std::vector<double> times;
+    while (std::getline(in, line)) {
+        if (!parse_fields(std::string_view(line), delim, fields)) {
+            BASELIB::Log::warning("[InvSourceEstimateIO::read_csv] Malformed row {}.", times.size() + 1);
+            return {};
         }
-        timePoints.append(row);
+        if (fields.empty()) {
+            continue;
+        }
+        if (static_cast<Index>(fields.size()) != n_vertices + 1) {
+            BASELIB::Log::warning("[InvSourceEstimateIO::read_csv] Row {} has {} values, expected {}.",
+                                  times.size() + 1, fields.size(), n_vertices + 1);
+            return {};
+        }
+        times.push_back(fields.front());
+        values.insert(values.end(), fields.begin() + 1, fields.end());
     }
 
-    file.close();
-
-    if (timePoints.isEmpty()) {
-        return InvSourceEstimate();
+    if (times.empty()) {
+        return {};
     }
 
-    // Build data matrix (n_vertices × n_times)
-    MatrixXd data(nVertices, timePoints.size());
-    for (int t = 0; t < timePoints.size(); ++t) {
-        data.col(t) = timePoints[t];
-    }
+    const MatrixXd data = Map<const MatrixXd>(values.data(), n_vertices, static_cast<Index>(times.size()));
+    const auto tmin = static_cast<float>(times.front());
+    const float tstep = (times.size() > 1) ? static_cast<float>(times[1] - times[0]) : 0.001f;
 
-    float tmin = static_cast<float>(times[0]);
-    float tstep = (times.size() > 1)
-        ? static_cast<float>(times[1] - times[0])
-        : 0.001f;
-
-    return InvSourceEstimate(data, vertices, tmin, tstep);
+    return InvSourceEstimate(data, Map<const VectorXi>(header_vertices.data(), n_vertices), tmin, tstep);
 }
 
 //=============================================================================================================
 
-bool InvSourceEstimateIO::writeMatrix(const InvSourceEstimate& stc,
-                                      const QString& sPath)
+bool InvSourceEstimateIO::write_matrix(const InvSourceEstimate& stc,
+                                       const std::filesystem::path& path)
 {
     if (stc.empty()) {
-        BASELIB::Log::warning("[InvSourceEstimateIO::writeMatrix] Source estimate is empty.");
+        BASELIB::Log::warning("[InvSourceEstimateIO::write_matrix] Source estimate is empty.");
         return false;
     }
 
-    QFile file(sPath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        BASELIB::Log::warning("[InvSourceEstimateIO::writeMatrix] Cannot open: {}", sPath.toStdString());
+    std::ofstream out(path);
+    if (!out) {
+        BASELIB::Log::warning("[InvSourceEstimateIO::write_matrix] Cannot open: {}", path.string());
         return false;
     }
 
-    QTextStream out(&file);
-    for (int v = 0; v < stc.data.rows(); ++v) {
-        for (int t = 0; t < stc.data.cols(); ++t) {
-            if (t > 0)
-                out << "\t";
-            out << QString::number(stc.data(v, t), 'e', 8);
+    for (Index v = 0; v < stc.data.rows(); ++v) {
+        for (Index t = 0; t < stc.data.cols(); ++t) {
+            if (t > 0) {
+                out << '\t';
+            }
+            put_number(out, stc.data(v, t));
         }
-        out << "\n";
+        out << '\n';
     }
 
-    file.close();
-    return true;
+    return static_cast<bool>(out.flush());
 }
