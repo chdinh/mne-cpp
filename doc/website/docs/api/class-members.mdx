@@ -3506,7 +3506,7 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **ncol** `[var]` in [MNESparseNamedMatrix](/docs/api/mne/mne-sparse-named-matrix) — Number of columns (same as in data).
 - **ncomp** `[var]` in [MNECTFCompDataSet](/docs/api/mne/mnectf-comp-data-set) — Number of compensation data sets.
 - **ncov** `[var]` in [MNECovMatrix](/docs/api/mne/mne-cov-matrix) — Dimension (number of channels).
-- **nderiv** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — How many derivations in the above.
+- **nderiv** `[fn]` in [MNEChSelection](/docs/api/mne/mne-ch-selection)
 - **ndim** `[fn]` in [MlTensor](/docs/api/ml/ml-tensor)
 - **ndip** `[var]` in [InvDipoleForward](/docs/api/inv/inv-dipole-forward) — Number of dipoles.
 - **nearest** `[var]` in [MNENearest](/docs/api/mne/mne-nearest) — Index of the nearest 'inuse' vertex.
@@ -4009,7 +4009,7 @@ Index of 6376 public class members (functions, variables, typedefs, enums) acros
 - **pick_data_channels** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — The data channels (MEG including reference MEG, EEG, CSD, sEEG, ECoG, DBS, fNIRS), like mne's picks="data".
 - **pick_data_filt** `[fn]` in [MNERawData](/docs/api/mne/mne-raw-data) — Pick filtered data for a channel selection by loading filter buffers, applying the frequency-domain filter per channel (skipping stimulus channels), and accumulating overlapping results.
 - **pick_data_proj** `[fn]` in [MNERawData](/docs/api/mne/mne-raw-data) — Extract raw data with SSP projection applied to each time sample before channel selection.
-- **pick_deriv** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Corresponding derivations in raw data.
+- **pick_deriv** `[var]` in [MNEChSelection](/docs/api/mne/mne-ch-selection) — Corresponding derivations in raw data (&lt; 0 where not derived).
 - **pick_info** `[fn]` in [FiffInfo](/docs/api/fiff/fiff-info) — fiff_pick_info
 - **pick_info** `[fn]` in [FiffInfoBase](/docs/api/fiff/fiff-info-base) — fiff_pick_info
 - **pick_regions** `[fn]` in [MNEForwardSolution](/docs/api/mne/mne-forward-solution) — Reduces a forward solution to selected regions.
