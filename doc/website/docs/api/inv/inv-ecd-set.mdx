@@ -41,57 +41,6 @@ const InvEcdSet reread = InvEcdSet::read_dipoles_dip(dipPath);
 
 ## Public Methods
 
-### InvEcdSet()
-
-Constructs a Electric Current Dipole Set object.
-
----
-
-### InvEcdSet(p_ECDSet)
-
-Copy constructor.
-
-**Parameters:**
-
-- **p_ECDSet** : *const InvEcdSet &*
-  Electric Current Dipole Set which should be copied.
-
----
-
-### operator=(other)
-
-Copy assignment.
-
-Every member has value semantics, so the compiler-generated member-wise assignment is correct. It is declared explicitly because declaring a copy constructor and/or a destructor deprecates the implicitly generated one.
-
-**Parameters:**
-
-- **other** : *const [InvEcdSet](/docs/api/inv/inv-ecd-set) &*
-  Object to assign from.
-
-**Returns:**
-
-- *[InvEcdSet](/docs/api/inv/inv-ecd-set) &* — reference to this object.
-
----
-
-### ~InvEcdSet()
-
-Destroys the Electric Current Dipole description.
-
----
-
-### addEcd(p_ecd)
-
-Appends an Electric Current Dipole to the set.
-
-**Parameters:**
-
-- **p_ecd** : *const [InvEcd](/docs/api/inv/inv-ecd) &*
-  Dipole to append (copied).
-
----
-
 ### save_dipoles_bdip(path)
 
 Save dipoles in the bdip format employed by xfit.
@@ -122,58 +71,72 @@ Save dipoles in the dip format suitable for mrilab.
 
 ---
 
+### push_back(ecd)
+
+Appends a dipole.
+
+**Parameters:**
+
+- **ecd** : *const [InvEcd](/docs/api/inv/inv-ecd) &*
+  The dipole to append.
+
+---
+
 ### size()
 
-Returns the number of stored ECDs.
+**Returns:**
+
+- *int* — The number of dipoles.
+
+---
+
+### empty()
 
 **Returns:**
 
-- *qint32* — number of stored ECDs.
+- *bool* — Whether the set holds no dipoles.
 
 ---
 
 ### operator\[\](idx)
 
-Subscript operator [] to access [`InvEcd`](/docs/api/inv/inv-ecd) by index.
-
 **Parameters:**
 
 - **idx** : *int*
-  the [`InvEcd`](/docs/api/inv/inv-ecd) index.
+  Index of the dipole, less than `size()`.
 
 **Returns:**
 
-- *const [InvEcd](/docs/api/inv/inv-ecd) &* — [`InvEcd`](/docs/api/inv/inv-ecd) related to the parameter index.
+- *const [InvEcd](/docs/api/inv/inv-ecd) &* — The dipole at `idx`.
 
 ---
 
 ### operator\[\](idx)
 
-Subscript operator [] to access [`InvEcd`](/docs/api/inv/inv-ecd) by index.
-
 **Parameters:**
 
 - **idx** : *int*
-  the [`InvEcd`](/docs/api/inv/inv-ecd) index.
+  Index of the dipole, less than `size()`.
 
 **Returns:**
 
-- *[InvEcd](/docs/api/inv/inv-ecd) &* — [`InvEcd`](/docs/api/inv/inv-ecd) related to the parameter index.
+- *[InvEcd](/docs/api/inv/inv-ecd) &* — The dipole at `idx`.
 
 ---
 
-### operator&lt;&lt;(p_ecd)
+### begin()
 
-Subscript operator &lt;&lt; to add a new [`InvEcd`](/docs/api/inv/inv-ecd).
+---
 
-**Parameters:**
+### end()
 
-- **p_ecd** : *const [InvEcd](/docs/api/inv/inv-ecd) &*
-  [`InvEcd`](/docs/api/inv/inv-ecd) to be added.
+---
 
-**Returns:**
+### begin()
 
-- *[InvEcdSet](/docs/api/inv/inv-ecd-set) &* — [`InvEcdSet`](/docs/api/inv/inv-ecd-set).
+---
+
+### end()
 
 ---
 
@@ -232,8 +195,8 @@ strong.Q = Vector3f(0.0f, 0.0f, 20e-9f);
 InvEcd weak;
 weak.rd = Vector3f(0.03f, 0.0f, 0.05f);
 weak.Q = Vector3f(10e-9f, 0.0f, 0.0f);
-dipoles.addEcd(strong);
-dipoles.addEcd(weak);
+dipoles.push_back(strong);
+dipoles.push_back(weak);
 DipoleObject dipoleGlyphs;
 dipoleGlyphs.load(dipoles); // one cone per dipole, scaled by moment
 float dipoleDistance = 0.0f;

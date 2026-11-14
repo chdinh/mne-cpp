@@ -364,8 +364,8 @@ int main(int argc, char* argv[])
     InvEcd weak;
     weak.rd = Vector3f(0.03f, 0.0f, 0.05f);
     weak.Q = Vector3f(10e-9f, 0.0f, 0.0f);
-    dipoles.addEcd(strong);
-    dipoles.addEcd(weak);
+    dipoles.push_back(strong);
+    dipoles.push_back(weak);
     DipoleObject dipoleGlyphs;
     dipoleGlyphs.load(dipoles); // one cone per dipole, scaled by moment
     float dipoleDistance = 0.0f;
