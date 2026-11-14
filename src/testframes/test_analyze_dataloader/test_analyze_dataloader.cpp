@@ -222,7 +222,7 @@ void TestAnalyzeDataLoader::loadsDipoleFiles()
         written.addEcd(ecd);
     }
     const QString path = dir.filePath("sample-dipoles.dip");
-    QVERIFY(written.save_dipoles_dip(path));
+    QVERIFY(written.save_dipoles_dip(path.toStdU16String()));
 
     auto data = QSharedPointer<AnalyzeData>::create();
     DataLoader loader;

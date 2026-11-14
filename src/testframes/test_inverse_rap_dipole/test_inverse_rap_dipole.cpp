@@ -170,10 +170,20 @@ private slots:
         }
 
         QTemporaryDir scratch;
-        QString tmpFile = scratch.filePath("test_ecd_roundtrip.bdip");
-        bool saved = set.save_dipoles_bdip(tmpFile);
-        QVERIFY(saved);
-        QFile::remove(tmpFile);
+        const QString tmpFile = scratch.filePath("test_ecd_roundtrip.bdip");
+        QVERIFY(set.save_dipoles_bdip(tmpFile.toStdU16String()));
+
+        // xfit record: 196 bytes; end equals begin, the error-analysis fields are zero
+        QFile file(tmpFile);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const QByteArray bytes = file.readAll();
+        QCOMPARE(bytes.size(), 5 * 196);
+        for (int i = 0; i < 5; ++i) {
+            const QByteArray record = bytes.mid(i * 196, 196);
+            QCOMPARE(record.mid(8, 4), record.mid(4, 4));
+            QCOMPARE(record.mid(56, 184 - 56), QByteArray(184 - 56, '\0'));
+            QCOMPARE(record.mid(188, 8), QByteArray(8, '\0'));
+        }
     }
 
     //=========================================================================

@@ -136,20 +136,13 @@ int main(int argc, char* argv[])
     /*
      * Saving...
      */
-    if (!settings.dipname.isEmpty() && !set.save_dipoles_dip(settings.dipname)) {
+    if (!settings.dipname.isEmpty() && !set.save_dipoles_dip(settings.dipname.toStdU16String())) {
         qCritical("Dipoles could not be saved to %s.", settings.dipname.toUtf8().data());
         return 1;
     }
-    if (!settings.bdipname.isEmpty() && !set.save_dipoles_bdip(settings.bdipname)) {
+    if (!settings.bdipname.isEmpty() && !set.save_dipoles_bdip(settings.bdipname.toStdU16String())) {
         qCritical("Dipoles could not be saved to %s.", settings.bdipname.toUtf8().data());
         return 1;
-    }
-
-    /*
-     * Test - Reading again
-     */
-    if (!settings.dipname.isEmpty()) {
-        InvEcdSet::read_dipoles_dip(settings.dipname);
     }
 
     return settings.gui ? app->exec() : 0;

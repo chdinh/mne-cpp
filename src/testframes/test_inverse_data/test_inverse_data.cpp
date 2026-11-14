@@ -625,7 +625,7 @@ private slots:
         QString path = tmpDir.path() + "/test_ecd.dat";
 
         // Save
-        set.save_dipoles_dip(path);
+        QVERIFY(set.save_dipoles_dip(path.toStdU16String()));
         QVERIFY(QFile::exists(path));
 
         // Read content to verify format

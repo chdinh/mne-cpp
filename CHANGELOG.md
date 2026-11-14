@@ -423,6 +423,16 @@ aliases; replace the old spelling as below.
   a number or lacks values (such rows used to be skipped silently, shifting
   the time axis). The write functions are `[[nodiscard]]`. Migration:
   `writeCsv(stc, qpath)` becomes `write_csv(stc, qpath.toStdU16String())`.
+- `InvEcdSet::read_dipoles_dip` reads `.dip` files written by
+  `mne.Dipole.save`: it read none of their dipoles because they carry extra
+  `khi^2` and `free` columns, which are now read into `khi2` and `nfree`.
+  Data lines need no leading blank, and a malformed line yields an empty
+  set instead of being skipped. `save_dipoles_bdip` writes the record's
+  `end` time and zeros in the error-analysis fields it does not compute
+  (they held whatever was in memory) and is `const`. The three functions
+  take a `std::filesystem::path` and use the standard library instead of
+  `QFile`/`QTextStream`; the save functions are `[[nodiscard]]`.
+  Migration: pass `qpath.toStdU16String()`.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

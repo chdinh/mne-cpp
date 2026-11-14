@@ -26,13 +26,15 @@
 
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QFile>
-#include <QTextStream>
-#include <QString>
-#include <QRegularExpression>
+#include <charconv>
+#include <format>
+#include <fstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -72,9 +74,46 @@ struct bdipEcdRec
     float prob;               /* Probability to exceed khi^2 by chance */
     float noise_est;          /* Total noise estimate */
 };
-using bdipEcd = bdipEcdRec*;
 
 } // Namespace
+
+namespace
+{
+
+constexpr std::string_view whitespace = " \t\r";
+
+std::vector<std::string_view> split_words(std::string_view text)
+{
+    std::vector<std::string_view> words;
+    while (true) {
+        const std::size_t begin = text.find_first_not_of(whitespace);
+        if (begin == std::string_view::npos) {
+            return words;
+        }
+        text.remove_prefix(begin);
+        const std::size_t end = text.find_first_of(whitespace);
+        words.push_back(text.substr(0, end));
+        text = (end == std::string_view::npos) ? std::string_view{} : text.substr(end);
+    }
+}
+
+//=============================================================================================================
+
+bool parse_floats(std::string_view line, std::vector<float>& values)
+{
+    values.clear();
+    for (const std::string_view word : split_words(line)) {
+        float value = 0.0f;
+        const auto [ptr, ec] = std::from_chars(word.data(), word.data() + word.size(), value);
+        if (ec != std::errc{} || ptr != word.data() + word.size()) {
+            return false;
+        }
+        values.push_back(value);
+    }
+    return true;
+}
+
+} // namespace
 
 //=============================================================================================================
 // DEFINE MEMBER METHODS
@@ -107,135 +146,146 @@ void InvEcdSet::addEcd(const InvEcd& p_ecd)
 
 //=============================================================================================================
 
-InvEcdSet InvEcdSet::read_dipoles_dip(const QString& fileName)
+InvEcdSet InvEcdSet::read_dipoles_dip(const std::filesystem::path& path)
 {
-    InvEcdSet set;
-
-    QFile inputFile(fileName);
-    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QTextStream in(&inputFile);
-        while (!in.atEnd()) {
-            QString line = in.readLine();
-            QStringList list = line.split(QRegularExpression("\\s+"));
-
-            if (list[0].contains("#") || list.size() != 11) {
-                continue;
-            } else {
-                InvEcd one;
-                one.valid = true;
-                one.time = list[1].toFloat() / 1000.0f;
-                one.rd[X] = list[3].toFloat() / 1000.0f;
-                one.rd[Y] = list[4].toFloat() / 1000.0f;
-                one.rd[Z] = list[5].toFloat() / 1000.0f;
-                one.Q[X] = list[7].toFloat() / 1e9f;
-                one.Q[Y] = list[8].toFloat() / 1e9f;
-                one.Q[Z] = list[9].toFloat() / 1e9f;
-                one.good = list[10].toFloat() / 100.0f;
-                set << one;
-            }
-        }
-        inputFile.close();
-
-        BASELIB::Log::info("Read {} dipoles in dip format from {}\n", set.size(), fileName.toStdString());
-    } else {
-        BASELIB::Log::critical("Not able to read from: {}\n", fileName.toStdString());
+    std::ifstream in(path);
+    if (!in) {
+        BASELIB::Log::critical("Not able to read from: {}", path.string());
+        return {};
     }
 
+    // begin end x y z Q Qx Qy Qz g/% come first; MNE-Python may append khi^2, free and confidence columns.
+    constexpr std::size_t n_fixed = 10;
+    std::ptrdiff_t khi2_column = -1;
+    std::ptrdiff_t free_column = -1;
+    bool data_seen = false;
+
+    InvEcdSet set;
+    std::string line;
+    std::vector<float> values;
+    while (std::getline(in, line)) {
+        const std::size_t first = line.find_first_not_of(whitespace);
+        if (first == std::string::npos) {
+            continue;
+        }
+        if (line[first] == '#' || line[first] == '%') {
+            if (const std::size_t gof = line.find("g/%"); !data_seen && gof != std::string::npos) {
+                const std::vector<std::string_view> extra = split_words(std::string_view(line).substr(gof + 3));
+                for (std::size_t k = 0; k < extra.size(); ++k) {
+                    const auto column = static_cast<std::ptrdiff_t>(n_fixed + k);
+                    if (extra[k] == "khi^2") {
+                        khi2_column = column;
+                    } else if (extra[k] == "free") {
+                        free_column = column;
+                    }
+                }
+            }
+            continue;
+        }
+        data_seen = true;
+        if (!parse_floats(line, values) || values.size() < n_fixed) {
+            BASELIB::Log::critical("Malformed dipole line in {}: {}", path.string(), line);
+            return {};
+        }
+        InvEcd one;
+        one.valid = true;
+        one.time = values[0] / 1000.0f;
+        one.rd = Eigen::Vector3f(values[2], values[3], values[4]) / 1000.0f;
+        one.Q = Eigen::Vector3f(values[6], values[7], values[8]) / 1e9f;
+        one.good = values[9] / 100.0f;
+        const auto n_values = static_cast<std::ptrdiff_t>(values.size());
+        if (khi2_column >= 0 && khi2_column < n_values) {
+            one.khi2 = values[static_cast<std::size_t>(khi2_column)];
+        }
+        if (free_column >= 0 && free_column < n_values) {
+            one.nfree = static_cast<int>(values[static_cast<std::size_t>(free_column)]);
+        }
+        set << one;
+    }
+
+    BASELIB::Log::info("Read {} dipoles in dip format from {}", set.size(), path.string());
     return set;
 }
 
 //=============================================================================================================
 
-bool InvEcdSet::save_dipoles_bdip(const QString& fileName)
-/*
-   * Save dipoles in the bdip format employed by xfit
-   */
+bool InvEcdSet::save_dipoles_bdip(const std::filesystem::path& path) const
 {
-    QFile out(fileName);
-    bdipEcdRec one_out;
-    InvEcd one;
-    int k, p;
-    int nsave;
-
-    if (fileName.isEmpty() || this->size() == 0)
+    if (path.empty() || this->size() == 0) {
         return true;
+    }
 
-    if (!out.open(QIODevice::WriteOnly)) {
-        BASELIB::Log::info("{}", fileName.toStdString());
+    std::ofstream out(path, std::ios::binary);
+    if (!out) {
+        BASELIB::Log::critical("Not able to write to: {}", path.string());
         return false;
     }
 
-    for (k = 0, nsave = 0; k < this->size(); k++) {
-        one = m_qListDips[k];
-        if (one.valid) {
-            one_out.dipole = FIFFLIB::swap_int(1);
-            one_out.begin = FIFFLIB::swap_float(one.time);
-            for (p = 0; p < 3; p++) {
-                one_out.r0[p] = FIFFLIB::swap_float(0.0);
-                one_out.rd[p] = FIFFLIB::swap_float(one.rd[p]);
-                one_out.Q[p] = FIFFLIB::swap_float(one.Q[p]);
-            }
-            one_out.goodness = FIFFLIB::swap_float(one.good);
-            one_out.errors_computed = FIFFLIB::swap_int(0);
-            one_out.khi2 = FIFFLIB::swap_float(one.khi2);
-            if (out.write(reinterpret_cast<const char*>(&one_out), sizeof(bdipEcdRec)) != sizeof(bdipEcdRec)) {
-                BASELIB::Log::critical("Failed to write a dipole");
-                out.close();
-                QFile::remove(fileName);
-                return false;
-            }
-            nsave++;
+    int nsave = 0;
+    for (const InvEcd& one : m_qListDips) {
+        if (!one.valid) {
+            continue;
         }
+        // Fields xfit fills from an error analysis stay zero.
+        bdipEcdRec one_out{};
+        one_out.dipole = FIFFLIB::swap_int(1);
+        one_out.begin = FIFFLIB::swap_float(one.time);
+        one_out.end = FIFFLIB::swap_float(one.time);
+        for (int p = 0; p < 3; p++) {
+            one_out.r0[p] = FIFFLIB::swap_float(0.0f);
+            one_out.rd[p] = FIFFLIB::swap_float(one.rd[p]);
+            one_out.Q[p] = FIFFLIB::swap_float(one.Q[p]);
+        }
+        one_out.goodness = FIFFLIB::swap_float(one.good);
+        one_out.errors_computed = FIFFLIB::swap_int(0);
+        one_out.khi2 = FIFFLIB::swap_float(one.khi2);
+        out.write(reinterpret_cast<const char*>(&one_out), sizeof(bdipEcdRec));
+        nsave++;
     }
     if (!out.flush()) {
-        BASELIB::Log::info("{}", fileName.toStdString());
+        BASELIB::Log::critical("Failed to write the dipoles to {}", path.string());
+        out.close();
+        std::error_code ec;
+        std::filesystem::remove(path, ec);
         return false;
     }
-    out.close();
-    BASELIB::Log::info("Save {} dipoles in bdip format to {}\n", nsave, fileName.toStdString());
+    BASELIB::Log::info("Save {} dipoles in bdip format to {}", nsave, path.string());
     return true;
 }
 
 //=============================================================================================================
 
-bool InvEcdSet::save_dipoles_dip(const QString& fileName) const
+bool InvEcdSet::save_dipoles_dip(const std::filesystem::path& path) const
 {
-    QFile out(fileName);
-    int k, nsave;
-    InvEcd one;
-
-    if (fileName.isEmpty() || this->size() == 0)
+    if (path.empty() || this->size() == 0) {
         return true;
-    if (!out.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        BASELIB::Log::info("{}", fileName.toStdString());
+    }
+    std::ofstream out(path);
+    if (!out) {
+        BASELIB::Log::critical("Not able to write to: {}", path.string());
         return false;
     }
-    //
-    // The column layout is read back by other tools, so keep printf style
-    // formatting rather than rebuilding the widths with stream manipulators.
-    //
-    QTextStream stream(&out);
-    stream << "# CoordinateSystem \"Head\"\n";
-    stream << QString::asprintf("# %7s %7s %8s %8s %8s %8s %8s %8s %8s %6s\n",
-                                "begin", "end", "X (mm)", "Y (mm)", "Z (mm)", "Q(nAm)", "Qx(nAm)", "Qy(nAm)", "Qz(nAm)", "g/%");
-    for (k = 0, nsave = 0; k < this->size(); k++) {
-        one = this->m_qListDips[k];
+    // Column widths as in MNE-C save_dipoles_dip; other tools read this layout back.
+    out << "# CoordinateSystem \"Head\"\n";
+    out << std::format("# {:>7} {:>7} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8} {:>6}\n",
+                       "begin", "end", "X (mm)", "Y (mm)", "Z (mm)", "Q(nAm)", "Qx(nAm)", "Qy(nAm)", "Qz(nAm)", "g/%");
+    int nsave = 0;
+    for (const InvEcd& one : m_qListDips) {
         if (one.valid) {
-            stream << QString::asprintf("  %7.1f %7.1f %8.2f %8.2f %8.2f %8.3f %8.3f %8.3f %8.3f %6.1f\n",
-                                        1000 * one.time, 1000 * one.time,
-                                        1000 * one.rd[X], 1000 * one.rd[Y], 1000 * one.rd[Z],
-                                        1e9 * one.Q.norm(), 1e9 * one.Q[X], 1e9 * one.Q[Y], 1e9 * one.Q[Z], 100.0 * one.good);
+            const double time = 1000.0 * one.time;
+            out << std::format("  {:7.1f} {:7.1f} {:8.2f} {:8.2f} {:8.2f} {:8.3f} {:8.3f} {:8.3f} {:8.3f} {:6.1f}\n",
+                               time, time,
+                               1000.0 * one.rd[X], 1000.0 * one.rd[Y], 1000.0 * one.rd[Z],
+                               1e9 * one.Q.norm(), 1e9 * one.Q[X], 1e9 * one.Q[Y], 1e9 * one.Q[Z], 100.0 * one.good);
             nsave++;
         }
     }
-    stream << QString::asprintf("## Name \"%s dipoles\" Style \"Dipoles\"\n", "ALL");
-    stream.flush();
+    out << "## Name \"ALL dipoles\" Style \"Dipoles\"\n";
     if (!out.flush()) {
-        BASELIB::Log::info("{}", fileName.toStdString());
+        BASELIB::Log::critical("Failed to write the dipoles to {}", path.string());
         return false;
     }
-    out.close();
-    BASELIB::Log::info("Save {} dipoles in dip format to {}\n", nsave, fileName.toStdString());
+    BASELIB::Log::info("Save {} dipoles in dip format to {}", nsave, path.string());
     return true;
 }
 

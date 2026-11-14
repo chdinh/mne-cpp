@@ -35,6 +35,12 @@
 #include <QString>
 
 //=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <filesystem>
+
+//=============================================================================================================
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
@@ -104,33 +110,34 @@ public:
 
     //=========================================================================================================
     /**
-     * Read dipoles from the dip format compatible with mrilab
+     * Read dipoles from the dip format compatible with mrilab, as written by save_dipoles_dip,
+     * MNE-C and MNE-Python (whose khi^2 and free columns are read too).
      *
-     * @param[in] fileName   File name to read from.
+     * @param[in] path   File to read from.
      *
-     * @return The dipole set read from the file; empty if the file could not be read.
+     * @return The dipole set read from the file; empty if the file could not be read or holds a malformed line.
      */
-    static InvEcdSet read_dipoles_dip(const QString& fileName);
+    static InvEcdSet read_dipoles_dip(const std::filesystem::path& path);
 
     //=========================================================================================================
     /**
      * Save dipoles in the bdip format employed by xfit
      *
-     * @param[in] fileName   File name to save to.
+     * @param[in] path   File to save to.
      *
      * @return True on success or if there is nothing to save, false if the file could not be written.
      */
-    bool save_dipoles_bdip(const QString& fileName);
+    [[nodiscard]] bool save_dipoles_bdip(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**
      * Save dipoles in the dip format suitable for mrilab
      *
-     * @param[in] fileName   File name to save to.
+     * @param[in] path   File to save to.
      *
      * @return True on success or if there is nothing to save, false if the file could not be written.
      */
-    bool save_dipoles_dip(const QString& fileName) const;
+    [[nodiscard]] bool save_dipoles_dip(const std::filesystem::path& path) const;
 
     //=========================================================================================================
     /**

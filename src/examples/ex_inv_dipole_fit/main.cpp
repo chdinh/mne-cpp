@@ -138,8 +138,9 @@ int main(int argc, char* argv[])
     settings.checkIntegrity();
     InvDipoleFit fit(&settings);
     InvEcdSet dipoles = fit.calculateFit();
-    const bool saved = dipoles.save_dipoles_dip(tmp.filePath("fit.dip")); // readable by mne.read_dipole
-    const InvEcdSet reread = InvEcdSet::read_dipoles_dip(tmp.filePath("fit.dip"));
+    const std::filesystem::path dipPath = tmp.filePath("fit.dip").toStdU16String();
+    const bool saved = dipoles.save_dipoles_dip(dipPath); // readable by mne.read_dipole
+    const InvEcdSet reread = InvEcdSet::read_dipoles_dip(dipPath);
     //! [inv_dipole_fit_usage]
     const Vector3d posMm = dipoles.size() > 0 ? Vector3d(1e3 * dipoles[0].rd.cast<double>()) : Vector3d::Zero();
     ok &= expect(saved && dipoles.size() == 1 && dipoles[0].valid && (posMm - mnePosMm).norm() < 1.0 && std::abs(100.0 * dipoles[0].good - 99.99996959113513) < 0.01 && dipoles[0].nfree == 297 && reread.size() == 1 && (reread[0].rd - dipoles[0].rd).norm() < 1e-4f,

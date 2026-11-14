@@ -141,10 +141,10 @@ void TestDipoleFit::dipoleFitSimple()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Write Read Dipole Fit >>>>>>>>>>>>>>>>>>>>>>>>>\n");
     fflush(stdout);
 
-    set.save_dipoles_dip(settings.dipname);
+    QVERIFY(set.save_dipoles_dip(settings.dipname.toStdU16String()));
     printf("[checkpoint] dipole file written (simple)\n");
     fflush(stdout);
-    m_ECDSet = InvEcdSet::read_dipoles_dip(settings.dipname);
+    m_ECDSet = InvEcdSet::read_dipoles_dip(settings.dipname.toStdU16String());
     printf("[checkpoint] dipole file read back (simple, size=%d)\n", m_ECDSet.size());
     fflush(stdout);
 
@@ -157,7 +157,7 @@ void TestDipoleFit::dipoleFitSimple()
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Load Dipole Fit Reference Set >>>>>>>>>>>>>>>>>>>>>>>>>\n");
     fflush(stdout);
-    m_refECDSet = InvEcdSet::read_dipoles_dip(refFileName);
+    m_refECDSet = InvEcdSet::read_dipoles_dip(refFileName.toStdU16String());
     printf("[checkpoint] reference loaded (simple, size=%d)\n", m_refECDSet.size());
     fflush(stdout);
 
@@ -255,10 +255,10 @@ void TestDipoleFit::dipoleFitAdvanced()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Write Read Dipole Fit >>>>>>>>>>>>>>>>>>>>>>>>>\n");
     fflush(stdout);
 
-    set.save_dipoles_dip(settings.dipname);
+    QVERIFY(set.save_dipoles_dip(settings.dipname.toStdU16String()));
     printf("[checkpoint] dipole file written (advanced)\n");
     fflush(stdout);
-    m_ECDSet = InvEcdSet::read_dipoles_dip(settings.dipname);
+    m_ECDSet = InvEcdSet::read_dipoles_dip(settings.dipname.toStdU16String());
     printf("[checkpoint] dipole file read back (advanced, size=%d)\n", m_ECDSet.size());
     fflush(stdout);
 
@@ -271,7 +271,7 @@ void TestDipoleFit::dipoleFitAdvanced()
 
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Load Dipole Fit Reference Set >>>>>>>>>>>>>>>>>>>>>>>>>\n");
     fflush(stdout);
-    m_refECDSet = InvEcdSet::read_dipoles_dip(refFileName);
+    m_refECDSet = InvEcdSet::read_dipoles_dip(refFileName.toStdU16String());
     printf("[checkpoint] reference loaded (advanced, size=%d)\n", m_refECDSet.size());
     fflush(stdout);
 

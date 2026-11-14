@@ -15,6 +15,8 @@
 #include <QFile>
 #include <QBuffer>
 #include <QTemporaryDir>
+#include <filesystem>
+#include <fstream>
 #include <QCoreApplication>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -607,13 +609,34 @@ void TestInvDipoleRapMne::ecdSet_writeReadDipFile()
     setOrig << ecd;
 
     // Write to .dip format
-    QString dipPath = tmpDir.path() + "/test_out.dip";
+    const std::filesystem::path dipPath = tmpDir.filePath("test_out.dip").toStdU16String();
     QVERIFY(setOrig.save_dipoles_dip(dipPath));
 
     // Read back
     InvEcdSet setRead = InvEcdSet::read_dipoles_dip(dipPath);
     QCOMPARE(setRead.size(), (qint32)1);
     QVERIFY(qAbs(setRead[0].time - 0.075f) < 1e-4);
+    QVERIFY(setRead[0].rd.isApprox(ecd.rd, 1e-4f));
+    QVERIFY(setRead[0].Q.isApprox(ecd.Q, 1e-4f));
+
+    // mne.Dipole.save appends khi^2 and free columns; a data line need not be indented
+    const std::filesystem::path pythonPath = tmpDir.filePath("python.dip").toStdU16String();
+    std::ofstream(pythonPath) << "# CoordinateSystem \"Head\"\n"
+                                 "#   begin     end   X (mm)   Y (mm)   Z (mm)   Q(nAm)  Qx(nAm)  Qy(nAm)  Qz(nAm)    g/%    khi^2  free\n"
+                                 "     75.0    75.0    30.00    20.00    70.00    5.000    0.000    5.000    0.000  88.00      1.5   100\n"
+                                 "80.0 80.0 31.00 20.00 70.00 4.000 0.000 4.000 0.000 87.00 2.5 99\n"
+                                 "## Name \"x dipoles\" Style \"Dipoles\"\n";
+    const InvEcdSet fromPython = InvEcdSet::read_dipoles_dip(pythonPath);
+    QCOMPARE(fromPython.size(), (qint32)2);
+    QVERIFY(fromPython[0].rd.isApprox(ecd.rd, 1e-6f));
+    QCOMPARE(fromPython[0].khi2, 1.5f);
+    QCOMPARE(fromPython[0].nfree, 100);
+    QCOMPARE(fromPython[1].nfree, 99);
+    QVERIFY(qAbs(fromPython[1].good - 0.87f) < 1e-6f);
+
+    const std::filesystem::path brokenPath = tmpDir.filePath("broken.dip").toStdU16String();
+    std::ofstream(brokenPath) << "  75.0 75.0 30.00 20.00 70.00 5.000 0.000 5.000 0.000 88.0\n  80.0 80.0 31.00\n";
+    QCOMPARE(InvEcdSet::read_dipoles_dip(brokenPath).size(), (qint32)0);
 }
 
 void TestInvDipoleRapMne::ecdSet_copyConstruction()

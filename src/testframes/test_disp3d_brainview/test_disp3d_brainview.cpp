@@ -424,7 +424,7 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
     INVLIB::InvEcdSet dipoles;
     dipoles << ecd;
     const QString dipPath = dir.filePath(QStringLiteral("one.dip"));
-    QVERIFY(dipoles.save_dipoles_dip(dipPath));
+    QVERIFY(dipoles.save_dipoles_dip(dipPath.toStdU16String()));
     CONNECTIVITYLIB::Network network("Coherence");
     network.add_node(Eigen::Vector3f::Zero());
     network.add_node(Eigen::Vector3f::Constant(0.01f));
@@ -443,7 +443,7 @@ void TestDisp3dBrainView::brainView_constructAndSetters()
         INVLIB::InvEcdSet offAxisSet;
         offAxisSet << offAxis;
         const QString offAxisPath = dir.filePath(QStringLiteral("off-axis.dip"));
-        QVERIFY(offAxisSet.save_dipoles_dip(offAxisPath));
+        QVERIFY(offAxisSet.save_dipoles_dip(offAxisPath.toStdU16String()));
         BrainTreeModel dipModel;
         BrainView dipView;
         dipView.setModel(&dipModel);

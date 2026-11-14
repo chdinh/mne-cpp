@@ -1846,7 +1846,7 @@ private slots:
         QCOMPARE(runToolExitCode("mne_dipole_fit", {"--meas", evokedFile, "--meg", "--eeg", "--tmin", "32", "--tmax", "42", "--bmin", "-100", "--bmax", "0", "--dip", dipoleFile}, 180000),
                  0);
 
-        const INVLIB::InvEcdSet dipoles = INVLIB::InvEcdSet::read_dipoles_dip(dipoleFile);
+        const INVLIB::InvEcdSet dipoles = INVLIB::InvEcdSet::read_dipoles_dip(dipoleFile.toStdU16String());
         QVERIFY(dipoles.size() >= 1);
     }
 
