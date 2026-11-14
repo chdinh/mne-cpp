@@ -32,8 +32,9 @@ settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();
-const bool saved = dipoles.save_dipoles_dip(tmp.filePath("fit.dip")); // readable by mne.read_dipole
-const InvEcdSet reread = InvEcdSet::read_dipoles_dip(tmp.filePath("fit.dip"));
+const std::filesystem::path dipPath = tmp.filePath("fit.dip").toStdU16String();
+const bool saved = dipoles.save_dipoles_dip(dipPath); // readable by mne.read_dipole
+const InvEcdSet reread = InvEcdSet::read_dipoles_dip(dipPath);
 ```
 
 ---
@@ -91,14 +92,14 @@ Appends an Electric Current Dipole to the set.
 
 ---
 
-### save_dipoles_bdip(fileName)
+### save_dipoles_bdip(path)
 
 Save dipoles in the bdip format employed by xfit.
 
 **Parameters:**
 
-- **fileName** : *const QString &*
-  File name to save to.
+- **path** : *const std::filesystem::path &*
+  File to save to.
 
 **Returns:**
 
@@ -106,14 +107,14 @@ Save dipoles in the bdip format employed by xfit.
 
 ---
 
-### save_dipoles_dip(fileName)
+### save_dipoles_dip(path)
 
 Save dipoles in the dip format suitable for mrilab.
 
 **Parameters:**
 
-- **fileName** : *const QString &*
-  File name to save to.
+- **path** : *const std::filesystem::path &*
+  File to save to.
 
 **Returns:**
 
@@ -178,18 +179,18 @@ Subscript operator &lt;&lt; to add a new [`InvEcd`](/docs/api/inv/inv-ecd).
 
 ## Static Methods
 
-### read_dipoles_dip(fileName)
+### read_dipoles_dip(path)
 
-Read dipoles from the dip format compatible with mrilab.
+Read dipoles from the dip format compatible with mrilab, as written by save_dipoles_dip, MNE-C and MNE-Python (whose khi^2 and free columns are read too).
 
 **Parameters:**
 
-- **fileName** : *const QString &*
-  File name to read from.
+- **path** : *const std::filesystem::path &*
+  File to read from.
 
 **Returns:**
 
-- *[InvEcdSet](/docs/api/inv/inv-ecd-set)* — The dipole set read from the file; empty if the file could not be read.
+- *[InvEcdSet](/docs/api/inv/inv-ecd-set)* — The dipole set read from the file; empty if the file could not be read or holds a malformed line.
 
 ---
 
@@ -211,8 +212,9 @@ settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();
-const bool saved = dipoles.save_dipoles_dip(tmp.filePath("fit.dip")); // readable by mne.read_dipole
-const InvEcdSet reread = InvEcdSet::read_dipoles_dip(tmp.filePath("fit.dip"));
+const std::filesystem::path dipPath = tmp.filePath("fit.dip").toStdU16String();
+const bool saved = dipoles.save_dipoles_dip(dipPath); // readable by mne.read_dipole
+const InvEcdSet reread = InvEcdSet::read_dipoles_dip(dipPath);
 const Vector3d posMm = dipoles.size() > 0 ? Vector3d(1e3 * dipoles[0].rd.cast<double>()) : Vector3d::Zero();
 ok &= expect(saved && dipoles.size() == 1 && dipoles[0].valid && (posMm - mnePosMm).norm() < 1.0 && std::abs(100.0 * dipoles[0].good - 99.99996959113513) < 0.01 && dipoles[0].nfree == 297 && reread.size() == 1 && (reread[0].rd - dipoles[0].rd).norm() < 1e-4f,
              "InvDipoleFitSettings/InvDipoleFit/InvEcdSet: the pipeline fit matches mne.fit_dipole and round-trips through .dip");

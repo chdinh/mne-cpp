@@ -36,8 +36,9 @@ settings.dipname = tmp.filePath("fit.dat"); // MNE-C .dat dipole file
 settings.checkIntegrity();
 InvDipoleFit fit(&settings);
 InvEcdSet dipoles = fit.calculateFit();
-const bool saved = dipoles.save_dipoles_dip(tmp.filePath("fit.dip")); // readable by mne.read_dipole
-const InvEcdSet reread = InvEcdSet::read_dipoles_dip(tmp.filePath("fit.dip"));
+const std::filesystem::path dipPath = tmp.filePath("fit.dip").toStdU16String();
+const bool saved = dipoles.save_dipoles_dip(dipPath); // readable by mne.read_dipole
+const InvEcdSet reread = InvEcdSet::read_dipoles_dip(dipPath);
 ````
 
 From [ex_inv_dipole_fit](../../examples/inv/ex_inv_dipole_fit.mdx).
