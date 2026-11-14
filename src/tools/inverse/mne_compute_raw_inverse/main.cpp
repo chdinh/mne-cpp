@@ -201,7 +201,7 @@ static InvSourceEstimate processLabel(const QString& labelFile,
           hemi == 0 ? "left" : "right");
 
     // Set up minimum norm with label restriction
-    InvMinimumNorm minimumNorm(invOp, lambda2, method);
+    InvMinimumNorm minimumNorm(invOp, lambda2, method.toStdString());
     minimumNorm.doInverseSetup(1, pickNormal);
 
     // Compute inverse for all data
@@ -253,7 +253,7 @@ static InvSourceEstimate processLabelDir(const QString& labelDir,
     qInfo("Found %lld label files in %s", static_cast<long long>(labelFiles.size()), labelDir.toUtf8().constData());
 
     // Compute full inverse solution first (with pickNormal=true for labeldir)
-    InvMinimumNorm minimumNorm(invOp, lambda2, method);
+    InvMinimumNorm minimumNorm(invOp, lambda2, method.toStdString());
     minimumNorm.doInverseSetup(1, true);
 
     InvSourceEstimate fullStc = minimumNorm.calculateInverse(data, tmin, tstep, true);
@@ -654,7 +654,7 @@ int main(int argc, char* argv[])
             //-----------------------------------------------------------------------------------------------------
             qInfo("\nComputing full source space inverse...");
 
-            InvMinimumNorm minimumNorm(inverseOperator, lambda2, method);
+            InvMinimumNorm minimumNorm(inverseOperator, lambda2, method.toStdString());
             minimumNorm.doInverseSetup(curNave, pickNormal);
 
             InvSourceEstimate stc = minimumNorm.calculateInverse(inputData, tmin, tstep, pickNormal);

@@ -202,8 +202,8 @@ int main(int argc, char* argv[])
     //! [inv_volume_source_estimate_usage]
     // A volume estimate keeps the grid shape, so a time slice can be written back into the full grid.
     InvVolumeSourceEstimate volumeStc(stc.data.topRows(4), VectorXi::LinSpaced(4, 0, 6), stc.tmin, stc.tstep);
-    volumeStc.setShape({2, 2, 2}); // 8 voxels, 4 of them sources
-    const VectorXd grid = volumeStc.toVolume(200);
+    volumeStc.set_shape({2, 2, 2}); // 8 voxels, 4 of them sources
+    const VectorXd grid = volumeStc.to_volume(200);
     //! [inv_volume_source_estimate_usage]
     ok &= expect(grid.size() == 8 && grid(0) == stc.data(0, 200) && grid(6) == stc.data(3, 200) && grid(1) == 0.0,
                  "InvVolumeSourceEstimate: source values land on their voxels, the rest of the grid is zero");
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
 
     //! [inv_sparse_usage]
     // Whitened data and a gain per nAm make the noise level 1, as mne.inverse_sparse.mixed_norm does.
-    const auto [whitener, rank] = computeWhitener(inverse.noise_cov); // rank 360: 364 channels minus 4 projectors
+    const auto [whitener, rank] = compute_whitener(inverse.noise_cov); // rank 360: 364 channels minus 4 projectors
     const MNEForwardSolution fixedFwd = MNEForwardSolution(fwdPath, {.force_fixed = true, .surf_ori = true}).pick_regions({v1}).pick_channels(inverse.noise_cov.names);
     const MatrixXd gain = whitener * fixedFwd.sol.data * 1e-9;
     const MatrixXd measured = whitener * evoked.pick_channels(inverse.noise_cov.names).data.middleCols(170, 40); // 83-148 ms
@@ -241,14 +241,14 @@ int main(int argc, char* argv[])
     const InvMxneResult mxne = InvMxne::compute(gain, measured, 0.5 * alphaMax, 1000, 1e-10);
     //! [inv_sparse_usage]
     // mne mixed_norm_solver(M, G, 0.5 * alpha_max, n_orient=1, debias=False): sources 8, 30, 37 with 21.37, 1.019, 4.455 nAm
-    ok &= expect(rank == 360 && near(alphaMax, 14.508623946749108, 1e-4) && mxne.activeVertices == QVector<int>({8, 30, 37}) && near(mxne.stc.data.row(0).norm(), 21.373078745157443, 1e-3) && near(mxne.stc.data.row(2).norm(), 4.455019654645694, 1e-3),
-                 "computeWhitener/InvMxne: whitened rank 360, MxNE picks the 3 V1 sources mne.inverse_sparse finds");
+    ok &= expect(rank == 360 && near(alphaMax, 14.508623946749108, 1e-4) && mxne.activeVertices == std::vector<int>({8, 30, 37}) && near(mxne.stc.data.row(0).norm(), 21.373078745157443, 1e-3) && near(mxne.stc.data.row(2).norm(), 4.455019654645694, 1e-3),
+                 "compute_whitener/InvMxne: whitened rank 360, MxNE picks the 3 V1 sources mne.inverse_sparse finds");
 
     //! [inv_gamma_map_usage]
     // Gamma-MAP: sparse Bayesian learning with unit (whitened) noise, MacKay updates as in mne.inverse_sparse.gamma_map.
     const InvGammaMapResult gammaMap = InvGammaMap::compute(gain, measured, MatrixXd::Identity(gain.rows(), gain.rows()), 1000, 1e-8);
     //! [inv_gamma_map_usage]
-    ok &= expect(!gammaMap.activeVertices.isEmpty() && gammaMap.activeVertices.size() < 70 && gammaMap.vecGamma.size() == 70,
+    ok &= expect(!gammaMap.activeVertices.empty() && gammaMap.activeVertices.size() < 70 && gammaMap.vecGamma.size() == 70,
                  std::format("InvGammaMap: {} of 70 V1 sources keep a nonzero variance", gammaMap.activeVertices.size()));
 
     //! [inv_tf_mxne_usage]
@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
     tfParams.dFMax = 40.0;
     const InvTfMxneResult tfMxne = InvTfMxne::compute(gain, measured, tfParams);
     //! [inv_tf_mxne_usage]
-    ok &= expect(!tfMxne.activeVertices.isEmpty() && tfMxne.activeVertices.size() <= 5 && tfMxne.activeVertices.contains(8),
+    ok &= expect(!tfMxne.activeVertices.empty() && tfMxne.activeVertices.size() <= 5 && std::ranges::contains(tfMxne.activeVertices, 8),
                  std::format("InvTfMxne: {} V1 sources, including the strongest MxNE source 8", tfMxne.activeVertices.size()));
 
     //! [inv_source_estimate_token_usage]

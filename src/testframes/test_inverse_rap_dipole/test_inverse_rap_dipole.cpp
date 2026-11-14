@@ -192,7 +192,7 @@ private slots:
     void dipoleFitSettings_defaults()
     {
         InvDipoleFitSettings settings;
-        QVERIFY(settings.measname.isEmpty());
+        QVERIFY(settings.measname.empty());
         // MNE-C mne_dipole_fit: neither modality until --meg/--eeg, 40 Hz low-pass, origin (0, 0, 40) mm
         QVERIFY(!settings.include_meg);
         QVERIFY(!settings.include_eeg);
@@ -241,7 +241,7 @@ private slots:
         settings.include_meg = true;
         QVERIFY(settings.checkIntegrity());
         QVERIFY(settings.checkIntegrity());
-        QCOMPARE(settings.projnames, std::vector<QString>{"data-ave.fif"});
+        QCOMPARE(settings.projnames, std::vector<std::string>{"data-ave.fif"});
     }
 
     //=========================================================================
@@ -480,7 +480,7 @@ private slots:
         float tstep = 1.0f / picked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("dSPM"));
+        InvMinimumNorm mn(invOp, lambda2, "dSPM");
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
@@ -523,7 +523,7 @@ private slots:
         float tstep = 1.0f / picked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("sLORETA"));
+        InvMinimumNorm mn(invOp, lambda2, "sLORETA");
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 
@@ -565,7 +565,7 @@ private slots:
         float tstep = 1.0f / picked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("MNE"));
+        InvMinimumNorm mn(invOp, lambda2, "MNE");
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(picked.data, tmin, tstep, false);
 

@@ -134,7 +134,7 @@ public:
      * @return False if the model cannot be loaded, does not fit the data, or there are no more than k samples.
      */
     static bool applyCmne(const Eigen::MatrixXd& matDspmData,
-                          const QString& onnxModelPath,
+                          const std::string& onnxModelPath,
                           Eigen::MatrixXd& sensing,
                           Eigen::MatrixXd& prediction,
                           Eigen::MatrixXd& cmne);

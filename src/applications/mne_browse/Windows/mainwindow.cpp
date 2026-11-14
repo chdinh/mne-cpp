@@ -4027,7 +4027,7 @@ void MainWindow::computeSourceEstimate()
             ? QStringLiteral("set_%1").arg(row + 1)
             : trimmedComment;
 
-        INVLIB::InvMinimumNorm minimumNorm(m_inverseOperator, lambda2, method);
+        INVLIB::InvMinimumNorm minimumNorm(m_inverseOperator, lambda2, method.toStdString());
         INVLIB::InvSourceEstimate sourceEstimate = minimumNorm.calculateInverse(*evoked, pickNormal);
 
         if (sourceEstimate.empty()) {

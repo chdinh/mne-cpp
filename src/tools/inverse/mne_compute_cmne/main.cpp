@@ -213,7 +213,7 @@ static int doCompute(const QCommandLineParser& parser)
     settings.method = methodStringToInt(methodStr);
     settings.lookBack = lookBack;
     settings.numSources = nSources;
-    settings.onnxModelPath = onnxPath;
+    settings.onnxModelPath = onnxPath.toStdString();
 
     out << "Settings: method=" << methodStr << ", SNR=" << snr
         << ", lambda2=" << settings.lambda2

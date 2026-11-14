@@ -48,7 +48,7 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
 #include <ostream>
@@ -274,14 +274,14 @@ public:
      * @return Fully initialised fit data, or nullptr on error. Caller takes ownership.
      */
     static InvDipoleFitData* setup_dipole_fit_data(
-        const QString& mriname,
-        const QString& measname,
-        const QString& bemname,
+        const std::string& mriname,
+        const std::string& measname,
+        const std::string& bemname,
         Eigen::Vector3f* r0,
         FWDLIB::FwdEegSphereModel* eeg_model,
         int accurate_coils,
-        const QString& badname,
-        const QString& noisename,
+        const std::string& badname,
+        const std::string& noisename,
         float grad_std,
         float mag_std,
         float eeg_std,
@@ -289,7 +289,7 @@ public:
         float grad_reg,
         float eeg_reg,
         int diagnoise,
-        const std::vector<QString>& projnames,
+        const std::vector<std::string>& projnames,
         int include_meg,
         int include_eeg);
 
@@ -387,7 +387,7 @@ public:
     std::unique_ptr<FWDLIB::FwdCoilSet> meg_coils;       /**< MEG coil definitions. */
     std::unique_ptr<FWDLIB::FwdCoilSet> eeg_els;         /**< EEG electrode definitions. */
     Eigen::Vector3f r0;                                  /**< Sphere model origin. */
-    QString bemname;                                     /**< Using a BEM? */
+    std::string bemname;                                 /**< Using a BEM? */
 
     std::unique_ptr<FWDLIB::FwdEegSphereModel> eeg_model; /**< EEG sphere model definition. */
     std::unique_ptr<FWDLIB::FwdBemModel> bem_model;       /**< BEM model definition. */

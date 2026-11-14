@@ -7,10 +7,8 @@ project(mne_inv LANGUAGES CXX)
 
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
-set(QT_REQUIRED_COMPONENTS Core Concurrent)
+set(QT_REQUIRED_COMPONENTS Core)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})
 
@@ -140,8 +138,8 @@ set(MNE_LIBS_REQUIRED
     mne_ml
 )
 
-# The public headers include Qt
-target_link_libraries(${PROJECT_NAME} PUBLIC ${QT_REQUIRED_COMPONENT_LIBS})
+# QJsonDocument reads the CMNE model metadata
+target_link_libraries(${PROJECT_NAME} PRIVATE ${QT_REQUIRED_COMPONENT_LIBS})
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${MNE_LIBS_REQUIRED}
     Eigen3::Eigen

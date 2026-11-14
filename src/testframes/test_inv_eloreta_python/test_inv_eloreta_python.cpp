@@ -305,10 +305,10 @@ void TestInvEloretaPython::estimateSnr_matchesPython()
         for (int i = 0; i < g.size(); ++i)
             evoked.data.row(FIFFLIB::channel_index(evoked.info.ch_names, m_freeFwd.sol.row_names[i])) = g(i) * ramp;
     } else {
-        QTest::ignoreMessage(QtWarningMsg, "[estimateSnr] SNR estimation did not converge.");
+        QTest::ignoreMessage(QtWarningMsg, "[estimate_snr] SNR estimation did not converge.");
     }
 
-    const auto [snr, est] = estimateSnr(evoked, m_loose);
+    const auto [snr, est] = estimate_snr(evoked, m_loose);
     QCOMPARE(static_cast<int>(snr.size()), 421);
     QCOMPARE(static_cast<int>(est.size()), 421);
     QVERIFY2(std::fabs(snr.sum() - snrSum) <= 1e-6 * snrSum, qPrintable(QString("snr sum %1").arg(snr.sum(), 0, 'g', 17)));
@@ -430,7 +430,7 @@ void TestInvEloretaPython::applyInverseRaw_matchesPython()
     const FiffRawData raw(data("MEG/sample/sample_audvis_trunc_raw.fif").toStdString());
     const int from = raw.first_samp + 1000;
 
-    const InvSourceEstimate stc = applyInverseRaw(raw, m_loose, 1.0f / 9.0f, method, from, from + 99);
+    const InvSourceEstimate stc = apply_inverse_raw(raw, m_loose, 1.0f / 9.0f, method.toStdString(), from, from + 99);
     QCOMPARE(static_cast<int>(stc.data.rows()), 70);
     QCOMPARE(static_cast<int>(stc.data.cols()), 100);
     QCOMPARE(stc.tmin, static_cast<float>(from) / raw.info.sfreq);
@@ -443,8 +443,8 @@ void TestInvEloretaPython::applyInverseRaw_matchesPython()
     // gets the same values; the second epoch is the same data with the opposite sign
     MatrixXd segment, times;
     raw.read_raw_segment(segment, times, from, from + 99, FiffInfo::pick_channels(raw.info.ch_names, m_loose.noise_cov.names));
-    const QList<InvSourceEstimate> epochs = applyInverseEpochs({segment, -segment}, m_loose, 1.0f / 9.0f, method, -0.1f, 0.002f);
-    QCOMPARE(epochs.size(), 2);
+    const std::vector<InvSourceEstimate> epochs = apply_inverse_epochs({segment, -segment}, m_loose, 1.0f / 9.0f, method.toStdString(), -0.1f, 0.002f);
+    QCOMPARE(epochs.size(), std::size_t{2});
     for (const InvSourceEstimate& epoch : epochs) {
         QCOMPARE(epoch.tmin, -0.1f);
         QCOMPARE(epoch.tstep, 0.002f);
@@ -487,7 +487,7 @@ void TestInvEloretaPython::kernel_matchesPython()
     QFETCH(double, singSum);
     QFETCH(double, reginvSum);
 
-    InvMinimumNorm mn(fixed ? m_fixed : m_loose, 1.0f / 9.0f, method);
+    InvMinimumNorm mn(fixed ? m_fixed : m_loose, 1.0f / 9.0f, method.toStdString());
     mn.setELoretaOptions(100, 1e-6, forceEqual);
     mn.doInverseSetup(m_nave, false);
 
@@ -504,7 +504,7 @@ void TestInvEloretaPython::kernel_matchesPython()
 
     if (method == QLatin1String("eLORETA")) {
         // Two iterations are not enough: mne-python warns as well and keeps the unconverged weights.
-        InvMinimumNorm early(fixed ? m_fixed : m_loose, 1.0f / 9.0f, method);
+        InvMinimumNorm early(fixed ? m_fixed : m_loose, 1.0f / 9.0f, method.toStdString());
         early.setELoretaOptions(2, 1e-6, forceEqual);
         QTest::ignoreMessage(QtWarningMsg, QRegularExpression("eLORETA weight fitting did not converge after 2 iterations"));
         early.doInverseSetup(m_nave, false);

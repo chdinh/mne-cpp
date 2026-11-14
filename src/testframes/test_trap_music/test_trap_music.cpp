@@ -119,9 +119,9 @@ void TestTrapMusic::testSingleSource()
     MatrixXd data = forwardSignal * timeSeries.transpose();
 
     InvTrapMusic trap(1, 0.5);
-    QList<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
+    std::vector<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
 
-    QVERIFY(!dipoles.isEmpty());
+    QVERIFY(!dipoles.empty());
     QCOMPARE(dipoles[0].sourceIdx, srcIdx);
 }
 
@@ -157,7 +157,7 @@ void TestTrapMusic::testTwoSources()
             data(i, t) += dist(gen) * 0.01;
 
     InvTrapMusic trap(2, 0.1);
-    QList<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
+    std::vector<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
 
     QVERIFY2(dipoles.size() >= 2,
              qPrintable(QString("Found %1 sources, expected >= 2").arg(dipoles.size())));
@@ -167,9 +167,9 @@ void TestTrapMusic::testTwoSources()
              "Found two sources should have different indices");
 
     // The ground truth: both sources, each with subspace correlation ~1 and its generating orientation.
-    QVector<int> found{dipoles[0].sourceIdx, dipoles[1].sourceIdx};
+    std::vector<int> found{dipoles[0].sourceIdx, dipoles[1].sourceIdx};
     std::sort(found.begin(), found.end());
-    QCOMPARE(found, QVector<int>({srcIdx1, srcIdx2}));
+    QCOMPARE(found, std::vector<int>({srcIdx1, srcIdx2}));
     for (const TrapMusicDipole& d : dipoles) {
         QVERIFY2(d.correlation > 0.999, qPrintable(QString("correlation %1").arg(d.correlation)));
         const Vector3d& truth = d.sourceIdx == srcIdx1 ? orient1 : orient2;
@@ -178,7 +178,7 @@ void TestTrapMusic::testTwoSources()
 
     // Noise-free data: the correlations are 1 to round-off, and nothing else passes a strict threshold.
     const MatrixXd clean = lfSrc1 * orient1 * ts1.transpose() + lfSrc2 * orient2 * ts2.transpose();
-    const QList<TrapMusicDipole> exact = InvTrapMusic(3, 0.999).compute(m_leadField, clean, m_sourcePos, 3);
+    const std::vector<TrapMusicDipole> exact = InvTrapMusic(3, 0.999).compute(m_leadField, clean, m_sourcePos, 3);
     QCOMPARE(exact.size(), 2);
     QVERIFY(exact[0].correlation > 1.0 - 1e-9 && exact[1].correlation > 1.0 - 1e-9);
 }
@@ -196,9 +196,9 @@ void TestTrapMusic::testCorrelationAboveThreshold()
     MatrixXd data = lfSrc * orient * ts.transpose();
 
     InvTrapMusic trap(1, 0.5);
-    QList<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
+    std::vector<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
 
-    QVERIFY(!dipoles.isEmpty());
+    QVERIFY(!dipoles.empty());
     QVERIFY2(dipoles[0].correlation >= 0.5,
              qPrintable(QString("Correlation %1 below threshold").arg(dipoles[0].correlation)));
 }
@@ -243,9 +243,9 @@ void TestTrapMusic::testFixedOrient()
     MatrixXd data = lfFixed.col(srcIdx) * ts.transpose();
 
     InvTrapMusic trap(1, 0.5);
-    QList<TrapMusicDipole> dipoles = trap.compute(lfFixed, data, m_sourcePos, 1);
+    std::vector<TrapMusicDipole> dipoles = trap.compute(lfFixed, data, m_sourcePos, 1);
 
-    QVERIFY(!dipoles.isEmpty());
+    QVERIFY(!dipoles.empty());
     QCOMPARE(dipoles[0].sourceIdx, srcIdx);
 }
 
@@ -264,7 +264,7 @@ void TestTrapMusic::testThresholdStop()
             noiseData(i, t) = dist(gen);
 
     InvTrapMusic trap(3, 0.99);
-    QList<TrapMusicDipole> dipoles = trap.compute(m_leadField, noiseData, m_sourcePos, 3);
+    std::vector<TrapMusicDipole> dipoles = trap.compute(m_leadField, noiseData, m_sourcePos, 3);
 
     // With a 0.99 threshold and pure noise, should find very few or no sources
     QVERIFY2(dipoles.size() <= 2,
@@ -278,8 +278,8 @@ void TestTrapMusic::testEmptyInput()
     InvTrapMusic trap;
     MatrixXd emptyLF, emptyData, emptyPos;
 
-    QList<TrapMusicDipole> dipoles = trap.compute(emptyLF, emptyData, emptyPos, 3);
-    QVERIFY(dipoles.isEmpty());
+    std::vector<TrapMusicDipole> dipoles = trap.compute(emptyLF, emptyData, emptyPos, 3);
+    QVERIFY(dipoles.empty());
 }
 
 //=============================================================================================================
@@ -289,8 +289,8 @@ void TestTrapMusic::testDimensionMismatch()
     MatrixXd badData(5, 10); // Wrong number of channels
     InvTrapMusic trap;
 
-    QList<TrapMusicDipole> dipoles = trap.compute(m_leadField, badData, m_sourcePos, 3);
-    QVERIFY(dipoles.isEmpty());
+    std::vector<TrapMusicDipole> dipoles = trap.compute(m_leadField, badData, m_sourcePos, 3);
+    QVERIFY(dipoles.empty());
 }
 
 //=============================================================================================================
@@ -306,9 +306,9 @@ void TestTrapMusic::testSourcePosition()
     MatrixXd data = lfSrc * orient * ts.transpose();
 
     InvTrapMusic trap(1, 0.5);
-    QList<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
+    std::vector<TrapMusicDipole> dipoles = trap.compute(m_leadField, data, m_sourcePos, 3);
 
-    QVERIFY(!dipoles.isEmpty());
+    QVERIFY(!dipoles.empty());
 
     // Position should match the source position in the grid
     Vector3d expectedPos = m_sourcePos.row(srcIdx).transpose();

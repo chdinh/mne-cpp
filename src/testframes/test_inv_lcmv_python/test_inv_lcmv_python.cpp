@@ -277,14 +277,14 @@ void TestInvLcmvPython::timeCoursesMatch()
     const float tstep = 1.0f / static_cast<float>(m_info.sfreq);
 
     // mne-python's apply_dics on the same matrices gives the LCMV values too.
-    QList<InvSourceEstimate> stcs{InvLCMV::applyLCMV(m_evoked, filters),
-                                  InvLCMV::applyLCMVRaw(m_evoked.data, 0.5f, tstep, filters),
-                                  InvDICS::applyDICS(m_evoked.data, 0.5f, tstep, dics)};
-    stcs << InvLCMV::applyLCMVEpochs({m_evoked.data, m_evoked.data}, 0.5f, tstep, filters)
-         << InvDICS::applyDICSEpochs({m_evoked.data, m_evoked.data}, 0.5f, tstep, dics);
-    QCOMPARE(stcs.size(), 7);
+    std::vector<InvSourceEstimate> stcs{InvLCMV::applyLCMV(m_evoked, filters),
+                                        InvLCMV::applyLCMVRaw(m_evoked.data, 0.5f, tstep, filters),
+                                        InvDICS::applyDICS(m_evoked.data, 0.5f, tstep, dics)};
+    stcs.append_range(InvLCMV::applyLCMVEpochs({m_evoked.data, m_evoked.data}, 0.5f, tstep, filters));
+    stcs.append_range(InvDICS::applyDICSEpochs({m_evoked.data, m_evoked.data}, 0.5f, tstep, dics));
+    QCOMPARE(stcs.size(), std::size_t{7});
 
-    for (int i = 0; i < stcs.size(); ++i) {
+    for (int i = 0; i < std::ssize(stcs); ++i) {
         const InvSourceEstimate& stc = stcs[i];
         QCOMPARE(static_cast<int>(stc.data.rows()), 7928);
         QCOMPARE(static_cast<int>(stc.data.cols()), 3);
@@ -309,7 +309,7 @@ void TestInvLcmvPython::timeCoursesMatch()
     QVERIFY(InvLCMV::applyLCMV(reordered, filters).data.isApprox(stcs[0].data));
 
     QTest::ignoreMessage(QtWarningMsg, "InvLCMV::applyLCMVEpochs - Invalid or non-LCMV filters!");
-    QVERIFY(InvLCMV::applyLCMVEpochs({m_evoked.data}, 0.0f, tstep, dics).isEmpty());
+    QVERIFY(InvLCMV::applyLCMVEpochs({m_evoked.data}, 0.0f, tstep, dics).empty());
     QTest::ignoreMessage(QtWarningMsg, "InvDICS::applyDICS - freqIdx 1 out of range (0..0)!");
     QVERIFY(InvDICS::applyDICS(m_evoked.data, 0.0f, tstep, dics, 1).empty());
 }

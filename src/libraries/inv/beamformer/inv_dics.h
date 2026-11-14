@@ -42,7 +42,7 @@
 
 #include <fiff/fiff_cov.h>
 
-#include <QList>
+#include <vector>
 
 //=============================================================================================================
 // STL INCLUDES
@@ -164,11 +164,11 @@ public:
      *
      * @return List of source estimates, one per epoch.
      */
-    static QList<InvSourceEstimate> applyDICSEpochs(const QList<Eigen::MatrixXd>& epochs,
-                                                    float tmin,
-                                                    float tstep,
-                                                    const InvBeamformer& filters,
-                                                    int freqIdx = 0);
+    static std::vector<InvSourceEstimate> applyDICSEpochs(const std::vector<Eigen::MatrixXd>& epochs,
+                                                          float tmin,
+                                                          float tstep,
+                                                          const InvBeamformer& filters,
+                                                          int freqIdx = 0);
 };
 
 } // NAMESPACE INVLIB

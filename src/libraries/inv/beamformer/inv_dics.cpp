@@ -305,15 +305,15 @@ InvSourceEstimate InvDICS::applyDICS(const MatrixXd& data,
 
 //=============================================================================================================
 
-QList<InvSourceEstimate> InvDICS::applyDICSEpochs(const QList<MatrixXd>& epochs,
-                                                  float tmin,
-                                                  float tstep,
-                                                  const InvBeamformer& filters,
-                                                  int freqIdx)
+std::vector<InvSourceEstimate> InvDICS::applyDICSEpochs(const std::vector<MatrixXd>& epochs,
+                                                        float tmin,
+                                                        float tstep,
+                                                        const InvBeamformer& filters,
+                                                        int freqIdx)
 {
-    QList<InvSourceEstimate> results;
+    std::vector<InvSourceEstimate> results;
 
-    if (epochs.isEmpty()) {
+    if (epochs.empty()) {
         BASELIB::Log::warning("InvDICS::applyDICSEpochs - No epochs provided.");
         return results;
     }
@@ -322,12 +322,12 @@ QList<InvSourceEstimate> InvDICS::applyDICSEpochs(const QList<MatrixXd>& epochs,
         return results;
     }
 
-    for (int i = 0; i < epochs.size(); ++i) {
-        InvSourceEstimate stc = applyDICS(epochs[i], tmin, tstep, filters, freqIdx);
-        if (stc.empty()) {
-            BASELIB::Log::warning("InvDICS::applyDICSEpochs - Epoch {} produced empty source estimate.", i);
+    results.reserve(epochs.size());
+    for (const MatrixXd& epoch : epochs) {
+        results.push_back(applyDICS(epoch, tmin, tstep, filters, freqIdx));
+        if (results.back().empty()) {
+            BASELIB::Log::warning("InvDICS::applyDICSEpochs - Epoch {} produced empty source estimate.", results.size() - 1);
         }
-        results.append(stc);
     }
 
     return results;

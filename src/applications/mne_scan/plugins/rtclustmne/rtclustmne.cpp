@@ -610,7 +610,7 @@ void RtClustMne::run()
         if (bUpdateMinimumNorm) {
             m_qMutex.lock();
             if (!bCmne) {
-                pMinimumNorm = std::make_shared<InvMinimumNorm>(m_invOp, lambda2, m_sMethod);
+                pMinimumNorm = std::make_shared<InvMinimumNorm>(m_invOp, lambda2, m_sMethod.toStdString());
             } else {
                 pMinimumNorm.reset();
             }
@@ -726,7 +726,7 @@ InvSourceEstimate RtClustMne::computeCmneInverse(const FiffEvoked& evoked,
     }
 
     InvCMNESettings cmneSettings;
-    cmneSettings.onnxModelPath = sModelCheckpoint;
+    cmneSettings.onnxModelPath = sModelCheckpoint.toStdString();
     cmneSettings.lambda2 = static_cast<double>(fLambda2);
     cmneSettings.numSources = static_cast<int>(pFwd->sol.data.cols());
 

@@ -51,11 +51,10 @@
 
 #include <Eigen/Dense>
 
-#include <QFile>
 
 #include <sstream>
-#include <QCoreApplication>
 
+#include <cassert>
 #include <cmath>
 
 using namespace Eigen;
@@ -102,20 +101,19 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
     dipoleFitFuncsRec* f;
     int fit_sphere_to_bem = true;
 
-    if (!d->bemname.isEmpty()) {
+    if (!d->bemname.empty()) {
         /*
          * Set up the boundary-element model
          */
-        QString bemsolname = QString::fromStdU16String(FwdBemModel::fwd_bem_make_bem_sol_name(d->bemname.toStdU16String()).u16string());
-        d->bemname = bemsolname;
+        d->bemname = BASELIB::utf8FromPath(FwdBemModel::fwd_bem_make_bem_sol_name(BASELIB::pathFromUtf8(d->bemname)));
 
-        BASELIB::Log::info("\nSetting up the BEM model using {}...", d->bemname.toStdString());
+        BASELIB::Log::info("\nSetting up the BEM model using {}...", d->bemname);
         BASELIB::Log::info("\nLoading surfaces...");
-        d->bem_model = FwdBemModel::fwd_bem_load_three_layer_surfaces(d->bemname.toStdU16String());
+        d->bem_model = FwdBemModel::fwd_bem_load_three_layer_surfaces(BASELIB::pathFromUtf8(d->bemname));
         if (d->bem_model) {
             BASELIB::Log::info("Three-layer model surfaces loaded.");
         } else {
-            d->bem_model = FwdBemModel::fwd_bem_load_homog_surface(d->bemname.toStdU16String());
+            d->bem_model = FwdBemModel::fwd_bem_load_homog_surface(BASELIB::pathFromUtf8(d->bemname));
             if (!d->bem_model)
                 return FAIL;
             BASELIB::Log::info("Homogeneous model surface loaded.");
@@ -125,10 +123,10 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
             return FAIL;
         }
         BASELIB::Log::info("\nLoading the solution matrix...");
-        if (d->bem_model->fwd_bem_load_recompute_solution(d->bemname.toStdU16String(), FWD_BEM_UNKNOWN, false) == FAIL)
+        if (d->bem_model->fwd_bem_load_recompute_solution(BASELIB::pathFromUtf8(d->bemname), FWD_BEM_UNKNOWN, false) == FAIL)
             return FAIL;
         BASELIB::Log::info("Employing the head->MRI coordinate transform with the BEM model.");
-        Q_ASSERT(d->mri_head_t);
+        assert(d->mri_head_t);
         if (d->bem_model->fwd_bem_set_head_mri_t(*d->mri_head_t) == FAIL)
             return FAIL;
         BASELIB::Log::info("BEM model {} is now set up", d->bem_model->sol_name);
@@ -243,7 +241,7 @@ int InvDipoleFitData::setup_forward_model(InvDipoleFitData* d, MNECTFCompDataSet
     /*
         * Select the appropriate fitting function
         */
-    d->funcs = !d->bemname.isEmpty() ? d->bem_funcs.get() : d->sphere_funcs.get();
+    d->funcs = !d->bemname.empty() ? d->bem_funcs.get() : d->sphere_funcs.get();
 
     return OK;
 }
@@ -477,14 +475,14 @@ int InvDipoleFitData::select_dipole_fit_noise_cov(InvDipoleFitData* f,
 /**
  * @brief Set up all resources needed for dipole fitting: channels, covariance, projection, and forward model.
  */
-InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname,
-                                                          const QString& measname,
-                                                          const QString& bemname,
+InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const std::string& mriname,
+                                                          const std::string& measname,
+                                                          const std::string& bemname,
                                                           Vector3f* r0,
                                                           FwdEegSphereModel* eeg_model,
                                                           int accurate_coils,
-                                                          const QString& badname,
-                                                          const QString& noisename,
+                                                          const std::string& badname,
+                                                          const std::string& noisename,
                                                           float grad_std,
                                                           float mag_std,
                                                           float eeg_std,
@@ -492,7 +490,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
                                                           float grad_reg,
                                                           float eeg_reg,
                                                           int diagnoise,
-                                                          const std::vector<QString>& projnames,
+                                                          const std::vector<std::string>& projnames,
                                                           int include_meg,
                                                           int include_eeg)
 {
@@ -510,14 +508,14 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Read the coordinate transformations
        */
-    if (!mriname.isEmpty()) {
-        const auto mriHead = FiffCoordTrans::read(mriname.toStdU16String(), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
+    if (!mriname.empty()) {
+        const auto mriHead = FiffCoordTrans::read(BASELIB::pathFromUtf8(mriname), FIFFV_COORD_MRI, FIFFV_COORD_HEAD);
         if (!mriHead) {
             BASELIB::Log::critical("{}", mriHead.error().what());
             return nullptr;
         }
         res->mri_head_t = std::make_unique<FiffCoordTrans>(*mriHead);
-    } else if (!bemname.isEmpty()) {
+    } else if (!bemname.empty()) {
         BASELIB::Log::warning("Source of MRI / head transform required for the BEM model is missing");
         return nullptr;
     } else {
@@ -534,7 +532,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     }
 
     res->mri_head_t->print();
-    const auto megHead = FiffCoordTrans::read(measname.toStdU16String(), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
+    const auto megHead = FiffCoordTrans::read(BASELIB::pathFromUtf8(measname), FIFFV_COORD_DEVICE, FIFFV_COORD_HEAD);
     if (!megHead) {
         BASELIB::Log::critical("{}", megHead.error().what());
         return nullptr;
@@ -544,14 +542,14 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Read the bad channel lists
        */
-    if (!badname.isEmpty()) {
-        if (!FiffInfoBase::readBadChannelsFromFile(badname.toStdString(), badlist))
+    if (!badname.empty()) {
+        if (!FiffInfoBase::readBadChannelsFromFile(badname, badlist))
             return nullptr;
         nbad = static_cast<int>(badlist.size());
-        BASELIB::Log::info("{} bad channels read from {}.", nbad, badname.toStdString());
+        BASELIB::Log::info("{} bad channels read from {}.", nbad, badname);
     }
     {
-        FiffStream measStream(measname.toStdU16String());
+        FiffStream measStream(BASELIB::pathFromUtf8(measname));
         if (measStream.open()) {
             file_bads = measStream.read_bad_channels(measStream.dirtree());
             file_nbad = static_cast<int>(file_bads.size());
@@ -572,7 +570,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Read the channel information
        */
-    if (!FiffInfo::readMegEegChannels(measname.toStdString(),
+    if (!FiffInfo::readMegEegChannels(measname,
                                       include_meg,
                                       include_eeg,
                                       badlist,
@@ -582,9 +580,9 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
         return nullptr;
 
     if (res->nmeg > 0)
-        BASELIB::Log::info("Will use {:3} MEG channels from {}", res->nmeg, measname.toStdString());
+        BASELIB::Log::info("Will use {:3} MEG channels from {}", res->nmeg, measname);
     if (res->neeg > 0)
-        BASELIB::Log::info("Will use {:3} EEG channels from {}", res->neeg, measname.toStdString());
+        BASELIB::Log::info("Will use {:3} EEG channels from {}", res->neeg, measname);
     {
         int nch_total = res->nmeg + res->neeg;
         res->ch_names.clear();
@@ -596,34 +594,12 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        */
     res->coord_frame = coord_frame;
     if (coord_frame == FIFFV_COORD_HEAD) {
-        //#ifdef USE_SHARE_PATH
-        //        char *coilfile = mne_compose_mne_name("share/mne","coil_def.dat");
-        //#else
-        //    const char *path = "setup/mne";
-        //    const char *filename = "coil_def.dat";
-        //    const char *coilfile = mne_compose_mne_name(path,filename);
-
-        //    QString qPath("/usr/pubsw/packages/mne/stable/share/mne/coil_def.dat");
-
-        QString qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
-        QFile file(qPath);
-        if (!QCoreApplication::startingUp())
-            qPath = QCoreApplication::applicationDirPath() + QString("/../resources/general/coilDefinitions/coil_def.dat");
-        else if (!file.exists())
-            qPath = "../resources/general/coilDefinitions/coil_def.dat";
-
-        QByteArray coilfileBytes = qPath.toUtf8();
-        const char* coilfile = coilfileBytes.constData();
-        //#endif
-
-        if (!coilfile)
-            return nullptr;
-        templates = FwdCoilSet::read_coil_defs(coilfile);
+        templates = FwdCoilSet::read_coil_defs(BASELIB::resource_path("general/coilDefinitions/coil_def.dat"));
         if (!templates) {
             return nullptr;
         }
 
-        Q_ASSERT(res->meg_head_t);
+        assert(res->meg_head_t);
         res->meg_coils = templates->create_meg_coils(res->chs,
                                                      res->nmeg,
                                                      accurate_coils ? FWD_COIL_ACCURACY_ACCURATE : FWD_COIL_ACCURACY_NORMAL,
@@ -650,16 +626,16 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
        * Compensation data
        */
-    comp_data = MNECTFCompDataSet::read(measname.toStdU16String());
+    comp_data = MNECTFCompDataSet::read(BASELIB::pathFromUtf8(measname));
     if (!comp_data)
         return nullptr;
     if (comp_data->ncomp > 0) { /* Compensation channel information may be needed */
         std::vector<FiffChInfo> comp_chs;
         int ncomp = 0;
 
-        BASELIB::Log::info("{} compensation data sets in {}", comp_data->ncomp, measname.toStdString());
+        BASELIB::Log::info("{} compensation data sets in {}", comp_data->ncomp, measname);
         {
-            FiffStream compStream(measname.toStdU16String());
+            FiffStream compStream(BASELIB::pathFromUtf8(measname));
             if (!compStream.open())
                 return nullptr;
             FiffInfo compInfo;
@@ -684,7 +660,7 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
             if (!comp_coils) {
                 return nullptr;
             }
-            BASELIB::Log::info("{} compensation channels in {}", comp_coils->ncoil(), measname.toStdString());
+            BASELIB::Log::info("{} compensation channels in {}", comp_coils->ncoil(), measname);
         }
     } else { /* Get rid of the empty data set */
         comp_data.reset();
@@ -700,8 +676,8 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
        */
     std::vector<std::filesystem::path> projPaths;
     projPaths.reserve(projnames.size());
-    for (const QString& projname : projnames)
-        projPaths.emplace_back(projname.toStdU16String());
+    for (const std::string& projname : projnames)
+        projPaths.emplace_back(BASELIB::pathFromUtf8(projname));
     auto projection = MNEProjOp::make_projection(projPaths, std::span(res->chs).first(static_cast<std::size_t>(res->nmeg) + static_cast<std::size_t>(res->neeg)));
     if (!projection) {
         BASELIB::Log::critical("{}", projection.error().what());
@@ -725,10 +701,10 @@ InvDipoleFitData* InvDipoleFitData::setup_dipole_fit_data(const QString& mriname
     /*
         * Noise covariance
         */
-    if (!noisename.isEmpty()) {
-        if ((cov = MNECovMatrix::read(noisename.toStdU16String(), FIFFV_MNE_SENSOR_COV)) == nullptr)
+    if (!noisename.empty()) {
+        if ((cov = MNECovMatrix::read(BASELIB::pathFromUtf8(noisename), FIFFV_MNE_SENSOR_COV)) == nullptr)
             return nullptr;
-        BASELIB::Log::info("Read a {} noise-covariance matrix from {}", cov->cov_diag.size() > 0 ? "diagonal" : "full", noisename.toStdString());
+        BASELIB::Log::info("Read a {} noise-covariance matrix from {}", cov->cov_diag.size() > 0 ? "diagonal" : "full", noisename);
     } else {
         if ((cov = ad_hoc_noise(res->meg_coils.get(), res->eeg_els.get(), grad_std, mag_std, eeg_std)) == nullptr)
             return nullptr;
@@ -1172,7 +1148,7 @@ bool InvDipoleFitData::fit_one(InvDipoleFitData* fit,
         else if (k == 0)
             fit->funcs = fit->sphere_funcs.get();
         else
-            fit->funcs = !fit->bemname.isEmpty() ? fit->bem_funcs.get() : fit->sphere_funcs.get();
+            fit->funcs = !fit->bemname.empty() ? fit->bem_funcs.get() : fit->sphere_funcs.get();
 
         MatrixXf simplexMat = make_initial_dipole_simplex(rd_guess, size);
         for (int p = 0; p < 4; p++)

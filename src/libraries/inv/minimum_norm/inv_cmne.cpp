@@ -37,7 +37,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -82,7 +81,7 @@ InvCMNEResult InvCMNE::compute(
     result.stcDspm = InvSourceEstimate(matDspm, vertices, 0.0f, 1.0f);
 
     MatrixXd sensing, prediction, cmne;
-    if (settings.onnxModelPath.isEmpty()) {
+    if (settings.onnxModelPath.empty()) {
         BASELIB::Log::info("[InvCMNE] No model: control estimate with look-back {}", settings.lookBack);
         cmne = controlEstimate(matDspm, settings.lookBack);
         sensing = zScoreRectify(matDspm);
@@ -197,21 +196,21 @@ MatrixXd InvCMNE::controlEstimate(const MatrixXd& matDspmData, int lookBack)
 //=============================================================================================================
 
 bool InvCMNE::applyCmne(const MatrixXd& matDspmData,
-                        const QString& onnxModelPath,
+                        const std::string& onnxModelPath,
                         MatrixXd& sensing,
                         MatrixXd& prediction,
                         MatrixXd& cmne)
 {
     MLLIB::MlOnnxModel model;
-    if (!model.load(onnxModelPath.toStdString())) {
-        BASELIB::Log::warning("[InvCMNE] Cannot load CMNE model {}", onnxModelPath.toStdString());
+    if (!model.load(onnxModelPath)) {
+        BASELIB::Log::warning("[InvCMNE] Cannot load CMNE model {}", onnxModelPath);
         return false;
     }
     const QJsonObject config = QJsonDocument::fromJson(QByteArray::fromStdString(model.metadata("cmne_config"))).object();
     const int k = config.value(QStringLiteral("look_back")).toInt();
     const int nSources = config.value(QStringLiteral("n_sources")).toInt();
     if (k <= 0 || nSources != matDspmData.rows()) {
-        BASELIB::Log::warning("[InvCMNE] Model {} has no cmne_config for {} sources (look_back {} , n_sources {} ).", onnxModelPath.toStdString(), matDspmData.rows(), k, nSources);
+        BASELIB::Log::warning("[InvCMNE] Model {} has no cmne_config for {} sources (look_back {} , n_sources {} ).", onnxModelPath, matDspmData.rows(), k, nSources);
         return false;
     }
     if (matDspmData.cols() <= k) {
@@ -263,7 +262,7 @@ PYBRIDGELIB::PythonRunnerResult InvCMNE::train_lstm(
 
     // Training package directory (pyproject.toml + script): <app_dir>/../scripts/ml/training/cmne/, with the source
     // tree relative to the working directory as fallback
-    fs::path cmneDir = BASELIB::pathFromUtf8(QCoreApplication::applicationDirPath().toStdString()) / ".." / "scripts" / "ml" / "training" / "cmne";
+    fs::path cmneDir = BASELIB::executable_dir().parent_path() / "scripts" / "ml" / "training" / "cmne";
     std::error_code ec;
     if (!fs::exists(cmneDir / "pyproject.toml", ec)) {
         cmneDir = fs::path("scripts") / "ml" / "training" / "cmne";

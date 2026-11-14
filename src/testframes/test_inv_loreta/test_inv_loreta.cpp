@@ -185,7 +185,7 @@ void TestInvLoreta::eloreta_setMethod()
         QSKIP("Failed to build inverse operator");
 
     float lambda2 = 1.0f / 9.0f;
-    InvMinimumNorm mn(m_invOp, lambda2, QString("eLORETA"));
+    InvMinimumNorm mn(m_invOp, lambda2, "eLORETA");
 
     mn.setELoretaOptions(10, 1e-4, true);
 
@@ -221,7 +221,7 @@ void TestInvLoreta::eloreta_fromEvoked()
     float tstep = 1.0f / pickedEvoked.info.sfreq;
     float lambda2 = 1.0f / 9.0f;
 
-    InvMinimumNorm mn(m_invOp, lambda2, QString("eLORETA"));
+    InvMinimumNorm mn(m_invOp, lambda2, "eLORETA");
     mn.setELoretaOptions(5, 1e-3, false);
 
     mn.doInverseSetup(evoked.nave, false);
@@ -260,7 +260,7 @@ void TestInvLoreta::eloreta_forceEqual()
     float tstep = 1.0f / pickedEvoked.info.sfreq;
     float lambda2 = 1.0f / 9.0f;
 
-    InvMinimumNorm mn(m_invOp, lambda2, QString("eLORETA"));
+    InvMinimumNorm mn(m_invOp, lambda2, "eLORETA");
     mn.setELoretaOptions(3, 1e-2, true);
 
     mn.doInverseSetup(evoked.nave, false);
@@ -293,12 +293,12 @@ void TestInvLoreta::eloreta_vs_dSPM()
     float tstep = 1.0f / pickedEvoked.info.sfreq;
     float lambda2 = 1.0f / 9.0f;
 
-    InvMinimumNorm mnDspm(m_invOp, lambda2, QString("dSPM"));
+    InvMinimumNorm mnDspm(m_invOp, lambda2, "dSPM");
     mnDspm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stcDspm = mnDspm.calculateInverse(
         pickedEvoked.data, tmin, tstep, false);
 
-    InvMinimumNorm mnEloreta(m_invOp, lambda2, QString("eLORETA"));
+    InvMinimumNorm mnEloreta(m_invOp, lambda2, "eLORETA");
     mnEloreta.setELoretaOptions(5, 1e-3, false);
     mnEloreta.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stcEloreta = mnEloreta.calculateInverse(

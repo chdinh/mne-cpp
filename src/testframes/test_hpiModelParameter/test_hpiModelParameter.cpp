@@ -88,7 +88,7 @@ void TestHpiModelParameters::testDefaultConsturctor()
 {
     int iExpectedSampleFreq = 0;
     int iExpectedLineFreq = 0;
-    QVector<int> vecExpectedHpiFreqs;
+    std::vector<int> vecExpectedHpiFreqs;
     int iExpectedNHpiCoils = 0;
     bool bExpectedBasic = true;
 
@@ -107,7 +107,7 @@ void TestHpiModelParameters::testConstructor()
     int iExpectedSampleFreq = 1;
     int iExpectedLineFreq = 2;
     int iExpectedNHpiCoils = 2;
-    QVector<int> vecExpectedHpiFreqs = {1, 2};
+    std::vector<int> vecExpectedHpiFreqs = {1, 2};
     bool bExpectedBasic = false;
 
     InvHpiModelParameters actualHpiModelParameters(vecExpectedHpiFreqs,
@@ -129,7 +129,7 @@ void TestHpiModelParameters::testConstructor_basicModel()
     int iExpectedSampleFreq = 1;
     int iExpectedLineFreq = 0;
     int iExpectedNHpiCoils = 2;
-    QVector<int> vecExpectedHpiFreqs = {1, 2};
+    std::vector<int> vecExpectedHpiFreqs = {1, 2};
     bool bExpectedBasic = true;
 
     InvHpiModelParameters actualHpiModelParameters(vecExpectedHpiFreqs,
@@ -150,7 +150,7 @@ void TestHpiModelParameters::testCopyConstructor()
 {
     int iExpectedSampleFreq = 1;
     int iExpectedLineFreq = 2;
-    QVector<int> vecExpectedHpiFreqs = {1, 2};
+    std::vector<int> vecExpectedHpiFreqs = {1, 2};
     bool bExpectedBasic = true;
 
     InvHpiModelParameters expectedHpiModelParameters(vecExpectedHpiFreqs,
@@ -169,7 +169,7 @@ void TestHpiModelParameters::testCopyAssignment()
 {
     int iExpectedSampleFreq = 1;
     int iExpectedLineFreq = 2;
-    QVector<int> vecExpectedHpiFreqs = {1, 2};
+    std::vector<int> vecExpectedHpiFreqs = {1, 2};
     bool bExpectedBasic = true;
 
     InvHpiModelParameters expectedHpiModelParameters(vecExpectedHpiFreqs,
@@ -188,7 +188,7 @@ void TestHpiModelParameters::testCompare_equal()
 {
     int iExpectedSampleFreq = 1;
     int iExpectedLineFreq = 2;
-    QVector<int> vecExpectedHpiFreqs = {1, 2};
+    std::vector<int> vecExpectedHpiFreqs = {1, 2};
     bool bExpectedBasic = true;
 
     InvHpiModelParameters expectedHpiModelParameters(vecExpectedHpiFreqs,
@@ -207,7 +207,7 @@ void TestHpiModelParameters::testCompare_notequal()
 {
     int iExpectedSampleFreq = 1;
     int iExpectedLineFreq = 2;
-    QVector<int> vecExpectedHpiFreqs = {1, 2};
+    std::vector<int> vecExpectedHpiFreqs = {1, 2};
 
     InvHpiModelParameters expectedHpiModelParameters(vecExpectedHpiFreqs,
                                                      iExpectedSampleFreq,

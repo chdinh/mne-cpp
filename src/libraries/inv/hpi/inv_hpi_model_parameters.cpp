@@ -22,10 +22,7 @@
 
 #include "inv_hpi_model_parameters.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-#include <QVector>
+#include <utility>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -41,11 +38,11 @@ using namespace INVLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-InvHpiModelParameters::InvHpiModelParameters(const QVector<int> vecHpiFreqs,
+InvHpiModelParameters::InvHpiModelParameters(std::vector<int> vecHpiFreqs,
                                              const int iSampleFreq,
                                              const int iLineFreq,
                                              const bool bBasic)
-: m_vecHpiFreqs(vecHpiFreqs)
+: m_vecHpiFreqs(std::move(vecHpiFreqs))
 , m_iSampleFreq(iSampleFreq)
 , m_iLineFreq(iLineFreq)
 , m_bBasic(bBasic)
@@ -56,20 +53,9 @@ InvHpiModelParameters::InvHpiModelParameters(const QVector<int> vecHpiFreqs,
 
 //=============================================================================================================
 
-InvHpiModelParameters::InvHpiModelParameters(const InvHpiModelParameters& hpiModelParameter)
-: m_vecHpiFreqs(hpiModelParameter.vecHpiFreqs())
-, m_iNHpiCoils(hpiModelParameter.iNHpiCoils())
-, m_iSampleFreq(hpiModelParameter.iSampleFreq())
-, m_iLineFreq(hpiModelParameter.iLineFreq())
-, m_bBasic(hpiModelParameter.bBasic())
-{
-}
-
-//=============================================================================================================
-
 void InvHpiModelParameters::computeNumberOfCoils()
 {
-    m_iNHpiCoils = m_vecHpiFreqs.size();
+    m_iNHpiCoils = static_cast<int>(m_vecHpiFreqs.size());
 }
 
 void InvHpiModelParameters::checkForLineFreq()
@@ -77,18 +63,4 @@ void InvHpiModelParameters::checkForLineFreq()
     if (m_iLineFreq == 0) {
         m_bBasic = true;
     }
-}
-
-//=============================================================================================================
-
-InvHpiModelParameters InvHpiModelParameters::operator=(const InvHpiModelParameters& other)
-{
-    if (this != &other) {
-        m_vecHpiFreqs = other.vecHpiFreqs();
-        m_iNHpiCoils = other.iNHpiCoils();
-        m_iSampleFreq = other.iSampleFreq();
-        m_iLineFreq = other.iLineFreq();
-        m_bBasic = other.bBasic();
-    }
-    return *this;
 }

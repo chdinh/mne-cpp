@@ -91,7 +91,7 @@ static MNEInverseOperator makeSmallInverseOp(const FiffInfo& info,
     }
 
     // 2. Map surviving sources back to their original linear indices
-    QVector<int> keepIdx;
+    std::vector<int> keepIdx;
     int globalOffset = 0;
     for (qint32 h = 0; h < fwd.src.size(); ++h) {
         const MNESourceSpace& origSp = fwd.src[h];
@@ -100,7 +100,7 @@ static MNEInverseOperator makeSmallInverseOp(const FiffInfo& info,
         for (int v = 0; v < origSp.np; ++v) {
             if (origSp.inuse[v]) {
                 if (newSp.inuse[v])
-                    keepIdx.append(globalOffset + origCount);
+                    keepIdx.push_back(globalOffset + origCount);
                 ++origCount;
             }
         }
@@ -109,7 +109,7 @@ static MNEInverseOperator makeSmallInverseOp(const FiffInfo& info,
 
     // 3. Subsample gain matrix columns
     const int nChan = fwd.sol.data.rows();
-    const int nKeep = keepIdx.size();
+    const int nKeep = static_cast<int>(keepIdx.size());
     MatrixXd G(nChan, nKeep * orient);
     for (int i = 0; i < nKeep; ++i)
         for (int j = 0; j < orient; ++j)
@@ -430,7 +430,7 @@ private slots:
         float tstep = 1.0f / pickedEvoked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("dSPM"));
+        InvMinimumNorm mn(invOp, lambda2, "dSPM");
         mn.doInverseSetup(evoked.nave, false);
 
         InvSourceEstimate stc = mn.calculateInverse(
@@ -466,7 +466,7 @@ private slots:
         float tstep = 1.0f / pickedEvoked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("MNE"));
+        InvMinimumNorm mn(invOp, lambda2, "MNE");
         mn.doInverseSetup(evoked.nave, false);
 
         InvSourceEstimate stc = mn.calculateInverse(
@@ -501,7 +501,7 @@ private slots:
         float tstep = 1.0f / pickedEvoked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("sLORETA"));
+        InvMinimumNorm mn(invOp, lambda2, "sLORETA");
         mn.doInverseSetup(evoked.nave, false);
 
         InvSourceEstimate stc = mn.calculateInverse(
@@ -525,7 +525,7 @@ private slots:
         MNEInverseOperator invOp = m_invOp;
 
         float lambda2 = 1.0f / 9.0f;
-        InvMinimumNorm mn(invOp, lambda2, QString("dSPM"));
+        InvMinimumNorm mn(invOp, lambda2, "dSPM");
 
         // Switch methods
         mn.setMethod("MNE");
@@ -565,7 +565,7 @@ private slots:
         float tstep = 1.0f / pickedEvoked.info.sfreq;
         float lambda2 = 1.0f / 9.0f;
 
-        InvMinimumNorm mn(invOp, lambda2, QString("dSPM"));
+        InvMinimumNorm mn(invOp, lambda2, "dSPM");
         mn.doInverseSetup(evoked.nave, false);
         InvSourceEstimate stc = mn.calculateInverse(
             pickedEvoked.data, tmin, tstep, false);
@@ -662,7 +662,7 @@ private slots:
     void hpiModelParams_construct()
     {
         // The coil count follows the frequencies; without a line frequency the basic model is used
-        const QVector<int> hpiFreqs{293, 307, 314, 321};
+        const std::vector<int> hpiFreqs{293, 307, 314, 321};
         const InvHpiModelParameters params(hpiFreqs, 600, 0, false);
         QCOMPARE(params.iNHpiCoils(), 4);
         QCOMPARE(params.iSampleFreq(), 600);

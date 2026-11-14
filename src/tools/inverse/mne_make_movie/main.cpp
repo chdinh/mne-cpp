@@ -386,7 +386,7 @@ int main(int argc, char* argv[])
         qInfo("Computing inverse: %s, SNR=%.1f, lambda2=%.4f",
               qPrintable(method), snr, lambda2);
 
-        InvMinimumNorm minimumNorm(invOp, lambda2, method);
+        InvMinimumNorm minimumNorm(invOp, lambda2, method.toStdString());
         stcLH = minimumNorm.calculateInverse(evoked);
         if (stcLH.empty()) {
             qCritical("Inverse computation failed.");

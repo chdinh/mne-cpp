@@ -29,6 +29,9 @@
 
 #include <QSharedPointer>
 #include <QColor>
+#include <QList>
+#include <QMap>
+#include <QString>
 
 //=============================================================================================================
 // USED NAMESPACES

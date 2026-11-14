@@ -1451,7 +1451,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
             evoked.info, fwd, noiseCov,
             static_cast<float>(opts.loose), static_cast<float>(opts.depth),
             /*fixed=*/false);
-        InvMinimumNorm mnEst(invOp, lambda2, m);
+        InvMinimumNorm mnEst(invOp, lambda2, m.toStdString());
         if (m == QStringLiteral("eLORETA")) {
             mnEst.setELoretaOptions();
         }
@@ -1469,7 +1469,7 @@ bool CorticalSurface::runComputeSourceEstimate(const QString& fwdPath,
         ok = !stc.empty();
     } else if (m == QStringLiteral("CMNE")) {
         InvCMNESettings settings;
-        settings.onnxModelPath = opts.onnxPath;
+        settings.onnxModelPath = opts.onnxPath.toStdString();
         settings.lambda2 = 1.0 / (opts.snr * opts.snr);
         const Eigen::MatrixXd& gain = fwd.sol.data;
         const Eigen::MatrixXd srcCov = Eigen::MatrixXd::Identity(gain.cols(), gain.cols());
@@ -1735,7 +1735,7 @@ bool CorticalSurface::extractLabelTimeCourse(const FsLabel& lbl, const QString& 
     }
     std::vector<FsLabel> single;
     single.push_back(lbl);
-    Eigen::MatrixXd tc = InvLabelTimeCourse::extract(m_stc, single, mode, /*bAllowEmpty=*/true);
+    Eigen::MatrixXd tc = InvLabelTimeCourse::extract(m_stc, single, mode.toStdString(), /*bAllowEmpty=*/true);
     if (tc.rows() == 0) {
         return false;
     }

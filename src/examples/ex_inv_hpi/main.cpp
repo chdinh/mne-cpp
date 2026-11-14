@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
     InvHpiDataUpdater updater(info); // good MEG channels, their sensors and the digitised coil positions
     updater.prepareDataAndProjectors(segment, MatrixXd::Identity(info->nchan, info->nchan));
     // The coil frequencies are known but not their order; the first fit with bOrderFrequencies finds it.
-    const InvHpiModelParameters model(QVector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
+    const InvHpiModelParameters model(std::vector<int>({154, 158, 161, 166}), info->sfreq, info->linefreq, true);
     InvHpiFit hpi(updater.getSensors());
     HpiFitResult fit;
     hpi.fit(updater.getProjectedData(), updater.getProjectors(), model, updater.getHpiDigitizer(), true, fit);
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     MATHLIB::read_matrix(maxfilter, (data + "/Result/ref_hpiFit_pos.txt").toStdString());
     const Vector3d translation = fit.devHeadTrans.trans.block<3, 1>(0, 3).cast<double>();
     const Vector3d reference = maxfilter.block<1, 3>(0, 4).transpose();
-    ok &= expect(fit.hpiFreqs == QVector<int>({166, 154, 161, 158}) && fit.GoF.minCoeff() > 0.98 && (translation - reference).norm() < 0.001,
+    ok &= expect(fit.hpiFreqs == std::vector<int>({166, 154, 161, 158}) && fit.GoF.minCoeff() > 0.98 && (translation - reference).norm() < 0.001,
                  std::format("InvHpiDataUpdater/InvHpiModelParameters/InvHpiFit: coils ordered 166/154/161/158 Hz, head position within {:.3f} mm of MaxFilter", 1e3 * (translation - reference).norm()));
 
     //! [inv_signal_model_usage]

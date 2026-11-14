@@ -165,7 +165,7 @@ void TestInvRtLibrary::cleanupTestCase()
 void TestInvRtLibrary::dipoleFitSettings_defaultCtor()
 {
     InvDipoleFitSettings settings;
-    QVERIFY(settings.measname.isEmpty());
+    QVERIFY(settings.measname.empty());
     QVERIFY(!settings.include_meg);
     QVERIFY(!settings.include_eeg);
     QVERIFY(!settings.accurate);
@@ -551,7 +551,7 @@ void TestInvRtLibrary::hpiFit_storeHeadPosition()
     MatrixXd matPosition = MatrixXd::Zero(1, 10);
     VectorXd vecGoF(4);
     vecGoF << 0.99, 0.98, 0.97, 0.96;
-    QVector<double> vecError = {0.001, 0.002, 0.001, 0.003};
+    std::vector<double> vecError = {0.001, 0.002, 0.001, 0.003};
     InvHpiFit::storeHeadPosition(0.5f, matTransDevHead, matPosition, vecGoF, vecError);
     // storeHeadPosition appends a new row; check the last row has data
     int lastRow = matPosition.rows() - 1;
@@ -572,7 +572,7 @@ void TestInvRtLibrary::hpiFit_fitWithSyntheticData()
     InvSensorSetCreator creator;
     InvSensorSet sensorSet = creator.updateSensorSet(megChs, Accuracy::medium);
     InvHpiFit hpiFit(sensorSet);
-    QVector<int> hpiFreqs = {154, 158, 162, 166};
+    std::vector<int> hpiFreqs = {154, 158, 162, 166};
     InvHpiModelParameters modelParams(hpiFreqs, static_cast<int>(raw.info.sfreq), 60, false);
     const int nMeg = megPicks.size();
     QCOMPARE(nMeg, sensorSet.ncoils());
@@ -664,7 +664,7 @@ void TestInvRtLibrary::hpiFitData_defaultConstruction()
 
 void TestInvRtLibrary::hpiModelParams_construction()
 {
-    QVector<int> freqs = {154, 158, 162, 166};
+    std::vector<int> freqs = {154, 158, 162, 166};
     InvHpiModelParameters params(freqs, 1000, 60, false);
     QCOMPARE(params.vecHpiFreqs(), freqs);
     QCOMPARE(params.iSampleFreq(), 1000);
@@ -675,7 +675,7 @@ void TestInvRtLibrary::hpiModelParams_construction()
 
 void TestInvRtLibrary::hpiModelParams_copyAndCompare()
 {
-    QVector<int> freqs = {154, 158, 162, 166};
+    std::vector<int> freqs = {154, 158, 162, 166};
     InvHpiModelParameters params1(freqs, 1000, 60, false);
     InvHpiModelParameters params2(params1);
     QVERIFY(params1 == params2);
@@ -690,7 +690,7 @@ void TestInvRtLibrary::hpiModelParams_copyAndCompare()
 
 void TestInvRtLibrary::signalModel_construction()
 {
-    QVector<int> freqs = {154, 158, 162, 166};
+    std::vector<int> freqs = {154, 158, 162, 166};
     InvHpiModelParameters params(freqs, 1000, 60, false);
     InvSignalModel model;
     int nSamples = 200;

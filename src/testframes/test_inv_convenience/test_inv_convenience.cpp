@@ -58,8 +58,8 @@ using namespace Eigen;
  * @brief Tests for inverse convenience functions.
  *
  * Note: Full integration tests with actual inverse operators require
- * test data files. These unit tests focus on computeWhitener and
- * applyInverseEpochs with synthetic data.
+ * test data files. These unit tests focus on compute_whitener and
+ * apply_inverse_epochs with synthetic data.
  */
 class TestInvConvenience : public QObject
 {
@@ -70,7 +70,7 @@ private slots:
     {
     }
 
-    //--- computeWhitener tests ---
+    //--- compute_whitener tests ---
 
     void testWhitenerDimensions()
     {
@@ -85,7 +85,7 @@ private slots:
         cov.eig = solver.eigenvalues();
         cov.eigvec = solver.eigenvectors().transpose(); // FiffCov: one eigenvector per row
 
-        auto [whitener, rank] = computeWhitener(cov);
+        auto [whitener, rank] = compute_whitener(cov);
 
         QCOMPARE(whitener.rows(), static_cast<Eigen::Index>(5));
         QCOMPARE(whitener.cols(), static_cast<Eigen::Index>(5));
@@ -105,7 +105,7 @@ private slots:
         cov.eig = solver.eigenvalues();
         cov.eigvec = solver.eigenvectors().transpose(); // FiffCov: one eigenvector per row
 
-        auto [W, rank] = computeWhitener(cov);
+        auto [W, rank] = compute_whitener(cov);
         QCOMPARE(rank, 4);
 
         // W * W^T should be identity for identity covariance
@@ -139,7 +139,7 @@ private slots:
         cov.eig = solver.eigenvalues();
         cov.eigvec = solver.eigenvectors().transpose(); // FiffCov: one eigenvector per row
 
-        auto [W, rank] = computeWhitener(cov);
+        auto [W, rank] = compute_whitener(cov);
 
         // W * C * W^T must be the identity, with or without a stored decomposition.
         MatrixXd whitened = W * trueCov * W.transpose();
@@ -148,7 +148,7 @@ private slots:
 
         cov.eig.resize(0);
         cov.eigvec.resize(0, 0);
-        auto [W2, rank2] = computeWhitener(cov);
+        auto [W2, rank2] = compute_whitener(cov);
         QCOMPARE(rank2, p);
         diff = (W2 * trueCov * W2.transpose() - MatrixXd::Identity(p, p)).norm();
         QVERIFY2(diff < 1e-10, qPrintable(QString("computed decomposition: |W C W^T - I| = %1").arg(diff)));
@@ -175,7 +175,7 @@ private slots:
         cov.eig = solver.eigenvalues();
         cov.eigvec = solver.eigenvectors().transpose(); // FiffCov: one eigenvector per row
 
-        auto [W, rank] = computeWhitener(cov);
+        auto [W, rank] = compute_whitener(cov);
         QCOMPARE(rank, trueRank);
     }
 
@@ -191,30 +191,30 @@ private slots:
         cov.eig = solver.eigenvalues();
         cov.eigvec = solver.eigenvectors().transpose(); // FiffCov: one eigenvector per row
 
-        auto [W, rank] = computeWhitener(cov, 3);
+        auto [W, rank] = compute_whitener(cov, 3);
         QCOMPARE(rank, 3);
     }
 
     void testWhitenerEmptyCov()
     {
         FiffCov cov;
-        auto [W, rank] = computeWhitener(cov);
+        auto [W, rank] = compute_whitener(cov);
         QCOMPARE(rank, 0);
         QVERIFY(W.rows() == 0 || W.cols() == 0);
     }
 
-    //--- applyInverseEpochs tests ---
+    //--- apply_inverse_epochs tests ---
 
     void testApplyInverseEpochsEmpty()
     {
-        QList<MatrixXd> epochs;
+        std::vector<MatrixXd> epochs;
         MNEInverseOperator inv;
 
-        QList<InvSourceEstimate> results = applyInverseEpochs(epochs, inv, 1.0f / 9.0f);
-        QVERIFY(results.isEmpty());
+        const std::vector<InvSourceEstimate> results = apply_inverse_epochs(epochs, inv, 1.0f / 9.0f);
+        QVERIFY(results.empty());
     }
 
-    //--- computeSourcePsd tests ---
+    //--- compute_source_psd tests ---
 
     void testSourcePsdDimensions()
     {
@@ -229,7 +229,7 @@ private slots:
 
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / sfreq);
 
-        auto [psd, freqs] = computeSourcePsd(stc, sfreq);
+        auto [psd, freqs] = compute_source_psd(stc, sfreq);
 
         // nFft = nTimes = 256, so nFreqs = 129 (0 to Nyquist)
         QCOMPARE(psd.rows(), static_cast<Eigen::Index>(nSrc));
@@ -258,7 +258,7 @@ private slots:
         verts << 0;
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / sfreq);
 
-        auto [psd, freqs] = computeSourcePsd(stc, sfreq);
+        auto [psd, freqs] = compute_source_psd(stc, sfreq);
 
         // Find peak frequency
         int peakIdx = 0;
@@ -286,7 +286,7 @@ private slots:
         verts << 0, 1;
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / sfreq);
 
-        auto [psd, freqs] = computeSourcePsd(stc, sfreq, 8.0f, 30.0f);
+        auto [psd, freqs] = compute_source_psd(stc, sfreq, 8.0f, 30.0f);
 
         QVERIFY(freqs(0) >= 8.0);
         QVERIFY(freqs(freqs.size() - 1) <= 30.0);
@@ -295,7 +295,7 @@ private slots:
     void testSourcePsdEmpty()
     {
         InvSourceEstimate stc;
-        auto [psd, freqs] = computeSourcePsd(stc, 256.0f);
+        auto [psd, freqs] = compute_source_psd(stc, 256.0f);
         QCOMPARE(psd.size(), static_cast<Eigen::Index>(0));
     }
 
@@ -309,14 +309,14 @@ private slots:
         verts << 0, 1;
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / 256.0f);
 
-        auto [psd, freqs] = computeSourcePsd(stc, 256.0f);
+        auto [psd, freqs] = compute_source_psd(stc, 256.0f);
 
         for (int i = 0; i < psd.rows(); ++i)
             for (int j = 0; j < psd.cols(); ++j)
                 QVERIFY2(psd(i, j) >= 0.0, "PSD values must be non-negative");
     }
 
-    //--- computeSourceBandPower tests ---
+    //--- compute_source_band_power tests ---
 
     void testBandPowerDimensions()
     {
@@ -329,13 +329,13 @@ private slots:
         verts << 0, 1, 2;
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / sfreq);
 
-        QMap<QString, QPair<float, float>> bands;
-        bands["alpha"] = QPair<float, float>(8.0f, 13.0f);
-        bands["beta"] = QPair<float, float>(13.0f, 30.0f);
+        std::map<std::string, std::pair<float, float>> bands;
+        bands["alpha"] = {8.0f, 13.0f};
+        bands["beta"] = {13.0f, 30.0f};
 
-        auto result = computeSourceBandPower(stc, sfreq, bands);
+        auto result = compute_source_band_power(stc, sfreq, bands);
 
-        QCOMPARE(result.size(), 2);
+        QCOMPARE(result.size(), std::size_t{2});
         QVERIFY(result.contains("alpha"));
         QVERIFY(result.contains("beta"));
         QCOMPARE(result["alpha"].size(), static_cast<Eigen::Index>(nSrc));
@@ -353,10 +353,10 @@ private slots:
         verts << 0, 1;
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / sfreq);
 
-        QMap<QString, QPair<float, float>> bands;
-        bands["theta"] = QPair<float, float>(4.0f, 8.0f);
+        std::map<std::string, std::pair<float, float>> bands;
+        bands["theta"] = {4.0f, 8.0f};
 
-        auto result = computeSourceBandPower(stc, sfreq, bands);
+        auto result = compute_source_band_power(stc, sfreq, bands);
 
         for (int i = 0; i < result["theta"].size(); ++i) {
             QVERIFY2(result["theta"](i) >= 0.0, "Band power must be non-negative");
@@ -378,11 +378,11 @@ private slots:
         verts << 0;
         InvSourceEstimate stc(data, verts, 0.0f, 1.0f / sfreq);
 
-        QMap<QString, QPair<float, float>> bands;
-        bands["alpha"] = QPair<float, float>(8.0f, 13.0f);
-        bands["beta"] = QPair<float, float>(20.0f, 30.0f);
+        std::map<std::string, std::pair<float, float>> bands;
+        bands["alpha"] = {8.0f, 13.0f};
+        bands["beta"] = {20.0f, 30.0f};
 
-        auto result = computeSourceBandPower(stc, sfreq, bands);
+        auto result = compute_source_band_power(stc, sfreq, bands);
 
         QVERIFY2(result["alpha"](0) > result["beta"](0) * 10.0,
                  qPrintable(QString("Alpha=%1 should >> beta=%2")
@@ -393,11 +393,11 @@ private slots:
     void testBandPowerEmpty()
     {
         InvSourceEstimate stc;
-        QMap<QString, QPair<float, float>> bands;
-        bands["alpha"] = QPair<float, float>(8.0f, 13.0f);
+        std::map<std::string, std::pair<float, float>> bands;
+        bands["alpha"] = {8.0f, 13.0f};
 
-        auto result = computeSourceBandPower(stc, 256.0f, bands);
-        QVERIFY(result.isEmpty());
+        auto result = compute_source_band_power(stc, 256.0f, bands);
+        QVERIFY(result.empty());
     }
 
     //=========================================================================

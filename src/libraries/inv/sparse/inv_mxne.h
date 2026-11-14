@@ -39,10 +39,10 @@
 #include <Eigen/Dense>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QVector>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -60,7 +60,7 @@ namespace INVLIB
 struct INVSHARED_EXPORT InvMxneResult
 {
     InvSourceEstimate stc;
-    QVector<int> activeVertices;
+    std::vector<int> activeVertices;
     int nIterations;
     double residualNorm;
 };

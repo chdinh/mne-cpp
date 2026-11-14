@@ -89,7 +89,7 @@ private:
     MatrixXd mHpiPos;
     MatrixXd mRefResult;
     MatrixXd mHpiResult;
-    QVector<int> vFreqs;
+    std::vector<int> vFreqs;
 };
 
 //=============================================================================================================
@@ -221,7 +221,7 @@ void TestHpiFitIntegration::initTestCase()
 
 void TestHpiFitIntegration::compareFrequencies()
 {
-    QVector<int> vFreqRef{166, 154, 161, 158};
+    std::vector<int> vFreqRef{166, 154, 161, 158};
     QVERIFY(vFreqRef == vFreqs);
 }
 

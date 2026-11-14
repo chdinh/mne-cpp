@@ -207,7 +207,7 @@ QJsonObject SourceEstimationSkill::executeSkill(const WorkflowNode& nodeState)
     // ── Prepare the inverse operator ──────────────────────────────────────────
     const qint32 nave = 1;
     const MNEInverseOperator prepInv = invOp->prepare_inverse_operator(nave, lambda2, isDSPM, isSLORETA);
-    InvMinimumNorm mnNorm(prepInv, lambda2, method);
+    InvMinimumNorm mnNorm(prepInv, lambda2, method.toStdString());
     // The MatrixXd overload of calculateInverse() requires the inverse operator
     // to be fully set up first; the FiffEvoked overload does this internally.
     mnNorm.doInverseSetup(nave, /*pick_normal=*/false);

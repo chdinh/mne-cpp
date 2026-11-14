@@ -32,6 +32,7 @@
 #include <fiff/fiff_stream.h>
 #include <fiff/fiff_tag.h>
 
+#include <cassert>
 #include <memory>
 
 //=============================================================================================================
@@ -80,10 +81,10 @@ InvGuessData::InvGuessData(const std::filesystem::path& guessname, const std::fi
         std::unique_ptr<MNESurface> inner_skull_owned;
         Eigen::Vector3f r0 = f->r0;
 
-        Q_ASSERT(f->mri_head_t);
+        assert(f->mri_head_t);
         FiffCoordTrans::apply_inverse_trans(r0.data(), *f->mri_head_t, true);
         if (f->bem_model) {
-            BASELIB::Log::info("Using inner skull surface from the BEM ({})...\n", f->bemname.toStdString());
+            BASELIB::Log::info("Using inner skull surface from the BEM ({})...\n", f->bemname);
             if ((inner_skull = f->bem_model->fwd_bem_find_surface(FIFFV_BEM_SURF_ID_BRAIN)) == nullptr)
                 return;
         } else if (!guess_surfname.empty()) {

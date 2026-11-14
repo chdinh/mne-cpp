@@ -38,12 +38,8 @@
 
 #include <cmath>
 #include <algorithm>
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QMap>
+#include <unordered_map>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -79,7 +75,7 @@ VectorXd InvLabelTimeCourse::computeSignFlip(const MatrixXd& stcData)
 
 MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                                      const std::vector<FsLabel>& labels,
-                                     const QString& sMode,
+                                     std::string_view sMode,
                                      bool bAllowEmpty)
 {
     if (stc.empty() || labels.empty()) {
@@ -91,17 +87,16 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
     const int nLabels = static_cast<int>(labels.size());
 
     // Resolve "auto" mode
-    QString mode = sMode;
-    if (mode == "auto")
-        mode = "mean_flip";
+    const std::string_view mode = sMode == "auto" ? std::string_view("mean_flip") : sMode;
 
     // Build a map from vertex index → row in stc.data
-    QMap<int, int> vertexToRow;
+    std::unordered_map<int, int> vertexToRow;
+    vertexToRow.reserve(static_cast<std::size_t>(stc.vertices.size()));
     for (int i = 0; i < stc.vertices.size(); ++i)
-        vertexToRow.insert(stc.vertices[i], i);
+        vertexToRow.emplace(stc.vertices[i], i);
 
     // Count output labels (skip empty if !bAllowEmpty)
-    QList<int> outputLabelIndices;
+    std::vector<int> outputLabelIndices;
     for (int li = 0; li < nLabels; ++li) {
         int count = 0;
         for (int vi = 0; vi < labels[li].vertices.size(); ++vi) {
@@ -109,26 +104,26 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                 ++count;
         }
         if (count > 0 || bAllowEmpty)
-            outputLabelIndices.append(li);
+            outputLabelIndices.push_back(li);
     }
 
-    MatrixXd result = MatrixXd::Zero(outputLabelIndices.size(), nTimes);
+    MatrixXd result = MatrixXd::Zero(std::ssize(outputLabelIndices), nTimes);
 
-    for (int oi = 0; oi < outputLabelIndices.size(); ++oi) {
+    for (int oi = 0; oi < std::ssize(outputLabelIndices); ++oi) {
         const FsLabel& label = labels[outputLabelIndices[oi]];
 
         // Find matching vertex rows
-        QList<int> rows;
+        std::vector<int> rows;
         for (int vi = 0; vi < label.vertices.size(); ++vi) {
             auto it = vertexToRow.find(label.vertices[vi]);
             if (it != vertexToRow.end())
-                rows.append(it.value());
+                rows.push_back(it->second);
         }
 
-        if (rows.isEmpty())
+        if (rows.empty())
             continue;
 
-        const int nVerts = rows.size();
+        const int nVerts = static_cast<int>(rows.size());
 
         // Extract sub-matrix for this label
         MatrixXd labelData(nVerts, nTimes);
@@ -178,7 +173,7 @@ MatrixXd InvLabelTimeCourse::extract(const InvSourceEstimate& stc,
                 result(oi, t) = maxVal;
             }
         } else {
-            BASELIB::Log::warning("[InvLabelTimeCourse::extract] Unknown mode: {} — using mean.", mode.toStdString());
+            BASELIB::Log::warning("[InvLabelTimeCourse::extract] Unknown mode: {} — using mean.", mode);
             result.row(oi) = labelData.colwise().mean();
         }
     }

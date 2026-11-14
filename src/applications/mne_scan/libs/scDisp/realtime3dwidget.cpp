@@ -200,11 +200,12 @@ void RealTime3DWidget::update(SCMEASLIB::Measurement::SPtr pMeasurement)
         }
 
         if (QSharedPointer<HpiFitResult> pHpiFitResult = pRTHR->getValue()) {
-            if (m_sFilePathDigitizers != pHpiFitResult->sFilePathDigitzers && m_pBemHeadAvr) {
+            const QString digitizerFile = QString::fromStdString(BASELIB::utf8FromPath(pHpiFitResult->digitizerFile));
+            if (m_sFilePathDigitizers != digitizerFile && m_pBemHeadAvr) {
                 //Add all digitizer but additional points to the 3D view
-                FiffDigPointSet digSet(pHpiFitResult->sFilePathDigitzers.toStdU16String());
+                FiffDigPointSet digSet(pHpiFitResult->digitizerFile);
                 addDigSetToView(digSet);
-                alignFiducials(pHpiFitResult->sFilePathDigitzers);
+                alignFiducials(digitizerFile);
             }
             if (!m_pFiffDigitizerData && m_pBemHeadAvr) {
                 if (auto pDigData = pRTHR->digitizerData()) {

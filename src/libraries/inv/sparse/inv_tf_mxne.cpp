@@ -175,25 +175,25 @@ InvTfMxneResult InvTfMxne::compute(const MatrixXd& matGain,
     MatrixXd X = Z * Phi; // (nSources × nTimes)
 
     // Find active sources
-    QVector<int> activeVertices;
+    std::vector<int> activeVertices;
     for (int j = 0; j < nSources; ++j) {
         if (Z.row(j).norm() > 1e-12) {
-            activeVertices.append(j);
+            activeVertices.push_back(j);
         }
     }
 
     // Optional debiasing: re-estimate amplitudes on active set
     MatrixXd finalX;
-    if (params.bDebias && !activeVertices.isEmpty()) {
-        MatrixXd Gactive(nChannels, activeVertices.size());
-        for (int i = 0; i < activeVertices.size(); ++i) {
+    if (params.bDebias && !activeVertices.empty()) {
+        MatrixXd Gactive(nChannels, std::ssize(activeVertices));
+        for (int i = 0; i < std::ssize(activeVertices); ++i) {
             Gactive.col(i) = matGain.col(activeVertices[i]);
         }
         // Least-squares on active set: X_active = pinv(G_active) * M
         finalX = Gactive.bdcSvd<ComputeThinU | ComputeThinV>().solve(matData);
-    } else if (!activeVertices.isEmpty()) {
-        finalX = MatrixXd(activeVertices.size(), nTimes);
-        for (int i = 0; i < activeVertices.size(); ++i) {
+    } else if (!activeVertices.empty()) {
+        finalX = MatrixXd(std::ssize(activeVertices), nTimes);
+        for (int i = 0; i < std::ssize(activeVertices); ++i) {
             finalX.row(i) = X.row(activeVertices[i]);
         }
     } else {
@@ -201,8 +201,8 @@ InvTfMxneResult InvTfMxne::compute(const MatrixXd& matGain,
     }
 
     // Build result
-    VectorXi vertices(activeVertices.size());
-    for (int i = 0; i < activeVertices.size(); ++i) {
+    VectorXi vertices(std::ssize(activeVertices));
+    for (int i = 0; i < std::ssize(activeVertices); ++i) {
         vertices(i) = activeVertices[i];
     }
 
@@ -213,9 +213,9 @@ InvTfMxneResult InvTfMxne::compute(const MatrixXd& matGain,
     result.residualNorm = residual.norm();
 
     // Store TF coefficients for active sources
-    if (!activeVertices.isEmpty()) {
-        result.tfCoefficients = MatrixXd(activeVertices.size(), nAtoms);
-        for (int i = 0; i < activeVertices.size(); ++i) {
+    if (!activeVertices.empty()) {
+        result.tfCoefficients = MatrixXd(std::ssize(activeVertices), nAtoms);
+        for (int i = 0; i < std::ssize(activeVertices); ++i) {
             result.tfCoefficients.row(i) = Z.row(activeVertices[i]);
         }
     }

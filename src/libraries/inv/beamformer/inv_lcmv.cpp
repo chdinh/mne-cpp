@@ -336,14 +336,14 @@ InvSourceEstimate InvLCMV::applyLCMVCov(const FiffCov& dataCov,
 
 //=============================================================================================================
 
-QList<InvSourceEstimate> InvLCMV::applyLCMVEpochs(const QList<MatrixXd>& epochs,
-                                                  float tmin,
-                                                  float tstep,
-                                                  const InvBeamformer& filters)
+std::vector<InvSourceEstimate> InvLCMV::applyLCMVEpochs(const std::vector<MatrixXd>& epochs,
+                                                        float tmin,
+                                                        float tstep,
+                                                        const InvBeamformer& filters)
 {
-    QList<InvSourceEstimate> results;
+    std::vector<InvSourceEstimate> results;
 
-    if (epochs.isEmpty()) {
+    if (epochs.empty()) {
         Log::warning("InvLCMV::applyLCMVEpochs - No epochs provided.");
         return results;
     }
@@ -352,12 +352,12 @@ QList<InvSourceEstimate> InvLCMV::applyLCMVEpochs(const QList<MatrixXd>& epochs,
         return results;
     }
 
-    for (int i = 0; i < epochs.size(); ++i) {
-        InvSourceEstimate stc = applyLCMVRaw(epochs[i], tmin, tstep, filters);
-        if (stc.empty()) {
-            Log::warning("InvLCMV::applyLCMVEpochs - Epoch {} produced empty source estimate.", i);
+    results.reserve(epochs.size());
+    for (const MatrixXd& epoch : epochs) {
+        results.push_back(applyLCMVRaw(epoch, tmin, tstep, filters));
+        if (results.back().empty()) {
+            Log::warning("InvLCMV::applyLCMVEpochs - Epoch {} produced empty source estimate.", results.size() - 1);
         }
-        results.append(stc);
     }
 
     return results;

@@ -35,11 +35,6 @@
 
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-
-//=============================================================================================================
 // DEFINE NAMESPACE INVLIB
 //=============================================================================================================
 
@@ -108,7 +103,7 @@ public:
      *
      * @return true when successful.
      */
-    static bool fit_dipoles(const QString& dataname, MNELIB::MNEMeasData* data, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set);
+    static bool fit_dipoles(const std::string& dataname, MNELIB::MNEMeasData* data, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set);
 
     //=========================================================================================================
     /**
@@ -133,7 +128,7 @@ public:
      *
      * @return true when successful.
      */
-    static bool fit_dipoles_raw(const QString& dataname, MNELIB::MNERawData* raw, MNELIB::MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set);
+    static bool fit_dipoles_raw(const std::string& dataname, MNELIB::MNERawData* raw, MNELIB::MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set);
 
     //=========================================================================================================
     /**
@@ -154,7 +149,7 @@ public:
      *
      * @return true when successful.
      */
-    static bool fit_dipoles_raw(const QString& dataname, MNELIB::MNERawData* raw, MNELIB::MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose);
+    static bool fit_dipoles_raw(const std::string& dataname, MNELIB::MNERawData* raw, MNELIB::MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose);
 
 private:
     InvDipoleFitSettings* settings; /**< Non-owning pointer to the dipole fit settings. */

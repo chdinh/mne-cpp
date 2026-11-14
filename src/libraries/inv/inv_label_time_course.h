@@ -38,11 +38,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QString>
+#include <string_view>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -80,7 +79,7 @@ public:
      */
     static Eigen::MatrixXd extract(const InvSourceEstimate& stc,
                                    const std::vector<FSLIB::FsLabel>& labels,
-                                   const QString& sMode = "mean_flip",
+                                   std::string_view sMode = "mean_flip",
                                    bool bAllowEmpty = false);
 
     //=========================================================================================================

@@ -207,7 +207,7 @@ void TestComputeRawInverse::testInverseDSPM()
     int nave = evoked.nave;
 
     // Compute dSPM inverse
-    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, QString("dSPM"));
+    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, "dSPM");
     minimumNorm.doInverseSetup(nave, false);
     m_stcDSPM = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
@@ -281,7 +281,7 @@ void TestComputeRawInverse::testInverseSLORETA()
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
-    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, QString("sLORETA"));
+    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, "sLORETA");
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stc = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
@@ -315,7 +315,7 @@ void TestComputeRawInverse::testInverseMNE()
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
-    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, QString("MNE"));
+    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, "MNE");
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stc = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
@@ -449,7 +449,7 @@ void TestComputeRawInverse::testBaselineAppliedWhenRequested()
     float tmin = pickedEvoked.times(0);
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
-    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, QString("dSPM"));
+    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, "dSPM");
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stc = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
 
@@ -594,7 +594,7 @@ void TestComputeRawInverse::testLabelRestrictedInverse()
     float tstep = 1.0f / pickedEvoked.info.sfreq;
 
     // Compute full inverse
-    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, QString("dSPM"));
+    InvMinimumNorm minimumNorm(m_invOp, s_fLambda2, "dSPM");
     minimumNorm.doInverseSetup(evoked.nave, false);
     InvSourceEstimate stcFull = minimumNorm.calculateInverse(pickedEvoked.data, tmin, tstep, false);
     QVERIFY2(!stcFull.empty(), "Full inverse failed");

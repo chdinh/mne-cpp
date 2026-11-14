@@ -56,7 +56,7 @@ using namespace FIFFLIB;
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
-InvMinimumNorm::InvMinimumNorm(const MNEInverseOperator& p_inverseOperator, float lambda, const QString method)
+InvMinimumNorm::InvMinimumNorm(const MNEInverseOperator& p_inverseOperator, float lambda, std::string_view method)
 : m_inverseOperator(p_inverseOperator)
 , m_beLoreta(false)
 , m_iELoretaMaxIter(20)
@@ -89,7 +89,7 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const FiffEvoked& p_fiffEvoke
     //
     //   Set up the inverse according to the parameters
     //
-    qint32 nave = p_fiffEvoked.nave;
+    int nave = p_fiffEvoked.nave;
 
     if (!m_inverseOperator.check_ch_names(p_fiffEvoked.info)) {
         Log::warning("Channel name check failed.");
@@ -132,7 +132,7 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const MatrixXd& data, float t
         Log::info("combining the current components...");
 
         MatrixXd sol1(sol.rows() / 3, sol.cols());
-        for (qint32 i = 0; i < sol.cols(); ++i) {
+        for (Eigen::Index i = 0; i < sol.cols(); ++i) {
             VectorXd tmp = Linalg::combine_xyz(sol.col(i));
             sol1.block(0, i, sol.rows() / 3, 1) = tmp.cwiseSqrt();
         }
@@ -155,10 +155,6 @@ InvSourceEstimate InvMinimumNorm::calculateInverse(const MatrixXd& data, float t
     //Results
     VectorXi p_vecVertices(inv.src[0].vertno.size() + inv.src[1].vertno.size());
     p_vecVertices << inv.src[0].vertno, inv.src[1].vertno;
-
-    //    VectorXi p_vecVertices();
-    //    for(qint32 h = 0; h < inv.src.size(); ++h)
-    //        t_qListVertices.push_back(inv.src[h].vertno);
 
     InvSourceEstimate stc(sol, p_vecVertices, tmin, tstep);
 
@@ -183,7 +179,7 @@ MNEMneData InvMinimumNorm::mneData(const FiffEvoked& p_fiffEvoked, double snr)
 
 //=============================================================================================================
 
-void InvMinimumNorm::doInverseSetup(qint32 nave, bool pick_normal)
+void InvMinimumNorm::doInverseSetup(int nave, bool pick_normal)
 {
     //
     //   Set up the inverse according to the parameters
@@ -196,7 +192,7 @@ void InvMinimumNorm::doInverseSetup(qint32 nave, bool pick_normal)
     }
 
     Log::info("Computing inverse...");
-    inv.assemble_kernel(label, m_sMethod.toStdString(), pick_normal, K, noise_norm, vertno);
+    inv.assemble_kernel(label, m_sMethod, pick_normal, K, noise_norm, vertno);
 
     Log::info("K {} x {}", K.rows(), K.cols());
 
@@ -219,23 +215,22 @@ const MNESourceSpaces& InvMinimumNorm::getSourceSpace() const
 
 //=============================================================================================================
 
-void InvMinimumNorm::setMethod(QString method)
+void InvMinimumNorm::setMethod(std::string_view method)
 {
-    if (method.compare("MNE") == 0)
+    if (method == "MNE")
         setMethod(false, false);
-    else if (method.compare("dSPM") == 0)
+    else if (method == "dSPM")
         setMethod(true, false);
-    else if (method.compare("sLORETA") == 0)
+    else if (method == "sLORETA")
         setMethod(false, true);
-    else if (method.compare("eLORETA") == 0)
+    else if (method == "eLORETA")
         setMethod(false, false, true);
     else {
         Log::warning("Method not recognized!");
-        method = "dSPM";
         setMethod(true, false);
     }
 
-    Log::info("\tSet minimum norm method to {}.", method.toStdString());
+    Log::info("\tSet minimum norm method to {}.", m_sMethod);
 }
 
 //=============================================================================================================
@@ -255,13 +250,13 @@ void InvMinimumNorm::setMethod(bool dSPM, bool sLORETA, bool eLoreta)
     m_beLoreta = eLoreta;
 
     if (dSPM)
-        m_sMethod = QString("dSPM");
+        m_sMethod = "dSPM";
     else if (sLORETA)
-        m_sMethod = QString("sLORETA");
+        m_sMethod = "sLORETA";
     else if (eLoreta)
-        m_sMethod = QString("eLORETA");
+        m_sMethod = "eLORETA";
     else
-        m_sMethod = QString("MNE");
+        m_sMethod = "MNE";
 }
 
 //=============================================================================================================

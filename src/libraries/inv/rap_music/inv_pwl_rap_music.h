@@ -34,7 +34,7 @@
 #include <inv/inv_source_estimate.h>
 #include <time.h>
 
-#include <QVector>
+#include <vector>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -110,7 +110,7 @@ public:
      */
     virtual InvSourceEstimate calculateInverse(const Eigen::MatrixXd& data, float tmin, float tstep, bool pick_normal = false) const;
 
-    virtual InvSourceEstimate calculateInverse(const Eigen::MatrixXd& p_matMeasurement, QList<InvDipolePair<double>>& p_RapDipoles) const;
+    virtual InvSourceEstimate calculateInverse(const Eigen::MatrixXd& p_matMeasurement, std::vector<InvDipolePair<double>>& p_RapDipoles) const;
 
     static int PowellOffset(int p_iRow, int p_iNumPoints);
 

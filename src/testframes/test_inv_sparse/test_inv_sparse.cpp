@@ -139,12 +139,12 @@ void TestInvSparse::testMxneMatchesMnePython()
     deterministicProblem(gain, data);
     const InvMxneResult result = InvMxne::compute(gain, data, 1.3706862500771375);
     MatrixXd x = MatrixXd::Zero(40, 10);
-    for (int k = 0; k < result.activeVertices.size(); ++k)
+    for (int k = 0; k < std::ssize(result.activeVertices); ++k)
         x.row(result.activeVertices[k]) = result.stc.data.row(k);
     x.row(5).setZero();
     x.row(22).setZero();
-    QVERIFY2(std::abs(result.stc.data.row(result.activeVertices.indexOf(5)).norm() - 5.482482828139865) < 1e-5, "source 5");
-    QVERIFY2(std::abs(result.stc.data.row(result.activeVertices.indexOf(22)).norm() - 3.0062181954974725) < 1e-5, "source 22");
+    QVERIFY2(std::abs(result.stc.data.row(std::ranges::find(result.activeVertices, 5) - result.activeVertices.begin()).norm() - 5.482482828139865) < 1e-5, "source 5");
+    QVERIFY2(std::abs(result.stc.data.row(std::ranges::find(result.activeVertices, 22) - result.activeVertices.begin()).norm() - 3.0062181954974725) < 1e-5, "source 22");
     QVERIFY2(x.norm() < 1e-5, qPrintable(QString("energy outside the mne support: %1").arg(x.norm())));
 }
 
@@ -158,7 +158,7 @@ void TestInvSparse::testGammaMapMatchesMnePython()
     MatrixXd gain, data;
     deterministicProblem(gain, data);
     const InvGammaMapResult result = InvGammaMap::compute(gain, data, 0.0025 * MatrixXd::Identity(20, 20), 5000, 1e-12, 1e-8);
-    QCOMPARE(result.activeVertices, QVector<int>({5, 7, 22, 35}));
+    QCOMPARE(result.activeVertices, std::vector<int>({5, 7, 22, 35}));
     const double expected[4] = {6.848310575155952, 0.28156801539348963, 4.369723814282878, 0.26551421080291066};
     for (int k = 0; k < 4; ++k) {
         const double norm = result.stc.data.row(k).norm();
@@ -326,9 +326,10 @@ void TestInvSparse::testGammaMapNoiseCovEffect()
     MatrixXd highNoiseCov = MatrixXd::Identity(nSensors, nSensors) * 10.0;
     InvGammaMapResult highNoise = InvGammaMap::compute(gain, data, highNoiseCov, 100, 1e-6);
 
-    // Both should produce results without crashing
-    QVERIFY(lowNoise.activeVertices.size() >= 0);
-    QVERIFY(highNoise.activeVertices.size() >= 0);
+    // Both produce one estimate row per active source, and the low-noise fit keeps some sources
+    QVERIFY(!lowNoise.activeVertices.empty());
+    QCOMPARE(lowNoise.stc.data.rows(), std::ssize(lowNoise.activeVertices));
+    QCOMPARE(highNoise.stc.data.rows(), std::ssize(highNoise.activeVertices));
 }
 
 //=============================================================================================================

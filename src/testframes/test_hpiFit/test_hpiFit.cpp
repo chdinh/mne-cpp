@@ -92,7 +92,7 @@ private:
     double dLocalizationErrorTol;
     double dGofTol;
     MatrixXd m_matProjectors;
-    QVector<int> vFreqs;
+    std::vector<int> vFreqs;
 };
 
 //=============================================================================================================
@@ -176,7 +176,7 @@ void TestHpiFit::testFit_dimensions_dataAndProjectors()
             matCoilsHead,
             hpiFitResult);
 
-    QVERIFY(hpiFitResult.errorDistances.isEmpty());
+    QVERIFY(hpiFitResult.errorDistances.empty());
 }
 
 //=============================================================================================================
@@ -201,7 +201,7 @@ void TestHpiFit::testFit_dimensions_nCoils()
             matCoilsHead,
             hpiFitResult);
 
-    QVERIFY(hpiFitResult.errorDistances.isEmpty());
+    QVERIFY(hpiFitResult.errorDistances.empty());
 }
 
 //=============================================================================================================
@@ -210,7 +210,7 @@ void TestHpiFit::testFit_dimensions_emptyData()
 {
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = true;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -229,7 +229,7 @@ void TestHpiFit::testFit_dimensions_emptyData()
             matCoilsHead,
             hpiFitResult);
 
-    QVERIFY(hpiFitResult.errorDistances.isEmpty());
+    QVERIFY(hpiFitResult.errorDistances.empty());
 }
 
 //=============================================================================================================
@@ -238,7 +238,7 @@ void TestHpiFit::testFit_dimensions_dataAndSensors()
 {
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = true;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -266,7 +266,7 @@ void TestHpiFit::testFit_dimensions_dataAndSensors()
             matCoilsHead,
             hpiFitResult);
 
-    QVERIFY(hpiFitResult.errorDistances.isEmpty());
+    QVERIFY(hpiFitResult.errorDistances.empty());
 }
 
 //=============================================================================================================
@@ -276,7 +276,7 @@ void TestHpiFit::testFit_basic_gof()
     /// prepare
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = true;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -312,7 +312,7 @@ void TestHpiFit::testFit_advanced_gof()
     /// prepare
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = false;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -348,7 +348,7 @@ void TestHpiFit::testFit_basic_error()
     /// prepare
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = true;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -370,7 +370,7 @@ void TestHpiFit::testFit_basic_error()
             matCoilsHead,
             hpiFitResult);
 
-    QVector<double> vecError = hpiFitResult.errorDistances;
+    std::vector<double> vecError = hpiFitResult.errorDistances;
 
     /// assert
     double dLocalizationErrorMean = 1000.0 * std::accumulate(vecError.begin(), vecError.end(), .0) / vecError.size();
@@ -384,7 +384,7 @@ void TestHpiFit::testFit_advanced_error()
     /// prepare
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = false;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -406,7 +406,7 @@ void TestHpiFit::testFit_advanced_error()
             matCoilsHead,
             hpiFitResult);
 
-    QVector<double> vecError = hpiFitResult.errorDistances;
+    std::vector<double> vecError = hpiFitResult.errorDistances;
 
     /// assert
     double dLocalizationErrorMean = 1000.0 * std::accumulate(vecError.begin(), vecError.end(), .0) / vecError.size();
@@ -420,7 +420,7 @@ void TestHpiFit::testCheckForUpdate()
     /// prepare
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = false;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -449,7 +449,7 @@ void TestHpiFit::testCheckForUpdate()
             matCoilsHead,
             hpiFitResult);
 
-    QVector<double> vecError = hpiFitResult.errorDistances;
+    std::vector<double> vecError = hpiFitResult.errorDistances;
 
     /// assert
     double dLocalizationErrorMean = 1000.0 * std::accumulate(vecError.begin(), vecError.end(), .0) / vecError.size();
@@ -461,32 +461,32 @@ void TestHpiFit::testCheckForUpdate()
 void TestHpiFit::testFindOrder()
 {
     /// prepare
-    QVector<int> vecFreqsActual01 = {154, 158, 161, 166};
-    QVector<int> vecFreqsActual02 = {158, 154, 161, 166};
-    QVector<int> vecFreqsActual03 = {161, 154, 158, 166};
-    QVector<int> vecFreqsActual04 = {154, 161, 158, 166};
-    QVector<int> vecFreqsActual05 = {158, 161, 154, 166};
-    QVector<int> vecFreqsActual06 = {161, 158, 154, 166};
-    QVector<int> vecFreqsActual07 = {161, 158, 166, 154};
-    QVector<int> vecFreqsActual08 = {158, 161, 166, 154};
-    QVector<int> vecFreqsActual09 = {166, 161, 158, 154};
-    QVector<int> vecFreqsActual10 = {161, 166, 158, 154};
-    QVector<int> vecFreqsActual11 = {158, 166, 161, 154};
-    QVector<int> vecFreqsActual12 = {166, 158, 161, 154};
-    QVector<int> vecFreqsActual13 = {166, 154, 161, 158};
-    QVector<int> vecFreqsActual14 = {154, 166, 161, 158};
-    QVector<int> vecFreqsActual15 = {161, 166, 154, 158};
-    QVector<int> vecFreqsActual16 = {166, 161, 154, 158};
-    QVector<int> vecFreqsActual17 = {154, 161, 166, 158};
-    QVector<int> vecFreqsActual18 = {161, 154, 166, 158};
-    QVector<int> vecFreqsActual19 = {158, 154, 166, 161};
-    QVector<int> vecFreqsActual20 = {154, 158, 166, 161};
-    QVector<int> vecFreqsActual21 = {166, 158, 154, 161};
-    QVector<int> vecFreqsActual22 = {158, 166, 154, 161};
-    QVector<int> vecFreqsActual23 = {154, 166, 158, 161};
-    QVector<int> vecFreqsActual24 = {166, 154, 158, 161};
+    std::vector<int> vecFreqsActual01 = {154, 158, 161, 166};
+    std::vector<int> vecFreqsActual02 = {158, 154, 161, 166};
+    std::vector<int> vecFreqsActual03 = {161, 154, 158, 166};
+    std::vector<int> vecFreqsActual04 = {154, 161, 158, 166};
+    std::vector<int> vecFreqsActual05 = {158, 161, 154, 166};
+    std::vector<int> vecFreqsActual06 = {161, 158, 154, 166};
+    std::vector<int> vecFreqsActual07 = {161, 158, 166, 154};
+    std::vector<int> vecFreqsActual08 = {158, 161, 166, 154};
+    std::vector<int> vecFreqsActual09 = {166, 161, 158, 154};
+    std::vector<int> vecFreqsActual10 = {161, 166, 158, 154};
+    std::vector<int> vecFreqsActual11 = {158, 166, 161, 154};
+    std::vector<int> vecFreqsActual12 = {166, 158, 161, 154};
+    std::vector<int> vecFreqsActual13 = {166, 154, 161, 158};
+    std::vector<int> vecFreqsActual14 = {154, 166, 161, 158};
+    std::vector<int> vecFreqsActual15 = {161, 166, 154, 158};
+    std::vector<int> vecFreqsActual16 = {166, 161, 154, 158};
+    std::vector<int> vecFreqsActual17 = {154, 161, 166, 158};
+    std::vector<int> vecFreqsActual18 = {161, 154, 166, 158};
+    std::vector<int> vecFreqsActual19 = {158, 154, 166, 161};
+    std::vector<int> vecFreqsActual20 = {154, 158, 166, 161};
+    std::vector<int> vecFreqsActual21 = {166, 158, 154, 161};
+    std::vector<int> vecFreqsActual22 = {158, 166, 154, 161};
+    std::vector<int> vecFreqsActual23 = {154, 166, 158, 161};
+    std::vector<int> vecFreqsActual24 = {166, 154, 158, 161};
 
-    QVector<int> vecFreqsExpected = {166, 154, 161, 158};
+    std::vector<int> vecFreqsExpected = {166, 154, 161, 158};
     QVector<bool> vecResultExpected(24);
     vecResultExpected.fill(true);
 
@@ -502,7 +502,7 @@ void TestHpiFit::testFindOrder()
 
     int iSampleFreq = m_pFiffInfo->sfreq;
     int iLineFreq = m_pFiffInfo->linefreq;
-    QVector<int> vecHpiFreqs = {166, 154, 161, 158};
+    std::vector<int> vecHpiFreqs = {166, 154, 161, 158};
     bool bBasic = false;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,

@@ -194,5 +194,5 @@ FiffEvoked DSPLIB::simulateEvokedNoiseless(
     const InvSourceEstimate& stc,
     const FiffInfo& info)
 {
-    return INVLIB::applyForward(fwd, stc, info);
+    return INVLIB::apply_forward(fwd, stc, info);
 }

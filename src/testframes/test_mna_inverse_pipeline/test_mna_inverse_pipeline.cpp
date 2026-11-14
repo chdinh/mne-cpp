@@ -261,7 +261,7 @@ void TestMnaInversePipeline::registerRealOps()
                            float tmin = picked.times(0);
                            float tstep = 1.0f / picked.info.sfreq;
 
-                           InvMinimumNorm mn(*invOp, lambda2, method);
+                           InvMinimumNorm mn(*invOp, lambda2, method.toStdString());
                            mn.doInverseSetup(evoked->nave, pickNormal);
 
                            InvSourceEstimate stcLocal = mn.calculateInverse(picked.data, tmin, tstep, pickNormal);

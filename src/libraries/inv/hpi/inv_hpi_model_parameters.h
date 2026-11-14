@@ -29,11 +29,10 @@
 #include "../inv_global.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QObject>
-#include <QVector>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -76,24 +75,18 @@ public:
     * @param[in] iLineFreq       The line Frequency
     * @param[in] bBasic          Create a basic model without line frequeny or not.
     */
-    explicit InvHpiModelParameters(const QVector<int> vecHpiFreqs,
+    explicit InvHpiModelParameters(std::vector<int> vecHpiFreqs,
                                    const int iSampleFreq,
                                    const int iLineFreq,
                                    const bool bBasic);
 
     //=========================================================================================================
     /**
-     * Copy constructor.
+     * @param[in] other   The parameters to compare with.
      *
-     * @param[in] hpiModelParameter   InvHpiModelParameters which should be copied.
+     * @return Whether all parameters are equal.
      */
-    InvHpiModelParameters(const InvHpiModelParameters& hpiModelParameter);
-
-    //=========================================================================================================
-
-    InvHpiModelParameters operator=(const InvHpiModelParameters& other);
-    inline bool operator==(const InvHpiModelParameters& b) const;
-    inline bool operator!=(const InvHpiModelParameters& b) const;
+    bool operator==(const InvHpiModelParameters& other) const = default;
 
     //=========================================================================================================
     /**
@@ -102,7 +95,7 @@ public:
     * @return HPI coil frequencies, in Hz.
     */
 
-    inline QVector<int> vecHpiFreqs() const;
+    inline const std::vector<int>& vecHpiFreqs() const;
     inline int iNHpiCoils() const;
     inline int iSampleFreq() const;
     inline int iLineFreq() const;
@@ -121,7 +114,7 @@ private:
     */
     void checkForLineFreq();
 
-    QVector<int> m_vecHpiFreqs{QVector<int>()};
+    std::vector<int> m_vecHpiFreqs;
     int m_iNHpiCoils{0};
     int m_iSampleFreq{0};
     int m_iLineFreq{0};
@@ -132,7 +125,7 @@ private:
 // INLINE DEFINITIONS
 //=============================================================================================================
 
-inline QVector<int> InvHpiModelParameters::vecHpiFreqs() const
+inline const std::vector<int>& InvHpiModelParameters::vecHpiFreqs() const
 {
     return m_vecHpiFreqs;
 }
@@ -165,23 +158,6 @@ inline bool InvHpiModelParameters::bBasic() const
     return m_bBasic;
 }
 
-//=============================================================================================================
-
-inline bool InvHpiModelParameters::operator==(const InvHpiModelParameters& b) const
-{
-    return (this->vecHpiFreqs() == b.vecHpiFreqs() &&
-            this->iNHpiCoils() == b.iNHpiCoils() &&
-            this->iSampleFreq() == b.iSampleFreq() &&
-            this->iLineFreq() == b.iLineFreq() &&
-            this->bBasic() == b.bBasic());
-}
-
-//=============================================================================================================
-
-inline bool InvHpiModelParameters::operator!=(const InvHpiModelParameters& b) const
-{
-    return !(*this == b);
-}
 
 } // namespace INVLIBE
 

@@ -229,7 +229,7 @@ private slots:
         InvSourceEstimate stc(data, (VectorXi(3) << 841, 3046, 713).finished(), 0.1f, 0.002f);
         stc.nVerticesLh = 2;
 
-        const FiffEvoked evoked = INVLIB::applyForward(m_fwd, stc, ave.info);
+        const FiffEvoked evoked = INVLIB::apply_forward(m_fwd, stc, ave.info);
         QCOMPARE(evoked.info.ch_names.size(), 366);
         QCOMPARE(evoked.info.ch_names.front(), QString("MEG 0113"));
         QVERIFY(std::abs(evoked.times(0) - 0.1f) < 1e-7f);
@@ -252,8 +252,8 @@ private slots:
         // A vertex the forward does not have is refused, as with mne's on_missing="raise"
         InvSourceEstimate missing(data.topRows(1), (VectorXi(1) << 842).finished(), 0.1f, 0.002f);
         missing.nVerticesLh = 1;
-        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("applyForward.*842"));
-        QCOMPARE(INVLIB::applyForward(m_fwd, missing, ave.info).data.size(), Eigen::Index(0));
+        QTest::ignoreMessage(QtWarningMsg, QRegularExpression("apply_forward.*842"));
+        QCOMPARE(INVLIB::apply_forward(m_fwd, missing, ave.info).data.size(), Eigen::Index(0));
     }
 
     // ── compute_orient_prior ────────────────────────────────────────────────

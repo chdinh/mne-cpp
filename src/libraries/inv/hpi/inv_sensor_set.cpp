@@ -32,7 +32,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QCoreApplication>
+#include <base/string_utils.h>
 
 //=============================================================================================================
 // EIGEN INCLUDES
@@ -118,8 +118,7 @@ void InvSensorSet::initMatrices(int ncoils, int np)
 
 InvSensorSetCreator::InvSensorSetCreator()
 {
-    const QString qPath = QString(QCoreApplication::applicationDirPath() + "/../resources/general/coilDefinitions/coil_def.dat");
-    m_pCoilDefinitions = std::shared_ptr<FwdCoilSet>(FwdCoilSet::read_coil_defs(qPath.toStdU16String()).release());
+    m_pCoilDefinitions = FwdCoilSet::read_coil_defs(BASELIB::resource_path("general/coilDefinitions/coil_def.dat"));
 }
 
 //=============================================================================================================

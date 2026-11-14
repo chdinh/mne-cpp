@@ -36,17 +36,10 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QString>
-#include <QStringList>
-#include <QList>
-
-//=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
+#include <string>
 #include <vector>
 
 //=============================================================================================================
@@ -119,7 +112,7 @@ public:
     inline int nFreqs() const;
 
 public:
-    QString kind; /**< "LCMV" or "DICS". */
+    std::string kind; /**< "LCMV" or "DICS". */
 
     // --- Spatial filter weights ---
     std::vector<Eigen::MatrixXd> weights; /**< Filter weights, size 1 for LCMV, n_freqs for DICS.
@@ -135,8 +128,8 @@ public:
     Eigen::MatrixX3f sourceNn; /**< Source normals (n_sources, 3). */
     bool isFreOri;             /**< True if free orientation (n_orient = 3). */
     int nSourcesTotal;         /**< Total number of source points. */
-    QString srcType;           /**< "surface", "volume", "mixed", "discrete". */
-    QString subject;           /**< Subject identifier. */
+    std::string srcType;       /**< "surface", "volume", "mixed", "discrete". */
+    std::string subject;       /**< Subject identifier. */
 
     // --- Filter parameters ---
     StringList chNames;              /**< Channel names used for filter computation. */

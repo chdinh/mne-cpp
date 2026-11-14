@@ -61,7 +61,7 @@ InvEcdSet InvDipoleFit::calculateFit() const
     BASELIB::Log::info("---- Setting up...\n");
     std::unique_ptr<FwdEegSphereModel> eeg_model;
     if (settings->include_eeg) {
-        eeg_model = FwdEegSphereModel::setup_eeg_sphere_model(settings->eeg_model_file.toStdU16String(), settings->eeg_model_name.toStdString(), settings->eeg_sphere_rad);
+        eeg_model = FwdEegSphereModel::setup_eeg_sphere_model(BASELIB::pathFromUtf8(settings->eeg_model_file), settings->eeg_model_name, settings->eeg_sphere_rad);
         if (!eeg_model)
             return set;
     }
@@ -98,7 +98,7 @@ InvEcdSet InvDipoleFit::calculateFit() const
 
     if (settings->is_raw) {
         BASELIB::Log::info("\n---- Opening a raw data file...\n");
-        raw.reset(MNERawData::open_file(settings->measname.toStdU16String(), true, false, settings->filter));
+        raw.reset(MNERawData::open_file(BASELIB::pathFromUtf8(settings->measname), true, false, settings->filter));
         if (!raw)
             return set;
         /*
@@ -125,10 +125,10 @@ InvEcdSet InvDipoleFit::calculateFit() const
         if (settings->tstep < 0)
             settings->tstep = 1.0f / raw->info->sfreq;
 
-        BASELIB::Log::info("\tOpened raw data file {} : {} MEG and {} EEG", settings->measname.toStdString(), fit_data->nmeg, fit_data->neeg);
+        BASELIB::Log::info("\tOpened raw data file {} : {} MEG and {} EEG", settings->measname, fit_data->nmeg, fit_data->neeg);
     } else {
         BASELIB::Log::info("\n---- Reading data...\n");
-        data = MNEMeasData::mne_read_meas_data(settings->measname.toStdU16String(),
+        data = MNEMeasData::mne_read_meas_data(BASELIB::pathFromUtf8(settings->measname),
                                                settings->setno,
                                                nullptr,
                                                nullptr,
@@ -147,8 +147,8 @@ InvEcdSet InvDipoleFit::calculateFit() const
         if (settings->tstep < 0)
             settings->tstep = data->current->tstep;
 
-        BASELIB::Log::info("\tRead data set {} from {} : {} MEG and {} EEG", settings->setno, settings->measname.toStdString(), fit_data->nmeg, fit_data->neeg);
-        if (!settings->noisename.isEmpty()) {
+        BASELIB::Log::info("\tRead data set {} from {} : {} MEG and {} EEG", settings->setno, settings->measname, fit_data->nmeg, fit_data->neeg);
+        if (!settings->noisename.empty()) {
             BASELIB::Log::info("Scaling the noise covariance...");
             if (InvDipoleFitData::scale_noise_cov(fit_data.get(), data->current->nave) < 0)
                 return set;
@@ -159,8 +159,8 @@ InvEcdSet InvDipoleFit::calculateFit() const
      * Proceed to computing the fits
      */
     BASELIB::Log::info("\n---- Computing the forward solution for the guesses...\n");
-    auto guess = std::make_unique<InvGuessData>(settings->guessname.toStdU16String(),
-                                                settings->guess_surfname.toStdU16String(),
+    auto guess = std::make_unique<InvGuessData>(BASELIB::pathFromUtf8(settings->guessname),
+                                                BASELIB::pathFromUtf8(settings->guess_surfname),
                                                 settings->guess_mindist, settings->guess_exclude, settings->guess_grid, fit_data.get(), settings->guess_rad);
     if (guess->nguess == 0) {
         BASELIB::Log::critical("Could not create the initial guesses.");
@@ -183,14 +183,14 @@ InvEcdSet InvDipoleFit::calculateFit() const
 
 //=============================================================================================================
 
-bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
+bool InvDipoleFit::fit_dipoles(const std::string& dataname, MNEMeasData* data, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
 {
     Eigen::VectorXf one(data->nchan);
     InvEcdSet set;
     InvEcd dip;
     constexpr int report_interval = 10;
 
-    set.dataname = dataname.toStdString();
+    set.dataname = dataname;
 
     if (verbose)
         BASELIB::Log::info("Fitting...");
@@ -221,7 +221,7 @@ bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDi
 
 //=============================================================================================================
 
-bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
+bool InvDipoleFit::fit_dipoles_raw(const std::string& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
 {
     const int nchan = sel->nchan();
     const float sfreq = raw->info->sfreq;
@@ -239,7 +239,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
 
     InvEcd dip;
     InvEcdSet set;
-    set.dataname = dataname.toStdString();
+    set.dataname = dataname;
 
     /*
      * Load the initial data segment
@@ -283,7 +283,7 @@ bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNE
 
 //=============================================================================================================
 
-bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose)
+bool InvDipoleFit::fit_dipoles_raw(const std::string& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose)
 {
     InvEcdSet set;
     return fit_dipoles_raw(dataname, raw, sel, fit, guess, tmin, tmax, tstep, integ, verbose, set);

@@ -147,12 +147,12 @@ int main(int argc, char* argv[])
     MatrixXd matPosition;
 
     // setup informations for HPI fit (VectorView)
-    QVector<int> vecFreqs(lFreqs.size());
+    std::vector<int> vecFreqs(lFreqs.size());
     for (int i = 0; i < lFreqs.size(); i++) {
         vecFreqs[i] = lFreqs[i].toInt();
     }
 
-    QVector<double> vecError(lFreqs.size());
+    std::vector<double> vecError(lFreqs.size());
     VectorXd vecGoF;
     FiffDigPointSet fittedPointSet;
 

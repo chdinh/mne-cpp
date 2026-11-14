@@ -11,12 +11,12 @@
  *
  * Free functions in this header glue together the lower-level INVLIB
  * classes so users can match the MNE-Python ergonomics:
- * @ref INVLIB::applyInverseEpochs applies a precomputed inverse operator
- * across an epoch list, @ref INVLIB::applyInverseRaw "applyInverseRaw" streams raw data through
- * the kernel, @ref INVLIB::estimateSnr "estimateSnr" returns the whitened-data SNR
- * trace from an evoked + inverse pair, @ref INVLIB::computeWhitener "computeWhitener" produces the
+ * @ref INVLIB::apply_inverse_epochs applies a precomputed inverse operator
+ * across an epoch list, @ref INVLIB::apply_inverse_raw "apply_inverse_raw" streams raw data through
+ * the kernel, @ref INVLIB::estimate_snr "estimate_snr" returns the whitened-data SNR
+ * trace from an evoked + inverse pair, @ref INVLIB::compute_whitener "compute_whitener" produces the
  * diagonal whitener from a noise covariance, and
- * @ref INVLIB::computeSourcePsd "computeSourcePsd" / @ref INVLIB::computeSourceBandPower "computeSourceBandPower" run Welch-based
+ * @ref INVLIB::compute_source_psd "compute_source_psd" / @ref INVLIB::compute_source_band_power "compute_source_band_power" run Welch-based
  * spectral analysis directly on @ref INVLIB::InvSourceEstimate output. All
  * methods are headers-only orchestration on top of @ref INVLIB::InvMinimumNorm
  * and the underlying FIFF / MNE primitives.
@@ -41,13 +41,14 @@
 #include <Eigen/Core>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QList>
-#include <QString>
-#include <QPair>
-#include <QMap>
+#include <map>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -91,11 +92,11 @@ namespace INVLIB
  *
  * @return List of source estimates, one per epoch.
  */
-INVSHARED_EXPORT QList<InvSourceEstimate> applyInverseEpochs(
-    const QList<Eigen::MatrixXd>& epochs,
+INVSHARED_EXPORT std::vector<InvSourceEstimate> apply_inverse_epochs(
+    const std::vector<Eigen::MatrixXd>& epochs,
     const MNELIB::MNEInverseOperator& inverse,
     float lambda2,
-    const QString& method = "dSPM",
+    std::string_view method = "dSPM",
     float tmin = 0.0f,
     float tstep = 0.001f,
     bool pickNormal = false);
@@ -119,11 +120,11 @@ INVSHARED_EXPORT QList<InvSourceEstimate> applyInverseEpochs(
  *
  * @return Source estimate spanning the requested time range.
  */
-INVSHARED_EXPORT InvSourceEstimate applyInverseRaw(
+INVSHARED_EXPORT InvSourceEstimate apply_inverse_raw(
     const FIFFLIB::FiffRawData& raw,
     const MNELIB::MNEInverseOperator& inverse,
     float lambda2,
-    const QString& method = "dSPM",
+    std::string_view method = "dSPM",
     int from = -1,
     int to = -1,
     bool pickNormal = false);
@@ -143,7 +144,7 @@ INVSHARED_EXPORT InvSourceEstimate applyInverseRaw(
  *
  * @return Simulated evoked data, empty on error.
  */
-INVSHARED_EXPORT FIFFLIB::FiffEvoked applyForward(
+INVSHARED_EXPORT FIFFLIB::FiffEvoked apply_forward(
     const MNELIB::MNEForwardSolution& fwd,
     const InvSourceEstimate& stc,
     const FIFFLIB::FiffInfo& info);
@@ -162,7 +163,7 @@ INVSHARED_EXPORT FIFFLIB::FiffEvoked applyForward(
  *
  * @return Pair of (snr, snrEst), one value per time point.
  */
-INVSHARED_EXPORT QPair<Eigen::VectorXd, Eigen::VectorXd> estimateSnr(
+INVSHARED_EXPORT std::pair<Eigen::VectorXd, Eigen::VectorXd> estimate_snr(
     const FIFFLIB::FiffEvoked& evoked,
     const MNELIB::MNEInverseOperator& inverse);
 
@@ -178,7 +179,7 @@ INVSHARED_EXPORT QPair<Eigen::VectorXd, Eigen::VectorXd> estimateSnr(
  *
  * @return Pair of (whitener matrix, effective rank).
  */
-INVSHARED_EXPORT QPair<Eigen::MatrixXd, int> computeWhitener(
+INVSHARED_EXPORT std::pair<Eigen::MatrixXd, int> compute_whitener(
     const FIFFLIB::FiffCov& noiseCov,
     int rank = 0);
 
@@ -198,7 +199,7 @@ INVSHARED_EXPORT QPair<Eigen::MatrixXd, int> computeWhitener(
  *
  * @return Pair of (PSD matrix [n_sources x n_freqs], frequency vector).
  */
-INVSHARED_EXPORT QPair<Eigen::MatrixXd, Eigen::VectorXd> computeSourcePsd(
+INVSHARED_EXPORT std::pair<Eigen::MatrixXd, Eigen::VectorXd> compute_source_psd(
     const InvSourceEstimate& stc,
     float sfreq,
     float fmin = 0.0f,
@@ -217,10 +218,10 @@ INVSHARED_EXPORT QPair<Eigen::MatrixXd, Eigen::VectorXd> computeSourcePsd(
  *
  * @return Map of band name -> power vector (n_sources).
  */
-INVSHARED_EXPORT QMap<QString, Eigen::VectorXd> computeSourceBandPower(
+INVSHARED_EXPORT std::map<std::string, Eigen::VectorXd> compute_source_band_power(
     const InvSourceEstimate& stc,
     float sfreq,
-    const QMap<QString, QPair<float, float>>& bands);
+    const std::map<std::string, std::pair<float, float>>& bands);
 
 } // namespace INVLIB
 

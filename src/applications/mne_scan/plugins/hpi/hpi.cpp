@@ -39,6 +39,7 @@
 
 #include <QDir>
 #include <QDebug>
+#include <cmath>
 #include <utility>
 
 //=============================================================================================================
@@ -235,9 +236,9 @@ void Hpi::initFiffInfo(std::shared_ptr<FIFFLIB::FiffInfo> info)
     // Take the HPI coil excitation frequencies from the file when it provides
     // them, so the user does not have to type them in by hand. Frequencies the
     // user enters in the GUI still override these.
-    if (m_vCoilFreqs.isEmpty() && m_pFiffInfo && !m_pFiffInfo->hpi_coil_freqs.empty()) {
+    if (m_vCoilFreqs.empty() && m_pFiffInfo && !m_pFiffInfo->hpi_coil_freqs.empty()) {
         for (float fFreq : m_pFiffInfo->hpi_coil_freqs) {
-            m_vCoilFreqs.append(static_cast<int>(qRound(fFreq)));
+            m_vCoilFreqs.push_back(static_cast<int>(std::lround(fFreq)));
         }
 
         qInfo() << "[Hpi::initFiffInfo] Read" << m_vCoilFreqs.size()
@@ -480,7 +481,7 @@ void Hpi::onDoFreqOrder()
 void Hpi::onCoilFrequenciesChanged(const QVector<int>& vCoilFreqs)
 {
     m_mutex.lock();
-    m_vCoilFreqs = vCoilFreqs;
+    m_vCoilFreqs.assign(vCoilFreqs.begin(), vCoilFreqs.end());
     m_mutex.unlock();
 }
 
@@ -504,13 +505,6 @@ void Hpi::onCompStatusChanged(bool bChecked)
 
 void Hpi::onContHpiStatusChanged(bool bChecked)
 {
-    //    if(m_vCoilFreqs.size() < 3) {
-    //       QMessageBox msgBox;
-    //       msgBox.setText("Please load a digitizer set with at least 3 HPI coils first.");
-    //       msgBox.exec();
-    //       return;
-    //    }
-
     m_bDoContinousHpi = bChecked;
 }
 
@@ -558,7 +552,7 @@ void Hpi::run()
                                              false);
     HpiFitResult fitResult;
     fitResult.hpiFreqs = m_vCoilFreqs;
-    fitResult.errorDistances = QVector<double>(m_vCoilFreqs.size());
+    fitResult.errorDistances.assign(m_vCoilFreqs.size(), 0.0);
     fitResult.devHeadTrans = m_pFiffInfo->dev_head_t;
     fitResult.devHeadTrans.from = 1;
     fitResult.devHeadTrans.to = 4;
@@ -607,7 +601,7 @@ void Hpi::run()
                     m_bDoSingleHpi = false;
                     fitResult = HpiFitResult();
                 }
-                fitResult.sFilePathDigitzers = m_sFilePathDigitzers;
+                fitResult.digitizerFile = BASELIB::pathFromUtf8(m_sFilePathDigitzers.toStdString());
                 m_mutex.unlock();
 
                 matDataMerged.block(0, iDataIndexCounter, matData.rows(), matDataMerged.cols() - iDataIndexCounter) =
@@ -641,11 +635,11 @@ void Hpi::run()
                 }
 
                 //Check if the error meets distance requirement
-                if (fitResult.errorDistances.size() > 0) {
-                    dMeanErrorDist = std::accumulate(fitResult.errorDistances.begin(), fitResult.errorDistances.end(), .0) / fitResult.errorDistances.size();
+                if (!fitResult.errorDistances.empty()) {
+                    dMeanErrorDist = std::accumulate(fitResult.errorDistances.begin(), fitResult.errorDistances.end(), .0) / static_cast<double>(fitResult.errorDistances.size());
                     dMeanGoF = fitResult.GoF.mean();
 
-                    emit errorsChanged(fitResult.errorDistances, dMeanErrorDist);
+                    emit errorsChanged(QVector<double>(fitResult.errorDistances.begin(), fitResult.errorDistances.end()), dMeanErrorDist);
                     emit gofChanged(fitResult.GoF, dMeanGoF);
 
                     m_mutex.lock();

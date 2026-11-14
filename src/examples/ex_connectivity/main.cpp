@@ -311,7 +311,7 @@ int main(int argc, char* argv[])
                                             0.8f);
 
         // Compute inverse solution
-        InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
+        InvMinimumNorm minimumNorm(inverse_operator, lambda2, method.toStdString());
         minimumNorm.doInverseSetup(1, true);
 
         picks = raw.info.pick_types("all", true, false, {}, exclude);
@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
             }
         }
 
-        InvMinimumNorm minimumNormEvoked(inverse_operator, lambda2, method);
+        InvMinimumNorm minimumNormEvoked(inverse_operator, lambda2, method.toStdString());
         sourceEstimateEvoked = minimumNormEvoked.calculateInverse(evoked, false);
         pConnectivitySettingsManager->m_matEvoked = evoked.data;
         pConnectivitySettingsManager->m_matEvokedSource = sourceEstimateEvoked.data;

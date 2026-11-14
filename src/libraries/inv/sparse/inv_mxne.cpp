@@ -30,6 +30,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -135,16 +136,16 @@ InvMxneResult InvMxne::compute(
     result.nIterations = actualIterations;
 
     // Collect active vertices and build sparse output
-    QVector<int> finalActive;
+    std::vector<int> finalActive;
     for (int i = 0; i < nSources; ++i) {
         if (matX.row(i).norm() >= 1e-8) {
-            finalActive.append(i);
+            finalActive.push_back(i);
         }
     }
     result.activeVertices = finalActive;
 
     // Build source estimate with active rows only
-    const int nActiveFinal = finalActive.size();
+    const int nActiveFinal = static_cast<int>(finalActive.size());
     MatrixXd matActiveSol(nActiveFinal, nTimes);
     VectorXi vecActiveVerts(nActiveFinal);
     for (int i = 0; i < nActiveFinal; ++i) {

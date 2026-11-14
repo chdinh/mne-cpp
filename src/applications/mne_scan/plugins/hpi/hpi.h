@@ -40,6 +40,8 @@
 
 #include <Eigen/Core>
 
+#include <vector>
+
 //=============================================================================================================
 // FORWARD DECLARATIONS
 //=============================================================================================================
@@ -273,7 +275,7 @@ private:
 
     QMutex m_mutex; /**< The threads mutex.*/
 
-    QVector<int> m_vCoilFreqs; /**< Vector contains the HPI coil frequencies. */
+    std::vector<int> m_vCoilFreqs; /**< Vector contains the HPI coil frequencies. */
 
     QString m_sFilePathDigitzers; /**< The file path to the current digitzers. */
 

@@ -40,7 +40,8 @@
 #include "../inv_source_estimate.h"
 #include <fs/fs_label.h>
 
-#include <QString>
+#include <string>
+#include <string_view>
 
 
 //=============================================================================================================
@@ -81,7 +82,7 @@ public:
      * @param[in] lambda             The regularization factor.
      * @param[in] method             Use mininum norm, dSPM or sLORETA. ("MNE" | "dSPM" | "sLORETA").
      */
-    explicit InvMinimumNorm(const MNELIB::MNEInverseOperator& p_inverseOperator, float lambda, const QString method);
+    explicit InvMinimumNorm(const MNELIB::MNEInverseOperator& p_inverseOperator, float lambda, std::string_view method);
 
     //=========================================================================================================
     /**
@@ -134,7 +135,7 @@ public:
      * @param[in] pick_normal    If True, rather than pooling the orientations by taking the norm, only the.
      *                           radial component is kept. This is only applied when working with loose orientations.
      */
-    virtual void doInverseSetup(qint32 nave, bool pick_normal = false);
+    virtual void doInverseSetup(int nave, bool pick_normal = false);
 
     //=========================================================================================================
     /**
@@ -166,7 +167,7 @@ public:
      *
      * @param[in] method   Use minimum norm, dSPM, sLORETA, or eLORETA.
      */
-    void setMethod(QString method);
+    void setMethod(std::string_view method);
 
     //=========================================================================================================
     /**
@@ -219,7 +220,7 @@ private:
 
     MNELIB::MNEInverseOperator m_inverseOperator; /**< The inverse operator. */
     float m_fLambda;                              /**< Regularization parameter. */
-    QString m_sMethod;                            /**< Selected method. */
+    std::string m_sMethod;                        /**< Selected method. */
     bool m_bsLORETA;                              /**< Do sLORETA method. */
     bool m_bdSPM;                                 /**< Do dSPM method. */
     bool m_beLoreta;                              /**< Do eLORETA method. */

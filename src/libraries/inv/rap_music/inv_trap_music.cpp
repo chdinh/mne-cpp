@@ -56,12 +56,12 @@ InvTrapMusic::InvTrapMusic(int iMaxSources, double dThreshold)
 
 //=============================================================================================================
 
-QList<TrapMusicDipole> InvTrapMusic::compute(const MatrixXd& matLeadField,
-                                             const MatrixXd& matData,
-                                             const MatrixXd& matSourcePos,
-                                             int iNOrient) const
+std::vector<TrapMusicDipole> InvTrapMusic::compute(const MatrixXd& matLeadField,
+                                                   const MatrixXd& matData,
+                                                   const MatrixXd& matSourcePos,
+                                                   int iNOrient) const
 {
-    QList<TrapMusicDipole> dipoles;
+    std::vector<TrapMusicDipole> dipoles;
 
     const int nCh = static_cast<int>(matLeadField.rows());
     const int nSrc = static_cast<int>(matSourcePos.rows());
@@ -129,7 +129,7 @@ QList<TrapMusicDipole> InvTrapMusic::compute(const MatrixXd& matLeadField,
         } else {
             dipole.orientation = Vector3d(0, 0, 1);
         }
-        dipoles.append(dipole);
+        dipoles.push_back(dipole);
 
         // RAP step: P = I - A A^+ with A the found topographies
         found.conservativeResize(NoChange, found.cols() + 1);

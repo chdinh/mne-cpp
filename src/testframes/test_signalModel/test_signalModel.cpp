@@ -107,7 +107,7 @@ void TestSignalModel::testFitData_emptyHpiFres()
 
 void TestSignalModel::testFitData_emptySFreq()
 {
-    QVector<int> vecHpiFreqs = {1, 2, 3, 4};
+    std::vector<int> vecHpiFreqs = {1, 2, 3, 4};
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs, 0, 0, true);
 
     InvSignalModel signalModel = InvSignalModel();
@@ -129,7 +129,7 @@ void TestSignalModel::testFitData_basic_4coils()
     // Prepare
     int iSampleFreq = 1000;
     int iLineFreq = 60;
-    QVector<int> vecHpiFreqs = {154, 158, 161, 166};
+    std::vector<int> vecHpiFreqs = {154, 158, 161, 166};
     bool bBasic = true;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -182,7 +182,7 @@ void TestSignalModel::testFitData_basic_5coils()
     // Prepare
     int iSampleFreq = 1000;
     int iLineFreq = 60;
-    QVector<int> vecHpiFreqs = {154, 158, 161, 166, 172};
+    std::vector<int> vecHpiFreqs = {154, 158, 161, 166, 172};
     bool bBasic = true;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -237,7 +237,7 @@ void TestSignalModel::testFitData_advanced_4coils()
     // Prepare
     int iSampleFreq = 1000;
     int iLineFreq = 60;
-    QVector<int> vecHpiFreqs = {154, 158, 161, 166};
+    std::vector<int> vecHpiFreqs = {154, 158, 161, 166};
     bool bBasic = false;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,
@@ -291,7 +291,7 @@ void TestSignalModel::testFitData_advanced_5coils()
     // Prepare
     int iSampleFreq = 1000;
     int iLineFreq = 60;
-    QVector<int> vecHpiFreqs = {154, 158, 161, 166, 172};
+    std::vector<int> vecHpiFreqs = {154, 158, 161, 166, 172};
     bool bBasic = false;
     InvHpiModelParameters hpiModelParameters(vecHpiFreqs,
                                              iSampleFreq,

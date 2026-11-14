@@ -23,7 +23,7 @@
 #include "inv_pwl_rap_music.h"
 #include <base/log.h>
 
-#include <QDebug>
+#include <vector>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -85,7 +85,7 @@ InvSourceEstimate InvPwlRapMusic::calculateInverse(const MatrixXd& data, float t
 
 //=============================================================================================================
 
-InvSourceEstimate InvPwlRapMusic::calculateInverse(const MatrixXd& p_matMeasurement, QList<InvDipolePair<double>>& p_RapDipoles) const
+InvSourceEstimate InvPwlRapMusic::calculateInverse(const MatrixXd& p_matMeasurement, std::vector<InvDipolePair<double>>& p_RapDipoles) const
 {
     InvSourceEstimate p_SourceEstimate;
 

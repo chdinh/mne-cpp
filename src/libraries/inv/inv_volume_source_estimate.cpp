@@ -50,20 +50,19 @@ InvVolumeSourceEstimate::InvVolumeSourceEstimate(const MatrixXd& p_sol,
 
 //=============================================================================================================
 
-void InvVolumeSourceEstimate::setShape(const QVector<int>& shape)
+void InvVolumeSourceEstimate::set_shape(const Eigen::Vector3i& shape)
 {
-    if (shape.size() == 3)
-        m_shape = shape;
+    m_shape = shape;
 }
 
 //=============================================================================================================
 
-VectorXd InvVolumeSourceEstimate::toVolume(int timeIdx) const
+VectorXd InvVolumeSourceEstimate::to_volume(int timeIdx) const
 {
-    if (!hasShape() || timeIdx < 0 || timeIdx >= static_cast<int>(data.cols()))
+    if (!has_shape() || timeIdx < 0 || timeIdx >= static_cast<int>(data.cols()))
         return VectorXd();
 
-    int nTotal = m_shape[0] * m_shape[1] * m_shape[2];
+    const int nTotal = m_shape.prod();
     VectorXd vol = VectorXd::Zero(nTotal);
 
     for (int i = 0; i < vertices.size(); ++i) {
@@ -77,9 +76,9 @@ VectorXd InvVolumeSourceEstimate::toVolume(int timeIdx) const
 
 //=============================================================================================================
 
-Vector3d InvVolumeSourceEstimate::centreOfMass(int timeIdx) const
+Vector3d InvVolumeSourceEstimate::centre_of_mass(int timeIdx) const
 {
-    if (!hasShape() || timeIdx < 0 || timeIdx >= static_cast<int>(data.cols()))
+    if (!has_shape() || timeIdx < 0 || timeIdx >= static_cast<int>(data.cols()))
         return Vector3d::Zero();
 
     const int nx = m_shape[0];

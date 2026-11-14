@@ -41,7 +41,7 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QList>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -101,10 +101,10 @@ public:
      *
      * @return List of found dipoles, ordered by descending correlation.
      */
-    QList<TrapMusicDipole> compute(const Eigen::MatrixXd& matLeadField,
-                                   const Eigen::MatrixXd& matData,
-                                   const Eigen::MatrixXd& matSourcePos,
-                                   int iNOrient = 3) const;
+    std::vector<TrapMusicDipole> compute(const Eigen::MatrixXd& matLeadField,
+                                         const Eigen::MatrixXd& matData,
+                                         const Eigen::MatrixXd& matSourcePos,
+                                         int iNOrient = 3) const;
 
     //=========================================================================================================
     /**

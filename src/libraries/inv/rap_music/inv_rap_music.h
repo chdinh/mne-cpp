@@ -36,8 +36,6 @@
 #include <inv/inv_source_estimate.h>
 #include <time.h>
 
-#include <QVector>
-
 #include <vector>
 
 //=============================================================================================================
@@ -146,7 +144,7 @@ public:
 
     virtual InvSourceEstimate calculateInverse(const Eigen::MatrixXd& data, float tmin, float tstep, bool pick_normal = false) const;
 
-    virtual InvSourceEstimate calculateInverse(const Eigen::MatrixXd& p_matMeasurement, QList<InvDipolePair<double>>& p_RapDipoles) const;
+    virtual InvSourceEstimate calculateInverse(const Eigen::MatrixXd& p_matMeasurement, std::vector<InvDipolePair<double>>& p_RapDipoles) const;
 
     virtual const char* getName() const;
 
@@ -289,7 +287,7 @@ protected:
     static void insertSource(int p_iDipoleIdx1, int p_iDipoleIdx2,
                              const Vector6T& p_vec_phi_k_1,
                              double p_valCor,
-                             QList<InvDipolePair<double>>& p_RapDipoles);
+                             std::vector<InvDipolePair<double>>& p_RapDipoles);
 
     MNELIB::MNEForwardSolution m_ForwardSolution; /**< The Forward operator which should be scanned through*/
 

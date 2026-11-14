@@ -671,8 +671,8 @@ void TestInvDipoleRapMne::ecdSet_copyConstruction()
 void TestInvDipoleRapMne::dipoleFitSettings_defaultConstruction()
 {
     InvDipoleFitSettings settings;
-    QVERIFY(settings.measname.isEmpty());
-    QVERIFY(settings.bemname.isEmpty());
+    QVERIFY(settings.measname.empty());
+    QVERIFY(settings.bemname.empty());
     QVERIFY(!settings.accurate);
     QVERIFY(!settings.include_meg);
     QVERIFY(!settings.include_eeg);
@@ -834,7 +834,7 @@ void TestInvDipoleRapMne::minimumNorm_methodSetting()
     if (!m_bMneSampleAvailable)
         QFAIL("MNE sample data not available");
 
-    InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, QString("MNE"));
+    InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, "MNE");
     QCOMPARE(QString(mn.getName()), QString("Minimum Norm Estimate"));
 
     // setMethod changes internal flags, not getName() output
@@ -860,7 +860,7 @@ void TestInvDipoleRapMne::minimumNorm_calculateInverse()
 
     FiffEvoked evoked = evokedSet.evoked.front();
 
-    InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, QString("MNE"));
+    InvMinimumNorm mn(m_invOp, 1.0f / 9.0f, "MNE");
     InvSourceEstimate stc = mn.calculateInverse(evoked);
 
     QVERIFY(!stc.empty());

@@ -22,6 +22,9 @@
 
 #include "inv_dipole_fit_settings.h"
 #include <base/log.h>
+#include <base/string_utils.h>
+
+#include <optional>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -48,13 +51,12 @@ namespace
  */
 bool parseFloat(const char* arg, float& value)
 {
-    bool bOk = false;
-    const float parsed = QString::fromUtf8(arg).toFloat(&bOk);
-    if (bOk) {
-        value = parsed;
+    const std::optional<double> parsed = BASELIB::toDouble(arg);
+    if (parsed) {
+        value = static_cast<float>(*parsed);
     }
 
-    return bOk;
+    return parsed.has_value();
 }
 
 //=============================================================================================================
@@ -68,13 +70,12 @@ bool parseFloat(const char* arg, float& value)
  */
 bool parseInt(const char* arg, int& value)
 {
-    bool bOk = false;
-    const int parsed = QString::fromUtf8(arg).toInt(&bOk);
-    if (bOk) {
-        value = parsed;
+    const std::optional<int> parsed = BASELIB::toInt(arg);
+    if (parsed) {
+        value = *parsed;
     }
 
-    return bOk;
+    return parsed.has_value();
 }
 
 //=============================================================================================================
@@ -88,18 +89,18 @@ bool parseInt(const char* arg, int& value)
  */
 bool parseTriplet(const char* arg, Eigen::Vector3f& values)
 {
-    const QStringList parts = QString::fromUtf8(arg).split(':');
+    const BASELIB::StringList parts = BASELIB::split(arg, ':');
     if (parts.size() != 3) {
         return false;
     }
 
     Eigen::Vector3f parsed;
     for (int i = 0; i < 3; ++i) {
-        bool bOk = false;
-        parsed[i] = parts.at(i).toFloat(&bOk);
-        if (!bOk) {
+        const std::optional<double> part = BASELIB::toDouble(parts[static_cast<std::size_t>(i)]);
+        if (!part) {
             return false;
         }
+        parsed[i] = static_cast<float>(*part);
     }
 
     values = parsed;
@@ -199,12 +200,12 @@ bool InvDipoleFitSettings::checkIntegrity()
 {
     do_baseline = (bmin < BIG_TIME && bmax < BIG_TIME);
 
-    if (measname.isEmpty()) {
+    if (measname.empty()) {
         BASELIB::Log::critical("Data file name missing. Please specify one using the --meas option.");
         return false;
     }
-    if (guessname.isEmpty()) {
-        if (bemname.isEmpty() && !guess_surfname.isEmpty() && mriname.isEmpty()) {
+    if (guessname.empty()) {
+        if (bemname.empty() && !guess_surfname.empty() && mriname.empty()) {
             BASELIB::Log::critical("Please specify the MRI/head coordinate transformation with the --mri option");
             return false;
         }
@@ -217,19 +218,19 @@ bool InvDipoleFitSettings::checkIntegrity()
     if (!omit_data_proj && !std::ranges::contains(projnames, measname))
         projnames.insert(projnames.begin(), measname);
 
-    if (!bemname.isEmpty())
-        BASELIB::Log::info("BEM              : {}", bemname.toStdString());
+    if (!bemname.empty())
+        BASELIB::Log::info("BEM              : {}", bemname);
     else {
         BASELIB::Log::info("Sphere model     : origin at ({: 7.2f} {: 7.2f} {: 7.2f}) mm", 1000 * r0[0], 1000 * r0[1], 1000 * r0[2]);
     }
     BASELIB::Log::info("Using {} MEG coil definitions.", accurate ? "accurate" : "standard");
-    if (!mriname.isEmpty())
-        BASELIB::Log::info("MRI transform    : {}", mriname.toStdString());
-    if (!guessname.isEmpty())
-        BASELIB::Log::info("Guesses          : {}", guessname.toStdString());
+    if (!mriname.empty())
+        BASELIB::Log::info("MRI transform    : {}", mriname);
+    if (!guessname.empty())
+        BASELIB::Log::info("Guesses          : {}", guessname);
     else {
-        if (!guess_surfname.isEmpty())
-            BASELIB::Log::info("Guess space bounded by {}", guess_surfname.toStdString());
+        if (!guess_surfname.empty())
+            BASELIB::Log::info("Guess space bounded by {}", guess_surfname);
         else
             BASELIB::Log::info("Spherical guess space, rad = {:.1f} mm", 1000 * guess_rad);
         BASELIB::Log::info("Guess grid       : {:6.1f} mm", 1000 * guess_grid);
@@ -238,18 +239,18 @@ bool InvDipoleFitSettings::checkIntegrity()
         if (guess_exclude > 0)
             BASELIB::Log::info("Guess exclude    : {:6.1f} mm", 1000 * guess_exclude);
     }
-    BASELIB::Log::info("Data             : {}", measname.toStdString());
+    BASELIB::Log::info("Data             : {}", measname);
     if (projnames.size() > 0) {
         BASELIB::Log::info("SSP sources      :");
-        for (const QString& projname : projnames)
-            BASELIB::Log::info("\t{}", projname.toStdString());
+        for (const std::string& projname : projnames)
+            BASELIB::Log::info("\t{}", projname);
     }
-    if (!badname.isEmpty())
-        BASELIB::Log::info("Bad channels     : {}", badname.toStdString());
+    if (!badname.empty())
+        BASELIB::Log::info("Bad channels     : {}", badname);
     if (do_baseline)
         BASELIB::Log::info("Baseline         : {:10.2f} ... {:10.2f} ms", 1000 * bmin, 1000 * bmax);
-    if (!noisename.isEmpty()) {
-        BASELIB::Log::info("Noise covariance : {}", noisename.toStdString());
+    if (!noisename.empty()) {
+        BASELIB::Log::info("Noise covariance : {}", noisename);
         if (include_meg) {
             if (mag_reg > 0.0)
                 BASELIB::Log::info("\tNoise-covariance regularization (mag)     : {:<5.2f}", mag_reg);
@@ -261,10 +262,10 @@ bool InvDipoleFitSettings::checkIntegrity()
     }
     if (fit_mag_dipoles)
         BASELIB::Log::info("Fit data with magnetic dipoles");
-    if (!dipname.isEmpty())
-        BASELIB::Log::info("dip output      : {}", dipname.toStdString());
-    if (!bdipname.isEmpty())
-        BASELIB::Log::info("bdip output     : {}", bdipname.toStdString());
+    if (!dipname.empty())
+        BASELIB::Log::info("dip output      : {}", dipname);
+    if (!bdipname.empty())
+        BASELIB::Log::info("bdip output     : {}", bdipname);
     return true;
 }
 
@@ -348,10 +349,7 @@ void InvDipoleFitSettings::usage(const char* name)
 bool InvDipoleFitSettings::check_unrecognized_args(int argc, char** argv)
 {
     if (argc > 1) {
-        QString args;
-        for (int k = 1; k < argc; k++)
-            args += QString(argv[k]) + " ";
-        BASELIB::Log::critical("Unrecognized arguments : {}", args.trimmed().toStdString());
+        BASELIB::Log::critical("Unrecognized arguments : {}", BASELIB::join(BASELIB::StringList(argv + 1, argv + argc), " "));
         return false;
     }
     return true;
@@ -382,21 +380,21 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--guess: argument required.");
                 return false;
             }
-            guessname = QString(argv[k + 1]);
+            guessname = argv[k + 1];
         } else if (strcmp(argv[k], "--gsurf") == 0) {
             found = 2;
             if (k == *argc - 1) {
                 BASELIB::Log::critical("--gsurf: argument required.");
                 return false;
             }
-            guess_surfname = QString(argv[k + 1]);
+            guess_surfname = argv[k + 1];
         } else if (strcmp(argv[k], "--guesssurf") == 0) {
             found = 2;
             if (k == *argc - 1) {
                 BASELIB::Log::critical("--guesssurf: argument required.");
                 return false;
             }
-            guess_surfname = QString(argv[k + 1]);
+            guess_surfname = argv[k + 1];
         } else if (strcmp(argv[k], "--guessrad") == 0) {
             found = 2;
             if (k == *argc - 1) {
@@ -460,14 +458,14 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--mri: argument required.");
                 return false;
             }
-            mriname = QString(argv[k + 1]);
+            mriname = argv[k + 1];
         } else if (strcmp(argv[k], "--bem") == 0) {
             found = 2;
             if (k == *argc - 1) {
                 BASELIB::Log::critical("--bem: argument required.");
                 return false;
             }
-            bemname = QString(argv[k + 1]);
+            bemname = argv[k + 1];
         } else if (strcmp(argv[k], "--accurate") == 0) {
             found = 1;
             accurate = true;
@@ -511,14 +509,14 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--eegmodels: argument required.");
                 return false;
             }
-            eeg_model_file = QString(argv[k + 1]);
+            eeg_model_file = argv[k + 1];
         } else if (strcmp(argv[k], "--eegmodel") == 0) {
             found = 2;
             if (k == *argc - 1) {
                 BASELIB::Log::critical("--eegmodel: argument required.");
                 return false;
             }
-            eeg_model_name = QString(argv[k + 1]);
+            eeg_model_name = argv[k + 1];
         } else if (strcmp(argv[k], "--eegscalp") == 0) {
             found = 1;
             scale_eeg_pos = true;
@@ -528,7 +526,7 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--meas: argument required.");
                 return false;
             }
-            measname = QString(argv[k + 1]);
+            measname = argv[k + 1];
             is_raw = false;
         } else if (strcmp(argv[k], "--raw") == 0) {
             found = 2;
@@ -536,7 +534,7 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--raw: argument required.");
                 return false;
             }
-            measname = QString(argv[k + 1]);
+            measname = argv[k + 1];
             is_raw = true;
         } else if (strcmp(argv[k], "--proj") == 0) {
             found = 2;
@@ -554,14 +552,14 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--bad: argument required.");
                 return false;
             }
-            badname = QString(argv[k + 1]);
+            badname = argv[k + 1];
         } else if (strcmp(argv[k], "--noise") == 0) {
             found = 2;
             if (k == *argc - 1) {
                 BASELIB::Log::critical("--noise: argument required.");
                 return false;
             }
-            noisename = QString(argv[k + 1]);
+            noisename = argv[k + 1];
         } else if (strcmp(argv[k], "--gradnoise") == 0) {
             found = 2;
             if (k == *argc - 1) {
@@ -835,14 +833,14 @@ bool InvDipoleFitSettings::check_args(int* argc, char** argv)
                 BASELIB::Log::critical("--dip: argument required.");
                 return false;
             }
-            dipname = QString(argv[k + 1]);
+            dipname = argv[k + 1];
         } else if (strcmp(argv[k], "--bdip") == 0) {
             found = 2;
             if (k == *argc - 1) {
                 BASELIB::Log::critical("--bdip: argument required.");
                 return false;
             }
-            bdipname = QString(argv[k + 1]);
+            bdipname = argv[k + 1];
         } else if (strcmp(argv[k], "--verbose") == 0) {
             found = 1;
             verbose = true;

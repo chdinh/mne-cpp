@@ -101,7 +101,7 @@ void TestDipoleFit::dipoleFitSimple()
     InvDipoleFitSettings settings;
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif");
     QVERIFY(testFile.exists());
-    settings.measname = testFile.fileName();
+    settings.measname = testFile.fileName().toStdString();
     settings.is_raw = false;
     settings.setno = 1;
     settings.include_meg = true;
@@ -110,7 +110,7 @@ void TestDipoleFit::dipoleFitSimple()
     settings.tmax = 148.0f / 1000.0f;
     settings.bmin = -100.0f / 1000.0f;
     settings.bmax = 0.0f / 1000.0f;
-    settings.dipname = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/dip_fit.dat";
+    settings.dipname = (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/dip_fit.dat").toStdString();
 
     settings.checkIntegrity();
 
@@ -141,10 +141,10 @@ void TestDipoleFit::dipoleFitSimple()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Write Read Dipole Fit >>>>>>>>>>>>>>>>>>>>>>>>>\n");
     fflush(stdout);
 
-    QVERIFY(set.save_dipoles_dip(settings.dipname.toStdU16String()));
+    QVERIFY(set.save_dipoles_dip(BASELIB::pathFromUtf8(settings.dipname)));
     printf("[checkpoint] dipole file written (simple)\n");
     fflush(stdout);
-    m_ECDSet = InvEcdSet::read_dipoles_dip(settings.dipname.toStdU16String());
+    m_ECDSet = InvEcdSet::read_dipoles_dip(BASELIB::pathFromUtf8(settings.dipname));
     printf("[checkpoint] dipole file read back (simple, size=%d)\n", m_ECDSet.size());
     fflush(stdout);
 
@@ -192,7 +192,7 @@ void TestDipoleFit::dipoleFitAdvanced()
 
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif");
     QVERIFY(testFile.exists());
-    settings.measname = testFile.fileName();
+    settings.measname = testFile.fileName().toStdString();
 
     settings.is_raw = false;
     settings.setno = 1;
@@ -204,27 +204,27 @@ void TestDipoleFit::dipoleFitAdvanced()
 
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/subjects/sample/bem/sample-5120-bem.fif");
     QVERIFY(testFile.exists());
-    settings.bemname = testFile.fileName();
+    settings.bemname = testFile.fileName().toStdString();
 
     settings.bmin = 1000000.0f;
     settings.bmax = 1000000.0f;
 
-    settings.dipname = QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/dip-5120-bem_fit.dat";
+    settings.dipname = (QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/Result/dip-5120-bem_fit.dat").toStdString();
 
     settings.guess_mindist = 0.0f;
     settings.guess_rad = 0.1f;
 
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/all-trans.fif");
     QVERIFY(testFile.exists());
-    settings.mriname = testFile.fileName();
+    settings.mriname = testFile.fileName().toStdString();
 
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-cov.fif");
     QVERIFY(testFile.exists());
-    settings.noisename = testFile.fileName();
+    settings.noisename = testFile.fileName().toStdString();
 
     testFile.setFileName(QCoreApplication::applicationDirPath() + "/../resources/data/mne-cpp-test-data/MEG/sample/sample_audvis-ave.fif");
     QVERIFY(testFile.exists());
-    settings.projnames.push_back(testFile.fileName());
+    settings.projnames.push_back(testFile.fileName().toStdString());
 
     settings.checkIntegrity();
 
@@ -255,10 +255,10 @@ void TestDipoleFit::dipoleFitAdvanced()
     printf(">>>>>>>>>>>>>>>>>>>>>>>>> Write Read Dipole Fit >>>>>>>>>>>>>>>>>>>>>>>>>\n");
     fflush(stdout);
 
-    QVERIFY(set.save_dipoles_dip(settings.dipname.toStdU16String()));
+    QVERIFY(set.save_dipoles_dip(BASELIB::pathFromUtf8(settings.dipname)));
     printf("[checkpoint] dipole file written (advanced)\n");
     fflush(stdout);
-    m_ECDSet = InvEcdSet::read_dipoles_dip(settings.dipname.toStdU16String());
+    m_ECDSet = InvEcdSet::read_dipoles_dip(BASELIB::pathFromUtf8(settings.dipname));
     printf("[checkpoint] dipole file read back (advanced, size=%d)\n", m_ECDSet.size());
     fflush(stdout);
 

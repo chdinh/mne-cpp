@@ -88,7 +88,7 @@ void InvHpiDataUpdater::updateChannels(const std::shared_ptr<FiffInfo>& pFiffInf
             // Check if the sensor is bad, if not append to innerind
 
             if (!(FIFFLIB::has_channel(pFiffInfo->bads, pFiffInfo->ch_names.at(i)))) {
-                m_vecInnerind.append(i);
+                m_vecInnerind.push_back(i);
                 m_lChannels.push_back(pFiffInfo->chs[i]);
             }
         }
@@ -156,9 +156,9 @@ void InvHpiDataUpdater::prepareDataAndProjectors(const MatrixXd& matData, const 
 void InvHpiDataUpdater::prepareData(const Eigen::MatrixXd& matData)
 {
     // extract data for channels to use
-    m_matInnerdata = MatrixXd(m_vecInnerind.size(), matData.cols());
+    m_matInnerdata = MatrixXd(std::ssize(m_vecInnerind), matData.cols());
 
-    for (int j = 0; j < m_vecInnerind.size(); ++j) {
+    for (int j = 0; j < std::ssize(m_vecInnerind); ++j) {
         m_matInnerdata.row(j) << matData.row(m_vecInnerind[j]);
     }
 }
@@ -168,21 +168,21 @@ void InvHpiDataUpdater::prepareData(const Eigen::MatrixXd& matData)
 void InvHpiDataUpdater::prepareProjectors(const Eigen::MatrixXd& matProjectors)
 {
     // check if m_vecInnerInd is alreadz initialized
-    if (m_vecInnerind.size() == 0) {
+    if (m_vecInnerind.empty()) {
         BASELIB::Log::warning("InvHpiFit::updateProjectors - No channels. Returning.");
         return;
     }
 
     //Create new projector based on the excluded channels, first exclude the rows then the columns
-    MatrixXd matProjectorsRows(m_vecInnerind.size(), matProjectors.cols());
-    MatrixXd matProjectorsInnerind(m_vecInnerind.size(), m_vecInnerind.size());
+    MatrixXd matProjectorsRows(std::ssize(m_vecInnerind), matProjectors.cols());
+    MatrixXd matProjectorsInnerind(std::ssize(m_vecInnerind), std::ssize(m_vecInnerind));
 
     for (int i = 0; i < matProjectorsRows.rows(); ++i) {
-        matProjectorsRows.row(i) = matProjectors.row(m_vecInnerind.at(i));
+        matProjectorsRows.row(i) = matProjectors.row(m_vecInnerind[static_cast<std::size_t>(i)]);
     }
 
     for (int i = 0; i < matProjectorsInnerind.cols(); ++i) {
-        matProjectorsInnerind.col(i) = matProjectorsRows.col(m_vecInnerind.at(i));
+        matProjectorsInnerind.col(i) = matProjectorsRows.col(m_vecInnerind[static_cast<std::size_t>(i)]);
     }
     m_matProjectors = matProjectorsInnerind;
     return;

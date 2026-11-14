@@ -518,6 +518,35 @@ aliases; replace the old spelling as below.
   `coil_def.dat`, `icos.fif` and the test data with them instead of
   `QCoreApplication::applicationDirPath()`, so these lookups also work in
   programs without a Qt application object.
+- The inv library is Qt-free in its public headers and links Qt Core only
+  privately (for the CMNE model metadata). Migration, per class:
+  - `InvMinimumNorm(inverse, lambda, method)` and `setMethod(method)` take
+    `std::string_view`; `doInverseSetup` takes `int`. Pass
+    `method.toStdString()` for a `QString`.
+  - The convenience functions are snake_case and use std types:
+    `apply_inverse_epochs(std::vector<MatrixXd>, ...)` returns
+    `std::vector<InvSourceEstimate>`, `apply_inverse_raw`, `apply_forward`,
+    `estimate_snr`, `compute_whitener` and `compute_source_psd` return
+    `std::pair`, `compute_source_band_power` takes and returns `std::map`
+    keyed by `std::string`; `method` is a `std::string_view`.
+  - `InvVolumeSourceEstimate`: `set_shape(Eigen::Vector3i)`, `shape()`,
+    `has_shape()`, `to_volume()`, `centre_of_mass()` (was `setShape(QVector)`,
+    `hasShape`, `toVolume`, `centreOfMass`).
+  - `InvLabelTimeCourse::extract` takes the mode as `std::string_view`.
+  - `activeVertices` of `InvMxne`, `InvGammaMap` and `InvTfMxne` results,
+    `InvTrapMusic::compute` results and the RAP-MUSIC dipole lists are
+    `std::vector`; `InvLCMV::applyLCMVEpochs`/`InvDICS::applyDICSEpochs`
+    take and return `std::vector`; `InvBeamformer::kind`, `srcType` and
+    `subject` are `std::string`.
+  - `InvHpiModelParameters` takes the coil frequencies as
+    `std::vector<int>` and is a plain value type with defaulted `==`;
+    `HpiFitResult::hpiFreqs`/`errorDistances` are `std::vector`, and
+    `sFilePathDigitzers` is now `digitizerFile` (`std::filesystem::path`).
+  - `InvDipoleFitSettings` file names, `projnames`,
+    `InvDipoleFitData::setup_dipole_fit_data` and `bemname`, and
+    `InvDipoleFit::fit_dipoles(_raw)` data names are `std::string` (UTF-8).
+  - `InvCMNESettings::onnxModelPath` and `InvCMNE::applyCmne` take a
+    `std::string`.
 - `InvEcdSet` is a `std::vector`-backed container: `addEcd(ecd)` and
   `set << ecd` become `push_back(ecd)`, `empty()`, `begin()` and `end()`
   are new, `size()` returns `int`, and `dataname` is a `std::string`. The

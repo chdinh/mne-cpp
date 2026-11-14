@@ -13,9 +13,9 @@
  * on a regular voxel grid — used by volume MNE, beamformers in volume
  * mode and Gamma-MAP on volumetric source spaces. In addition to the
  * inherited vertex/data/time fields it stores an @c (nx, ny, nz) grid
- * shape and exposes @ref INVLIB::InvVolumeSourceEstimate::toVolume "toVolume" to materialise a dense 3-D volume at
+ * shape and exposes @ref INVLIB::InvVolumeSourceEstimate::to_volume "to_volume" to materialise a dense 3-D volume at
  * one time index (filling inactive voxels with zero) and
- * @ref INVLIB::InvVolumeSourceEstimate::centreOfMass "centreOfMass" for a quick activity centroid — both feeding directly
+ * @ref INVLIB::InvVolumeSourceEstimate::centre_of_mass "centre_of_mass" for a quick activity centroid — both feeding directly
  * into the @c MRILIB volume viewers.
  */
 
@@ -27,12 +27,6 @@
 //=============================================================================================================
 
 #include "inv_source_estimate.h"
-
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QVector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -75,15 +69,15 @@ public:
      *
      * @param[in] shape  Grid dimensions {nx, ny, nz}.
      */
-    void setShape(const QVector<int>& shape);
+    void set_shape(const Eigen::Vector3i& shape);
 
     //=========================================================================================================
     /**
      * Get the 3D grid shape.
      *
-     * @return Grid dimensions {nx, ny, nz}; empty if no shape was set.
+     * @return Grid dimensions {nx, ny, nz}; all zero if no shape was set.
      */
-    const QVector<int>& shape() const
+    const Eigen::Vector3i& shape() const
     {
         return m_shape;
     }
@@ -92,11 +86,11 @@ public:
     /**
      * Check whether the grid shape has been set.
      *
-     * @return True if the shape holds exactly three dimensions.
+     * @return True if all three dimensions are positive.
      */
-    bool hasShape() const
+    bool has_shape() const
     {
-        return m_shape.size() == 3;
+        return (m_shape.array() > 0).all();
     }
 
     //=========================================================================================================
@@ -109,7 +103,7 @@ public:
      * @return Flattened volume (nx*ny*nz, x fastest like volume source-space vertex numbers) with values at
      *         active voxels.
      */
-    Eigen::VectorXd toVolume(int timeIdx) const;
+    Eigen::VectorXd to_volume(int timeIdx) const;
 
     //=========================================================================================================
     /**
@@ -119,10 +113,10 @@ public:
      *
      * @return 3D position (x, y, z) in voxel coordinates, or (0,0,0) if no activity.
      */
-    Eigen::Vector3d centreOfMass(int timeIdx) const;
+    Eigen::Vector3d centre_of_mass(int timeIdx) const;
 
 private:
-    QVector<int> m_shape; // {nx, ny, nz}
+    Eigen::Vector3i m_shape = Eigen::Vector3i::Zero(); // {nx, ny, nz}
 };
 
 } // namespace INVLIB

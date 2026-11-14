@@ -95,15 +95,15 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationVersion(PROGRAM_VERSION);
 
     InvDipoleFitSettings settings(&argc, argv);
-    if (settings.measname.isEmpty() || (!settings.include_meg && !settings.include_eeg)) {
+    if (settings.measname.empty() || (!settings.include_meg && !settings.include_eeg)) {
         return 1;
     }
-    if (settings.dipname.isEmpty() && settings.bdipname.isEmpty()) {
+    if (settings.dipname.empty() && settings.bdipname.empty()) {
         qCritical("Output file name missing. Please use the --dip or --bdip options to do this.");
         return 1;
     }
-    if (!QFileInfo(settings.measname).isReadable()) {
-        qCritical("Measurement data file is not readable: %s", settings.measname.toUtf8().constData());
+    if (!QFileInfo(QString::fromStdString(settings.measname)).isReadable()) {
+        qCritical("Measurement data file is not readable: %s", settings.measname.c_str());
         return 1;
     }
 
@@ -121,8 +121,8 @@ int main(int argc, char* argv[])
         pModel->addDipoles(set);
 
         // Load brain surface if available
-        if (!settings.bemname.isEmpty()) {
-            MNEBem bem(settings.bemname.toStdU16String());
+        if (!settings.bemname.empty()) {
+            MNEBem bem(BASELIB::pathFromUtf8(settings.bemname));
             for (std::size_t i = 0; i < bem.size(); ++i) {
                 pModel->addBemSurface("Subject", "BEM", bem[i]);
             }
@@ -136,12 +136,12 @@ int main(int argc, char* argv[])
     /*
      * Saving...
      */
-    if (!settings.dipname.isEmpty() && !set.save_dipoles_dip(settings.dipname.toStdU16String())) {
-        qCritical("Dipoles could not be saved to %s.", settings.dipname.toUtf8().data());
+    if (!settings.dipname.empty() && !set.save_dipoles_dip(BASELIB::pathFromUtf8(settings.dipname))) {
+        qCritical("Dipoles could not be saved to %s.", settings.dipname.c_str());
         return 1;
     }
-    if (!settings.bdipname.isEmpty() && !set.save_dipoles_bdip(settings.bdipname.toStdU16String())) {
-        qCritical("Dipoles could not be saved to %s.", settings.bdipname.toUtf8().data());
+    if (!settings.bdipname.empty() && !set.save_dipoles_bdip(BASELIB::pathFromUtf8(settings.bdipname))) {
+        qCritical("Dipoles could not be saved to %s.", settings.bdipname.c_str());
         return 1;
     }
 

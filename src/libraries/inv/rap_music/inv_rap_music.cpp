@@ -27,7 +27,7 @@
 #include <math/numerics.h>
 #include <fiff/fiff_evoked.h>
 
-#include <QDebug>
+#include <vector>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -86,7 +86,7 @@ InvRapMusic::~InvRapMusic()
 
 //=============================================================================================================
 
-bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, double p_dThr)
+bool InvRapMusic::init(MNEForwardSolution& p_pFwd, [[maybe_unused]] bool p_bSparsed, int p_iN, double p_dThr)
 {
 //Get available thread number
 #ifdef _OPENMP
@@ -158,8 +158,6 @@ bool InvRapMusic::init(MNEForwardSolution& p_pFwd, bool p_bSparsed, int p_iN, do
 
     Log::debug("##### Initialization RAP MUSIC completed ######\n\n\n");
 
-    Q_UNUSED(p_bSparsed);
-
     m_bIsInit = true;
 
     return m_bIsInit;
@@ -181,10 +179,8 @@ const MNESourceSpaces& InvRapMusic::getSourceSpace() const
 
 //=============================================================================================================
 
-InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, bool pick_normal)
+InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, [[maybe_unused]] bool pick_normal)
 {
-    Q_UNUSED(pick_normal);
-
     InvSourceEstimate p_sourceEstimate;
 
     if (p_fiffEvoked.data.rows() != m_iNumChannels) {
@@ -208,10 +204,10 @@ InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, 
 
     if (m_iSamplesStcWindow <= 3 || m_iSamplesStcWindow >= p_fiffEvoked.data.cols()) // no window set, or it spans the data
     {
-        QList<InvDipolePair<double>> t_RapDipoles;
+        std::vector<InvDipolePair<double>> t_RapDipoles;
         calculateInverse(p_fiffEvoked.data, t_RapDipoles);
 
-        for (qint32 i = 0; i < t_RapDipoles.size(); ++i) {
+        for (std::size_t i = 0; i < t_RapDipoles.size(); ++i) {
             double dip1 = sqrt(pow(t_RapDipoles[i].m_Dipole1.phi_x(), 2) +
                                pow(t_RapDipoles[i].m_Dipole1.phi_y(), 2) +
                                pow(t_RapDipoles[i].m_Dipole1.phi_z(), 2)) *
@@ -232,20 +228,20 @@ InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, 
         bool first = true;
         bool last = false;
 
-        qint32 t_iNumSensors = p_fiffEvoked.data.rows();
-        qint32 t_iNumSteps = p_fiffEvoked.data.cols();
+        int t_iNumSensors = p_fiffEvoked.data.rows();
+        int t_iNumSteps = p_fiffEvoked.data.cols();
 
-        qint32 t_iSamplesOverlap = static_cast<qint32>(floor(static_cast<float>(m_iSamplesStcWindow) * m_fStcOverlap));
-        qint32 t_iSamplesDiscard = t_iSamplesOverlap / 2;
+        int t_iSamplesOverlap = static_cast<int>(floor(static_cast<float>(m_iSamplesStcWindow) * m_fStcOverlap));
+        int t_iSamplesDiscard = t_iSamplesOverlap / 2;
 
         MatrixXd data = MatrixXd::Zero(t_iNumSensors, m_iSamplesStcWindow);
 
-        qint32 curSample = 0;
-        qint32 curResultSample = 0;
-        qint32 stcWindowSize = m_iSamplesStcWindow - 2 * t_iSamplesDiscard;
+        int curSample = 0;
+        int curResultSample = 0;
+        int stcWindowSize = m_iSamplesStcWindow - 2 * t_iSamplesDiscard;
 
         while (!last) {
-            QList<InvDipolePair<double>> t_RapDipoles;
+            std::vector<InvDipolePair<double>> t_RapDipoles;
 
             //Data
             if (curSample + m_iSamplesStcWindow >= t_iNumSteps) //last
@@ -266,7 +262,7 @@ InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, 
             if (last)
                 stcWindowSize = p_sourceEstimate.data.cols() - curResultSample;
 
-            for (qint32 i = 0; i < t_RapDipoles.size(); ++i) {
+            for (std::size_t i = 0; i < t_RapDipoles.size(); ++i) {
                 double dip1 = sqrt(pow(t_RapDipoles[i].m_Dipole1.phi_x(), 2) +
                                    pow(t_RapDipoles[i].m_Dipole1.phi_y(), 2) +
                                    pow(t_RapDipoles[i].m_Dipole1.phi_z(), 2)) *
@@ -296,10 +292,8 @@ InvSourceEstimate InvRapMusic::calculateInverse(const FiffEvoked& p_fiffEvoked, 
 
 //=============================================================================================================
 
-InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& data, float tmin, float tstep, bool pick_normal) const
+InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& data, float tmin, float tstep, [[maybe_unused]] bool pick_normal) const
 {
-    Q_UNUSED(pick_normal);
-
     InvSourceEstimate p_sourceEstimate;
 
     if (data.rows() != m_iNumChannels) {
@@ -319,15 +313,15 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& data, float tmin
 
     p_sourceEstimate.times = RowVectorXf::Zero(data.cols());
     p_sourceEstimate.times[0] = tmin;
-    for (qint32 i = 1; i < p_sourceEstimate.times.size(); ++i)
+    for (int i = 1; i < p_sourceEstimate.times.size(); ++i)
         p_sourceEstimate.times[i] = p_sourceEstimate.times[i - 1] + tstep;
     p_sourceEstimate.tmin = tmin;
     p_sourceEstimate.tstep = tstep;
 
-    QList<InvDipolePair<double>> t_RapDipoles;
+    std::vector<InvDipolePair<double>> t_RapDipoles;
     calculateInverse(data, t_RapDipoles);
 
-    for (qint32 i = 0; i < t_RapDipoles.size(); ++i) {
+    for (std::size_t i = 0; i < t_RapDipoles.size(); ++i) {
         double dip1 = sqrt(pow(t_RapDipoles[i].m_Dipole1.phi_x(), 2) +
                            pow(t_RapDipoles[i].m_Dipole1.phi_y(), 2) +
                            pow(t_RapDipoles[i].m_Dipole1.phi_z(), 2)) *
@@ -350,7 +344,7 @@ InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& data, float tmin
 
 //=============================================================================================================
 
-InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement, QList<InvDipolePair<double>>& p_RapDipoles) const
+InvSourceEstimate InvRapMusic::calculateInverse(const MatrixXd& p_matMeasurement, std::vector<InvDipolePair<double>>& p_RapDipoles) const
 {
     InvSourceEstimate p_SourceEstimate;
 
@@ -793,7 +787,7 @@ void InvRapMusic::getGainMatrixPair(const MatrixXT& p_matGainMarix,
 void InvRapMusic::insertSource(int p_iDipoleIdx1, int p_iDipoleIdx2,
                                const Vector6T& p_vec_phi_k_1,
                                double p_valCor,
-                               QList<InvDipolePair<double>>& p_RapDipoles)
+                               std::vector<InvDipolePair<double>>& p_RapDipoles)
 {
     InvDipolePair<double> t_pRapDipolePair;
 
@@ -818,7 +812,7 @@ void InvRapMusic::insertSource(int p_iDipoleIdx1, int p_iDipoleIdx2,
 
     t_pRapDipolePair.m_vCorrelation = p_valCor;
 
-    p_RapDipoles.append(t_pRapDipolePair);
+    p_RapDipoles.push_back(t_pRapDipolePair);
 }
 
 //=============================================================================================================

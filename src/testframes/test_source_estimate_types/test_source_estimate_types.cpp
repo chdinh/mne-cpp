@@ -237,10 +237,10 @@ void TestSourceEstimateTypes::testVolumeConstruct()
 void TestSourceEstimateTypes::testVolumeShape()
 {
     InvVolumeSourceEstimate vol;
-    QVERIFY(!vol.hasShape());
+    QVERIFY(!vol.has_shape());
 
-    vol.setShape({4, 5, 6});
-    QVERIFY(vol.hasShape());
+    vol.set_shape({4, 5, 6});
+    QVERIFY(vol.has_shape());
     QCOMPARE(vol.shape()[0], 4);
     QCOMPARE(vol.shape()[1], 5);
     QCOMPARE(vol.shape()[2], 6);
@@ -263,9 +263,9 @@ void TestSourceEstimateTypes::testVolumeToVolume()
         5.0, 6.0;
 
     InvVolumeSourceEstimate vol(data, verts, 0.0f, 0.001f);
-    vol.setShape({nx, ny, nz});
+    vol.set_shape({nx, ny, nz});
 
-    VectorXd flat = vol.toVolume(0);
+    VectorXd flat = vol.to_volume(0);
     QCOMPARE(static_cast<int>(flat.size()), nTotal);
     QVERIFY(std::abs(flat[0] - 1.0) < 1e-10);
     QVERIFY(std::abs(flat[5] - 3.0) < 1e-10);
@@ -288,9 +288,9 @@ void TestSourceEstimateTypes::testVolumeCentreOfMass()
     data(0, 0) = 1.0;
 
     InvVolumeSourceEstimate vol(data, verts, 0.0f, 0.001f);
-    vol.setShape({nx, ny, nz});
+    vol.set_shape({nx, ny, nz});
 
-    Vector3d com = vol.centreOfMass(0);
+    Vector3d com = vol.centre_of_mass(0);
     QVERIFY(std::abs(com[0] - 2.0) < 1e-10);
     QVERIFY(std::abs(com[1] - 1.0) < 1e-10);
     QVERIFY(std::abs(com[2] - 3.0) < 1e-10);
@@ -313,7 +313,7 @@ void TestSourceEstimateTypes::testVolumeNoShape()
     MatrixXd data = MatrixXd::Ones(2, 3);
     InvVolumeSourceEstimate vol(data, verts, 0.0f, 0.001f);
 
-    VectorXd flat = vol.toVolume(0);
+    VectorXd flat = vol.to_volume(0);
     QCOMPARE(static_cast<int>(flat.size()), 0);
 }
 

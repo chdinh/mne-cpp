@@ -102,7 +102,7 @@ void TestAnalyzeDipoleFit::defaultPanelFitsLikeMneC()
 
     // The same fit with MNE-C's defaults (sphere origin (0, 0, 40) mm, EEG sphere radius 90 mm, ...)
     INVLIB::InvDipoleFitSettings settings;
-    settings.measname = avePath;
+    settings.measname = avePath.toStdString();
     settings.include_meg = true;
     settings.tmin = 0.09f;
     settings.tmax = 0.1f;

@@ -438,7 +438,7 @@ int main(int argc, char* argv[])
     //
     // Compute inverse solution
     //
-    InvMinimumNorm minimumNorm(inverse_operator, lambda2, method);
+    InvMinimumNorm minimumNorm(inverse_operator, lambda2, method.toStdString());
 
     InvSourceEstimate sourceEstimate = minimumNorm.calculateInverse(evoked);
 

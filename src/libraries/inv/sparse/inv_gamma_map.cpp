@@ -31,6 +31,7 @@
 
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include <limits>
 
 //=============================================================================================================
@@ -141,16 +142,16 @@ InvGammaMapResult InvGammaMap::compute(
     result.vecGamma = vecGamma;
 
     // Collect active vertices
-    QVector<int> finalActive;
+    std::vector<int> finalActive;
     for (int i = 0; i < nSources; ++i) {
         if (vecGamma(i) >= gammaThreshold) {
-            finalActive.append(i);
+            finalActive.push_back(i);
         }
     }
     result.activeVertices = finalActive;
 
     // Build source estimate with active rows only
-    const int nActiveFinal = finalActive.size();
+    const int nActiveFinal = static_cast<int>(finalActive.size());
     MatrixXd matActiveSol(nActiveFinal, nTimes);
     VectorXi vecActiveVerts(nActiveFinal);
     for (int i = 0; i < nActiveFinal; ++i) {

@@ -539,7 +539,7 @@ void TestMneInvCoverage::testMinNormCalculateInverse()
     QVERIFY2(!evokedSet.evoked.empty(), "No evoked data found in file");
 
     // Setup minimum norm and calculate inverse
-    InvMinimumNorm invMNE(invOp, 1.0f / 9.0f, QString("dSPM"));
+    InvMinimumNorm invMNE(invOp, 1.0f / 9.0f, "dSPM");
     invMNE.doInverseSetup(1, false);
 
     InvSourceEstimate stc = invMNE.calculateInverse(evokedSet.evoked[0]);

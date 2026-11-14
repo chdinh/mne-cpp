@@ -43,10 +43,10 @@
 #include <Eigen/Dense>
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QVector>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -63,11 +63,11 @@ namespace INVLIB
  */
 struct INVSHARED_EXPORT InvTfMxneResult
 {
-    InvSourceEstimate stc;          /**< Sparse source estimate (time domain). */
-    QVector<int> activeVertices;    /**< Indices of active sources. */
-    int nIterations = 0;            /**< Number of iterations performed. */
-    double residualNorm = 0.0;      /**< Final residual norm. */
-    Eigen::MatrixXd tfCoefficients; /**< Time-frequency coefficients of active sources (n_active*n_freqs × n_times). */
+    InvSourceEstimate stc;           /**< Sparse source estimate (time domain). */
+    std::vector<int> activeVertices; /**< Indices of active sources. */
+    int nIterations = 0;             /**< Number of iterations performed. */
+    double residualNorm = 0.0;       /**< Final residual norm. */
+    Eigen::MatrixXd tfCoefficients;  /**< Time-frequency coefficients of active sources (n_active*n_freqs × n_times). */
 };
 
 //=============================================================================================================

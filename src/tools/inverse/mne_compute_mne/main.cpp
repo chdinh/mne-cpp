@@ -998,7 +998,7 @@ int main(int argc, char* argv[])
     qInfo("\nComputing %s inverse solution (SNR=%.1f, lambda2=%.4e, nave=%d)...",
           method.toUtf8().constData(), snr, lambda2, nave);
 
-    InvMinimumNorm minimumNorm(invOp, lambda2, method);
+    InvMinimumNorm minimumNorm(invOp, lambda2, method.toStdString());
     minimumNorm.doInverseSetup(nave, pickNormal);
 
     InvSourceEstimate stc = minimumNorm.calculateInverse(data, tmin, tstep, pickNormal);

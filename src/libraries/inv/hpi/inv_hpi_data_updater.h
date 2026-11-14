@@ -35,11 +35,6 @@
 #include <fiff/fiff_dig_point.h>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-
-//=============================================================================================================
 // FORWARD DECLARATIONS
 //=============================================================================================================
 
@@ -182,7 +177,7 @@ private:
     void prepareProjectors(const Eigen::MatrixXd& matProjectors);
 
     std::vector<FIFFLIB::FiffChInfo> m_lChannels; /**< Channellist with bads excluded. */
-    QVector<int> m_vecInnerind;                   /**< index of inner channels . */
+    std::vector<int> m_vecInnerind;               /**< index of inner channels . */
     StringList m_lBads;                           /**< contains bad channels . */
     Eigen::MatrixXd m_matHpiDigitizer;            /**< The coordinates of the digitized HPI coils in head space*/
     Eigen::MatrixXd m_matProjectors;              /**< The projectors ready to use*/

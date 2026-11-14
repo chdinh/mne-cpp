@@ -111,19 +111,19 @@ VectorXd computeRowPsd(const VectorXd& row, int nFft, double sfreq)
 // DEFINE FUNCTIONS
 //=============================================================================================================
 
-QList<InvSourceEstimate> INVLIB::applyInverseEpochs(
-    const QList<MatrixXd>& epochs,
+std::vector<InvSourceEstimate> INVLIB::apply_inverse_epochs(
+    const std::vector<MatrixXd>& epochs,
     const MNEInverseOperator& inverse,
     float lambda2,
-    const QString& method,
+    std::string_view method,
     float tmin,
     float tstep,
     bool pickNormal)
 {
-    QList<InvSourceEstimate> results;
+    std::vector<InvSourceEstimate> results;
 
-    if (epochs.isEmpty()) {
-        BASELIB::Log::warning("[applyInverseEpochs] No epochs provided.");
+    if (epochs.empty()) {
+        BASELIB::Log::warning("[apply_inverse_epochs] No epochs provided.");
         return results;
     }
 
@@ -133,12 +133,12 @@ QList<InvSourceEstimate> INVLIB::applyInverseEpochs(
     // Setup once with nave=1 (per-epoch)
     mn.doInverseSetup(1, pickNormal);
 
-    for (int i = 0; i < epochs.size(); ++i) {
-        InvSourceEstimate stc = mn.calculateInverse(epochs[i], tmin, tstep, pickNormal);
-        if (stc.empty()) {
-            BASELIB::Log::warning("[applyInverseEpochs] Epoch {} produced empty source estimate.", i);
+    results.reserve(epochs.size());
+    for (const MatrixXd& epoch : epochs) {
+        results.push_back(mn.calculateInverse(epoch, tmin, tstep, pickNormal));
+        if (results.back().empty()) {
+            BASELIB::Log::warning("[apply_inverse_epochs] Epoch {} produced empty source estimate.", results.size() - 1);
         }
-        results.append(stc);
     }
 
     return results;
@@ -146,11 +146,11 @@ QList<InvSourceEstimate> INVLIB::applyInverseEpochs(
 
 //=============================================================================================================
 
-InvSourceEstimate INVLIB::applyInverseRaw(
+InvSourceEstimate INVLIB::apply_inverse_raw(
     const FiffRawData& raw,
     const MNEInverseOperator& inverse,
     float lambda2,
-    const QString& method,
+    std::string_view method,
     int from,
     int to,
     bool pickNormal)
@@ -164,7 +164,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
     // Pick channels matching the inverse operator
     RowVectorXi picks = FiffInfo::pick_channels(raw.info.ch_names, inverse.noise_cov.names);
     if (picks.size() == 0) {
-        BASELIB::Log::warning("[applyInverseRaw] No channels match the inverse operator.");
+        BASELIB::Log::warning("[apply_inverse_raw] No channels match the inverse operator.");
         return InvSourceEstimate();
     }
 
@@ -173,7 +173,7 @@ InvSourceEstimate INVLIB::applyInverseRaw(
     raw.read_raw_segment(data, times, from, to, picks);
 
     if (data.cols() == 0) {
-        BASELIB::Log::warning("[applyInverseRaw] No data read from raw file.");
+        BASELIB::Log::warning("[apply_inverse_raw] No data read from raw file.");
         return InvSourceEstimate();
     }
 
@@ -189,11 +189,11 @@ InvSourceEstimate INVLIB::applyInverseRaw(
 
 //=============================================================================================================
 
-FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEstimate& stc, const FiffInfo& info)
+FiffEvoked INVLIB::apply_forward(const MNEForwardSolution& fwd, const InvSourceEstimate& stc, const FiffInfo& info)
 {
     // Adapted from mne.forward.forward.apply_forward / _apply_forward (MNE-Python, BSD-3-Clause).
     if (fwd.sol.data.size() == 0 || stc.empty()) {
-        BASELIB::Log::warning("[applyForward] Empty forward solution or source estimate.");
+        BASELIB::Log::warning("[apply_forward] Empty forward solution or source estimate.");
         return FiffEvoked();
     }
     MNEForwardSolution fixed = fwd;
@@ -204,16 +204,16 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     }
     const MatrixXd& gain = fixed.sol.data;
 
-    QVector<int> columns(static_cast<int>(stc.data.rows()));
+    std::vector<int> columns(static_cast<std::size_t>(stc.data.rows()));
     if (nHemi == 0) {
         if (gain.cols() != stc.data.rows()) {
-            BASELIB::Log::warning("[applyForward] Forward columns {} != source estimate rows {}", gain.cols(), stc.data.rows());
+            BASELIB::Log::warning("[apply_forward] Forward columns {} != source estimate rows {}", gain.cols(), stc.data.rows());
             return FiffEvoked();
         }
         std::iota(columns.begin(), columns.end(), 0);
     } else {
         const int nLh = stc.nVerticesLh >= 0 ? stc.nVerticesLh : static_cast<int>(stc.vertices.size());
-        for (int r = 0; r < columns.size(); ++r) {
+        for (int r = 0; r < std::ssize(columns); ++r) {
             const int hemi = (r < nLh || nHemi == 1) ? 0 : 1;
             const VectorXi& vertno = fixed.src.hemisphereAt(hemi)->vertno;
             int offset = 0;
@@ -221,7 +221,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
                 offset += static_cast<int>(fixed.src.hemisphereAt(h)->vertno.size());
             const auto* hit = std::find(vertno.data(), vertno.data() + vertno.size(), stc.vertices(r));
             if (hit == vertno.data() + vertno.size()) {
-                BASELIB::Log::warning("[applyForward] Vertex {} is not in the forward solution.", stc.vertices(r));
+                BASELIB::Log::warning("[apply_forward] Vertex {} is not in the forward solution.", stc.vertices(r));
                 return FiffEvoked();
             }
             columns[r] = offset + static_cast<int>(hit - vertno.data());
@@ -232,7 +232,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     RowVectorXi sel(fixed.sol.row_names.empty() ? gain.rows() : fixed.sol.row_names.size());
     if (fixed.sol.row_names.empty()) {
         if (info.nchan != gain.rows()) {
-            BASELIB::Log::warning("[applyForward] Unnamed forward rows {} != info channels {}", gain.rows(), info.nchan);
+            BASELIB::Log::warning("[apply_forward] Unnamed forward rows {} != info channels {}", gain.rows(), info.nchan);
             return FiffEvoked();
         }
         std::iota(sel.begin(), sel.end(), 0);
@@ -240,14 +240,14 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
     for (int c = 0; c < static_cast<int>(fixed.sol.row_names.size()); ++c) {
         sel(c) = static_cast<int>(FIFFLIB::channel_index(info.ch_names, fixed.sol.row_names[c]));
         if (sel(c) < 0) {
-            BASELIB::Log::warning("[applyForward] Channel {} of the forward is not in the info.", fixed.sol.row_names[c]);
+            BASELIB::Log::warning("[apply_forward] Channel {} of the forward is not in the info.", fixed.sol.row_names[c]);
             return FiffEvoked();
         }
     }
 
     FiffEvoked evoked;
-    MatrixXd selected(gain.rows(), columns.size());
-    for (int r = 0; r < columns.size(); ++r)
+    MatrixXd selected(gain.rows(), std::ssize(columns));
+    for (int r = 0; r < std::ssize(columns); ++r)
         selected.col(r) = gain.col(columns[r]);
     evoked.data = selected * stc.data;
     evoked.info = info.pick_info(sel);
@@ -261,7 +261,7 @@ FiffEvoked INVLIB::applyForward(const MNEForwardSolution& fwd, const InvSourceEs
 
 //=============================================================================================================
 
-QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
+std::pair<VectorXd, VectorXd> INVLIB::estimate_snr(
     const FiffEvoked& evoked,
     const MNEInverseOperator& inverse)
 {
@@ -269,8 +269,8 @@ QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
     // compute_regularization in MNE-C's mne_analyze/regularization.c.
     const MNEInverseOperator inv = inverse.prepare_inverse_operator(evoked.nave, 1.0f / 9.0f, false);
     if (inv.eigen_fields.empty()) {
-        BASELIB::Log::warning("[estimateSnr] Could not prepare the inverse operator.");
-        return QPair<VectorXd, VectorXd>();
+        BASELIB::Log::warning("[estimate_snr] Could not prepare the inverse operator.");
+        return std::pair<VectorXd, VectorXd>();
     }
     const MatrixXd white = inv.whitener * inv.proj * evoked.pick_channels(inv.noise_cov.names).data;
     const MatrixXd whiteEf = inv.eigen_fields.data * white;
@@ -312,22 +312,22 @@ QPair<VectorXd, VectorXd> INVLIB::estimateSnr(
         }
     }
     if (!converged)
-        BASELIB::Log::warning("[estimateSnr] SNR estimation did not converge.");
+        BASELIB::Log::warning("[estimate_snr] SNR estimation did not converge.");
 
-    return QPair<VectorXd, VectorXd>(snr.cwiseSqrt(), lambda2.cwiseSqrt().cwiseInverse());
+    return std::pair<VectorXd, VectorXd>(snr.cwiseSqrt(), lambda2.cwiseSqrt().cwiseInverse());
 }
 
 //=============================================================================================================
 
-QPair<MatrixXd, int> INVLIB::computeWhitener(
+std::pair<MatrixXd, int> INVLIB::compute_whitener(
     const FiffCov& noiseCov,
     int rank)
 {
     const int dim = noiseCov.dim;
 
     if (dim <= 0) {
-        BASELIB::Log::warning("[computeWhitener] Empty noise covariance.");
-        return QPair<MatrixXd, int>(MatrixXd(), 0);
+        BASELIB::Log::warning("[compute_whitener] Empty noise covariance.");
+        return std::pair<MatrixXd, int>(MatrixXd(), 0);
     }
 
     // Use pre-computed eigendecomposition if available
@@ -374,12 +374,12 @@ QPair<MatrixXd, int> INVLIB::computeWhitener(
 
     MatrixXd whitener = invSqrtEig.asDiagonal() * eigvec;
 
-    return QPair<MatrixXd, int>(whitener, effectiveRank);
+    return std::pair<MatrixXd, int>(whitener, effectiveRank);
 }
 
 //=============================================================================================================
 
-QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
+std::pair<MatrixXd, VectorXd> INVLIB::compute_source_psd(
     const InvSourceEstimate& stc,
     float sfreq,
     float fmin,
@@ -387,8 +387,8 @@ QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
     int nFft)
 {
     if (stc.empty()) {
-        BASELIB::Log::warning("[computeSourcePsd] Empty source estimate.");
-        return QPair<MatrixXd, VectorXd>();
+        BASELIB::Log::warning("[compute_source_psd] Empty source estimate.");
+        return std::pair<MatrixXd, VectorXd>();
     }
 
     const int nSources = static_cast<int>(stc.data.rows());
@@ -424,8 +424,8 @@ QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
 
     int nBandFreqs = fmaxIdx - fminIdx + 1;
     if (nBandFreqs <= 0) {
-        BASELIB::Log::warning("[computeSourcePsd] No frequencies in range.");
-        return QPair<MatrixXd, VectorXd>();
+        BASELIB::Log::warning("[compute_source_psd] No frequencies in range.");
+        return std::pair<MatrixXd, VectorXd>();
     }
 
     // Compute PSD for each source
@@ -438,24 +438,24 @@ QPair<MatrixXd, VectorXd> INVLIB::computeSourcePsd(
 
     VectorXd bandFreqs = freqs.segment(fminIdx, nBandFreqs);
 
-    return QPair<MatrixXd, VectorXd>(psd, bandFreqs);
+    return std::pair<MatrixXd, VectorXd>(psd, bandFreqs);
 }
 
 //=============================================================================================================
 
-QMap<QString, VectorXd> INVLIB::computeSourceBandPower(
+std::map<std::string, VectorXd> INVLIB::compute_source_band_power(
     const InvSourceEstimate& stc,
     float sfreq,
-    const QMap<QString, QPair<float, float>>& bands)
+    const std::map<std::string, std::pair<float, float>>& bands)
 {
-    QMap<QString, VectorXd> result;
+    std::map<std::string, VectorXd> result;
 
-    if (stc.empty() || bands.isEmpty()) {
+    if (stc.empty() || bands.empty()) {
         return result;
     }
 
     // Compute full PSD
-    auto [psd, freqs] = computeSourcePsd(stc, sfreq);
+    auto [psd, freqs] = compute_source_psd(stc, sfreq);
     if (psd.size() == 0)
         return result;
 
@@ -463,9 +463,9 @@ QMap<QString, VectorXd> INVLIB::computeSourceBandPower(
     const int nFreqs = static_cast<int>(freqs.size());
     double df = (nFreqs > 1) ? (freqs(1) - freqs(0)) : 1.0;
 
-    for (auto it = bands.constBegin(); it != bands.constEnd(); ++it) {
-        float bfmin = it.value().first;
-        float bfmax = it.value().second;
+    for (const auto& [name, range] : bands) {
+        const float bfmin = range.first;
+        const float bfmax = range.second;
 
         VectorXd bandPower = VectorXd::Zero(nSources);
 
@@ -475,7 +475,7 @@ QMap<QString, VectorXd> INVLIB::computeSourceBandPower(
             }
         }
 
-        result[it.key()] = bandPower;
+        result[name] = bandPower;
     }
 
     return result;

@@ -106,7 +106,7 @@
       ]
     },
     "disp3D": {
-      "tokens": 2898,
+      "tokens": 2895,
       "public_header_includes": 142,
       "modules": [
         "Concurrent",
@@ -139,7 +139,7 @@
       "modules": []
     },
     "fwd": {
-      "tokens": 25,
+      "tokens": 9,
       "public_header_includes": 2,
       "modules": [
         "Concurrent",
@@ -154,10 +154,9 @@
       ]
     },
     "inv": {
-      "tokens": 212,
-      "public_header_includes": 28,
+      "tokens": 6,
+      "public_header_includes": 0,
       "modules": [
-        "Concurrent",
         "Core"
       ]
     },
@@ -202,7 +201,7 @@
       ]
     },
     "pybridge": {
-      "tokens": 35,
+      "tokens": 34,
       "public_header_includes": 0,
       "modules": [
         "Core"

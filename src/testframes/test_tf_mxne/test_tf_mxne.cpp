@@ -73,7 +73,7 @@ private slots:
         InvTfMxneResult result = InvTfMxne::compute(G, M, params);
 
         // Should find some active sources
-        QVERIFY(!result.activeVertices.isEmpty());
+        QVERIFY(!result.activeVertices.empty());
         QVERIFY(result.nIterations > 0);
         QVERIFY(!result.stc.empty());
     }
@@ -100,7 +100,7 @@ private slots:
         params.bDebias = false; // default iterations and tolerance: they must land within 1e-3 of the minimum
         const InvTfMxneResult result = InvTfMxne::compute(G, G * z0 * phi, params);
 
-        QCOMPARE(result.activeVertices, QVector<int>({5, 22}));
+        QCOMPARE(result.activeVertices, std::vector<int>({5, 22}));
         const MatrixXd& z = result.tfCoefficients;
         MatrixXd full = MatrixXd::Zero(40, 16);
         full.row(5) = z.row(0);
@@ -116,7 +116,7 @@ private slots:
         MatrixXd G(0, 0);
         MatrixXd M(0, 0);
         InvTfMxneResult result = InvTfMxne::compute(G, M);
-        QVERIFY(result.activeVertices.isEmpty());
+        QVERIFY(result.activeVertices.empty());
     }
 
     void testComputeDimensionMismatch()
@@ -140,7 +140,7 @@ private slots:
         InvTfMxneResult result = InvTfMxne::compute(G, M, params);
 
         // With very high regularization, should have no active sources
-        QVERIFY(result.activeVertices.isEmpty() || result.stc.data.norm() < 0.01);
+        QVERIFY(result.activeVertices.empty() || result.stc.data.norm() < 0.01);
     }
 
     void testResultMethod()
@@ -190,9 +190,9 @@ private slots:
 
         const InvTfMxneResult result = InvTfMxne::compute(G, M, params);
         QVERIFY(result.nIterations < params.iMaxIterations);
-        QVERIFY(result.activeVertices.contains(1) && result.activeVertices.contains(5));
+        QVERIFY(std::ranges::contains(result.activeVertices, 1) && std::ranges::contains(result.activeVertices, 5));
         MatrixXd Z = MatrixXd::Zero(nSrc, Phi.rows());
-        for (int i = 0; i < result.activeVertices.size(); ++i) {
+        for (int i = 0; i < std::ssize(result.activeVertices); ++i) {
             Z.row(result.activeVertices[i]) = result.tfCoefficients.row(i);
             QVERIFY((result.stc.data.row(i) - result.tfCoefficients.row(i) * Phi).norm() < 1e-12);
         }
@@ -217,8 +217,8 @@ private slots:
         // Debiasing refits the active set by least squares: G_A^T (M - G_A X) = 0.
         params.bDebias = true;
         const InvTfMxneResult debiased = InvTfMxne::compute(G, M, params);
-        MatrixXd GA(nCh, debiased.activeVertices.size());
-        for (int i = 0; i < debiased.activeVertices.size(); ++i)
+        MatrixXd GA(nCh, std::ssize(debiased.activeVertices));
+        for (int i = 0; i < std::ssize(debiased.activeVertices); ++i)
             GA.col(i) = G.col(debiased.activeVertices[i]);
         QVERIFY((GA.transpose() * (M - GA * debiased.stc.data)).norm() <= 1e-10 * M.norm());
     }

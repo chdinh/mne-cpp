@@ -43,10 +43,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
+#include <filesystem>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -108,12 +106,12 @@ struct CoilParam
  */
 struct HpiFitResult
 {
-    QVector<int> hpiFreqs;
+    std::vector<int> hpiFreqs;
     FIFFLIB::FiffDigPointSet fittedCoils;
     FIFFLIB::FiffCoordTrans devHeadTrans;
-    QVector<double> errorDistances;
+    std::vector<double> errorDistances;
     Eigen::VectorXd GoF;
-    QString sFilePathDigitzers;
+    std::filesystem::path digitizerFile;
     bool bIsLargeHeadMovement;
     float fHeadMovementDistance;
     float fHeadMovementAngle;
@@ -200,7 +198,7 @@ public:
                                   const Eigen::MatrixXf& matTransDevHead,
                                   Eigen::MatrixXd& matPosition,
                                   const Eigen::VectorXd& vecGoF,
-                                  const QVector<double>& vecError);
+                                  const std::vector<double>& vecError);
 
     //=========================================================================================================
     /**
@@ -244,7 +242,7 @@ private:
      */
     Eigen::MatrixXd computeSeedPoints(const Eigen::MatrixXd& matAmplitudes,
                                       const FIFFLIB::FiffCoordTrans& transDevHead,
-                                      const QVector<double>& vecError,
+                                      const std::vector<double>& vecError,
                                       const Eigen::MatrixXd& matCoilsHead);
 
     //=========================================================================================================
@@ -299,9 +297,9 @@ private:
      * @param[out]  transDevHead        The dev->head transformation matrix.
      * @return Returns the coil estimation error.
      */
-    QVector<double> computeEstimationError(const Eigen::MatrixXd& matCoilsDev,
-                                           const Eigen::MatrixXd& matCoilsHead,
-                                           const FIFFLIB::FiffCoordTrans& transDevHead);
+    std::vector<double> computeEstimationError(const Eigen::MatrixXd& matCoilsDev,
+                                               const Eigen::MatrixXd& matCoilsHead,
+                                               const FIFFLIB::FiffCoordTrans& transDevHead);
 
     //=========================================================================================================
     /**
@@ -349,8 +347,8 @@ private:
     Eigen::MatrixXd order(const std::vector<int>& vecOrder,
                           const Eigen::MatrixXd& matToOrder);
 
-    QVector<int> order(const std::vector<int>& vecOrder,
-                       const QVector<int>& vecToOrder);
+    std::vector<int> order(const std::vector<int>& vecOrder,
+                           const std::vector<int>& vecToOrder);
 
     //=========================================================================================================
     /**

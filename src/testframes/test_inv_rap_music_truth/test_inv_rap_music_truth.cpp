@@ -142,7 +142,7 @@ void TestInvRapMusicTruth::recoversPairs()
     const QList<QPair<int, int>> truth{{2, 9}, {4, 7}};
     const MatrixXd data = makeData(G, truth, {o1, o2});
 
-    QList<InvDipolePair<double>> found;
+    std::vector<InvDipolePair<double>> found;
     if (powell) {
         InvPwlRapMusic rap(fwd, false, 2, 0.5);
         rap.calculateInverse(data, found);
@@ -192,16 +192,16 @@ void TestInvRapMusicTruth::stopsAtThreshold()
     }
 
     InvRapMusic rap(fwd, false, 3, 0.99);
-    QList<InvDipolePair<double>> found;
+    std::vector<InvDipolePair<double>> found;
     rap.calculateInverse(data, found);
 
     QVERIFY(found.size() >= 1);
     QVERIFY(found.size() < 3);
-    QVERIFY(found.first().m_vCorrelation > 0.99);
-    QCOMPARE(std::min(found.first().m_iIdx1, found.first().m_iIdx2), 1);
-    QCOMPARE(std::max(found.first().m_iIdx1, found.first().m_iIdx2), 10);
+    QVERIFY(found.front().m_vCorrelation > 0.99);
+    QCOMPARE(std::min(found.front().m_iIdx1, found.front().m_iIdx2), 1);
+    QCOMPARE(std::max(found.front().m_iIdx1, found.front().m_iIdx2), 10);
     if (found.size() == 2) {
-        QVERIFY(found.last().m_vCorrelation < 0.99);
+        QVERIFY(found.back().m_vCorrelation < 0.99);
     }
 }
 
@@ -210,7 +210,7 @@ void TestInvRapMusicTruth::stopsAtThreshold()
 void TestInvRapMusicTruth::rejectsInvalidInput()
 {
     const MatrixXd G = makeLeadField();
-    QList<InvDipolePair<double>> found;
+    std::vector<InvDipolePair<double>> found;
 
     InvRapMusic uninitialised;
     QVERIFY_THROWS_EXCEPTION(std::logic_error, uninitialised.calculateInverse(MatrixXd::Zero(kChannels, kSamples), found));

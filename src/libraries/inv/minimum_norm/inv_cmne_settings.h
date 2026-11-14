@@ -28,10 +28,10 @@
 #include "../inv_global.h"
 
 //=============================================================================================================
-// QT INCLUDES
+// STL INCLUDES
 //=============================================================================================================
 
-#include <QString>
+#include <string>
 
 //=============================================================================================================
 // DEFINE NAMESPACE INVLIB
@@ -50,7 +50,7 @@ namespace INVLIB
  */
 struct INVSHARED_EXPORT InvCMNESettings
 {
-    QString onnxModelPath;           /**< Path to trained LSTM model (.onnx). */
+    std::string onnxModelPath;       /**< Path to trained LSTM model (.onnx). */
     int lookBack = 80;               /**< k: number of past time steps. */
     int numSources = 5124;           /**< n_s: must match model input dim. */
     double lambda2 = 1.0 / 9.0;      /**< Tikhonov regularisation (SNR=3 -> lambda^2=1/9). */

@@ -361,7 +361,7 @@ void InvDipoleFit::onNewBemSelected(const QString& sName)
     }
     for (QSharedPointer<ANSHAREDLIB::AbstractModel> pModel : m_ModelList) {
         if (QFileInfo(pModel->getModelPath()).fileName() == sName) {
-            m_DipoleSettings.bemname = pModel->getModelPath();
+            m_DipoleSettings.bemname = pModel->getModelPath().toStdString();
             return;
         }
     }
@@ -377,7 +377,7 @@ void InvDipoleFit::onNewMriSelected(const QString& sName)
     }
     for (QSharedPointer<ANSHAREDLIB::AbstractModel> pModel : m_ModelList) {
         if (QFileInfo(pModel->getModelPath()).fileName() == sName) {
-            m_DipoleSettings.mriname = pModel->getModelPath();
+            m_DipoleSettings.mriname = pModel->getModelPath().toStdString();
             return;
         }
     }
@@ -393,7 +393,7 @@ void InvDipoleFit::onNewNoiseSelected(const QString& sName)
     }
     for (QSharedPointer<ANSHAREDLIB::AbstractModel> pModel : m_ModelList) {
         if (QFileInfo(pModel->getModelPath()).fileName() == sName) {
-            m_DipoleSettings.noisename = pModel->getModelPath();
+            m_DipoleSettings.noisename = pModel->getModelPath().toStdString();
             return;
         }
     }
@@ -412,10 +412,10 @@ void InvDipoleFit::onNewMeasSelected(const QString& sName)
     for (QSharedPointer<ANSHAREDLIB::AbstractModel> pModel : m_ModelList) {
         if (QFileInfo(pModel->getModelPath()).fileName() == sName) {
             if (pModel->getType() == MODEL_TYPE::ANSHAREDLIB_AVERAGING_MODEL) {
-                m_DipoleSettings.measname = pModel->getModelPath();
+                m_DipoleSettings.measname = pModel->getModelPath().toStdString();
                 m_DipoleSettings.is_raw = false;
             } else if (pModel->getType() == MODEL_TYPE::ANSHAREDLIB_FIFFRAW_MODEL) {
-                m_DipoleSettings.measname = pModel->getModelPath();
+                m_DipoleSettings.measname = pModel->getModelPath().toStdString();
                 m_DipoleSettings.is_raw = true;
             }
         }

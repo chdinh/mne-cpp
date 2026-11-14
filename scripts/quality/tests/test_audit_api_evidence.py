@@ -73,7 +73,7 @@ class AuditTests(unittest.TestCase):
     def test_exports_and_free_functions_are_found(self) -> None:
         classes, functions = audit.exported_symbols(Path(__file__).resolve().parents[3] / "src" / "libraries")
         self.assertTrue(any(c["name"] == "FiffStream" for c in classes))
-        self.assertTrue(any(f["name"] == "applyInverseRaw" for f in functions))
+        self.assertTrue(any(f["name"] == "apply_inverse_raw" for f in functions))
 
     def test_records_are_classified_by_kind(self) -> None:
         records = {r["name"]: r for r in self.build()["classes"]}

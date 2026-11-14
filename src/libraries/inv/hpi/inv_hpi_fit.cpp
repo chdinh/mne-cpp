@@ -55,7 +55,6 @@
 // QT INCLUDES
 //=============================================================================================================
 
-#include <QVector>
 #include <base/thread_pool.h>
 
 //=============================================================================================================
@@ -198,7 +197,7 @@ Eigen::MatrixXd InvHpiFit::computeAmplitudes(const Eigen::MatrixXd& matProjected
 
 Eigen::MatrixXd InvHpiFit::computeSeedPoints(const Eigen::MatrixXd& matAmplitudes,
                                              const FIFFLIB::FiffCoordTrans& transDevHead,
-                                             const QVector<double>& vecError,
+                                             const std::vector<double>& vecError,
                                              const Eigen::MatrixXd& matCoilsHead)
 {
     const int iNumCoils = matCoilsHead.rows();
@@ -244,11 +243,10 @@ CoilParam InvHpiFit::dipfit(const MatrixXd matCoilsSeed,
                             const int iMaxIterations,
                             const float fAbortError)
 {
-    //Do this in conncurrent mode
-    //Generate QList structure which can be handled by the QConcurrent framework
+    // One fit per coil, run in parallel
     std::vector<InvHpiFitData> lCoilData;
 
-    for (qint32 i = 0; i < iNumCoils; ++i) {
+    for (int i = 0; i < iNumCoils; ++i) {
         InvHpiFitData coilData;
         coilData.m_coilPos = matCoilsSeed.row(i);
         coilData.m_sensorData = matData.col(i);
@@ -359,11 +357,11 @@ Eigen::MatrixXd InvHpiFit::order(const std::vector<int>& vecOrder,
 
 //=============================================================================================================
 
-QVector<int> InvHpiFit::order(const std::vector<int>& vecOrder,
-                              const QVector<int>& vecToOrder)
+std::vector<int> InvHpiFit::order(const std::vector<int>& vecOrder,
+                                  const std::vector<int>& vecToOrder)
 {
     const int iNumCoils = static_cast<int>(vecOrder.size());
-    QVector<int> vecToOrderTemp = vecToOrder;
+    std::vector<int> vecToOrderTemp = vecToOrder;
 
     for (int i = 0; i < iNumCoils; i++) {
         vecToOrderTemp[i] = vecToOrder[vecOrder[i]];
@@ -458,9 +456,9 @@ Eigen::Matrix4d InvHpiFit::computeTransformation(Eigen::MatrixXd matNH, MatrixXd
 
 //=============================================================================================================
 
-QVector<double> InvHpiFit::computeEstimationError(const Eigen::MatrixXd& matCoilsDev,
-                                                  const Eigen::MatrixXd& matCoilsHead,
-                                                  const FIFFLIB::FiffCoordTrans& transDevHead)
+std::vector<double> InvHpiFit::computeEstimationError(const Eigen::MatrixXd& matCoilsDev,
+                                                      const Eigen::MatrixXd& matCoilsHead,
+                                                      const FIFFLIB::FiffCoordTrans& transDevHead)
 {
     //Calculate Error
     MatrixXd matTemp = matCoilsDev;
@@ -469,7 +467,7 @@ QVector<double> InvHpiFit::computeEstimationError(const Eigen::MatrixXd& matCoil
 
     // compute error
     int iNumCoils = matCoilsDev.rows();
-    QVector<double> vecError(iNumCoils);
+    std::vector<double> vecError(iNumCoils);
     for (int i = 0; i < matDiffPos.rows(); ++i) {
         vecError[i] = matDiffPos.row(i).norm();
     }
@@ -502,7 +500,7 @@ void InvHpiFit::storeHeadPosition(float fTime,
                                   const Eigen::MatrixXf& transDevHead,
                                   Eigen::MatrixXd& matPosition,
                                   const Eigen::VectorXd& vecGoF,
-                                  const QVector<double>& vecError)
+                                  const std::vector<double>& vecError)
 
 {
     Matrix3f matRot = transDevHead.block(0, 0, 3, 3);

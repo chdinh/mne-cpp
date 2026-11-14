@@ -8,8 +8,6 @@ project(mne_mne LANGUAGES CXX)
 
 #Handle qt uic, moc, rrc automatically
 set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
 
 set(QT_REQUIRED_COMPONENTS Core Concurrent)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS ${QT_REQUIRED_COMPONENTS})

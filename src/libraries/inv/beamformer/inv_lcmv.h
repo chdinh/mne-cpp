@@ -37,7 +37,7 @@
 
 #include <fiff/fiff_cov.h>
 
-#include <QList>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -154,10 +154,10 @@ public:
      *
      * @return List of source estimates, one per epoch.
      */
-    static QList<InvSourceEstimate> applyLCMVEpochs(const QList<Eigen::MatrixXd>& epochs,
-                                                    float tmin,
-                                                    float tstep,
-                                                    const InvBeamformer& filters);
+    static std::vector<InvSourceEstimate> applyLCMVEpochs(const std::vector<Eigen::MatrixXd>& epochs,
+                                                          float tmin,
+                                                          float tstep,
+                                                          const InvBeamformer& filters);
 
     //=========================================================================================================
     /**
