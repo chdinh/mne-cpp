@@ -39,11 +39,7 @@
 #include <utility>
 #include "mne_epoch_data.h"
 
-//=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QList>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE MNELIB
@@ -73,7 +69,7 @@ struct ArtifactRejectionData
  *
  * @snippet ex_mne_api/main.cpp mne_epoch_rejection_usage
  */
-class MNESHARED_EXPORT MNEEpochDataList : public QList<std::shared_ptr<MNEEpochData>>
+class MNESHARED_EXPORT MNEEpochDataList : public std::vector<std::shared_ptr<MNEEpochData>>
 {
 public:
     //=========================================================================================================

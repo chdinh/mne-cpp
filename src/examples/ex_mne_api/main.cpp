@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
     const FiffEvents events = FiffEvents::find_events(raw).value(); // rising edges on STI 014
     // Epochs of event 1 from -100 to 300 ms, no rejection
     MNEEpochDataList epochs = MNEEpochDataList::readEpochs(raw, events.events, -0.1f, 0.3f, 1, {});
-    const MNEEpochData& firstEpoch = *epochs.first();
+    const MNEEpochData& firstEpoch = *epochs.front();
     FiffEvoked evoked = epochs.average(raw.info, raw.first_samp, raw.last_samp);
     //! [mne_epoch_data_list_usage]
     // mne.Epochs(event_id=1, tmin=-0.1, tmax=0.3, baseline=None, proj=False): 6 epochs of 376 x 121, MEG 0113 first sample -7.5857e-15

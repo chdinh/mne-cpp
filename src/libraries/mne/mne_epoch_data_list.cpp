@@ -34,14 +34,6 @@
 #include <fiff/fiff_evoked_set.h>
 
 //=============================================================================================================
-// QT INCLUDES
-//=============================================================================================================
-
-#include <QPointer>
-#include <QtConcurrent>
-#include <QDebug>
-
-//=============================================================================================================
 // STL INCLUDES
 //=============================================================================================================
 
@@ -153,12 +145,12 @@ MNEEpochDataList MNEEpochDataList::readEpochs(const FiffRawData& raw,
             }
 
             //Check if data block has the same size as the previous one
-            if (!data.isEmpty()) {
-                if (epoch->epoch.size() == data.last()->epoch.size()) {
-                    data.append(std::shared_ptr<MNEEpochData>(epoch.release())); //List takes ownwership of the pointer - no delete need
+            if (!data.empty()) {
+                if (epoch->epoch.size() == data.back()->epoch.size()) {
+                    data.push_back(std::shared_ptr<MNEEpochData>(epoch.release())); //List takes ownwership of the pointer - no delete need
                 }
             } else {
-                data.append(std::shared_ptr<MNEEpochData>(epoch.release())); //List takes ownwership of the pointer - no delete need
+                data.push_back(std::shared_ptr<MNEEpochData>(epoch.release())); //List takes ownwership of the pointer - no delete need
             }
         } else {
             Log::warning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
@@ -194,14 +186,14 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
     if (sel.size() > 0) {
         p_evoked.nave = sel.size();
 
-        for (qint32 i = 0; i < sel.size(); ++i) {
-            matAverage.array() += this->at(sel(i))->epoch.array();
+        for (Eigen::Index i = 0; i < sel.size(); ++i) {
+            matAverage.array() += this->at(static_cast<std::size_t>(sel(i)))->epoch.array();
         }
     } else {
-        p_evoked.nave = this->size();
+        p_evoked.nave = static_cast<int>(this->size());
 
-        for (qint32 i = 0; i < this->size(); ++i) {
-            matAverage.array() += this->at(i)->epoch.array();
+        for (const std::shared_ptr<MNEEpochData>& epoch : *this) {
+            matAverage.array() += epoch->epoch.array();
         }
     }
     matAverage.array() /= p_evoked.nave;
@@ -216,13 +208,13 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
     p_evoked.last = last;
 
     // Sample times relative to the event, as in readEpochs (and mne.Epochs.times)
-    const long firstSample = std::lround(this->first()->tmin * info.sfreq);
-    p_evoked.times.resize(this->first()->epoch.cols());
+    const long firstSample = std::lround(this->front()->tmin * info.sfreq);
+    p_evoked.times.resize(this->front()->epoch.cols());
     for (Eigen::Index i = 0; i < p_evoked.times.size(); ++i) {
         p_evoked.times[i] = static_cast<float>((firstSample + i) / info.sfreq);
     }
 
-    p_evoked.comment = std::to_string(this->at(0)->event);
+    p_evoked.comment = std::to_string(this->front()->event);
 
     if (p_evoked.proj.rows() > 0) {
         matAverage = p_evoked.proj * matAverage;
@@ -239,9 +231,8 @@ FiffEvoked MNEEpochDataList::average(const FiffInfo& info,
 void MNEEpochDataList::applyBaselineCorrection(const std::pair<float, float>& baseline)
 {
     // Run baseline correction
-    QMutableListIterator<std::shared_ptr<MNEEpochData>> i(*this);
-    while (i.hasNext()) {
-        i.next()->applyBaselineCorrection(baseline);
+    for (const std::shared_ptr<MNEEpochData>& epoch : *this) {
+        epoch->applyBaselineCorrection(baseline);
     }
 }
 
@@ -249,21 +240,15 @@ void MNEEpochDataList::applyBaselineCorrection(const std::pair<float, float>& ba
 
 void MNEEpochDataList::dropRejected()
 {
-    QMutableListIterator<std::shared_ptr<MNEEpochData>> i(*this);
-    while (i.hasNext()) {
-        if (i.next()->isRejected()) {
-            i.remove();
-        }
-    }
+    std::erase_if(*this, [](const std::shared_ptr<MNEEpochData>& epoch) { return epoch->isRejected(); });
 }
 
 //=============================================================================================================
 
 void MNEEpochDataList::pick_channels(const RowVectorXi& sel)
 {
-    QMutableListIterator<std::shared_ptr<MNEEpochData>> i(*this);
-    while (i.hasNext()) {
-        i.next()->pick_channels(sel);
+    for (const std::shared_ptr<MNEEpochData>& epoch : *this) {
+        epoch->pick_channels(sel);
     }
 }
 
@@ -313,14 +298,11 @@ bool MNEEpochDataList::checkForArtifact(const MatrixXd& data,
     }
 
 
-    //Start the concurrent processing
-    QFuture<void> future = QtConcurrent::map(lchData, checkChThreshold);
-    future.waitForFinished();
-
-    for (int i = 0; i < std::ssize(lchData); ++i) {
-        if (lchData.at(i).bRejected) {
+    for (ArtifactRejectionData& channel : lchData) {
+        checkChThreshold(channel);
+        if (channel.bRejected) {
             bReject = true;
-            Log::info("[MNEEpochDataList::checkForArtifact] Reject trial because of channel {}", lchData.at(i).sChName);
+            Log::info("[MNEEpochDataList::checkForArtifact] Reject trial because of channel {}", channel.sChName);
             break;
         }
     }
@@ -389,7 +371,7 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
                                                                   eventCode,
                                                                   mapReject);
 
-        if (epochList.isEmpty()) {
+        if (epochList.empty()) {
             Log::warning("[MNEEpochDataList::averageCategories] No epochs found for event {} - skipping category.", eventCode);
             continue;
         }
@@ -402,7 +384,7 @@ FiffEvokedSet MNEEpochDataList::averageCategories(const FiffRawData& raw,
         // Drop rejected epochs
         epochList.dropRejected();
 
-        if (epochList.isEmpty()) {
+        if (epochList.empty()) {
             Log::warning("[MNEEpochDataList::averageCategories] All epochs rejected for event {} - skipping category.", eventCode);
             continue;
         }
@@ -457,13 +439,13 @@ FiffEvoked MNEEpochDataList::computeAverage(const FiffRawData& raw,
         lstEpochDataList.dropRejected();
     }
 
-    if (lstEpochDataList.isEmpty())
+    if (lstEpochDataList.empty())
         return FiffEvoked();
 
     const fiff_int_t first = static_cast<fiff_int_t>(std::lround(fTMinS * raw.info.sfreq));
     FiffEvoked evoked = lstEpochDataList.average(raw.info,
                                                  first,
-                                                 first + static_cast<fiff_int_t>(lstEpochDataList.first()->epoch.cols()) - 1);
+                                                 first + static_cast<fiff_int_t>(lstEpochDataList.front()->epoch.cols()) - 1);
     evoked.baseline = bApplyBaseline ? std::pair<float, float>(fTBaselineFromS, fTBaselineToS)
                                      : std::pair<float, float>(0.0f, 0.0f);
     return evoked;

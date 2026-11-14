@@ -374,7 +374,7 @@ private slots:
             std::shared_ptr<MNEEpochData> e = std::make_shared<MNEEpochData>();
             e->epoch = MatrixXd::Random(2, 10);
             e->bReject = (i == 1 || i == 3); // reject epochs 1 and 3
-            list.append(e);
+            list.push_back(e);
         }
         QCOMPARE(list.size(), 5);
         list.dropRejected();
@@ -387,14 +387,14 @@ private slots:
         for (int i = 0; i < 3; ++i) {
             std::shared_ptr<MNEEpochData> e = std::make_shared<MNEEpochData>();
             e->epoch = MatrixXd::Random(5, 10); // 5 channels, 10 samples
-            list.append(e);
+            list.push_back(e);
         }
 
         RowVectorXi sel(2);
         sel << 0, 3; // pick channels 0 and 3
         list.pick_channels(sel);
 
-        for (int i = 0; i < list.size(); ++i) {
+        for (int i = 0; i < std::ssize(list); ++i) {
             QCOMPARE(list[i]->epoch.rows(), (Eigen::Index)2);
         }
     }
@@ -796,7 +796,7 @@ private slots:
                 epoch->epoch = data;
                 epoch->tmin = (float)(from - raw.first_samp) / raw.info.sfreq;
                 epoch->tmax = epoch->tmin + 0.5f;
-                epochList.append(epoch);
+                epochList.push_back(epoch);
                 nEpochs++;
             }
             from += epochSamples;
@@ -828,13 +828,13 @@ private slots:
                 std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
                 epoch->epoch = data;
                 epoch->bReject = (i == 2);
-                epochList.append(epoch);
+                epochList.push_back(epoch);
             }
             from += epochSamples;
         }
-        int orig = epochList.size();
+        const auto orig = std::ssize(epochList);
         epochList.dropRejected();
-        QVERIFY(epochList.size() <= orig);
+        QVERIFY(std::ssize(epochList) <= orig);
     }
 
     void data_epochList_pickChannels()
@@ -855,7 +855,7 @@ private slots:
             if (raw.read_raw_segment(data, times, from, from + epochSamples - 1)) {
                 std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
                 epoch->epoch = data;
-                epochList.append(epoch);
+                epochList.push_back(epoch);
             }
             from += epochSamples;
         }
@@ -865,7 +865,7 @@ private slots:
         for (int i = 0; i < 10; ++i)
             sel(i) = i;
         epochList.pick_channels(sel);
-        for (int i = 0; i < epochList.size(); ++i)
+        for (int i = 0; i < std::ssize(epochList); ++i)
             QCOMPARE(epochList[i]->epoch.rows(), (Eigen::Index)10);
     }
 

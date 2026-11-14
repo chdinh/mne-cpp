@@ -647,7 +647,7 @@ private slots:
                                                                          0.3f,
                                                                          codes.front(),
                                                                          {});
-        QVERIFY(!unfilteredEpochs.isEmpty());
+        QVERIFY(!unfilteredEpochs.empty());
 
         MNEEpochDataList filteredEpochs = MNEEpochDataList::readEpochs(raw,
                                                                        events,
@@ -655,7 +655,7 @@ private slots:
                                                                        0.3f,
                                                                        codes.front(),
                                                                        {});
-        QVERIFY(!filteredEpochs.isEmpty());
+        QVERIFY(!filteredEpochs.empty());
 
         SessionFilter filter(QStringLiteral("analysis_filter"),
                              SessionFilter::DesignMethod::Butterworth,
@@ -673,22 +673,22 @@ private slots:
             epoch->epoch = filter.applyToMatrix(epoch->epoch, raw.info);
         }
 
-        const MatrixXd originalEpoch = unfilteredEpochs.first()->epoch;
-        const MatrixXd filteredEpoch = filteredEpochs.first()->epoch;
+        const MatrixXd originalEpoch = unfilteredEpochs.front()->epoch;
+        const MatrixXd filteredEpoch = filteredEpochs.front()->epoch;
         QVERIFY((filteredEpoch - originalEpoch).cwiseAbs().maxCoeff() > 1e-15);
 
         const FiffEvoked evokedOriginal = unfilteredEpochs.average(raw.info,
                                                                    0,
-                                                                   unfilteredEpochs.first()->epoch.cols());
+                                                                   unfilteredEpochs.front()->epoch.cols());
         const FiffEvoked evokedFiltered = filteredEpochs.average(raw.info,
                                                                  0,
-                                                                 filteredEpochs.first()->epoch.cols());
+                                                                 filteredEpochs.front()->epoch.cols());
         QVERIFY((evokedFiltered.data - evokedOriginal.data).cwiseAbs().maxCoeff() > 1e-15);
 
         MatrixXd covOriginal = MatrixXd::Zero(raw.info.nchan, raw.info.nchan);
         MatrixXd covFiltered = MatrixXd::Zero(raw.info.nchan, raw.info.nchan);
         int sampleCount = 0;
-        for (int i = 0; i < unfilteredEpochs.size(); ++i) {
+        for (int i = 0; i < std::ssize(unfilteredEpochs); ++i) {
             covOriginal += unfilteredEpochs.at(i)->epoch * unfilteredEpochs.at(i)->epoch.transpose();
             covFiltered += filteredEpochs.at(i)->epoch * filteredEpochs.at(i)->epoch.transpose();
             sampleCount += static_cast<int>(unfilteredEpochs.at(i)->epoch.cols());

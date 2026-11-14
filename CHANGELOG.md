@@ -489,6 +489,11 @@ aliases; replace the old spelling as below.
   `Eigen::Vector2d(x, y)`, `QRectF(x, y, w, h)` becomes
   `Eigen::AlignedBox2d(Eigen::Vector2d(x, y), Eigen::Vector2d(x + w, y + h))`,
   `rect.left()`/`top()` become `box.min().x()`/`min().y()`.
+- `MNEEpochDataList` derives from `std::vector` instead of `QList`.
+  Migration: `isEmpty()` becomes `empty()`, `first()`/`last()` become
+  `front()`/`back()`, `append(epoch)` and `list << epoch` become
+  `push_back(epoch)`; `size()` is unsigned, so compare it with
+  `std::ssize(list)` in signed loops.
 - The remaining `Q_DECLARE_METATYPE` declarations in the connectivity and
   disp libraries, MNE Scan (`scMeas`, LSL adapter), MNE Analyze
   (`anShared`), MNE Browse, the MNE Analyze Studio browser extension and

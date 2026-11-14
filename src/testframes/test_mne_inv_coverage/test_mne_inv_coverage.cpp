@@ -484,7 +484,7 @@ void TestMneInvCoverage::testEpochDataListFromRaw()
     // Should have created some epochs
     QVERIFY(epochList.size() > 0);
     // Each epoch should have reasonable number of samples (non-empty)
-    if (!epochList.isEmpty()) {
+    if (!epochList.empty()) {
         QVERIFY(epochList[0]->epoch.cols() > 0);
         QVERIFY(epochList[0]->epoch.rows() > 0);
     }

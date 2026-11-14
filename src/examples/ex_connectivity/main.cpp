@@ -268,7 +268,7 @@ int main(int argc, char* argv[])
 
         vDataIndices = VectorXi::LinSpaced(iNumberRows, 0, iNumberRows);
 
-        for (int i = 0; i < data.size(); ++i) {
+        for (int i = 0; i < std::ssize(data); ++i) {
             matData.resize(iNumberRows, data.at(i)->epoch.cols());
 
             for (qint32 j = 0; j < iNumberRows; ++j) {
@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
 
         picks = raw.info.pick_types("all", true, false, {}, exclude);
         data.pick_channels(picks);
-        for (int i = 0; i < data.size(); i++) {
+        for (int i = 0; i < std::ssize(data); i++) {
             sourceEstimate = minimumNorm.calculateInverse(data.at(i)->epoch,
                                                           evoked.times[0],
                                                           //0.0f,

@@ -587,7 +587,7 @@ Eigen::VectorXi reviewedEpochSelection(const MNELIB::MNEEpochDataList& epochList
     QList<int> selectedIndices;
     selectedIndices.reserve(epochList.size());
 
-    for (int index = 0; index < epochList.size(); ++index) {
+    for (int index = 0; index < std::ssize(epochList); ++index) {
         const auto& epoch = epochList.at(index);
         if (epoch && !epoch->isRejected(respectAutoRejects)) {
             selectedIndices.append(index);
@@ -3605,7 +3605,7 @@ bool MainWindow::refreshReviewedEvokedSet(const QString& statusMessage)
 
     for (int index = 0; index < m_epochReviewLists.size(); ++index) {
         const MNELIB::MNEEpochDataList& epochList = m_epochReviewLists.at(index);
-        if (epochList.isEmpty()) {
+        if (epochList.empty()) {
             continue;
         }
 
@@ -3614,7 +3614,7 @@ bool MainWindow::refreshReviewedEvokedSet(const QString& statusMessage)
             continue;
         }
 
-        const auto& firstEpoch = epochList.first();
+        const auto& firstEpoch = epochList.front();
         if (!firstEpoch) {
             continue;
         }
@@ -3796,7 +3796,7 @@ bool MainWindow::runEvokedComputation(bool promptForSettings)
                                                                                   eventCode,
                                                                                   epochRejectMap);
 
-        if (epochList.isEmpty()) {
+        if (epochList.empty()) {
             continue;
         }
 
@@ -4177,7 +4177,7 @@ void MainWindow::computeCovariance()
                                                                                       tmax,
                                                                                       eventCode,
                                                                                       {});
-            if (epochList.isEmpty()) {
+            if (epochList.empty()) {
                 continue;
             }
 

@@ -951,9 +951,10 @@ void TestMneBrowseData::testEpochModelReviewsEpochs()
         return epoch;
     };
     MNEEpochDataList code1;
-    code1 << makeEpoch(1900, 2.0, false) << makeEpoch(1100, 1.0, false);
+    code1.push_back(makeEpoch(1900, 2.0, false));
+    code1.push_back(makeEpoch(1100, 1.0, false));
     MNEEpochDataList code3;
-    code3 << makeEpoch(1300, 5.0, true);
+    code3.push_back(makeEpoch(1300, 5.0, true));
 
     EpochModel model;
     QSignalSpy changed(&model, &EpochModel::epochsChanged);

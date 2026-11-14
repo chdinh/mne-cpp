@@ -598,12 +598,12 @@ FiffEvoked DSPLIB::computeFilteredAverage(const FiffRawData& raw,
             }
 
             //Check if data block has the same size as the previous one
-            if (!lstEpochDataList.isEmpty()) {
-                if (epoch->epoch.size() == lstEpochDataList.last()->epoch.size()) {
-                    lstEpochDataList.append(std::shared_ptr<MNEEpochData>(epoch.release()));
+            if (!lstEpochDataList.empty()) {
+                if (epoch->epoch.size() == lstEpochDataList.back()->epoch.size()) {
+                    lstEpochDataList.push_back(std::shared_ptr<MNEEpochData>(epoch.release()));
                 }
             } else {
-                lstEpochDataList.append(std::shared_ptr<MNEEpochData>(epoch.release()));
+                lstEpochDataList.push_back(std::shared_ptr<MNEEpochData>(epoch.release()));
             }
         } else {
             Log::warning("[MNEEpochDataList::readEpochs] Can't read the event data segments.");
@@ -621,13 +621,13 @@ FiffEvoked DSPLIB::computeFilteredAverage(const FiffRawData& raw,
         lstEpochDataList.dropRejected();
     }
 
-    if (lstEpochDataList.isEmpty())
+    if (lstEpochDataList.empty())
         return FiffEvoked();
 
     const fiff_int_t first = static_cast<fiff_int_t>(std::lround(fTMinS * raw.info.sfreq));
     FiffEvoked evoked = lstEpochDataList.average(raw.info,
                                                  first,
-                                                 first + static_cast<fiff_int_t>(lstEpochDataList.first()->epoch.cols()) - 1);
+                                                 first + static_cast<fiff_int_t>(lstEpochDataList.front()->epoch.cols()) - 1);
     evoked.baseline = bApplyBaseline ? QPair<float, float>(fTBaselineFromS, fTBaselineToS)
                                      : QPair<float, float>(0.0f, 0.0f);
     return evoked;

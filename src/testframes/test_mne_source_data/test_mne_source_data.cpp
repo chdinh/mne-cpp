@@ -353,7 +353,7 @@ private slots:
                 epoch->epoch = data;
                 epoch->tmin = (float)(from - raw.first_samp) / raw.info.sfreq;
                 epoch->tmax = epoch->tmin + epochDuration;
-                epochList.append(epoch);
+                epochList.push_back(epoch);
                 nEpochs++;
             }
             from += epochSamples;
@@ -386,14 +386,14 @@ private slots:
                 std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
                 epoch->epoch = data;
                 epoch->bReject = (i == 2); // Reject middle epoch
-                epochList.append(epoch);
+                epochList.push_back(epoch);
             }
             from += epochSamples;
         }
 
-        int origSize = epochList.size();
+        const auto origSize = std::ssize(epochList);
         epochList.dropRejected();
-        QVERIFY(epochList.size() <= origSize);
+        QVERIFY(std::ssize(epochList) <= origSize);
     }
 
     //=========================================================================

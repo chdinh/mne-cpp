@@ -567,7 +567,7 @@ private slots:
     void epochDataList_basic()
     {
         MNEEpochDataList list;
-        QVERIFY(list.isEmpty());
+        QVERIFY(list.empty());
 
         std::shared_ptr<MNEEpochData> epoch(new MNEEpochData());
         epoch->epoch = MatrixXd::Random(5, 10);
@@ -575,7 +575,7 @@ private slots:
         epoch->tmax = 0.01f;
         epoch->bReject = false;
 
-        list.append(epoch);
+        list.push_back(epoch);
         QCOMPARE(list.size(), 1);
     }
 

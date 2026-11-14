@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
             epoch->tmin = ((float)(from) - (float)(raw.first_samp)) / raw.info.sfreq;
             epoch->tmax = ((float)(to) - (float)(raw.first_samp)) / raw.info.sfreq;
 
-            data.append(std::shared_ptr<MNEEpochData>(epoch)); //List takes ownwership of the pointer - no delete need
+            data.push_back(std::shared_ptr<MNEEpochData>(epoch)); //List takes ownwership of the pointer - no delete need
         } else {
             printf("Can't read the event data segments");
             return 0;

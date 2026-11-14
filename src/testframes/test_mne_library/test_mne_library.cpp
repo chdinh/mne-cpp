@@ -1351,7 +1351,7 @@ void TestMneLibrary::epochData_baselineCorrectionAndDrop()
         epoch->tmin = -0.1f;
         epoch->tmax = 0.3f;
         epoch->bReject = (i == 2);
-        list.append(epoch);
+        list.push_back(epoch);
     }
 
     QPair<float, float> baseline(-0.1f, 0.0f);
@@ -1366,7 +1366,7 @@ void TestMneLibrary::epochData_pickChannels()
     for (int i = 0; i < 3; i++) {
         std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
         epoch->epoch = MatrixXd::Random(5, 50);
-        list.append(epoch);
+        list.push_back(epoch);
     }
 
     RowVectorXi sel(3);
@@ -1394,7 +1394,7 @@ void TestMneLibrary::epochData_average()
         epoch->epoch = MatrixXd::Ones(3, 100) * (i + 1);
         epoch->tmin = 0.0f;
         epoch->tmax = 0.099f;
-        list.append(epoch);
+        list.push_back(epoch);
     }
 
     FiffEvoked avg = list.average(*pInfo, 0, 99);
@@ -1668,13 +1668,13 @@ void TestMneLibrary::misc_ctfCompData()
 void TestMneLibrary::misc_epochDataList()
 {
     MNEEpochDataList list;
-    QVERIFY(list.isEmpty());
+    QVERIFY(list.empty());
 
     std::shared_ptr<MNEEpochData> epoch = std::make_shared<MNEEpochData>();
     epoch->epoch = MatrixXd::Random(5, 100);
     epoch->tmin = 0.0f;
     epoch->tmax = 0.1f;
-    list.append(epoch);
+    list.push_back(epoch);
     QCOMPARE(list.size(), 1);
 }
 
