@@ -137,11 +137,9 @@ MNEChSelection TestMneRawDataPython::makeSelection() const
     sel.name = "picks";
     sel.chspick = picks;
     sel.chspick_nospace = picks;
-    sel.nchan = static_cast<int>(picks.size());
-    sel.ndef = sel.nchan;
-    sel.pick = VectorXi::Constant(sel.nchan, -1);
-    sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
-    for (int c = 0; c < sel.nchan; ++c) {
+    sel.pick = VectorXi::Constant(sel.nchan(), -1);
+    sel.pick_deriv = VectorXi::Constant(sel.nchan(), -1);
+    for (int c = 0; c < sel.nchan(); ++c) {
         std::erase(sel.chspick_nospace[c], ' ');
         sel.pick[c] = static_cast<int>(BASELIB::indexOf(m_raw->ch_names, sel.chspick[c]));
     }
@@ -202,7 +200,7 @@ void TestMneRawDataPython::picksSegments()
     QFETCH(double, eogLast);
 
     MNEChSelection sel = makeSelection();
-    PickBuffer buf(sel.nchan, ns);
+    PickBuffer buf(sel.nchan(), ns);
     QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + offset, buf.values), 0);
 
     QVERIFY2(closeTo(buf.values.cast<double>().cwiseAbs().sum(), absSum, 1e-5),
@@ -213,7 +211,7 @@ void TestMneRawDataPython::picksSegments()
     // The same data without a selection, every channel in file order.
     PickBuffer all(m_raw->info->nchan, ns);
     QCOMPARE(m_raw->pick_data(nullptr, m_raw->first_samp + offset, all.values), 0);
-    for (int c = 0; c < sel.nchan; ++c)
+    for (int c = 0; c < sel.nchan(); ++c)
         QCOMPARE(all.values.row(sel.pick[c]), buf.values.row(c));
 }
 
@@ -223,12 +221,12 @@ void TestMneRawDataPython::padsOutsideData()
 {
     // Before the first sample the data are zero; past the end the last sample repeats.
     MNEChSelection sel = makeSelection();
-    PickBuffer before(sel.nchan, 8);
+    PickBuffer before(sel.nchan(), 8);
     QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp - 3, before.values), 0);
     QVERIFY((before.values.leftCols(3).array() == 0.0f).all());
     QVERIFY(closeTo(before.values(3, 3), 4.491140926785156e-10, 1e-5));
 
-    PickBuffer after(sel.nchan, 10);
+    PickBuffer after(sel.nchan(), 10);
     QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 6000, after.values), 0);
     for (int s = 7; s < 10; ++s)
         QCOMPARE(after.values.col(s), after.values.col(6));
@@ -237,13 +235,13 @@ void TestMneRawDataPython::padsOutsideData()
     for (int s = 7; s < 10; ++s)
         QCOMPARE(allAfter.values.col(s), allAfter.values.col(6));
     // A request that starts past the end has no sample to repeat
-    PickBuffer beyond(sel.nchan, 4);
+    PickBuffer beyond(sel.nchan(), 4);
     beyond.values.setConstant(1.0f);
     QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 7000, beyond.values), 0);
     QVERIFY((beyond.values.array() == 0.0f).all());
 
     // A buffer whose row count does not match the selection is refused, not overrun
-    for (const int nrow : {sel.nchan - 1, sel.nchan + 1}) {
+    for (const int nrow : {sel.nchan() - 1, sel.nchan() + 1}) {
         PickBuffer wrong(nrow, 4);
         BASELIB::LogCapture log;
         QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp, wrong.values), -1);
@@ -259,7 +257,7 @@ void TestMneRawDataPython::padsOutsideData()
     QVERIFY(proj->make_proj());
     m_raw->proj = std::move(proj);
     for (MNEChSelection* picks : {&sel, static_cast<MNEChSelection*>(nullptr)}) {
-        const int nchan = picks ? sel.nchan : m_raw->info->nchan;
+        const int nchan = picks ? sel.nchan() : m_raw->info->nchan;
         PickBuffer projected(nchan, 10);
         QCOMPARE(m_raw->pick_data_proj(picks, m_raw->first_samp + 6000, projected.values), 0);
         for (int s = 7; s < 10; ++s)
@@ -272,7 +270,7 @@ void TestMneRawDataPython::padsOutsideData()
     m_raw->proj.reset();
 
     // A trigger channel is read uncalibrated: the first event (sample 13988) has code 2.
-    PickBuffer stim(sel.nchan, 3);
+    PickBuffer stim(sel.nchan(), 3);
     QCOMPARE(m_raw->pick_data(&sel, 13987, stim.values), 0);
     QCOMPARE(stim.values(4, 0), 0.0f);
     QCOMPARE(stim.values(4, 1), 2.0f);
@@ -286,7 +284,7 @@ void TestMneRawDataPython::projectsSegment()
     MNEChSelection sel = makeSelection();
 
     // Without an operator the projected read is the plain read.
-    PickBuffer plain(sel.nchan, 25);
+    PickBuffer plain(sel.nchan(), 25);
     QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, plain.values), 0);
     QVERIFY(closeTo(plain.values.cast<double>().cwiseAbs().sum(), 1.8063671136130195e-07, 1e-5));
 
@@ -304,7 +302,7 @@ void TestMneRawDataPython::projectsSegment()
     QCOMPARE(proj->nvec, 4);
     m_raw->proj = std::move(proj);
 
-    PickBuffer buf(sel.nchan, 25);
+    PickBuffer buf(sel.nchan(), 25);
     QCOMPARE(m_raw->pick_data_proj(&sel, m_raw->first_samp + 2990, buf.values), 0);
     QVERIFY2(closeTo(buf.values.cast<double>().cwiseAbs().sum(), 1.8631954154371812e-07, 1e-4),
              qPrintable(QStringLiteral("projected abs sum %1").arg(buf.values.cast<double>().cwiseAbs().sum(), 0, 'g', 12)));
@@ -388,8 +386,8 @@ void TestMneRawDataPython::filterIsTransparentWhenOff()
 {
     // With the filter switched off pick_data_filt must return the raw data.
     MNEChSelection sel = makeSelection();
-    PickBuffer raw(sel.nchan, 25);
-    PickBuffer filt(sel.nchan, 25);
+    PickBuffer raw(sel.nchan(), 25);
+    PickBuffer filt(sel.nchan(), 25);
     QCOMPARE(m_raw->pick_data(&sel, m_raw->first_samp + 2990, raw.values), 0);
     QVERIFY(m_raw->filter);
     QVERIFY(!m_raw->filter->filter_on);
@@ -440,11 +438,11 @@ void TestMneRawDataPython::filtersSegments()
     QVERIFY(raw);
 
     MNEChSelection sel = makeSelection();
-    PickBuffer buf(sel.nchan, ns);
+    PickBuffer buf(sel.nchan(), ns);
     QCOMPARE(raw->pick_data_filt(&sel, raw->first_samp + offset, buf.values), 0);
 
     double sum = 0.0;
-    for (int c = 0; c < sel.nchan; ++c)
+    for (int c = 0; c < sel.nchan(); ++c)
         if (c != 4)
             sum += buf.values.row(c).cast<double>().cwiseAbs().sum();
     QVERIFY2(closeTo(sum, absSum, 1e-4), qPrintable(QStringLiteral("abs sum %1").arg(sum, 0, 'g', 12)));
@@ -452,7 +450,7 @@ void TestMneRawDataPython::filtersSegments()
     QVERIFY2(closeTo(buf.values(5, ns - 1), eogLast, 1e-3), qPrintable(QStringLiteral("EOG %1").arg(buf.values(5, ns - 1), 0, 'g', 12)));
 
     // The stimulus channel passes through unfiltered.
-    PickBuffer plain(sel.nchan, ns);
+    PickBuffer plain(sel.nchan(), ns);
     QCOMPARE(raw->pick_data(&sel, raw->first_samp + offset, plain.values), 0);
     QCOMPARE(buf.values.row(4), plain.values.row(4));
 
@@ -460,19 +458,19 @@ void TestMneRawDataPython::filtersSegments()
     std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     PickBuffer all(fresh->info->nchan, ns);
     QCOMPARE(fresh->pick_data_filt(nullptr, fresh->first_samp + offset, all.values), 0);
-    for (int c = 0; c < sel.nchan; ++c)
+    for (int c = 0; c < sel.nchan(); ++c)
         QCOMPARE(all.values.row(sel.pick[c]), buf.values.row(c));
 
     // Switching to this filter from another one, after data was filtered with that, gives the same data
     MNEFilterDef other = filter;
     other.highpass = other.eog_highpass = static_cast<float>(1.0 - highpass);
     std::unique_ptr<MNERawData> switched(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, other));
-    PickBuffer before(sel.nchan, ns);
+    PickBuffer before(sel.nchan(), ns);
     QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, before.values), 0);
     QVERIFY(before.values != buf.values);
     QVERIFY(switched->setFilter(filter));
     QVERIFY(!switched->setFilter(filter));
-    PickBuffer after(sel.nchan, ns);
+    PickBuffer after(sel.nchan(), ns);
     QCOMPARE(switched->pick_data_filt(&sel, switched->first_samp + offset, after.values), 0);
     QCOMPARE(after.values, buf.values);
 }
@@ -518,7 +516,6 @@ void TestMneRawDataPython::picksDerivedChannel()
 
     // Channel 0 is derived, 1 and 2 are its inputs.
     MNEChSelection sel;
-    sel.nchan = 3;
     sel.pick = VectorXi(3);
     sel.pick << -1, a, b;
     sel.pick_deriv = VectorXi(3);
@@ -562,7 +559,10 @@ void TestMneRawDataPython::picksDerivedChannel()
     std::unique_ptr<MNERawData> fresh(MNERawData::open_file(m_rawPath.toStdU16String(), false, false, filter));
     fresh->deriv_matched = std::move(raw->deriv_matched);
     MNEChSelection only = sel;
-    only.nchan = 1;
+    only.chspick.resize(1);
+    only.chspick_nospace.resize(1);
+    only.pick.conservativeResize(1);
+    only.pick_deriv.conservativeResize(1);
     PickBuffer alone(1, 25);
     QCOMPARE(fresh->pick_data_filt(&only, first, alone.values), 0);
     PickBuffer inputs(3, 25);

@@ -107,7 +107,7 @@ InvEcdSet InvDipoleFit::calculateFit() const
         sel = std::make_unique<MNEChSelection>(MNEChSelection::these(
             "fit", std::span(fit_data->ch_names).first(static_cast<std::size_t>(fit_data->nmeg) + static_cast<std::size_t>(fit_data->neeg))));
         sel->assign_channels(raw->info->chInfo, raw->deriv_matched.get());
-        for (int c = 0; c < sel->nchan; c++)
+        for (int c = 0; c < sel->nchan(); c++)
             if (sel->pick[c] < 0) {
                 BASELIB::Log::critical("All desired channels were not available");
                 return set;
@@ -223,7 +223,7 @@ bool InvDipoleFit::fit_dipoles(const QString& dataname, MNEMeasData* data, InvDi
 
 bool InvDipoleFit::fit_dipoles_raw(const QString& dataname, MNERawData* raw, MNEChSelection* sel, InvDipoleFitData* fit, InvGuessData* guess, float tmin, float tmax, float tstep, float integ, int verbose, InvEcdSet& p_set)
 {
-    const int nchan = sel->nchan;
+    const int nchan = sel->nchan();
     const float sfreq = raw->info->sfreq;
     const float myinteg = integ > 0.0f ? 2 * integ : 0.1f;
     const int overlap = static_cast<int>(std::ceil(myinteg * sfreq));

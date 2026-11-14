@@ -847,14 +847,14 @@ void TestMneRawProjComp::rawData_pickData()
 
     // Create a simple channel selection for 3 MEG channels
     MNEChSelection sel;
-    sel.nchan = 3;
+    sel.chspick = sel.chspick_nospace = {raw->ch_names[0], raw->ch_names[1], raw->ch_names[2]};
     sel.pick.resize(3);
     sel.pick << 0, 1, 2;
     sel.pick_deriv.resize(3);
     sel.pick_deriv << -1, -1, -1;
     sel.nderiv = 0;
 
-    MNERawData::RowMajorMatrixXf picked(sel.nchan, 100);
+    MNERawData::RowMajorMatrixXf picked(sel.nchan(), 100);
     QCOMPARE(raw->pick_data(&sel, raw->first_samp, picked), 0);
     // Real data, not all zeros
     QVERIFY((picked.array() != 0.0f).any());

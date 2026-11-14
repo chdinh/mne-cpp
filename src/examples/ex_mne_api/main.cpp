@@ -273,15 +273,14 @@ int main(int argc, char* argv[])
 
     MNEChSelection sel; // channel names are stored without spaces
     sel.chspick = sel.chspick_nospace = {"MEG 0113", "EEG 001", "EOG 061"};
-    sel.nchan = sel.ndef = static_cast<int>(sel.chspick.size());
-    sel.pick_deriv = VectorXi::Constant(sel.nchan, -1);
-    sel.pick.resize(sel.nchan);
-    for (int c = 0; c < sel.nchan; ++c) {
+    sel.pick_deriv = VectorXi::Constant(sel.nchan(), -1);
+    sel.pick.resize(sel.nchan());
+    for (int c = 0; c < sel.nchan(); ++c) {
         sel.pick[c] = static_cast<int>(BASELIB::indexOf(mneRaw->ch_names, sel.chspick[c]));
     }
 
     const int ns = 25;
-    MNERawData::RowMajorMatrixXf segment(sel.nchan, ns);
+    MNERawData::RowMajorMatrixXf segment(sel.nchan(), ns);
     mneRaw->pick_data(&sel, mneRaw->first_samp + 2990, segment); // calibrated, across a buffer boundary
     const double eegRaw = segment(1, 0);
     mneRaw->pick_data_filt(&sel, mneRaw->first_samp + 2990, segment);
@@ -490,7 +489,6 @@ int main(int argc, char* argv[])
     const int usable = mneRaw->attachDerivations(*fromFif); // FRONT needs EEG999 and is dropped
     MNEChSelection bipolar;
     bipolar.chspick = bipolar.chspick_nospace = {"EEG 001-EEG 002", "EEG 001", "EEG 002"};
-    bipolar.nchan = bipolar.ndef = 3;
     bipolar.nderiv = 1;
     bipolar.pick = (VectorXi(3) << -1, BASELIB::indexOf(mneRaw->ch_names, "EEG 001"), BASELIB::indexOf(mneRaw->ch_names, "EEG 002")).finished();
     bipolar.pick_deriv = (VectorXi(3) << 0, -1, -1).finished();

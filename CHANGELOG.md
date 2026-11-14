@@ -410,6 +410,10 @@ aliases; replace the old spelling as below.
   that matches a channel by the part of its name before a dash (`EEG 001`
   for `EEG 001-REF`) compared the whole name again and never matched; it now
   matches like MNE-C. `mne_ch_selection.h` no longer includes `QString`.
+- `MNEChSelection::ndef` is gone (use `chdef.size()`), and `nchan` is the
+  function `nchan()` returning `chspick.size()` instead of a count kept next
+  to the picked names. Migration: `sel.nchan` becomes `sel.nchan()`; a
+  selection built by hand sets `chspick` (and `pick`) instead of `nchan`.
 - `mne/mne_types.h` holds only the MNE-C constants and no longer includes
   20 other headers (fiff stream, projection, covariance, CTF compensation,
   layout, events, filter, ...) and `<QStringList>`. `MNE_DEFAULT_TRIGGER_CH`

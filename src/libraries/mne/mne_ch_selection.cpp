@@ -42,7 +42,6 @@ MNEChSelection MNEChSelection::these(std::string selname, std::span<const std::s
     MNEChSelection sel;
     sel.name = std::move(selname);
     sel.chdef.assign(names.begin(), names.end());
-    sel.ndef = static_cast<int>(sel.chdef.size());
     sel.kind = MNE_CH_SELECTION_USER;
     return sel;
 }
@@ -55,7 +54,7 @@ int MNEChSelection::assign_channels(std::span<const FiffChInfo> chs, const MNEDe
     chspick_nospace = chdef;
     for (auto& name : chspick_nospace)
         std::erase(name, ' ');
-    nchan = ndef;
+    const int nchan = this->nchan();
 
     pick.setConstant(nchan, -1);
     pick_deriv.setConstant(nchan, -1);
