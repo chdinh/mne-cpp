@@ -151,6 +151,18 @@ public:
 
     //=========================================================================================================
     /**
+     * Seeds the random choices of the starting centroids, so that equal seeds give equal results
+     * (scikit-learn @c random_state, MATLAB @c rng). Unseeded objects draw a random seed.
+     *
+     * @param[in] value  The seed.
+     */
+    void seed(std::uint32_t value)
+    {
+        m_rng.seed(value);
+    }
+
+    //=========================================================================================================
+    /**
      * Clusters input data X.
      *
      * @param[in] X          Input data (rows = points; cols = p dimensional space).

@@ -499,12 +499,24 @@ private slots:
     void testClusterStart()
     {
         // "cluster" seeds from a preliminary clustering of a 10 % subsample, then clusters all points
+        // A fixed seed makes every replicate, including the preliminary clustering, reproducible
         KMeans kmeans("sqeuclidean", "cluster", 5, "drop", true, 100);
+        kmeans.seed(7);
         MatrixXd X = generateBlobs(40, 3);
         VectorXi idx;
         MatrixXd C, D;
         VectorXd sumD;
         QVERIFY(kmeans.calculate(X, 3, idx, C, sumD, D));
+        for (int run = 0; run < 3; ++run) {
+            KMeans again("sqeuclidean", "cluster", 5, "drop", true, 100);
+            again.seed(7);
+            VectorXi idxAgain;
+            MatrixXd CAgain, DAgain;
+            VectorXd sumDAgain;
+            QVERIFY(again.calculate(X, 3, idxAgain, CAgain, sumDAgain, DAgain));
+            QCOMPARE(idxAgain, idx);
+            QCOMPARE(CAgain, C);
+        }
         QVERIFY(C.allFinite());
         for (int c = 0; c < 3; ++c) {
             for (int i = 1; i < 40; ++i) {

@@ -465,6 +465,11 @@ aliases; replace the old spelling as below.
   Unused `QSharedPointer` includes are gone from the fs, fwd and
   `filter_thread_arg.h` headers. Migration: code that put these types in a
   `QVariant` declares the metatype itself.
+- New `MATHLIB::KMeans::seed(value)` makes a clustering reproducible, like
+  scikit-learn's `random_state`; the preliminary clustering of the
+  `"cluster"` start draws its seed from the object's engine instead of its
+  own random device. `test_math_kmeans` failed in about 1 of 200 runs
+  because every replicate landed in a local minimum.
 - New `MNEChSelection::these(name, channels)` and
   `MNEChSelection::assign_channels(chs, deriv = nullptr)` (MNE-C
   `mne_ch_selection_these`, `mne_ch_selection_assign_chs` and

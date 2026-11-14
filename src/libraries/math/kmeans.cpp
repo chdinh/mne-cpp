@@ -215,6 +215,7 @@ bool KMeans::calculate(const MatrixXd& X_in,
             for (std::int32_t i = 0; i < nSub; ++i)
                 Xsub.row(i) = X.row(order[i]);
             KMeans preliminary(m_distance, KMeansStart::Sample, 1, m_emptyact, m_bOnline, m_iMaxit);
+            preliminary.seed(static_cast<std::uint32_t>(m_rng()));
             VectorXi idxSub;
             VectorXd sumDSub;
             MatrixXd DSub;
