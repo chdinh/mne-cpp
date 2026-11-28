@@ -35,6 +35,9 @@
 //=============================================================================================================
 
 #include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // FORWARD DECLARATIONS
@@ -45,10 +48,15 @@ namespace mne::analyze
 class Communicator;
 }
 
+namespace mne::viz
+{
+class ApplyToPanel;
+}
+
 namespace mne::viz::qt
 {
-class ApplyToView;
 class Control3DView;
+class PanelWidget;
 }
 
 #ifdef MNE_VIZ_QT_3D
@@ -111,6 +119,12 @@ private:
      * @param[in] scalingMap   new scaling map to be sent out in an event.
      */
     void onScalingChanged(const std::map<int, float>& scalingMap);
+
+    //=========================================================================================================
+    /**
+     * @return The views ticked in the "Apply to" panel; none while the dock does not exist.
+     */
+    std::vector<std::string> selectedViews() const;
 
     //=========================================================================================================
     /**
@@ -228,7 +242,8 @@ private:
 
     QPointer<mne::viz::qt::Control3DView> m_pControl3DView; /**< Controls for 3d View. */
 
-    QPointer<mne::viz::qt::ApplyToView> m_pApplyToView;  /**< Controls for selecting views to apply settings; null until getControl() and after the dock is closed. */
+    QPointer<mne::viz::qt::PanelWidget> m_pApplyToView;  /**< Shows m_pApplyTo; null until getControl() and after the dock is closed. */
+    std::shared_ptr<mne::viz::ApplyToPanel> m_pApplyTo;  /**< Controls for selecting views to apply settings. */
     mne::analyze::ScalingParameters m_ScalingParameters; /**< Controls for scaling. */
     mne::analyze::ViewParameters m_ViewParameters;       /**< Struct for 2D view settings. */
     mne::analyze::View3DParameters m_View3DParameters;   /**< Struct for 3D view settings. */

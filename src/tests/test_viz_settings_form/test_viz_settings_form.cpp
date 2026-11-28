@@ -23,6 +23,8 @@
 #include <mne/viz/panels/project_panel.h>
 #include <mne/viz/panels/artifact_panel.h>
 #include <mne/viz/panels/averaging_panel.h>
+#include <mne/viz/panels/apply_to_panel.h>
+#include <mne/viz/panels/average_selection_panel.h>
 #include <mne/viz/panels/compensator_panel.h>
 #include <mne/viz/panels/connectivity_panel.h>
 #include <mne/viz/panels/filter_settings_panel.h>
@@ -32,7 +34,10 @@
 #include <mne/viz/panels/forward_panel.h>
 #include <mne/fiff/fiff_constants.h>
 #include <mne/viz/panels/minimum_norm_panel.h>
+#include <mne/viz/panels/modality_selection_panel.h>
 #include <mne/viz/panels/projectors_panel.h>
+#include <mne/viz/panels/raw_view_panel.h>
+#include <mne/viz/panels/scaling_panel.h>
 #include <mne/viz/panels/sphara_panel.h>
 #include <mne/viz/panels/time_frequency_panel.h>
 #include <mne/viz/panels/trigger_detection_panel.h>
@@ -45,7 +50,10 @@
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
+#include <algorithm>
+#include <cmath>
 #include <functional>
+#include <map>
 #include <optional>
 #include <string>
 #include <tuple>
@@ -796,6 +804,209 @@ void test_project_panel()
     CHECK(!panel.add_subject("New"));
 }
 
+void test_store_keys_and_colors()
+{
+    MemorySettingsStore store;
+    store.set_value("a/b", 1);
+    store.set_value("a/c", std::string("x"));
+    store.set_value("a/d/e", true);
+    store.set_value("ab", 2);
+    CHECK((store.child_keys("a") == std::vector<std::string>{"b", "c"}));
+    CHECK(store.child_keys("a/d") == std::vector<std::string>{"e"});
+    CHECK(store.child_keys("z").empty());
+
+    CHECK(parse_setting_color("#0AC81E") == (Color{10, 200, 30, 255}));
+    CHECK(parse_setting_color("#0ac81e80") == (Color{10, 200, 30, 128}));
+    CHECK(!parse_setting_color("0ac81e") && !parse_setting_color("#0ac81") && !parse_setting_color("#0ac8zz"));
+    CHECK(setting_color(Color{10, 200, 30, 255}) == "#0ac81e");
+    CHECK(setting_color(Color{10, 200, 30, 128}) == "#0ac81e80");
+}
+
+bool near(double a, double b)
+{
+    return std::abs(a - b) < 1e-6 * std::max(1.0, std::abs(b));
+}
+
+void test_scaling_panel()
+{
+    ScalingPanel panel(std::vector<std::string>{"mag", "grad", "eeg"});
+    CHECK(panel.id() == "ScalingView");
+    CHECK(panel.form().field("scaleMAG") && panel.form().field("scaleEEG") && !panel.form().field("scaleEOG"));
+    CHECK(panel.scale_map().size() == 7 && panel.scale_map().at(FIFFV_EOG_CH) == 1e-6f);
+    CHECK(near(panel.form().get<double>("scaleGRAD"), 300.0));
+    std::vector<std::map<int, float>> reports;
+    panel.set_callback([&reports](const std::map<int, float>& scales) {
+        reports.push_back(scales);
+    });
+    panel.form().set_value("scaleEEG", 50.0);
+    CHECK(reports.size() == 1 && reports.back().at(FIFFV_EEG_CH) == static_cast<float>(50.0 * 1e-6));
+
+    // Linked, MAG and GRAD follow each other by the link factor
+    panel.set_mag_grad_link(true);
+    CHECK(near(panel.form().get<double>("magGradLink"), 1.0) && reports.size() == 1);
+    panel.form().set_value("scaleGRAD", 500.0);
+    CHECK(near(panel.form().get<double>("scaleMAG"), 5.0) && reports.size() == 2);
+    panel.form().set_value("magGradLink", 2.0);
+    CHECK(near(panel.form().get<double>("scaleGRAD"), 250.0) && reports.size() == 3);
+
+    // Stored under the keys of ScalingView in SI units, restored without reports
+    MemorySettingsStore store;
+    panel.save(store, "app");
+    CHECK(store.read_double("app/ScalingView/scaleEEG", 0.0) == static_cast<double>(static_cast<float>(50.0 * 1e-6)));
+    CHECK(store.contains("app/ScalingView/scaleSTIM") && !store.contains("app/ScalingView/scaleEMG"));
+    ScalingPanel restored;
+    restored.load(store, "app");
+    CHECK(restored.scale_map().at(FIFFV_EEG_CH) == panel.scale_map().at(FIFFV_EEG_CH));
+    CHECK(near(restored.form().get<double>("scaleGRAD"), 250.0));
+
+    // A new map rebuilds the fields without a report
+    const std::size_t count = reports.size();
+    panel.set_scale_map({{FIFFV_EMG_CH, 2e-3f}});
+    CHECK(reports.size() == count && !panel.form().field("scaleMAG") && !panel.form().field("scaleEMG"));
+    ScalingPanel all;
+    all.set_scale_map({{FIFFV_EMG_CH, 2e-3f}});
+    CHECK(near(all.form().get<double>("scaleEMG"), 2.0) && !all.form().field("linkMagGrad"));
+}
+
+void test_modality_selection_panel()
+{
+    mne::FiffChInfo grad;
+    grad.kind = FIFFV_MEG_CH;
+    grad.unit = FIFF_UNIT_T_M;
+    mne::FiffChInfo stim;
+    stim.kind = FIFFV_STIM_CH;
+    ModalitySelectionPanel panel({grad, stim, grad});
+    CHECK(panel.id() == "ModalitySelectionView");
+    CHECK((panel.channel_modalities() == std::vector<std::string>{"GRAD", "STIM"}));
+    CHECK(panel.form().fields().size() == 2 && panel.form().field("modalityGRAD") && !panel.form().field("modalityMAG"));
+    std::vector<std::map<std::string, bool>> reports;
+    panel.set_callback([&reports](const std::map<std::string, bool>& modalities) {
+        reports.push_back(modalities);
+    });
+    panel.form().set_value("modalitySTIM", false);
+    CHECK(reports.size() == 1 && !reports.back().at("STIM") && reports.back().at("MAG"));
+
+    MemorySettingsStore store;
+    panel.save(store, "app");
+    CHECK(!store.read_bool("app/ModalitySelectionView/modalitySTIM", true) && store.read_bool("app/ModalitySelectionView/modalityEEG", false));
+    ModalitySelectionPanel restored({stim});
+    restored.load(store, "app");
+    CHECK(!restored.modality_map().at("STIM") && !restored.form().get<bool>("modalitySTIM", true));
+
+    panel.set_modality_map({{"grad", false}});
+    CHECK(reports.size() == 1 && panel.form().fields().size() == 1 && !panel.form().get<bool>("modalitygrad", true));
+}
+
+void test_average_selection_panel()
+{
+    AverageSelectionPanel panel;
+    CHECK(panel.id() == "AverageSelectionView" && panel.form().fields().empty());
+    std::vector<std::map<std::string, bool>> activations;
+    std::vector<std::map<std::string, Color>> colors;
+    AverageSelectionPanel::Callbacks callbacks;
+    callbacks.activation_changed = [&activations](const std::map<std::string, bool>& activation) {
+        activations.push_back(activation);
+    };
+    callbacks.colors_changed = [&colors](const std::map<std::string, Color>& c) {
+        colors.push_back(c);
+    };
+    panel.set_callbacks(std::move(callbacks));
+
+    // The form waits until colours and activations name the same averages
+    panel.set_average_colors({{"aud", Color{255, 0, 0, 255}}, {"vis", Color{0, 0, 255, 255}}});
+    CHECK(panel.form().fields().empty());
+    panel.set_average_activation({{"aud", true}, {"vis", false}});
+    CHECK(panel.form().fields().size() == 4 && !panel.form().get<bool>("active/vis", true));
+    CHECK(panel.form().get<std::string>("color/aud") == "#ff0000" && activations.empty() && colors.empty());
+
+    panel.form().set_value("active/vis", true);
+    CHECK(activations.size() == 1 && activations.back().at("vis"));
+    panel.form().set_value("color/vis", std::string("#0ac81e"));
+    CHECK(colors.size() == 1 && colors.back().at("vis") == (Color{10, 200, 30, 255}));
+
+    // Stored in the groups of AverageSelectionView, restored by listing them
+    MemorySettingsStore store;
+    panel.save(store, "app");
+    CHECK(store.read_string("app/AverageSelectionView/averageColorMap/vis", {}) == "#0ac81e");
+    CHECK(store.read_bool("app/AverageSelectionView/averageActivationMap/vis", false));
+    AverageSelectionPanel restored;
+    restored.load(store, "app");
+    CHECK(restored.average_colors() == panel.average_colors() && restored.average_activation() == panel.average_activation());
+    CHECK(restored.form().fields().size() == 4);
+
+    // At most ten averages are listed
+    std::map<std::string, Color> many;
+    std::map<std::string, bool> on;
+    for (int i = 0; i < 12; ++i) {
+        many[std::to_string(100 + i)] = Color::black();
+        on[std::to_string(100 + i)] = true;
+    }
+    restored.set_average_colors(many);
+    restored.set_average_activation(on);
+    CHECK(restored.form().fields().size() == 2 * AverageSelectionPanel::kMaxAverages);
+}
+
+void test_apply_to_panel()
+{
+    ApplyToPanel panel;
+    CHECK(panel.id() == "ApplyToView");
+    const std::vector<std::string> all{"null", "signalview", "butterflyview", "layoutview"};
+    CHECK(panel.selected_views() == all);
+    panel.form().set_value("layoutView", false);
+    CHECK((panel.selected_views() == std::vector<std::string>{"null", "signalview", "butterflyview"}));
+    panel.form().trigger("clearSelected");
+    CHECK(panel.selected_views() == std::vector<std::string>{"null"});
+    panel.form().trigger("selectAll");
+    CHECK(panel.selected_views() == all);
+    MemorySettingsStore store;
+    panel.save(store, "app");
+    CHECK(store.values().empty());
+}
+
+void test_raw_view_panel()
+{
+    RawViewPanel panel;
+    CHECK(panel.id() == "FiffRawViewSettings");
+    CHECK(panel.zoom() == 16.0 && panel.window_size() == 10 && panel.time_spacer() == 1000);
+    CHECK(panel.signal_color() == (Color{0, 0, 255, 255}) && panel.background_color() == Color::white() && panel.image_type() == "PNG");
+    std::vector<int> spacers;
+    std::vector<Color> signals;
+    std::vector<std::string> screenshots;
+    RawViewPanel::Callbacks callbacks;
+    callbacks.time_spacer_changed = [&spacers](int spacer) {
+        spacers.push_back(spacer);
+    };
+    callbacks.signal_color_changed = [&signals](const Color& color) {
+        signals.push_back(color);
+    };
+    callbacks.screenshot_wanted = [&screenshots](const std::string& type) {
+        screenshots.push_back(type);
+    };
+    panel.set_callbacks(std::move(callbacks));
+    panel.form().set_value("distanceTimeSpacer", std::string("200"));
+    panel.form().set_value("signalColor", std::string("#102030"));
+    panel.form().set_value("imageType", std::string("SVG"));
+    panel.form().trigger("makeScreenshot");
+    CHECK((spacers == std::vector<int>{200}) && signals.size() == 1 && signals.back() == (Color{16, 32, 48, 255}));
+    CHECK(screenshots == std::vector<std::string>{"SVG"});
+
+    // Setters and restored settings are not reported; stored settings of FiffRawViewSettings carry over
+    panel.set_time_spacer(500);
+    panel.set_signal_color(Color::black());
+    CHECK(panel.time_spacer() == 500 && spacers.size() == 1 && signals.size() == 1);
+    MemorySettingsStore store;
+    store.set_value("app/FiffRawViewSettings/distanceTimeSpacer", 100);
+    store.set_value("app/FiffRawViewSettings/viewZoomFactor", 24.0);
+    panel.load(store, "app");
+    CHECK(panel.time_spacer() == 100 && panel.zoom() == 24.0 && spacers.size() == 1);
+    panel.save(store, "app");
+    CHECK(!store.contains("app/FiffRawViewSettings/imageType") && store.read_string("app/FiffRawViewSettings/signalColor", {}) == "#000000");
+
+    // Controls not asked for are hidden but kept
+    RawViewPanel some({"screenshot", "backgroundColor"});
+    CHECK(some.form().field("viewZoomFactor")->hidden && !some.form().field("backgroundColor")->hidden);
+    CHECK(!some.form().field("makeScreenshot")->hidden && some.form().field("viewZoomFactor")->persistent);
+}
 
 } // namespace
 
@@ -824,6 +1035,12 @@ int main()
         {"coregistration_panel", test_coregistration_panel},
         {"dipole_fit_panel", test_dipole_fit_panel},
         {"project_panel", test_project_panel},
+        {"store_keys_and_colors", test_store_keys_and_colors},
+        {"scaling_panel", test_scaling_panel},
+        {"modality_selection_panel", test_modality_selection_panel},
+        {"average_selection_panel", test_average_selection_panel},
+        {"apply_to_panel", test_apply_to_panel},
+        {"raw_view_panel", test_raw_view_panel},
     };
     for (const auto& [name, test] : tests) {
         const int before = g_failures;

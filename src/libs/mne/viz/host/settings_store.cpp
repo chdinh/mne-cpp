@@ -67,6 +67,13 @@ std::optional<double> toNumber(const SettingValue& value)
 // DEFINE MEMBER METHODS
 //=============================================================================================================
 
+std::vector<std::string> SettingsStore::child_keys(const std::string& /*group*/) const
+{
+    return {};
+}
+
+//=============================================================================================================
+
 bool SettingsStore::contains(const std::string& key) const
 {
     return value(key).has_value();
@@ -151,4 +158,19 @@ std::optional<SettingValue> MemorySettingsStore::value(const std::string& key) c
 void MemorySettingsStore::set_value(const std::string& key, const SettingValue& value)
 {
     m_values[key] = value;
+}
+
+//=============================================================================================================
+
+std::vector<std::string> MemorySettingsStore::child_keys(const std::string& group) const
+{
+    const std::string prefix = group + '/';
+    std::vector<std::string> keys;
+    for (auto it = m_values.lower_bound(prefix); it != m_values.end() && it->first.starts_with(prefix); ++it) {
+        const std::string name = it->first.substr(prefix.size());
+        if (!name.empty() && name.find('/') == std::string::npos) {
+            keys.push_back(name);
+        }
+    }
+    return keys;
 }

@@ -21,9 +21,10 @@
 #include <anShared/Management/eventmanager.h>
 #include <anShared/Model/fiffrawviewmodel.h>
 #include <anShared/Utils/types.h>
+#include <mne/viz/backends/qt/kit/panelwidget.h>
+#include <mne/viz/backends/qt/kit/settingspanel.h>
 #include <mne/viz/backends/qt/viewers/control3dview.h>
-#include <mne/viz/backends/qt/viewers/fiffrawviewsettings.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
+#include <mne/viz/panels/panel.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -119,43 +120,60 @@ void TestAnalyzeControlManager::publishesViewSettings()
             view3d << e->getData().value<View3DParameters>();
     });
 
+    // The controls are panels in widgets, found by the ids of the views they replace
+    const auto panelWidget = [&dock](const char* id) -> mne::viz::qt::PanelWidget* {
+        for (auto* widget : dock->findChildren<mne::viz::qt::PanelWidget*>()) {
+            if (widget->panel().id() == id)
+                return widget;
+        }
+        return nullptr;
+    };
+
     // Only the views ticked in "Apply to" are addressed
-    auto* signalView = dock->findChild<QCheckBox*>("m_checkBoxSignaViewer");
-    auto* butterfly = dock->findChild<QCheckBox*>("m_checkBoxButterfly");
-    auto* layout = dock->findChild<QCheckBox*>("m_checkBoxLayout");
+    auto* applyTo = panelWidget("ApplyToView");
+    QVERIFY(applyTo);
+    auto* signalView = qobject_cast<QCheckBox*>(applyTo->formPanel()->editor("signalViewer"));
+    auto* butterfly = qobject_cast<QCheckBox*>(applyTo->formPanel()->editor("butterflyView"));
+    auto* layout = qobject_cast<QCheckBox*>(applyTo->formPanel()->editor("layoutView"));
     QVERIFY(signalView && butterfly && layout);
     signalView->setChecked(true);
     butterfly->setChecked(false);
     layout->setChecked(false);
     const std::vector<std::string> views{"null", "signalview"};
 
-    auto* settings = dock->findChild<mne::viz::qt::FiffRawViewSettings*>();
+    auto* settings = panelWidget("FiffRawViewSettings");
     QVERIFY(settings);
-    auto* zoom = settings->findChild<QDoubleSpinBox*>("m_doubleSpinBox_numberVisibleChannels");
+    auto* zoom = qobject_cast<QDoubleSpinBox*>(settings->formPanel()->editor("viewZoomFactor"));
+    QVERIFY(zoom);
     zoom->setValue(zoom->value() == 20.0 ? 21.0 : 20.0);
     QTRY_VERIFY_WITH_TIMEOUT(!view.isEmpty(), 5000);
     QCOMPARE(view.last().m_sSettingsToApply, ViewParameters::zoom);
     QCOMPARE(view.last().m_dZoomValue, zoom->value());
     QCOMPARE(view.last().m_sViewsToApply, views);
 
-    auto* window = settings->findChild<QSpinBox*>("m_spinBox_windowSize");
+    auto* window = qobject_cast<QSpinBox*>(settings->formPanel()->editor("viewWindowSize"));
+    QVERIFY(window);
     window->setValue(window->value() == 7 ? 8 : 7);
     QTRY_COMPARE_WITH_TIMEOUT(view.last().m_sSettingsToApply, ViewParameters::window, 5000);
     QCOMPARE(view.last().m_iTimeWindow, window->value());
 
-    auto* spacer = settings->findChild<QComboBox*>("m_comboBox_distaceTimeSpacer");
+    auto* spacer = qobject_cast<QComboBox*>(settings->formPanel()->editor("distanceTimeSpacer"));
+    QVERIFY(spacer);
     spacer->setCurrentIndex(spacer->currentIndex() == 2 ? 3 : 2);
     QTRY_COMPARE_WITH_TIMEOUT(view.last().m_sSettingsToApply, ViewParameters::spacer, 5000);
     QCOMPARE(view.last().m_iTimeSpacers, spacer->currentIndex() == 2 ? 500 : 1000);
 
-    settings->findChild<QPushButton*>("m_pushButton_makeScreenshot")->click();
+    auto* imageType = qobject_cast<QComboBox*>(settings->formPanel()->editor("imageType"));
+    QVERIFY(imageType);
+    imageType->setCurrentIndex(1);
+    qobject_cast<QPushButton*>(settings->formPanel()->editor("makeScreenshot"))->click();
     QTRY_COMPARE_WITH_TIMEOUT(view.last().m_sSettingsToApply, ViewParameters::screenshot, 5000);
-    QCOMPARE(view.last().m_sImageType, settings->findChild<QComboBox*>("m_comboBox_imageType")->currentText());
+    QCOMPARE(view.last().m_sImageType, QStringLiteral("SVG"));
 
     // Scaling
-    auto* scalingView = dock->findChild<mne::viz::qt::ScalingView*>();
+    auto* scalingView = panelWidget("ScalingView");
     QVERIFY(scalingView);
-    auto* scale = scalingView->findChild<QDoubleSpinBox*>();
+    auto* scale = qobject_cast<QDoubleSpinBox*>(scalingView->formPanel()->editor("scaleEEG"));
     QVERIFY(scale);
     scale->setValue(scale->value() == scale->minimum() ? scale->maximum() : scale->minimum());
     QTRY_VERIFY_WITH_TIMEOUT(!scaling.isEmpty(), 5000);

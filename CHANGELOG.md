@@ -513,6 +513,17 @@ aliases; replace the old spelling as below.
   and the mne_analyze coregistration and dipolefit plugins. The HPI settings
   keep their keys; coil frequencies are typed as a list ("none" for a coil
   without one) and the fit results are a list. File choices are path fields.
+- The display settings of mne_scan, mne_analyze and mne_browse are toolkit-free
+  panels: `viz::ScalingPanel`, `viz::ModalitySelectionPanel`,
+  `viz::AverageSelectionPanel`, `viz::ApplyToPanel` and `viz::RawViewPanel`
+  replace `ScalingView`, `ModalitySelectionView`, `AverageSelectionView`,
+  `ApplyToView` and `FiffRawViewSettings` and keep their settings keys.
+  Scales show in readable units (pT, fT/cm, µV, mV) in spin boxes.
+  `qt::getScalingValue()` and `qt::getDefaultScalingValue()` are gone; use
+  `viz::channel_scale()` and `viz::default_channel_scale()`.
+  `SettingsStore::child_keys()` lists the keys of a group;
+  `viz::parse_setting_color()` and `viz::setting_color()` convert colour field
+  values.
 - `ChannelRhiRenderer` hosts a `viz::TraceViewClient`, the same trace view
   client the SDL example runs, instead of wiring its own view, animator,
   markers and frame builder; its host becomes the client's `viz::Surface`.

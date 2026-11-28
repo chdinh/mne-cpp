@@ -44,12 +44,6 @@
 
 class RawDataViewerControl;
 
-namespace mne::viz::qt
-{
-class ScalingView;
-class FiffRawViewSettings;
-}
-
 namespace mne::analyze
 {
 class Communicator;

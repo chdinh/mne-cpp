@@ -52,12 +52,12 @@ namespace mne::viz
 {
 class AverageLayoutPanel;
 class AveragingPanel;
+class AverageSelectionPanel;
+class RawViewPanel;
 }
 
 namespace mne::viz::qt
 {
-class AverageSelectionView;
-class FiffRawViewSettings;
 class PanelWidget;
 class ChannelInfoModel;
 class EvokedSetModel;
@@ -317,8 +317,10 @@ private:
 
     std::shared_ptr<mne::viz::AveragingPanel> m_pAveragingPanel; /**< Averaging settings. */
 
-    std::unique_ptr<mne::viz::qt::AverageSelectionView> m_pAverageSelectionView;   /**< Holds the average selection; not shown. */
-    std::unique_ptr<mne::viz::qt::FiffRawViewSettings> m_pChannelDataSettingsView; /**< Holds the view settings; not shown. */
+    std::shared_ptr<mne::viz::AverageSelectionPanel> m_pAverageSelection;  /**< The average selection. */
+    std::unique_ptr<mne::viz::qt::PanelWidget> m_pAverageSelectionView;    /**< Keeps the average selection with the settings; not shown. */
+    std::shared_ptr<mne::viz::RawViewPanel> m_pChannelDataSettings;        /**< The view settings. */
+    std::unique_ptr<mne::viz::qt::PanelWidget> m_pChannelDataSettingsView; /**< Keeps the view settings with the settings; not shown. */
 
     float m_fBaselineFromS;    /**< Baseline start - in seconds relative to stim(0) - can be negative*/
     float m_fBaselineToS;      /**< Baseline end - in seconds relative to stim(0) - can be negative*/

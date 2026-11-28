@@ -92,21 +92,6 @@ void pop_code_point(std::string& text)
     }
 }
 
-std::optional<Color> parse_color(const std::string& text)
-{
-    if ((text.size() != 7 && text.size() != 9) || text.front() != '#') {
-        return std::nullopt;
-    }
-    const auto component = [&text](std::size_t at) {
-        return static_cast<std::uint8_t>(std::stoi(text.substr(at, 2), nullptr, 16));
-    };
-    Color color{component(1), component(3), component(5), 255};
-    if (text.size() == 9) {
-        color.a = component(7);
-    }
-    return color;
-}
-
 constexpr double kCheckBoxSize = 18.0;
 constexpr double kControlRadius = 4.0;
 constexpr double kRowInset = 16.0;
@@ -957,7 +942,7 @@ void FormView::draw_editor(Canvas& canvas, const Row& r, const SettingField& f) 
         case SettingField::Kind::Color: {
             const std::string text = m_form.get<std::string>(f.key);
             canvas.set_pen(Pen{t.field_border, 1.0});
-            canvas.set_brush(Brush::solid(parse_color(text).value_or(Color::transparent())));
+            canvas.set_brush(Brush::solid(parse_setting_color(text).value_or(Color::transparent())));
             canvas.draw_rounded_rect(e.adjusted(0.5, 0.5, -0.5, -0.5), kControlRadius, kControlRadius);
             const Font mono = t.mono_font(t.small_font_size);
             canvas.set_font(mono);

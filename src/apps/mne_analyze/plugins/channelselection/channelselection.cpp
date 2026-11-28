@@ -23,7 +23,7 @@
 #include <mne/viz/backends/qt/kit/panelwidget.h>
 #include <mne/viz/backends/qt/kit/sceneviewport.h>
 #include <mne/viz/panels/channel_selection_panel.h>
-#include <mne/viz/backends/qt/viewers/applytoview.h>
+#include <mne/viz/panels/apply_to_panel.h>
 #include <anShared/Management/communicator.h>
 #include <anShared/Model/fiffrawviewmodel.h>
 #include <anShared/Management/analyzedata.h>
@@ -39,7 +39,9 @@
 //=============================================================================================================
 
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -209,9 +211,8 @@ void ChannelSelection::setFiffSettings(std::shared_ptr<mne::FiffInfo> pFiffInfo)
     m_pViewLayout->addWidget(m_pChannelSelectionView->figureViewport());
     m_pControlLayout->addWidget(m_pChannelSelectionView);
 
-    m_pApplyToView = new mne::viz::qt::ApplyToView("", m_pControlLayout->parentWidget());
-
-    m_pControlLayout->addWidget(m_pApplyToView);
+    m_pApplyTo = std::make_shared<mne::viz::ApplyToPanel>();
+    m_pControlLayout->addWidget(new mne::viz::qt::PanelWidget(m_pApplyTo, QString(), m_pControlLayout->parentWidget()));
 
     m_pChannelInfoModel->setLayout(m_pChannelSelection->layout_map());
 
@@ -234,7 +235,7 @@ void ChannelSelection::onSelectionChanged(const mne::viz::qt::SelectionItem& sel
 
     m_pSelectionItem->m_bShowAll = m_pChannelSelection->selection_empty();
 
-    m_pSelectionItem->m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_pSelectionItem->m_sViewsToApply = m_pApplyTo ? m_pApplyTo->selected_views() : std::vector<std::string>{};
 
     m_pCommu->publishEvent(EVENT_TYPE::CHANNEL_SELECTION_ITEMS, QVariant::fromValue(m_pSelectionItem.get()));
 }

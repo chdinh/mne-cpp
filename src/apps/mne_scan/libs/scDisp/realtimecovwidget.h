@@ -63,7 +63,6 @@ class RealTimeCov;
 
 namespace mne::viz::qt
 {
-class ModalitySelectionView;
 class ImageSc;
 }
 

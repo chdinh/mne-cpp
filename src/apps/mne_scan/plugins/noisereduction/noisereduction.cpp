@@ -21,7 +21,6 @@
 
 #include "FormFiles/noisereductionsetupwidget.h"
 #include <mne/base/string_utils.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
 #include <mne/viz/backends/qt/kit/panelwidget.h>
 #include <mne/viz/panels/compensator_panel.h>
 #include <mne/viz/panels/projectors_panel.h>

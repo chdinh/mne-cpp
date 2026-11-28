@@ -56,6 +56,7 @@ private slots:
     void testVisibilityLoadSave();
     void testSubViewLoadSave();
     void testSettingsStoreConversions();
+    void testQtSettingsStoreChildKeys();
 
     // ── SubView ───────────────────────────────────────────────────────
     void testSubViewDefaults();
@@ -266,6 +267,24 @@ void TestVizQtViewstate::testSettingsStoreConversions()
     QCOMPARE(store.read_double("junk", -1.0), -1.0);
     QVERIFY(store.read_bool("missing", true));
     QVERIFY(!store.contains("missing"));
+}
+
+//=============================================================================================================
+
+void TestVizQtViewstate::testQtSettingsStoreChildKeys()
+{
+    // QSettings lists the keys of a group, e.g. the averages whose colours a panel stored
+    QTemporaryDir tmpDir;
+    QVERIFY(tmpDir.isValid());
+    QSettings settings(tmpDir.path() + "/test_child_keys.ini", QSettings::IniFormat);
+    QtSettingsStore store(settings);
+    store.set_value("app/colors/vis", std::string("#0000ff"));
+    store.set_value("app/colors/aud", std::string("#ff0000"));
+    store.set_value("app/colors/nested/deep", 1);
+    store.set_value("app/other", true);
+    QCOMPARE(store.child_keys("app/colors"), (std::vector<std::string>{"aud", "vis"}));
+    QVERIFY(store.child_keys("app/none").empty());
+    QVERIFY(settings.group().isEmpty());
 }
 
 //=============================================================================================================

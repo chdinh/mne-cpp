@@ -14,9 +14,7 @@
  * ScaleControl pairs a horizontal @c QSlider with a synchronised
  * @c QDoubleSpinBox so the user can either drag for coarse control
  * or type for precise control. It supports linear and log10 mapping,
- * configurable min / max and the option to invert direction, and is
- * the building block of @ref mne::viz::qt::ScalingView and several settings
- * panels.
+ * configurable min / max and the option to invert direction.
  */
 #ifndef SCALECONTROL_H
 #define SCALECONTROL_H
@@ -61,8 +59,7 @@ namespace mne::viz::qt
  * @brief Composite slider + spinbox widget for picking a (possibly logarithmic) scale value.
  *
  * Supports linear and log10 mapping, configurable min / max and an
- * optional inverted direction; building block of @ref ScalingView
- * and several other settings panels.
+ * optional inverted direction.
  */
 class VIZQTSHARED_EXPORT ScaleControl : public QWidget
 {

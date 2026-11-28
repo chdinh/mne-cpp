@@ -9,9 +9,9 @@
  * @date     March, 2026
  * @brief    Tests for the disp viewer widget classes: construction, getter/setter round-trips,
  *           settings persistence, GuiMode/ProcessingMode switching, and clearView.
- *           Covers: ScalingView, PanelWidget (compensators, projectors, covariance, time-frequency, SPHARA,
- *           minimum norm, connectivity, averaging, artifact rejection, trigger detection, filter settings
- *           and design), ModalitySelectionView, SettingsPanel, ProgressView, QuickControlView, and MultiView.
+ *           Covers: PanelWidget (compensators, projectors, covariance, time-frequency, SPHARA,
+ *           minimum norm, connectivity, scaling, modality selection, averaging, artifact rejection, trigger
+ *           detection, filter settings and design), SettingsPanel, ProgressView, QuickControlView, and MultiView.
  */
 
 //=============================================================================================================
@@ -19,7 +19,6 @@
 //=============================================================================================================
 
 #include <mne/viz/backends/qt/viewers/abstractview.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
 #include <mne/viz/backends/qt/kit/panelwidget.h>
 #include <mne/viz/panels/artifact_panel.h>
 #include <mne/viz/panels/averaging_panel.h>
@@ -29,12 +28,13 @@
 #include <mne/viz/panels/forward_panel.h>
 #include <mne/viz/figures/theme.h>
 #include <mne/viz/panels/minimum_norm_panel.h>
+#include <mne/viz/panels/modality_selection_panel.h>
 #include <mne/viz/panels/projectors_panel.h>
+#include <mne/viz/panels/scaling_panel.h>
 #include <mne/viz/panels/sphara_panel.h>
 #include <mne/viz/panels/time_frequency_panel.h>
 #include <mne/viz/panels/trigger_detection_panel.h>
 #include <mne/viz/models/item_list.h>
-#include <mne/viz/backends/qt/viewers/modalityselectionview.h>
 #include <mne/viz/panels/filter_settings_panel.h>
 #include <mne/viz/backends/qt/viewers/progressview.h>
 #include <mne/viz/backends/qt/viewers/quickcontrolview.h>
@@ -106,9 +106,10 @@ private slots:
 
     //=========================================================================================================
     /**
-     * Verifies the getDefaultScalingValue free function and ScalingView getter/setter round-trip.
+     * Verifies the scaling panel in a widget: a spin box per shown channel type in readable units, its report,
+     * the MAG-GRAD link and the scales persisted under the keys of ScalingView.
      */
-    void scalingView_constructAndGetSet();
+    void scalingPanel_widget();
 
     //=========================================================================================================
     /**
@@ -132,10 +133,10 @@ private slots:
 
     //=========================================================================================================
     /**
-     * Verifies that ModalitySelectionView builds a modality map from a channel list and
-     * round-trips setModalityMap.
+     * Verifies the modality selection panel in a widget: a check box per modality of the channels, its report and
+     * the silent setModalityMap round trip.
      */
-    void modalitySelectionView_setAndGet();
+    void modalitySelectionPanel_widget();
 
 
     //=========================================================================================================
@@ -267,40 +268,54 @@ void TestVizQtViewers::cleanupTestCase()
 
 //=============================================================================================================
 
-void TestVizQtViewers::scalingView_constructAndGetSet()
+void TestVizQtViewers::scalingPanel_widget()
 {
-    // Free function: getDefaultScalingValue(kind, unit)
-    float megMagDefault = mne::viz::qt::getDefaultScalingValue(FIFFV_MEG_CH, FIFF_UNIT_T);
-    float megGradDefault = mne::viz::qt::getDefaultScalingValue(FIFFV_MEG_CH, FIFF_UNIT_T_M);
-    float eegDefault = mne::viz::qt::getDefaultScalingValue(FIFFV_EEG_CH, FIFF_UNIT_V);
-    QVERIFY(megMagDefault > 0.0f);
-    QVERIFY(megGradDefault > 0.0f);
-    QVERIFY(eegDefault > 0.0f);
+    const QString path = QStringLiteral("test_viz_qt_viewers_scaling_%1").arg(QCoreApplication::applicationPid());
+    std::vector<std::map<int, float>> reports;
+    {
+        auto panel = std::make_shared<ScalingPanel>(std::vector<std::string>{"mag", "grad", "eeg"});
+        panel->set_callback([&reports](const std::map<int, float>& scales) {
+            reports.push_back(scales);
+        });
+        PanelWidget view(panel, path);
+        QCOMPARE(view.windowTitle(), QStringLiteral("Scaling"));
+        auto* mag = qobject_cast<QDoubleSpinBox*>(view.formPanel()->editor("scaleMAG"));
+        auto* grad = qobject_cast<QDoubleSpinBox*>(view.formPanel()->editor("scaleGRAD"));
+        auto* eeg = qobject_cast<QDoubleSpinBox*>(view.formPanel()->editor("scaleEEG"));
+        QVERIFY(mag && grad && eeg);
+        QVERIFY(!view.formPanel()->editor("scaleEOG"));
+        QCOMPARE(mag->value(), 3.0);
+        QCOMPARE(grad->value(), 300.0);
+        QCOMPARE(eeg->value(), 100.0);
 
-    ScalingView view("test_viz_qt_viewers");
+        eeg->setValue(50.0);
+        QCOMPARE(reports.size(), std::size_t{1});
+        QVERIFY(qFuzzyCompare(reports.back().at(FIFFV_EEG_CH), 5e-5f));
 
-    // getScaleMap may be empty until channels are added — call must not crash
-    std::map<int, float> scaleMap = view.getScaleMap();
-    Q_UNUSED(scaleMap);
+        // Linked, the gradiometers follow the magnetometers
+        auto* link = qobject_cast<QCheckBox*>(view.formPanel()->editor("linkMagGrad"));
+        QVERIFY(link);
+        link->setChecked(true);
+        QCOMPARE(qobject_cast<QDoubleSpinBox*>(view.formPanel()->editor("magGradLink"))->value(), 1.0);
+        mag->setValue(6.0);
+        QCOMPARE(grad->value(), 600.0);
+        QVERIFY(qFuzzyCompare(reports.back().at(FIFF_UNIT_T_M), 6e-11f));
 
-    // setScaleMap round-trip
-    std::map<int, float> customMap;
-    customMap[FIFFV_MEG_CH] = 1e-12f;
-    customMap[FIFFV_EEG_CH] = 1e-6f;
-    view.setScaleMap(customMap);
-    std::map<int, float> returned = view.getScaleMap();
-    QVERIFY(qFuzzyCompare(returned.at(FIFFV_MEG_CH), 1e-12f));
-    QVERIFY(qFuzzyCompare(returned.at(FIFFV_EEG_CH), 1e-6f));
-
-    view.setGuiMode(AbstractView::GuiMode::Clinical);
-    view.setGuiMode(AbstractView::GuiMode::Research);
-    view.setProcessingMode(AbstractView::ProcessingMode::RealTime);
-    view.setProcessingMode(AbstractView::ProcessingMode::Offline);
-    view.saveSettings();
-    view.loadSettings();
-    view.clearView();
-
-    QApplication::processEvents();
+        std::map<int, float> custom{{FIFFV_EEG_CH, 2e-4f}};
+        const std::size_t count = reports.size();
+        panel->set_scale_map(custom);
+        QCOMPARE(reports.size(), count);
+        QVERIFY(!view.formPanel()->editor("scaleMAG"));
+        QCOMPARE(qobject_cast<QDoubleSpinBox*>(view.formPanel()->editor("scaleEEG"))->value(), 200.0);
+        QCOMPARE(panel->scale_map(), custom);
+    }
+    QSettings settings(QStringLiteral("MNECPP"));
+    QVERIFY(qFuzzyCompare(settings.value(path + QStringLiteral("/ScalingView/scaleEEG")).toFloat(), 2e-4f));
+    auto restored = std::make_shared<ScalingPanel>();
+    PanelWidget view(restored, path);
+    QVERIFY(qFuzzyCompare(restored->scale_map().at(FIFFV_EEG_CH), 2e-4f));
+    QVERIFY(restored->scale_map().contains(FIFF_UNIT_T));
+    settings.remove(path);
 }
 
 //=============================================================================================================
@@ -419,7 +434,7 @@ void TestVizQtViewers::panelWidget_theme()
 
 //=============================================================================================================
 
-void TestVizQtViewers::modalitySelectionView_setAndGet()
+void TestVizQtViewers::modalitySelectionPanel_widget()
 {
     FiffChInfo megCh;
     megCh.kind = FIFFV_MEG_CH;
@@ -431,32 +446,33 @@ void TestVizQtViewers::modalitySelectionView_setAndGet()
     eegCh.ch_name = "EEG 001";
     eegCh.unit = FIFF_UNIT_V;
 
-    std::vector<FiffChInfo> chList;
-    chList.push_back(megCh);
-    chList.push_back(eegCh);
+    auto panel = std::make_shared<ModalitySelectionPanel>(std::vector<FiffChInfo>{megCh, eegCh});
+    std::vector<std::map<std::string, bool>> reports;
+    panel->set_callback([&reports](const std::map<std::string, bool>& modalities) {
+        reports.push_back(modalities);
+    });
+    PanelWidget view(panel);
+    QCOMPARE(view.windowTitle(), QStringLiteral("Modality Selection"));
+    auto* mag = qobject_cast<QCheckBox*>(view.formPanel()->editor("modalityMAG"));
+    auto* eeg = qobject_cast<QCheckBox*>(view.formPanel()->editor("modalityEEG"));
+    QVERIFY(mag && eeg);
+    QVERIFY(!view.formPanel()->editor("modalityGRAD"));
+    QCOMPARE(panel->modality_map().size(), std::size_t{6});
 
-    ModalitySelectionView view(chList, "test_viz_qt_viewers");
+    eeg->setChecked(false);
+    QCOMPARE(reports.size(), std::size_t{1});
+    QVERIFY(!reports.back().at("EEG"));
+    QVERIFY(reports.back().at("MAG"));
 
-    std::map<std::string, bool> modalMap = view.getModalityMap();
-    QVERIFY(!modalMap.empty());
-
-    // Flip all to false and round-trip
+    // Flip all to false and round-trip, without a report
     std::map<std::string, bool> allOff;
-    for (auto it = modalMap.cbegin(); it != modalMap.cend(); ++it)
-        allOff[it->first] = false;
-    view.setModalityMap(allOff);
-
-    std::map<std::string, bool> returned = view.getModalityMap();
-    for (auto it = returned.cbegin(); it != returned.cend(); ++it)
-        QVERIFY(!it->second);
-
-    view.setGuiMode(AbstractView::GuiMode::Research);
-    view.setProcessingMode(AbstractView::ProcessingMode::Offline);
-    view.saveSettings();
-    view.loadSettings();
-    view.clearView();
-
-    QApplication::processEvents();
+    for (const auto& [modality, on] : panel->modality_map()) {
+        allOff[modality] = false;
+    }
+    panel->set_modality_map(allOff);
+    QCOMPARE(panel->modality_map(), allOff);
+    QVERIFY(!qobject_cast<QCheckBox*>(view.formPanel()->editor("modalityMAG"))->isChecked());
+    QCOMPARE(reports.size(), std::size_t{1});
 }
 
 //=============================================================================================================

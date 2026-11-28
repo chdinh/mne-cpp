@@ -16,8 +16,8 @@
  * ButterflyView is a @c QWidget that paints all averaged traces of
  * the active @ref mne::viz::qt::EvokedSetModel with @c QPainter, decimated to
  * the widget width. Per-modality visibility (@c MAG / @c GRAD / @c EEG) is
- * toggled through @ref mne::viz::qt::ModalitySelectionView and the colour /
- * selection of conditions through @ref mne::viz::qt::AverageSelectionView. The
+ * toggled through @ref mne::viz::ModalitySelectionPanel and the colour /
+ * selection of conditions through @ref mne::viz::AverageSelectionPanel. The
  * widget is the workhorse evoked viewer in MNE-Scan and is intended
  * to live as a tab inside a @ref mne::viz::qt::MultiView dock.
  */
@@ -71,7 +71,7 @@ class ChannelInfoModel;
  * @brief Butterfly viewer overlaying every channel of one or more averaged conditions.
  *
  * Paints all visible traces with QPainter; visibility per modality and per condition is driven by
- * @ref ModalitySelectionView and @ref AverageSelectionView. Used as
+ * @ref mne::viz::ModalitySelectionPanel and @ref mne::viz::AverageSelectionPanel. Used as
  * the main evoked viewer in MNE-Scan.
  */
 class VIZQTSHARED_EXPORT ButterflyView : public QWidget

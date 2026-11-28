@@ -21,6 +21,7 @@
 //=============================================================================================================
 
 #include <QSettings>
+#include <QStringList>
 #include <QString>
 #include <QVariant>
 
@@ -28,6 +29,7 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <algorithm>
 #include <type_traits>
 
 //=============================================================================================================
@@ -85,4 +87,20 @@ void QtSettingsStore::set_value(const std::string& key, const SettingValue& valu
         },
         value);
     m_settings.setValue(QString::fromStdString(key), stored);
+}
+
+//=============================================================================================================
+
+std::vector<std::string> QtSettingsStore::child_keys(const std::string& group) const
+{
+    m_settings.beginGroup(QString::fromStdString(group));
+    const QStringList names = m_settings.childKeys();
+    m_settings.endGroup();
+    std::vector<std::string> keys;
+    keys.reserve(static_cast<std::size_t>(names.size()));
+    for (const QString& name : names) {
+        keys.push_back(name.toStdString());
+    }
+    std::ranges::sort(keys);
+    return keys;
 }

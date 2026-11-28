@@ -22,10 +22,11 @@
 
 #include <mne/viz/backends/qt/kit/panelwidget.h>
 #include <mne/viz/panels/channel_selection_panel.h>
+#include <mne/viz/panels/raw_view_panel.h>
+#include <mne/viz/panels/scaling_panel.h>
+#include <mne/viz/backends/qt/qtconversions.h>
 #include <mne/viz/backends/qt/viewers/helpers/channelinfomodel.h>
 #include <mne/viz/backends/qt/viewers/rtfiffrawview.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
-#include <mne/viz/backends/qt/viewers/fiffrawviewsettings.h>
 #include <mne/viz/panels/trigger_detection_panel.h>
 #include <scMeas/realtimemultisamplearray.h>
 #include <mne/dsp/filterkernel.h>
@@ -48,7 +49,9 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <map>
 #include <memory>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -187,44 +190,66 @@ void RealTimeMultiSampleArrayWidget::initDisplayControllWidgets()
         //Init control widgets
         QList<QWidget*> lControlWidgets;
 
+
+        // The control widgets may outlive this widget in the quick control view
+        const QPointer<RealTimeMultiSampleArrayWidget> self(this);
+
         // Quick control scaling
-        ScalingView* pScalingView = new ScalingView(QString("MNESCAN/RTMSAW"), this, Qt::Widget, m_pFiffInfo->get_channel_types());
+        auto pScaling = std::make_shared<viz::ScalingPanel>(m_pFiffInfo->get_channel_types());
+        pScaling->set_callback([self](const std::map<int, float>& scaleMap) {
+            if (self) {
+                self->m_pChannelDataView->setScalingMap(scaleMap);
+            }
+        });
+        auto* pScalingView = new PanelWidget(pScaling, QString("MNESCAN/RTMSAW"), this);
         pScalingView->setObjectName("group_tab_View_Scaling");
         lControlWidgets.append(pScalingView);
 
-        connect(pScalingView, &ScalingView::scalingChanged,
-                m_pChannelDataView.data(), &RtFiffRawView::setScalingMap);
-
-        m_pChannelDataView->setScalingMap(pScalingView->getScaleMap());
+        m_pChannelDataView->setScalingMap(pScaling->scale_map());
 
         // Quick control channel data settings
-        FiffRawViewSettings* pChannelDataSettingsView = new FiffRawViewSettings(QString("MNESCAN/RTMSAW"), this);
+        auto pChannelDataSettings = std::make_shared<viz::RawViewPanel>();
+        viz::RawViewPanel::Callbacks viewCallbacks;
+        viewCallbacks.signal_color_changed = [self](const viz::Color& color) {
+            if (self) {
+                self->m_pChannelDataView->setSignalColor(toQColor(color));
+            }
+        };
+        viewCallbacks.background_color_changed = [self](const viz::Color& color) {
+            if (self) {
+                self->m_pChannelDataView->setBackgroundColor(toQColor(color));
+            }
+        };
+        viewCallbacks.zoom_changed = [self](double zoom) {
+            if (self) {
+                self->m_pChannelDataView->setZoom(zoom);
+            }
+        };
+        viewCallbacks.window_size_changed = [self](int seconds) {
+            if (self) {
+                self->m_pChannelDataView->setWindowSize(seconds);
+            }
+        };
+        viewCallbacks.time_spacer_changed = [self](int milliseconds) {
+            if (self) {
+                self->m_pChannelDataView->setDistanceTimeSpacer(milliseconds);
+            }
+        };
+        viewCallbacks.screenshot_wanted = [self](const std::string& imageType) {
+            if (self) {
+                self->onMakeScreenshot(QString::fromStdString(imageType));
+            }
+        };
+        pChannelDataSettings->set_callbacks(std::move(viewCallbacks));
+        auto* pChannelDataSettingsView = new PanelWidget(pChannelDataSettings, QString("MNESCAN/RTMSAW"), this);
         pChannelDataSettingsView->setObjectName("group_tab_View_General");
         lControlWidgets.append(pChannelDataSettingsView);
 
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::signalColorChanged,
-                m_pChannelDataView.data(), &RtFiffRawView::setSignalColor);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::backgroundColorChanged,
-                m_pChannelDataView.data(), &RtFiffRawView::setBackgroundColor);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::zoomChanged,
-                m_pChannelDataView.data(), &RtFiffRawView::setZoom);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::timeWindowChanged,
-                m_pChannelDataView.data(), &RtFiffRawView::setWindowSize);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::distanceTimeSpacerChanged,
-                m_pChannelDataView.data(), &RtFiffRawView::setDistanceTimeSpacer);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::makeScreenshot,
-                this, &RealTimeMultiSampleArrayWidget::onMakeScreenshot);
-
-        m_pChannelDataView->setZoom(pChannelDataSettingsView->getZoom());
-        m_pChannelDataView->setWindowSize(pChannelDataSettingsView->getWindowSize());
-        m_pChannelDataView->setDistanceTimeSpacer(pChannelDataSettingsView->getDistanceTimeSpacer());
-        m_pChannelDataView->setBackgroundColor(pChannelDataSettingsView->getBackgroundColor());
-        m_pChannelDataView->setSignalColor(pChannelDataSettingsView->getSignalColor());
+        m_pChannelDataView->setZoom(pChannelDataSettings->zoom());
+        m_pChannelDataView->setWindowSize(pChannelDataSettings->window_size());
+        m_pChannelDataView->setDistanceTimeSpacer(pChannelDataSettings->time_spacer());
+        m_pChannelDataView->setBackgroundColor(toQColor(pChannelDataSettings->background_color()));
+        m_pChannelDataView->setSignalColor(toQColor(pChannelDataSettings->signal_color()));
 
         // Quick control trigger detection settings
         auto triggers = std::make_shared<TriggerDetectionPanel>();

@@ -52,6 +52,7 @@ public:
 
     std::optional<viz::SettingValue> value(const std::string& key) const override;
     void set_value(const std::string& key, const viz::SettingValue& value) override;
+    std::vector<std::string> child_keys(const std::string& group) const override;
 
 private:
     QSettings& m_settings; /**< The wrapped settings. */

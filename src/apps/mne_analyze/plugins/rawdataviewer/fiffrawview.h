@@ -381,7 +381,7 @@ private:
     std::map<int, float> m_qMapChScaling; /**< Channel scaling values. */
 
     float m_fDefaultSectionSize;  /**< Default row height */
-    float m_fZoomFactor = 16.0f;  /**< Number of channels shown at once (mne::viz::qt::FiffRawViewSettings default) */
+    float m_fZoomFactor = 16.0f;  /**< Number of channels shown at once (mne::viz::RawViewPanel default) */
     int m_iLastClickedSample = 0; /**< Stores last clicked sample on screen */
 
     qint32 m_iT = 10; /**< Display window size in seconds. */

@@ -181,6 +181,19 @@ inline std::map<std::string, viz::Color> toColors(const std::map<std::string, QC
     return result;
 }
 
+/**
+ * @param[in] colors   mne_viz colours by name.
+ * @return The Qt colours by name.
+ */
+inline std::map<std::string, QColor> toQColors(const std::map<std::string, viz::Color>& colors)
+{
+    std::map<std::string, QColor> result;
+    for (const auto& [name, color] : colors) {
+        result.emplace(name, toQColor(color));
+    }
+    return result;
+}
+
 } // namespace mne::viz::qt
 
 #endif // VIZ_QT_QTCONVERSIONS_H

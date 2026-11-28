@@ -81,6 +81,11 @@ set(SOURCES
   panels/hpi_panel.cpp
   panels/coregistration_panel.cpp
   panels/dipole_fit_panel.cpp
+  panels/scaling_panel.cpp
+  panels/modality_selection_panel.cpp
+  panels/average_selection_panel.cpp
+  panels/apply_to_panel.cpp
+  panels/raw_view_panel.cpp
   panels/panel.cpp
   panels/projectors_panel.cpp
   panels/spectrum_panel.cpp
@@ -191,6 +196,11 @@ set(HEADERS
   panels/hpi_panel.h
   panels/coregistration_panel.h
   panels/dipole_fit_panel.h
+  panels/scaling_panel.h
+  panels/modality_selection_panel.h
+  panels/average_selection_panel.h
+  panels/apply_to_panel.h
+  panels/raw_view_panel.h
   panels/panel.h
   panels/projectors_panel.h
   panels/spectrum_panel.h

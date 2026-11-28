@@ -23,6 +23,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstdint>
+#include <format>
 #include <utility>
 
 //=============================================================================================================
@@ -553,4 +555,30 @@ void SettingsForm::notify_structure(const std::string& key)
     for (const auto& [id, listener] : listeners) {
         listener(key);
     }
+}
+
+//=============================================================================================================
+
+std::optional<Color> mne::viz::parse_setting_color(const std::string& text)
+{
+    if ((text.size() != 7 && text.size() != 9) || text.front() != '#' ||
+        !std::all_of(text.begin() + 1, text.end(), [](char c) { return std::isxdigit(static_cast<unsigned char>(c)) != 0; })) {
+        return std::nullopt;
+    }
+    const auto component = [&text](std::size_t at) {
+        return static_cast<std::uint8_t>(std::stoi(text.substr(at, 2), nullptr, 16));
+    };
+    Color color{component(1), component(3), component(5), 255};
+    if (text.size() == 9) {
+        color.a = component(7);
+    }
+    return color;
+}
+
+//=============================================================================================================
+
+std::string mne::viz::setting_color(const Color& color)
+{
+    return color.a == 255 ? std::format("#{:02x}{:02x}{:02x}", color.r, color.g, color.b)
+                          : std::format("#{:02x}{:02x}{:02x}{:02x}", color.r, color.g, color.b, color.a);
 }

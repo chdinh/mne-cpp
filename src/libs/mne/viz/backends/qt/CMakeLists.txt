@@ -49,14 +49,9 @@ set(SOURCES
     detail/layout_reset.h
     detail/scoped_flag.h
     viewers/abstractview.cpp
-    viewers/applytoview.cpp
     viewers/helpers/scalecontrol.cpp
     viewers/progressview.cpp
-    viewers/modalityselectionview.cpp
     viewers/butterflyview.cpp
-    viewers/scalingview.cpp
-    viewers/fiffrawviewsettings.cpp
-    viewers/averageselectionview.cpp
     viewers/quickcontrolview.cpp
     viewers/control3dview.cpp
     viewers/channeldataview.cpp
@@ -125,14 +120,9 @@ set(HEADERS
     plots/helpers/scenepainter.h
     plots/helpers/rhiframerenderer.h
     viewers/abstractview.h
-    viewers/applytoview.h
     viewers/helpers/scalecontrol.h
     viewers/progressview.h
-    viewers/modalityselectionview.h
     viewers/butterflyview.h
-    viewers/scalingview.h
-    viewers/fiffrawviewsettings.h
-    viewers/averageselectionview.h
     viewers/quickcontrolview.h
     viewers/control3dview.h
     viewers/channeldataview.h
@@ -190,11 +180,8 @@ set(HEADERS
 )
 
 set(UI
-    viewers/formfiles/applytoview.ui
     viewers/formfiles/scalecontrol.ui
     viewers/formfiles/progressview.ui
-    viewers/formfiles/scalingview.ui
-    viewers/formfiles/fiffrawviewsettings.ui
     viewers/formfiles/quickcontrolview.ui
     viewers/formfiles/control3dview.ui
     viewers/formfiles/bidsview.ui

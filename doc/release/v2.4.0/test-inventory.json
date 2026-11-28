@@ -11352,7 +11352,9 @@
         "windows-2025-vs2026-qt-min": "absent"
       },
       "registry_classes": [
+        "ApplyToPanel",
         "ArtifactPanel",
+        "AverageSelectionPanel",
         "AveragingPanel",
         "CompensatorPanel",
         "ConnectivityPanel",
@@ -11365,9 +11367,12 @@
         "ForwardPanel",
         "HpiPanel",
         "MinimumNormPanel",
+        "ModalitySelectionPanel",
         "Panel",
         "ProjectPanel",
         "ProjectorsPanel",
+        "RawViewPanel",
+        "ScalingPanel",
         "SettingChoice",
         "SettingField",
         "SettingsForm",

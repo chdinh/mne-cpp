@@ -21,11 +21,11 @@
 #include "../detail/map_value.h"
 #include <mne/base/log.h>
 
-#include "scalingview.h"
 #include "helpers/evokedsetmodel.h"
 #include "helpers/channelinfomodel.h"
 #include "../plots/helpers/scenepainter.h"
 #include <mne/viz/figures/butterfly_plot.h>
+#include <mne/viz/figures/channel_scale.h>
 #include <mne/viz/figures/svg_renderer.h>
 
 //=============================================================================================================
@@ -335,7 +335,7 @@ mne::viz::DisplayList ButterflyView::figure() const
             }
             viz::ButterflyPlot::Channel channel;
             const qint32 kind = m_pEvokedSetModel->getKind(r);
-            channel.max_value = mne::viz::qt::getScalingValue(m_scaleMap, kind, m_pEvokedSetModel->getUnit(r));
+            channel.max_value = mne::viz::channel_scale(m_scaleMap, kind, m_pEvokedSetModel->getUnit(r));
             channel.bad = m_pEvokedSetModel->getIsChannelBad(r);
             for (const mne::viz::qt::AvrTypeRowVector& average : m_pEvokedSetModel->data(r, 1).value<std::vector<mne::viz::qt::AvrTypeRowVector>>()) {
                 if (detail::valueOr(*m_qMapAverageActivation, average.first)) {

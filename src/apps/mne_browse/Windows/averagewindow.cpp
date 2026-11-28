@@ -505,10 +505,10 @@ void AverageWindow::initTableViewWidgets()
 void AverageWindow::initAverageSceneView()
 {
     // Set sensible default scale map so traces are visible before the user
-    // opens the Scale window.  The raw defaults in getDefaultScalingValue
+    // opens the Scale window.  The raw defaults in viz::default_channel_scale
     // (MAG=1e-12, GRAD=1e-15) are the unit amplitude, producing extreme
-    // dScaleY values.  Here we use the same multiples that ScalingView
-    // applies to its default slider positions.
+    // dScaleY values.  Here we use multiples like the defaults of
+    // viz::ScalingPanel.
     std::map<int, float> defaultScaleMap;
     defaultScaleMap[FIFF_UNIT_T] = 1e-11f;   // MAG
     defaultScaleMap[FIFF_UNIT_T_M] = 1e-10f; // GRAD

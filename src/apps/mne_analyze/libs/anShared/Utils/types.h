@@ -148,7 +148,7 @@ struct ViewParameters
         all
     };
 
-    // Defaults are those of mne::viz::qt::FiffRawViewSettings
+    // Defaults are those of mne::viz::RawViewPanel
     std::vector<std::string> m_sViewsToApply;
     ViewSetting m_sSettingsToApply = all;
     QColor m_colorSignal = Qt::blue;

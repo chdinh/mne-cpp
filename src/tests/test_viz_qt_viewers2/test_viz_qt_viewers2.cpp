@@ -9,8 +9,8 @@
  * @date     March, 2026
  * @brief    Tests for additional disp viewer widget classes and helper models.
  *           Covers: PanelWidget (HPI, co-registration, forward solution, project, dipole fit, averaging,
- *           artifact rejection, trigger detection), FiffRawViewSettings, BidsView,
- *           ChannelSelectionView, AverageLayoutPanel, AverageSelectionView,
+ *           artifact rejection, trigger detection, raw view, average selection, apply to), BidsView,
+ *           ChannelSelectionView, AverageLayoutPanel,
  *           ButterflyView, SpectrumPanel, RtFiffRawViewModel, EvokedSetModel,
  *           ChannelInfoModel, and RtFiffRawView.
  */
@@ -30,7 +30,7 @@
 #include <mne/viz/panels/averaging_panel.h>
 #include <mne/viz/panels/forward_panel.h>
 #include <mne/viz/panels/trigger_detection_panel.h>
-#include <mne/viz/backends/qt/viewers/fiffrawviewsettings.h>
+#include <mne/viz/panels/raw_view_panel.h>
 #include <mne/viz/panels/project_panel.h>
 #include <mne/viz/panels/filter_design_panel.h>
 #include <mne/viz/backends/qt/plots/helpers/scenepainter.h>
@@ -46,7 +46,7 @@
 #include <mne/viz/figures/average_layout_figure.h>
 #include <mne/viz/figures/sensor_layout_figure.h>
 #include <mne/viz/panels/average_layout_panel.h>
-#include <mne/viz/backends/qt/viewers/averageselectionview.h>
+#include <mne/viz/panels/average_selection_panel.h>
 #include <mne/viz/backends/qt/viewers/butterflyview.h>
 #include <mne/viz/panels/spectrum_panel.h>
 #include <mne/viz/backends/qt/viewers/rtfiffrawview.h>
@@ -55,7 +55,7 @@
 #include <mne/viz/backends/qt/viewers/helpers/channelinfomodel.h>
 #include <mne/viz/panels/dipole_fit_panel.h>
 #include <mne/viz/backends/qt/viewers/control3dview.h>
-#include <mne/viz/backends/qt/viewers/applytoview.h>
+#include <mne/viz/panels/apply_to_panel.h>
 #include <mne/viz/backends/qt/viewers/helpers/rtfiffrawviewdelegate.h>
 #include <mne/viz/backends/qt/viewers/helpers/bidsviewmodel.h>
 #include <mne/viz/backends/qt/viewers/helpers/mneoperator.h>
@@ -99,6 +99,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QToolButton>
 #include <QSpinBox>
 #include <QTableView>
 #include <QTableWidget>
@@ -400,10 +401,10 @@ private slots:
 
     //=========================================================================================================
     /**
-     * Verifies that FiffRawViewSettings constructs, getters return sensible defaults,
-     * and setters do not crash.
+     * Verifies the raw view panel in a widget: defaults, reports, silent setters, hidden controls and the
+     * settings keys of FiffRawViewSettings.
      */
-    void fiffRawViewSettings_setAndGet();
+    void rawViewPanel_widget();
 
     //=========================================================================================================
     /**
@@ -426,9 +427,10 @@ private slots:
 
     //=========================================================================================================
     /**
-     * Verifies that AverageSelectionView constructs and survives all lifecycle transitions.
+     * Verifies the average selection panel in a widget: a check box and a colour per average, reports, the
+     * colour dialog, persistence and the limit of ten averages.
      */
-    void averageSelectionView_lifecycle();
+    void averageSelectionPanel_widget();
 
     //=========================================================================================================
     /**
@@ -566,10 +568,9 @@ private slots:
 
     //=========================================================================================================
     /**
-     * Verifies that ApplyToView constructs headlessly and survives
-     * lifecycle transitions.
+     * Verifies the apply-to panel in a widget: all views ticked, the "Select All" and "Clear Selected" buttons.
      */
-    void applyToView_lifecycle();
+    void applyToPanel_widget();
 
     //=========================================================================================================
     /**
@@ -1608,30 +1609,87 @@ void TestVizQtViewers2::forwardPanel_inPanelWidget()
 
 //=============================================================================================================
 
-void TestVizQtViewers2::fiffRawViewSettings_setAndGet()
+void TestVizQtViewers2::rawViewPanel_widget()
 {
-    FiffRawViewSettings view("test_viz_qt_viewers2");
+    const QString path = QStringLiteral("test_viz_qt_viewers2_rawview_%1").arg(QCoreApplication::applicationPid());
+    QSettings(QStringLiteral("MNECPP")).remove(path);
+    // Settings of FiffRawViewSettings carry over
+    QSettings(QStringLiteral("MNECPP")).setValue(path + QStringLiteral("/FiffRawViewSettings/distanceTimeSpacer"), 500);
+    QSettings(QStringLiteral("MNECPP")).setValue(path + QStringLiteral("/FiffRawViewSettings/backgroundColor"), QColor(Qt::black));
+    std::vector<double> zooms;
+    std::vector<int> spacers;
+    std::vector<mne::viz::Color> backgrounds;
+    std::vector<std::string> screenshots;
+    {
+        auto panel = std::make_shared<mne::viz::RawViewPanel>();
+        mne::viz::RawViewPanel::Callbacks callbacks;
+        callbacks.zoom_changed = [&zooms](double zoom) {
+            zooms.push_back(zoom);
+        };
+        callbacks.time_spacer_changed = [&spacers](int spacer) {
+            spacers.push_back(spacer);
+        };
+        callbacks.background_color_changed = [&backgrounds](const mne::viz::Color& color) {
+            backgrounds.push_back(color);
+        };
+        callbacks.screenshot_wanted = [&screenshots](const std::string& type) {
+            screenshots.push_back(type);
+        };
+        panel->set_callbacks(std::move(callbacks));
+        PanelWidget view(panel, path);
+        QCOMPARE(panel->zoom(), 16.0);
+        QCOMPARE(panel->window_size(), 10);
+        QCOMPARE(panel->time_spacer(), 500);
+        QCOMPARE(panel->signal_color(), (mne::viz::Color{0, 0, 255, 255}));
+        QCOMPARE(panel->background_color(), mne::viz::Color::black());
 
-    // Window size getter/setter
-    int wSize = view.getWindowSize();
-    QVERIFY(wSize > 0);
-    view.setWindowSize(wSize + 1);
+        auto* zoom = qobject_cast<QDoubleSpinBox*>(view.formPanel()->editor("viewZoomFactor"));
+        auto* spacer = qobject_cast<QComboBox*>(view.formPanel()->editor("distanceTimeSpacer"));
+        QVERIFY(zoom && spacer);
+        zoom->setValue(20.0);
+        QCOMPARE(zooms, std::vector<double>{20.0});
+        spacer->setCurrentIndex(1);
+        QCOMPARE(spacers, std::vector<int>{200});
 
-    // Distance time spacer
-    int dist = view.getDistanceTimeSpacer();
-    QVERIFY(dist >= 0);
+        // The colour dialog picks the background
+        auto* background = qobject_cast<QToolButton*>(view.formPanel()->editor("backgroundColor"));
+        QVERIFY(background);
+        answerNextModal([](QWidget* pModal) {
+            auto* pDialog = qobject_cast<QColorDialog*>(pModal);
+            QVERIFY(pDialog);
+            pDialog->setCurrentColor(QColor(10, 200, 30));
+            static_cast<QDialog*>(pDialog)->accept();
+        });
+        background->click();
+        QCOMPARE(backgrounds.size(), std::size_t{1});
+        QCOMPARE(backgrounds.back(), (mne::viz::Color{10, 200, 30, 255}));
 
-    // Background color
-    QColor bg = view.getBackgroundColor();
-    QVERIFY(bg.isValid());
+        qobject_cast<QPushButton*>(view.formPanel()->editor("makeScreenshot"))->click();
+        QCOMPARE(screenshots, std::vector<std::string>{"PNG"});
 
-    view.setGuiMode(AbstractView::GuiMode::Research);
-    view.setProcessingMode(AbstractView::ProcessingMode::Offline);
-    view.saveSettings();
-    view.loadSettings();
-    view.clearView();
+        // Setters are silent
+        panel->set_zoom(30.0);
+        panel->set_window_size(20);
+        panel->set_time_spacer(1000);
+        panel->set_signal_color(mne::viz::Color{1, 2, 3, 255});
+        QCOMPARE(zoom->value(), 30.0);
+        QCOMPARE(panel->window_size(), 20);
+        QCOMPARE(panel->time_spacer(), 1000);
+        QCOMPARE(panel->signal_color(), (mne::viz::Color{1, 2, 3, 255}));
+        QCOMPARE(zooms.size(), std::size_t{1});
+        QCOMPARE(spacers.size(), std::size_t{1});
+    }
+    QSettings settings(QStringLiteral("MNECPP"));
+    QCOMPARE(settings.value(path + QStringLiteral("/FiffRawViewSettings/viewWindowSize")).toInt(), 20);
+    QCOMPARE(settings.value(path + QStringLiteral("/FiffRawViewSettings/backgroundColor")).toString(), QStringLiteral("#0ac81e"));
 
-    QApplication::processEvents();
+    // Hidden controls keep their values but get no editor
+    auto shown = std::make_shared<mne::viz::RawViewPanel>(std::vector<std::string>{"screenshot", "backgroundColor"});
+    PanelWidget view(shown, path);
+    QVERIFY(!view.formPanel()->editor("viewZoomFactor") || !view.formPanel()->editor("viewZoomFactor")->isVisibleTo(&view));
+    QCOMPARE(shown->window_size(), 20);
+    QCOMPARE(shown->background_color(), (mne::viz::Color{10, 200, 30, 255}));
+    settings.remove(path);
 }
 
 //=============================================================================================================
@@ -1771,41 +1829,47 @@ void TestVizQtViewers2::averageLayoutPanel_lifecycle()
 
 //=============================================================================================================
 
-void TestVizQtViewers2::averageSelectionView_lifecycle()
+void TestVizQtViewers2::averageSelectionPanel_widget()
 {
-    const QString settingsPath = QStringLiteral("test_viz_qt_viewers2_avgsel");
+    const QString settingsPath = QStringLiteral("test_viz_qt_viewers2_avgsel_%1").arg(QCoreApplication::applicationPid());
     QSettings(QStringLiteral("MNECPP")).remove(settingsPath);
-    auto view = std::make_unique<AverageSelectionView>(settingsPath);
-
-    view->setGuiMode(AbstractView::GuiMode::Research);
-    view->setProcessingMode(AbstractView::ProcessingMode::Offline);
-    view->clearView();
+    auto panel = std::make_shared<mne::viz::AverageSelectionPanel>();
+    std::vector<std::map<std::string, bool>> activations;
+    std::vector<std::map<std::string, mne::viz::Color>> colorReports;
+    mne::viz::AverageSelectionPanel::Callbacks callbacks;
+    callbacks.activation_changed = [&activations](const std::map<std::string, bool>& activation) {
+        activations.push_back(activation);
+    };
+    callbacks.colors_changed = [&colorReports](const std::map<std::string, mne::viz::Color>& colors) {
+        colorReports.push_back(colors);
+    };
+    panel->set_callbacks(std::move(callbacks));
+    auto view = std::make_unique<PanelWidget>(panel, settingsPath);
+    QCOMPARE(view->windowTitle(), QStringLiteral("Average Selection"));
 
     // One checkbox and one colour button per average
-    auto colors = std::make_shared<std::map<std::string, QColor>>();
-    auto activation = std::make_shared<std::map<std::string, bool>>();
-    colors->insert_or_assign("aud", Qt::red);
-    colors->insert_or_assign("vis", Qt::blue);
-    activation->insert_or_assign("aud", true);
-    activation->insert_or_assign("vis", false);
-    view->setAverageActivation(activation);
-    view->setAverageColor(colors);
-    QCOMPARE(view->getAverageColor(), colors);
-    QCOMPARE(view->getAverageActivation(), activation);
+    const mne::viz::Color red{255, 0, 0, 255};
+    const mne::viz::Color blue{0, 0, 255, 255};
+    std::map<std::string, mne::viz::Color> colors{{"aud", red}, {"vis", blue}};
+    std::map<std::string, bool> activation{{"aud", true}, {"vis", false}};
+    panel->set_average_activation(activation);
+    panel->set_average_colors(colors);
+    QCOMPARE(panel->average_colors(), colors);
+    QCOMPARE(panel->average_activation(), activation);
     QCOMPARE(view->findChildren<QCheckBox*>().size(), 2);
-    auto* visBox = view->findChild<QCheckBox*>(QStringLiteral("vis"));
+    auto* visBox = qobject_cast<QCheckBox*>(view->formPanel()->editor("active/vis"));
     QVERIFY(visBox && !visBox->isChecked());
-    QVERIFY(view->findChild<QCheckBox*>(QStringLiteral("aud"))->isChecked());
+    QVERIFY(qobject_cast<QCheckBox*>(view->formPanel()->editor("active/aud"))->isChecked());
+    QVERIFY(activations.empty() && colorReports.empty());
 
-    // Toggling a checkbox updates the activation map
-    QSignalSpy activationSpy(view.get(), &AverageSelectionView::newAverageActivationMap);
+    // Toggling a checkbox reports the activation map
     visBox->click();
-    QCOMPARE(activationSpy.size(), 1);
-    QVERIFY(mne::viz::qt::detail::valueOr(*activation, "vis"));
+    QCOMPARE(activations.size(), std::size_t{1});
+    QVERIFY(activations.back().at("vis"));
 
     // Picking a colour stores it; cancelling the dialog keeps the old one
-    QSignalSpy colorSpy(view.get(), &AverageSelectionView::newAverageColorMap);
-    auto* visButton = view->findChild<QPushButton*>(QStringLiteral("vis"));
+    auto* visButton = qobject_cast<QToolButton*>(view->formPanel()->editor("color/vis"));
+    QVERIFY(visButton);
     answerNextModal([](QWidget* pModal) {
         auto* pDialog = qobject_cast<QColorDialog*>(pModal);
         QVERIFY(pDialog);
@@ -1813,38 +1877,39 @@ void TestVizQtViewers2::averageSelectionView_lifecycle()
         static_cast<QDialog*>(pDialog)->accept();
     });
     visButton->click();
-    QCOMPARE(mne::viz::qt::detail::valueOr(*colors, "vis"), QColor(10, 200, 30));
-    QCOMPARE(colorSpy.size(), 1);
+    QCOMPARE(panel->average_colors().at("vis"), (mne::viz::Color{10, 200, 30, 255}));
+    QCOMPARE(colorReports.size(), std::size_t{1});
     answerNextModal([](QWidget* pModal) {
         auto* pDialog = qobject_cast<QColorDialog*>(pModal);
         QVERIFY(pDialog);
         static_cast<QDialog*>(pDialog)->reject();
     });
     visButton->click();
-    QCOMPARE(mne::viz::qt::detail::valueOr(*colors, "vis"), QColor(10, 200, 30));
-    QCOMPARE(colorSpy.size(), 1);
+    QCOMPARE(panel->average_colors().at("vis"), (mne::viz::Color{10, 200, 30, 255}));
+    QCOMPARE(colorReports.size(), std::size_t{1});
 
-    // Colours and activation are restored by a new view with the same settings path
+    // Colours and activation are restored by a new panel with the same settings path
     view.reset();
-    view = std::make_unique<AverageSelectionView>(settingsPath);
-    QCOMPARE(mne::viz::qt::detail::valueOr(*view->getAverageColor(), "vis"), QColor(10, 200, 30));
-    QVERIFY(mne::viz::qt::detail::valueOr(*view->getAverageActivation(), "vis"));
+    panel = std::make_shared<mne::viz::AverageSelectionPanel>();
+    view = std::make_unique<PanelWidget>(panel, settingsPath);
+    QCOMPARE(panel->average_colors().at("vis"), (mne::viz::Color{10, 200, 30, 255}));
+    QCOMPARE(panel->average_colors().at("aud"), red);
+    QVERIFY(panel->average_activation().at("vis"));
     QCOMPARE(view->findChildren<QCheckBox*>().size(), 2);
 
     // At most 10 averages are listed; maps of different size are not drawn
     for (int i = 0; i < 12; ++i) {
-        colors->insert_or_assign(std::format("avg{:02}", i), Qt::green);
-        activation->insert_or_assign(std::format("avg{:02}", i), true);
+        colors.insert_or_assign(std::format("avg{:02}", i), mne::viz::Color{0, 255, 0, 255});
+        activation.insert_or_assign(std::format("avg{:02}", i), true);
     }
-    view->setAverageActivation(activation);
-    view->setAverageColor(colors);
+    panel->set_average_activation(activation);
+    panel->set_average_colors(colors);
     QApplication::processEvents();
     QCOMPARE(view->findChildren<QCheckBox*>().size(), 10);
-    activation->erase("aud");
-    view->setAverageActivation(activation);
+    activation.erase("aud");
+    panel->set_average_activation(activation);
     QApplication::processEvents();
     QCOMPARE(view->findChildren<QCheckBox*>().size(), 10);
-
     view.reset();
     QSettings(QStringLiteral("MNECPP")).remove(settingsPath);
 }
@@ -4322,16 +4387,25 @@ void TestVizQtViewers2::control3dView_lifecycle()
 
 //=============================================================================================================
 
-void TestVizQtViewers2::applyToView_lifecycle()
+void TestVizQtViewers2::applyToPanel_widget()
 {
-    ApplyToView view("test_viz_qt_viewers2");
+    auto panel = std::make_shared<mne::viz::ApplyToPanel>();
+    PanelWidget view(panel);
+    QCOMPARE(view.windowTitle(), QStringLiteral("Apply to View"));
+    const std::vector<std::string> all{"null", "signalview", "butterflyview", "layoutview"};
+    QCOMPARE(panel->selected_views(), all);
 
-    // AbstractView lifecycle
-    view.saveSettings();
-    view.loadSettings();
-    view.clearView();
+    auto* butterfly = qobject_cast<QCheckBox*>(view.formPanel()->editor("butterflyView"));
+    QVERIFY(butterfly);
+    butterfly->setChecked(false);
+    QCOMPARE(panel->selected_views(), (std::vector<std::string>{"null", "signalview", "layoutview"}));
 
-    QApplication::processEvents();
+    qobject_cast<QPushButton*>(view.formPanel()->editor("clearSelected"))->click();
+    QCOMPARE(panel->selected_views(), std::vector<std::string>{"null"});
+    QVERIFY(!butterfly->isChecked());
+    qobject_cast<QPushButton*>(view.formPanel()->editor("selectAll"))->click();
+    QCOMPARE(panel->selected_views(), all);
+    QVERIFY(butterfly->isChecked());
 }
 
 //=============================================================================================================

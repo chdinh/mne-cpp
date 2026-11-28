@@ -8,8 +8,7 @@
  * @since    2.0.0
  * @date     March, 2026
  * @brief    Tests for disp plot widgets — ColorMap verification,
- *           LinePlot, ImageSc, Plot, Spline, Bar, TFplot, Graph,
- *           and ScalingView helper functions.
+ *           LinePlot, ImageSc, Plot, Spline, Bar, TFplot and Graph.
  */
 
 //=============================================================================================================
@@ -25,7 +24,6 @@
 #include <mne/viz/backends/qt/plots/bar.h>
 #include <mne/viz/backends/qt/plots/tfplot.h>
 #include <mne/viz/backends/qt/plots/graph.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
 
 //=============================================================================================================
 // QT INCLUDES
@@ -121,10 +119,6 @@ private slots:
     // ── TFplot ────────────────────────────────────────────────────────
     void testTFplotConstruction();
     void testTFplotWithFreqRange();
-
-    // ── ScalingView helpers ───────────────────────────────────────────
-    void testGetDefaultScalingValue();
-    void testGetScalingValueFromMap();
 };
 
 //=============================================================================================================
@@ -862,43 +856,6 @@ void TestVizQtPlots::testTFplotWithFreqRange()
     TFplotProbe odd(MatrixXd::Ones(210, 421), sfreq, 1.0, 50.0, ColorMaps::Jet);
     QCOMPARE(odd.extent()[2], sfreq / 421);
     QCOMPARE(odd.extent()[3], 35 * sfreq / 421);
-}
-
-//=============================================================================================================
-// ScalingView helpers
-//=============================================================================================================
-
-void TestVizQtPlots::testGetDefaultScalingValue()
-{
-    // FIFFV_MEG_CH = 1, FIFFV_EEG_CH = 2 etc. - test that we get nonzero defaults
-    float megGradScale = getDefaultScalingValue(1, 201); // MEG, T/m unit
-    float megMagScale = getDefaultScalingValue(1, 112);  // MEG, T unit
-    float eegScale = getDefaultScalingValue(2, 107);     // EEG, V unit
-
-    QVERIFY(megGradScale > 0);
-    QVERIFY(megMagScale > 0);
-    QVERIFY(eegScale > 0);
-}
-
-//=============================================================================================================
-
-void TestVizQtPlots::testGetScalingValueFromMap()
-{
-    std::map<int, float> scaleMap;
-    // Use EEG (kind=2) and STIM (kind=3) — non-MEG kinds so the lookup
-    // uses iChannelKind directly (MEG channels look up by unit instead).
-    scaleMap[2] = 42.0f;
-    scaleMap[3] = 84.0f;
-
-    float val = getScalingValue(scaleMap, 2, 0);
-    QCOMPARE(val, 42.0f);
-
-    float val2 = getScalingValue(scaleMap, 3, 0);
-    QCOMPARE(val2, 84.0f);
-
-    // Non-existent key should return a default
-    float valDefault = getScalingValue(scaleMap, 999, 0);
-    QVERIFY(valDefault >= 0);
 }
 
 //=============================================================================================================

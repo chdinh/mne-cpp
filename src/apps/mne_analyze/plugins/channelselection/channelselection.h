@@ -49,6 +49,7 @@ class AbstractModel;
 
 namespace mne::viz
 {
+class ApplyToPanel;
 class ChannelSelectionPanel;
 }
 
@@ -57,7 +58,6 @@ namespace mne::viz::qt
 class PanelWidget;
 class ChannelInfoModel;
 class SelectionItem;
-class ApplyToView;
 }
 
 namespace mne
@@ -153,7 +153,7 @@ private:
     std::shared_ptr<mne::viz::qt::ChannelInfoModel> m_pChannelInfoModel;  /**< Hold channel info - needed to initialize channelselectionview. */
     std::shared_ptr<mne::FiffInfo> m_pFiffInfo;                           /**< Hold Information baout currently loaded file. */
 
-    mne::viz::qt::ApplyToView* m_pApplyToView;
+    std::shared_ptr<mne::viz::ApplyToPanel> m_pApplyTo; /**< Chooses the views the selection applies to. */
 
     QHBoxLayout* m_pViewLayout;    /**< Holds the view portion of the channel selection to be displayed. */
     QVBoxLayout* m_pControlLayout; /**< Holds the control portion of the channel selection to be displayed. */

@@ -31,10 +31,10 @@
 #include <mne/viz/figures/svg_renderer.h>
 #include <mne/viz/panels/average_layout_panel.h>
 #include <mne/base/log.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
-#include <mne/viz/backends/qt/viewers/modalityselectionview.h>
-#include <mne/viz/backends/qt/viewers/fiffrawviewsettings.h>
-#include <mne/viz/backends/qt/viewers/averageselectionview.h>
+#include <mne/viz/panels/average_selection_panel.h>
+#include <mne/viz/panels/modality_selection_panel.h>
+#include <mne/viz/panels/raw_view_panel.h>
+#include <mne/viz/panels/scaling_panel.h>
 #include <scMeas/realtimeevokedset.h>
 #include <mne/dsp/filterkernel.h>
 
@@ -63,7 +63,10 @@
 // STL INCLUDES
 //=============================================================================================================
 
+#include <map>
 #include <memory>
+#include <string>
+#include <vector>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -256,86 +259,114 @@ void RealTimeEvokedSetWidget::initDisplayControllWidgets()
         //Init control widgets
         QList<QWidget*> lControlWidgets;
 
+
+        // The control widgets may outlive this widget in the quick control view
+        const QPointer<RealTimeEvokedSetWidget> self(this);
+
         // Scaling
-        ScalingView* pScalingView = new ScalingView(QString("MNESCAN/RTESW"), this, Qt::Widget, m_pFiffInfo->get_channel_types());
+        auto pScaling = std::make_shared<viz::ScalingPanel>(m_pFiffInfo->get_channel_types());
+        pScaling->set_callback([self](const std::map<int, float>& scaleMap) {
+            if (self) {
+                self->m_pButterflyView->setScaleMap(scaleMap);
+                self->m_pAverageLayout->set_scale_map(scaleMap);
+            }
+        });
+        auto* pScalingView = new PanelWidget(pScaling, QString("MNESCAN/RTESW"), this);
         pScalingView->setObjectName("group_tab_View_Scaling");
         lControlWidgets.append(pScalingView);
 
-        connect(pScalingView, &ScalingView::scalingChanged,
-                m_pButterflyView.data(), &ButterflyView::setScaleMap);
-
-        connect(pScalingView, &ScalingView::scalingChanged,
-                this, [this](const std::map<int, float>& scaleMap) {
-                    m_pAverageLayout->set_scale_map(scaleMap);
-                });
-
-        m_pButterflyView->setScaleMap(pScalingView->getScaleMap());
-        m_pAverageLayout->set_scale_map(pScalingView->getScaleMap());
+        m_pButterflyView->setScaleMap(pScaling->scale_map());
+        m_pAverageLayout->set_scale_map(pScaling->scale_map());
 
         // Quick control channel data settings
-        FiffRawViewSettings* pChannelDataSettingsView = new FiffRawViewSettings(QString("MNESCAN/RTESW"), this);
-        pChannelDataSettingsView->setWidgetList({"screenshot", "backgroundColor"});
+        auto pChannelDataSettings = std::make_shared<viz::RawViewPanel>(std::vector<std::string>{"screenshot", "backgroundColor"});
+        viz::RawViewPanel::Callbacks viewCallbacks;
+        viewCallbacks.background_color_changed = [self](const viz::Color& color) {
+            if (self) {
+                self->m_pAverageLayoutView->figureViewport()->setBackgroundColor(toQColor(color));
+                self->m_pButterflyView->setBackgroundColor(toQColor(color));
+            }
+        };
+        viewCallbacks.screenshot_wanted = [self](const std::string& imageType) {
+            if (self) {
+                self->onMakeScreenshot(QString::fromStdString(imageType));
+            }
+        };
+        pChannelDataSettings->set_callbacks(std::move(viewCallbacks));
+        auto* pChannelDataSettingsView = new PanelWidget(pChannelDataSettings, QString("MNESCAN/RTESW"), this);
         pChannelDataSettingsView->setObjectName("group_tab_View_General");
         lControlWidgets.append(pChannelDataSettingsView);
 
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::backgroundColorChanged,
-                m_pAverageLayoutView->figureViewport(), &SceneViewport::setBackgroundColor);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::backgroundColorChanged,
-                m_pButterflyView.data(), &ButterflyView::setBackgroundColor);
-
-        connect(pChannelDataSettingsView, &FiffRawViewSettings::makeScreenshot,
-                this, &RealTimeEvokedSetWidget::onMakeScreenshot);
-
-        m_pAverageLayoutView->figureViewport()->setBackgroundColor(pChannelDataSettingsView->getBackgroundColor());
-        m_pButterflyView->setBackgroundColor(pChannelDataSettingsView->getBackgroundColor());
+        m_pAverageLayoutView->figureViewport()->setBackgroundColor(toQColor(pChannelDataSettings->background_color()));
+        m_pButterflyView->setBackgroundColor(toQColor(pChannelDataSettings->background_color()));
 
         // Quick control modality selection
-        ModalitySelectionView* pModalitySelectionView = new ModalitySelectionView(m_pFiffInfo->chs, QString("MNESCAN/RTESW"), this);
+        auto pModalitySelection = std::make_shared<viz::ModalitySelectionPanel>(m_pFiffInfo->chs);
+        pModalitySelection->set_callback([self](const std::map<std::string, bool>& modalities) {
+            if (self) {
+                self->m_pButterflyView->setModalityMap(modalities);
+            }
+        });
+        auto* pModalitySelectionView = new PanelWidget(pModalitySelection, QString("MNESCAN/RTESW"), this);
         pModalitySelectionView->setObjectName("group_tab_View_Modalities");
         lControlWidgets.append(pModalitySelectionView);
 
-        connect(pModalitySelectionView, &ModalitySelectionView::modalitiesChanged,
-                m_pButterflyView.data(), &ButterflyView::setModalityMap);
-
-        m_pButterflyView->setModalityMap(pModalitySelectionView->getModalityMap());
+        m_pButterflyView->setModalityMap(pModalitySelection->modality_map());
 
         // Quick control average selection
-        AverageSelectionView* pAverageSelectionView = new AverageSelectionView(QString("MNESCAN/RTESW"), this);
-        pAverageSelectionView->setObjectName("group_tab_View_Selection");
-        lControlWidgets.append(pAverageSelectionView);
-
-        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
-                pAverageSelectionView, &AverageSelectionView::setAverageActivation);
-        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
-                pAverageSelectionView, &AverageSelectionView::setAverageColor);
-
-        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
-                m_pButterflyView.data(), &ButterflyView::setAverageColor);
-        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
-                m_pButterflyView.data(), &ButterflyView::setAverageActivation);
-        connect(pAverageSelectionView, &AverageSelectionView::newAverageActivationMap,
-                m_pButterflyView.data(), &ButterflyView::setAverageActivation);
-        connect(pAverageSelectionView, &AverageSelectionView::newAverageColorMap,
-                m_pButterflyView.data(), &ButterflyView::setAverageColor);
-
         const auto setLayoutColors = [this](const std::shared_ptr<std::map<std::string, QColor>>& colors) {
             m_pAverageLayout->set_average_colors(colors ? toColors(*colors) : std::map<std::string, viz::Color>{});
         };
         const auto setLayoutActivation = [this](const std::shared_ptr<std::map<std::string, bool>>& activation) {
             m_pAverageLayout->set_average_activation(activation ? *activation : std::map<std::string, bool>{});
         };
+
+        auto pAverageSelection = std::make_shared<viz::AverageSelectionPanel>();
+        viz::AverageSelectionPanel::Callbacks selectionCallbacks;
+        selectionCallbacks.colors_changed = [self, setLayoutColors](const std::map<std::string, viz::Color>& colors) {
+            if (self) {
+                const auto qColors = std::make_shared<std::map<std::string, QColor>>(toQColors(colors));
+                self->m_pButterflyView->setAverageColor(qColors);
+                setLayoutColors(qColors);
+            }
+        };
+        selectionCallbacks.activation_changed = [self, setLayoutActivation](const std::map<std::string, bool>& activation) {
+            if (self) {
+                const auto shared = std::make_shared<std::map<std::string, bool>>(activation);
+                self->m_pButterflyView->setAverageActivation(shared);
+                setLayoutActivation(shared);
+            }
+        };
+        pAverageSelection->set_callbacks(std::move(selectionCallbacks));
+        auto* pAverageSelectionView = new PanelWidget(pAverageSelection, QString("MNESCAN/RTESW"), this);
+        pAverageSelectionView->setObjectName("group_tab_View_Selection");
+        lControlWidgets.append(pAverageSelectionView);
+
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
+                pAverageSelectionView, [pAverageSelection](const std::shared_ptr<std::map<std::string, bool>>& activation) {
+                    pAverageSelection->set_average_activation(activation ? *activation : std::map<std::string, bool>{});
+                });
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
+                pAverageSelectionView, [pAverageSelection](const std::shared_ptr<std::map<std::string, QColor>>& colors) {
+                    pAverageSelection->set_average_colors(colors ? toColors(*colors) : std::map<std::string, viz::Color>{});
+                });
+
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap,
+                m_pButterflyView.data(), &ButterflyView::setAverageColor);
+        connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap,
+                m_pButterflyView.data(), &ButterflyView::setAverageActivation);
+
         connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageColorMap, this, setLayoutColors);
         connect(m_pEvokedSetModel.get(), &EvokedSetModel::newAverageActivationMap, this, setLayoutActivation);
-        connect(pAverageSelectionView, &AverageSelectionView::newAverageActivationMap, this, setLayoutActivation);
-        connect(pAverageSelectionView, &AverageSelectionView::newAverageColorMap, this, setLayoutColors);
 
-        m_pEvokedSetModel->setAverageActivation(pAverageSelectionView->getAverageActivation());
-        m_pEvokedSetModel->setAverageColor(pAverageSelectionView->getAverageColor());
-        m_pButterflyView->setAverageActivation(pAverageSelectionView->getAverageActivation());
-        m_pButterflyView->setAverageColor(pAverageSelectionView->getAverageColor());
-        setLayoutActivation(pAverageSelectionView->getAverageActivation());
-        setLayoutColors(pAverageSelectionView->getAverageColor());
+        const auto averageColors = std::make_shared<std::map<std::string, QColor>>(toQColors(pAverageSelection->average_colors()));
+        const auto averageActivation = std::make_shared<std::map<std::string, bool>>(pAverageSelection->average_activation());
+        m_pEvokedSetModel->setAverageActivation(averageActivation);
+        m_pEvokedSetModel->setAverageColor(averageColors);
+        m_pButterflyView->setAverageActivation(averageActivation);
+        m_pButterflyView->setAverageColor(averageColors);
+        setLayoutActivation(averageActivation);
+        setLayoutColors(averageColors);
 
         emit displayControlWidgetsChanged(lControlWidgets, t_sRTESName);
 

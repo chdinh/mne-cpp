@@ -20,7 +20,8 @@
 
 #include <mne/base/string_utils.h>
 #include <scMeas/realtimecov.h>
-#include <mne/viz/backends/qt/viewers/modalityselectionview.h>
+#include <mne/viz/backends/qt/kit/panelwidget.h>
+#include <mne/viz/panels/modality_selection_panel.h>
 #include <mne/viz/backends/qt/plots/imagesc.h>
 #include <mne/fiff/fiff_info.h>
 
@@ -39,6 +40,14 @@
 //=============================================================================================================
 
 #include <Eigen/Core>
+
+//=============================================================================================================
+// STL INCLUDES
+//=============================================================================================================
+
+#include <map>
+#include <memory>
+#include <string>
 
 //=============================================================================================================
 // USED NAMESPACES
@@ -130,14 +139,19 @@ void RealTimeCovWidget::initDisplayControllWidgets()
         //Init control widgets
         QList<QWidget*> lControlWidgets;
 
-        mne::viz::qt::ModalitySelectionView* pModalitySelectionWidget = new ModalitySelectionView(m_pRTC->getFiffInfo()->chs, QString("MNESCAN/RTCW"), this);
+        // The control widget may outlive this widget in the quick control view
+        const QPointer<RealTimeCovWidget> self(this);
+        auto pModalitySelection = std::make_shared<viz::ModalitySelectionPanel>(m_pRTC->getFiffInfo()->chs);
+        pModalitySelection->set_callback([self](const std::map<std::string, bool>& modalities) {
+            if (self) {
+                self->onNewModalitySelection(modalities);
+            }
+        });
+        auto* pModalitySelectionWidget = new PanelWidget(pModalitySelection, QString("MNESCAN/RTCW"), this);
         pModalitySelectionWidget->setObjectName("group_tab_View_Modalities");
         lControlWidgets.append(pModalitySelectionWidget);
 
-        connect(pModalitySelectionWidget, &ModalitySelectionView::modalitiesChanged,
-                this, &RealTimeCovWidget::onNewModalitySelection);
-
-        pModalitySelectionWidget->setModalityMap(m_modalityMap);
+        pModalitySelection->set_modality_map(m_modalityMap);
 
         emit displayControlWidgetsChanged(lControlWidgets, m_pRTC->getName());
 

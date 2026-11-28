@@ -29,8 +29,6 @@
 #include <anShared/Model/fiffrawviewmodel.h>
 #include <anShared/Model/eventmodel.h>
 
-#include <mne/viz/backends/qt/viewers/fiffrawviewsettings.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
 #include <mne/viz/backends/qt/viewers/helpers/selectionitem.h>
 
 #include <mne/dsp/filterkernel.h>

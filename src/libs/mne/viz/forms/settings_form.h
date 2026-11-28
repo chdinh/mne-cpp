@@ -23,6 +23,7 @@
 //=============================================================================================================
 
 #include "../viz_global.h"
+#include "../figures/style.h"
 
 //=============================================================================================================
 // STL INCLUDES
@@ -531,6 +532,28 @@ private:
     std::map<int, std::function<void(const std::string&)>> m_structureListeners;
     int m_nextListener = 1;
 };
+
+//=============================================================================================================
+/**
+ * Reads the value of a colour field.
+ *
+ * @param[in] text   "#rrggbb" or "#rrggbbaa", in either case.
+ * @return The colour, or nothing when @p text is no such colour.
+ *
+ * @since 3.0.0
+ */
+VIZSHARED_EXPORT std::optional<Color> parse_setting_color(const std::string& text);
+
+//=============================================================================================================
+/**
+ * Writes a colour as the value of a colour field.
+ *
+ * @param[in] color   Colour.
+ * @return "#rrggbb" for opaque colours, "#rrggbbaa" otherwise, in lower case.
+ *
+ * @since 3.0.0
+ */
+VIZSHARED_EXPORT std::string setting_color(const Color& color);
 
 } // namespace mne::viz
 

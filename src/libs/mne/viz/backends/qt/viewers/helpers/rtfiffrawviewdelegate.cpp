@@ -23,7 +23,6 @@
 #include "rtfiffrawviewmodel.h"
 #include "../rtfiffrawview.h"
 
-#include "../scalingview.h"
 
 //=============================================================================================================
 // QT INCLUDES

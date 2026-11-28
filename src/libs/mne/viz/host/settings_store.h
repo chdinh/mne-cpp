@@ -31,6 +31,7 @@
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 //=============================================================================================================
 // DEFINE NAMESPACE mne::viz
@@ -73,6 +74,17 @@ public:
      * @param[in] value   Value.
      */
     virtual void set_value(const std::string& key, const SettingValue& value) = 0;
+
+    /**
+     * Lists the keys stored directly below @p group, e.g. "b" and "c" for "a/b" and "a/c" below "a", but not
+     * "a/d/e". Stores that cannot list their keys return none.
+     *
+     * @param[in] group   Key of the group, without a trailing '/'.
+     * @return The names of the keys below @p group, sorted.
+     *
+     * @since 3.0.0
+     */
+    virtual std::vector<std::string> child_keys(const std::string& group) const;
 
     /**
      * @param[in] key   Key.
@@ -122,6 +134,7 @@ class VIZSHARED_EXPORT MemorySettingsStore : public SettingsStore
 public:
     std::optional<SettingValue> value(const std::string& key) const override;
     void set_value(const std::string& key, const SettingValue& value) override;
+    std::vector<std::string> child_keys(const std::string& group) const override;
 
     /**
      * @return All stored values by key.

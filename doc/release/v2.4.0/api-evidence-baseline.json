@@ -10,7 +10,7 @@
     "registered_function_modules": 15,
     "registered_header_only": 158,
     "registered_stale": 0,
-    "registered_with_test": 433,
+    "registered_with_test": 438,
     "registered_test_unresolved": 0,
     "registered_with_example": 484,
     "registered_example_not_built": 0,
@@ -227,7 +227,7 @@
     "viz": {
       "public": 254,
       "registered": 254,
-      "with_test": 207,
+      "with_test": 212,
       "eligible": 73,
       "eligible_with_registry_example": 73,
       "eligible_used_by_example": 56,
@@ -1296,16 +1296,6 @@
       "library": "viz"
     },
     {
-      "name": "getDefaultScalingValue",
-      "header": "viz/backends/qt/viewers/scalingview.h",
-      "library": "viz"
-    },
-    {
-      "name": "getScalingValue",
-      "header": "viz/backends/qt/viewers/scalingview.h",
-      "library": "viz"
-    },
-    {
       "name": "perspectivePresetRotation",
       "header": "viz/brain/viewstate.h",
       "library": "viz"
@@ -1438,6 +1428,16 @@
     {
       "name": "tick_label",
       "header": "viz/figures/ticks.h",
+      "library": "viz"
+    },
+    {
+      "name": "parse_setting_color",
+      "header": "viz/forms/settings_form.h",
+      "library": "viz"
+    },
+    {
+      "name": "setting_color",
+      "header": "viz/forms/settings_form.h",
       "library": "viz"
     },
     {
@@ -13919,44 +13919,6 @@
       "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
     },
     {
-      "name": "ApplyToView",
-      "header": "viz/backends/qt/viewers/applytoview.h",
-      "library": "viz",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/viz-qt/apply-to-view.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
-    },
-    {
-      "name": "AverageSelectionView",
-      "header": "viz/backends/qt/viewers/averageselectionview.h",
-      "library": "viz",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/viz-qt/average-selection-view.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
-    },
-    {
       "name": "BidsView",
       "header": "viz/backends/qt/viewers/bidsview.h",
       "library": "viz",
@@ -14030,25 +13992,6 @@
       "including_examples": [],
       "snippets": [],
       "api_page": "doc/website/docs/api/viz-qt/control3-d-view.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
-    },
-    {
-      "name": "FiffRawViewSettings",
-      "header": "viz/backends/qt/viewers/fiffrawviewsettings.h",
-      "library": "viz",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/viz-qt/fiff-raw-view-settings.mdx",
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
@@ -14434,25 +14377,6 @@
       "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
     },
     {
-      "name": "ModalitySelectionView",
-      "header": "viz/backends/qt/viewers/modalityselectionview.h",
-      "library": "viz",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/viz-qt/modality-selection-view.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
-    },
-    {
       "name": "MultiView",
       "header": "viz/backends/qt/viewers/multiview.h",
       "library": "viz",
@@ -14543,25 +14467,6 @@
       "including_examples": [],
       "snippets": [],
       "api_page": "doc/website/docs/api/viz-qt/rt-fiff-raw-view.mdx",
-      "python_equiv": null,
-      "example_eligible": false,
-      "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
-    },
-    {
-      "name": "ScalingView",
-      "header": "viz/backends/qt/viewers/scalingview.h",
-      "library": "viz",
-      "kind": "exported-class",
-      "exported": true,
-      "registered": true,
-      "registry_status": "documented",
-      "test": null,
-      "test_resolves": false,
-      "example": null,
-      "example_state": "none",
-      "including_examples": [],
-      "snippets": [],
-      "api_page": "doc/website/docs/api/viz-qt/scaling-view.mdx",
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "header prefix 'viz/backends/qt/viewers/': Qt widget or view; evidenced by a screenshot scenario and GUI test (G4), not by a compiled console example."
@@ -17159,6 +17064,25 @@
       "exempt_reason": "registry: View model of the spectrum viewer; drawn by SpectrumFigure, whose panel example shows it, and exercised by test_viz_viewmodels."
     },
     {
+      "name": "ApplyToPanel",
+      "header": "viz/panels/apply_to_panel.h",
+      "library": "viz",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_viz_settings_form",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": "doc/website/docs/api/viz/apply-to-panel.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Display settings panel of MNE Scan and MNE Analyze, shown by the backends' panel hosts; works like CompensatorPanel, whose example shows the pattern."
+    },
+    {
       "name": "ArtifactPanel",
       "header": "viz/panels/artifact_panel.h",
       "library": "viz",
@@ -17224,6 +17148,25 @@
       "python_equiv": null,
       "example_eligible": true,
       "exempt_reason": null
+    },
+    {
+      "name": "AverageSelectionPanel",
+      "header": "viz/panels/average_selection_panel.h",
+      "library": "viz",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_viz_settings_form",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": "doc/website/docs/api/viz/average-selection-panel.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Display settings panel of MNE Scan and MNE Analyze, shown by the backends' panel hosts; works like CompensatorPanel, whose example shows the pattern."
     },
     {
       "name": "AveragingPanel",
@@ -17512,6 +17455,25 @@
       "exempt_reason": "registry: Tool panel of an MNE Scan plugin, shown by the backends' panel hosts; works like CompensatorPanel, whose example shows the pattern."
     },
     {
+      "name": "ModalitySelectionPanel",
+      "header": "viz/panels/modality_selection_panel.h",
+      "library": "viz",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_viz_settings_form",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": "doc/website/docs/api/viz/modality-selection-panel.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Display settings panel of MNE Scan and MNE Analyze, shown by the backends' panel hosts; works like CompensatorPanel, whose example shows the pattern."
+    },
+    {
       "name": "Panel",
       "header": "viz/panels/panel.h",
       "library": "viz",
@@ -17571,6 +17533,44 @@
       "python_equiv": null,
       "example_eligible": false,
       "exempt_reason": "registry: Tool panel shown by the backends' panel hosts in MNE Scan; works like CompensatorPanel, whose example shows the pattern."
+    },
+    {
+      "name": "RawViewPanel",
+      "header": "viz/panels/raw_view_panel.h",
+      "library": "viz",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_viz_settings_form",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": "doc/website/docs/api/viz/raw-view-panel.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Display settings panel of MNE Scan and MNE Analyze, shown by the backends' panel hosts; works like CompensatorPanel, whose example shows the pattern."
+    },
+    {
+      "name": "ScalingPanel",
+      "header": "viz/panels/scaling_panel.h",
+      "library": "viz",
+      "kind": "exported-class",
+      "exported": true,
+      "registered": true,
+      "registry_status": "documented",
+      "test": "test_viz_settings_form",
+      "test_resolves": true,
+      "example": null,
+      "example_state": "none",
+      "including_examples": [],
+      "snippets": [],
+      "api_page": "doc/website/docs/api/viz/scaling-panel.mdx",
+      "python_equiv": null,
+      "example_eligible": false,
+      "exempt_reason": "registry: Display settings panel of MNE Scan and MNE Analyze, shown by the backends' panel hosts; works like CompensatorPanel, whose example shows the pattern."
     },
     {
       "name": "SpectrumPanel",

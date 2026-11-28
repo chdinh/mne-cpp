@@ -20,10 +20,12 @@
 #include <mne/base/log.h>
 #include <anShared/Management/analyzedata.h>
 #include <anShared/Management/communicator.h>
-#include <mne/viz/backends/qt/viewers/scalingview.h>
-#include <mne/viz/backends/qt/viewers/applytoview.h>
+#include <mne/viz/backends/qt/kit/panelwidget.h>
+#include <mne/viz/backends/qt/qtconversions.h>
 #include <mne/viz/backends/qt/viewers/control3dview.h>
-#include <mne/viz/backends/qt/viewers/fiffrawviewsettings.h>
+#include <mne/viz/panels/apply_to_panel.h>
+#include <mne/viz/panels/raw_view_panel.h>
+#include <mne/viz/panels/scaling_panel.h>
 #ifdef MNE_VIZ_QT_3D
 #include <mne/viz/backends/qt/3d/model/braintreemodel.h>
 #endif
@@ -112,38 +114,64 @@ QDockWidget* ControlManager::getControl()
 
     const std::vector<std::string> slControlFlags{"Data", "View", "Light"};
 
+    // The panels outlive the plugin when the dock does
+    const QPointer<ControlManager> self(this);
+
     //Scaling
-    mne::viz::qt::ScalingView* pScalingWidget = new mne::viz::qt::ScalingView("MNEANALYZE", wrappedScrollArea);
+    auto pScaling = std::make_shared<ScalingPanel>();
+    pScaling->set_callback([self](const std::map<int, float>& scaleMap) {
+        if (self) {
+            self->onScalingChanged(scaleMap);
+        }
+    });
+    auto* pScalingWidget = new PanelWidget(pScaling, "MNEANALYZE", wrappedScrollArea);
     pTabWidget->addTab(pScalingWidget, "Scaling");
 
-    connect(pScalingWidget, &mne::viz::qt::ScalingView::scalingChanged,
-            this, &ControlManager::onScalingChanged, Qt::UniqueConnection);
-
-    m_ScalingParameters.m_mScalingMap = pScalingWidget->getScaleMap();
+    m_ScalingParameters.m_mScalingMap = pScaling->scale_map();
 
     //View Settings
-    mne::viz::qt::FiffRawViewSettings* pFiffViewSettings = new mne::viz::qt::FiffRawViewSettings("MNEANALYZE", wrappedScrollArea);
+    auto pRawView = std::make_shared<RawViewPanel>();
+    RawViewPanel::Callbacks rawViewCallbacks;
+    rawViewCallbacks.signal_color_changed = [self](const Color& color) {
+        if (self) {
+            self->onSignalColorChanged(toQColor(color));
+        }
+    };
+    rawViewCallbacks.background_color_changed = [self](const Color& color) {
+        if (self) {
+            self->onBackgroundColorChanged(toQColor(color));
+        }
+    };
+    rawViewCallbacks.zoom_changed = [self](double zoom) {
+        if (self) {
+            self->onZoomChanged(zoom);
+        }
+    };
+    rawViewCallbacks.window_size_changed = [self](int seconds) {
+        if (self) {
+            self->onTimeWindowChanged(seconds);
+        }
+    };
+    rawViewCallbacks.time_spacer_changed = [self](int milliseconds) {
+        if (self) {
+            self->onDistanceTimeSpacerChanged(milliseconds);
+        }
+    };
+    rawViewCallbacks.screenshot_wanted = [self](const std::string& imageType) {
+        if (self) {
+            self->onMakeScreenshot(QString::fromStdString(imageType));
+        }
+    };
+    pRawView->set_callbacks(std::move(rawViewCallbacks));
+    auto* pFiffViewSettings = new PanelWidget(pRawView, "MNEANALYZE", wrappedScrollArea);
 
     pTabWidget->addTab(pFiffViewSettings, "Controls");
 
-    connect(pFiffViewSettings, &mne::viz::qt::FiffRawViewSettings::signalColorChanged,
-            this, &ControlManager::onSignalColorChanged, Qt::UniqueConnection);
-    connect(pFiffViewSettings, &mne::viz::qt::FiffRawViewSettings::backgroundColorChanged,
-            this, &ControlManager::onBackgroundColorChanged, Qt::UniqueConnection);
-    connect(pFiffViewSettings, &mne::viz::qt::FiffRawViewSettings::zoomChanged,
-            this, &ControlManager::onZoomChanged, Qt::UniqueConnection);
-    connect(pFiffViewSettings, &mne::viz::qt::FiffRawViewSettings::timeWindowChanged,
-            this, &ControlManager::onTimeWindowChanged, Qt::UniqueConnection);
-    connect(pFiffViewSettings, &mne::viz::qt::FiffRawViewSettings::distanceTimeSpacerChanged,
-            this, &ControlManager::onDistanceTimeSpacerChanged, Qt::UniqueConnection);
-    connect(pFiffViewSettings, &mne::viz::qt::FiffRawViewSettings::makeScreenshot,
-            this, &ControlManager::onMakeScreenshot, Qt::UniqueConnection);
-
-    m_ViewParameters.m_colorSignal = pFiffViewSettings->getSignalColor();
-    m_ViewParameters.m_colorBackground = pFiffViewSettings->getBackgroundColor();
-    m_ViewParameters.m_dZoomValue = pFiffViewSettings->getZoom();
-    m_ViewParameters.m_iTimeWindow = pFiffViewSettings->getWindowSize();
-    m_ViewParameters.m_iTimeSpacers = pFiffViewSettings->getDistanceTimeSpacer();
+    m_ViewParameters.m_colorSignal = toQColor(pRawView->signal_color());
+    m_ViewParameters.m_colorBackground = toQColor(pRawView->background_color());
+    m_ViewParameters.m_dZoomValue = pRawView->zoom();
+    m_ViewParameters.m_iTimeWindow = pRawView->window_size();
+    m_ViewParameters.m_iTimeSpacers = pRawView->time_spacer();
     m_ViewParameters.m_sImageType = "";
 
     //View3D Settings
@@ -166,7 +194,8 @@ QDockWidget* ControlManager::getControl()
     connect(m_pControl3DView, &mne::viz::qt::Control3DView::takeScreenshotChanged,
             this, &ControlManager::onTakeScreenshotChanged);
 
-    m_pApplyToView = new mne::viz::qt::ApplyToView("", wrappedScrollArea);
+    m_pApplyTo = std::make_shared<ApplyToPanel>();
+    m_pApplyToView = new PanelWidget(m_pApplyTo, "", wrappedScrollArea);
     pLayout->addWidget(pTabWidget);
     pLayout->addWidget(m_pApplyToView);
     pLayout->addStretch();
@@ -190,7 +219,7 @@ void ControlManager::handleEvent(QSharedPointer<Event> e)
         case EVENT_TYPE::SELECTED_MODEL_CHANGED:
             if (m_pApplyToView && e->getData().value<QSharedPointer<mne::analyze::AbstractModel>>()->getType() != ANSHAREDLIB_BEMDATA_MODEL) {
                 onScalingChanged(m_ScalingParameters.m_mScalingMap);
-                m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+                m_ViewParameters.m_sViewsToApply = selectedViews();
                 m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::all;
                 m_pCommu->publishEvent(EVENT_TYPE::VIEW_SETTINGS_CHANGED, QVariant::fromValue(m_ViewParameters));
             }
@@ -222,9 +251,16 @@ QVector<EVENT_TYPE> ControlManager::getEventSubscriptions(void) const
 
 //=============================================================================================================
 
+std::vector<std::string> ControlManager::selectedViews() const
+{
+    return m_pApplyToView && m_pApplyTo ? m_pApplyTo->selected_views() : std::vector<std::string>{};
+}
+
+//=============================================================================================================
+
 void ControlManager::onScalingChanged(const std::map<int, float>& scalingMap)
 {
-    m_ScalingParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ScalingParameters.m_sViewsToApply = selectedViews();
 
     m_ScalingParameters.m_mScalingMap = scalingMap;
 
@@ -235,7 +271,7 @@ void ControlManager::onScalingChanged(const std::map<int, float>& scalingMap)
 
 void ControlManager::onSignalColorChanged(const QColor& signalColor)
 {
-    m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ViewParameters.m_sViewsToApply = selectedViews();
     m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::signal;
     m_ViewParameters.m_colorSignal = signalColor;
 
@@ -246,7 +282,7 @@ void ControlManager::onSignalColorChanged(const QColor& signalColor)
 
 void ControlManager::onBackgroundColorChanged(const QColor& backgroundColor)
 {
-    m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ViewParameters.m_sViewsToApply = selectedViews();
     m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::background;
     m_ViewParameters.m_colorBackground = backgroundColor;
 
@@ -257,7 +293,7 @@ void ControlManager::onBackgroundColorChanged(const QColor& backgroundColor)
 
 void ControlManager::onZoomChanged(double dZoomValue)
 {
-    m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ViewParameters.m_sViewsToApply = selectedViews();
     m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::zoom;
     m_ViewParameters.m_dZoomValue = dZoomValue;
 
@@ -268,7 +304,7 @@ void ControlManager::onZoomChanged(double dZoomValue)
 
 void ControlManager::onTimeWindowChanged(int iTimeWindow)
 {
-    m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ViewParameters.m_sViewsToApply = selectedViews();
     m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::window;
     m_ViewParameters.m_iTimeWindow = iTimeWindow;
 
@@ -279,7 +315,7 @@ void ControlManager::onTimeWindowChanged(int iTimeWindow)
 
 void ControlManager::onDistanceTimeSpacerChanged(int iSpacerDistance)
 {
-    m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ViewParameters.m_sViewsToApply = selectedViews();
     m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::spacer;
     m_ViewParameters.m_iTimeSpacers = iSpacerDistance;
 
@@ -290,7 +326,7 @@ void ControlManager::onDistanceTimeSpacerChanged(int iSpacerDistance)
 
 void ControlManager::onMakeScreenshot(const QString& imageType)
 {
-    m_ViewParameters.m_sViewsToApply = m_pApplyToView->getSelectedViews();
+    m_ViewParameters.m_sViewsToApply = selectedViews();
     m_ViewParameters.m_sSettingsToApply = mne::analyze::ViewParameters::ViewSetting::screenshot;
     m_ViewParameters.m_sImageType = imageType;
 
