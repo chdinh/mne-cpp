@@ -38,10 +38,14 @@ compensators.save(settings, "ex_scene");
 
 ```mermaid
 classDiagram
+    Panel <|-- ApplyToPanel
+    click ApplyToPanel href "../../viz/apply-to-panel/"
     Panel <|-- ArtifactPanel
     click ArtifactPanel href "../../viz/artifact-panel/"
     Panel <|-- AverageLayoutPanel
     click AverageLayoutPanel href "../../viz/average-layout-panel/"
+    Panel <|-- AverageSelectionPanel
+    click AverageSelectionPanel href "../../viz/average-selection-panel/"
     Panel <|-- AveragingPanel
     click AveragingPanel href "../../viz/averaging-panel/"
     Panel <|-- ChannelSelectionPanel
@@ -66,10 +70,16 @@ classDiagram
     click HpiPanel href "../../viz/hpi-panel/"
     Panel <|-- MinimumNormPanel
     click MinimumNormPanel href "../../viz/minimum-norm-panel/"
+    Panel <|-- ModalitySelectionPanel
+    click ModalitySelectionPanel href "../../viz/modality-selection-panel/"
     Panel <|-- ProjectPanel
     click ProjectPanel href "../../viz/project-panel/"
     Panel <|-- ProjectorsPanel
     click ProjectorsPanel href "../../viz/projectors-panel/"
+    Panel <|-- RawViewPanel
+    click RawViewPanel href "../../viz/raw-view-panel/"
+    Panel <|-- ScalingPanel
+    click ScalingPanel href "../../viz/scaling-panel/"
     Panel <|-- SpectrumPanel
     click SpectrumPanel href "../../viz/spectrum-panel/"
     Panel <|-- SpharaPanel

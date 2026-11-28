@@ -71,7 +71,7 @@ All 723 documented public classes in MNE-CPP, sorted alphabetically.
 | [AnnotateAmplitudeParams](/docs/api/dsp/annotate-amplitude-params) | DSP Library | `dsp/annotate_artifact.h` |
 | [AnnotateArtifact](/docs/api/dsp/annotate-artifact) | DSP Library | `dsp/annotate_artifact.h` |
 | [AnnotateMusclParams](/docs/api/dsp/annotate-muscl-params) | DSP Library | `dsp/annotate_artifact.h` |
-| [ApplyToView](/docs/api/viz-qt/apply-to-view) | Visualization: Qt Backend | `viz/backends/qt/viewers/applytoview.h` |
+| [ApplyToPanel](/docs/api/viz/apply-to-panel) | Visualization Library | `viz/panels/apply_to_panel.h` |
 | [ApproximateTextMetrics](/docs/api/viz/approximate-text-metrics) | Visualization Library | `viz/figures/text_metrics.h` |
 | [ArtifactDetect](/docs/api/dsp/artifact-detect) | DSP Library | `dsp/artifact_detect.h` |
 | [ArtifactDetectEcgParams](/docs/api/dsp/artifact-detect-ecg-params) | DSP Library | `dsp/artifact_detect.h` |
@@ -84,7 +84,7 @@ All 723 documented public classes in MNE-CPP, sorted alphabetically.
 | [AverageLayout](/docs/api/viz/average-layout) | Visualization Library | `viz/figures/average_layout.h` |
 | [AverageLayoutFigure](/docs/api/viz/average-layout-figure) | Visualization Library | `viz/figures/average_layout_figure.h` |
 | [AverageLayoutPanel](/docs/api/viz/average-layout-panel) | Visualization Library | `viz/panels/average_layout_panel.h` |
-| [AverageSelectionView](/docs/api/viz-qt/average-selection-view) | Visualization: Qt Backend | `viz/backends/qt/viewers/averageselectionview.h` |
+| [AverageSelectionPanel](/docs/api/viz/average-selection-panel) | Visualization Library | `viz/panels/average_selection_panel.h` |
 | [AverageTile](/docs/api/viz/average-tile) | Visualization Library | `viz/figures/average_tile.h` |
 | [AveragingPanel](/docs/api/viz/averaging-panel) | Visualization Library | `viz/panels/averaging_panel.h` |
 | [BadChannelDetect](/docs/api/dsp/bad-channel-detect) | DSP Library | `dsp/bad_channel_detect.h` |
@@ -255,7 +255,6 @@ All 723 documented public classes in MNE-CPP, sorted alphabetically.
 | [FiffProj](/docs/api/fiff/fiff-proj) | FIFF Library | `fiff/fiff_proj.h` |
 | [FiffRawData](/docs/api/fiff/fiff-raw-data) | FIFF Library | `fiff/fiff_raw_data.h` |
 | [FiffRawDir](/docs/api/fiff/fiff-raw-dir) | FIFF Library | `fiff/fiff_raw_dir.h` |
-| [FiffRawViewSettings](/docs/api/viz-qt/fiff-raw-view-settings) | Visualization: Qt Backend | `viz/backends/qt/viewers/fiffrawviewsettings.h` |
 | [FiffSparseMatrix](/docs/api/fiff/fiff-sparse-matrix) | FIFF Library | `fiff/fiff_sparse_matrix.h` |
 | [FiffStream](/docs/api/fiff/fiff-stream) | FIFF Library | `fiff/fiff_stream.h` |
 | [FiffTag](/docs/api/fiff/fiff-tag) | FIFF Library | `fiff/fiff_tag.h` |
@@ -511,7 +510,7 @@ All 723 documented public classes in MNE-CPP, sorted alphabetically.
 | [MNESurfacePatch](/docs/api/mne/mne-surface-patch) | MNE Library | `mne/mne_surface_patch.h` |
 | [MNETriangle](/docs/api/mne/mne-triangle) | MNE Library | `mne/mne_triangle.h` |
 | [MNEVolGeom](/docs/api/mne/mne-vol-geom) | MNE Library | `mne/mne_vol_geom.h` |
-| [ModalitySelectionView](/docs/api/viz-qt/modality-selection-view) | Visualization: Qt Backend | `viz/backends/qt/viewers/modalityselectionview.h` |
+| [ModalitySelectionPanel](/docs/api/viz/modality-selection-panel) | Visualization Library | `viz/panels/modality_selection_panel.h` |
 | [MorletTfr](/docs/api/dsp/morlet-tfr) | DSP Library | `dsp/morlet_tfr.h` |
 | [MorletTfrResult](/docs/api/dsp/morlet-tfr-result) | DSP Library | `dsp/morlet_tfr.h` |
 | [MriCorFifIO](/docs/api/mri/mri-cor-fif-io) | MRI Library | `mri/mri_cor_fif_io.h` |
@@ -579,6 +578,7 @@ All 723 documented public classes in MNE-CPP, sorted alphabetically.
 | [QuickControlView](/docs/api/viz-qt/quick-control-view) | Visualization: Qt Backend | `viz/backends/qt/viewers/quickcontrolview.h` |
 | [RasterImage](/docs/api/base/raster-image) | Base Library | `base/raster_image.h` |
 | [RasterOptions](/docs/api/viz/raster-options) | Visualization Library | `viz/figures/raster_renderer.h` |
+| [RawViewPanel](/docs/api/viz/raw-view-panel) | Visualization Library | `viz/panels/raw_view_panel.h` |
 | [Ray](/docs/api/viz/ray) | Visualization Library | `viz/views/ray_picking.h` |
 | [RayHit](/docs/api/viz-qt/ray-hit) | Visualization: Qt Backend | `viz/backends/qt/3d/input/raypicker.h` |
 | [RayPicker](/docs/api/viz-qt/ray-picker) | Visualization: Qt Backend | `viz/backends/qt/3d/input/raypicker.h` |
@@ -614,7 +614,7 @@ All 723 documented public classes in MNE-CPP, sorted alphabetically.
 | [RtSourceInterpolationMatWorker](/docs/api/viz/rt-source-interpolation-mat-worker) | Visualization Library | `viz/brain/realtime/rtsourceinterpolationmatworker.h` |
 | [RtSourceStream](/docs/api/viz/rt-source-stream) | Visualization Library | `viz/brain/realtime/rtsourcestream.h` |
 | [ScaleControl](/docs/api/viz-qt/scale-control) | Visualization: Qt Backend | `viz/backends/qt/viewers/helpers/scalecontrol.h` |
-| [ScalingView](/docs/api/viz-qt/scaling-view) | Visualization: Qt Backend | `viz/backends/qt/viewers/scalingview.h` |
+| [ScalingPanel](/docs/api/viz/scaling-panel) | Visualization Library | `viz/panels/scaling_panel.h` |
 | [SceneFigure](/docs/api/viz/scene-figure) | Visualization Library | `viz/figures/scene_figure.h` |
 | [SceneLayer](/docs/api/viz/scene-layer) | Visualization Library | `viz/brain/scenestate.h` |
 | [SceneState](/docs/api/viz/scene-state) | Visualization Library | `viz/brain/scenestate.h` |

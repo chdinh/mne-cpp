@@ -785,7 +785,12 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/viz/project-panel',
         'api/viz/hpi-panel',
         'api/viz/coregistration-panel',
-        'api/viz/dipole-fit-panel'
+        'api/viz/dipole-fit-panel',
+        'api/viz/scaling-panel',
+        'api/viz/modality-selection-panel',
+        'api/viz/average-selection-panel',
+        'api/viz/apply-to-panel',
+        'api/viz/raw-view-panel'
       ],
     },
     {
@@ -796,8 +801,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
       link: {type: 'doc', id: 'api/viz-qt/index'},
       items: [
         'api/viz-qt/abstract-view',
-        'api/viz-qt/apply-to-view',
-        'api/viz-qt/average-selection-view',
         'api/viz-qt/bar',
         'api/viz-qt/bids-view',
         'api/viz-qt/bids-view-model',
@@ -812,7 +815,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/viz-qt/control3-d-view',
         'api/viz-qt/draggable-frameless-widget',
         'api/viz-qt/evoked-set-model',
-        'api/viz-qt/fiff-raw-view-settings',
         'api/viz-qt/filter-plot',
         'api/viz-qt/graph',
         'api/viz-qt/image-sc',
@@ -820,7 +822,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/viz-qt/figure-exporter',
         'api/viz-qt/svg-writer',
         'api/viz-qt/mne-operator',
-        'api/viz-qt/modality-selection-view',
         'api/viz-qt/multi-view',
         'api/viz-qt/multi-view-window',
         'api/viz-qt/overview-bar-widget',
@@ -831,7 +832,6 @@ const apiSidebar: SidebarsConfig['apiSidebar'] = [
         'api/viz-qt/rt-fiff-raw-view-delegate',
         'api/viz-qt/rt-fiff-raw-view-model',
         'api/viz-qt/scale-control',
-        'api/viz-qt/scaling-view',
         'api/viz-qt/selection-item',
         'api/viz-qt/spline',
         'api/viz-qt/t-fplot',

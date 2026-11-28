@@ -392,8 +392,8 @@
       "missing_tests": []
     },
     "viz": {
-      "classes": 172,
-      "tested": 163,
+      "classes": 177,
+      "tested": 168,
       "untested": [
         "ElectrodeObject",
         "GeometryInfo",
@@ -408,13 +408,11 @@
       "missing_tests": []
     },
     "viz_qt": {
-      "classes": 81,
+      "classes": 76,
       "tested": 44,
       "untested": [
         "AbstractTreeItem",
         "AbstractView",
-        "ApplyToView",
-        "AverageSelectionView",
         "Bar",
         "BidsView",
         "BidsViewModel",
@@ -426,13 +424,11 @@
         "ColorMap",
         "Control3DView",
         "DraggableFramelessWidget",
-        "FiffRawViewSettings",
         "Graph",
         "ImageSc",
         "LinePlot",
         "LiveMarker",
         "MNEOperator",
-        "ModalitySelectionView",
         "MultiView",
         "MultiViewWindow",
         "MultimodalScene",
@@ -441,7 +437,6 @@
         "ProgressView",
         "QuickControlView",
         "ScaleControl",
-        "ScalingView",
         "SensorTreeItem",
         "Spline",
         "TFplot",

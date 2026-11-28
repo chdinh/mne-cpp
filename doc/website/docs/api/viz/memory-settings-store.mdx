@@ -67,6 +67,23 @@ Store `value` under `key`, replacing any previous value.
 
 ---
 
+### child_keys(group)
+
+Lists the keys stored directly below `group`, e.g.
+
+"b" and "c" for "a/b" and "a/c" below "a", but not "a/d/e". Stores that cannot list their keys return none.
+
+**Parameters:**
+
+- **group** : *const std::string &*
+  `Key` of the group, without a trailing '/'.
+
+**Returns:**
+
+- *std::vector&lt; std::string &gt;* — The names of the keys below `group`, sorted.
+
+---
+
 ### values()
 
 **Returns:**
